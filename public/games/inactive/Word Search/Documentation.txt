@@ -1,0 +1,41 @@
+===============
+Word Search Event List
+===============
+GAME_START => Player start the current level
+	- GAME_START (event)
+	- FRUITS/COMPUTER/COUNTRIES/VEGETABLES/MUSIC/ANIMALS (category)
+	- 0 (words)
+	- ENGLISH/FRENCH/GERMAN/ITALIAN/PORTOGUESE/SPANISH (language)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+DRAG => Each time player drag the lines
+	- DRAG (event)
+	- LEFT/RIGHT/UP/DOWN/UP_LEFT/UP_RIGHT/DOWN_LEFT/DOWN_RIGHT (direction)
+	- 0 (time)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+CORRECT_WORD => Each time player get a correct words
+	- CORRECT_WORD (event)
+	- WORD (word)
+	- 0 (time)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_PAUSE => Player click on pause button
+	- GAME_PAUSE (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESUME => Player click on resume button
+	- GAME_RESUME (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player finish the game or quit in mid of the game
+	- GAME_END (event)
+	- FRUITS/COMPUTER/COUNTRIES/VEGETABLES/MUSIC/ANIMALS (category)
+	- 0 (time)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESTART => Player click on restart button
+	- GAME_RESTART (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

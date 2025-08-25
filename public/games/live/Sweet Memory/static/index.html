@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<script>
+function logEvent(params) {
+  params.messageType = 'gameEvent';
+  const paramsAsJSON = JSON.stringify(params);
+  if (globalThis.ReactNativeWebView) {
+    globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
+  } else {
+    window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
+  }
+}
+globalThis.logEvent = logEvent;
+</script>
+
+
+    <title>Sweet Memory</title>   
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta id="viewport" name="viewport" content="minimal-ui, initial-scale=1, maximum-scale=1, width=device-width, user-scalable=no">
+
+    <meta name="format-detection" content="telephone=no">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="HandheldFriendly" content="true">
+
+    <!--preload fonts-->
+    <link rel="preload" as="font" href="media/fonts/walibi-holland.woff" type="font/woff" crossorigin="anonymous">
+
+    <!--style sheet-->
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <!--config-->
+    <script type="text/javascript" src="config.js"></script> 
+
+    <!--libraries-->
+    <script type="text/javascript" src="js/lib/createjs.min.js"></script>
+    <script type="text/javascript" src="js/lib/CSSPlugin.js"></script>
+    <script src="../../SkillprintLib/html2canvas.min.js"></script>
+    <script src="../../SkillprintLib/skillprintScreenshot.js"></script>
+    <!--  
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitControls.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitLoader.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitPause.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitPrep.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitStage.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitTimer.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitInput.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitSaver.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitUtils.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitWindow.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitSounds.js"></script>
+    <script type="text/javascript" src="http://localhost/BlitTools/BlitLanguage.js"></script>
+   --> 
+  
+ 
+    <script type="text/javascript" src="js/lib/BlitTools.min.js"></script>
+ 
+
+    <!--framework-->
+    <script type="text/javascript" src="js/init.js"></script>
+    <script type="text/javascript" src="js/asset_manifests.js"></script>
+    <script type="text/javascript" src="js/assets.js"></script> 
+    <script type="text/javascript" src="js/scenes/GlobalQuit.js"></script>
+
+    <!--screens-->
+    <script type="text/javascript" src="js/scenes/TitleScene.js"></script>
+    <script type="text/javascript" src="js/scenes/TutorialScene.js"></script>
+    <script type="text/javascript" src="js/scenes/GameScene.js"></script>
+    <script type="text/javascript" src="js/scenes/RecapScene.js"></script>
+    <script type="text/javascript" src="js/scenes/PopupConfirm.js"></script>
+
+    <!--game-->
+    <script type="text/javascript" src="js/game/SweetMemoryGame.js"></script>
+  
+
+</head>
+
+
+
+<body onLoad="doInit();">
+    <audio id="audio_music" autoplay loop></audio>
+    <div id="wrapper">
+        <canvas id="canvas_game"></canvas>
+        <canvas id="canvas_screens"></canvas>
+        <canvas id="canvas_mute"></canvas>
+        <div id="fader"></div>
+
+        <div id="orientation_overlay"></div>
+        <canvas id="canvas_quit"></canvas>
+        <canvas id="canvas_popups"></canvas>
+        <canvas id="canvas_overlay"></canvas>
+    </div>
+
+    <div id="cover"></div>
+    <div id="debug"></div>
+
+</body>
+
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Game - Skillprint</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .achievement {
+            background: rgba(255, 215, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .timer {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            opacity: 0.9;
+        }
+        
+        .game-over {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .game-over.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Demo Game</h1>
+        <p>This is a demo game showing how to integrate with Skillprint's post-game results system.</p>
+        <p style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
+          💡 <strong>Tip:</strong> Use the exit button (X) in the top-right corner to see your progress results even before completing the game!
+        </p>
+        
+        <div class="timer">
+            Time: <span id="timer">0:00</span>
+        </div>
+        
+        <div class="score-display" id="score">0</div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">Level</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="mistakes">0</div>
+                <div class="stat-label">Mistakes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="bonus">0</div>
+                <div class="stat-label">Bonus</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="addScore(10)">+10 Points</button>
+            <button onclick="addScore(25)">+25 Points</button>
+            <button onclick="addScore(50)">+50 Points</button>
+            <button onclick="nextLevel()">Next Level</button>
+            <button onclick="addMistake()">Add Mistake</button>
+            <button onclick="addBonus()">Add Bonus</button>
+            <button onclick="addAchievement()">Add Achievement</button>
+        </div>
+        
+        <div class="achievements" id="achievements"></div>
+        
+        <div class="game-over" id="gameOver">
+            <h2>🎉 Game Complete!</h2>
+            <p>Click the button below to see your results in the Skillprint app!</p>
+            <button onclick="completeGame()" style="background: rgba(0, 255, 0, 0.3); border-color: rgba(0, 255, 0, 0.5);">
+                Complete Game & Show Results
+            </button>
+        </div>
+        
+        <div class="controls" style="margin-top: 30px;">
+            <button onclick="resetGame()" style="background: rgba(255, 165, 0, 0.3); border-color: rgba(255, 165, 0, 0.5);">
+                Reset Game
+            </button>
+        </div>
+    </div>
+
+    <!-- Include the Skillprint Game Communication Library -->
+    <script src="../../SkillprintLib/game-communication.js"></script>
+    
+    <script>
+        // Game state
+        let gameState = {
+            score: 0,
+            level: 1,
+            accuracy: 100,
+            mistakes: 0,
+            bonus: 0,
+            achievements: [],
+            startTime: Date.now()
+        };
+        
+        // Initialize game communication
+        const gameComm = window.SkillprintGameComm;
+        
+        // Timer update
+        setInterval(() => {
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+        
+        function addScore(points) {
+            gameState.score = Math.min(100, gameState.score + points);
+            updateDisplay();
+            gameComm.updateScore(gameState.score);
+            
+            // Auto-complete game if score reaches 100
+            if (gameState.score >= 100) {
+                showGameOver();
+            }
+        }
+        
+        function nextLevel() {
+            gameState.level++;
+            updateDisplay();
+            gameComm.updateLevel(gameState.level);
+            
+            // Add achievement for level completion
+            if (gameState.level > 1) {
+                addAchievement(`Level ${gameState.level - 1} Complete!`);
+            }
+        }
+        
+        function addMistake() {
+            gameState.mistakes++;
+            gameState.accuracy = Math.max(0, gameState.accuracy - 5);
+            updateDisplay();
+            gameComm.addMistake();
+            gameComm.updateAccuracy(gameState.accuracy);
+        }
+        
+        function addBonus() {
+            gameState.bonus += 10;
+            updateDisplay();
+            gameComm.addBonus(10);
+        }
+        
+        function addAchievement() {
+            const achievements = [
+                'First Steps!',
+                'Getting Better!',
+                'Speed Runner!',
+                'Accuracy Master!',
+                'Bonus Hunter!',
+                'Level Master!',
+                'Perfect Player!',
+                'Skillprint Champion!'
+            ];
+            
+            const randomAchievement = achievements[Math.floor(Math.random() * achievements.length)];
+            if (!gameState.achievements.includes(randomAchievement)) {
+                gameState.achievements.push(randomAchievement);
+                gameComm.addAchievement(randomAchievement);
+                updateDisplay();
+            }
+        }
+        
+        function showGameOver() {
+            document.getElementById('gameOver').classList.add('show');
+        }
+        
+        function completeGame() {
+            // Calculate final accuracy based on mistakes
+            const finalAccuracy = Math.max(0, 100 - (gameState.mistakes * 5));
+            
+            // Complete the game and send results to parent window
+            gameComm.completeGame({
+                score: gameState.score,
+                level: gameState.level,
+                accuracy: finalAccuracy,
+                mistakes: gameState.mistakes,
+                bonus: gameState.bonus
+            });
+        }
+        
+        function resetGame() {
+            gameState = {
+                score: 0,
+                level: 1,
+                accuracy: 100,
+                mistakes: 0,
+                bonus: 0,
+                achievements: [],
+                startTime: Date.now()
+            };
+            
+            gameComm.resetGame();
+            updateDisplay();
+            document.getElementById('gameOver').classList.remove('show');
+        }
+        
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('accuracy').textContent = gameState.accuracy + '%';
+            document.getElementById('mistakes').textContent = gameState.mistakes;
+            document.getElementById('bonus').textContent = gameState.bonus;
+            
+            // Update achievements display
+            const achievementsDiv = document.getElementById('achievements');
+            achievementsDiv.innerHTML = gameState.achievements.length > 0 
+                ? '<h3>🏆 Achievements:</h3>' + gameState.achievements.map(a => `<div class="achievement">${a}</div>`).join('')
+                : '';
+        }
+        
+        // Initialize display
+        updateDisplay();
+        
+        // Auto-complete game after 2 minutes for demo purposes
+        setTimeout(() => {
+            if (gameState.score < 100) {
+                addScore(100 - gameState.score);
+                showGameOver();
+            }
+        }, 120000);
+    </script>
+</body>
+</html> 

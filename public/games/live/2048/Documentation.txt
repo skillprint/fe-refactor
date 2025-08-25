@@ -1,0 +1,20 @@
+===============
+2048 Event List
+===============
+SWIPE => Player swiped
+	- SWIPE (event)
+	- LEFT/UP/RIGHT/DOWN (direction)
+	- 0 (score)
+---------------
+LEVEL_FAILED => Player lost
+	- LEVEL_FAILED (event)
+	- 0 (score)
+---------------
+LEVEL_COMPLETE => Player won
+	- LEVEL_COMPLETE (event)
+	- 0 (score)
+---------------
+LEVEL_RESTART => Player restarted
+	- LEVEL_RESTART (event)
+	- 0 (score)
+---------------

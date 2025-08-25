@@ -1,0 +1,95 @@
+root { 
+    display: block;
+}
+
+body{
+    background-color: #000000;
+    background-repeat: repeat-x;
+    background-position: top; 
+}
+
+*, *:before, *:after {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+     
+input, input:before, input:after {
+    -webkit-user-select: initial;
+    -khtml-user-select: initial;
+    -moz-user-select: initial;
+    -ms-user-select: initial;
+    user-select: initial;
+}
+
+::selection { background: transparent;color:inherit; }
+::-moz-selection { background: transparent;color:inherit; }
+
+#canvas{
+    position: fixed;
+}
+
+canvas {
+    image-rendering: optimizeSpeed;
+    image-rendering:-o-crisp-edges;
+    image-rendering:-webkit-optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+	-ms-touch-action: none;
+}
+
+.ani_hack{
+    -webkit-perspective: 1000;
+    -webkit-backface-visibility: hidden;
+    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent; /* mobile webkit */
+}
+
+
+/***************FONTS*******************/
+
+.check-fonts{
+        position: fixed;
+        opacity:0;
+}
+
+.check-font-1{
+        font-family: 'rocks__gregular';
+}
+.check-font-2{
+        font-family: 'suplexmentary_comic_ncregular';
+}
+                
+@font-face {
+    font-family: 'rocks__gregular';
+    src: url('gomarice_rocks-webfont.eot');
+    src: url('gomarice_rocks-webfont.eot?#iefix') format('embedded-opentype'),
+         url('gomarice_rocks-webfont.woff2') format('woff2'),
+         url('gomarice_rocks-webfont.woff') format('woff'),
+         url('gomarice_rocks-webfont.ttf') format('truetype'),
+         url('gomarice_rocks-webfont.svg#rocks__gregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'suplexmentary_comic_ncregular';
+    src: url('suplexmentary_comic_nc-webfont.eot');
+    src: url('suplexmentary_comic_nc-webfont.eot?#iefix') format('embedded-opentype'),
+         url('suplexmentary_comic_nc-webfont.woff2') format('woff2'),
+         url('suplexmentary_comic_nc-webfont.woff') format('woff'),
+         url('suplexmentary_comic_nc-webfont.ttf') format('truetype'),
+         url('suplexmentary_comic_nc-webfont.svg#suplexmentary_comic_ncregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}

@@ -1,0 +1,16 @@
+===============
+Mine Rusher Events
+===============
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+---------------
+TAP => Player taps (changes direction)
+	- TAP (event)
+---------------
+LEVEL_FAILED => Player failed the level
+	- LEVEL_FAILED (event)
+	- 0 (score)
+---------------
+COIN_COLLECTED => Player collects a coin
+	- COIN_COLLECTED (event)
+---------------

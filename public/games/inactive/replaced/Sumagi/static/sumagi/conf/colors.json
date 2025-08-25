@@ -1,0 +1,16 @@
+{
+	"background": "#676d6a",
+	"menu_text": "#bbb",
+	"menu_text2": "#eee",
+	"piece_solved": "#4c4",
+	"piece_tagged": "#ecefbf",
+	"piece_normal": "#888c8a",
+	"piece_text_solved": "#feffea",
+	"piece_text_tagged": "#000",
+	"piece_text_normal": "#fff",
+	"piece_shadow": "#555",
+	"gridlines": "#666a68",
+	"goal_text_sigma": "#999",
+	"goal_text_sum": "#fff",
+	"status_text": "#ccc"
+}

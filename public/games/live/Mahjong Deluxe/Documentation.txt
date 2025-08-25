@@ -1,0 +1,27 @@
+===============
+Mahjong Deluxe Event List
+===============
+LEVEL_START => Player starts a level
+	- layout: "classic"/"monument"/"pyramids"/"arena"/"four"/"the wall"
+---------------
+MATCH => Player clicks a second tile that matches the highlighted tile
+---------------
+UNMATCH => Player clicks a second tile that does not match the first
+---------------
+HINT => Player clicks on the hint button
+---------------
+SHUFFLE => Player confirms that they want to shuffle
+---------------
+LEVEL_RESTART => Player confirms that they want to restart the game
+	- layout: "classic"/"monument"/"pyramids"/"arena"/"four"/"the wall"
+---------------
+LEVEL_QUIT => Player quits in the middle of the game
+---------------
+LEVEL_WON => Player clears the board
+	- score (0)
+	- layout: "classic"/"monument"/"pyramids"/"arena"/"four"/"the wall"
+---------------
+LEVEL_FAILED => No more selectable pairs
+	- score (0)
+	- layout: "classic"/"monument"/"pyramids"/"arena"/"four"/"the wall"
+---------------

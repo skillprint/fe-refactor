@@ -1,0 +1,32 @@
+===============
+Mortar Watermelon Event List
+===============
+GAME_START => Game loaded / Play again after Game End
+	- GAME_START (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- 0 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_FAILED => Player failed the level
+	- LEVEL_FAILED (event)
+	- 0 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_RESTART => Player Restart the level
+	- LEVEL_RESTART (event)
+	- 0 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 0 (level)
+	- 0 (star)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player quit in mid of the game / All level completed
+	- GAME_END (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

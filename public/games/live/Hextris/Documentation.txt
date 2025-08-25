@@ -1,0 +1,47 @@
+===============
+Hextris Event List
+===============
+LEVEL_START => Player start the game
+	- LEVEL_START (event)
+---------------
+CLOCKWISE_TAP => Player tap CW
+	- CLOCKWISE_TAP (event)
+	- 0 (score)
+---------------
+ANTICLOCKWISE_TAP => Player tap CCW
+	- ANTICLOCKWISE_TAP (event)
+	- 0 (score)
+---------------
+TWO COLORS MEET => 2 Colors Meet
+	- 2_COLORS (event)
+	- RED/YELLOW/BLUE/GREEN (color)
+	- 0 (score)
+---------------
+THREE COLORS MEET => 3 Colors Meet
+	- 3_COLORS (event)
+	- RED/YELLOW/BLUE/GREEN (color)
+	- 0 (score)
+---------------
+MATCH => When the blocks color match
+	- MATCH (event)
+	- RED/YELLOW/BLUE/GREEN (color)
+	- 0 (score)
+---------------
+GAME_PAUSE => Player pause the game
+	- GAME_PAUSE (event)
+---------------
+GAME_RESUME => Player resume the game
+	- GAME_RESUME (event)
+---------------
+LEVEL_RESTART => Player restart the game
+	- LEVEL_RESTART (event)
+	- 0 (score)
+---------------
+LEVEL_FAILED => Player lose the game
+	- LEVEL_FAILED (event)
+	- 0 (score)
+---------------
+LEVEL_QUIT => Player stop the game
+	- LEVEL_QUIT (event)
+	- 0 (score)
+---------------

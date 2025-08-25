@@ -1,0 +1,27 @@
+===============
+Jigsaw Puzzle Event List
+===============
+GAME_START => Player start the Game
+	- GAME_START (event)
+	- LION/WOLF/EAGLE/ELEPHANT/PARROT/PENGUIN (image)
+	- 16/36/64/100 (pieces)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+MATCH => Player matched the puzzle pieces
+	- MATCH (event)
+	- 0 (score)
+	- 0 (time)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESTART => Player restart the game
+	- GAME_RESTART (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player quit in mid of the game / Puzzle Finished
+	- GAME_END (event)
+	- LION/WOLF/EAGLE/ELEPHANT/PARROT/PENGUIN (image)
+	- 16/36/64/100 (pieces)
+	- 0 (score)
+	- 0 (time)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

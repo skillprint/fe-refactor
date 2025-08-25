@@ -1,0 +1,22 @@
+===============
+I Love Hue Event
+===============
+LEVEL_START => Player starts the level
+	- 0 (level)
+---------------
+SWAP => Player swaps a color patch
+	- Correct (1 or 0 (incorrect))
+---------------
+LEVEL_QUIT => Player quit the level
+	- 0 (level)
+	- 0 (clicks)
+---------------
+LEVEL_RESTART => Player restarts the level
+	- LEVEL_RESTART (event)
+	- 0 (level)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 0 (level)
+	- 0 (clicks)
+---------------

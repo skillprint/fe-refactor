@@ -1,0 +1,39 @@
+===============
+SpaceTrip Event List
+===============
+LEVEL_START => Player start the game
+    - LEVEL_START (event)
+---------------
+COIN_GEN => Coin shape spawns
+    - COIN_GEN (event)
+    - shape (shape)
+    - int (coins) => # of coins generated.
+---------------
+FIRST_COIN => First coin taken (Timeout for 5 seconds to avoid spamming this)
+    - FIRST_COIN (event)
+    - shape (shape)
+    - int(num_objs) ⇒ # of moving objects on the screen when the coin is taken.
+---------------
+COIN_OUT => Coin shape leaves the screen
+    - COIN_OUT (event)
+    - int(coins) ⇒ # of coins
+---------------
+HIT=> got hit by obstacle
+    - HIT (event)
+    - asteroid/planet/satellite (object)
+    - int(num_objs) ⇒ # of moving objects on the screen when dead.
+---------------
+LEVEL_COMPLETE => Player finish the level 
+    - LEVEL_COMPLETE (event)
+    - int (distance) ⇒ distance covered
+---------------
+
+Analysis:
+    I would like to capture % of coins gained and # of moving objects on the screen along with the distance they have covered. 
+
+Transform/score:
+    Score ~ distance* coin (%) * num_objs when HIT
+Each of the scores would be z scored based on distribution and their distance to origin in proportion to maximal distance. 
+score: normal distribution
+coin(%): 1-rayleigh
+num_objs: normal distribution

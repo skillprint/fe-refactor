@@ -1,0 +1,22 @@
+===============
+Snake Attack Event List
+===============
+LEVEL_START => Player starts the game (length is 6; eaten is 0)
+	- timestamp: 2020-08-01T08:34:01.527Z
+---------------
+GAME_PAUSE => Player pauses game
+	- timestamp: 2020-08-01T08:34:01.527Z
+---------------
+GAME_RESUME => Player resumes game
+	- timestamp: 2020-08-01T08:34:01.527Z
+---------------
+LEVEL_QUIT => Player quits or restarts level
+	- bestLength: 13 (longest snake has gotten without getting cut)
+	- eaten: 6 (total number of apples eaten)
+	- timestamp: 2020-08-01T08:34:01.527Z
+---------------
+LEVEL_FAILED => Player gets eaten
+    - bestLength: 13 (longest snake has gotten without getting cut)
+	- eaten: 6 (total number of apples eaten)
+	- timestamp: 2020-08-01T08:34:01.527Z
+---------------

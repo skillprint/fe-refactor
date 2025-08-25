@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.14/semantic.css">
+
+    <script src="js/jquery.js"></script>
+    <script src="js/semantic.js"></script>
+</head>
+<body>
+    <div class='ui container'>
+        <div class="ui icon message" style="margin-top: 30px">
+            <i class="game icon"></i>
+            <div class="content">
+                <div class="header">
+                    Color Bump documentation
+                </div>
+                <p>By Andrey Krepyshev</p>
+            </div>
+        </div>
+
+
+        <div class="ui basic segment">
+            <ol class="ui list">
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#file-structure">File structure</a></li>
+                <li><a href="#quickstart">Quickstart</a></li>
+                <li><a href="#custom-element">Embedding the game into a custom HTML element on your page</a></li>
+                <li><a href="#reskinning">Reskinning the game</a></li>
+
+            </ol>
+        </div>
+
+        <div class="ui horizontal divider">&nbsp;</div>
+
+        <div class="ui basic segment">
+            <h3 class="ui header">Introduction</h3>
+            <a id="introduction"></a>
+            <p>
+                Thank you for purchasing this game.
+            </p>
+            <p>
+                If you have any questions that are beyond the scope of this help file, please feel free to email via my <a href="https://codecanyon.net/user/elkranio">user page contact form</a>.
+            </p>
+        </div>
+
+        <div class="ui basic segment">
+            <h3 class="ui header">File structure</h3>
+            <a id="file-structure"></a>
+            <p>
+                The file structure is very simple.
+            </p>
+            <img src="images/file-structure.png">
+            <p>
+                The <strong>assets</strong> folder holds game resources (graphics, sounds etc).<br>
+                The <strong>js</strong> folder holds game code.<br>
+                The <strong>index.html</strong> file is the starting point of the game.
+            </p>
+        </div>
+
+        <div class="ui basic segment">
+            <h3 class="ui header">Quickstart</h3>
+            <a id="quickstart"></a>
+            <p>
+                Create a folder inside your site public directore. Paste all the files there. For example if you create a folder named "game" inside your public folder, you can play the game by going to <u>http://yoursite.com/game</u>.
+            </p>
+        </div>        
+            
+        <div class="ui basic segment">
+            <h3 class="ui header">Custom HTML element</h3>
+            <a id="custom-element"></a>
+            <p>
+                If you wish to embed the game into a custom element on the existing page, do the following steps:
+                <ol>
+                    <li>Copy "dist" and "assets" folders into the same folder as your .html file</li>
+                    <li>Add <strong>&lt;script src=&quot;dist/bundle.js&quot;&gt;</strong> line right before the closing <strong>head</strong> tag.</li>
+                    <li>Create an element and give it a "game" id. For example: <strong>&lt;div id=&quot;game&quot;&gt;&lt;/div&gt;</strong></li>
+                    <li>Enjoy the game</li>
+                </ol>
+            </p>
+        </div>    
+        
+        <div class="ui basic segment">
+            <h3 class="ui header">Reskinning the game</h3>
+            <a id="reskinning"></a>
+            <p>
+                The reskinning process is very simple, don't be discouraged by the fact that you'll need to use a third-party program.<br>
+                Follow these steps.
+                <ol>
+                    <li>Download and install <a href="https://www.codeandweb.com/texturepacker">Texture Packer</a></li> It's a free program that will allow you to update the game's graphics.
+                    <li>Run Texture packer</li>
+                    <li>Double click on <strong>atlas.tps</strong> file in the <strong>assets</strong> folder.</li>
+                    <li>Change any file you want and then press <strong>publish sprite sheet</strong></li>
+                </ol>
+                Now you can change any image in the folder and Texture Packer will automatically pack everything into a nice texture atlas. Don't change file names and try to get as close to the initial image sizes as possible.
+            </p>
+            <p>
+                When you're finished, click on the <strong>Publish sprite sheet</strong> button.
+                Name the export <strong>atlas</strong> and you will get 2 files: <strong>atlas.png</strong> and <strong>atlas.json</strong>. Put both of them into the <strong>assets/images</strong> folder of the game.
+            </p>
+
+        </div>
+                  
+    </div>
+</body>
+</html>

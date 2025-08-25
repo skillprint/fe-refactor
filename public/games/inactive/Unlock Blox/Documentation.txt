@@ -1,0 +1,33 @@
+===============
+Unlock Blox Event List
+===============
+GAME_START => Game loaded / Play again after Game End
+	- GAME_START (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- 1 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+DRAG => Everytime player drag the tile
+	- DRAG (event)
+	- 0 (time)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_RESTART => Player restart the level
+	- LEVEL_RESTART (event)
+	- 1 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_COMPLETE => Player has complete the level
+	- LEVEL_COMPLETE (event)
+	- 1 (level)
+	- 0 (time)
+	- 0 (stars)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player quit from mid-game
+	- GAME_END (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

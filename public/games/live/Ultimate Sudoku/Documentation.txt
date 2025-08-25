@@ -1,0 +1,41 @@
+===============
+Sudoku Event List
+===============
+LEVEL_START => Player select difficulty and board size
+	- LEVEL_START (event)
+	- BEGINNER/INTERMEDIATE/ADVANCED (difficulty)
+---------------
+ACTIVE_CELL => Player click on the cell
+	- ACTIVE_CELL (event)
+	- 0,0 (cell)
+---------------
+Check Cell => Player fill the cell
+	- VALID/INVALID (event)
+	- 0 (number)
+	- 0 / NO_TIME_MODE (times)
+	- 0 (total)
+---------------
+DELETE => Player delete the cell
+	- DELETE (event)
+	- 0 (number)
+	- 0 / NO_TIME_MODE (time)
+	- 0 (total)
+---------------
+LEVEL_COMPLETE => Player complete the level
+	- LEVEL_COMPLETE (event)
+	- BEGINNER/INTERMEDIATE/ADVANCED (difficulty)
+	- 0 / NO_TIME_MODE (time)
+	- 0 (score)
+---------------
+LEVEL_FAILED => Player failed the level
+	- LEVEL_FAILED (event)
+	- BEGINNER/INTERMEDIATE/ADVANCED (difficulty)
+	- 0 / NO_TIME_MODE (time)
+	- 0 (score)
+---------------
+LEVEL_QUIT => Player quit the level
+	- LEVEL_QUIT (event)
+	- BEGINNER/INTERMEDIATE/ADVANCED (difficulty)
+	- 0 / NO_TIME_MODE (time)
+	- 0 (score)
+---------------

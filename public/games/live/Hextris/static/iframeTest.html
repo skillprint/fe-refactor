@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				width: 100vw;
+				height: 100vh;
+			}
+		</style>
+		<!-- import jquery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script>
+			let element;
+
+			// when document is ready
+			document.addEventListener('DOMContentLoaded', function() {
+				// setInterval(() => {
+				// element = document.getElementById('');
+
+				element = $('#game_frame').contents().find('body')[0]
+
+				// the above line but in vanilla js
+				element = document.getElementById('game_frame').contentWindow.document.body;
+				// // element = element.contentWindow.document.body;
+
+				// // element = document.body;
+				// console.log("Element", element);
+
+				// const options = {
+				// 	allowTaint: true,
+				// 	useCORS : true,
+				// 	// foreignObjectRendering: true,
+				// 	x: element.offsetLeft,
+				// 	y: element.offsetTop,
+				// 	width: element.clientWidth,
+				// 	height: element.clientHeight,
+				// 	windowWidth: element.clientWidth,
+				// 	windowHeight: element.clientHeight,
+				// 	removeContainer: false,
+				// 	scale: 1,
+				// }
+
+				
+				// // 	console.log("Sending message to parent");
+					
+				// 	html2canvas(element, options).then(canvas => {
+				// 		console.log("Got canvas", canvas);
+				// 		const dataUrl = canvas.toDataURL();
+				// 		console.log("Got dataUrl");
+				// 		console.log(dataUrl)
+				// 		// window.parent.postMessage({ type: 'screenshot', dataUrl }, "*");
+				// 	})
+
+				// // 	domtoimage.toPng(element)
+				// // 	.then(function (dataUrl) {
+				// // 		console.log("Got dataUrl");
+				// // 		console.log(dataUrl)
+				// // 		// window.parent.postMessage({ type: 'screenshot', dataUrl }, "*");
+				// // 	})
+				// // 	.catch(function (error) {
+				// // 		console.error('oops, something went wrong!', error);
+				// // 	});
+
+				// }, 3000);
+					
+			})
+			</script>
+			<script type='text/javascript' src="js/html2canvas.min.js"></script>
+			<script type='text/javascript' src="js/dom-to-image-more.js"></script>
+	</head>
+	<body>
+		<iframe id="game_frame" src="./index.html" style="width: 100vw; height: 100vh; border: 0 " />
+	</body>
+</html>

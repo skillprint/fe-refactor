@@ -1,0 +1,22 @@
+===============
+Gummy Blocks Event List
+===============
+LEVEL_START => Player starts the game
+	- score: 0 (int; can be non-zero if continuing saved game)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LINE_CLEARED => Player clears one or more lines
+	- num_lines_cleared: 1 or more (number of lines cleared in that move)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_RESTART => Player restarts level
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_QUIT => Player quits or restarts level
+	- score: 0 (int)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_FAILED => Player cannot play a block
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

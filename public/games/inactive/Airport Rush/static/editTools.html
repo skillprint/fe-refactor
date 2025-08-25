@@ -1,0 +1,113 @@
+<div id="editWrapper">
+    <div id="floatForm">
+		<input id='toggleShowOption' name="toggleOption" type="button" value="Hide Edit Option" />
+        
+        <div id="editOption">
+			<br/>
+        	<div id="editOptionWrapper">
+				Select terminals:<br/>
+                <select id="terminallist" name="terminallist"></select>
+                <br/>
+                <input id="prevTerminal" name="prevTerminal" class="button" type="button" value="Prev Terminal">
+                <input id="nextTerminal" name="nextTerminal" class="button" type="button" value="Next Terminal">
+                <br/><br/>
+                <input id="removeTerminal" name="removeTerminal" type="button" value="Remove Terminal">
+                <input id="moveTerminalUp" name="moveTerminalUp" type="button" value="Move Terminal Up">
+                <input id="moveTerminalDown" name="moveTerminalDown" type="button" value="Move Terminal Down">
+                <input id="addTerminal" name="addTerminal" type="button" value="New Terminal">
+                <br/><br/>
+                
+                Edit terminal :<br/>
+				<input id="editTerminal" name="editTerminal" type="button" value="Edit Terminal">
+                <input id="editRunway" name="editRunway" type="button" value="Edit Runway">
+                <br/><br/>
+                
+                Generate and replace array :<br/>
+                <input id="generate" name="generate" type="button" value="Generate Array">
+                <textarea id="outputArray" name="outputArray" cols="" rows="5"></textarea>
+			</div>
+			
+			<div id="editTerminalWrapper">
+				Edit terminal :<br/>
+                <div class="formRowLong extraHeight">
+                    <label for="terminalImage">Terminal image:</label>
+                    <input id="terminalImage" name="terminalImage" value="">
+                </div>
+				<div class="formRowLong extraHeight">
+                    <label for="terminalThumb">Terminal thumb:</label>
+                    <input id="terminalThumb" name="terminalThumb" value="">
+                </div>
+				<div class="formRow">
+                    <label for="terminalName">Terminal Name:</label>
+                    <input id="terminalName" name="terminalName" value="">
+                </div>
+				<br/>
+                <input id="updateTerminal" name="updateTerminal" type="button" value="Update">
+                <input id="backTerminal" name="backTerminal" type="button" value="Done">
+			</div>
+			
+			<div id="editRunwayWrapper">
+				Select runways:<br/>
+                <select id="runwaylist" name="runwaylist"></select>
+                <br/>
+                <input id="prevRunway" name="prevRunway" class="button" type="button" value="Prev Runway">
+                <input id="nextRunway" name="nextRunway" class="button" type="button" value="Next Runway">
+				<br/><br/>
+				<input id="removeRunway" name="removeRunway" type="button" value="Remove Runway">
+				<input id="moveRunwayUp" name="moveRunwayUp" type="button" value="Move Runway Up">
+                <input id="moveRunwayDown" name="moveRunwayDown" type="button" value="Move Runway Down">
+            	<input id="addRunway" name="addRunway" type="button" value="Add Runway">
+				<br/><br/>
+				
+				<div class="modeWrapper">
+					Select runway steps:<br/>
+					<select id="modelist" name="modelist">
+						<option value='0'>1) Landing runway</option>
+						<option value='1'>2) Holding position (Landing)</option>
+						<option value='2'>3) Taxiway to terminal</option>
+						<option value='3'>4) Enter terminal</option>
+						<option value='4'>5) Exit terminal</option>
+						<option value='5'>6) Taxiway to holding position</option>
+						<option value='6'>7) Holding position (Takeoff)</option>
+						<option value='7'>8) Takeoff</option>
+					</select>
+					<br/>
+					<input id="prevMode" name="prevMode" class="button" type="button" value="Prev Step">
+					<input id="nextMode" name="nextMode" class="button" type="button" value="Next Step">
+					<br/><br/>
+					Double click on stage to draw runway steps.
+					<input id="removePoint" name="removePoint" type="button" value="Remove Point">
+					<br/><br/>
+					<div class="formRow">
+						<label for="pointX">Point X position:</label>
+						<input id="pointX" name="pointX" value="">
+					</div>
+					<div class="formRow">
+						<label for="pointY">Point Y position:</label>
+						<input id="pointY" name="pointY" value="">
+					</div>
+					<input id="updatePoint" name="updatePoint" type="button" value="Update Point Position">
+					<br/><br/>
+                    <div class="gateEditWrapper">
+                        Select terminal gates:<br/>
+                        <select id="gatelist" name="gatelist"></select>
+                        <br/>
+                        <input id="prevGate" name="prevGate" class="button" type="button" value="Prev Gate">
+                        <input id="nextGate" name="nextGate" class="button" type="button" value="Next Gate">
+                        <br/><br/>
+                        <input id="addGate" name="addGate" type="button" value="Add Gate">
+                        <input id="removeGate" name="removeGate" type="button" value="Remove Gate">
+                    </div>
+				</div>
+				<br/>
+				<div class="testWrapper">
+					Make sure to build the complete runway from landing to takeoff before test animation.
+					<input id="testRun" name="testRun" type="button" value="Test Plane Animation">
+					<input id="testPause" name="testPause" type="button" value="Stop Plane Animation">
+				</div>
+				<br/>
+				<input id="backRunway" name="backRunway" type="button" value="Done">
+			</div>
+		</div>
+    </div>
+</div>

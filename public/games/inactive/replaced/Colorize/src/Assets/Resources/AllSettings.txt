@@ -1,0 +1,9 @@
+HOMEBUTTONS|GALLERY,INSPIRATION,MY DESIGNS
+HOMEBUTTONIMAGES|Graphics/UIIcons/gallery,Graphics/UIIcons/insipiration,Graphics/UIIcons/myDesigns
+HOMEBUTTONCOLORS|(0.000, 0.000, 0.000, 0.000):(0.000, 0.000, 0.000, 0.000):(0.000, 0.000, 0.000, 0.000)
+INSPIRATIONLINK|https://www.instagram.com/explore/tags/colorize/
+POPUPBUTTONS|START OVER,CONTINUE
+POPUPBUTTONCOLORS|(0.000, 0.000, 0.000, 1.000):(0.000, 0.000, 0.000, 1.000)
+UIICONIMAGES|Graphics/UIIcons/undo,Graphics/UIIcons/share,Graphics/UIIcons/home,Graphics/IAPIcons/close
+SOCIALICONIMAGES|Graphics/SocialIcons/instagram,Graphics/SocialIcons/savetogallery,Graphics/SocialIcons/moreshare
+WATERMARK|Graphics/UIIcons/watermark_bg

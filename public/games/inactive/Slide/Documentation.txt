@@ -1,0 +1,38 @@
+===============
+Slide Game Event List
+===============
+GAME_START => Game loaded / Play again after Game End
+	- GAME_START (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- 0 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+SLIDE => Everytime player slide the block
+	- SLIDE (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_PAUSE => Player click on pause button
+	- GAME_PAUSE (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESUME => Player click on close/resume button
+	- GAME_RESUME (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_RESTART => Player restart the level
+	- LEVEL_RESTART (event)
+	- 0 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 0 (level)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player quit in mid of the game / All level completed
+	- GAME_END (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

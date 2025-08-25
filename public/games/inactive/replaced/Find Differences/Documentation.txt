@@ -1,0 +1,35 @@
+===============
+Finding Differences Event List
+===============
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- 1 (level)
+---------------
+Tap => Everytime player tap the screen
+	- TAP (event)
+	- TRUE/FALSE (condition)
+	- 0 (guess)
+	- 0 (time)
+---------------
+LEVEL_FAILED => Player failed the level
+	- LEVEL_FAILED (event)
+	- 1 (level)
+	- 0 (guess)
+	- 0 (time)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 1 (level)
+	- 0 (guess)
+	- 0 (time)
+---------------
+LEVEL_RESTART => Player restart the level
+	- LEVEL_RESTART (event)
+	- 1 (level)
+---------------
+LEVEL_QUIT => Player quit from the level
+	- LEVEL_QUIT (event)
+	- 1 (level)
+---------------
+ALL_LEVELS_COMPLETED => All levels in the game has been completed
+	- ALL_LEVELS_COMPLETED

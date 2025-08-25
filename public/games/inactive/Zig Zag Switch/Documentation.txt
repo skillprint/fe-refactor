@@ -1,0 +1,27 @@
+===============
+ZigZag Switch Event List
+===============
+GAME_START => Player start the game
+	- GAME_START (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GET_POINTS => Player get points
+	- GET_POINTS (event)
+	- 0 (score)
+	- CYAN/PINK/PURPLE/YELLOW (color)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+TAP => Player TAP
+	- TAP (event)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESTART => Player restart the game
+	- GAME_RESTART (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player lose
+	- GAME_END (event)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

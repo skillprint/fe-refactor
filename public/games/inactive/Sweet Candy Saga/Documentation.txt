@@ -1,0 +1,34 @@
+===============
+Sweet Candy Saga Event List
+===============
+GAME_START => Player start the game
+	- GAME_START (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_PAUSE => Player click on pause button
+	- GAME_PAUSE (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESUME => Player click on close/resume button
+	- GAME_RESUME (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+SWAP => Everytime player swap the tile
+	- SWAP (event)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+COMBO => Everytime player gets combo
+	- COMBO x2/COMBO x3/COMBO x4/SUPER COMBO (event)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESTART => Player click on restart button
+	- GAME_RESTART (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Time ended or player quit from mid-game via Pause Button
+	- GAME_END (event)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

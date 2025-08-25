@@ -1,0 +1,21 @@
+TEXT_SCORE = "SCORE";
+TEXT_SCORE_GAMEOVER = "Total Score";
+TEXT_LEVEL = "Level";
+TEXT_LEVEL_UPPERCASE = "LEVEL";
+TEXT_SELECT_LEVEL = "SELECT A LEVEL";
+TEXT_COMPLETE = "Complete";
+TEXT_CONGRATULATIONS = "All levels completed... Congratulations!";
+TEXT_HELP_PAGE_1_PC = "Move the paddle to bounce the ball and destroy all the bricks! Grab any falling power-ups to get more points!";
+TEXT_HELP_PAGE_1_MOBILE = "Swipe the paddle to bounce the ball and destroy all the bricks! Grab any falling power-ups to get more points!";
+TEXT_DEVELOPED = "DEVELOPED BY";
+var TEXT_CONFIRM_CLEAR_SAVINGS = "ALL YOUR SAVED DATA WILL BE DELETED. ARE YOU SURE?";
+var TEXT_ARE_SURE = "ARE YOU SURE?";
+var TEXT_PRELOADER_CONTINUE = "START";
+var TEXT_ERR_LS = "YOUR WEB BROWSER DOES NOT SUPPORT LOCAL STORAGE. IN SAFARI, THE MOST COMMON CAUSE OF THIS IS USING 'PRIVATE BROWSING MODE'. SOME INFO MAY NOT SAVE AND OTHER FEATURES MAY NOT WORK PROPERLY.";
+
+TEXT_SHARE_IMAGE = "200x200.jpg";
+TEXT_SHARE_TITLE = "Congratulations!";
+TEXT_SHARE_MSG1 = "You collected <strong>";
+TEXT_SHARE_MSG2 = " points</strong>!<br><br>Share your score with your friends!";
+TEXT_SHARE_SHARE1 = "My score is ";
+TEXT_SHARE_SHARE2 = " points! Can you do better?";

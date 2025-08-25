@@ -1,0 +1,9 @@
+09/26/22
+- Added x rounds per difficulty level - (set to 5)
+- config settings for bonus points based on grid size - (30,45,60)
+- 1 bonus point per second
+- fixed bug showing decimal score during bonus give
+- Improved screen scaling, Increased scale of some txt elements
+- Improved button value text centering
+- Added "SUM ≠ GOAL" Alert when solution is wrong
+- Incremented game_id

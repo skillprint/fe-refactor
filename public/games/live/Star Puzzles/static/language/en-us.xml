@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!--general-->
+    <txt id="comma">,</txt>
+
+    <txt id="loading_msg"><![CDATA[LOADING...]]></txt>
+    <txt id="play"><![CDATA[PLAY]]></txt>
+    <txt id="ok"><![CDATA[OK]]></txt>
+    <txt id="help_home"><![CDATA[?]]></txt>
+    <txt id="replay"><![CDATA[REPLAY]]></txt>
+
+    <!--pause-->
+    <txt id="exit_game"><![CDATA[EXIT]]></txt>
+    <txt id="resume_game"><![CDATA[RESUME]]></txt>
+    <txt id="help"><![CDATA[HELP]]></txt>
+
+    <!--levels-->
+    <txt id="levels_header"><![CDATA[SELECT LEVEL]]></txt>
+    <txt id="reset"><![CDATA[RESET PROGRESS]]></txt>
+ 
+    <!--popups-->
+    <txt id="reset_confirm"><![CDATA[ARE YOU SURE YOU WANT TO CLEAR ALL YOUR PROGRESS?]]></txt>
+    <txt id="home_confirm"><![CDATA[ARE YOU SURE YOU WANT TO QUIT THIS GAME?]]></txt>
+    <txt id="quit_confirm"><![CDATA[ARE YOU SURE YOU WANT TO EXIT OUT OF THIS GAME ENTIRELY?]]></txt>
+
+    <txt id="complete_hdr"><![CDATA[GREAT JOB!]]></txt>
+    <txt id="complete_msg"><![CDATA[YOU COMPLETED ALL THE LEVELS. TAP REPLAY TO START AGAIN.]]></txt>
+
+
+    <txt id="game_msg"><![CDATA[ROUND {*var*}]]></txt>
+
+    <!--instructions-->
+    <txt id="tutorial_header"><![CDATA[HOW TO PLAY]]></txt>
+
+    <txt id="instruction_desktop_1" type="instruction_desktop" img="media/images/Instructions/instructions_1.jpg"><![CDATA[CHOOSE A STARTING DOT, THEN TAP TO START DRAWING A LINE.]]></txt>
+    <txt id="instruction_desktop_2" type="instruction_desktop" img="media/images/Instructions/instructions_2.jpg"><![CDATA[FOLLOWING THE EMPTY PATHS, DRAG YOUR LINE TO CONNECT TO ANOTHER DOT.]]></txt> 
+    <txt id="instruction_desktop_3" type="instruction_desktop" img="media/images/Instructions/instructions_3.jpg"><![CDATA[KEEP GOING UNTIL ALL PATHS ARE CONNECTED.]]></txt>   
+    <txt id="instruction_desktop_4" type="instruction_desktop" img="media/images/Instructions/instructions_4.jpg"><![CDATA[YOU CANNOT RE-USE PATHS. IF YOU HIT A DEAD END, THE BOARD WILL CLEAR FOR ANOTHER TRY.]]></txt>
+
+    <txt id="instruction_mobile_1" type="instruction_mobile" img="media/images/Instructions/instructions_1.jpg"><![CDATA[CHOOSE A STARTING DOT, THEN TAP TO START DRAWING A LINE.]]></txt>
+    <txt id="instruction_mobile_2" type="instruction_mobile" img="media/images/Instructions/instructions_2.jpg"><![CDATA[FOLLOWING THE EMPTY PATHS, DRAG YOUR LINE TO CONNECT TO ANOTHER DOT.]]></txt> 
+    <txt id="instruction_mobile_3" type="instruction_mobile" img="media/images/Instructions/instructions_3.jpg"><![CDATA[KEEP GOING UNTIL ALL PATHS ARE CONNECTED.]]></txt>    
+    <txt id="instruction_mobile_4" type="instruction_mobile" img="media/images/Instructions/instructions_4.jpg"><![CDATA[YOU CANNOT RE-USE PATHS. IF YOU HIT A DEAD END, THE BOARD WILL CLEAR FOR ANOTHER TRY.]]></txt>
+
+
+</xml>

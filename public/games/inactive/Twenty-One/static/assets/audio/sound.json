@@ -1,0 +1,1 @@
+{"resources":["sound.ogg","sound.m4a","sound.mp3","sound.ac3"],"spritemap":{"card":{"start":0,"end":0.12770975056689343,"loop":false},"chip":{"start":2,"end":2.358458049886621,"loop":false},"click":{"start":4,"end":4.023219954648526,"loop":false},"error":{"start":6,"end":6.242358276643991,"loop":false},"win":{"start":8,"end":8.901224489795919,"loop":false}}}

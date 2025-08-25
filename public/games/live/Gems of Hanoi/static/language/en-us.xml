@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!--general-->
+    <txt id="comma">,</txt>
+
+
+    <txt id="loading_msg"><![CDATA[LOADING...]]></txt>
+    <txt id="play"><![CDATA[PLAY]]></txt>
+    <txt id="replay"><![CDATA[REPLAY]]></txt>
+    <txt id="continue"><![CDATA[CONTINUE]]></txt>
+
+    <!--pause-->
+    <txt id="exit_game"><![CDATA[EXIT]]></txt>
+    <txt id="resume_game"><![CDATA[RESUME]]></txt>
+    <txt id="help"><![CDATA[HELP]]></txt>
+ 
+    <!--levels-->
+    <txt id="levels_header"><![CDATA[SELECT LEVEL]]></txt>
+    <txt id="reset"><![CDATA[RESET PROGRESS]]></txt>
+
+    <txt id="restart"><![CDATA[RESTART LEVEL]]></txt>
+    <txt id="label_moves"><![CDATA[MOVES:]]></txt>
+    <txt id="label_best"><![CDATA[BEST]]></txt>
+
+    <txt id="recap_hdr_0_stars"><![CDATA[GREAT JOB!]]></txt>
+    <txt id="recap_hdr_1_stars"><![CDATA[NICE WORK!]]></txt>
+    <txt id="recap_hdr_2_stars"><![CDATA[FANTASTIC!]]></txt>
+    <txt id="recap_hdr_3_stars"><![CDATA[INCREDIBLE!]]></txt>
+
+    <txt id="reset_confirm"><![CDATA[ARE YOU SURE YOU WANT TO CLEAR ALL YOUR PROGRESS?]]></txt>
+    <txt id="restart_confirm"><![CDATA[ARE YOU SURE YOU WANT TO RESTART THIS LEVEL?]]></txt>
+    <txt id="home_confirm"><![CDATA[ARE YOU SURE YOU WANT TO QUIT THIS LEVEL?]]></txt>
+    <txt id="quit_confirm"><![CDATA[ARE YOU SURE YOU WANT TO EXIT OUT OF THIS GAME ENTIRELY?]]></txt>
+
+    <txt id="recap_msg"><![CDATA[YOU WON IN {*var*} MOVES!]]></txt>
+
+    <!--instructions-->
+    <txt id="tutorial_header"><![CDATA[HOW TO PLAY]]></txt>
+
+    <txt id="instruction_desktop_1" type="instruction_desktop" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Tap to pick up a disc.]]></txt>
+    <txt id="instruction_desktop_2" type="instruction_desktop" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Tap on another post to drop the disc there.]]></txt>   
+    <txt id="instruction_desktop_3" type="instruction_desktop" img="media/images/Instructions/instructions_3.jpg"><![CDATA[You can only drop smaller discs on top of larger ones.]]></txt>  
+    <txt id="instruction_desktop_4" type="instruction_desktop" img="media/images/Instructions/instructions_4.jpg"><![CDATA[Move all dics to the silver post to complete the puzzle.]]></txt> 
+
+    <txt id="instruction_mobile_1" type="instruction_mobile" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Tap to pick up a disc.]]></txt>
+    <txt id="instruction_mobile_2" type="instruction_mobile" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Tap on another post to drop the disc there.]]></txt>   
+    <txt id="instruction_mobile_3" type="instruction_mobile" img="media/images/Instructions/instructions_3.jpg"><![CDATA[You can only drop smaller discs ontop of larger ones.]]></txt>  
+    <txt id="instruction_mobile_4" type="instruction_mobile" img="media/images/Instructions/instructions_4.jpg"><![CDATA[Move all dics to the silver post to complete the puzzle.]]></txt> 
+
+</xml>

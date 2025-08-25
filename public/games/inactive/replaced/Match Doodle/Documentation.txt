@@ -1,0 +1,27 @@
+===============
+Match Doodle Event List
+===============
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- 0 (level)
+	- 0 (objectives)
+---------------
+DRAG/DROP => Player drag/drop the object
+	- DRAG/DROP (event)
+	- 01/02/.../40 (object_id)
+	- 0 (time)
+---------------
+MATCH => Player puts object on table
+	- MATCH/UNMATCH (event)
+	- 0 (time)
+	- 0 (object_done)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 0 (level)
+	- 0 (time)
+---------------
+LEVEL_QUIT => Player stop the game
+	- LEVEL_QUIT (event)
+	- 0 (level)
+---------------

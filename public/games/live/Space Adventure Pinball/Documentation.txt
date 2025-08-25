@@ -1,0 +1,31 @@
+===============
+Space Adventure Pinball Event List
+===============
+LEVEL_START => Player presses play
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+BALL_LAUNCH => 
+	- num_lines_cleared: 1 or more (number of lines cleared in that move)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+BALL_LOST => Player loses ball (although extra ball may be given)
+	- score: 100 (total score so far)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_QUIT => Player quits level
+	- score: 100 (total score so far)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_RESTART => Player restarts level
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_PAUSE => Player pauses game
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESUME => Player resumes game
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_FAILED => Player has no balls remaining
+	- score: 100 (total score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

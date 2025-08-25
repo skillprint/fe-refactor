@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!--general-->
+    <txt id="comma">,</txt>
+
+    <txt id="loading_msg"><![CDATA[LOADING...]]></txt>
+    <txt id="play"><![CDATA[PLAY]]></txt>
+    <txt id="ok"><![CDATA[OK]]></txt>
+    <txt id="help_home"><![CDATA[?]]></txt>
+    <txt id="replay"><![CDATA[REPLAY]]></txt>
+    <txt id="continue"><![CDATA[CONTINUE]]></txt>
+    <txt id="ready"><![CDATA[READY?]]></txt>
+
+    <!--pause-->
+    <txt id="exit_game"><![CDATA[EXIT]]></txt>
+    <txt id="resume_game"><![CDATA[RESUME]]></txt>
+    <txt id="help"><![CDATA[HELP]]></txt>
+
+     <!--levels-->
+    <txt id="levels_header"><![CDATA[SELECT LEVEL]]></txt>
+    <txt id="reset"><![CDATA[RESET PROGRESS]]></txt>
+    <txt id="restart"><![CDATA[RESTART LEVEL]]></txt>
+ 
+    <!--popups-->
+    <txt id="reset_confirm"><![CDATA[ARE YOU SURE YOU WANT TO CLEAR ALL YOUR PROGRESS?]]></txt>
+    <txt id="restart_confirm"><![CDATA[ARE YOU SURE YOU WANT TO RESTART THIS LEVEL?]]></txt>
+    <txt id="home_confirm"><![CDATA[ARE YOU SURE YOU WANT TO QUIT THIS LEVEL?]]></txt>
+    <txt id="quit_confirm"><![CDATA[ARE YOU SURE YOU WANT TO EXIT OUT OF THIS GAME ENTIRELY?]]></txt>
+   
+    <!--game-->
+    <txt id="txt_score"><![CDATA[SCORE:]]></txt>
+    <txt id="game_msg"><![CDATA[ROUND {*round*} / {*rounds*}]]></txt>
+
+
+    <!--results-->
+    <txt id="results_header"><![CDATA[YOUR RESULTS:]]></txt>
+
+    <txt id="results_win"><![CDATA[GREAT JOB!]]></txt>
+    <txt id="result_win_msg"><![CDATA[YOU COMPLETED ALL THE LEVELS WITH A FINAL SCORE OF {*score*}.]]></txt>
+
+    <!--instructions-->
+    <txt id="tutorial_header"><![CDATA[HOW TO PLAY]]></txt>
+
+    <txt id="instruction_desktop_1" type="instruction_desktop" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Choose a card, then tap to flip it.]]></txt>
+    <txt id="instruction_desktop_2" type="instruction_desktop" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Try to find the matching card, then tap to flip it.]]></txt>  
+    <txt id="instruction_desktop_3" type="instruction_desktop" img="media/images/Instructions/instructions_3.jpg"><![CDATA[Finding the match will clear the cards. Find consecutive pairs for point multipliers.]]></txt>  
+    <txt id="instruction_desktop_4" type="instruction_desktop" img="media/images/Instructions/instructions_4.jpg"><![CDATA[Clear them all to complete the level. Finish early for bonus points.]]></txt>  
+
+    <txt id="instruction_mobile_1" type="instruction_mobile" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Choose a card, then tap to flip it.]]></txt>
+    <txt id="instruction_mobile_2" type="instruction_mobile" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Try to find the matching card, then tap to flip it.]]></txt>  
+    <txt id="instruction_mobile_3" type="instruction_mobile" img="media/images/Instructions/instructions_3.jpg"><![CDATA[Finding the match will clear the cards. Find consecutive pairs for point multipliers.]]></txt>  
+    <txt id="instruction_mobile_4" type="instruction_mobile" img="media/images/Instructions/instructions_4.jpg"><![CDATA[Clear them all to complete the level. Finish early for bonus points.]]></txt>  
+
+</xml>

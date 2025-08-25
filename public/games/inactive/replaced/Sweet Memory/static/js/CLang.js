@@ -1,0 +1,20 @@
+var TEXT_GAMEOVER  = "GAME OVER";
+var TEXT_PLAY      = "PLAY";
+var TEXT_LEVEL_SCORE = "LEVEL SCORE";
+var TEXT_LEVELCOMPLETED = "STAGE CLEARED!";
+var TEXT_TIMELEFT = "Time ";
+var TEXT_SCORE = "Score ";
+var TEXT_MATCH_SCORE = "SCORE MATCHING";
+var TEXT_TIMEBONUS = "TIME BONUS";
+var TEXT_TOTALSCORE = "TOTAL SCORE";
+var TEXT_VICTORY = "CONGRATULATIONS!!";
+var TEXT_PLAY_AGAIN = "PLAY AGAIN";
+var TEXT_DEVELOPED = "DEVELOPED BY";
+var TEXT_PRELOADER_CONTINUE = "START";
+
+var TEXT_SHARE_IMAGE = "200x200.jpg";
+var TEXT_SHARE_TITLE = "Congratulations!";
+var TEXT_SHARE_MSG1 = "You collected <strong>";
+var TEXT_SHARE_MSG2 = " points</strong>!<br><br>Share your score with your friends!";
+var TEXT_SHARE_SHARE1 = "My score is ";
+var TEXT_SHARE_SHARE2 = " points! Can you do better?";

@@ -1,0 +1,23 @@
+===============
+Whack em All Event List
+===============
+GAME_START => Player select level and game mode
+	- GAME_START (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+Tap => Tap on the animal/bomb
+	- ANIMAL/BOMB (event)
+	- 0 (score)
+	- 0 (timeleft)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_RESTART => Player restart the game
+	- GAME_RESTART (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+GAME_END => Player quit or time end
+	- GAME_END (event)
+	- 0 (score)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+

@@ -1,0 +1,21 @@
+===============
+Katana Fruits Event List
+===============
+LEVEL_START => Player start the level
+---------------
+SPAWN => A fruit/bomb spawns
+	- FRUIT / BOMB (entity)
+	- 0 (id)
+---------------
+SLASHED => Player slashes an entity
+	- FRUIT / BOMB (entity)
+	- 0 (id)
+---------------
+FRUIT_NOT_SLASHED => Fruit falls without being slashed
+---------------
+LEVEL_FAILED => Player lost the game
+	- 0 (score)
+---------------
+LEVEL_QUIT => Player quit from the level
+	- 0 (score)
+---------------

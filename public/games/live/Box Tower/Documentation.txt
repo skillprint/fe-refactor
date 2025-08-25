@@ -1,0 +1,20 @@
+===============
+Box Tower Event List
+===============
+LEVEL_START => Player starts the level
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+STACK => Each time the player taps a block
+	- perfect: 1 or 0
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_QUIT => Player quits the level
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_RESTART => Player restarts the level
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_FAILED => Player loses
+	- LEVEL_FAILED (event)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

@@ -1,0 +1,23 @@
+===============
+Brick Out Events
+===============
+LEVEL_START 
+	- level: 1
+---------------
+LEVEL_FAILED 
+	- score: 100
+---------------
+BALL_LAUNCH
+---------------
+BALL_LOST
+---------------
+LEVEL_COMPLETE 
+	- level: 1
+	- score: 100
+---------------
+LEVEL_QUIT
+	- 0 (score)
+---------------
+GAME_PAUSE
+---------------
+GAME_RESUME

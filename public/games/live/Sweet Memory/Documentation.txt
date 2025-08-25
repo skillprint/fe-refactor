@@ -1,0 +1,38 @@
+===============
+Sweet Memory Event List
+===============
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- 0 (level)
+	- 0 (score)
+	- 0 (time)
+	- 0 (pairs)
+
+
+---------------
+CHECK CARD => Player match the tile
+	- MATCH/UNMATCH (event)
+	- 0 (score)
+	- 0 (time)
+---------------
+FLIP => Player flip the card
+	- FLIP (event)
+	- card0/card1/card2/card3/card4/card5/card6/card7/card8/card9/card10/card11/card12/card13/card14/card15 (name)
+	- 1-N (position index)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 0 (level)
+	- 0 (score)
+	- 0 (time)
+---------------
+LEVEL_QUIT => Player quit the level
+	- LEVEL_QUIT (event)
+	- 0 (level)
+	- 0 (score)
+---------------
+LEVEL_RESTART => Player restarts the level
+	- LEVEL_RESTARTT (event)
+	- 0 (level)
+	- 0 (score)
+---------------

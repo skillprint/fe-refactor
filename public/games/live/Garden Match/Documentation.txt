@@ -1,0 +1,24 @@
+===============
+Garden Match Event List
+===============
+LEVEL_START => Player swiped
+	- LEVEL_START (event)
+	- 1 (level)
+---------------
+SWIPE => Player swiped
+	- SWIPE (event)
+	- True/False (match_success)
+	- 0 (moves)
+---------------
+LEVEL_FAILED => Player lost
+	- LEVEL_FAILED (event)
+	- 1 (level)
+---------------
+LEVEL_COMPLETE => Player won
+	- LEVEL_COMPLETE (event)
+	- 1 (level)
+---------------
+LEVEL_RESTART => Player restarted
+	- LEVEL_RESTART (event)
+	- 1 (level)
+---------------

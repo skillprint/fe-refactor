@@ -1,0 +1,3 @@
+SKUS|com.colorize.allcategories,com.colorize.allcolors,com.colorize.everything
+PRICING|$1.99,$0.99,$1.99
+TESTMODE|False

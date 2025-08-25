@@ -1,0 +1,497 @@
+@font-face{ 
+    font-family: "Nova Oval"; 
+    src: local('☺'), url('../media/fonts/NovaOval-Regular.woff') format('woff');
+}
+
+
+
+/* -------------------------- */
+/* general                    */
+/* -------------------------- */
+
+
+html {
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    position: absolute;
+    right:0px;
+    left:0px;
+    top:0px;
+    bottom:0px;
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none; 
+    -webkit-user-callout: none;
+    -ms-touch-action: manipulation !important;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background-color: #370048;
+}
+
+a { color: inherit; } 
+
+/* -------------------------- */
+/* canvases                   */
+/* -------------------------- */
+
+#canvas_library {
+    position: absolute;
+    display: none;
+    transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
+    -ms-transform-origin: 0% 0%;
+    overflow: hidden;
+    background-color: #640081;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+
+   
+}
+
+#canvas_builder {
+    position: absolute;
+    display: none;
+   
+    top: 0px;
+    left: 0px;
+
+    background-position: center;
+    background-size: cover;
+    background-image: url('../media/images/background.jpg');
+
+    transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
+    -ms-transform-origin: 0% 0%;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+#canvas_floater {
+    position: absolute;
+    display: none;
+    background-color: transparent;
+    transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
+    -ms-transform-origin: 0% 0%;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+#frame{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    border:  6px solid #0099FF;
+    border-radius: 20px;
+    pointer-events: none;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+#wrapper{
+  position: absolute;
+  display: block;
+  top: 0px; 
+  left: 0px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform-origin: 0% 0%;
+  -webkit-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  overflow: hidden;
+
+ 
+}
+
+/*threejs layer*/
+#canvas_game {
+  position: absolute;
+  display: block;
+  top: 0px; 
+  left: 0px;
+  display: none;
+  background-color: #666666;
+  pointer-events: none;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/*createjs layer*/
+#canvas_screens {
+  position: absolute;
+  display: block;
+  top: 0px; 
+  left: 0px;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background-color:  none;
+
+   background-position: center;
+    background-size: cover;
+    background-image: url('../media/images/background.jpg');
+}
+
+.dimmer{
+   /* backdrop-filter: blur(4px);*/
+   /* background-color: rgba(0,0,0,0.1);*/
+   /* transition: backdrop-filter 500ms linear;*/
+}
+
+
+
+
+#canvas_mute {
+  position: absolute;
+  display: block;
+  left: 0px; 
+  top: 0px;
+  width: 64px;
+  height: 180px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+#canvas_quit {
+  position: absolute;
+  display: block;
+  right: 0px; 
+  top: 0px;
+  width: 52px;
+  height: 52px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+#canvas_overlay {
+  position: absolute;
+  display: none;
+  top: 0px; 
+  left: 0px;
+  background: transparent;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+#canvas_popups {
+  position: absolute;
+  display: none;
+  top: 0px; 
+  left: 0px;
+  background-color: rgb(0,0,0, 0.5);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+#fader {
+  position: absolute;
+  top: 0px; 
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0,0,0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  pointer-events: none;
+}
+
+#cover{
+  position: absolute;
+  display: block;
+  top: 0px; 
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+}
+
+
+/* -------------------------- */
+/* landscape / screensize     */
+/* -------------------------- */
+
+#orientation_overlay {
+  position: absolute;
+  display: none;
+  top: 0px; 
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background-color: #000000;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+#div_errors{
+    position: absolute;
+    display: none;
+    left: 0px;
+    top: 0px;
+    z-index: 1002;
+    font-family: Arial, Helvetica;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: black;
+}
+
+#debug{
+  position: absolute;
+  display: none;
+  top: 0px; 
+  left: 0px;
+  z-index: 2000;
+  overflow: auto;
+  height: 100%;
+  padding: 20px;
+  color: red;
+  font-family: sans-serif;
+  background-color: rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+
+
+
+/*--------------------------------------------------------*/
+/*  loading                                               */
+/*--------------------------------------------------------*/
+
+
+.loading_screen{
+  position: absolute;
+  display: block;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+    background-color: #370048;
+  }
+
+.loading_block{
+  position: absolute;
+  display: block;
+  text-align: center;
+  pointer-events: none;
+  width: 512px;
+ }
+
+ .loading_logo{
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+ }
+
+ .loading_msg{
+    position: relative;
+    display: inline-block;
+    pointer-events: none;
+    color: #ffffff;
+    font-size: 20px;
+    text-align: center;
+    font-family: "Roboto";
+    font-weight: normal;  
+ }
+
+ .loading_bar{
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 300px;
+    height: 24px;
+    background:  rgba(0,0,0,0.5);
+    margin-top: 10px;
+    border-radius: 12px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+ }
+
+.loading_bar_fill{
+    position: absolute;
+    display: block;
+    width: 0%;
+    height: 100%;
+    border-radius: 12px;
+    background:  #ffffff;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+ }
+
+.loading_bar_frame{
+    position: absolute;
+    display: none;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    border: 4px solid #000000;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+ }
+
+
+
+
+/*--------------------------------------------------------*/
+/*  footer                                                */
+/*--------------------------------------------------------*/
+
+#footer {
+    transform-origin: 50% 0%;
+    -webkit-transform-origin: 50% 0%;
+    -ms-transform-origin: 50% 0%;
+
+    position: absolute;
+    display: block;
+
+    bottom: 0px;
+    left: 0px; 
+    width: 100%;
+
+    background-color: black;
+    background-repeat: no-repeat;
+    background-position: center center;
+    -webkit-background-size: auto;
+    -moz-background-size: auto;
+    -o-background-size: auto;
+    background-size: auto;
+    color: #cccccc;
+    text-align: center;
+    font-family: 'Roboto';
+    font-weight: normal;
+    font-size: 10pt;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */  
+}
+
+
+.footer_block{
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  padding: 4px;
+  font-size: 10pt;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+  box-sizing: border-box;         /* Opera/IE 8+ */
+  transition: opacity 0.25s;
+}
+
+.legal_block_table{
+  width: 100%;
+  vertical-align: middle;
+  border: 0px;
+  margin: 0px;
+  padding: 0px;
+  border-spacing: 0; 
+  }
+
+.legal_button{
+  position: relative;
+  display: inline-block;
+  float: left;
+  font-size: 10pt;
+  width:  80px;
+  padding: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: #333333;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+
+
+.legal_divider {
+    position: relative;
+    display: inline-block;
+    margin-left: 4px;
+    margin-right: 4px;
+    text-decoration: none;
+    pointer-events: auto;
+    color: #ff0000;
+}
+
+.legal_link {
+    text-decoration: none;
+    pointer-events: auto;
+    white-space: nowrap;
+    color: #cccccc;
+}
+
+.legal_link:hover {
+    color: #ffffff;
+    cursor: pointer;
+}
+.legal_link:active {
+    color: #faaf1e;
+}
+
+
+/*legal links for mobile*/
+.legal_link_mobile {
+    text-decoration: none;
+    pointer-events: auto;
+    white-space: nowrap;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.legal_image{
+    position: relative;
+    display: inline-block;
+    margin: 4px;
+   /*height: 40px;*/
+    pointer-events: none;
+}
+
+
+
+
+.footer_logo{
+  position: relative;
+  display: inline-block;
+  background-color: #ff2efd;
+  padding: 10px;
+
+  padding-right: 8px;
+  margin: 20px;
+  border-radius: 16px;
+}
+
+.footer_rating{
+  margin: 10px;
+  position: relative;
+  display: inline-block;
+  width: 149px;
+  height: 59px;
+
+}
+

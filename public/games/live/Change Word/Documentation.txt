@@ -1,0 +1,40 @@
+===============
+Change Word Event List
+===============
+LEVEL_START => Player starts the level
+	- word: "ARM" (prompt)
+	- possibleWords: 10 (possible answers)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+WORD => Player makes a new word
+	- word: "ARM" (prompt)
+	- possibleWords: 10 (possible answers)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+NONWORD => Player makes a nonword
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+REPEAT => Player attempts to play a repeated word (not allowed)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+NONWORD => No more words possible
+	- word: "ARM" (prompt)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_QUIT => Player quits the level
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+HINT_USED => Player uses hint of replaceable letters or replacement letters
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+WORD_RESET => Player resets word
+	- word: "ARM" (prompt)
+	- possibleWords: 10 (possible answers)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------
+LEVEL_FAILED => Player out of time
+	- LEVEL_FAILED (event)
+	- word: "ARM" (prompt)
+	- possibleWords: 10 (possible answers)
+	- 2020-08-01T08:34:01.527Z (timestamp)
+---------------

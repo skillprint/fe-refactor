@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!--general-->
+    <txt id="comma">,</txt>
+
+    <txt id="loading_msg"><![CDATA[LOADING...]]></txt>
+    <txt id="play"><![CDATA[PLAY]]></txt>
+    <txt id="ok"><![CDATA[OK]]></txt>
+    <txt id="help_home"><![CDATA[?]]></txt>
+    <txt id="replay"><![CDATA[REPLAY]]></txt>
+
+    <!--pause-->
+    <txt id="exit_game"><![CDATA[EXIT]]></txt>
+    <txt id="resume_game"><![CDATA[RESUME]]></txt>
+    <txt id="help"><![CDATA[HELP]]></txt>
+    <txt id="txt_goal"><![CDATA[GOAL]]></txt>
+
+    <!--levels-->
+    <txt id="home_confirm"><![CDATA[ARE YOU SURE YOU WANT TO QUIT THIS GAME?]]></txt>
+    <txt id="quit_confirm"><![CDATA[ARE YOU SURE YOU WANT TO EXIT OUT OF THIS GAME ENTIRELY?]]></txt>
+
+    <txt id="complete_hdr"><![CDATA[GAME OVER!]]></txt>
+    <txt id="complete_msg"><![CDATA[CONGRATULATIONS! YOU MADE IT TO ROUND {*level*} WITH A SCORE OF {*score*}. PLAY AGAIN TO KEEP IMPROVING YOUR SKILLS.]]></txt>
+
+    <txt id="wrong_alert"><![CDATA[{*sum*} ≠ {*goal*}]]></txt>
+
+    <txt id="game_msg"><![CDATA[ROUND {*var*}]]></txt>
+
+    <!--instructions-->
+    <txt id="tutorial_header"><![CDATA[HOW TO PLAY]]></txt>
+
+    <txt id="instruction_desktop_1" type="instruction_desktop" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Notice the GOAL sum for this round.]]></txt>
+    <txt id="instruction_desktop_2" type="instruction_desktop" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Look for and swipe tiles that add up to that GOAL.]]></txt>   
+    <txt id="instruction_desktop_3" type="instruction_desktop" img="media/images/Instructions/instructions_3.jpg"><![CDATA[Get it right to advance to the next level.]]></txt>
+    <txt id="instruction_desktop_4" type="instruction_desktop" img="media/images/Instructions/instructions_4.jpg"><![CDATA[Any time left on the timer is converted to bonus points.]]></txt>
+    <txt id="instruction_desktop_5" type="instruction_desktop" img="media/images/Instructions/instructions_5.jpg"><![CDATA[Three mistakes and the game is over.]]></txt>
+
+    <txt id="instruction_mobile_1" type="instruction_mobile" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Notice the GOAL sum for this round.]]></txt>
+    <txt id="instruction_mobile_2" type="instruction_mobile" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Look for and swipe tiles that add up to that GOAL.]]></txt>   
+    <txt id="instruction_mobile_3" type="instruction_mobile" img="media/images/Instructions/instructions_3.jpg"><![CDATA[Get it right to advance to the next level.]]></txt>
+    <txt id="instruction_mobile_4" type="instruction_mobile" img="media/images/Instructions/instructions_4.jpg"><![CDATA[Any time left on the timer is converted to bonus points.]]></txt>
+    <txt id="instruction_mobile_5" type="instruction_mobile" img="media/images/Instructions/instructions_5.jpg"><![CDATA[Three mistakes and the game is over.]]></txt>
+
+
+</xml>

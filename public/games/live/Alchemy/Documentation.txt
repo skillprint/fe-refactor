@@ -1,0 +1,31 @@
+===============
+Alchemy Event List
+===============
+
+Player begins a work session
+	- SESSION_START (event)
+	- 0 (timestamp)
+
+---------------
+Player chooses to reset all progress
+	- SESSION_RESET (event)
+	- 0 (timestamp)
+
+---------------
+Player chooses to clear the workspace
+	- WORKSPACE_CLEAR (event)
+	- 0 (timestamp)
+
+---------------
+Player chooses to stop playing and return to title screen
+	- GAME_QUIT (event)
+	- 0 (timestamp)
+
+---------------
+Player attempts to combine two items
+	- COMBINE_ATTEMPT (event)
+	- "success_new/success_exists/fail" (result)
+	- "fire" (item_1)
+	- "water"(item_2)
+	- "steam" (resulting_item; no field if failed)
+	- 0 (timestamp)

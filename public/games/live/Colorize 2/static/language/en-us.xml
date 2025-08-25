@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!--general-->
+    <txt id="comma">,</txt>
+
+    <txt id="loading_msg"><![CDATA[LOADING...]]></txt>
+    <txt id="play"><![CDATA[BEGIN]]></txt>
+    <txt id="ok"><![CDATA[OK]]></txt>
+    <txt id="help_home"><![CDATA[?]]></txt>
+    <txt id="replay"><![CDATA[REPLAY]]></txt>
+
+    <!--pause-->
+    <txt id="exit_game"><![CDATA[EXIT]]></txt>
+    <txt id="resume_game"><![CDATA[RESUME]]></txt>
+    <txt id="help"><![CDATA[HELP]]></txt>
+
+    <!--levels-->
+    <txt id="levels_header"><![CDATA[SELECT PAGE]]></txt>
+    <txt id="reset"><![CDATA[RESET PROGRESS]]></txt>
+
+    <!--page categories-->
+    <txt id="category_animals"><![CDATA[ANIMALS]]></txt>
+    <txt id="category_arabic"><![CDATA[ARABIC]]></txt>
+    <txt id="category_florals"><![CDATA[FLORALS]]></txt>
+    <txt id="category_gardens"><![CDATA[GARDENS]]></txt>
+    <txt id="category_geometric"><![CDATA[GEOMETRIC]]></txt>
+    <txt id="category_mandalas"><![CDATA[MANDALAS]]></txt>
+    <txt id="category_oriental"><![CDATA[ORIENTAL]]></txt>
+ 
+    <!--popups-->
+    <txt id="clear_confirm"><![CDATA[ARE YOU SURE YOU WANT TO CLEAR ALL YOUR WORK?]]></txt>
+    <txt id="home_confirm"><![CDATA[ARE YOU SURE YOU WANT TO QUIT THIS ACTIVITY?]]></txt>
+    <txt id="quit_confirm"><![CDATA[ARE YOU SURE YOU WANT TO EXIT OUT OF THIS ACTIVITY ENTIRELY?]]></txt>
+
+    <!--instructions-->
+    <txt id="tutorial_header"><![CDATA[HOW TO PLAY]]></txt>
+    <txt id="page_header"><![CDATA[SELECT PAGE]]></txt>
+
+
+
+
+    <txt id="instruction_desktop_1" type="instruction_desktop" img="media/images/Instructions/instructions_1.jpg"><![CDATA[TAP THE COLORED PENCIL TO BRING UP THE COLOR CHOOSER.]]></txt>
+    <txt id="instruction_desktop_2" type="instruction_desktop" img="media/images/Instructions/instructions_2.jpg"><![CDATA[TAP OR DRAG TO SELECT A NEW COLOR, THEN TAP THE CHECK BUTTON TO CONFIRM.]]></txt> 
+    <txt id="instruction_desktop_3" type="instruction_desktop" img="media/images/Instructions/instructions_3.jpg"><![CDATA[TAP ON THE IMAGE TO FILL AREAS.]]></txt>   
+    <txt id="instruction_desktop_4" type="instruction_desktop" img="media/images/Instructions/instructions_4.jpg"><![CDATA[YOU CAN MOVE YOUR ART AROUND BY DRAGGING OR ZOOM BY PINCHING OR USING THE ZOOM BUTTONS.]]></txt>  
+    <txt id="instruction_desktop_5" type="instruction_desktop" img="media/images/Instructions/instructions_5.jpg"><![CDATA[USE THESE BUTTONS TO UNDO OR REDO YOUR WORK.]]></txt> 
+
+    <txt id="instruction_mobile_1" type="instruction_mobile" img="media/images/Instructions/instructions_1.jpg"><![CDATA[TAP THE COLORED PENCIL TO BRING UP THE COLOR CHOOSER.]]></txt>
+    <txt id="instruction_mobile_2" type="instruction_mobile" img="media/images/Instructions/instructions_2.jpg"><![CDATA[TAP OR DRAG TO SELECT A NEW COLOR, THEN TAP THE CHECK BUTTON TO CONFIRM.]]></txt> 
+    <txt id="instruction_mobile_3" type="instruction_mobile" img="media/images/Instructions/instructions_3.jpg"><![CDATA[TAP ON THE IMAGE TO FILL AREAS.]]></txt>    
+    <txt id="instruction_mobile_4" type="instruction_mobile" img="media/images/Instructions/instructions_4.jpg"><![CDATA[YOU CAN MOVE YOUR ART AROUND BY DRAGGING OR ZOOM BY PINCHING OR USING THE ZOOM BUTTONS.]]></txt>   
+    <txt id="instruction_mobile_5" type="instruction_mobile" img="media/images/Instructions/instructions_5.jpg"><![CDATA[USE THESE BUTTONS TO UNDO OR REDO YOUR WORK.]]></txt> 
+
+
+</xml>

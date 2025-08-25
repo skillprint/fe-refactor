@@ -1,0 +1,16 @@
+===============
+Flapcat Steampunk Event List
+===============
+LEVEL_START => Player start the game (by leaving the balloon ship)
+	- LEVEL_START (event)
+---------------
+TAP => player taps the screen
+	- TAP (event)
+---------------
+PASSED => player passed an obstacle (when the score increases)
+	- PASSED (event)
+	- height (float) => The middle point of obstacle opening
+---------------
+LEVEL_COMPLETE => Player dies 
+	- LEVEL_COMPLETE (event)
+---------------

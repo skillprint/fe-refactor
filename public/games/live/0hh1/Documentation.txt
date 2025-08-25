@@ -1,0 +1,29 @@
+===============
+0hh1 Event List
+===============
+LEVEL_START => Player start the game
+	- LEVEL_START (event)
+	- 4/6/8/10 (size)
+	- 0,0,0,0... (empty)
+	- 2,1,2,1... (full)
+---------------
+TAP => Player click on the tile
+	- TAP (event)
+	- 2,3 (position)
+	- red/blue/empty (color)
+---------------
+UNDO => Player click on the undo button
+	- UNDO_MOVE (event)
+	- 2,3 (position)
+	- red/blue/empty (color)
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 0 (score)
+	- 4/6/8/10 (size)
+---------------
+LEVEL_QUIT => Player quit the level
+	- LEVEL_QUIT (event)
+	- 0 (score)
+	- 4/6/8/10 (size)
+---------------

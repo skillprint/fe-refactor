@@ -1,0 +1,15 @@
+==============================
+Colorize Event Objects
+==============================
+
+event: 'START_PUZZLE'
+puzzle: 'animal1'
+segments: 362
+
+event: 'PUZZLE_CLEAR'
+puzzle: 'animal1'
+colored_segments: 4
+
+event: 'PUZZLE_QUIT'
+puzzle: 'animal1'
+colored_segments: 362

@@ -1,0 +1,409 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head lang="en">
+	<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	<title>Circle Word Documentation</title>
+	<!-- Framework CSS -->
+	<link rel="stylesheet" href="assets/blueprint-css/screen.css" type="text/css" media="screen, projection">
+	<link rel="stylesheet" href="assets/blueprint-css/print.css" type="text/css" media="print">
+	<!--[if lt IE 8]><link rel="stylesheet" href="assets/blueprint-css/ie.css" type="text/css" media="screen, projection"><![endif]-->
+	<link rel="stylesheet" href="assets/blueprint-css/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">
+	<style type="text/css" media="screen">
+		p, table, hr, .box { margin-bottom:25px; }
+		.box p { margin-bottom:10px; }
+	</style>
+    <link rel="stylesheet" href="assets/blueprint-css/prettify.css">
+	<script src="assets/js/prettify.js" defer></script>
+    <script>
+	window.onload = (function(){ prettyPrint(); });
+	</script>
+</head>
+
+
+<body>
+	<div class="container">
+	
+		<h3 class="center alt">&ldquo;Circle Word&rdquo; Documentation by &ldquo;demonisblack&rdquo; v1.1</h3>
+		
+		<hr>
+		
+		<h1 class="center">&ldquo;Circle Word&rdquo;</h1>
+		
+		<div class="borderTop">
+			<div class="span-6 colborder info prepend-1">
+				<p class="prepend-top">
+					<strong>
+					Created: 08/20/2022<br>
+					By: demonisblack<br>
+					Email: <a href="mailto:demonisblack@gmail.com">demonisblack@gmail.com</a>
+					</strong>
+				</p>
+			</div><!-- end div .span-6 -->		
+	
+			<div class="span-12 last">
+				<p class="prepend-top append-0">Thank you for purchasing the game. If you have any questions that are beyond the scope of this help file, please feel free to email via profile page contact form <a href="https://codecanyon.net/user/demonisblack">here</a>. Thanks so much!</p>
+			</div>
+		</div><!-- end div .borderTop -->
+		
+		<hr>
+		
+		<h2 id="toc" class="alt">Table of Contents</h2>
+		<ol class="alpha">
+        	<li><a href="#introduction">Introduction</a></li>
+            <li><a href="#gettingStarted">Getting Started</a></li>
+            <li><a href="#htmlStructure">HTML Structure</a></li>
+			<li><a href="#cssFiles">CSS Files and Structure</a></li>
+			<li><a href="#javascript">JavaScript</a></li>
+            <li><a href="#gameFunctions">Game Functions</a></li>
+            <li><a href="#gameAssets">Game Assets</a></li>
+            <li><a href="#compatibility">Compatibility</a></li>
+			<li><a href="#credits">Sources and Credits</a></li>
+            <li><a href="#changelog">Changelog</a></li>
+            <li><a href="#support">Support Policy</a></li>
+		</ol>
+		
+		<hr>
+        
+        <h3 id="introduction"><strong>A) Introduction</strong> - <a href="#toc">top</a></h3>
+        <p>Circle Word is a HTML5 game is a word challenge game that you have to connect all letters to form a word, play from 3 to 6 letters Circle Word before time run out to score high points.</p>
+        
+        <p>The ZIP package contains the game with 1280×768 and 768×1024 resolution that scales proportionally to fit current screen device.</p>
+        
+        <hr>
+        
+        <h3 id="gettingStarted"><strong>B) Getting Started</strong> - <a href="#toc">top</a></h3>
+		<p>To install the game just upload folder 'game' to your server. The game won't run locally with some browser like Chrome due to some security mode.</p>        
+        <p>You need a website that runs PHP to make facebook share button work, and make sure to change Facebook Open Graph meta and Twitter meta in index.html, just replace [GAME_URL] to your game URL.</p>
+        <pre class="prettyprint linenums">
+        &lt;!-- for Facebook --&gt;
+        &lt;meta property=&quot;og:image&quot; content=&quot;[GAME_URL]/share.jpg&quot; /&gt;
+        &lt;meta property=&quot;og:url&quot; content=&quot;[GAME_URL]&quot; /&gt;
+        
+        &lt;!-- for Twitter --&gt;
+        &lt;meta name=&quot;twitter:image&quot; content=&quot;[GAME_URL]/share.jpg&quot; /&gt;
+        </pre>
+        
+        <p>You can easily customize game text and settings in game.js file
+        <pre class="prettyprint linenums">
+//word settings
+var gameSettings = {
+    title:{
+        name:["CIRCLE","WORD"],
+        radius:50,
+        shadowY:10,
+        fontSize:55,
+        textColor:"#fff",
+        fontY:20
+    },
+    letters:{
+        radius:40,
+        shadowY:10,
+        fontSize:50,
+        colors:["#1ABC9C","#2ECC71","#3498DB","#E67E22","#F1C40F","#E67E22","#D90000"],
+        textColor:"#fff",
+        fontY:20,
+        angleSpeed:30,
+    },
+    word:{
+        x:0,
+        y:-240,
+        formY:60,
+        space:20,
+        speed:.3,
+        revertSpeed:.3
+    },
+    timer:{
+        color:"#fff",
+        radius:170,
+        stroke:10,
+    },
+    score:{
+        speed:1
+    },
+    keyboard:["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"],
+}
+
+//game test display
+var textDisplay = {
+                    loading:'LOADING WORDS...',
+                    point:'[NUMBER]PTS',
+                    pointplus:'+[NUMBER]PTS',
+                    pointDisplay:'SCORE : [NUMBER]PTS',
+                    timesup:"TIME\'S UP!",
+                    nextstage:"NEXT STAGE!",
+                    exitTitle:'EXIT GAME',
+                    exitMessage:'ARE YOU SURE\nYOU WANT TO\nQUIT THE GAME?',
+                    share:'SHARE YOUR SCORE',
+                    resultTitle:'GAME OVER',
+                    resultTimer:'TIME : [NUMBER]',
+                    resultDesc:'SCORE : [NUMBER]PTS'
+                }
+
+//Social share, [SCORE] will replace with game score
+var shareEnable = true; //toggle share
+var shareTitle = 'Highscore on Circle Word is [SCORE]PTS';//social share score title
+var shareMessage = '[SCORE]PTS is mine new highscore on Circle Word game! Try it now!'; //social share score message
+        </pre>
+        </p>
+
+        <p><strong>words_arr</strong> array load all the words, below is the explanation of each most important <strong>words_arr</strong> array item:</p>
+	
+		<pre class="prettyprint linenums">
+var words_arr = [
+    {
+        file:'4letters.json',
+        name:'4 LETTERS',
+        letters:4,
+        radius:80,
+        score:200,
+        timer:40000,
+        hint:1,
+        stage:{
+            next:4,
+            timer:2000
+        }
+    }
+]
+        </pre>
+	
+		<ol>
+            <li><strong>file</strong> - JSON files</li>
+            <li><strong>name</strong> - category name</li>
+            <li><strong>letters</strong> - total letters</li>
+            <li><strong>radius</strong> - radius to show letters in game</li>
+            <li><strong>score</strong> - total score</li>
+            <li><strong>timer</strong> - game timer</li>
+            <li><strong>hint</strong> - hint to show (hint button show after half timer)</li>
+            <li><strong>stage</strong> - to proceed next stage
+                <ol>
+                    <li><strong>next</strong> - total to complete to next stage</li>
+                    <li><strong>timer</strong> - total timer to decrease every round</li>
+                </ol>
+            </li>
+        </ol>
+        
+        <p>
+        The sound can be easily disabled to avoid compatibility issues in sound.js file:
+        <pre class="prettyprint linenums">
+        var enableMobileSound = true;
+        </pre>
+        </p>
+
+        <hr>
+		
+		<h3 id="htmlStructure"><strong>C) HTML Structure</strong> - <a href="#toc">top</a></h3>
+        <p>The page start with the loader wrapper that covering the whole screen in the body. It shows loader progress when calls the function <strong>initPreload()</strong></p>
+        <pre class="prettyprint linenums">
+        &lt;!-- PERCENT LOADER START--&gt;
+    	&#x3C;div id=&#x22;mainLoader&#x22;&#x3E;&#x3C;img src=&#x22;assets/loader.png&#x22; /&#x3E;&#x3C;br&#x3E;&#x3C;span&#x3E;0&#x3C;/span&#x3E;&#x3C;/div&#x3E;
+        &lt;!-- PERCENT LOADER END--&gt;
+        </pre>
+        
+        <p>This section is for browser not support page when calls the function <strong>checkBrowser()</strong>. It shows error message when detect the browser does not support canvas.</p>
+        <pre class="prettyprint linenums">
+        &lt;!-- BROWSER NOT SUPPORT START--&gt;
+        &lt;div id=&quot;notSupportHolder&quot;&gt;
+            &lt;div class=&quot;notSupport&quot;&gt;YOUR BROWSER ISN&#39;T SUPPORTED.&lt;br/&gt;PLEASE UPDATE YOUR BROWSER IN ORDER TO RUN THE GAME&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;!-- BROWSER NOT SUPPORT END--&gt;
+        </pre>
+        
+        <p>Follow by one canvas tag in the body. The game start initiatie by calls the main function of the game <strong>initMain()</strong>.</p>
+        <pre class="prettyprint linenums">
+        &lt;!-- CANVAS START--&gt;
+        &lt;div id=&quot;canvasHolder&quot;&gt;
+            &lt;canvas id=&quot;gameCanvas&quot; width=&quot;1280&quot; height=&quot;768&quot;&gt;&lt;/canvas&gt;
+        &lt;/div&gt;
+        &lt;!-- CANVAS END--&gt;
+        </pre>
+		<hr>
+
+		<h3 id="cssFiles"><strong>D) CSS Files and Structure</strong> - <a href="#toc">top</a></h3>
+		<p>I'm using two CSS files in this game. The first one is a generic reset file. Many browser interpret the default behavior of html elements differently. By using a general reset CSS file, we can work round this. This file also contains some general styling, such as anchor tag colors, font-sizes, etc. Keep in mind, that these values might be overridden somewhere else in the file.</p>
+		<p>The second file contains all of the specific stylings for the page.</p>
+        <hr>
+		
+        
+		<h3 id="javascript"><strong>E) JavaScript</strong> - <a href="#toc">top</a></h3>
+		
+		<p>This game using Javascript files below.</p>
+		
+		<ol>
+			<li>
+                <strong>jQuery</strong> is a cross-platform JavaScript library designed to simplify the client-side scripting of HTML.<br/><br/>
+            </li>
+            
+            <li>
+                <strong>Detect Mobile Browser</strong> is a open source scripts to detect mobile browsers and phones.<br/><br/>
+            </li>
+            
+            <li>
+                <strong>CreateJs plugin</strong> is a suite of modular libraries and tools which work together to create interactive content on open web technologies via HTML5.<br/><br/>
+            </li>
+            
+            <li>
+                <strong>TweenMax</strong> is an extremely fast, lightweight, and flexible animation tool that serves as the foundation of the GreenSock Animation Platform (GSAP).<br/><br/>
+            </li>
+            
+            <li>
+                <strong>The game have the following js files</strong>
+                <ul>
+                    <li><strong>init.js :</strong> check if browser or device support <br/><br/></li>
+                    <li><strong>loader.js :</strong> loader to load all game images<br/><br/></li>
+                    <li><strong>main.js :</strong> initiate game setup and browser resize function<br/><br/></li>
+                    <li><strong>mobile.js :</strong> mobile orientation change<br/><br/></li>
+                    <li><strong>canvas.js :</strong> canvas setup and resize<br/><br/></li>
+                    <li><strong>sound.js :</strong> sound event<br/><br/></li>
+                    <li><strong>game.js :</strong> game play and logics<br/><br/></li>
+                    <li><strong>plugins.js :</strong> additonal useful plugins<br/><br/></li>
+                </ul>
+            </li>
+		</ol>
+        
+        <p>Complete game flow:</p>
+		<ol>
+        	<li>The index.html file start init.js for browser detection</li>
+            <li>If browser is supported, init loader.js to start load asserts with loading progress</li>
+            <li>For mobile the rotate instruction shows when device is in portrait view, detect by mobile.js</li>
+            <li>When all asserts contained in "/assets" folder are loaded, the game start construct canvas.js from main.js thats shows game menu</li>
+            <li>If user click Quic Play button in game menu, the game will start with game.js</li>
+            <li>If user click one of the Category in game menu, the game will start with game.js</li>
+            <li>If user connected all letters to form a correct word, the game will score and proceed next word</li>
+            <li>If user connected all letters to form a wrong word, the letters will reset</li>
+            <li>When timer is run out, the game will end and over</li>
+            <li>If user click the main button in game result, it will back to main</li>
+        </ol>
+		
+		<hr>
+        
+        <h3 id="gameFunctions"><strong>F) Game Functions</strong> - <a href="#toc">top</a></h3>
+		
+		<p>The most important functions used for page.</p>
+        <ul>
+        	<li>
+                <strong>checkBrowser()</strong><br/>
+                This function is runs for browser detection<br/><br/>
+            </li>
+            
+            <li>
+                <strong>checkMobileEvent()</strong><br/>
+                This function runs for mobile event<br/><br/>
+            </li>
+        </ul>
+        
+        <p>The most important functions used for game.</p>
+        <ul>
+        	<li>
+                <strong>initMain()</strong><br/>
+                This function build canvas<br/><br/>
+            </li>
+            
+            <li>
+                <strong>startGame()</strong><br/>
+                This function start gameplay<br/><br/>
+            </li>
+            
+            <li>
+                <strong>stopGame()</strong><br/>
+                This function stop gameplay<br/><br/>
+            </li>
+
+            <li>
+                <strong>saveGame()</strong><br>
+                This function save game score<br><br>
+            </li>
+        </ul>
+		<hr>
+        
+        <h3 id="gameAssets"><strong>G) Game Assets</strong> - <a href="#toc">top</a></h3>
+        <p>The game contain 'design' folder which include following:
+        <ol>
+        	<li>circleword_1280x768.psd - with layer folders below
+                <ul>
+                <li>Option</li>
+                <li>Result</li>
+                <li>Gameplay</li>
+                <li>Landing</li>
+                </ul>
+        	</li>
+        </ol>
+        </p>
+
+        <p>The folder 'assets' in 'game' folder contains all the images of the game that can be replaced. Is better to have the same size of the old ones if you want to reskin the game graphic without coding.</p>
+		<hr>
+        
+        <h3 id="compatibility"><strong>H) Compatibility</strong> - <a href="#top">top</a></h3>
+		
+		<p>This game is build for Desktop browsers that support HTML5 canvas. Any mobile/tablet should work in landscape view, but they are not officially supported.</p>
+		<hr>
+		
+		<h3 id="credits"><strong>I) Sources and Credits</strong> - <a href="#toc">top</a></h3>
+		
+		<p>I've used the following font and sound files as listed.</p>
+		
+		<ul>
+			<li><a href="https://www.dafont.com/comfortaa.font" target="_blank">Johan Aakerlund</a> from file Fontalicious</li>
+			
+            <li><a href="https://freesound.org/people/DWOBoyle/sounds/143608/" target="_blank">Menu Interface - Cancel 003.wav</a> from file DWOBoyle</li>
+            <li><a href="https://freesound.org/people/sonically_sound/sounds/613163/" target="_blank">Magic</a> from file sonically_sound</li>
+            <li><a href="https://freesound.org/people/onikage22/sounds/240566/" target="_blank">blip-plock-pop</a> from file onikage22</li>
+            <li><a href="https://freesound.org/people/ironcross32/sounds/582649/" target="_blank">Long Rising Tones 14.wav</a> from file ironcross32</li>
+            <li><a href="https://freesound.org/people/GabFitzgerald/sounds/625174/" target="_blank">[UI Sound] Approval - High Pitched Bell Synth</a> from file GabFitzgerald</li>
+            <li><a href="https://freesound.org/people/Eponn/sounds/619837/" target="_blank">Soft Short App Melody</a> from file Eponn</li>
+            <li><a href="https://freesound.org/people/Eponn/sounds/619840/" target="_blank">Achievement Accomplish Jingle App UI</a> from file Eponn</li>
+            <li><a href="https://freesound.org/people/Eponn/sounds/619838/" target="_blank">Achievement Happy Beeps Jingle</a> from file Eponn</li>
+		</ul>
+		
+		<hr>
+        
+        <h3 id="changelog"><strong>J) Changelog</strong> - <a href="#toc">top</a></h3>
+
+        Version 1.1
+		<ul>
+			<li>Fixed canvas issue</li>
+		</ul>
+		<hr>
+		
+		<h3 id="support"><strong>K) Support Policy</strong> - <a href="#toc">top</a></h3>
+
+		<p>Check out support policy <a href="http://demonisblack.com/code/support-policy/">here</a>.</p>
+
+        <strong>Wordpress Site</strong><br/>
+        <p>
+            By using Scoreboard for HTML5 Games plugin, you can embed HTML5 game into WordPress post or page.<br>
+            <a href="https://wordpress.org/plugins/scoreboard-for-html5-game-lite/" target="_blank">> Plugin</a>
+        </p>
+
+        <strong>Ad Placeholder</strong><br/>
+        <p>
+            Help simulate ads on HTML5 Games, you can integrate and display static and takeover ads through different Ads Serving Platform.<br>
+            <a href="https://demonisblack.com/code/ads/" target="_blank">> Documentation</a>
+        </p>
+
+        <strong>Instant Games – Facebook</strong><br/>
+        <p>
+            Guide you through integrating Facebook Instant Games API in our HTML5 Games.<br>
+            <a href="https://demonisblack.com/code/instantgames/" target="_blank">> Documentation</a>
+        </p>
+		<hr>
+		
+		<p>Once again, thank you so much for purchasing this game, if you have a more general question relating to the games on CodeCanyon, you might consider visiting the item page in the <a href="https://codecanyon.net/item/circle-word-html5-game/39483759/support">"Support"</a> section.</p>
+		<p>If you like the game, please take a moment to rate it. Thanks!   <img src="assets/images/rate.png" /><img src="assets/images/rate.png" /><img src="assets/images/rate.png" /><img src="assets/images/rate.png" /><img src="assets/images/rate.png" /></p>
+        
+        <p>
+        	<h3>How to rate an item on CodeCanyon?</h3>
+            If you want to rate one of our items on CodeCanyon please do it like this:
+            <ol>
+                <li>Login to CodeCanyon</li>
+                <li>Open the menu on the top right, and click onto the link “Downloads” which shows a list of your downloads</li>
+                <li>Rate our items using the stars</li>
+                <li>That’s it. Thank you very much!</li>
+            </ol>
+        </p>
+		
+		<p class="append-bottom alt large"><strong>demonisblack</strong></p>
+		<p><a href="#toc">Go To Table of Contents</a></p>
+		
+		<hr class="space">
+	</div><!-- end div .container -->
+</body>
+</html>

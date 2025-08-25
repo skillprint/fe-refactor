@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <!--general-->
+    <txt id="comma">,</txt>
+
+    <txt id="loading_msg"><![CDATA[LOADING...]]></txt>
+    <txt id="play"><![CDATA[PLAY]]></txt>
+    <txt id="ok"><![CDATA[OK]]></txt>
+    <txt id="help_home"><![CDATA[?]]></txt>
+    <txt id="replay"><![CDATA[REPLAY]]></txt>
+    <txt id="continue"><![CDATA[CONTINUE]]></txt>
+    <txt id="ready"><![CDATA[READY?]]></txt>
+
+    <!--pause-->
+    <txt id="exit_game"><![CDATA[EXIT]]></txt>
+    <txt id="resume_game"><![CDATA[RESUME]]></txt>
+    <txt id="help"><![CDATA[HELP]]></txt>
+ 
+    <!--levels-->
+    <txt id="home_confirm"><![CDATA[ARE YOU SURE YOU WANT TO QUIT THIS GAME?]]></txt>
+    <txt id="clear_confirm"><![CDATA[ARE YOU SURE YOU WANT TO CLEAR THIS WORKSPACE?]]></txt>
+    <txt id="quit_confirm"><![CDATA[ARE YOU SURE YOU WANT TO EXIT OUT OF THIS GAME ENTIRELY?]]></txt>
+    <txt id="reset_confirm"><![CDATA[ARE YOU SURE YOU WANT RESET? ALL YOUR PROGRESS WILL BE LOST.]]></txt>
+
+    <txt id="complete_hdr"><![CDATA[ALL ITEMS FOUND!]]></txt>
+    <txt id="complete_msg"><![CDATA[FANTASTIC JOB! YOU CREATED ALL 100 ITEMS STARTING WITH JUST 4 ELEMENTS!]]></txt>
+
+
+
+    <txt id="txt_reset"><![CDATA[RESET PROGRESS]]></txt>
+
+    <txt id="workspace"><![CDATA[WORKSPACE]]></txt>
+    <txt id="library"><![CDATA[LIBRARY]]></txt>
+
+    <!--instructions-->
+    <txt id="tutorial_header"><![CDATA[HOW TO PLAY]]></txt>
+
+    <txt id="instruction_desktop_1" type="instruction_desktop" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Drag and drop elements into the workspace.]]></txt>
+    <txt id="instruction_desktop_2" type="instruction_desktop" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Drag elements together to combine them and create new items.]]></txt>   
+    <txt id="instruction_desktop_3" type="instruction_desktop" img="media/images/Instructions/instructions_3.jpg"><![CDATA[Try to find all 100.]]></txt>
+
+    <txt id="instruction_mobile_1" type="instruction_mobile" img="media/images/Instructions/instructions_1.jpg"><![CDATA[Drag and drop elements into the workspace.]]></txt>
+    <txt id="instruction_mobile_2" type="instruction_mobile" img="media/images/Instructions/instructions_2.jpg"><![CDATA[Drag elements together to combine them and create new items.]]></txt>   
+    <txt id="instruction_mobile_3" type="instruction_mobile" img="media/images/Instructions/instructions_3.jpg"><![CDATA[Try to find all 100.]]></txt>
+
+
+ <txt id="ai"><![CDATA[A.I.]]></txt>
+<txt id="air"><![CDATA[AIR]]></txt>
+<txt id="algae"><![CDATA[ALGAE]]></txt>
+<txt id="archipelago"><![CDATA[ARCHIPELAGO]]></txt>
+<txt id="atmosphere"><![CDATA[ATMOSPHERE]]></txt>
+<txt id="beach"><![CDATA[BEACH]]></txt>
+<txt id="bird"><![CDATA[BIRD]]></txt>
+<txt id="blade"><![CDATA[BLADE]]></txt>
+<txt id="boiler"><![CDATA[BOILER]]></txt>
+<txt id="brick"><![CDATA[BRICK]]></txt>
+<txt id="cactus"><![CDATA[CACTUS]]></txt>
+<txt id="carbon"><![CDATA[CARBON]]></txt>
+<txt id="cathode"><![CDATA[CATHODE]]></txt>
+<txt id="clay"><![CDATA[CLAY]]></txt>
+<txt id="cloud"><![CDATA[CLOUD]]></txt>
+<txt id="coal"><![CDATA[COAL]]></txt>
+<txt id="component"><![CDATA[COMPONENT]]></txt>
+<txt id="computer"><![CDATA[COMPUTER]]></txt>
+<txt id="cotton"><![CDATA[COTTON]]></txt>
+<txt id="desert"><![CDATA[DESERT]]></txt>
+<txt id="diamond"><![CDATA[DIAMOND]]></txt>
+<txt id="dune"><![CDATA[DUNE]]></txt>
+<txt id="earth"><![CDATA[EARTH]]></txt>
+<txt id="earthquake"><![CDATA[EARTHQUAKE]]></txt>
+<txt id="electricity"><![CDATA[ELECTRICITY]]></txt>
+<txt id="energy"><![CDATA[ENERGY]]></txt>
+<txt id="eruption"><![CDATA[ERUPTION]]></txt>
+<txt id="explosion"><![CDATA[EXPLOSION]]></txt>
+<txt id="fire"><![CDATA[FIRE]]></txt>
+<txt id="flower"><![CDATA[FLOWER]]></txt>
+<txt id="fog"><![CDATA[FOG]]></txt>
+<txt id="garden"><![CDATA[GARDEN]]></txt>
+<txt id="geyser"><![CDATA[GEYSER]]></txt>
+<txt id="glass"><![CDATA[GLASS]]></txt>
+<txt id="gold"><![CDATA[GOLD]]></txt>
+<txt id="granite"><![CDATA[GRANITE]]></txt>
+<txt id="grass"><![CDATA[GRASS]]></txt>
+<txt id="horizon"><![CDATA[HORIZON]]></txt>
+<txt id="house"><![CDATA[HOUSE]]></txt>
+<txt id="human"><![CDATA[HUMAN]]></txt>
+<txt id="island"><![CDATA[ISLAND]]></txt>
+<txt id="ivy"><![CDATA[IVY]]></txt>
+<txt id="laser"><![CDATA[LASER]]></txt>
+<txt id="lava"><![CDATA[LAVA]]></txt>
+<txt id="life"><![CDATA[LIFE]]></txt>
+<txt id="lightbulb"><![CDATA[LIGHTBULB]]></txt>
+<txt id="medicine"><![CDATA[MEDICINE]]></txt>
+<txt id="metal"><![CDATA[METAL]]></txt>
+<txt id="mirror"><![CDATA[MIRROR]]></txt>
+<txt id="moon"><![CDATA[MOON]]></txt>
+<txt id="moonbase"><![CDATA[MOONBASE]]></txt>
+<txt id="moss"><![CDATA[MOSS]]></txt>
+<txt id="mountain"><![CDATA[MOUNTAIN]]></txt>
+<txt id="mountainrange"><![CDATA[MOUNTAINRANGE]]></txt>
+<txt id="mud"><![CDATA[MUD]]></txt>
+<txt id="oasis"><![CDATA[OASIS]]></txt>
+<txt id="obsidian"><![CDATA[OBSIDIAN]]></txt>
+<txt id="ocean"><![CDATA[OCEAN]]></txt>
+<txt id="oil"><![CDATA[OIL]]></txt>
+<txt id="plant"><![CDATA[PLANT]]></txt>
+<txt id="pond"><![CDATA[POND]]></txt>
+<txt id="pottery"><![CDATA[POTTERY]]></txt>
+<txt id="pressure"><![CDATA[PRESSURE]]></txt>
+<txt id="pyramid"><![CDATA[PYRAMID]]></txt>
+<txt id="radio"><![CDATA[RADIO]]></txt>
+<txt id="rain"><![CDATA[RAIN]]></txt>
+<txt id="ring"><![CDATA[RING]]></txt>
+<txt id="river"><![CDATA[RIVER]]></txt>
+<txt id="robot"><![CDATA[ROBOT]]></txt>
+<txt id="stone"><![CDATA[STONE]]></txt>
+<txt id="rocket"><![CDATA[ROCKET]]></txt>
+<txt id="ruby"><![CDATA[RUBY]]></txt>
+<txt id="rubyring"><![CDATA[RUBYRING]]></txt>
+<txt id="rust"><![CDATA[RUST]]></txt>
+<txt id="salt"><![CDATA[SALT]]></txt>
+<txt id="sand"><![CDATA[SAND]]></txt>
+<txt id="sandstone"><![CDATA[SANDSTONE]]></txt>
+<txt id="scissors"><![CDATA[SCISSORS]]></txt>
+<txt id="sea"><![CDATA[SEA]]></txt>
+<txt id="seaweed"><![CDATA[SEAWEED]]></txt>
+<txt id="silicone"><![CDATA[SILICONE]]></txt>
+<txt id="silver"><![CDATA[SILVER]]></txt>
+<txt id="sky"><![CDATA[SKY]]></txt>
+<txt id="sound"><![CDATA[SOUND]]></txt>
+<txt id="steam"><![CDATA[STEAM]]></txt>
+<txt id="steel"><![CDATA[STEEL]]></txt>
+<txt id="storm"><![CDATA[STORM]]></txt>
+<txt id="sun"><![CDATA[SUN]]></txt>
+<txt id="sunflower"><![CDATA[SUNFLOWER]]></txt>
+<txt id="swamp"><![CDATA[SWAMP]]></txt>
+<txt id="sword"><![CDATA[SWORD]]></txt>
+<txt id="telescope"><![CDATA[TELESCOPE]]></txt>
+<txt id="screen"><![CDATA[SCREEN]]></txt>
+<txt id="tornado"><![CDATA[TORNADO]]></txt>
+<txt id="volcano"><![CDATA[VOLCANO]]></txt>
+<txt id="wall"><![CDATA[WALL]]></txt>
+<txt id="water"><![CDATA[WATER]]></txt>
+<txt id="wave"><![CDATA[WAVE]]></txt>
+<txt id="wind"><![CDATA[WIND]]></txt>
+<txt id="wire"><![CDATA[WIRE]]></txt>
+
+</xml>

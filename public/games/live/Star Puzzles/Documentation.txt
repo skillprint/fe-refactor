@@ -1,0 +1,31 @@
+==============================
+Star Puzzles Event Objects
+==============================
+
+event: 'LEVEL_START',
+level: 1
+
+event: 'TRY_START',
+level: 1,
+try: 1,
+time: 56108.60000000009
+
+event: 'TRY_FAILED',
+level: 5,
+try: 1,
+time: 1416.8999999999069
+
+event: 'TRY_SOLVED',
+level: 1,
+try: 1,
+time: 59810.60000000009
+
+event: 'TRY_ABANDON',
+level: 2,
+try: 2,
+time: 38972.60000000009
+
+event: 'LEVEL_QUIT',
+level: 2,
+try: 2,
+time: 56546.90000000037

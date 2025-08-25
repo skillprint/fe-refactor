@@ -1,0 +1,41 @@
+===============
+Fruit Boom Event List
+===============
+LEVEL_START => Player start the level
+	- LEVEL_START (event)
+	- NORMAL/LIMITED (mode)
+---------------
+SPAWN => Everytime fruit spawned
+	- SPAWN (event)
+	- 0 (id)
+	- GREEN_APPLE/RED_APPLE/BANANA/COCONUT/DARK_COCONUT/LEMON/ORANGE/PEAR/STRAWBERRY/WATERMELON/BOMB (entity)
+	- 0 (score)
+---------------
+SLASH => Everytime player hit the entity
+	- SLASHED (event)
+	- 0 (id)
+	- GREEN_APPLE/RED_APPLE/BANANA/COCONUT/DARK_COCONUT/LEMON/ORANGE/PEAR/STRAWBERRY/WATERMELON/BOMB (entity)
+	- 0 (score)
+---------------
+NOT_SLASHED => Everytime entity falls without slashed
+	- NOT_SLASHED (event)
+	- 0 (id)
+	- GREEN_APPLE/RED_APPLE/BANANA/COCONUT/DARK_COCONUT/LEMON/ORANGE/PEAR/STRAWBERRY/WATERMELON/BOMB (entity)
+	- 0 (score)
+---------------
+GAME_PAUSE => Player click on pause button
+	- GAME_PAUSE (event)
+---------------
+GAME_RESUME => Player click on close/resume button
+	- GAME_RESUME (event)
+---------------
+LEVEL_FAILED => Player lose the game
+	- LEVEL_FAILED (event)
+	- NORMAL/LIMITED (mode)
+	- 0 (score)
+---------------
+LEVEL_QUIT => Player quit from the level
+	- LEVEL_QUIT (event)
+	- NORMAL/LIMITED (mode)
+	- 0 (score)
+---------------

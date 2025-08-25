@@ -1,0 +1,33 @@
+===============
+Sumagi Event List - Leveling Game
+===============
+
+LEVEL_START => Level Start
+	- LEVEL_START (event)
+	- 3/4/5/6/7/8 (board)
+	- 1/2/3/4/5/... (level)
+	- 0 (sumgoal)
+
+---------------
+INCORRECT => Player guesses wrong
+	- INCORRECT (event)
+	- 1/2/3/4/5 (level)
+	- 0 (tries)
+	- 0 (sumgoal)
+	- 0 (totalsum)
+
+---------------
+LEVEL_COMPLETE => Player finish the level
+	- LEVEL_COMPLETE (event)
+	- 1/2/3/4/5 (level)
+	- 0 (tries)
+	- 0 (sumgoal)
+
+---------------
+LEVEL_QUIT => Player quit the level
+	- LEVEL_QUIT (event)
+	- 1/2/3/4/5 (level)
+	- 0 (tries)
+	- 0 (sumgoal)
+
+---------------

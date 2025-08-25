@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    NOTES:
+
+        difficulty: 1,2,3 - 3 being most difficult to find
+        box: position and size of bounding box
+        hit: optional list of coordinates to draw a polygonal hit area - overrides coorsd and requires center (imageMap format)
+        center: coordinate for visua center - where check mark is rendered
+
+        <difference difficulty="1" coords="x,y,w,h" hit="x,y,x,y,x,y" center="x,y"/>
+-->
+<xml>
+     <puzzle id="fish" time="120" source_a="puzzles/fish_base.jpg" source_b="puzzles/fish_diffs.jpg">
+        <difference difficulty="1" box="287,4,164,75" hit="" center=""/>
+        <difference difficulty="1" box="0,149,47,57" hit="" center=""/>
+        <difference difficulty="1" box="218,176,152,101" hit="" center=""/>
+        <difference difficulty="1" box="13,206,176,95" hit="" center=""/>
+        <difference difficulty="1" box="289,352,28,31" hit="" center=""/>
+        <difference difficulty="1" box="56,431,156,72" hit="" center=""/>
+        <difference difficulty="1" box="368,423,144,89" hit="" center=""/>
+    </puzzle>
+
+    <puzzle id="fruit" time="120" source_a="puzzles/fruit_base.jpg" source_b="puzzles/fruit_diffs.jpg">
+        <difference difficulty="1" box="373,0,79,120" hit="" center=""/>
+        <difference difficulty="1" box="81,59,63,64" hit="" center=""/>
+        <difference difficulty="1" box="161,134,91,76" hit="" center=""/>
+        <difference difficulty="1" box="261,173,136,105" hit="" center=""/>
+        <difference difficulty="1" box="365,258,135,131" hit="366,334,418,291,456,255,500,256,512,322,472,394,393,393,364,355" center="460,340"/>
+        <difference difficulty="1" box="171,324,84,65" hit="" center=""/>
+        <difference difficulty="1" box="36,360,112,150" hit="40,360,146,361,153,444,121,466,115,511,79,502,78,461,41,452" center="94,397"/>
+    </puzzle>
+ 
+    <puzzle id="ducks" time="120" source_a="puzzles/ducks_base.jpg" source_b="puzzles/ducks_diffs.jpg">
+        <difference difficulty="1" box="10,29,81,70" hit="" center=""/>
+        <difference difficulty="1" box="377,19,110,138" hit="" center=""/>
+        <difference difficulty="1" box="335,182,88,126" hit="" center=""/>
+        <difference difficulty="1" box="104,236,73,70" hit="" center=""/>
+        <difference difficulty="1" box="12,328,102,118" hit="" center=""/>
+        <difference difficulty="1" box="162,306,81,70" hit="" center=""/>
+        <difference difficulty="1" box="353,318,107,129" hit="" center=""/>
+    </puzzle>
+
+     <puzzle id="merrygoround" time="120" source_a="puzzles/merrygoround_base.jpg" source_b="puzzles/merrygoround_diffs.jpg">
+        <difference difficulty="1" box="170,18,69,107" hit="" center=""/>
+        <difference difficulty="1" box="312,0,45,109" hit="" center=""/>
+        <difference difficulty="1" box="423,0,89,100" hit="" center=""/>
+        <difference difficulty="1" box="5,195,97,109" hit="" center=""/>
+        <difference difficulty="1" box="209,154,61,76" hit="" center=""/>
+        <difference difficulty="1" box="350,119,43,56" hit="" center=""/>
+        <difference difficulty="1" box="273,403,94,97" hit="" center=""/>
+    </puzzle>
+    
+    <puzzle id="taxis" time="120" source_a="puzzles/taxis_base.jpg" source_b="puzzles/taxis_diffs.jpg">
+        <difference difficulty="1" box="10,102,54,55" hit="" center=""/>
+        <difference difficulty="1" box="187,36,78,113" hit="" center=""/>
+        <difference difficulty="1" box="424,84,88,80" hit="" center=""/>
+        <difference difficulty="1" box="158,183,84,45" hit="" center=""/>
+        <difference difficulty="1" box="364,283,67,63" hit="" center=""/>
+        <difference difficulty="1" box="23,406,180,85" hit="" center=""/>
+        <difference difficulty="1" box="325,435,123,49" hit="" center=""/>
+    </puzzle>
+
+     <puzzle id="venice" time="120" source_a="puzzles/venice_base.jpg" source_b="puzzles/venice_diffs.jpg">
+        <difference difficulty="1" box="16,0,44,139" hit="" center=""/>
+        <difference difficulty="1" box="313,36,99,67" hit="" center=""/>
+        <difference difficulty="1" box="449,92,37,81" hit="" center=""/>
+        <difference difficulty="1" box="401,186,87,42" hit="" center=""/>
+        <difference difficulty="1" box="0,326,140,178" hit="" center=""/>
+        <difference difficulty="1" box="283,253,43,183" hit="" center=""/>
+        <difference difficulty="1" box="405,295,107,135" hit="" center=""/>
+    </puzzle>
+
+
+     <puzzle id="coveredbridge" time="120" source_a="puzzles/coveredbridge_base.jpg" source_b="puzzles/coveredbridge_diffs.jpg">
+        <difference difficulty="1" box="46,178,54,54" hit="" center=""/>
+        <difference difficulty="1" box="311,0,120,111" hit="" center=""/>
+        <difference difficulty="1" box="426,110,87,151" hit="" center=""/>
+        <difference difficulty="1" box="368,212,20,50" hit="" center=""/>
+        <difference difficulty="1" box="27,374,72,47" hit="" center=""/>
+        <difference difficulty="1" box="207,389,81,71" hit="" center=""/>
+        <difference difficulty="1" box="402,418,110,94" hit="" center=""/>
+    </puzzle>
+
+    <puzzle id="balloons" time="120" source_a="puzzles/balloons_base.jpg" source_b="puzzles/balloons_diffs.jpg">
+        <difference difficulty="1" box="18,6,184,86" hit="" center=""/>
+        <difference difficulty="1" box="331,30,67,83" hit="" center=""/>
+        <difference difficulty="1" box="8,178,78,100" hit="" center=""/>
+        <difference difficulty="1" box="178,155,125,86" hit="" center=""/>
+        <difference difficulty="1" box="371,198,74,144" hit="" center=""/>
+        <difference difficulty="1" box="90,246,101,139" hit="" center=""/>
+        <difference difficulty="1" box="319,440,80,72" hit="" center=""/>
+    </puzzle>
+
+    <puzzle id="boats" time="120" source_a="puzzles/boats_base.jpg" source_b="puzzles/boats_diffs.jpg">
+        <difference difficulty="1" box="46,153,126,49" hit="" center=""/>
+        <difference difficulty="1" box="189,75,98,128" hit="" center=""/>
+        <difference difficulty="1" box="390,122,37,44" hit="" center=""/>
+        <difference difficulty="1" box="235,216,53,36" hit="" center=""/>
+        <difference difficulty="1" box="65,241,59,90" hit="" center=""/>
+        <difference difficulty="1" box="76,374,75,139" hit="" center=""/>
+        <difference difficulty="1" box="277,436,74,68" hit="" center=""/>
+    </puzzle>
+
+     <puzzle id="lighthouse" time="120" source_a="puzzles/lighthouse_base.jpg" source_b="puzzles/lighthouse_diffs.jpg">
+        <difference difficulty="1" box="97,176,109,42" hit="" center=""/>
+        <difference difficulty="1" box="290,96,130,69" hit="" center=""/>
+        <difference difficulty="1" box="411,183,81,52" hit="" center=""/>
+        <difference difficulty="1" box="149,276,42,55" hit="" center=""/>
+        <difference difficulty="1" box="194,307,84,68" hit="" center=""/>
+        <difference difficulty="1" box="0,360,95,112" hit="" center=""/>
+        <difference difficulty="1" box="439,396,25,63" hit="" center=""/>
+    </puzzle>
+
+     <puzzle id="toys" time="120" source_a="puzzles/toys_base.jpg" source_b="puzzles/toys_diffs.jpg">
+        <difference difficulty="1" box="130,79,120,64" hit="" center=""/>
+        <difference difficulty="1" box="259,35,113,76" hit="" center=""/>
+        <difference difficulty="1" box="155,231,69,82" hit="" center=""/>
+        <difference difficulty="1" box="92,313,78,68" hit="" center=""/>
+        <difference difficulty="1" box="44,396,59,62" hit="" center=""/>
+        <difference difficulty="1" box="298,377,99,75" hit="" center=""/>
+        <difference difficulty="1" box="428,338,66,63" hit="" center=""/>
+    </puzzle>
+
+     <puzzle id="boat" time="120" source_a="puzzles/boat_base.jpg" source_b="puzzles/boat_diffs.jpg">
+        <difference difficulty="1" box="240,100,63,64" hit="" center=""/>
+        <difference difficulty="1" box="446,83,65,110" hit="" center=""/>
+        <difference difficulty="1" box="238,288,51,30" hit="" center=""/>
+        <difference difficulty="1" box="408,244,104,120" hit="" center=""/>
+        <difference difficulty="1" box="128,328,37,93" hit="" center=""/>
+        <difference difficulty="1" box="303,364,34,138" hit="" center=""/>
+        <difference difficulty="1" box="408,441,99,50" hit="" center=""/>
+    </puzzle>
+
+
+</xml>

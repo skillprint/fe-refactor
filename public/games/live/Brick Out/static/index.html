@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<script>
+function logEvent(params) {
+  params.messageType = 'gameEvent';
+  const paramsAsJSON = JSON.stringify(params);
+  if (globalThis.ReactNativeWebView) {
+    globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
+  } else {
+    window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
+  }
+}
+globalThis.logEvent = logEvent;
+</script>
+
+        <title>BRICK OUT</title>
+        <link rel="stylesheet" href="css/reset.css" type="text/css">
+        <link rel="stylesheet" href="css/main.css" type="text/css">
+        <link rel="stylesheet" href="css/orientation_utils.css" type="text/css">
+        <link rel="stylesheet" href="css/ios_fullscreen.css" type="text/css">
+        <link rel='shortcut icon' type='image/x-icon' href='./favicon.ico' />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        <meta name="msapplication-tap-highlight" content="no"/>
+
+        <script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
+        <script type="text/javascript" src="js/createjs.min.js"></script>
+        <script type="text/javascript" src="js/platform.js"></script>
+        <script type="text/javascript" src="js/ios_fullscreen.js"></script>
+        <script type="text/javascript" src="js/howler.min.js"></script>
+        <script type="text/javascript" src="js/screenfull.js"></script>
+        <script type="text/javascript" src="js/ctl_utils.js"></script>
+        <script type="text/javascript" src="js/sprite_lib.js"></script>
+        <script type="text/javascript" src="js/settings.js"></script>
+        <script type="text/javascript" src="js/CLang.js"></script>
+        <script type="text/javascript" src="js/CPreloader.js"></script>
+        <script type="text/javascript" src="js/CMain.js"></script>
+        <script type="text/javascript" src="js/CTextButton.js"></script>
+        <script type="text/javascript" src="js/CToggle.js"></script>
+        <script type="text/javascript" src="js/CNumToggle.js"></script>
+        <script type="text/javascript" src="js/CGfxButton.js"></script>
+        <script type="text/javascript" src="js/CMenu.js"></script>
+        <script type="text/javascript" src="js/CGame.js"></script>
+        <script type="text/javascript" src="js/CSettingsLevel.js"></script>
+        <script type="text/javascript" src="js/CInterface.js"></script>
+        <script type="text/javascript" src="js/CBall.js"></script>
+        <script type="text/javascript" src="js/CBrick.js"></script>
+        <script type="text/javascript" src="js/CBonus.js"></script>
+        <script type="text/javascript" src="js/CBullet.js"></script>
+        <script type="text/javascript" src="js/CVector2.js"></script>
+        <script type="text/javascript" src="js/CLevelMenu.js"></script>
+        <script type="text/javascript" src="js/CLevelBut.js"></script>
+        <script type="text/javascript" src="js/CCreditsPanel.js"></script>
+        <script type="text/javascript" src="js/CAlertSavingBox.js"></script>
+        <script type="text/javascript" src="js/CAreYouSurePanel.js"></script>
+        <script type="text/javascript" src="js/CCTLText.js"></script>
+
+        <script src="../../SkillprintLib/html2canvas.min.js"></script>
+        <script src="../../SkillprintLib/skillprintScreenshot.js"></script>
+    </head>
+    <body ondragstart="return false;" ondrop="return false;" >
+        <div style="position: fixed; background-color: transparent; top: 0px; left: 0px; width: 100%; height: 100%"></div>
+        <script>
+            $(document).ready(function () {
+                var oMain = new CMain({
+                    ball_speed: 7, //SPEED OF BALL IN PIXEL
+                    bricks_score: [5, 10, 15, 20, 50, 40], //SCORE ASSIGNED TO EVERY BRICK (brick0 to brickN)
+                    bricks_resistance: [0, 0, 0, 0, 0, 1], //HOW MANY TIME THE BALL COLLISION THE BRICK UNTIL IT IS DESTROYED (brick0 to brickN)
+                    bricks_destructible: [true, true, true, true, false, true], //INDICATES THAT A BRICK IS DESTRUCTABLE BY BALL IN NORMAL STATE (brick0 to brick5)
+                    bonus_speed: 2, //SPEED OF BONUS IN PIXEL
+                    bonus_time: {t0: 15, t1: 150, t2: 15, t3: 15, t6: 15}, //DURATION OF EVERY BONUS IN THIS ORDER (IN SECONDS) t0=LargePad,t1=FireBall,t2=Floor,t3=Magnetic,t6=Shot
+                    bonus_score: {s0: 15, s1: 10, s2: 10, s3: 15, s4: 100, s5: 20, s6: 15, s7: 10, s8: 30, s9: 30}, //SCORE OF EVERY BONUS IN THIS ORDER s0=LargePad,s1=FireBall,s2=Floor,s3=Magnetic,s4=extra life,s5=multiBall,s6=Shot,s7=ball speed down,s8ball speed up,s9=smallPad
+                    life: 3, //LIVES ASSIGNED AT THE BEGIN OF THE GAME
+                    bullet_speed: 0.5, //SPEED OF THE BULLET OF THE SHOT BONUS
+                    speed_down_ball: 0.25, //DECREASE SPEED TO BALL EVERY TIME TAKES THE POWER UP SPEED DOWN BALL
+                    speed_up_ball: 0.25, //INCREASE SPEED TO BALL EVERY TIME TAKES THE POWER UP SPEED UP BALL
+                    fullscreen:false, //SET THIS TO FALSE IF YOU DON'T WANT TO SHOW FULLSCREEN BUTTON
+                    check_orientation:true,     //SET TO FALSE IF YOU DON'T WANT TO SHOW ORIENTATION ALERT ON MOBILE DEVICES
+                    audio_enable_on_startup:false, //ENABLE/DISABLE AUDIO WHEN GAME STARTS 
+                    num_levels_for_ads: 3 //NUMBER OF LEVELS TO COMPLETE BEFORE TRIGGERING SAVE_SCORE EVENT. USEFUL FOR INTER-LEVEL AD EVENTUALLY.
+                });
+
+                $(oMain).on("start_session", function (evt) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeStartSession();
+                    }
+                });
+
+
+                $(oMain).on("end_session", function (evt) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeEndSession();
+                    }
+                });
+
+
+                $(oMain).on("start_level", function (evt, iLevel) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeStartLevel({level: iLevel});
+                    }
+                });
+
+                $(oMain).on("end_level", function (evt, iLevel) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeEndLevel({level: iLevel});
+                    }
+                });
+
+                $(oMain).on("save_score", function (evt, iScore) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeSaveScore({score: iScore});
+                    }
+                });
+
+                $(oMain).on("show_interlevel_ad", function (evt) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeShowInterlevelAD();
+                    }
+                });
+
+                $(oMain).on("share_event", function (evt, iScore) {
+                    if (getParamValue('ctl-arcade') === "true") {
+                        parent.__ctlArcadeShareEvent({img: TEXT_SHARE_IMAGE,
+                            title: TEXT_SHARE_TITLE,
+                            msg: TEXT_SHARE_MSG1 + iScore
+                                    + TEXT_SHARE_MSG2,
+                            msg_share: TEXT_SHARE_SHARE1
+                                    + iScore + TEXT_SHARE_SHARE1});
+                    }
+                });
+
+                if (isIOS()) {
+                    setTimeout(function () {
+                        sizeHandler();
+                    }, 200);
+                } else {
+                    sizeHandler();
+                }
+            });
+
+        </script>
+        
+        <div class="check-fonts">
+            <p class="check-font-1">test 1</p>
+        </div> 
+        
+        
+        <canvas id="canvas" class='ani_hack' width="840" height="1024"> </canvas> 
+        <div data-orientation="portrait" class="orientation-msg-container"><p class="orientation-msg-text">Please rotate your device</p></div>
+        <div id="block_game" style="position: fixed; background-color: transparent; top: 0px; left: 0px; width: 100%; height: 100%; display:none"></div>
+
+    </body>
+</html>

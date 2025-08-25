@@ -1,0 +1,71 @@
+<div id="editWrapper">
+    <div id="floatForm">
+    	<input id='toggleShowOption' name="toggleOption" type="button" value="Hide Edit Option" />
+        
+        <div id="editOption">
+        	<br/>
+        	<div id="actionWrapper">
+                Select levels:<br/>
+                <select id="levellist" name="levellist">
+                </select><br/>
+                <input id="prevLevel" name="prevLevel" class="button" type="button" value="Prev Level">
+                <input id="nextLevel" name="nextLevel" class="button" type="button" value="Next Level">
+                <br/><br/>
+                <input id="addNewLevel" name="addNewLevel" type="button" value="Add New Level">
+                <input id="moveLevelUp" name="moveLevelUp" type="button" value="Move Level Up">
+                <input id="moveLevelDown" name="moveLevelDown" type="button" value="Move Level Down">
+                <input id="removeLevel" name="removeLevel" type="button" value="Remove Level">
+            	<br/><br/>
+                Edit level:
+                <input id='editLevels' name="editLevels" type="button" value="Edit Levels" />
+                <br/><br/>
+                Test play, generate and replace array:
+                <input id='testPlay' name="testPlay" type="button" value="Test Play" />
+                <input id='generateArray' name="generateArray" type="button" value="Generate Array" />
+                <textarea id="outputArray" name="outputArray" cols="" rows="10"></textarea>
+        	</div>
+            
+            <div id="playWrapper">
+            	<div id="gameStatus"></div>
+            	<input id='stopTestPlay' name="stopTestPlay" type="button" value="Stop Play" />
+            </div>
+            
+            <div id="editLevelsWrapper" style="display:none;">
+            	Edit level option:
+                <div class="formRow">
+                    <label class="button">Column:</label>
+                    <input id="totalColumn" name="totalColumn" class="button" type="text" value="0">
+                </div>
+                
+                <div class="formRow">
+                    <label class="button">Row:</label>
+                    <input id="totalRow" name="totalRow" class="button" type="text" value="0">
+                </div>
+                
+                <div class="formRow">
+                    <label class="button">Size:</label>
+                    <input id="rectSize" name="rectSize" class="button" type="text" value="0">
+                </div>
+                
+            	<input id='updateLevels' name="updateLevels" type="button" value="Update" />
+                <br/><br/>
+                Once the grid is generated, click on the square on stage to switch between show or hidden square.
+                <br/><br/>
+                Select pipes:
+                <select id="pipelist" name="pipelist">
+                </select>
+                <input id="prevPipe" name="prevPipe" class="button" type="button" value="Prev Pipe">
+                <input id="nextPipe" name="nextPipe" class="button" type="button" value="Next Pipe">
+                <br/><br/>
+                <input id='updatePipe' name="updatePipe" type="button" value="Place start and exit" />
+                <input id='removePipe' name="removePipe" type="button" value="Remove Pipe" />
+                <br/><br/>
+                <input id='doneLevels' name="doneLevels" type="button" value="Done" />
+            </div>
+            
+            <div id="pipeWrapper">
+            	Start placing pipe start and end position on stage
+            </div>
+        </div>
+    </div>
+</div>
