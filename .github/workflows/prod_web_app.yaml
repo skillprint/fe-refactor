@@ -1,10 +1,10 @@
 name: Stage Web App
 
 on:
-# push to main
-push:
-  branches:
-    - main
+  # push to main
+  push:
+    branches:
+      - main
 
 jobs:
   stage:
