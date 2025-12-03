@@ -7,8 +7,7 @@ on:
       - main
 
 jobs:
-  stage:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'staged') || github.event.label.name == 'staged' || github.event_name == 'workflow_dispatch' }}
+  prod:
     runs-on: ubuntu-latest
     env:
       NODE_VERSION: 22.0.0
@@ -37,8 +36,6 @@ jobs:
       - name: Build app with webpack
         run: pnpm run build
         env:
-          AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY_STAGING }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           API_BASE_URL: 'https://api.skillprint.co/'
       - name: Upload app to S3
         uses: jakejarvis/s3-sync-action@master

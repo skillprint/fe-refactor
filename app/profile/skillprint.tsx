@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import BottomTabs from '../components/BottomTabs';
+import toast from 'react-hot-toast';
 
 interface Skill {
   id: string;
@@ -238,10 +239,28 @@ export default function Skillprint() {
                   document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
                   // Show confirmation
-                  alert('Settings reset! Refresh the page to see the welcome experience again.');
+                  toast.success('Settings reset! Refresh the page to see the welcome experience again.');
                 }}
                 className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
                 Reset
+              </button>
+            </div>
+
+            {/* Temp Toast Test */}
+            <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Test Notification
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Trigger a test toast notification
+                </p>
+              </div>
+              <button
+                onClick={() => toast.success('This is a test notification!')}
+                className="px-6 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-all duration-200"
+              >
+                Test Toast
               </button>
             </div>
           </div>
