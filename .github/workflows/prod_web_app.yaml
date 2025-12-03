@@ -1,11 +1,10 @@
 name: Stage Web App
 
 on:
-  pull_request:
-    branches: [ main ]
-    types: [opened, synchronize, reopened, labeled, ready_for_review]
-
-  workflow_dispatch:
+# push to main
+push:
+  branches:
+    - main
 
 jobs:
   stage:
