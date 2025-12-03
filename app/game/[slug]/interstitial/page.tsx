@@ -1,29 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomTabs from '../../../components/BottomTabs';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
 
 interface GameInterstitialProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default function GameInterstitial({ params }: GameInterstitialProps) {
-  const { slug } = params;
+  const { slug } = React.use(params);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Decode the URL slug (handle spaces and special characters)
   const decodedSlug = decodeURIComponent(slug);
-  
+
   // Get game configuration and details
   const gameConfig = getGameConfig(decodedSlug);
   const gameDetails = getGameDetails(decodedSlug);
-  
+
   if (!gameDetails) {
     notFound();
   }
@@ -58,7 +58,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
             </div>
           </div>
         </header>
-        
+
         {/* Game Preview Section */}
         <main className="flex-1 px-4 py-6">
           <div className="max-w-2xl mx-auto">
@@ -94,7 +94,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 About This Game
               </h3>
-              
+
               {gameDetails.category && (
                 <div className="mb-4">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Category:</span>
@@ -103,7 +103,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
                   </span>
                 </div>
               )}
-              
+
               {gameDetails.difficulty && (
                 <div className="mb-4">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Difficulty:</span>
@@ -112,7 +112,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
                   </span>
                 </div>
               )}
-              
+
               {gameDetails.estimatedTime && (
                 <div className="mb-4">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Estimated Time:</span>
@@ -121,7 +121,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
                   </span>
                 </div>
               )}
-              
+
               {gameDetails.skills && (
                 <div className="mb-4">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Skills Developed:</span>
@@ -137,7 +137,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
                   </div>
                 </div>
               )}
-              
+
               {gameDetails.instructions && (
                 <div>
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">How to Play:</span>
@@ -172,7 +172,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
                   </>
                 )}
               </button>
-              
+
               <button
                 onClick={handleBackToGames}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-4 px-6 rounded-lg transition-colors duration-200"
@@ -182,7 +182,7 @@ export default function GameInterstitial({ params }: GameInterstitialProps) {
             </div>
           </div>
         </main>
-        
+
         {/* Bottom tabs */}
         <BottomTabs />
       </div>

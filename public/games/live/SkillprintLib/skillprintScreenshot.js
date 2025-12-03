@@ -22,7 +22,7 @@ const shouldLogDataUrl = () => {
 
 const getElementForScreenshot = () => {
     const urlPath = window.location.pathname;
-    console.log(urlPath);
+    // console.log(urlPath);
     const canvasPathNames = [
         '/public/games/live/Garden%20Match/static/index.html', 
         '/public/games/live/Box%20Tower/static/index.html',
@@ -39,10 +39,10 @@ const getElementForScreenshot = () => {
     const bodyPathNames = ['/games/live/SkillprintLib/skillprint.html', '/games/live/SkillprintLib/skillprint.html'];
 
     if (canvasPathNames.includes(urlPath)) {
-        console.log("using canvas");
+        // console.log("using canvas");
         return document.getElementsByTagName('canvas')[0];
     } else if (bodyPathNames.includes(urlPath)) {
-        console.log("using body");
+        // console.log("using body");
         return document.body;
     }
 
@@ -66,12 +66,12 @@ const takeScreenshot = async () => {
         windowHeight: skillprintScreenshotSlement.clientHeight,
         removeContainer: true,
         scale: 1,
-        logging: true,
+        // logging: true,
     }
 
     html2canvas(skillprintScreenshotSlement, options).then(canvas => {
         const dataUrl = canvas.toDataURL("image/jpeg");
-        console.log("Transmitting screenshot to parent");
+        // console.log("Transmitting screenshot to parent");
         
         if (shouldLogDataUrl()) {
             // console.log("" + dataUrl);

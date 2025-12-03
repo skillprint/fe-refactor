@@ -1,0 +1,54 @@
+name: Stage Web App
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, labeled, ready_for_review]
+
+  workflow_dispatch:
+
+jobs:
+  stage:
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'staged') || github.event.label.name == 'staged' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: 22.0.0
+    steps:
+      - uses: actions/checkout@v2
+
+      # TODO set up reusable workflows to DRY!
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      # install pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Use node_modules cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: node_modules-${{ env.NODE_VERSION }}-${{ hashFiles('package*.json') }}
+          restore-keys: node_modules-${{ env.NODE_VERSION }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app with webpack
+        run: pnpm run build
+        env:
+          AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY_STAGING }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          API_BASE_URL: 'https://api.skillprint.co/'
+      - name: Upload app to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks
+        env:
+          AWS_S3_BUCKET: 'marketplace.skillprint.co'
+          AWS_ACCESS_KEY_ID: ${{ secrets.CI_AWS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CI_AWS_SECRET_KEY }}
+          AWS_REGION: 'us-west-2'
+          SOURCE_DIR: 'dist'
+          API_BASE_URL: 'https://api.skillprint.co/'

@@ -24,7 +24,28 @@ const sampleSkills: Skill[] = [
 
 export default function Skillprint() {
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
+  const [userId, setUserId] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    // Load settings from cookies
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    };
+    setUserId(getCookie('user_id') || '');
+    setApiKey(getCookie('api_key') || '');
+  }, []);
+
+  const updateSetting = (name: string, value: string, setter: (val: string) => void) => {
+    setter(value);
+    // Set cookie with 1 year expiration
+    const date = new Date();
+    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+  };
 
   const renderRadialCluster = () => {
     if (!svgRef.current) return;
@@ -110,7 +131,7 @@ export default function Skillprint() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
           Your Skillprint
         </h1>
-        
+
         <div className="bg-white rounded-lg shadow">
           <div className="flex justify-center">
             <svg
@@ -160,8 +181,73 @@ export default function Skillprint() {
             ))}
           </div>
         </div>
+
+        {/* Settings Section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Settings
+          </h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+            {/* API Configuration */}
+            <div className="space-y-4 border-b border-gray-200 dark:border-gray-700 pb-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                API Configuration
+              </h3>
+              <div className="grid gap-4">
+                <div>
+                  <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    User ID
+                  </label>
+                  <input
+                    type="text"
+                    id="user_id"
+                    value={userId}
+                    onChange={(e) => updateSetting('user_id', e.target.value, setUserId)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Enter User ID"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="api_key" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    API Key
+                  </label>
+                  <input
+                    type="password"
+                    id="api_key"
+                    value={apiKey}
+                    onChange={(e) => updateSetting('api_key', e.target.value, setApiKey)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Enter API Key"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Reset First-Time Experience
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Clear all first-time user experience flags to see the welcome carousel again
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  // Delete the FTUE cookie
+                  document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+                  // Show confirmation
+                  alert('Settings reset! Refresh the page to see the welcome experience again.');
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       <BottomTabs />
     </div>
   );
-} 
+}

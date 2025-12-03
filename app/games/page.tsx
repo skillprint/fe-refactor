@@ -151,7 +151,7 @@ export default function GamesPage() {
     }
 
     // Then apply search filtering
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch = searchQuery === '' ||
       game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       game.description.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -200,7 +200,7 @@ export default function GamesPage() {
                 </p>
               </div>
               {/* profile button */}
-              <button 
+              <button
                 onClick={handleProfileClick}
                 className="text-[13px] rounded-lg font-medium transition-colors hover:bg-white/20 p-1 rounded-full"
               >
@@ -226,8 +226,8 @@ export default function GamesPage() {
                 <button
                   onClick={() => handleTabChange('moods')}
                   className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'moods'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
                   Moods
@@ -235,20 +235,19 @@ export default function GamesPage() {
                 <button
                   onClick={() => handleTabChange('skills')}
                   className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'skills'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
                   Skills
                 </button>
                 {/* search button */}
-                <button 
+                <button
                   onClick={handleSearchToggle}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    isSearchActive 
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${isSearchActive
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -270,10 +269,10 @@ export default function GamesPage() {
                   className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                   autoFocus
                 />
-                <svg 
-                  className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -301,8 +300,8 @@ export default function GamesPage() {
                     key={item.id}
                     onClick={() => handleFilterSelect(item.id)}
                     className={`px-2 py-1 rounded-full text-[12px] font-medium transition-colors ${selectedFilter === item.id
-                        ? 'ring-2 ring-blue-500 ring-offset-2'
-                        : ''
+                      ? 'ring-2 ring-blue-500 ring-offset-2'
+                      : ''
                       } ${item.color} hover:opacity-80`}
                   >
                     {item.name}
@@ -321,8 +320,8 @@ export default function GamesPage() {
                     key={item.id}
                     onClick={() => handleFilterSelect(item.id)}
                     className={`px-2 py-1 rounded-full text-[12px] font-medium transition-colors ${selectedFilter === item.id
-                        ? 'ring-2 ring-blue-500 ring-offset-2'
-                        : ''
+                      ? 'ring-2 ring-blue-500 ring-offset-2'
+                      : ''
                       } ${item.color} hover:opacity-80`}
                   >
                     {item.name}
@@ -391,7 +390,7 @@ export default function GamesPage() {
         </main>
 
         {/* Bottom tabs */}
-        {/* <BottomTabs /> */}
+        <BottomTabs />
       </div>
     </div>
   );
