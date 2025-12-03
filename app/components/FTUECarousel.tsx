@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Slide {
     title: string;
     description: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
     gradient: string;
 }
 
@@ -177,8 +177,8 @@ export default function FTUECarousel() {
                                         setCurrentSlide(index);
                                     }}
                                     className={`h-2 rounded-full transition-all duration-300 ${index === currentSlide
-                                            ? 'w-8 bg-white'
-                                            : 'w-2 bg-white/40 hover:bg-white/60'
+                                        ? 'w-8 bg-white'
+                                        : 'w-2 bg-white/40 hover:bg-white/60'
                                         }`}
                                     aria-label={`Go to slide ${index + 1}`}
                                     aria-current={index === currentSlide ? 'true' : 'false'}
@@ -193,8 +193,8 @@ export default function FTUECarousel() {
                                 onClick={handlePrevious}
                                 disabled={currentSlide === 0}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-200 ${currentSlide === 0
-                                        ? 'opacity-0 pointer-events-none'
-                                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/30'
+                                    ? 'opacity-0 pointer-events-none'
+                                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/30'
                                     }`}
                                 aria-label="Previous slide"
                             >
