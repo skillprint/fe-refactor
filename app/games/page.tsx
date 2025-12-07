@@ -34,98 +34,98 @@ const games = [
   },
   {
     name: 'Alchemy',
-    slug: 'Alchemy',
+    slug: 'alchemy',
     description: 'Combine elements to create new ones',
     moods: ['creative', 'relaxed'],
     skills: ['logic', 'pattern']
   },
   {
     name: 'Brick Out',
-    slug: 'Brick Out',
+    slug: 'brick-out',
     description: 'Break all the bricks with your paddle',
     moods: ['energetic', 'focused'],
     skills: ['coordination', 'speed']
   },
   {
     name: 'Bubble Spirit',
-    slug: 'Bubble Spirit',
+    slug: 'bubble-spirit',
     description: 'Pop bubbles in this puzzle game',
     moods: ['relaxed', 'creative'],
     skills: ['pattern', 'coordination']
   },
   {
     name: 'Change Word',
-    slug: 'Change Word',
+    slug: 'change-word',
     description: 'Transform words letter by letter',
     moods: ['focused', 'creative'],
     skills: ['memory', 'logic']
   },
   {
     name: 'Flapcat Steampunk',
-    slug: 'Flapcat Steampunk',
+    slug: 'flapcat-steampunk',
     description: 'Navigate through obstacles',
     moods: ['energetic', 'focused'],
     skills: ['coordination', 'speed']
   },
   {
     name: 'Fruit Sorting',
-    slug: 'Fruit Sorting',
+    slug: 'fruit-sorting',
     description: 'Sort fruits by color and type',
     moods: ['relaxed', 'focused'],
     skills: ['pattern', 'coordination']
   },
   {
     name: 'Garden Match',
-    slug: 'Garden Match',
+    slug: 'garden-match',
     description: 'Match garden items in this puzzle',
     moods: ['relaxed', 'creative'],
     skills: ['memory', 'pattern']
   },
   {
     name: 'Hextris',
-    slug: 'Hextris',
+    slug: 'hextris',
     description: 'Rotate and match hexagons',
     moods: ['focused', 'energetic'],
     skills: ['coordination', 'speed']
   },
   {
     name: 'I Love Hue',
-    slug: 'I Love Hue',
+    slug: 'i-love-hue',
     description: 'Arrange colors in perfect harmony',
     moods: ['relaxed', 'creative'],
     skills: ['pattern', 'memory']
   },
   {
     name: 'Mahjong Deluxe',
-    slug: 'Mahjong Deluxe',
+    slug: 'mahjong-deluxe',
     description: 'Classic tile matching game',
     moods: ['focused', 'relaxed'],
     skills: ['memory', 'pattern']
   },
   {
     name: 'Mine Rusher',
-    slug: 'Mine Rusher',
+    slug: 'mine-rusher',
     description: 'Navigate through the minefield',
     moods: ['energetic', 'focused'],
     skills: ['logic', 'coordination']
   },
   {
     name: 'Snake Attack',
-    slug: 'Snake Attack',
+    slug: 'snake-attack',
     description: 'Grow your snake by eating food',
     moods: ['energetic', 'social'],
     skills: ['coordination', 'speed']
   },
   {
     name: 'Space Trip',
-    slug: 'Space Trip',
+    slug: 'space-trip',
     description: 'Explore space in this adventure',
     moods: ['creative', 'relaxed'],
     skills: ['pattern', 'memory']
   },
   {
     name: 'Ultimate Sudoku',
-    slug: 'Ultimate Sudoku',
+    slug: 'ultimate-sudoku',
     description: 'Solve number puzzles',
     moods: ['focused', 'relaxed'],
     skills: ['logic', 'memory']
@@ -245,8 +245,8 @@ export default function GamesPage() {
                 <button
                   onClick={handleSearchToggle}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${isSearchActive
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

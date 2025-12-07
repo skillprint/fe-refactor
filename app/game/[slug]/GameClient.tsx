@@ -103,11 +103,21 @@ export default function GameClient({ slug }: GameClientProps) {
         setIsEarlyExit(false);
         setGameResults(results);
         setGameState('completed');
+        stopIframe();
 
         // Check for first game badge
         const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
         if (!hasSeenBadge) {
             setShowBadge(true);
+        }
+    };
+
+    const stopIframe = () => {
+        if (iframeRef.current) {
+            // remove event listener
+            window.removeEventListener('message', handleGameMessage);
+            // remove iframe
+            iframeRef.current.remove();
         }
     };
 

@@ -58,85 +58,85 @@ const allGames = [
   },
   {
     name: 'Alchemy',
-    slug: 'Alchemy',
+    slug: 'alchemy',
     description: 'Combine elements to create new ones',
     skills: ['logic', 'pattern']
   },
   {
     name: 'Brick Out',
-    slug: 'Brick Out',
+    slug: 'brick-out',
     description: 'Break all the bricks with your paddle',
     skills: ['coordination', 'speed']
   },
   {
     name: 'Bubble Spirit',
-    slug: 'Bubble Spirit',
+    slug: 'bubble-spirit',
     description: 'Pop bubbles in this puzzle game',
     skills: ['pattern', 'coordination']
   },
   {
     name: 'Change Word',
-    slug: 'Change Word',
+    slug: 'change-word',
     description: 'Transform words letter by letter',
     skills: ['memory', 'logic']
   },
   {
     name: 'Flapcat Steampunk',
-    slug: 'Flapcat Steampunk',
+    slug: 'flapcat-steampunk',
     description: 'Navigate through obstacles',
     skills: ['coordination', 'speed']
   },
   {
     name: 'Fruit Sorting',
-    slug: 'Fruit Sorting',
+    slug: 'fruit-sorting',
     description: 'Sort fruits by color and type',
     skills: ['pattern', 'coordination']
   },
   {
     name: 'Garden Match',
-    slug: 'Garden Match',
+    slug: 'garden-match',
     description: 'Match garden items in this puzzle',
     skills: ['memory', 'pattern']
   },
   {
     name: 'Hextris',
-    slug: 'Hextris',
+    slug: 'hextris',
     description: 'Rotate and match hexagons',
     skills: ['coordination', 'speed']
   },
   {
     name: 'I Love Hue',
-    slug: 'I Love Hue',
+    slug: 'i-love-hue',
     description: 'Arrange colors in perfect harmony',
     skills: ['pattern', 'memory']
   },
   {
     name: 'Mahjong Deluxe',
-    slug: 'Mahjong Deluxe',
+    slug: 'mahjong-deluxe',
     description: 'Classic tile matching game',
     skills: ['memory', 'pattern']
   },
   {
     name: 'Mine Rusher',
-    slug: 'Mine Rusher',
+    slug: 'mine-rusher',
     description: 'Navigate through the minefield',
     skills: ['logic', 'coordination']
   },
   {
     name: 'Snake Attack',
-    slug: 'Snake Attack',
+    slug: 'snake-attack',
     description: 'Grow your snake by eating food',
     skills: ['coordination', 'speed']
   },
   {
     name: 'Space Trip',
-    slug: 'Space Trip',
+    slug: 'space-trip',
     description: 'Explore space in this adventure',
     skills: ['pattern', 'memory']
   },
   {
     name: 'Ultimate Sudoku',
-    slug: 'Ultimate Sudoku',
+    slug: 'ultimate-sudoku',
     description: 'Solve number puzzles',
     skills: ['logic', 'memory']
   },
@@ -146,25 +146,25 @@ const allGames = [
 const newGames = [
   {
     name: 'Space Trip',
-    slug: 'Space Trip',
+    slug: 'space-trip',
     description: 'Explore space in this adventure',
     gradient: 'from-purple-500 to-blue-500'
   },
   {
     name: 'I Love Hue',
-    slug: 'I Love Hue',
+    slug: 'i-love-hue',
     description: 'Arrange colors in perfect harmony',
     gradient: 'from-pink-500 to-purple-500'
   },
   {
     name: 'Hextris',
-    slug: 'Hextris',
+    slug: 'hextris',
     description: 'Rotate and match hexagons',
     gradient: 'from-orange-500 to-red-500'
   },
   {
     name: 'Garden Match',
-    slug: 'Garden Match',
+    slug: 'garden-match',
     description: 'Match garden items in this puzzle',
     gradient: 'from-green-500 to-emerald-500'
   },

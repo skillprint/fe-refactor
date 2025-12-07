@@ -256,12 +256,6 @@ export default function Skillprint() {
                   Trigger a test toast notification
                 </p>
               </div>
-              <button
-                onClick={() => toast.success('This is a test notification!')}
-                className="px-6 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-all duration-200"
-              >
-                Test Toast
-              </button>
             </div>
           </div>
         </div>
