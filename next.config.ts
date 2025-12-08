@@ -13,6 +13,17 @@ const nextConfig: NextConfig = {
   // This tells Next.js to export pages as "folders with an `index.html` file inside"
   // We use this option so we can avoid having the `.html` extension at the end of the page URLs.
   trailingSlash: true,
+
+  // Rewrites for development to proxy API requests and avoid CORS
+  // Note: These won't work in the static export, but help during development
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://api.staging.skillprint.co/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BottomTabs from '../components/BottomTabs';
 import Image from 'next/image';
+import { getMoods, getSkills } from '../api/api';
 
 // Sample mood and skill data for demonstration
 const moods = [
@@ -140,6 +141,9 @@ export default function GamesPage() {
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [moods, setMoods] = useState<any[]>([]);
+  const [skills, setSkills] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filteredGames = games.filter(game => {
     // First apply tab filtering
@@ -183,6 +187,22 @@ export default function GamesPage() {
   const handleProfileClick = () => {
     router.push('/profile');
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [moodsData, skillsData] = await Promise.all([getMoods(), getSkills()]);
+        setMoods(moodsData);
+        setSkills(skillsData);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
 
   return (
     <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">

@@ -1,10 +1,13 @@
-import Axios from "axios";
+import axios from "axios";
 import { setupCache } from 'axios-cache-interceptor';
 
-const instance = Axios.create();
-const axios = setupCache(instance);
+// const instance = Axios.create();
+// const axios = setupCache(instance);
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// Use local proxy during development to avoid CORS
+// The /api/ path will be rewritten to https://api.staging.skillprint.co/ by next.config.ts
+// For production static builds, you'll need to configure CORS on your API server or CloudFront
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/';
 
 const moods_path = `games/api/moods/`;
 const skills_path = `games/api/skills/`;
