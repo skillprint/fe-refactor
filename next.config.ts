@@ -17,14 +17,14 @@ const nextConfig: NextConfig = {
   // Rewrites for development to proxy API requests and avoid CORS
   // Note: These won't work in the static export, but help during development
   async rewrites() {
-    if (process.env.NEXT_PUBLIC_NODE_ENV === 'development') {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'https://api.staging.skillprint.co/:path*',
-        },
-      ];
-    }
+    // if (process.env.NEXT_PUBLIC_NODE_ENV === 'development') {
+    //   return [
+    //     {
+    //       source: '/api/:path*',
+    //       destination: 'https://api.staging.skillprint.co/:path*',
+    //     },
+    //   ];
+    // }
 
     return [];
   },
