@@ -36,7 +36,9 @@ jobs:
       - name: Build app with webpack
         run: pnpm run build
         env:
-          API_BASE_URL: 'https://api.skillprint.co/'
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      - name: Remove out/games directory
+        run: rm -rf out/games
       - name: Upload app to S3
         uses: jakejarvis/s3-sync-action@master
         with:
@@ -47,7 +49,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CI_AWS_SECRET_KEY }}
           AWS_REGION: 'us-west-2'
           SOURCE_DIR: 'out'
-          API_BASE_URL: 'https://api.skillprint.co/'
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
         env:
