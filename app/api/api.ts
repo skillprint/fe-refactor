@@ -7,7 +7,7 @@ import { setupCache } from 'axios-cache-interceptor';
 // Use local proxy during development to avoid CORS
 // The /api/ path will be rewritten to https://api.staging.skillprint.co/ by next.config.ts
 // For production static builds, you'll need to configure CORS on your API server or CloudFront
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.staging.skillprint.co/";
 
 console.log(BASE_URL);
 
