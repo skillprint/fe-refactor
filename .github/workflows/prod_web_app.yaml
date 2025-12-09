@@ -48,3 +48,11 @@ jobs:
           AWS_REGION: 'us-west-2'
           SOURCE_DIR: 'out'
           API_BASE_URL: 'https://api.skillprint.co/'
+      - name: Invalidate CloudFront
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          PATHS: "/*"
+          AWS_REGION: "us-west-2"
+          AWS_ACCESS_KEY_ID: ${{ secrets.CI_AWS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CI_AWS_SECRET_KEY }}         
