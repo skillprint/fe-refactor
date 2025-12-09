@@ -37,8 +37,6 @@ jobs:
         run: pnpm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-      - name: Remove out/games directory
-        run: rm -rf out/games
       - name: Upload app to S3
         uses: jakejarvis/s3-sync-action@master
         with:
