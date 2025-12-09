@@ -9,6 +9,8 @@ import { setupCache } from 'axios-cache-interceptor';
 // For production static builds, you'll need to configure CORS on your API server or CloudFront
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/';
 
+console.log(BASE_URL);
+
 const moods_path = `games/api/moods/`;
 const skills_path = `games/api/skills/`;
 const catalog_path = `games/api/catalog/`;
