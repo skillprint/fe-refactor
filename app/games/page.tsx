@@ -1,137 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BottomTabs from '../components/BottomTabs';
 import Image from 'next/image';
-import { getMoods, getSkills } from '../api/api';
-
-// Sample mood and skill data for demonstration
-const moods = [
-  { id: 'relaxed', name: 'Relaxed', color: 'bg-blue-100 text-blue-800' },
-  { id: 'energetic', name: 'Energetic', color: 'bg-yellow-100 text-yellow-800' },
-  { id: 'focused', name: 'Focused', color: 'bg-green-100 text-green-800' },
-  { id: 'creative', name: 'Creative', color: 'bg-purple-100 text-purple-800' },
-  { id: 'social', name: 'Social', color: 'bg-pink-100 text-pink-800' },
-];
-
-const skills = [
-  { id: 'memory', name: 'Memory', color: 'bg-indigo-100 text-indigo-800' },
-  { id: 'logic', name: 'Logic', color: 'bg-red-100 text-red-800' },
-  { id: 'speed', name: 'Speed', color: 'bg-orange-100 text-orange-800' },
-  { id: 'pattern', name: 'Pattern Recognition', color: 'bg-teal-100 text-teal-800' },
-  { id: 'coordination', name: 'Coordination', color: 'bg-emerald-100 text-emerald-800' },
-];
-
-// Games with mood and skill tags
-const games = [
-  {
-    name: '2048',
-    slug: '2048',
-    description: 'Slide tiles to reach 2048',
-    moods: ['focused', 'logic'],
-    skills: ['logic', 'pattern']
-  },
-  {
-    name: 'Alchemy',
-    slug: 'alchemy',
-    description: 'Combine elements to create new ones',
-    moods: ['creative', 'relaxed'],
-    skills: ['logic', 'pattern']
-  },
-  {
-    name: 'Brick Out',
-    slug: 'brick-out',
-    description: 'Break all the bricks with your paddle',
-    moods: ['energetic', 'focused'],
-    skills: ['coordination', 'speed']
-  },
-  {
-    name: 'Bubble Spirit',
-    slug: 'bubble-spirit',
-    description: 'Pop bubbles in this puzzle game',
-    moods: ['relaxed', 'creative'],
-    skills: ['pattern', 'coordination']
-  },
-  {
-    name: 'Change Word',
-    slug: 'change-word',
-    description: 'Transform words letter by letter',
-    moods: ['focused', 'creative'],
-    skills: ['memory', 'logic']
-  },
-  {
-    name: 'Flapcat Steampunk',
-    slug: 'flapcat-steampunk',
-    description: 'Navigate through obstacles',
-    moods: ['energetic', 'focused'],
-    skills: ['coordination', 'speed']
-  },
-  {
-    name: 'Fruit Sorting',
-    slug: 'fruit-sorting',
-    description: 'Sort fruits by color and type',
-    moods: ['relaxed', 'focused'],
-    skills: ['pattern', 'coordination']
-  },
-  {
-    name: 'Garden Match',
-    slug: 'garden-match',
-    description: 'Match garden items in this puzzle',
-    moods: ['relaxed', 'creative'],
-    skills: ['memory', 'pattern']
-  },
-  {
-    name: 'Hextris',
-    slug: 'hextris',
-    description: 'Rotate and match hexagons',
-    moods: ['focused', 'energetic'],
-    skills: ['coordination', 'speed']
-  },
-  {
-    name: 'I Love Hue',
-    slug: 'i-love-hue',
-    description: 'Arrange colors in perfect harmony',
-    moods: ['relaxed', 'creative'],
-    skills: ['pattern', 'memory']
-  },
-  {
-    name: 'Mahjong Deluxe',
-    slug: 'mahjong-deluxe',
-    description: 'Classic tile matching game',
-    moods: ['focused', 'relaxed'],
-    skills: ['memory', 'pattern']
-  },
-  {
-    name: 'Mine Rusher',
-    slug: 'mine-rusher',
-    description: 'Navigate through the minefield',
-    moods: ['energetic', 'focused'],
-    skills: ['logic', 'coordination']
-  },
-  {
-    name: 'Snake Attack',
-    slug: 'snake-attack',
-    description: 'Grow your snake by eating food',
-    moods: ['energetic', 'social'],
-    skills: ['coordination', 'speed']
-  },
-  {
-    name: 'Space Trip',
-    slug: 'space-trip',
-    description: 'Explore space in this adventure',
-    moods: ['creative', 'relaxed'],
-    skills: ['pattern', 'memory']
-  },
-  {
-    name: 'Ultimate Sudoku',
-    slug: 'ultimate-sudoku',
-    description: 'Solve number puzzles',
-    moods: ['focused', 'relaxed'],
-    skills: ['logic', 'memory']
-  },
-];
+import { useGamesBySkill } from '../hooks/useGamesBySkill';
+import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
+import { getGameDetails } from '../config/gameConfig';
 
 type FilterType = 'moods' | 'skills';
 
@@ -141,16 +17,12 @@ export default function GamesPage() {
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [moods, setMoods] = useState<any[]>([]);
-  const [skills, setSkills] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
 
-  const filteredGames = games.filter(game => {
+  const filteredSkillsGames = gamesBySkill.filter(game => {
     // First apply tab filtering
     let matchesTab = true;
-    if (activeTab === 'moods' && selectedFilter) {
-      matchesTab = game.moods.includes(selectedFilter);
-    } else if (activeTab === 'skills' && selectedFilter) {
+    if (activeTab === 'skills' && selectedFilter) {
       matchesTab = game.skills.includes(selectedFilter);
     }
 
@@ -161,6 +33,23 @@ export default function GamesPage() {
 
     return matchesTab && matchesSearch;
   });
+
+  const filteredMoodGames = gamesByMood.filter(game => {
+    // First apply tab filtering
+    let matchesTab = true;
+    if (activeTab === 'moods' && selectedFilter) {
+      matchesTab = game.moods.includes(selectedFilter);
+    }
+
+    // Then apply search filtering
+    const matchesSearch = searchQuery === '' ||
+      game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      game.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesTab && matchesSearch;
+  });
+
+  const filteredGames = activeTab === 'skills' ? filteredSkillsGames : filteredMoodGames;
 
   const handleTabChange = (tab: FilterType) => {
     setActiveTab(tab);
@@ -188,21 +77,7 @@ export default function GamesPage() {
     router.push('/profile');
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [moodsData, skillsData] = await Promise.all([getMoods(), getSkills()]);
-        setMoods(moodsData);
-        setSkills(skillsData);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
+  console.log(filteredGames);
 
   return (
     <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -352,12 +227,20 @@ export default function GamesPage() {
           )}
         </div>
 
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex justify-center items-center h-full">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+          </div>
+        )}
+
         {/* Games Grid */}
         <main className="flex-1 px-4 py-6">
           {filteredGames.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 dark:text-gray-400 text-lg">
-                {searchQuery ? 'No games found matching your search.' : 'No games found with the selected filter.'}
+                {isLoading ? 'Loading games...' : ''}
+                {!isLoading && !searchQuery ? 'No games found with the selected filter.' : !isLoading && searchQuery ? 'No games found matching your search.' : ''}
               </p>
             </div>
           ) : (
@@ -365,42 +248,54 @@ export default function GamesPage() {
               {filteredGames.map((game) => (
                 <Link
                   key={game.slug}
-                  href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
+                  href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
                   className="block group"
                 >
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow duration-200">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {game.name}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-                      {game.description}
-                    </p>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    {game.screenshot && (
+                      <div className="relative h-40 w-full bg-gray-200 dark:bg-gray-700">
+                        <Image
+                          src={game.screenshot}
+                          alt={game.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {game.name}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 line-clamp-2">
+                        {game.description}
+                      </p>
 
-                    {/* Game Tags */}
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {game.moods.map(moodId => {
-                        const mood = moods.find(m => m.id === moodId);
-                        return mood ? (
-                          <span key={moodId} className={`px-2 py-1 rounded-full text-xs font-medium ${mood.color}`}>
-                            {mood.name}
-                          </span>
-                        ) : null;
-                      })}
-                      {game.skills.map(skillId => {
-                        const skill = skills.find(s => s.id === skillId);
-                        return skill ? (
-                          <span key={skillId} className={`px-2 py-1 rounded-full text-xs font-medium ${skill.color}`}>
-                            {skill.name}
-                          </span>
-                        ) : null;
-                      })}
-                    </div>
+                      {/* Game Tags */}
+                      <div className="mt-3 flex flex-wrap gap-1">
+                        {game.moods.map(moodId => {
+                          const mood = moods.find(m => m.id === moodId);
+                          return mood ? (
+                            <span key={moodId} className={`px-2 py-1 rounded-full text-xs font-medium ${mood.color}`}>
+                              {mood.name}
+                            </span>
+                          ) : null;
+                        })}
+                        {game.skills.map(skillId => {
+                          const skill = skills.find(s => s.id === skillId);
+                          return skill ? (
+                            <span key={skillId} className={`px-2 py-1 rounded-full text-xs font-medium ${skill.color}`}>
+                              {skill.name}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
 
-                    <div className="mt-3 flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
-                      Play Now
-                      <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <div className="mt-3 flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
+                        Play Now
+                        <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </Link>

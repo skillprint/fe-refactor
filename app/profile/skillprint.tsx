@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import BottomTabs from '../components/BottomTabs';
 import toast from 'react-hot-toast';
 
@@ -24,6 +25,7 @@ const sampleSkills: Skill[] = [
 ];
 
 export default function Skillprint() {
+  const router = useRouter();
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -39,6 +41,11 @@ export default function Skillprint() {
     setUserId(getCookie('user_id') || '');
     setApiKey(getCookie('api_key') || '');
   }, []);
+
+  const handleSkillClick = (skillName: string) => {
+    // Navigate to skill detail page with the skill name as a parameter
+    router.push(`/profile/skill/${encodeURIComponent(skillName)}`);
+  };
 
   const updateSetting = (name: string, value: string, setter: (val: string) => void) => {
     setter(value);
@@ -77,6 +84,17 @@ export default function Skillprint() {
       const x = centerX + (radius * 0.7) * Math.cos(angle);
       const y = centerY + (radius * 0.7) * Math.sin(angle);
 
+      // Create a group for the skill node to make it clickable
+      const skillGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      skillGroup.setAttribute('cursor', 'pointer');
+      skillGroup.addEventListener('click', () => handleSkillClick(skill.name));
+      skillGroup.addEventListener('mouseenter', () => {
+        skillCircle.setAttribute('opacity', '1');
+      });
+      skillGroup.addEventListener('mouseleave', () => {
+        skillCircle.setAttribute('opacity', '0.8');
+      });
+
       // Create skill circle
       const skillCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       skillCircle.setAttribute('cx', x.toString());
@@ -86,7 +104,7 @@ export default function Skillprint() {
       skillCircle.setAttribute('stroke', '#FFFFFF');
       skillCircle.setAttribute('stroke-width', '3');
       skillCircle.setAttribute('opacity', '0.8');
-      svg.appendChild(skillCircle);
+      skillGroup.appendChild(skillCircle);
 
       // Create skill text
       const skillText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -97,7 +115,7 @@ export default function Skillprint() {
       skillText.setAttribute('font-size', '18');
       skillText.setAttribute('font-weight', 'bold');
       skillText.textContent = skill.name;
-      svg.appendChild(skillText);
+      skillGroup.appendChild(skillText);
 
       // Create level text
       const levelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -107,7 +125,7 @@ export default function Skillprint() {
       levelText.setAttribute('fill', '#000');
       levelText.setAttribute('font-size', '14');
       levelText.textContent = `${skill.level}%`;
-      svg.appendChild(levelText);
+      skillGroup.appendChild(levelText);
 
       // Create connecting line to center
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -119,6 +137,9 @@ export default function Skillprint() {
       line.setAttribute('stroke-width', '1');
       line.setAttribute('opacity', '0.5');
       svg.appendChild(line);
+
+      // Append the skill group after the line so it appears on top
+      svg.appendChild(skillGroup);
     });
   };
 
@@ -153,7 +174,8 @@ export default function Skillprint() {
             {skills.map((skill) => (
               <div
                 key={skill.id}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                onClick={() => handleSkillClick(skill.name)}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
               >
                 <div className="flex items-center space-x-3">
                   <div
@@ -177,6 +199,19 @@ export default function Skillprint() {
                   <span className="text-sm text-gray-600 dark:text-gray-300 w-12 text-right">
                     {skill.level}%
                   </span>
+                  <svg
+                    className="w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
                 </div>
               </div>
             ))}
