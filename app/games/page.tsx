@@ -19,7 +19,7 @@ export default function GamesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
 
-  const filteredSkillsGames = gamesBySkill.filter(game => {
+  const filteredSkillsGames = gamesBySkill.filter((game: any) => {
     // First apply tab filtering
     let matchesTab = true;
     if (activeTab === 'skills' && selectedFilter) {
@@ -34,7 +34,7 @@ export default function GamesPage() {
     return matchesTab && matchesSearch;
   });
 
-  const filteredMoodGames = gamesByMood.filter(game => {
+  const filteredMoodGames = gamesByMood.filter((game: any) => {
     // First apply tab filtering
     let matchesTab = true;
     if (activeTab === 'moods' && selectedFilter) {
@@ -76,8 +76,6 @@ export default function GamesPage() {
   const handleProfileClick = () => {
     router.push('/profile');
   };
-
-  console.log(filteredGames);
 
   return (
     <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -190,7 +188,7 @@ export default function GamesPage() {
           {!isSearchActive && (
             <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:bg-gray-800 px-4 py-2 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-wrap gap-2">
-                {(activeTab === 'moods' ? moods : skills).map((item) => (
+                {(activeTab === 'moods' ? moods : skills).map((item: any) => (
                   <button
                     key={item.id}
                     onClick={() => handleFilterSelect(item.id)}
@@ -210,7 +208,7 @@ export default function GamesPage() {
           {isSearchActive && (
             <div className="dark:bg-gray-800 px-4 py-2 border-b border-gray-100 dark:border-gray-800">
               <div className="flex flex-wrap gap-2">
-                {(activeTab === 'moods' ? moods : skills).map((item) => (
+                {(activeTab === 'moods' ? moods : skills).map((item: any) => (
                   <button
                     key={item.id}
                     onClick={() => handleFilterSelect(item.id)}
@@ -245,7 +243,7 @@ export default function GamesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredGames.map((game) => (
+              {filteredGames.map((game: any) => (
                 <Link
                   key={game.slug}
                   href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
@@ -272,16 +270,16 @@ export default function GamesPage() {
 
                       {/* Game Tags */}
                       <div className="mt-3 flex flex-wrap gap-1">
-                        {game.moods.map(moodId => {
-                          const mood = moods.find(m => m.id === moodId);
+                        {game.moods.map((moodId: any) => {
+                          const mood = moods.find((m: any) => m.id === moodId);
                           return mood ? (
                             <span key={moodId} className={`px-2 py-1 rounded-full text-xs font-medium ${mood.color}`}>
                               {mood.name}
                             </span>
                           ) : null;
                         })}
-                        {game.skills.map(skillId => {
-                          const skill = skills.find(s => s.id === skillId);
+                        {game.skills.map((skillId: any) => {
+                          const skill = skills.find((s: any) => s.id === skillId);
                           return skill ? (
                             <span key={skillId} className={`px-2 py-1 rounded-full text-xs font-medium ${skill.color}`}>
                               {skill.name}
