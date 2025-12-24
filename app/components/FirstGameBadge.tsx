@@ -11,8 +11,8 @@ export default function FirstGameBadge({ onDismiss }: FirstGameBadgeProps) {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Trigger animation on mount
-        setIsVisible(true);
+        // Trigger animation on mount with a small delay
+        const timer = setTimeout(() => setIsVisible(true), 10);
 
         const duration = 3000;
         const animationEnd = Date.now() + duration;
@@ -35,12 +35,25 @@ export default function FirstGameBadge({ onDismiss }: FirstGameBadgeProps) {
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
         }, 250);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearTimeout(timer);
+            clearInterval(interval);
+        };
     }, []);
 
+    const handleDismiss = () => {
+        setIsVisible(false);
+        // Wait for the transition to finish before calling onDismiss
+        setTimeout(onDismiss, 300);
+    };
+
     return (
-        <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all duration-500 scale-100 animate-bounce-slight border-4 border-yellow-400">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <div
+                className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                onClick={handleDismiss}
+            />
+            <div className={`relative bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all duration-300 border-4 border-yellow-400 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                 <div className="text-center">
                     <div className="mb-6 relative inline-block">
                         <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-50 animate-pulse"></div>
@@ -56,7 +69,7 @@ export default function FirstGameBadge({ onDismiss }: FirstGameBadgeProps) {
                     </p>
 
                     <button
-                        onClick={onDismiss}
+                        onClick={handleDismiss}
                         className="w-full py-3 px-6 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold rounded-xl shadow-lg transform transition-all hover:scale-105 hover:shadow-xl"
                     >
                         Awesome!

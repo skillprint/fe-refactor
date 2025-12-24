@@ -218,6 +218,41 @@ export default function Skillprint() {
           </div>
         </div>
 
+        {/* Badges Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Achievements
+            </h2>
+            <button
+              onClick={() => router.push('/badges')}
+              className="text-sm text-purple-600 dark:text-purple-400 font-medium hover:underline"
+            >
+              View All
+            </button>
+          </div>
+
+          <div
+            onClick={() => router.push('/badges')}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="flex -space-x-2 overflow-hidden">
+                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg">🏆</div>
+                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-lg">🧠</div>
+                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center text-lg">⚡</div>
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-900 dark:text-white font-medium">4 Badges Earned</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Latest: Consistent</p>
+              </div>
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
         {/* Settings Section */}
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
