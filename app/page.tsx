@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import BottomTabs from "./components/BottomTabs";
+import TopNav from "./components/TopNav";
 
 // Skills data
 const skills = [
@@ -201,7 +201,7 @@ export default function Home() {
     document.cookie = `spotlight_dismissed=true; expires=${date.toUTCString()}; path=/`;
   };
   return (
-    <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="font-sans min-h-screen bg-background">
       {/* Spotlight Overlay */}
       {showTooltip && (
         <div
@@ -210,19 +210,20 @@ export default function Home() {
         />
       )}
       <div className="flex flex-col min-h-screen pb-32">
+        <TopNav />
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900 px-8 py-12 sm:px-20 sm:py-16">
           <div className="max-w-4xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
               Skillprint
             </h1>
-            <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">
+            <p className="text-xl text-muted-foreground mb-8">
               Build skills through engaging games and track your progress
             </p>
 
             <div className="flex gap-4 items-center flex-col sm:flex-row">
               <a
-                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-gray-900 text-white gap-2 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto shadow-lg"
+                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:opacity-90 font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto shadow-lg"
                 href="/games"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +232,7 @@ export default function Home() {
                 Play Games
               </a>
               <a
-                className="rounded-full border-2 border-gray-900 dark:border-white transition-colors flex items-center justify-center bg-transparent text-gray-900 dark:text-white hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900 font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto"
+                className="rounded-full border-2 border-foreground transition-colors flex items-center justify-center bg-transparent text-foreground hover:bg-foreground hover:text-background font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto"
                 href="/profile"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,10 +248,10 @@ export default function Home() {
         <div className="px-4 sm:px-8 py-8 relative">
           {/* Tooltip for first item - Positioned relative to the section */}
           {showTooltip && (
-            <div className="absolute top-24 left-80 sm:left-96 z-[60] w-64 bg-white dark:bg-white p-4 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 animate-bounce-slight">
-              <div className="absolute top-6 -left-2 -translate-x-1/2 rotate-45 w-4 h-4 bg-white dark:bg-white border-l border-b border-gray-200 dark:border-gray-700"></div>
-              <h3 className="font-bold text-gray-900 dark:text-black mb-1">Game Tile</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            <div className="absolute top-24 left-80 sm:left-96 z-[60] w-64 bg-popover p-4 rounded-xl shadow-2xl border border-border animate-bounce-slight">
+              <div className="absolute top-6 -left-2 -translate-x-1/2 rotate-45 w-4 h-4 bg-popover border-l border-b border-border"></div>
+              <h3 className="font-bold text-foreground mb-1">Game Tile</h3>
+              <p className="text-sm text-muted-foreground mb-3">
                 This is a game tile. Click it to begin your game!
               </p>
               <button
@@ -259,7 +260,7 @@ export default function Home() {
                   e.stopPropagation();
                   dismissTooltip();
                 }}
-                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 uppercase tracking-wide"
+                className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wide"
               >
                 Got it
               </button>
@@ -268,16 +269,16 @@ export default function Home() {
 
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+              <h2 className="text-2xl font-bold text-foreground mb-1">
                 New Games
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Check out our latest additions
               </p>
             </div>
             <Link
               href="/games"
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm flex items-center gap-1"
+              className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
             >
               See all
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,16 +296,16 @@ export default function Home() {
                     href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
                     className="block group flex-shrink-0 w-72"
                   >
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       {/* Gradient header */}
                       <div className={`h-32 bg-gradient-to-br ${game.gradient} relative`}>
-                        <div className="absolute top-3 right-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                        <div className="absolute top-3 right-3 bg-card text-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg">
                           NEW
                         </div>
                         {/* Play icon overlay */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="bg-white/90 dark:bg-gray-900/90 rounded-full p-4">
-                            <svg className="w-8 h-8 text-gray-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <div className="bg-card/90 rounded-full p-4">
+                            <svg className="w-8 h-8 text-foreground" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z" />
                             </svg>
                           </div>
@@ -313,14 +314,14 @@ export default function Home() {
 
                       {/* Card content */}
                       <div className="p-4">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                           {game.name}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                        <p className="text-muted-foreground text-sm mb-4">
                           {game.description}
                         </p>
 
-                        <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
+                        <div className="flex items-center text-primary text-sm font-medium">
                           Play Now
                           <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -336,16 +337,16 @@ export default function Home() {
         </div>
 
         {/* Featured Skill Section */}
-        <div className="px-4 sm:px-8 py-8 bg-gray-100 dark:bg-gray-800/50">
+        <div className="px-4 sm:px-8 py-8 bg-secondary">
           <div className="mb-6">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-4xl">{featuredSkill.icon}</span>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                  <h2 className="text-2xl font-bold text-foreground mb-1">
                     Featured Skill: {featuredSkill.name}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {featuredSkill.description}
                   </p>
                 </div>
@@ -355,12 +356,12 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-foreground">
                 Games to develop this skill
               </h3>
               <Link
                 href="/games"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm flex items-center gap-1"
+                className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
               >
                 View all
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,14 +381,14 @@ export default function Home() {
                     href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
                     className="block group flex-shrink-0 w-64"
                   >
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       {/* Skill-themed header */}
                       <div className={`h-24 bg-gradient-to-br ${featuredSkill.gradient} relative flex items-center justify-center`}>
                         <span className="text-5xl opacity-30">{featuredSkill.icon}</span>
                         {/* Play icon overlay */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                          <div className="bg-white/95 dark:bg-gray-900/95 rounded-full p-3">
-                            <svg className="w-6 h-6 text-gray-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <div className="bg-card/95 rounded-full p-3">
+                            <svg className="w-6 h-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z" />
                             </svg>
                           </div>
@@ -396,14 +397,14 @@ export default function Home() {
 
                       {/* Card content */}
                       <div className="p-4">
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                           {game.name}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                        <p className="text-muted-foreground text-sm mb-3">
                           {game.description}
                         </p>
 
-                        <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
+                        <div className="flex items-center text-primary text-sm font-medium">
                           Play Now
                           <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -414,7 +415,7 @@ export default function Home() {
                   </Link>
                 ))
               ) : (
-                <div className="text-gray-500 dark:text-gray-400 text-center py-8 w-full">
+                <div className="text-muted-foreground text-center py-8 w-full">
                   Loading games...
                 </div>
               )}
@@ -423,9 +424,9 @@ export default function Home() {
         </div>
 
         {/* Quick Stats or Additional Content */}
-        <div className="px-4 sm:px-8 py-8 bg-white dark:bg-gray-800 mt-8">
+        <div className="px-4 sm:px-8 py-8 bg-card mt-8">
           <div className="max-w-4xl">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-6">
               What would you like to do today?
             </h2>
 
@@ -441,8 +442,8 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-1">Browse All Games</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Explore our full collection of games</p>
+                    <h3 className="font-bold text-foreground mb-1">Browse All Games</h3>
+                    <p className="text-sm text-muted-foreground">Explore our full collection of games</p>
                   </div>
                 </div>
               </Link>
@@ -458,8 +459,8 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-1">View Your Progress</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Track your skills and achievements</p>
+                    <h3 className="font-bold text-foreground mb-1">View Your Progress</h3>
+                    <p className="text-sm text-muted-foreground">Track your skills and achievements</p>
                   </div>
                 </div>
               </Link>
@@ -468,7 +469,7 @@ export default function Home() {
         </div>
       </div>
 
-      <BottomTabs />
+
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomTabs from '../components/BottomTabs';
+import TopNav from '../components/TopNav';
 import toast from 'react-hot-toast';
 
 interface Skill {
@@ -68,15 +68,17 @@ export default function Skillprint() {
     // Clear previous content
     svg.innerHTML = '';
 
-    // Create background circle
-    // const backgroundCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    // backgroundCircle.setAttribute('cx', centerX.toString());
-    // backgroundCircle.setAttribute('cy', centerY.toString());
-    // backgroundCircle.setAttribute('r', radius.toString());
-    // backgroundCircle.setAttribute('fill', '#F3F4F6');
-    // backgroundCircle.setAttribute('stroke', '#E5E7EB');
-    // backgroundCircle.setAttribute('stroke-width', '2');
-    // svg.appendChild(backgroundCircle);
+    const nodes: {
+      group: SVGGElement;
+      circle: SVGCircleElement;
+      text: SVGTextElement;
+      levelText: SVGTextElement;
+      line: SVGLineElement;
+      baseX: number;
+      baseY: number;
+      phase: number;
+      speed: number;
+    }[] = [];
 
     // Create skill nodes
     skills.forEach((skill, index) => {
@@ -88,12 +90,17 @@ export default function Skillprint() {
       const skillGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       skillGroup.setAttribute('cursor', 'pointer');
       skillGroup.addEventListener('click', () => handleSkillClick(skill.name));
-      skillGroup.addEventListener('mouseenter', () => {
-        skillCircle.setAttribute('opacity', '1');
-      });
-      skillGroup.addEventListener('mouseleave', () => {
-        skillCircle.setAttribute('opacity', '0.8');
-      });
+
+      // Create connecting line to center
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', centerX.toString());
+      line.setAttribute('y1', centerY.toString());
+      line.setAttribute('x2', x.toString());
+      line.setAttribute('y2', y.toString());
+      line.setAttribute('stroke', '#777777');
+      line.setAttribute('stroke-width', '1');
+      line.setAttribute('opacity', '0.5');
+      svg.appendChild(line);
 
       // Create skill circle
       const skillCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -105,6 +112,14 @@ export default function Skillprint() {
       skillCircle.setAttribute('stroke-width', '3');
       skillCircle.setAttribute('opacity', '0.8');
       skillGroup.appendChild(skillCircle);
+
+      // Add hover effects
+      skillGroup.addEventListener('mouseenter', () => {
+        skillCircle.setAttribute('opacity', '1');
+      });
+      skillGroup.addEventListener('mouseleave', () => {
+        skillCircle.setAttribute('opacity', '0.8');
+      });
 
       // Create skill text
       const skillText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -127,34 +142,75 @@ export default function Skillprint() {
       levelText.textContent = `${skill.level}%`;
       skillGroup.appendChild(levelText);
 
-      // Create connecting line to center
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', centerX.toString());
-      line.setAttribute('y1', centerY.toString());
-      line.setAttribute('x2', x.toString());
-      line.setAttribute('y2', y.toString());
-      line.setAttribute('stroke', '#777777');
-      line.setAttribute('stroke-width', '1');
-      line.setAttribute('opacity', '0.5');
-      svg.appendChild(line);
-
       // Append the skill group after the line so it appears on top
       svg.appendChild(skillGroup);
+
+      nodes.push({
+        group: skillGroup,
+        circle: skillCircle,
+        text: skillText,
+        levelText: levelText,
+        line: line,
+        baseX: x,
+        baseY: y,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 0.5 // Random speed between 0.5 and 1.0
+      });
     });
+
+    // Animation loop
+    let animationId: number;
+    const animate = () => {
+      const time = Date.now() / 1000;
+
+      nodes.forEach(node => {
+        // Create a gentle floating motion
+        const offsetX = Math.sin(time * node.speed + node.phase) * 3;
+        const offsetY = Math.cos(time * node.speed * 0.8 + node.phase) * 3;
+
+        const newX = node.baseX + offsetX;
+        const newY = node.baseY + offsetY;
+
+        // Update positions
+        node.circle.setAttribute('cx', newX.toString());
+        node.circle.setAttribute('cy', newY.toString());
+
+        node.text.setAttribute('x', newX.toString());
+        node.text.setAttribute('y', (newY - 55).toString());
+
+        node.levelText.setAttribute('x', newX.toString());
+        node.levelText.setAttribute('y', (newY + 5).toString());
+
+        node.line.setAttribute('x2', newX.toString());
+        node.line.setAttribute('y2', newY.toString());
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId);
+    };
   };
 
   useEffect(() => {
-    renderRadialCluster();
+    const cleanup = renderRadialCluster();
+    return () => {
+      if (cleanup) cleanup();
+    };
   }, [skills]);
 
   return (
-    <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="font-sans min-h-screen bg-background">
+      <TopNav />
       <div className="p-8 pb-32">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+        <h1 className="text-3xl font-bold text-foreground mb-6">
           Your Skillprint
         </h1>
 
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-card rounded-lg shadow">
           <div className="flex justify-center">
             <svg
               ref={svgRef}
@@ -167,7 +223,7 @@ export default function Skillprint() {
         </div>
 
         <div className="py-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
             Skill Breakdown
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -175,19 +231,19 @@ export default function Skillprint() {
               <div
                 key={skill.id}
                 onClick={() => handleSkillClick(skill.name)}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                className="flex items-center justify-between p-3 bg-card rounded-lg cursor-pointer hover:bg-secondary transition-colors"
               >
                 <div className="flex items-center space-x-3">
                   <div
                     className="w-4 h-4 rounded-full"
                     style={{ backgroundColor: skill.color }}
                   />
-                  <span className="text-gray-900 dark:text-white font-medium">
+                  <span className="text-foreground font-medium">
                     {skill.name}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                  <div className="w-20 bg-secondary rounded-full h-2">
                     <div
                       className="h-2 rounded-full"
                       style={{
@@ -196,7 +252,7 @@ export default function Skillprint() {
                       }}
                     />
                   </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-300 w-12 text-right">
+                  <span className="text-sm text-muted-foreground w-12 text-right">
                     {skill.level}%
                   </span>
                   <svg
@@ -221,12 +277,12 @@ export default function Skillprint() {
         {/* Badges Section */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-foreground">
               Achievements
             </h2>
             <button
               onClick={() => router.push('/badges')}
-              className="text-sm text-purple-600 dark:text-purple-400 font-medium hover:underline"
+              className="text-sm text-primary font-medium hover:underline"
             >
               View All
             </button>
@@ -234,17 +290,17 @@ export default function Skillprint() {
 
           <div
             onClick={() => router.push('/badges')}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+            className="bg-card rounded-lg shadow p-4 cursor-pointer hover:bg-secondary transition-colors"
           >
             <div className="flex items-center space-x-4">
               <div className="flex -space-x-2 overflow-hidden">
-                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg">🏆</div>
-                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-lg">🧠</div>
-                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center text-lg">⚡</div>
+                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-card bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg">🏆</div>
+                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-card bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-lg">🧠</div>
+                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-card bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center text-lg">⚡</div>
               </div>
               <div className="flex-1">
-                <p className="text-gray-900 dark:text-white font-medium">4 Badges Earned</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Latest: Consistent</p>
+                <p className="text-foreground font-medium">4 Badges Earned</p>
+                <p className="text-sm text-muted-foreground">Latest: Consistent</p>
               </div>
               <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -255,18 +311,18 @@ export default function Skillprint() {
 
         {/* Settings Section */}
         <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
             Settings
           </h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+          <div className="bg-card rounded-lg shadow p-6 space-y-6">
             {/* API Configuration */}
-            <div className="space-y-4 border-b border-gray-200 dark:border-gray-700 pb-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            <div className="space-y-4 border-b border-border pb-6">
+              <h3 className="text-lg font-medium text-foreground">
                 API Configuration
               </h3>
               <div className="grid gap-4">
                 <div>
-                  <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="user_id" className="block text-sm font-medium text-muted-foreground mb-1">
                     User ID
                   </label>
                   <input
@@ -274,12 +330,12 @@ export default function Skillprint() {
                     id="user_id"
                     value={userId}
                     onChange={(e) => updateSetting('user_id', e.target.value, setUserId)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Enter User ID"
                   />
                 </div>
                 <div>
-                  <label htmlFor="api_key" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="api_key" className="block text-sm font-medium text-muted-foreground mb-1">
                     API Key
                   </label>
                   <input
@@ -287,7 +343,7 @@ export default function Skillprint() {
                     id="api_key"
                     value={apiKey}
                     onChange={(e) => updateSetting('api_key', e.target.value, setApiKey)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Enter API Key"
                   />
                 </div>
@@ -296,10 +352,10 @@ export default function Skillprint() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-foreground">
                   Reset First-Time Experience
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Clear all first-time user experience flags to see the welcome carousel again
                 </p>
               </div>
@@ -311,18 +367,18 @@ export default function Skillprint() {
                   // Show confirmation
                   toast.success('Settings reset! Refresh the page to see the welcome experience again.');
                 }}
-                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
                 Reset
               </button>
             </div>
 
             {/* Temp Toast Test */}
-            <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
+            <div className="flex items-center justify-between border-t border-border pt-6">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-foreground">
                   Test Notification
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Trigger a test toast notification
                 </p>
               </div>
@@ -330,7 +386,7 @@ export default function Skillprint() {
           </div>
         </div>
       </div>
-      <BottomTabs />
+
     </div>
   );
 }
