@@ -25,7 +25,7 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
   },
-  
+
   // Specific game configurations
   '2048': {
     exitButtonPosition: 'top-left',
@@ -35,7 +35,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'alchemy': {
     exitButtonPosition: 'bottom-right',
     hideBottomTabs: true,
@@ -44,7 +44,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'lg'
     }
   },
-  
+
   'bubble-spirit': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -53,7 +53,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'change-word': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
@@ -62,7 +62,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'sm'
     }
   },
-  
+
   'crossy-chicken': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -71,7 +71,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'flapcat-steampunk': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
@@ -80,7 +80,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'fruit-boom': {
     exitButtonPosition: 'bottom-right',
     hideBottomTabs: true,
@@ -89,7 +89,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'lg'
     }
   },
-  
+
   'garden-match': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -98,7 +98,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'hextris': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
@@ -107,7 +107,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'sm'
     }
   },
-  
+
   'i-love-hue': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -116,7 +116,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'impossible-10': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
@@ -125,7 +125,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'lg'
     }
   },
-  
+
   'katana-fruits': {
     exitButtonPosition: 'bottom-right',
     hideBottomTabs: true,
@@ -134,7 +134,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'mine-rusher': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -143,7 +143,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
-  
+
   'snake-attack': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
@@ -152,7 +152,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'sm'
     }
   },
-  
+
   'space-trip': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
@@ -161,7 +161,7 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'lg'
     }
   },
-  
+
   'ultimate-sudoku': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -326,21 +326,21 @@ export const gameDetails: Record<string, GameDetails> = {
 export function getGameConfig(gameSlug: string): GameConfig {
   // Normalize the slug for matching (lowercase, replace spaces with hyphens)
   const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
-  
+
   // Try to find exact match first
   if (gameConfigs[normalizedSlug]) {
     return gameConfigs[normalizedSlug];
   }
-  
+
   // Try to find partial match
-  const partialMatch = Object.keys(gameConfigs).find(key => 
+  const partialMatch = Object.keys(gameConfigs).find(key =>
     key !== 'default' && normalizedSlug.includes(key)
   );
-  
+
   if (partialMatch) {
     return gameConfigs[partialMatch];
   }
-  
+
   // Return default configuration
   return gameConfigs.default;
 }
@@ -348,21 +348,58 @@ export function getGameConfig(gameSlug: string): GameConfig {
 export function getGameDetails(gameSlug: string): GameDetails | null {
   // Normalize the slug for matching (lowercase, replace spaces with hyphens)
   const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
-  
+
   // Try to find exact match first
   if (gameDetails[normalizedSlug]) {
     return gameDetails[normalizedSlug];
   }
-  
+
   // Try to find partial match
-  const partialMatch = Object.keys(gameDetails).find(key => 
+  const partialMatch = Object.keys(gameDetails).find(key =>
     normalizedSlug.includes(key)
   );
-  
+
   if (partialMatch) {
     return gameDetails[partialMatch];
   }
-  
+
   // Return null if no match found
   return null;
-} 
+}
+
+export const knownGameSlugs = [
+  '0hh1',
+  '2048',
+  'alchemy',
+  'box-tower',
+  'brick-out',
+  'bubble-spirit',
+  'change-word',
+  'colorize-2',
+  'crossy-chicken',
+  'flapcat-steampunk',
+  'flapcat-steampunk-2',
+  'fruit-boom',
+  'fruit-sorting',
+  'garden-match',
+  'gems-of-hanoi',
+  'gummy-blocks',
+  'hextris',
+  'hiding-master',
+  'i-love-hue',
+  'impossible-10',
+  'katana-fruits',
+  'mahjong-deluxe',
+  'match-doodle',
+  'mine-rusher',
+  'photo-hunt',
+  'snake-attack',
+  'space-adventure-pinball',
+  'space-trip',
+  'stacks-tower',
+  'star-puzzles',
+  'sumagi',
+  'sweet-memory',
+  'ultimate-sudoku',
+  'whack-em-all',
+]; 

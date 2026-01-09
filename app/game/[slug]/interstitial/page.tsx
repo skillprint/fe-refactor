@@ -1,10 +1,12 @@
-import { gameDetails } from '../../../config/gameConfig';
+import { gameDetails, knownGameSlugs } from '../../../config/gameConfig';
 import GameInterstitialClient from './GameInterstitialClient';
 
 export async function generateStaticParams() {
-  return Object.keys(gameDetails).map((slug) => ({
+  const params = knownGameSlugs.map((slug) => ({
     slug: slug,
   }));
+  console.log('Generating static params for interstitial:', params);
+  return params;
 }
 
 interface GameInterstitialProps {
@@ -15,5 +17,8 @@ interface GameInterstitialProps {
 
 export default async function GameInterstitial({ params }: GameInterstitialProps) {
   const { slug } = await params;
+
+  console.log(slug);
+
   return <GameInterstitialClient slug={slug} />;
 }

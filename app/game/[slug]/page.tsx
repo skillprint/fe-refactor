@@ -1,8 +1,8 @@
-import { gameDetails } from '../../config/gameConfig';
+import { gameDetails, knownGameSlugs } from '../../config/gameConfig';
 import GameClient from './GameClient';
 
 export async function generateStaticParams() {
-  return Object.keys(gameDetails).map((slug) => ({
+  return knownGameSlugs.map((slug) => ({
     slug: slug,
   }));
 }
