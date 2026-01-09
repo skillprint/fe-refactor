@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import BottomTabs from '../../../components/BottomTabs';
 
 interface GameSession {
     game_name: string;
@@ -154,13 +153,13 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
     };
 
     return (
-        <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="font-sans min-h-screen bg-background">
             <div className="p-8 pb-32">
                 {/* Header */}
                 <div className="mb-6">
                     <button
                         onClick={handleBackClick}
-                        className="flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-4 transition-colors"
+                        className="flex items-center text-accent hover:opacity-80 mb-4 transition-opacity"
                     >
                         <svg
                             className="w-5 h-5 mr-2"
@@ -177,71 +176,71 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                         </svg>
                         Back to Profile
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-3xl font-bold text-foreground">
                         {skillName}
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-2">
+                    <p className="text-muted-foreground mt-2">
                         Gameplay sessions breakdown
                     </p>
                 </div>
 
                 {/* Game Sessions Table */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div className="bg-card rounded-lg shadow overflow-hidden">
                     {gameSessions.length === 0 ? (
-                        <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+                        <div className="p-8 text-center text-muted-foreground">
                             No games found for this skill
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-100 dark:bg-gray-700">
+                                <thead className="bg-secondary">
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                                        <th className="px-6 py-4 text-left text-sm font-semibold text-card-foreground">
                                             Game
                                         </th>
-                                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                                        <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">
                                             Total Plays
                                         </th>
-                                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                                        <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">
                                             Last Day
                                         </th>
-                                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                                        <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">
                                             Last Week
                                         </th>
-                                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                                        <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">
                                             Last Month
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody className="divide-y divide-border">
                                     {gameSessions.map((session, index) => (
                                         <tr
                                             key={index}
                                             onClick={() => handleGameClick(session.game_slug)}
-                                            className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                                            className="hover:bg-secondary cursor-pointer transition-colors"
                                         >
                                             <td className="px-6 py-4">
-                                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                <div className="text-sm font-medium text-card-foreground">
                                                     {session.game_name}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent">
                                                     {session.total_plays}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="text-sm text-gray-900 dark:text-white">
+                                                <span className="text-sm text-card-foreground">
                                                     {session.plays_last_day}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="text-sm text-gray-900 dark:text-white">
+                                                <span className="text-sm text-card-foreground">
                                                     {session.plays_last_week}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="text-sm text-gray-900 dark:text-white">
+                                                <span className="text-sm text-card-foreground">
                                                     {session.plays_last_month}
                                                 </span>
                                             </td>
@@ -256,35 +255,35 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                 {/* Summary Stats */}
                 {gameSessions.length > 0 && (
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <div className="bg-card rounded-lg shadow p-6">
+                            <div className="text-sm text-muted-foreground mb-1">
                                 Total Games
                             </div>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <div className="text-2xl font-bold text-card-foreground">
                                 {gameSessions.length}
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <div className="bg-card rounded-lg shadow p-6">
+                            <div className="text-sm text-muted-foreground mb-1">
                                 Total Plays
                             </div>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <div className="text-2xl font-bold text-card-foreground">
                                 {gameSessions.reduce((sum, s) => sum + s.total_plays, 0)}
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <div className="bg-card rounded-lg shadow p-6">
+                            <div className="text-sm text-muted-foreground mb-1">
                                 Plays This Week
                             </div>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <div className="text-2xl font-bold text-card-foreground">
                                 {gameSessions.reduce((sum, s) => sum + s.plays_last_week, 0)}
                             </div>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <div className="bg-card rounded-lg shadow p-6">
+                            <div className="text-sm text-muted-foreground mb-1">
                                 Plays This Month
                             </div>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <div className="text-2xl font-bold text-card-foreground">
                                 {gameSessions.reduce((sum, s) => sum + s.plays_last_month, 0)}
                             </div>
                         </div>
@@ -293,19 +292,19 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
 
                 {/* Population Comparison Graph */}
                 {gameSessions.length > 0 && (
-                    <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div className="mt-6 bg-card rounded-lg shadow p-6">
                         <div className="mb-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                            <h2 className="text-xl font-semibold text-card-foreground mb-2">
                                 Performance Comparison
                             </h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                                 See how your activity compares to the average user population
                             </p>
                         </div>
 
                         {/* Day-by-Day Bar Chart */}
                         <div className="mb-8">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                            <h3 className="text-lg font-medium text-card-foreground mb-4">
                                 30-Day Activity Breakdown
                             </h3>
                             <div className="w-full h-80">
@@ -360,22 +359,22 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                             {/* Last Day Comparison */}
                             <div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span className="text-sm font-medium text-card-foreground">
                                         Last Day
                                     </span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    <span className="text-xs text-muted-foreground">
                                         {calculatePercentile(userStats.playsLastDay, populationStats.playsLastDay)}% of average
                                     </span>
                                 </div>
                                 <div className="space-y-2">
                                     {/* User Bar */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-purple-600 dark:text-purple-400 w-16">
+                                        <span className="text-xs font-medium text-accent w-16">
                                             You
                                         </span>
-                                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative overflow-hidden">
+                                        <div className="flex-1 bg-secondary rounded-full h-6 relative overflow-hidden">
                                             <div
-                                                className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                className="bg-accent h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
                                                 style={{
                                                     width: `${Math.min((userStats.playsLastDay / Math.max(userStats.playsLastDay, populationStats.playsLastDay)) * 100, 100)}%`
                                                 }}
@@ -388,12 +387,12 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                                     </div>
                                     {/* Population Bar */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-16">
+                                        <span className="text-xs font-medium text-muted-foreground w-16">
                                             Average
                                         </span>
-                                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative overflow-hidden">
+                                        <div className="flex-1 bg-secondary rounded-full h-6 relative overflow-hidden">
                                             <div
-                                                className="bg-gradient-to-r from-gray-400 to-gray-500 h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                className="bg-muted-foreground h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
                                                 style={{
                                                     width: `${Math.min((populationStats.playsLastDay / Math.max(userStats.playsLastDay, populationStats.playsLastDay)) * 100, 100)}%`
                                                 }}
@@ -410,22 +409,22 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                             {/* Last Week Comparison */}
                             <div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span className="text-sm font-medium text-card-foreground">
                                         Last Week
                                     </span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    <span className="text-xs text-muted-foreground">
                                         {calculatePercentile(userStats.playsLastWeek, populationStats.playsLastWeek)}% of average
                                     </span>
                                 </div>
                                 <div className="space-y-2">
                                     {/* User Bar */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-purple-600 dark:text-purple-400 w-16">
+                                        <span className="text-xs font-medium text-accent w-16">
                                             You
                                         </span>
-                                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative overflow-hidden">
+                                        <div className="flex-1 bg-secondary rounded-full h-6 relative overflow-hidden">
                                             <div
-                                                className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                className="bg-accent h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
                                                 style={{
                                                     width: `${Math.min((userStats.playsLastWeek / Math.max(userStats.playsLastWeek, populationStats.playsLastWeek)) * 100, 100)}%`
                                                 }}
@@ -438,12 +437,12 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                                     </div>
                                     {/* Population Bar */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-16">
+                                        <span className="text-xs font-medium text-muted-foreground w-16">
                                             Average
                                         </span>
-                                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative overflow-hidden">
+                                        <div className="flex-1 bg-secondary rounded-full h-6 relative overflow-hidden">
                                             <div
-                                                className="bg-gradient-to-r from-gray-400 to-gray-500 h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                className="bg-muted-foreground h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
                                                 style={{
                                                     width: `${Math.min((populationStats.playsLastWeek / Math.max(userStats.playsLastWeek, populationStats.playsLastWeek)) * 100, 100)}%`
                                                 }}
@@ -460,22 +459,22 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                             {/* Last Month Comparison */}
                             <div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span className="text-sm font-medium text-card-foreground">
                                         Last Month
                                     </span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    <span className="text-xs text-muted-foreground">
                                         {calculatePercentile(userStats.playsLastMonth, populationStats.playsLastMonth)}% of average
                                     </span>
                                 </div>
                                 <div className="space-y-2">
                                     {/* User Bar */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-purple-600 dark:text-purple-400 w-16">
+                                        <span className="text-xs font-medium text-accent w-16">
                                             You
                                         </span>
-                                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative overflow-hidden">
+                                        <div className="flex-1 bg-secondary rounded-full h-6 relative overflow-hidden">
                                             <div
-                                                className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                className="bg-accent h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
                                                 style={{
                                                     width: `${Math.min((userStats.playsLastMonth / Math.max(userStats.playsLastMonth, populationStats.playsLastMonth)) * 100, 100)}%`
                                                 }}
@@ -488,12 +487,12 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                                     </div>
                                     {/* Population Bar */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-16">
+                                        <span className="text-xs font-medium text-muted-foreground w-16">
                                             Average
                                         </span>
-                                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative overflow-hidden">
+                                        <div className="flex-1 bg-secondary rounded-full h-6 relative overflow-hidden">
                                             <div
-                                                className="bg-gradient-to-r from-gray-400 to-gray-500 h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                className="bg-muted-foreground h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
                                                 style={{
                                                     width: `${Math.min((populationStats.playsLastMonth / Math.max(userStats.playsLastMonth, populationStats.playsLastMonth)) * 100, 100)}%`
                                                 }}
@@ -509,22 +508,21 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
                         </div>
 
                         {/* Legend */}
-                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="mt-6 pt-4 border-t border-border">
                             <div className="flex items-center justify-center gap-6 text-xs">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded bg-gradient-to-r from-purple-500 to-purple-600"></div>
-                                    <span className="text-gray-600 dark:text-gray-400">Your Performance</span>
+                                    <div className="w-4 h-4 rounded bg-accent"></div>
+                                    <span className="text-muted-foreground">Your Performance</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded bg-gradient-to-r from-gray-400 to-gray-500"></div>
-                                    <span className="text-gray-600 dark:text-gray-400">Population Average</span>
+                                    <div className="w-4 h-4 rounded bg-muted-foreground"></div>
+                                    <span className="text-muted-foreground">Population Average</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
-            <BottomTabs />
         </div>
     );
 }

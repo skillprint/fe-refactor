@@ -23,6 +23,7 @@ function GamesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
 
+
   const filteredSkillsGames = gamesBySkill.filter((game: any) => {
     // First apply tab filtering
     let matchesTab = true;

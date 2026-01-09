@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import { notFound, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import BottomTabs from '../../../components/BottomTabs';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
 
 interface GameInterstitialClientProps {
@@ -35,21 +33,21 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
     };
 
     return (
-        <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="font-sans min-h-screen bg-background">
             <div className="flex flex-col min-h-screen pb-32">
                 {/* Header */}
-                <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+                <header className="bg-card shadow-sm border-b border-border">
                     <div className="px-4 py-4">
                         <div className="flex items-center">
                             <button
                                 onClick={handleBackToGames}
-                                className="mr-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                className="mr-3 p-2 rounded-lg hover:bg-secondary transition-colors"
                             >
-                                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            <h1 className="text-xl font-semibold text-foreground">
                                 Game Details
                             </h1>
                         </div>
@@ -60,9 +58,9 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                 <main className="flex-1 px-4 py-6">
                     <div className="max-w-2xl mx-auto">
                         {/* Game Title and Image */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                        <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
                             <div className="text-center mb-6">
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                <h2 className="text-3xl font-bold text-foreground mb-2">
                                     {gameDetails.name}
                                 </h2>
                                 {gameDetails.image ? (
@@ -80,22 +78,22 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                                         </svg>
                                     </div>
                                 )}
-                                <p className="text-lg text-gray-600 dark:text-gray-400">
+                                <p className="text-lg text-muted-foreground">
                                     {gameDetails.description}
                                 </p>
                             </div>
                         </div>
 
                         {/* Game Information */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                        <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
+                            <h3 className="text-xl font-semibold text-foreground mb-4">
                                 About This Game
                             </h3>
 
                             {gameDetails.category && (
                                 <div className="mb-4">
-                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Category:</span>
-                                    <span className="ml-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full">
+                                    <span className="text-sm font-medium text-muted-foreground">Category:</span>
+                                    <span className="ml-2 px-3 py-1 bg-primary/10 text-primary text-sm rounded-full">
                                         {gameDetails.category}
                                     </span>
                                 </div>
@@ -103,8 +101,8 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
                             {gameDetails.difficulty && (
                                 <div className="mb-4">
-                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Difficulty:</span>
-                                    <span className="ml-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">
+                                    <span className="text-sm font-medium text-muted-foreground">Difficulty:</span>
+                                    <span className="ml-2 px-3 py-1 bg-accent/10 text-accent text-sm rounded-full">
                                         {gameDetails.difficulty}
                                     </span>
                                 </div>
@@ -112,8 +110,8 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
                             {gameDetails.estimatedTime && (
                                 <div className="mb-4">
-                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Estimated Time:</span>
-                                    <span className="ml-2 text-gray-900 dark:text-white">
+                                    <span className="text-sm font-medium text-muted-foreground">Estimated Time:</span>
+                                    <span className="ml-2 text-foreground">
                                         {gameDetails.estimatedTime}
                                     </span>
                                 </div>
@@ -121,12 +119,12 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
                             {gameDetails.skills && (
                                 <div className="mb-4">
-                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Skills Developed:</span>
+                                    <span className="text-sm font-medium text-muted-foreground">Skills Developed:</span>
                                     <div className="mt-2 flex flex-wrap gap-2">
                                         {gameDetails.skills.map((skill: string, index: number) => (
                                             <span
                                                 key={index}
-                                                className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full"
+                                                className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
                                             >
                                                 {skill}
                                             </span>
@@ -137,8 +135,8 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
                             {gameDetails.instructions && (
                                 <div>
-                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">How to Play:</span>
-                                    <p className="mt-2 text-gray-900 dark:text-white">
+                                    <span className="text-sm font-medium text-muted-foreground">How to Play:</span>
+                                    <p className="mt-2 text-foreground">
                                         {gameDetails.instructions}
                                     </p>
                                 </div>
@@ -150,7 +148,7 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                             <button
                                 onClick={handleStartGame}
                                 disabled={isLoading}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                                className="flex-1 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
                             >
                                 {isLoading ? (
                                     <>
@@ -172,16 +170,13 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
                             <button
                                 onClick={handleBackToGames}
-                                className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-4 px-6 rounded-lg transition-colors duration-200"
+                                className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold py-4 px-6 rounded-lg transition-colors duration-200"
                             >
                                 Back to Games
                             </button>
                         </div>
                     </div>
                 </main>
-
-                {/* Bottom tabs */}
-                <BottomTabs />
             </div>
         </div>
     );

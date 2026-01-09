@@ -388,7 +388,8 @@ export default function Skillprint() {
                 onClick={() => {
                   // Delete the FTUE cookie
                   document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-
+                  // delete the first badge cookie
+                  document.cookie = 'first_game_badge_seen=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                   // Show confirmation
                   toast.success('Settings reset! Refresh the page to see the welcome experience again.');
                 }}

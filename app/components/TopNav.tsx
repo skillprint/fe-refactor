@@ -52,7 +52,7 @@ export default function TopNav() {
     const currentPageName = getCurrentPageName();
 
     return (
-        <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
+        <nav className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border">
             <div className="max-w-[100%] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Left Branding */}

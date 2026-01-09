@@ -212,18 +212,18 @@ export default function Home() {
       <div className="flex flex-col min-h-screen pb-32">
         <TopNav />
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900 px-8 py-12 sm:px-20 sm:py-16">
+        <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-500 dark:to-purple-500 px-8 py-12 sm:py-16">
           <div className="max-w-4xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 dark:text-white">
               Skillprint
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl mb-8 dark:text-white text-white">
               Build skills through engaging games and track your progress
             </p>
 
             <div className="flex gap-4 items-center flex-col sm:flex-row">
               <a
-                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:opacity-90 font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto shadow-lg"
+                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:opacity-90 font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto shadow-lg dark:text-white dark:hover:text-background dark:hover:bg-foreground dark:border-white"
                 href="/games"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +232,7 @@ export default function Home() {
                 Play Games
               </a>
               <a
-                className="rounded-full border-2 border-foreground transition-colors flex items-center justify-center bg-transparent text-foreground hover:bg-foreground hover:text-background font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto"
+                className="rounded-full border-2 border-foreground transition-colors flex items-center justify-center bg-transparent text-foreground hover:bg-foreground hover:text-background font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto dark:text-white dark:hover:text-background dark:hover:bg-foreground dark:border-white"
                 href="/profile"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,7 +291,7 @@ export default function Home() {
           <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
             <div className="flex gap-4 min-w-min">
               {newGames.map((game, index) => (
-                <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-50' : ''}`}>
+                <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
                   <Link
                     href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
                     className="block group flex-shrink-0 w-72"
