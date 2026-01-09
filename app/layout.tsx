@@ -4,6 +4,7 @@ import "./globals.css";
 import "./globals.css";
 import FTUECarousel from "./components/FTUECarousel";
 import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -31,9 +32,11 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${geistMono.variable} antialiased`}
       >
-        <FTUECarousel />
-        <Toaster position="top-center" />
-        {children}
+        <ThemeProvider>
+          <FTUECarousel />
+          <Toaster position="top-center" />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

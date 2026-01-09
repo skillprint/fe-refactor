@@ -37,12 +37,10 @@ export default function TopNav() {
         }
     ];
 
-    const getLinks = () => {
-        // Filter out the current page
-        return allLinks.filter(link => link.href !== pathname);
+    const isActive = (href: string) => {
+        if (href === '/') return pathname === '/';
+        return pathname.startsWith(href);
     };
-
-    const links = getLinks();
 
     const getCurrentPageName = () => {
         if (pathname === '/') return 'Home';
@@ -55,47 +53,38 @@ export default function TopNav() {
 
     return (
         <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[100%] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    {/* Left Link */}
-                    <div className="flex-1 flex justify-start">
-                        {links[0] && (
-                            <Link
-                                href={links[0].href}
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-                            >
-                                {links[0].icon}
-                                {links[0].name}
-                            </Link>
-                        )}
-                    </div>
-
-                    {/* Center Branding */}
-                    <div className="flex-shrink-0 flex flex-col items-center justify-center">
+                    {/* Left Branding */}
+                    <div className="flex items-center gap-2">
                         <Link href="/" className="flex items-center gap-2">
                             <Image src="/logo192.png" alt="Skillprint Logo" width={24} height={24} className="w-6 h-6 rounded-full" />
-                            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-none">
-                                Skillprint
-                            </span>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-green-300 to-lime-300 bg-clip-text text-transparent leading-none text-shadow-sm">
+                                    Skillprint
+                                </span>
+                            </div>
                         </Link>
-                        {currentPageName && (
-                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mt-1">
-                                {currentPageName}
-                            </span>
-                        )}
                     </div>
 
-                    {/* Right Link */}
-                    <div className="flex-1 flex justify-end">
-                        {links[1] && (
-                            <Link
-                                href={links[1].href}
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-                            >
-                                {links[1].name}
-                                {links[1].icon}
-                            </Link>
-                        )}
+                    {/* Right Navigation Icons */}
+                    <div className="flex items-center gap-4">
+                        {allLinks.map((link) => {
+                            const active = isActive(link.href);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={`transition-colors p-2 rounded-md ${active
+                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                                        }`}
+                                    title={link.name}
+                                >
+                                    {link.icon}
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

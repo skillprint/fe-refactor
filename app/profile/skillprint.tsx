@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import TopNav from '../components/TopNav';
 import toast from 'react-hot-toast';
+import { useTheme } from '../components/ThemeProvider';
 
 interface Skill {
   id: string;
@@ -26,6 +27,7 @@ const sampleSkills: Skill[] = [
 
 export default function Skillprint() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -350,6 +352,29 @@ export default function Skillprint() {
               </div>
             </div>
 
+            {/* Theme Toggle */}
+            <div className="flex items-center justify-between border-b border-border pb-6">
+              <div>
+                <h3 className="text-lg font-medium text-foreground">
+                  Appearance
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Switch between light and dark themes
+                </p>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${theme === 'dark' ? 'bg-primary' : 'bg-input'
+                  }`}
+              >
+                <span className="sr-only">Enable dark mode</span>
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                />
+              </button>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-foreground">
@@ -371,22 +396,9 @@ export default function Skillprint() {
                 Reset
               </button>
             </div>
-
-            {/* Temp Toast Test */}
-            <div className="flex items-center justify-between border-t border-border pt-6">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">
-                  Test Notification
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Trigger a test toast notification
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-
     </div>
   );
 }

@@ -277,7 +277,7 @@ export default function Home() {
               </p>
             </div>
             <Link
-              href="/games"
+              href="/games?filter=new"
               className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
             >
               See all
@@ -360,7 +360,7 @@ export default function Home() {
                 Games to develop this skill
               </h3>
               <Link
-                href="/games"
+                href={`/games?tab=skills&filter=${featuredSkill.id}`}
                 className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
               >
                 View all
