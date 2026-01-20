@@ -59,11 +59,7 @@ export default function FTUECarousel() {
             title: 'Explore different moods and skills through gameplay',
             description: 'Play games that target specific moods or skills to build your profile and unlock new content.',
             gradient: 'from-blue-600 via-cyan-600 to-teal-600',
-            icon: (
-                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-            ),
+            icon: null,
             content: (
                 <div className="flex flex-col gap-4 mt-6">
                     <div className="grid grid-cols-2 gap-3">
@@ -87,17 +83,12 @@ export default function FTUECarousel() {
             title: 'Browse our games',
             description: 'Jump right into the action and build your profile by playing games.',
             gradient: 'from-green-600 via-emerald-600 to-teal-600',
-            icon: (
-                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
+            icon: null,
             content: (
                 <div className="flex flex-col gap-4 mt-6 items-center">
                     <Link href="/game/hextris/interstitial" onClick={handleClose} className="w-full max-w-xs group">
                         <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden hover:scale-105 transition-transform duration-300">
-                            <div className="h-32 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
+                            <div className="h-32 flex items-center justify-center relative bg-[url('https://skillprint-api-static.s3.us-west-2.amazonaws.com/static/images/Hextris.png')] bg-cover">
                                 <span className="text-2xl font-bold text-white/50 group-hover:text-white transition-colors">Hextris</span>
                             </div>
                             <div className="p-3 text-left">
@@ -188,11 +179,13 @@ export default function FTUECarousel() {
                                 }`}
                         >
                             {/* Icon */}
-                            <div className="flex justify-center mb-8">
-                                <div className={`text-white bg-gradient-to-br ${currentSlideData.gradient} p-6 rounded-2xl shadow-lg`}>
-                                    {currentSlideData.icon}
+                            {currentSlideData.icon && (
+                                <div className="flex justify-center mb-8">
+                                    <div className={`text-white bg-gradient-to-br ${currentSlideData.gradient} p-6 rounded-2xl shadow-lg`}>
+                                        {currentSlideData.icon}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Title */}
                             <h2
@@ -207,6 +200,7 @@ export default function FTUECarousel() {
                                 {currentSlideData.description}
                             </p>
                             {currentSlideData.content}
+                            <div className="h-8"></div>
                         </div>
 
                         {/* Slide Indicators */}
@@ -250,9 +244,9 @@ export default function FTUECarousel() {
                             <button
                                 onClick={handleNext}
                                 className={`flex items-center gap-2 px-8 py-3 rounded-full font-semibold transition-all duration-200 bg-gradient-to-r ${currentSlideData.gradient} hover:shadow-lg hover:scale-105 text-white`}
-                                aria-label={isLastSlide ? 'Get started' : 'Next slide'}
+                                aria-label={isLastSlide ? 'Play!' : 'Next slide'}
                             >
-                                {isLastSlide ? 'Get Started' : 'Next'}
+                                {isLastSlide ? 'Play!' : 'Next'}
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
@@ -298,6 +292,6 @@ export default function FTUECarousel() {
           animation: slide-in-left 0.5s ease-out;
         }
       `}</style>
-        </div>
+        </div >
     );
 }
