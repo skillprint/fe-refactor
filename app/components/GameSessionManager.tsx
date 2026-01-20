@@ -25,7 +25,7 @@ export const GameSessionManager: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-2xl font-bold text-foreground">Game Sessions</h3>
-                        <p className="text-muted-foreground text-sm mt-1">Track your gaming journey</p>
+                        <p className="text-muted-foreground text-sm mt-1">Test utility that increases play count</p>
                     </div>
                     <div className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
                         <span className="text-primary font-bold text-lg">{count}</span>
