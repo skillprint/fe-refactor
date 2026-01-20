@@ -11,7 +11,7 @@ import { newGameSlugs } from '../config/newGames';
 
 type FilterType = 'moods' | 'skills';
 
-function GamesPage() {
+function GamesPageContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as FilterType) || 'moods';
   const initialFilter = searchParams.get('filter');
@@ -367,6 +367,14 @@ function GamesPage() {
 
       </div>
     </div>
+  );
+}
+
+function GamesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <GamesPageContent />
+    </Suspense>
   );
 }
 
