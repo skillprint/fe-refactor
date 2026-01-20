@@ -99,14 +99,14 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                                 </div>
                             )}
 
-                            {gameDetails.difficulty && (
+                            {/* {gameDetails.difficulty && (
                                 <div className="mb-4">
                                     <span className="text-sm font-medium text-muted-foreground">Difficulty:</span>
                                     <span className="ml-2 px-3 py-1 bg-accent/10 text-accent text-sm rounded-full">
                                         {gameDetails.difficulty}
                                     </span>
                                 </div>
-                            )}
+                            )} */}
 
                             {gameDetails.estimatedTime && (
                                 <div className="mb-4">
@@ -160,9 +160,6 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                                     </>
                                 ) : (
                                     <>
-                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
                                         Start Game
                                     </>
                                 )}

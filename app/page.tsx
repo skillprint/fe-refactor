@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import TopNav from "./components/TopNav";
+import { useGamesByMood } from './hooks/useGamesByMood';
+import BuckyballLoading from './components/BuckyballLoading';
 
 // Skills data
 const skills = [
@@ -45,6 +47,33 @@ const skills = [
     gradient: 'from-emerald-500 to-green-500',
     icon: '🎯',
     description: 'Build hand-eye coordination skills'
+  },
+];
+
+const moods = [
+  {
+    id: 'relax',
+    name: 'Relax',
+    icon: '🧘',
+    gradient: 'from-emerald-400 to-teal-500'
+  },
+  {
+    id: 'focus',
+    name: 'Focus',
+    icon: '🎯',
+    gradient: 'from-indigo-400 to-blue-500'
+  },
+  {
+    id: 'energize',
+    name: 'Energize',
+    icon: '⚡',
+    gradient: 'from-orange-400 to-red-500'
+  },
+  {
+    id: 'creativity',
+    name: 'Creative',
+    icon: '🎨',
+    gradient: 'from-pink-400 to-purple-500'
   },
 ];
 
@@ -142,38 +171,29 @@ const allGames = [
   },
 ];
 
-// New games data - games marked as recently added
-const newGames = [
-  {
-    name: 'Space Trip',
-    slug: 'space-trip',
-    description: 'Explore space in this adventure',
-    gradient: 'from-purple-500 to-blue-500'
-  },
-  {
-    name: 'I Love Hue',
-    slug: 'i-love-hue',
-    description: 'Arrange colors in perfect harmony',
-    gradient: 'from-pink-500 to-purple-500'
-  },
-  {
-    name: 'Hextris',
-    slug: 'hextris',
-    description: 'Rotate and match hexagons',
-    gradient: 'from-orange-500 to-red-500'
-  },
-  {
-    name: 'Garden Match',
-    slug: 'garden-match',
-    description: 'Match garden items in this puzzle',
-    gradient: 'from-green-500 to-emerald-500'
-  },
+// Default gradients for games
+const gradients = [
+  'from-purple-500 to-blue-500',
+  'from-pink-500 to-purple-500',
+  'from-orange-500 to-red-500',
+  'from-green-500 to-emerald-500',
+  'from-blue-500 to-cyan-500',
+  'from-indigo-500 to-purple-500',
 ];
 
 export default function Home() {
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<typeof allGames>([]);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  // Fetch games for the "New Games" section using the 'relax' mood
+  const { games: fetchedNewGames, isLoading: isLoadingNewGames } = useGamesByMood('relax');
+
+  useEffect(() => {
+    if (fetchedNewGames.length > 0) {
+      console.log('Fetched New Games:', fetchedNewGames);
+    }
+  }, [fetchedNewGames]);
 
   useEffect(() => {
     // Check for spotlight cookie
@@ -290,48 +310,137 @@ export default function Home() {
           {/* Horizontal scrollable game cards */}
           <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
             <div className="flex gap-4 min-w-min">
-              {newGames.map((game, index) => (
-                <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
-                  <Link
-                    href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                    className="block group flex-shrink-0 w-72"
-                  >
-                    <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                      {/* Gradient header */}
-                      <div className={`h-32 bg-gradient-to-br ${game.gradient} relative`}>
-                        <div className="absolute top-3 right-3 bg-card text-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          NEW
+              {isLoadingNewGames ? (
+                <div className="w-full py-12 flex justify-center items-center">
+                  <BuckyballLoading />
+                </div>
+              ) : fetchedNewGames.length > 0 ? (
+                fetchedNewGames.map((game, index) => (
+                  <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
+                    <Link
+                      href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
+                      className="block group flex-shrink-0 w-72"
+                    >
+                      <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        {/* Gradient header or Game Image */}
+                        <div className={`h-32 bg-gradient-to-br ${gradients[index % gradients.length]} relative`}>
+                          {game.screenshot && (
+                            <img
+                              src={game.screenshot}
+                              alt={game.name}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                          <div className="absolute top-3 right-3 bg-card text-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                            NEW
+                          </div>
+                          {/* Play icon overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+                            <div className="bg-card/90 rounded-full p-4">
+                              <svg className="w-8 h-8 text-foreground" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                          </div>
                         </div>
-                        {/* Play icon overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="bg-card/90 rounded-full p-4">
-                            <svg className="w-8 h-8 text-foreground" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
+
+                        {/* Card content */}
+                        <div className="p-4">
+                          <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                            {game.name}
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                            {game.description}
+                          </p>
+
+                          <div className="flex items-center text-primary text-sm font-medium">
+                            Play Now
+                            <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </div>
                         </div>
                       </div>
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted-foreground py-8">No games found for this mood.</div>
+              )}
+            </div>
+          </div>
+        </div>
 
-                      {/* Card content */}
-                      <div className="p-4">
-                        <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                          {game.name}
-                        </h3>
-                        <p className="text-muted-foreground text-sm mb-4">
-                          {game.description}
-                        </p>
+        {/* Browse by Mood & Skill Section */}
+        <div className="px-4 sm:px-8 py-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              Explore by Mood & Skill
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Find the perfect game for your current state of mind or goal
+            </p>
+          </div>
 
-                        <div className="flex items-center text-primary text-sm font-medium">
-                          Play Now
-                          <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
+          <div className="space-y-8">
+            {/* Moods Row */}
+            <div>
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
+                Moods
+              </h3>
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+                {moods.map((mood) => (
+                  <Link
+                    key={mood.id}
+                    href={`/games?tab=moods&filter=${mood.id}`}
+                    className="flex-shrink-0 group"
+                  >
+                    <div className="flex items-center gap-4 px-5 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${mood.gradient} flex items-center justify-center text-2xl shadow-inner text-white`}>
+                        {mood.icon}
+                      </div>
+                      <div>
+                        <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
+                          {mood.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
+                          Mood
+                        </span>
                       </div>
                     </div>
                   </Link>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Skills Row */}
+            <div>
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
+                Skills
+              </h3>
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+                {skills.map((skill) => (
+                  <Link
+                    key={skill.id}
+                    href={`/games?tab=skills&filter=${skill.id}`}
+                    className="flex-shrink-0 group"
+                  >
+                    <div className="flex items-center gap-4 px-5 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${skill.gradient} flex items-center justify-center text-2xl shadow-inner text-white`}>
+                        {skill.icon}
+                      </div>
+                      <div>
+                        <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
+                          {skill.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
+                          Skill
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -415,8 +524,8 @@ export default function Home() {
                   </Link>
                 ))
               ) : (
-                <div className="text-muted-foreground text-center py-8 w-full">
-                  Loading games...
+                <div className="w-full py-12 flex justify-center items-center">
+                  <BuckyballLoading />
                 </div>
               )}
             </div>

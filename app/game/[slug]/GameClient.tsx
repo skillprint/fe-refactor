@@ -8,6 +8,7 @@ import GameResultsInterstitial from '../../components/GameResultsInterstitial';
 import FirstGameBadge from '../../components/FirstGameBadge';
 import { getGameConfig } from '../../config/gameConfig';
 import React from 'react';
+import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 
 interface GameClientProps {
     slug: string;
@@ -182,6 +183,22 @@ export default function GameClient({ slug }: GameClientProps) {
         setGameResults(results);
         setGameState('completed');
         stopIframe();
+
+        // Record the game session
+        const session: GameSession = {
+            id: Math.random().toString(36).substr(2, 9),
+            gameSlug: decodedSlug,
+            timestamp: endTime,
+            duration: playTime,
+            score: results.score,
+            completed: true,
+            metadata: {
+                level: results.level,
+                accuracy: results.accuracy,
+                mistakes: results.mistakes
+            }
+        };
+        saveGameSession(session);
 
         // Check for first game badge
         const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));

@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import TopNav from '../components/TopNav';
 import toast from 'react-hot-toast';
 import { useTheme } from '../components/ThemeProvider';
+import { GameSessionManager } from '../components/GameSessionManager';
+import { useGameSessions } from '../hooks/useGameSessions';
+import BuckyballLoading from '../components/BuckyballLoading';
 
 interface Skill {
   id: string;
@@ -32,6 +36,7 @@ export default function Skillprint() {
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
   const svgRef = useRef<SVGSVGElement>(null);
+  const { count, isLoaded } = useGameSessions();
 
   useEffect(() => {
     // Load settings from cookies
@@ -198,11 +203,13 @@ export default function Skillprint() {
   };
 
   useEffect(() => {
-    const cleanup = renderRadialCluster();
-    return () => {
-      if (cleanup) cleanup();
-    };
-  }, [skills]);
+    if (isLoaded && count >= 3) {
+      const cleanup = renderRadialCluster();
+      return () => {
+        if (cleanup) cleanup();
+      };
+    }
+  }, [skills, count, isLoaded]);
 
   return (
     <div className="font-sans min-h-screen bg-background">
@@ -212,72 +219,141 @@ export default function Skillprint() {
           Your Skillprint
         </h1>
 
-        <div className="bg-card rounded-lg shadow">
-          <div className="flex justify-center">
-            <svg
-              ref={svgRef}
-              width="600"
-              height="600"
-              viewBox="0 0 600 600"
-              className="max-w-full h-auto"
-            />
+        {!isLoaded ? (
+          <div className="flex justify-center py-20">
+            <BuckyballLoading />
           </div>
-        </div>
+        ) : count < 3 ? (
+          <div className="bg-card rounded-lg shadow p-8 text-center border border-border mb-8">
+            <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🔒</span>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Unlock Your Skillprint</h2>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Play at least 3 games to reveal your unique cognitive profile and skill breakdown.
+            </p>
 
-        <div className="py-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">
-            Skill Breakdown
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {skills.map((skill) => (
-              <div
-                key={skill.id}
-                onClick={() => handleSkillClick(skill.name)}
-                className="flex items-center justify-between p-3 bg-card rounded-lg cursor-pointer hover:bg-secondary transition-colors"
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <div className={`h-2 w-16 rounded-full ${count >= 1 ? 'bg-primary' : 'bg-secondary'}`} />
+              <div className={`h-2 w-16 rounded-full ${count >= 2 ? 'bg-primary' : 'bg-secondary'}`} />
+              <div className={`h-2 w-16 rounded-full ${count >= 3 ? 'bg-primary' : 'bg-secondary'}`} />
+              <span className="ml-2 text-sm font-medium text-foreground">{count}/3 Played</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-6">
+              <Link
+                href="/game/hextris/interstitial"
+                className="block group w-full max-w-xs text-left transition-transform hover:scale-105 duration-300"
               >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: skill.color }}
-                  />
-                  <span className="text-foreground font-medium">
-                    {skill.name}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-secondary rounded-full h-2">
-                    <div
-                      className="h-2 rounded-full"
-                      style={{
-                        width: `${skill.level}%`,
-                        backgroundColor: skill.color,
-                      }}
-                    />
+                <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300">
+                  <div className="h-32 bg-gradient-to-br from-orange-500 to-red-500 relative flex items-center justify-center">
+                    <span className="text-5xl">⚡</span>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+                      <div className="bg-card/90 rounded-full p-3">
+                        <svg className="w-8 h-8 text-foreground" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-sm text-muted-foreground w-12 text-right">
-                    {skill.level}%
-                  </span>
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                      Hextris
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-3">
+                      Rotate and match hexagons
+                    </p>
+                    <div className="flex items-center text-primary text-sm font-medium">
+                      Play Now
+                      <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              </Link>
+
+              <button
+                onClick={() => router.push('/games?tab=moods')}
+                className="text-sm text-muted-foreground hover:text-primary font-medium transition-colors flex items-center gap-1"
+              >
+                Explore more games to improve your mood!
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="bg-card rounded-lg shadow">
+              <div className="flex justify-center">
+                <svg
+                  ref={svgRef}
+                  width="600"
+                  height="600"
+                  viewBox="0 0 600 600"
+                  className="max-w-full h-auto"
+                />
+              </div>
+            </div>
+
+            <div className="py-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">
+                Skill Breakdown
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {skills.map((skill) => (
+                  <div
+                    key={skill.id}
+                    onClick={() => handleSkillClick(skill.name)}
+                    className="flex items-center justify-between p-3 bg-card rounded-lg cursor-pointer hover:bg-secondary transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: skill.color }}
+                      />
+                      <span className="text-foreground font-medium">
+                        {skill.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-20 bg-secondary rounded-full h-2">
+                        <div
+                          className="h-2 rounded-full"
+                          style={{
+                            width: `${skill.level}%`,
+                            backgroundColor: skill.color,
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm text-muted-foreground w-12 text-right">
+                        {skill.level}%
+                      </span>
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Badges Section */}
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-foreground">
               Achievements
@@ -309,6 +385,11 @@ export default function Skillprint() {
               </svg>
             </div>
           </div>
+        </div> */}
+
+        {/* Game Sessions Section */}
+        <div className="mt-8">
+          <GameSessionManager />
         </div>
 
         {/* Settings Section */}

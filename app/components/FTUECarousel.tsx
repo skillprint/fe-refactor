@@ -1,46 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface Slide {
     title: string;
     description: string;
     icon: React.ReactNode;
     gradient: string;
+    content?: React.ReactNode;
 }
 
-const slides: Slide[] = [
-    {
-        title: 'Build Skills Through Play',
-        description: 'Transform learning into an engaging adventure. Play interactive games designed to develop real-world skills while having fun.',
-        gradient: 'from-purple-600 via-pink-600 to-red-600',
-        icon: (
-            <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        ),
-    },
-    {
-        title: 'Track Your Progress',
-        description: 'Visualize your skill development journey with beautiful charts and insights. Watch yourself grow and celebrate every milestone.',
-        gradient: 'from-blue-600 via-cyan-600 to-teal-600',
-        icon: (
-            <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-        ),
-    },
-    {
-        title: 'Personalized Journey',
-        description: 'Get tailored skill recommendations based on your interests and progress. Your unique path to mastery starts here.',
-        gradient: 'from-green-600 via-emerald-600 to-teal-600',
-        icon: (
-            <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-        ),
-    },
-];
+
 
 const COOKIE_NAME = 'ftue_completed';
 const COOKIE_EXPIRY_DAYS = 365;
@@ -72,6 +43,76 @@ export default function FTUECarousel() {
         setCookie();
         setIsVisible(false);
     };
+
+    const slides: Slide[] = [
+        {
+            title: 'Build Skills Through Play',
+            description: 'Transform learning into an engaging adventure. Play interactive games designed to develop real-world skills while having fun.',
+            gradient: 'from-purple-600 via-pink-600 to-red-600',
+            icon: (
+                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            ),
+        },
+        {
+            title: 'Explore different moods and skills through gameplay',
+            description: 'Play games that target specific moods or skills to build your profile and unlock new content.',
+            gradient: 'from-blue-600 via-cyan-600 to-teal-600',
+            icon: (
+                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            ),
+            content: (
+                <div className="flex flex-col gap-4 mt-6">
+                    <div className="grid grid-cols-2 gap-3">
+                        <Link href="/games?tab=moods&filter=focus" onClick={handleClose} className="p-3 rounded-xl bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors text-white text-sm font-medium">
+                            Focus
+                        </Link>
+                        <Link href="/games?tab=moods&filter=relax" onClick={handleClose} className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors text-white text-sm font-medium">
+                            Relax
+                        </Link>
+                        <Link href="/games?tab=skills&filter=memory" onClick={handleClose} className="p-3 rounded-xl bg-violet-500/20 border border-violet-500/30 hover:bg-violet-500/30 transition-colors text-white text-sm font-medium">
+                            Memory
+                        </Link>
+                        <Link href="/games?tab=skills&filter=logic" onClick={handleClose} className="p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors text-white text-sm font-medium">
+                            Logic
+                        </Link>
+                    </div>
+                </div>
+            )
+        },
+        {
+            title: 'Browse our games',
+            description: 'Jump right into the action and build your profile by playing games.',
+            gradient: 'from-green-600 via-emerald-600 to-teal-600',
+            icon: (
+                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            ),
+            content: (
+                <div className="flex flex-col gap-4 mt-6 items-center">
+                    <Link href="/game/hextris/interstitial" onClick={handleClose} className="w-full max-w-xs group">
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden hover:scale-105 transition-transform duration-300">
+                            <div className="h-32 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
+                                <span className="text-2xl font-bold text-white/50 group-hover:text-white transition-colors">Hextris</span>
+                            </div>
+                            <div className="p-3 text-left">
+                                <div className="font-semibold text-white">Hextris</div>
+                                <div className="text-xs text-white/60">Fast-paced puzzle game</div>
+                            </div>
+                        </div>
+                    </Link>
+                    <Link href="/games" onClick={handleClose} className="text-white/80 hover:text-white text-sm font-medium underline decoration-white/30 hover:decoration-white transition-all">
+                        View all games
+                    </Link>
+                </div>
+            )
+        },
+    ];
 
     const handleNext = () => {
         if (currentSlide < slides.length - 1) {
@@ -165,6 +206,7 @@ export default function FTUECarousel() {
                             <p className="text-lg text-white/90 leading-relaxed mb-8">
                                 {currentSlideData.description}
                             </p>
+                            {currentSlideData.content}
                         </div>
 
                         {/* Slide Indicators */}

@@ -109,3 +109,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
 }
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
