@@ -170,6 +170,15 @@ export const gameConfigs: Record<string, GameConfig> = {
       size: 'md'
     }
   },
+
+  'plastoblasto': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'green',
+      size: 'sm'
+    }
+  }
 };
 
 // Game details data
@@ -193,6 +202,16 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '10-30 minutes',
     skills: ['Creativity', 'Logical Thinking', 'Experimentation'],
     instructions: 'Drag and drop elements to combine them and discover new elements. Start with basic elements like fire, water, earth, and air.'
+  },
+  'box-tower': {
+    name: 'Box Tower',
+    description: 'Stack boxes as high as you can!',
+    image: '/games/live/Box Tower/box-tower.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to drop the box. Stack them perfectly to reach new heights.'
   },
   'bubble-spirit': {
     name: 'Bubble Spirit',
@@ -320,6 +339,256 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '15-60 minutes',
     skills: ['Logical Thinking', 'Number Recognition', 'Problem Solving'],
     instructions: 'Fill in the grid so that every row, column, and 3x3 box contains the digits 1-9 without repetition.'
+  },
+  '0hh1': {
+    name: '0h h1',
+    description: 'A logic game with red and blue tiles',
+    image: '/games/live/0hh1/static/screenshot.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Logic', 'Pattern Recognition'],
+    instructions: 'Fill the grid with red and blue tiles. No three of the same color in a row. Equal number of red and blue in each row and column.'
+  },
+  'brick-out': {
+    name: 'Brick Out',
+    description: 'Break all the bricks',
+    image: '/games/live/Brick Out/brick-out.png',
+    category: 'Arcade',
+    difficulty: 'Easy',
+    estimatedTime: '3-8 minutes',
+    skills: ['Hand-Eye Coordination', 'Reaction Time'],
+    instructions: 'Control the paddle to bounce the ball and break all the bricks.'
+  },
+  'colorize-2': {
+    name: 'Colorize 2',
+    description: 'Fill the board with color',
+    image: '/games/live/Colorize 2/screenshot.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '5-10 minutes',
+    skills: ['Logic', 'Planning'],
+    instructions: 'Fill the board with the target color within the given number of moves.'
+  },
+  'flapcat-steampunk-2': {
+    name: 'Flapcat Steampunk 2',
+    description: 'More steampunk flying adventures',
+    image: '/games/live/Flapcat Steampunk 2/screenshot.png',
+    category: 'Arcade',
+    difficulty: 'Hard',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to fly. Avoid obstacles and collect gears.'
+  },
+  'fruit-sorting': {
+    name: 'Fruit Sorting',
+    description: 'Sort the fruits into the right baskets',
+    image: '/games/live/Fruit Sorting/icon_144.png',
+    category: 'Puzzle',
+    difficulty: 'Easy',
+    estimatedTime: '3-5 minutes',
+    skills: ['Sorting', 'Speed'],
+    instructions: 'Drag and drop fruits into their corresponding baskets before time runs out.'
+  },
+  'gems-of-hanoi': {
+    name: 'Gems of Hanoi',
+    description: 'Classic Tower of Hanoi puzzle',
+    image: '/games/live/Gems of Hanoi/screenshot.png',
+    category: 'Puzzle',
+    difficulty: 'Hard',
+    estimatedTime: '10-20 minutes',
+    skills: ['Logic', 'Planning', 'Problem Solving'],
+    instructions: 'Move the stack of gems from one rod to another. You cannot place a larger gem on top of a smaller one.'
+  },
+  'gummy-blocks': {
+    name: 'Gummy Blocks',
+    description: 'Fit the gummy blocks into the grid',
+    image: '/games/live/Gummy Blocks/gummy-blocks.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Spatial Reasoning', 'Planning'],
+    instructions: 'Drag blocks onto the grid to create full rows or columns to clear them.'
+  },
+  'hiding-master': {
+    name: 'Hiding Master',
+    description: 'Hide from the seeker',
+    image: '/games/live/Hiding Master/screenshot.png',
+    category: 'Arcade',
+    difficulty: 'Easy',
+    estimatedTime: '2-5 minutes',
+    skills: ['Stealth', 'Timing'],
+    instructions: 'Move around and hide behind objects to avoid being seen by the seeker.'
+  },
+  'mahjong-deluxe': {
+    name: 'Mahjong Deluxe',
+    description: 'Classic tile-matching game',
+    image: '/games/live/Mahjong Deluxe/screenshot.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '10-20 minutes',
+    skills: ['Pattern Recognition', 'Memory'],
+    instructions: 'Match pairs of identical free tiles to remove them from the board.'
+  },
+  'match-doodle': {
+    name: 'Match Doodle',
+    description: 'Draw to match items',
+    image: '/games/live/Match Doodle/icon_144.png',
+    category: 'Puzzle',
+    difficulty: 'Easy',
+    estimatedTime: '3-8 minutes',
+    skills: ['Creativity', 'Pattern Recognition'],
+    instructions: 'Draw lines to connect matching items.'
+  },
+  'photo-hunt': {
+    name: 'Photo Hunt',
+    description: 'Find the differences between photos',
+    image: '/games/live/Photo Hunt/icon_144.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '5-10 minutes',
+    skills: ['Observation', 'Attention to Detail'],
+    instructions: 'Spot and tap the differences between two seemingly identical photos.'
+  },
+  'space-adventure-pinball': {
+    name: 'Space Adventure Pinball',
+    description: 'Classic pinball in space',
+    image: '/games/live/Space Adventure Pinball/space-adventure-pinball.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Reaction Time', 'Physics Intuition'],
+    instructions: 'Use the flippers to keep the ball in play and score points.'
+  },
+  'stacks-tower': {
+    name: 'Stacks Tower',
+    description: 'Stack blocks to build a tower',
+    image: '/games/live/Stacks Tower/screenshot.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to drop blocks and stack them as high as possible.'
+  },
+  'star-puzzles': {
+    name: 'Star Puzzles',
+    description: 'Collect stars in this logic puzzle',
+    image: '/games/live/Star Puzzles/icon_144.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Logic', 'Problem Solving'],
+    instructions: 'Solve the puzzle to collect all the stars in each level.'
+  },
+  'sumagi': {
+    name: 'Sumagi',
+    description: 'Sum matching game',
+    image: '/games/live/Sumagi/icon_144.png',
+    category: 'Puzzle',
+    difficulty: 'Hard',
+    estimatedTime: '5-15 minutes',
+    skills: ['Math', 'Logic'],
+    instructions: 'Combine numbers to reach the target sum.'
+  },
+  'sweet-memory': {
+    name: 'Sweet Memory',
+    description: 'Memory matching with sweets',
+    image: '/games/live/Sweet Memory/icon_144.png',
+    category: 'Puzzle',
+    difficulty: 'Easy',
+    estimatedTime: '3-5 minutes',
+    skills: ['Memory', 'Concentration'],
+    instructions: 'Flip cards to find matching pairs of sweets.'
+  },
+  'whack-em-all': {
+    name: 'Whack \'em All',
+    description: 'Whack the moles!',
+    image: '/games/live/Whack \'em All/screenshot.png',
+    category: 'Arcade',
+    difficulty: 'Easy',
+    estimatedTime: '1-3 minutes',
+    skills: ['Reaction Time', 'Hand-Eye Coordination'],
+    instructions: 'Tap the moles as they pop up. Avoid hitting the bombs.'
+  },
+  'infinite-runner-3d': {
+    name: 'Infinite Runner 3D',
+    description: 'Run and jump in this 3D infinite runner',
+    image: '/games/live/Infinite Runner 3D/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'flappy-bird-1': {
+    name: 'Flappy Bird',
+    description: 'Flappy Bird',
+    image: '/games/live/Flappy Bird/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'lastwar-frontline': {
+    name: 'Last War Frontline',
+    description: 'Last War Frontline',
+    image: '/games/live/Last War Frontline/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'fruit-ninja': {
+    name: 'Fruit Ninja',
+    description: 'Fruit Ninja',
+    image: '/games/live/Fruit Ninja/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'whack-em-all': {
+    name: 'Whack Em All',
+    description: 'Whack Em All',
+    image: '/games/live/Whack Em All/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'sumagi': {
+    name: 'Sumagi',
+    description: 'Sumagi',
+    image: '/games/live/Sumagi/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'line-color': {
+    name: 'Line Color',
+    description: 'Line Color',
+    image: '/games/live/Line Color/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'plastoblasto': {
+    name: 'Plastoblasto',
+    description: 'Plastoblasto',
+    image: '/games/live/Plastoblasto/icon_144.png',
+    category: 'Arcade',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Timing', 'Precision'],
+    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
   }
 };
 
