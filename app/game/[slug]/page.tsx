@@ -1,13 +1,7 @@
 import { gameDetails, knownGameSlugs } from '../../config/gameConfig';
 import GameClient from './GameClient';
 
-export const dynamicParams = false;
 
-export async function generateStaticParams() {
-  return knownGameSlugs.map((slug) => ({
-    slug: slug,
-  }));
-}
 
 interface GamePageProps {
   params: Promise<{

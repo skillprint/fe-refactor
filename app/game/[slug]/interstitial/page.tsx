@@ -1,15 +1,7 @@
 import { gameDetails, knownGameSlugs } from '../../../config/gameConfig';
 import GameInterstitialClient from './GameInterstitialClient';
 
-export const dynamicParams = false;
 
-export async function generateStaticParams() {
-  const params = knownGameSlugs.map((slug) => ({
-    slug: slug,
-  }));
-  console.log('Generating static params for interstitial:', params);
-  return params;
-}
 
 interface GameInterstitialProps {
   params: Promise<{

@@ -1,22 +1,6 @@
 import SkillDetailClient from './SkillDetailClient';
 
-// Sample skills for static generation
-const sampleSkills = [
-    'Problem Solving',
-    'Memory',
-    'Speed',
-    'Accuracy',
-    'Pattern Recognition',
-    'Spatial Awareness',
-    'Logic',
-    'Creativity',
-];
 
-export async function generateStaticParams() {
-    return sampleSkills.map((skill) => ({
-        skillId: encodeURIComponent(skill),
-    }));
-}
 
 interface SkillDetailPageProps {
     params: Promise<{
