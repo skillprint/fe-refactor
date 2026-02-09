@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import TopNav from '../components/TopNav';
+import ProgressBanner from '../components/ProgressBanner';
 import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
@@ -141,6 +142,7 @@ function GamesPageContent() {
     >
       <div className="flex flex-col min-h-screen pb-32">
         <TopNav />
+        <ProgressBanner />
         <div className="flex flex-col sticky top-16 z-40">
 
           {/* Tab Menu */}

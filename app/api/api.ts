@@ -32,7 +32,7 @@ const getApiKey = () => {
 export const get = async (path: string) => {
     const headers = {
         "Content-Type": "application/json",
-        "Authorization": `Api-Key ${getApiKey()}`
+        // "Authorization": `Api-Key ${getApiKey()}`
     }
     const response = await axios.get(`${BASE_URL}${path}`, { headers });
     return response.data;
@@ -41,7 +41,7 @@ export const get = async (path: string) => {
 export const post = async (path: string, data: any, headers: any) => {
     const hdrs = {
         "Content-Type": "application/json",
-        "Authorization": `Api-Key ${getApiKey()}`,
+        // "Authorization": `Api-Key ${getApiKey()}`,
         ...headers
     }
     const response = await axios.post(`${BASE_URL}${path}`, data, { headers: hdrs });

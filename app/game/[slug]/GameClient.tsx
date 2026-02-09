@@ -9,6 +9,7 @@ import FirstGameBadge from '../../components/FirstGameBadge';
 import { getGameConfig } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
+import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult } from '../../lib/skillprintSdk';
 
 interface GameClientProps {
     slug: string;
@@ -112,7 +113,17 @@ export default function GameClient({ slug }: GameClientProps) {
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
     const [isEarlyExit, setIsEarlyExit] = useState(false);
     const [showBadge, setShowBadge] = useState(false);
+    const [isCalculating, setIsCalculating] = useState(false);
+    const [calculationError, setCalculationError] = useState<string | undefined>(undefined);
+    const skillprintSessionIdRef = useRef<string>('');
+    const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    const getApiKey = () => {
+        if (typeof document === 'undefined') return '';
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
+        return cookie ? cookie.split('=')[1] : 'test-api-key';
+    };
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
@@ -160,8 +171,66 @@ export default function GameClient({ slug }: GameClientProps) {
         }
     };
 
-    const handleScreenshot = (event: MessageEvent) => {
+    const handleScreenshot = async (event: MessageEvent) => {
         console.log('handleScreenshot', event.data);
+        if (skillprintClientRef.current && skillprintSessionIdRef.current) {
+            try {
+                // Assuming event.data is the base64 string directly or contains it
+                const base64Data = event.data?.data || event.data;
+                if (typeof base64Data === 'string' && base64Data.startsWith('data:image')) {
+                    const res = await fetch(base64Data);
+                    const blob = await res.blob();
+                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob]);
+                }
+            } catch (e) {
+                console.error('Failed to process screenshot', e);
+            }
+        }
+    };
+
+    const pollResults = async () => {
+        if (!skillprintClientRef.current || !skillprintSessionIdRef.current) return;
+
+        setIsCalculating(true);
+        setCalculationError(undefined);
+
+        const startTime = Date.now();
+        const timeout = 20000; // 20 seconds
+
+        const poll = async () => {
+            if (Date.now() - startTime > timeout) {
+                setIsCalculating(false);
+                setCalculationError('Computation could not be done in time.');
+                return;
+            }
+
+            try {
+                const updates = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
+                if (updates && updates.length > 0) {
+                    setIsCalculating(false);
+                    // If we receive updates, we could potentially update gameResults here
+                    // For now, we just stop the loading state as user requested "computed data... is ready"
+                } else {
+                    // Keep polling if no updates or empty updates (depending on API behavior, usually empty implies still processing or no changes)
+                    // If API returns empty array when 'done but no changes', we might need a status field. 
+                    // The requirement says "poll to see if when the computed data... is ready".
+                    // We'll assume any successful response means 'ready' if it's not a 202 or similar?
+                    // The API client throws on error. If it returns [], it means success but no updates?
+                    // Let's assume we poll for a bit. If we get something, great. If not, eventually timeout?
+                    // Or maybe just ONE poll is enough if we wait?
+                    // Re-reading: "polling should occur... If 20 seconds go by... timeout".
+                    // This implies repeated polling.
+                    setTimeout(poll, 2000);
+                }
+            } catch (e) {
+                console.error('Polling error', e);
+                // On error, we might want to retry or fail?
+                // For now, retry until timeout (as some errors might be 404/not ready?)
+                setTimeout(poll, 2000);
+            }
+        };
+
+        poll();
     };
 
     const handleGameComplete = (data: any) => {
@@ -199,6 +268,11 @@ export default function GameClient({ slug }: GameClientProps) {
             }
         };
         saveGameSession(session);
+
+        if (skillprintClientRef.current && skillprintSessionIdRef.current) {
+            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+            pollResults();
+        }
 
         // Check for first game badge
         const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
@@ -285,6 +359,12 @@ export default function GameClient({ slug }: GameClientProps) {
 
             // Check for first game badge on early exit too? Maybe only on full completion?
             // Let's show it on any completion for now to encourage the user.
+            if (skillprintClientRef.current && skillprintSessionIdRef.current) {
+                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+                pollResults();
+            }
+
+            // Check for first game badge
             const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
             if (!hasSeenBadge) {
                 setShowBadge(true);
@@ -307,6 +387,28 @@ export default function GameClient({ slug }: GameClientProps) {
         setGameResults(null);
         setGameStartTime(Date.now());
         setIsEarlyExit(false);
+        setIsCalculating(false);
+        setCalculationError(undefined);
+
+        // Initialize Skillprint Session
+        const sessionId = crypto.randomUUID();
+        skillprintSessionIdRef.current = sessionId;
+        const apiKey = getApiKey();
+
+        // Use staging by default as per existing code
+        const client = new SkillprintClient({
+            apiKey,
+            baseUrl: 'https://api.skillprint.co/',
+            logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`)
+        });
+        skillprintClientRef.current = client;
+
+        try {
+            client.startSession(sessionId, Mood.FOCUS, decodedSlug);
+        } catch (e) {
+            console.error('Failed to start Skillprint session', e);
+        }
+
         injectJavascriptIntoIframe();
     }, [slug]);
 
@@ -367,6 +469,8 @@ export default function GameClient({ slug }: GameClientProps) {
                     onPlayAgain={handlePlayAgain}
                     onBackToGames={handleBackToGames}
                     isEarlyExit={isEarlyExit}
+                    isCalculating={isCalculating}
+                    calculationError={calculationError}
                 />
             )}
 

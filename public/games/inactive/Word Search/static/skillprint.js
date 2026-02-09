@@ -1,4 +1,4 @@
-var SKILLPRINT_API = 'https://api.skillprint.co';
+var SKILLPRINT_API = 'https://api.staging.skillprint.co';
 
 var url = new URL(window.location.href);
 var sessionId = url.searchParams.get('sessionId');

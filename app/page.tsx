@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import TopNav from "./components/TopNav";
+import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
 
@@ -231,6 +232,7 @@ export default function Home() {
       )}
       <div className="flex flex-col min-h-screen pb-32">
         <TopNav />
+        <ProgressBanner />
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-500 dark:to-purple-500 px-8 py-12 sm:py-16">
           <div className="max-w-4xl">

@@ -3,13 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useGameSessions } from '../hooks/useGameSessions';
 
 export default function TopNav() {
     const pathname = usePathname();
-    const { count } = useGameSessions();
-    const targetGames = 3;
-    const showProgress = count < targetGames;
 
     const allLinks = [
         {
@@ -46,15 +42,6 @@ export default function TopNav() {
         return pathname.startsWith(href);
     };
 
-    const getCurrentPageName = () => {
-        if (pathname === '/') return 'Home';
-        if (pathname.startsWith('/games')) return 'Games';
-        if (pathname.startsWith('/profile')) return 'Profile';
-        return '';
-    };
-
-    const currentPageName = getCurrentPageName();
-
     return (
         <nav className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border">
             <div className="max-w-[100%] mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,43 +59,23 @@ export default function TopNav() {
                     </div>
 
                     {/* Right Navigation Icons */}
-                    <div className="flex flex-col items-end gap-1">
-                        <div className="flex items-center gap-4">
-                            {allLinks.map((link) => {
-                                const active = isActive(link.href);
-                                return (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className={`transition-colors p-2 rounded-md ${active
-                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                                            }`}
-                                        title={link.name}
-                                    >
-                                        {link.icon}
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                        {showProgress && (
-                            <div className="w-32 px-1">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-center">
-                                        Play {targetGames - count} more games!
-                                    </span>
-                                    {/* <span className="text-[10px] font-bold text-primary">
-                                        {count}/{targetGames}
-                                    </span> */}
-                                </div>
-                                <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
-                                        style={{ width: `${(count / targetGames) * 100}%` }}
-                                    />
-                                </div>
-                            </div>
-                        )}
+                    <div className="flex items-center gap-4">
+                        {allLinks.map((link) => {
+                            const active = isActive(link.href);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={`transition-colors p-2 rounded-md ${active
+                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                                        }`}
+                                    title={link.name}
+                                >
+                                    {link.icon}
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

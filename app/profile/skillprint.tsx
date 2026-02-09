@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import TopNav from '../components/TopNav';
+import ProgressBanner from '../components/ProgressBanner';
 import toast from 'react-hot-toast';
 import { useTheme } from '../components/ThemeProvider';
 import { GameSessionManager } from '../components/GameSessionManager';
@@ -214,6 +215,7 @@ export default function Skillprint() {
   return (
     <div className="font-sans min-h-screen bg-background">
       <TopNav />
+      <ProgressBanner />
       <div className="p-8 pb-32">
         <h1 className="text-3xl font-bold text-foreground mb-6">
           Your Skillprint
