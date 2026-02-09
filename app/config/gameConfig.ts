@@ -550,26 +550,6 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Timing', 'Precision'],
     instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
   },
-  'whack-em-all': {
-    name: 'Whack Em All',
-    description: 'Whack Em All',
-    image: '/games/live/Whack Em All/icon_144.png',
-    category: 'Arcade',
-    difficulty: 'Medium',
-    estimatedTime: '2-5 minutes',
-    skills: ['Timing', 'Precision'],
-    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
-  },
-  'sumagi': {
-    name: 'Sumagi',
-    description: 'Sumagi',
-    image: '/games/live/Sumagi/icon_144.png',
-    category: 'Arcade',
-    difficulty: 'Medium',
-    estimatedTime: '2-5 minutes',
-    skills: ['Timing', 'Precision'],
-    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
-  },
   'line-color': {
     name: 'Line Color',
     description: 'Line Color',
