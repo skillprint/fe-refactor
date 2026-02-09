@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import TopNav from '../components/TopNav';
@@ -10,6 +10,7 @@ import { useTheme } from '../components/ThemeProvider';
 import { GameSessionManager } from '../components/GameSessionManager';
 import { useGameSessions } from '../hooks/useGameSessions';
 import BuckyballLoading from '../components/BuckyballLoading';
+import SkillprintVisualization from '../components/Skillprint';
 
 interface Skill {
   id: string;
@@ -36,8 +37,14 @@ export default function Skillprint() {
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const svgRef = useRef<SVGSVGElement>(null);
   const { count, isLoaded } = useGameSessions();
+
+  const userSkills = skills.map(s => s.name);
+  const hasScoreBySkill = skills.reduce((acc, s) => ({ ...acc, [s.name]: true }), {});
+
+  // Example moods since none are in state currently
+  const userMoods = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
+  const hasScoreByMood = userMoods.reduce((acc, m) => ({ ...acc, [m]: true }), {});
 
   useEffect(() => {
     // Load settings from cookies
@@ -63,154 +70,7 @@ export default function Skillprint() {
     document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
   };
 
-  const renderRadialCluster = () => {
-    if (!svgRef.current) return;
 
-    const svg = svgRef.current;
-    const width = 600;
-    const height = 600;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = 300;
-
-    // Clear previous content
-    svg.innerHTML = '';
-
-    const nodes: {
-      group: SVGGElement;
-      circle: SVGCircleElement;
-      text: SVGTextElement;
-      levelText: SVGTextElement;
-      line: SVGLineElement;
-      baseX: number;
-      baseY: number;
-      phase: number;
-      speed: number;
-    }[] = [];
-
-    // Create skill nodes
-    skills.forEach((skill, index) => {
-      const angle = (index * 2 * Math.PI) / skills.length;
-      const x = centerX + (radius * 0.7) * Math.cos(angle);
-      const y = centerY + (radius * 0.7) * Math.sin(angle);
-
-      // Create a group for the skill node to make it clickable
-      const skillGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      skillGroup.setAttribute('cursor', 'pointer');
-      skillGroup.addEventListener('click', () => handleSkillClick(skill.name));
-
-      // Create connecting line to center
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', centerX.toString());
-      line.setAttribute('y1', centerY.toString());
-      line.setAttribute('x2', x.toString());
-      line.setAttribute('y2', y.toString());
-      line.setAttribute('stroke', '#777777');
-      line.setAttribute('stroke-width', '1');
-      line.setAttribute('opacity', '0.5');
-      svg.appendChild(line);
-
-      // Create skill circle
-      const skillCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      skillCircle.setAttribute('cx', x.toString());
-      skillCircle.setAttribute('cy', y.toString());
-      skillCircle.setAttribute('r', "40");
-      skillCircle.setAttribute('fill', skill.color);
-      skillCircle.setAttribute('stroke', '#FFFFFF');
-      skillCircle.setAttribute('stroke-width', '3');
-      skillCircle.setAttribute('opacity', '0.8');
-      skillGroup.appendChild(skillCircle);
-
-      // Add hover effects
-      skillGroup.addEventListener('mouseenter', () => {
-        skillCircle.setAttribute('opacity', '1');
-      });
-      skillGroup.addEventListener('mouseleave', () => {
-        skillCircle.setAttribute('opacity', '0.8');
-      });
-
-      // Create skill text
-      const skillText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      skillText.setAttribute('x', x.toString());
-      skillText.setAttribute('y', (y - 55).toString());
-      skillText.setAttribute('text-anchor', 'middle');
-      skillText.setAttribute('fill', '#000');
-      skillText.setAttribute('font-size', '18');
-      skillText.setAttribute('font-weight', 'bold');
-      skillText.textContent = skill.name;
-      skillGroup.appendChild(skillText);
-
-      // Create level text
-      const levelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      levelText.setAttribute('x', x.toString());
-      levelText.setAttribute('y', (y + 5).toString());
-      levelText.setAttribute('text-anchor', 'middle');
-      levelText.setAttribute('fill', '#000');
-      levelText.setAttribute('font-size', '14');
-      levelText.textContent = `${skill.level}%`;
-      skillGroup.appendChild(levelText);
-
-      // Append the skill group after the line so it appears on top
-      svg.appendChild(skillGroup);
-
-      nodes.push({
-        group: skillGroup,
-        circle: skillCircle,
-        text: skillText,
-        levelText: levelText,
-        line: line,
-        baseX: x,
-        baseY: y,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.5 + Math.random() * 0.5 // Random speed between 0.5 and 1.0
-      });
-    });
-
-    // Animation loop
-    let animationId: number;
-    const animate = () => {
-      const time = Date.now() / 1000;
-
-      nodes.forEach(node => {
-        // Create a gentle floating motion
-        const offsetX = Math.sin(time * node.speed + node.phase) * 3;
-        const offsetY = Math.cos(time * node.speed * 0.8 + node.phase) * 3;
-
-        const newX = node.baseX + offsetX;
-        const newY = node.baseY + offsetY;
-
-        // Update positions
-        node.circle.setAttribute('cx', newX.toString());
-        node.circle.setAttribute('cy', newY.toString());
-
-        node.text.setAttribute('x', newX.toString());
-        node.text.setAttribute('y', (newY - 55).toString());
-
-        node.levelText.setAttribute('x', newX.toString());
-        node.levelText.setAttribute('y', (newY + 5).toString());
-
-        node.line.setAttribute('x2', newX.toString());
-        node.line.setAttribute('y2', newY.toString());
-      });
-
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      if (animationId) cancelAnimationFrame(animationId);
-    };
-  };
-
-  useEffect(() => {
-    if (isLoaded && count >= 3) {
-      const cleanup = renderRadialCluster();
-      return () => {
-        if (cleanup) cleanup();
-      };
-    }
-  }, [skills, count, isLoaded]);
 
   return (
     <div className="font-sans min-h-screen bg-background">
@@ -288,16 +148,14 @@ export default function Skillprint() {
           </div>
         ) : (
           <>
-            <div className="bg-card rounded-lg shadow">
-              <div className="flex justify-center">
-                <svg
-                  ref={svgRef}
-                  width="600"
-                  height="600"
-                  viewBox="0 0 600 600"
-                  className="max-w-full h-auto"
-                />
-              </div>
+            <div className="bg-card rounded-lg shadow p-4">
+              <SkillprintVisualization
+                userSkills={userSkills}
+                userMoods={userMoods}
+                hasScoreBySkill={hasScoreBySkill}
+                hasScoreByMood={hasScoreByMood}
+                size={600}
+              />
             </div>
 
             <div className="py-6">
