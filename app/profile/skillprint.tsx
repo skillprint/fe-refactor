@@ -148,7 +148,7 @@ export default function Skillprint() {
           </div>
         ) : (
           <>
-            <div className="bg-card rounded-lg shadow p-4">
+            <div className="rounded-lg">
               <SkillprintVisualization
                 userSkills={userSkills}
                 userMoods={userMoods}

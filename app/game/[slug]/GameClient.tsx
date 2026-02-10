@@ -26,6 +26,7 @@ interface GameResults {
 }
 
 export const unifiedSlugFromBESlug = (slug: string) => {
+    console.log(slug);
     if (slug.indexOf('0hh1') >= 0) return '0hh1';
     if (slug.indexOf('2048') >= 0) return '2048';
     if (slug.indexOf('alchemy') >= 0) return 'alchemy';

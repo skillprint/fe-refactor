@@ -5,8 +5,8 @@ import { SkillprintStateType } from './types';
 interface SkillprintGraphProps {
     data: SkillprintStateType;
     size: number;
-    width?: number; // Optional override
-    height?: number; // Optional override
+    width?: number | string; // Optional override
+    height?: number | string; // Optional override
     state: string; // 'skills' | 'mindsets' | 'reset'
     viewBox?: string;
     zoom?: {
@@ -15,6 +15,7 @@ interface SkillprintGraphProps {
         rotate: string;
     };
     onNodeClick?: (group: string, slug: string) => void;
+    onNodeHover?: (node: { group: string; slug: string; rect: DOMRect } | null) => void;
 }
 
 const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
@@ -26,8 +27,19 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
     viewBox = '0 0 812 812',
     zoom,
     onNodeClick,
+    onNodeHover,
 }) => {
     const [hoveredNodeId, setHoveredNodeId] = React.useState<number | null>(null);
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const containerStyle = zoom
         ? {
@@ -65,12 +77,13 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
                     // Center for transform origin
                     const transformOrigin = `${ss.node.cx}px ${ss.node.cy}px`;
 
+                    const clickEvent = isMobile ? 'touchstart' : 'click';
+                    const hoverEvent = isMobile ? 'touchmove' : 'mousemove';
+                    const leaveEvent = isMobile ? 'touchend' : 'mouseleave';
+
                     return (
                         <g
                             key={ss.id}
-                            onMouseEnter={() => setHoveredNodeId(ss.id)}
-                            onMouseLeave={() => setHoveredNodeId(null)}
-                            onClick={() => onNodeClick && onNodeClick(ss.group, ss.slug)}
                             style={{ cursor: 'pointer', transition: 'opacity 0.3s ease' }}
                         >
                             <path
@@ -84,6 +97,29 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
                                 }}
                             />
                             <circle
+                                onMouseEnter={(e) => {
+                                    setHoveredNodeId(ss.id);
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    onNodeHover && onNodeHover({ group: ss.group, slug: ss.slug, rect });
+                                }}
+                                onMouseLeave={() => {
+                                    setHoveredNodeId(null);
+                                    onNodeHover && onNodeHover(null);
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent propagation if needed
+                                    e.preventDefault();
+                                    if (isMobile) {
+                                        if (hoveredNodeId === ss.id) {
+                                            setHoveredNodeId(null);
+                                            onNodeHover && onNodeHover(null);
+                                            return;
+                                        }
+                                        setHoveredNodeId(ss.id);
+                                        return;
+                                    }
+                                    onNodeClick && onNodeClick(ss.group, ss.slug);
+                                }}
                                 cx={ss.node.cx}
                                 cy={ss.node.cy}
                                 r={ss.node.r}

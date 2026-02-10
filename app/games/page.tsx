@@ -59,6 +59,10 @@ function GamesPageContent() {
 
   // Apply deduplication
   let filteredGames = nonDedupedFilteredGames.filter((game: any, index: number) => {
+    // TODO: import these games
+    if (['infinite-runner-3d', 'hextris', 'fruit-ninja', 'plastoblasto', 'flappy-bird-1', 'lastwar-frontline', 'line-color'].includes(game.slug)) {
+      return false;
+    };
     return nonDedupedFilteredGames.findIndex((g: any) => g.slug === game.slug) === index;
   });
 
