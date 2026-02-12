@@ -54,6 +54,31 @@ export interface TelemetryItem {
     adjustment: Adjustment;
 }
 
+export interface SkillMetric {
+    score: number;
+    trend: number;
+    momentum: number;
+    confidence: number;
+    volatility: number;
+    consistency: number;
+    trendScore: number;
+    valueScore: number;
+}
+
+export interface SkillScores {
+    metrics: {
+        [key: string]: SkillMetric;
+    };
+    analyzedAt: string;
+    numChunksAnalyzed: number;
+}
+
+export interface MoodScores {
+    confidence: number;
+    flowScore: number;
+    targetMood: string;
+}
+
 export interface PollResultsResponse {
     gameplayTips?: string;
     state?: string;
@@ -62,6 +87,8 @@ export interface PollResultsResponse {
         newValue: any;
     }[];
     telemetry?: TelemetryItem[];
+    skillScores?: SkillScores;
+    moodScores?: MoodScores;
 }
 
 export class SkillprintClient {

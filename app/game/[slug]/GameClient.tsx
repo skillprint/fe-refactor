@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import BottomTabs from '../../components/BottomTabs';
 import FloatingExitButton from '../../components/FloatingExitButton';
-import GameResultsInterstitial from '../../components/GameResultsInterstitial';
 import FirstGameBadge from '../../components/FirstGameBadge';
 import { getGameConfig } from '../../config/gameConfig';
 import React from 'react';
@@ -110,13 +109,8 @@ export default function GameClient({ slug }: GameClientProps) {
     const router = useRouter();
     const [isIframeLoaded, setIsIframeLoaded] = useState(false);
     const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
-    const [gameResults, setGameResults] = useState<GameResults | null>(null);
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
-    const [isEarlyExit, setIsEarlyExit] = useState(false);
     const [showBadge, setShowBadge] = useState(false);
-    const [isCalculating, setIsCalculating] = useState(false);
-    const [calculationError, setCalculationError] = useState<string | undefined>(undefined);
-    const [closedSessionResult, setClosedSessionResult] = useState<PollResultsResponse | null>(null);
     const skillprintSessionIdRef = useRef<string>('');
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -195,50 +189,7 @@ export default function GameClient({ slug }: GameClientProps) {
         }
     };
 
-    const pollResults = async () => {
-        if (!skillprintClientRef.current || !skillprintSessionIdRef.current) return;
 
-        setIsCalculating(true);
-        setCalculationError(undefined);
-
-        const startTime = Date.now();
-        const timeout = 20000; // 20 seconds
-
-        const poll = async () => {
-            if (Date.now() - startTime > timeout) {
-                setIsCalculating(false);
-                setCalculationError('Score calculation took longer than expected. Please try again.');
-                return;
-            }
-
-            try {
-                const polledRes = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
-
-                if (polledRes && polledRes.state === "CLOSED") {
-                    setIsCalculating(false);
-                    setClosedSessionResult(polledRes);
-                } else {
-                    // Keep polling if no updates or empty updates (depending on API behavior, usually empty implies still processing or no changes)
-                    // If API returns empty array when 'done but no changes', we might need a status field. 
-                    // The requirement says "poll to see if when the computed data... is ready".
-                    // We'll assume any successful response means 'ready' if it's not a 202 or similar?
-                    // The API client throws on error. If it returns [], it means success but no updates?
-                    // Let's assume we poll for a bit. If we get something, great. If not, eventually timeout?
-                    // Or maybe just ONE poll is enough if we wait?
-                    // Re-reading: "polling should occur... If 20 seconds go by... timeout".
-                    // This implies repeated polling.
-                    setTimeout(poll, 2000);
-                }
-            } catch (e) {
-                console.error('Polling error', e);
-                // On error, we might want to retry or fail?
-                // For now, retry until timeout (as some errors might be 404/not ready?)
-                setTimeout(poll, 2000);
-            }
-        };
-
-        poll();
-    };
 
     const pollSessionTips = async () => {
         if (!skillprintClientRef.current || !skillprintSessionIdRef.current) return;
@@ -325,11 +276,7 @@ export default function GameClient({ slug }: GameClientProps) {
         };
 
         setPollForSessionTips(false);
-        setIsEarlyExit(false);
-        setGameResults(results);
-        setGameState('completed');
         stopIframe();
-        // skillprintClientRef.current?.stopGameSession();
 
         // Record the game session
         const session: GameSession = {
@@ -349,13 +296,17 @@ export default function GameClient({ slug }: GameClientProps) {
 
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
             skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
-            pollResults();
         }
 
         // Check for first game badge
         const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
         if (!hasSeenBadge) {
             setShowBadge(true);
+        }
+
+        // Navigate to review page with sessionId
+        if (skillprintSessionIdRef.current) {
+            router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
         }
     };
 
@@ -392,9 +343,7 @@ export default function GameClient({ slug }: GameClientProps) {
     const handlePlayAgain = () => {
         // Reset game state
         setGameState('playing');
-        setGameResults(null);
         setGameStartTime(Date.now());
-        setIsEarlyExit(false);
 
         // Reload the iframe to restart the game
         if (iframeRef.current) {
@@ -405,9 +354,7 @@ export default function GameClient({ slug }: GameClientProps) {
     const handleBackToGames = () => {
         // Reset game state when actually leaving
         setGameState('playing');
-        setGameResults(null);
         setGameStartTime(Date.now());
-        setIsEarlyExit(false);
         router.push('/games');
     };
 
@@ -416,7 +363,7 @@ export default function GameClient({ slug }: GameClientProps) {
             // If game is already completed, just go back to games
             handleBackToGames();
         } else {
-            // If game is in progress, show results interstitial with current progress
+            // If game is in progress, navigate to review page
             const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
 
             // Generate results based on current game state
@@ -430,23 +377,22 @@ export default function GameClient({ slug }: GameClientProps) {
                 bonus: Math.floor(Math.random() * 10) // Default bonus for early exit
             };
 
-            setIsEarlyExit(false);
-            setGameResults(exitResults);
-            setGameState('completed');
             stopIframe();
             setPollForSessionTips(false);
 
-            // Check for first game badge on early exit too? Maybe only on full completion?
-            // Let's show it on any completion for now to encourage the user.
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
                 skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
-                pollResults();
             }
 
-            // Check for first game adge
+            // Check for first game badge on early exit too
             const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
             if (!hasSeenBadge) {
                 setShowBadge(true);
+            }
+
+            // Navigate to review page with sessionId
+            if (skillprintSessionIdRef.current) {
+                router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
             }
         }
     };
@@ -463,11 +409,7 @@ export default function GameClient({ slug }: GameClientProps) {
     useEffect(() => {
         setIsIframeLoaded(false);
         setGameState('playing');
-        setGameResults(null);
         setGameStartTime(Date.now());
-        setIsEarlyExit(false);
-        setIsCalculating(false);
-        setCalculationError(undefined);
         setCurrentAdjustment(null);
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
@@ -554,19 +496,7 @@ export default function GameClient({ slug }: GameClientProps) {
                 {(!isIframeLoaded || !gameConfig.hideBottomTabs) && <BottomTabs />}
             </div>
 
-            {/* Post-game results interstitial */}
-            {gameState === 'completed' && gameResults && (
-                <GameResultsInterstitial
-                    gameSlug={decodedSlug}
-                    results={gameResults}
-                    onPlayAgain={handlePlayAgain}
-                    onBackToGames={handleBackToGames}
-                    isEarlyExit={isEarlyExit}
-                    isCalculating={isCalculating}
-                    calculationError={calculationError}
-                    closedSessionResult={closedSessionResult}
-                />
-            )}
+
 
             {/* First Game Badge Popup */}
             {showBadge && (
