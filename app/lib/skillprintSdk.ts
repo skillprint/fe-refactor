@@ -1,6 +1,8 @@
 
 // removed uuid import since sessionId is passed as argument
 
+import { getCookie, updateSetting } from "../profile/skillprint";
+
 export enum Mood {
     RELAX = 'relax',
     FOCUS = 'focus',
@@ -95,6 +97,7 @@ export class SkillprintClient {
     private baseUrl: string;
     private apiKey: string;
     private logger?: (message: string, level: LogLevel) => void;
+    private userToken: string | null = null;
 
     private lastScreenshotBlob: Blob | null = null;
     private lastScreenshotDataURI: string | null = null;
@@ -104,11 +107,32 @@ export class SkillprintClient {
     private readonly UPLOAD_SCREENSHOTS_ENDPOINT = '/games/api/record-session/{sessionId}/';
     private readonly POLL_RESULTS_ENDPOINT = '/games/api/sessions/{sessionId}/';
     private readonly STOP_SESSION_ENDPOINT = '/games/api/sessions/{sessionId}/stop/';
+    private readonly CREATE_USER_ENDPOINT = '/partners/api/users/add/';
+    private readonly GET_USER_TOKEN_ENDPOINT = '/partners/api/users/auth/token/';
+
 
     constructor(options: SkillprintConfigOptions) {
         this.baseUrl = options.baseUrl.replace(/\/$/, '');
         this.apiKey = options.apiKey;
         this.logger = options.logger;
+
+        this.setupUser().then(() => {
+            this.log('User setup complete.', LogLevel.INFO);
+        }).catch((error: any) => {
+            this.log(`User setup failed: ${error.message}`, LogLevel.ERROR);
+        });
+    }
+
+    async setupUser(): Promise<void> {
+        // check if user id in cookie
+        const userId = getCookie('user_id')
+        if (userId) {
+            this.userToken = await this.createOrGetUserToken(userId);
+        } else {
+            const customPlayerId = crypto.randomUUID();
+            updateSetting('user_id', customPlayerId, () => { });
+            this.userToken = await this.createOrGetUserToken(customPlayerId);
+        }
     }
 
     private log(message: string, level: LogLevel) {
@@ -134,13 +158,18 @@ export class SkillprintClient {
             targetMood
         };
 
+        let headers: any = {
+            'Content-Type': 'application/json'
+        };
+
+        if (this.userToken) {
+            headers['X-Auth-Token'] = `Token ${this.userToken}`;
+        }
+
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'Authorization': `Api-Key ${this.apiKey}`
-                },
+                headers: headers,
                 body: JSON.stringify(requestData)
             });
 
@@ -190,13 +219,18 @@ export class SkillprintClient {
             });
         }
 
+        let headers: any = {
+            'Content-Type': 'application/json',
+        };
+
+        if (this.userToken) {
+            headers['X-Auth-Token'] = `Token ${this.userToken}`;
+        }
+
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    // 'Authorization': `Api-Key ${this.apiKey}`
-                    // Do not set Content-Type for FormData, fetch handles it
-                },
+                headers: headers,
                 body: formData
             });
 
@@ -218,13 +252,18 @@ export class SkillprintClient {
         const url = `${this.baseUrl}${this.POLL_RESULTS_ENDPOINT.replace('{sessionId}', sessionId)}`;
         this.log(`Polling results: GET ${url}`, LogLevel.INFO);
 
+        let headers: any = {
+            'Content-Type': 'application/json',
+        };
+
+        if (this.userToken) {
+            headers['X-Auth-Token'] = `Token ${this.userToken}`;
+        }
+
         try {
             const response = await fetch(url, {
                 method: 'GET',
-                headers: {
-                    // 'Authorization': `Api-Key ${this.apiKey}`,
-                    'Accept': 'application/json'
-                }
+                headers: headers,
             });
 
             const text = await response.text();
@@ -247,4 +286,122 @@ export class SkillprintClient {
             throw error;
         }
     }
+
+    async createOrGetUserToken(customPlayerId) {
+        if (!customPlayerId) {
+            throw new Error('Custom player ID cannot be null or empty');
+        }
+
+        try {
+            // First, try to get an existing user token
+            return await this.getUserToken(customPlayerId);
+        } catch (error) {
+            // User doesn't exist or token retrieval failed, try to create user
+            try {
+                await this.createUser(customPlayerId);
+                // User created successfully, now get token
+                return await this.getUserToken(customPlayerId);
+            } catch (createError) {
+                throw new Error(`Failed to create user: ${createError.message}`);
+            }
+        }
+    }
+
+    async createUser(internalId) {
+        const url = `${this.baseUrl}${this.CREATE_USER_ENDPOINT}`;
+        this.logger?.(`Creating user: POST ${url} with internalId: ${internalId}`, LogLevel.INFO);
+
+        const requestData = { internalId };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Api-Key dVVoaBUz.ez1rZLc0bhnxd7DqKhovQqSpx0tLwnrA`
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseText = await response.text();
+
+        if (response.ok) {
+            this.logger?.(`CreateUser successful. Response: ${responseText}`, LogLevel.INFO);
+            return responseText;
+        } else {
+            this.logger?.(`CreateUser Error: ${response.status}. Response: ${responseText}`, LogLevel.ERROR);
+            throw new Error(`${response.status} | ${responseText}`);
+        }
+    }
+
+    async getUserToken(internalId: string) {
+        const url = `${this.baseUrl}${this.GET_USER_TOKEN_ENDPOINT}`;
+        this.logger?.(`Getting user token: POST ${url} with internalId: ${internalId}`, LogLevel.INFO);
+
+        const requestData = { internalId };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Api-Key dVVoaBUz.ez1rZLc0bhnxd7DqKhovQqSpx0tLwnrA`
+
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseText = await response.text();
+
+        if (response.ok) {
+            this.logger?.(`GetUserToken successful. Response: ${responseText}`, LogLevel.INFO);
+
+            try {
+                const tokenResponse = JSON.parse(responseText);
+                if (tokenResponse.token) {
+                    return tokenResponse.token;
+                } else {
+                    throw new Error('Token not found in response');
+                }
+            } catch (parseError: any) {
+                this.logger?.(`Failed to parse token response: ${parseError.message}`, LogLevel.ERROR);
+                throw new Error('Failed to parse token response');
+            }
+        } else {
+            this.logger?.(`GetUserToken Error: ${response.status}. Response: ${responseText}`, LogLevel.ERROR);
+            throw new Error(`${response.status} | ${responseText}`);
+        }
+    }
+
+    // async getUserProfile(userId: string): Promise<UserProfile> {
+    //     const url = `${this.baseUrl}${this.GET_USER_PROFILE_ENDPOINT.replace('{userId}', userId)}`;
+    //     this.log(`Getting user profile: GET ${url}`, LogLevel.INFO);
+
+    //     try {
+    //         const response = await fetch(url, {
+    //             method: 'GET',
+    //             headers: {
+    //                 // 'Authorization': `Api-Key ${this.apiKey}`,
+    //                 'Accept': 'application/json'
+    //             }
+    //         });
+
+    //         const text = await response.text();
+
+    //         if (response.ok) {
+    //             this.log(`GetUserProfile successful.`, LogLevel.INFO);
+    //             try {
+    //                 const parsedResponse: UserProfile = JSON.parse(text);
+    //                 return parsedResponse;
+    //             } catch (parseError: any) {
+    //                 this.log(`GetUserProfile JSON parsing error: ${parseError.message}`, LogLevel.ERROR);
+    //                 throw parseError;
+    //             }
+    //         } else {
+    //             this.log(`GetUserProfile Error: ${response.status}. Response: ${text}`, LogLevel.ERROR);
+    //             throw new Error(`${response.status} | ${text}`);
+    //         }
+    //     } catch (error: any) {
+    //         this.log(`GetUserProfile Error: ${error.message}`, LogLevel.ERROR);
+    //         throw error;
+    //     }
+    // }
 }

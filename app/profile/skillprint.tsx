@@ -31,6 +31,20 @@ const sampleSkills: Skill[] = [
   { id: '8', name: 'Creativity', level: 71, category: 'Cognitive', color: '#F97316' },
 ];
 
+export const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+};
+
+export const updateSetting = (name: string, value: string, setter: (val: string) => void) => {
+  setter(value);
+  // Set cookie with 1 year expiration
+  const date = new Date();
+  date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+};
+
 export default function Skillprint() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
@@ -54,11 +68,7 @@ export default function Skillprint() {
 
   useEffect(() => {
     // Load settings from cookies
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-    };
+
     setUserId(getCookie('user_id') || '');
     setApiKey(getCookie('api_key') || '');
   }, []);
@@ -67,15 +77,6 @@ export default function Skillprint() {
     // Navigate to skill detail page with the skill name as a parameter
     router.push(`/profile/skill/${encodeURIComponent(skillName)}`);
   };
-
-  const updateSetting = (name: string, value: string, setter: (val: string) => void) => {
-    setter(value);
-    // Set cookie with 1 year expiration
-    const date = new Date();
-    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
-  };
-
 
 
   return (
