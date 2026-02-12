@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { getGameDetails } from '../config/gameConfig';
+import { PollResultsResponse } from '../lib/skillprintSdk';
 
 interface GameResults {
   score?: number;
@@ -23,6 +23,7 @@ interface GameResultsInterstitialProps {
   isEarlyExit?: boolean;
   isCalculating?: boolean;
   calculationError?: string;
+  closedSessionResult?: PollResultsResponse | null;
 }
 
 export default function GameResultsInterstitial({
@@ -32,7 +33,8 @@ export default function GameResultsInterstitial({
   onBackToGames,
   isEarlyExit = false,
   isCalculating = false,
-  calculationError
+  calculationError,
+  closedSessionResult
 }: GameResultsInterstitialProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -60,20 +62,6 @@ export default function GameResultsInterstitial({
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-accent';
-    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-destructive';
-  };
-
-  const getScoreMessage = (score: number) => {
-    if (score >= 90) return 'Excellent!';
-    if (score >= 80) return 'Great job!';
-    if (score >= 70) return 'Good work!';
-    if (score >= 60) return 'Not bad!';
-    return 'Keep practicing!';
   };
 
   return (
@@ -121,25 +109,6 @@ export default function GameResultsInterstitial({
                 </div>
               )}
 
-              {/* Score Section */}
-              {results.score !== undefined && (
-                <div className="text-center mb-6">
-                  <div className="text-4xl font-bold mb-2">
-                    <span className={getScoreColor(results.score)}>{results.score}</span>
-                    <span className="text-2xl text-gray-500">/100</span>
-                  </div>
-                  <p className="text-lg text-muted-foreground mb-2">
-                    {getScoreMessage(results.score)}
-                  </p>
-                  <div className="w-full bg-secondary rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-1000"
-                      style={{ width: `${results.score}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {results.time !== undefined && (
@@ -147,68 +116,12 @@ export default function GameResultsInterstitial({
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {formatTime(results.time)}
                     </div>
-                    <div className="text-sm text-muted-foreground">Time</div>
+                    <div className="text-sm text-muted-foreground">Play Time</div>
                   </div>
                 )}
 
-                {results.level !== undefined && (
-                  <div className="bg-secondary rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {results.level}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Level</div>
-                  </div>
-                )}
 
-                {results.accuracy !== undefined && (
-                  <div className="bg-secondary rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {results.accuracy}%
-                    </div>
-                    <div className="text-sm text-muted-foreground">Accuracy</div>
-                  </div>
-                )}
-
-                {results.mistakes !== undefined && (
-                  <div className="bg-secondary rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                      {results.mistakes}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Mistakes</div>
-                  </div>
-                )}
               </div>
-
-              {/* Bonus Points */}
-              {results.bonus && results.bonus > 0 && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-6 text-center">
-                  <div className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
-                    🎉 Bonus Points!
-                  </div>
-                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                    +{results.bonus}
-                  </div>
-                </div>
-              )}
-
-              {/* Achievements */}
-              {results.achievements && results.achievements.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
-                    🏆 Achievements Unlocked
-                  </h3>
-                  <div className="space-y-2">
-                    {results.achievements.map((achievement, index) => (
-                      <div key={index} className="flex items-center bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
-                        <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-sm text-yellow-800 dark:text-yellow-200">{achievement}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Action Buttons */}
               <div className="space-y-3">

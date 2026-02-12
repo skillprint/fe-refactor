@@ -1,0 +1,36 @@
+const packageJsonExample = {
+    "name": "skillprint-js-sdk",
+    "version": "1.0.0",
+    "description": "JavaScript SDK for Skillprint dynamic gameplay adjustment",
+    "main": "dist/skillprint-sdk.js",
+    "module": "src/skillprint-sdk.js",
+    "types": "types/index.d.ts",
+    "scripts": {
+        "build": "rollup -c",
+        "test": "jest",
+        "lint": "eslint src/",
+        "docs": "jsdoc src/ -d docs/"
+    },
+    "keywords": ["skillprint", "game", "analytics", "dynamic", "difficulty"],
+    "author": "Skillprint Inc.",
+    "license": "MIT",
+    "dependencies": {},
+    "devDependencies": {
+        "rollup": "^3.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.0",
+        "@rollup/plugin-terser": "^0.4.0",
+        "eslint": "^8.0.0",
+        "jest": "^29.0.0",
+        "jsdoc": "^4.0.0"
+    },
+    "files": [
+        "dist/",
+        "src/",
+        "types/",
+        "README.md"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/skillprint/skillprint-js-sdk.git"
+    }
+};

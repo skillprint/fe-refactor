@@ -1,0 +1,192 @@
+{
+    "sessionId": "4b65efc2-2966-4886-b4c7-e9a63764f219",
+    "user": null,
+    "game": "hextris-475aff99-6346-4ea4-b432-dc8aa51f2178",
+    "duration": "00:00:00.003196",
+    "telemetry": [
+        {
+            "tips": {},
+            "adjustment": {
+                "gameSlug": "hextris-475aff99-6346-4ea4-b432-dc8aa51f2178",
+                "createDate": "2026-02-12T13:19:05.018933+00:00",
+                "parameterName": "creationSpeedModifier",
+                "parameterValue": 0.5818
+            }
+        },
+        {
+            "tips": {},
+            "adjustment": {
+                "gameSlug": "hextris-475aff99-6346-4ea4-b432-dc8aa51f2178",
+                "createDate": "2026-02-12T13:19:05.018933+00:00",
+                "parameterName": "comboTime",
+                "parameterValue": 33.0527
+            }
+        },
+        {
+            "tips": {},
+            "adjustment": {
+                "gameSlug": "hextris-475aff99-6346-4ea4-b432-dc8aa51f2178",
+                "createDate": "2026-02-12T13:19:05.018933+00:00",
+                "parameterName": "hexagonSpeed",
+                "parameterValue": 0.4636
+            }
+        }
+    ],
+    "state": "OPEN",
+    "generatedContent": {},
+    "skillScores": {
+        "metrics": {
+            "math": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "action": {
+                "score": 0.9450000000000001,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.9450000000000001
+            },
+            "memory": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "timing": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "verbal": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "spatial": {
+                "score": 0.8,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.8
+            },
+            "planning": {
+                "score": 0.2,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.2
+            },
+            "attention": {
+                "score": 1.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 1.0
+            },
+            "deduction": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "knowledge": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "visualization": {
+                "score": 0.35,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.35
+            },
+            "task-switching": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "pattern-matching": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            },
+            "perceptual-speed": {
+                "score": 0.0,
+                "trend": 0.0,
+                "momentum": 0.0,
+                "confidence": 0.0,
+                "volatility": 0.0,
+                "consistency": 0.0,
+                "trendScore": 0.0,
+                "valueScore": 0.0
+            }
+        },
+        "analyzedAt": "2026-02-12T13:19:05.033679+00:00",
+        "numChunksAnalyzed": 1
+    },
+    "moodScores": {
+        "confidence": 0.7500000000000001,
+        "flowScore": 0.7465384615384616,
+        "targetMood": "focus"
+    },
+    "gameplayTips": null,
+    "partnerOrganization": null,
+    "targetMood": "focus",
+    "parameterUpdates": []
+}

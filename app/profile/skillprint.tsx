@@ -37,7 +37,13 @@ export default function Skillprint() {
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const { count, isLoaded } = useGameSessions();
+  const { count, isLoaded, markViewed, profileViewed } = useGameSessions();
+
+  useEffect(() => {
+    if (isLoaded && count >= 3 && !profileViewed) {
+      markViewed();
+    }
+  }, [isLoaded, count, markViewed, profileViewed]);
 
   const userSkills = skills.map(s => s.name);
   const hasScoreBySkill = skills.reduce((acc, s) => ({ ...acc, [s.name]: true }), {});
@@ -75,7 +81,7 @@ export default function Skillprint() {
   return (
     <div className="font-sans min-h-screen bg-background">
       <TopNav />
-      <ProgressBanner />
+      {/* <ProgressBanner /> */}
       <div className="p-8 pb-32">
         <h1 className="text-3xl font-bold text-foreground mb-6">
           Your Skillprint

@@ -58,4 +58,17 @@ export const getGamesPlayedCount = (): number => {
 export const clearGameSessions = (): void => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PROFILE_VIEWED_KEY);
+};
+
+const PROFILE_VIEWED_KEY = 'skillprint_profile_viewed';
+
+export const hasViewedProfile = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(PROFILE_VIEWED_KEY) === 'true';
+};
+
+export const markProfileAsViewed = (): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(PROFILE_VIEWED_KEY, 'true');
 };

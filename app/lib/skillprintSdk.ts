@@ -42,7 +42,7 @@ export interface ParameterUpdateResult {
     newValue: any;
 }
 
-interface PollResultsResponse {
+export interface PollResultsResponse {
     gameplayTips?: string;
     state?: string;
     parameterUpdates?: {
@@ -56,9 +56,14 @@ export class SkillprintClient {
     private apiKey: string;
     private logger?: (message: string, level: LogLevel) => void;
 
+    private lastScreenshotBlob: Blob | null = null;
+    private lastScreenshotDataURI: string | null = null;
+    private testEmptyDataBase64String: string = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKAP/2Q==';
+
     private readonly START_SESSION_ENDPOINT = '/games/api/sessions/';
     private readonly UPLOAD_SCREENSHOTS_ENDPOINT = '/games/api/record-session/{sessionId}/';
     private readonly POLL_RESULTS_ENDPOINT = '/games/api/sessions/{sessionId}/';
+    private readonly STOP_SESSION_ENDPOINT = '/games/api/sessions/{sessionId}/stop/';
 
     constructor(options: SkillprintConfigOptions) {
         this.baseUrl = options.baseUrl.replace(/\/$/, '');
@@ -113,6 +118,10 @@ export class SkillprintClient {
         }
     }
 
+    async setLastScreenshotDataURI(dataURI: string): Promise<void> {
+        this.lastScreenshotDataURI = dataURI;
+    }
+
     async postScreenshots(sessionId: string, screenshots: Blob[], isLastChunk: boolean = false): Promise<boolean> {
         const url = `${this.baseUrl}${this.UPLOAD_SCREENSHOTS_ENDPOINT.replace('{sessionId}', sessionId)}`;
         this.log(`Posting ${screenshots.length} screenshots (isLastChunk: ${isLastChunk}): POST ${url}`, LogLevel.INFO);
@@ -122,16 +131,26 @@ export class SkillprintClient {
             return false;
         }
 
+        this.lastScreenshotBlob = screenshots[screenshots.length - 1];
+
+        console.log(screenshots, this.lastScreenshotBlob);
+
         const formData = new FormData();
         formData.append('is_last_chunk', isLastChunk.toString().toLowerCase());
 
-        screenshots.forEach((screenshot, i) => {
-            if (screenshot) {
-                // Assuming JPEG for now, as per original SDK implications or just generic blob
-                const filename = `screenshot_${i}.jpg`;
-                formData.append(`screenshot${i}`, screenshot, filename);
-            }
-        });
+        if (isLastChunk) {
+            const fetchedResponse = await fetch(this.testEmptyDataBase64String);
+            const blob = await fetchedResponse.blob();
+            formData.append('screenshot_0', blob, 'screenshot_0.jpg');
+        } else {
+            screenshots.forEach((screenshot, i) => {
+                if (screenshot) {
+                    // Assuming JPEG for now, as per original SDK implications or just generic blob
+                    const filename = `screenshot_${i}.jpg`;
+                    formData.append(`screenshot${i}`, screenshot, filename);
+                }
+            });
+        }
 
         try {
             const response = await fetch(url, {
@@ -157,7 +176,7 @@ export class SkillprintClient {
         }
     }
 
-    async pollParameterResults(sessionId: string): Promise<ParameterUpdateResult[]> {
+    async pollParameterResults(sessionId: string): Promise<PollResultsResponse> {
         const url = `${this.baseUrl}${this.POLL_RESULTS_ENDPOINT.replace('{sessionId}', sessionId)}`;
         this.log(`Polling results: GET ${url}`, LogLevel.INFO);
 
@@ -176,8 +195,7 @@ export class SkillprintClient {
                 this.log(`PollResults successful.`, LogLevel.INFO);
                 try {
                     const parsedResponse: PollResultsResponse = JSON.parse(text);
-                    // The SDK structure suggests 'parameterUpdates' is the key
-                    return parsedResponse.parameterUpdates || [];
+                    return parsedResponse;
                 } catch (parseError: any) {
                     this.log(`PollResults JSON parsing error: ${parseError.message}`, LogLevel.ERROR);
                     throw parseError;

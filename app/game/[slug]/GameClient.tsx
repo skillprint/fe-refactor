@@ -9,7 +9,7 @@ import FirstGameBadge from '../../components/FirstGameBadge';
 import { getGameConfig } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
-import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult } from '../../lib/skillprintSdk';
+import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse } from '../../lib/skillprintSdk';
 
 interface GameClientProps {
     slug: string;
@@ -26,7 +26,6 @@ interface GameResults {
 }
 
 export const unifiedSlugFromBESlug = (slug: string) => {
-    console.log(slug);
     if (slug.indexOf('0hh1') >= 0) return '0hh1';
     if (slug.indexOf('2048') >= 0) return '2048';
     if (slug.indexOf('alchemy') >= 0) return 'alchemy';
@@ -116,9 +115,12 @@ export default function GameClient({ slug }: GameClientProps) {
     const [showBadge, setShowBadge] = useState(false);
     const [isCalculating, setIsCalculating] = useState(false);
     const [calculationError, setCalculationError] = useState<string | undefined>(undefined);
+    const [closedSessionResult, setClosedSessionResult] = useState<PollResultsResponse | null>(null);
     const skillprintSessionIdRef = useRef<string>('');
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [pollForSessionTips, setPollForSessionTips] = useState(false);
+    const [lastSessionResponse, setLastSessionResponse] = useState<PollResultsResponse | null>(null);
 
     const getApiKey = () => {
         if (typeof document === 'undefined') return '';
@@ -136,11 +138,10 @@ export default function GameClient({ slug }: GameClientProps) {
     const handleIframeLoad = () => {
         setIsIframeLoaded(true);
         setGameStartTime(Date.now());
+        setPollForSessionTips(true);
 
         // Set up message listener for communication with the game
         window.addEventListener('message', handleGameMessage);
-
-        console.log('handleIframeLoad');
     };
 
     const handleGameMessage = (event: MessageEvent) => {
@@ -173,14 +174,17 @@ export default function GameClient({ slug }: GameClientProps) {
     };
 
     const handleScreenshot = async (event: MessageEvent) => {
-        console.log('handleScreenshot', event.data);
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
             try {
                 // Assuming event.data is the base64 string directly or contains it
                 const base64Data = event.data?.data || event.data;
-                if (typeof base64Data === 'string' && base64Data.startsWith('data:image')) {
-                    const res = await fetch(base64Data);
-                    const blob = await res.blob();
+
+                if (typeof base64Data === 'object') {
+                    const base64String = base64Data.dataUrl;
+                    skillprintClientRef.current.setLastScreenshotDataURI(base64String);
+                    const fetchedResponse = await fetch(base64String);
+                    const blob = await fetchedResponse.blob();
+
                     skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob]);
                 }
             } catch (e) {
@@ -201,16 +205,16 @@ export default function GameClient({ slug }: GameClientProps) {
         const poll = async () => {
             if (Date.now() - startTime > timeout) {
                 setIsCalculating(false);
-                setCalculationError('Computation could not be done in time.');
+                setCalculationError('Score calculation took longer than expected. Please try again.');
                 return;
             }
 
             try {
-                const updates = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
-                if (updates && updates.length > 0) {
+                const polledRes = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
+
+                if (polledRes && polledRes.state === "CLOSED") {
                     setIsCalculating(false);
-                    // If we receive updates, we could potentially update gameResults here
-                    // For now, we just stop the loading state as user requested "computed data... is ready"
+                    setClosedSessionResult(polledRes);
                 } else {
                     // Keep polling if no updates or empty updates (depending on API behavior, usually empty implies still processing or no changes)
                     // If API returns empty array when 'done but no changes', we might need a status field. 
@@ -234,6 +238,33 @@ export default function GameClient({ slug }: GameClientProps) {
         poll();
     };
 
+    const pollSessionTips = async () => {
+        if (!skillprintClientRef.current || !skillprintSessionIdRef.current) return;
+
+        const poll = async () => {
+            try {
+                const polledRes = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
+
+                if (polledRes && polledRes.state === "OPEN") {
+                    setLastSessionResponse(polledRes);
+                }
+
+                console.log("Polling for session tips", pollForSessionTips);
+
+                if (pollForSessionTips) {
+                    setTimeout(poll, 2000);
+                }
+            } catch (e) {
+                console.error('Polling error', e);
+                if (pollForSessionTips) {
+                    setTimeout(poll, 2000);
+                }
+            }
+        };
+
+        setTimeout(poll, 2000);
+    };
+
     const handleGameComplete = (data: any) => {
         const endTime = Date.now();
         const playTime = Math.floor((endTime - gameStartTime) / 1000);
@@ -249,10 +280,12 @@ export default function GameClient({ slug }: GameClientProps) {
             bonus: data.bonus || Math.floor(Math.random() * 20)
         };
 
+        setPollForSessionTips(false);
         setIsEarlyExit(false);
         setGameResults(results);
         setGameState('completed');
         stopIframe();
+        // skillprintClientRef.current?.stopGameSession();
 
         // Record the game session
         const session: GameSession = {
@@ -406,12 +439,14 @@ export default function GameClient({ slug }: GameClientProps) {
 
         try {
             client.startSession(sessionId, Mood.FOCUS, decodedSlug);
+            setPollForSessionTips(true);
+            pollSessionTips();
         } catch (e) {
             console.error('Failed to start Skillprint session', e);
         }
 
         injectJavascriptIntoIframe();
-    }, [slug]);
+    }, [slug, setPollForSessionTips, pollForSessionTips]);
 
     // Cleanup message listener
     useEffect(() => {
@@ -472,6 +507,7 @@ export default function GameClient({ slug }: GameClientProps) {
                     isEarlyExit={isEarlyExit}
                     isCalculating={isCalculating}
                     calculationError={calculationError}
+                    closedSessionResult={closedSessionResult}
                 />
             )}
 

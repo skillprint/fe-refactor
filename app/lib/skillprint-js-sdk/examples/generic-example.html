@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generic Canvas Skillprint Example</title>
+    <style>
+        canvas { border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script type="module">
+        import { GenericCanvasGame } from './generic-canvas-skillprint-example.js';
+        const game = new GenericCanvasGame('gameCanvas');
+    </script>
+</body>
+</html>
