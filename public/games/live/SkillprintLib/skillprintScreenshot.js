@@ -24,7 +24,7 @@ const getElementForScreenshot = () => {
     const urlPath = window.location.pathname;
     // console.log(urlPath);
     const canvasPathNames = [
-        '/public/games/live/Garden%20Match/static/index.html', 
+        '/public/games/live/Garden%20Match/static/index.html',
         '/public/games/live/Box%20Tower/static/index.html',
         '/public/games/live/Change%20Word/static/index.html',
         '/public/games/live/Flapcat%20Steampunk/static/index.html',
@@ -56,7 +56,7 @@ const takeScreenshot = async () => {
 
     const options = {
         allowTaint: true,
-        useCORS : true,
+        useCORS: true,
         // foreignObjectRendering: true,
         x: skillprintScreenshotSlement.offsetLeft,
         y: skillprintScreenshotSlement.offsetTop,
@@ -66,13 +66,13 @@ const takeScreenshot = async () => {
         windowHeight: skillprintScreenshotSlement.clientHeight,
         removeContainer: true,
         scale: 1,
-        // logging: true,
+        logging: false,
     }
 
     html2canvas(skillprintScreenshotSlement, options).then(canvas => {
         const dataUrl = canvas.toDataURL("image/jpeg");
         // console.log("Transmitting screenshot to parent");
-        
+
         if (shouldLogDataUrl()) {
             // console.log("" + dataUrl);
             // log dataUrl to localstorage
@@ -84,7 +84,7 @@ const takeScreenshot = async () => {
 }
 
 // when document is ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const screenshotFrequency = getScreenshotFrequency();
     // skillprintScreenshotSlement = document.body;
 
@@ -97,10 +97,9 @@ function logEvent(params) {
     params.messageType = 'gameEvent';
     const paramsAsJSON = JSON.stringify(params);
     if (globalThis.ReactNativeWebView && globalThis.ReactNativeWebView.postMessage) {
-    //   globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
+        //   globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
     } else {
-    //   window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
+        //   window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
     }
-  }
-  globalThis.logEvent = logEvent;
-  
+}
+globalThis.logEvent = logEvent;

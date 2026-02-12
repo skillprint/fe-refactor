@@ -42,6 +42,18 @@ export interface ParameterUpdateResult {
     newValue: any;
 }
 
+export interface Adjustment {
+    gameSlug: string;
+    createDate: string;
+    parameterName: string;
+    parameterValue: number;
+}
+
+export interface TelemetryItem {
+    tips: any;
+    adjustment: Adjustment;
+}
+
 export interface PollResultsResponse {
     gameplayTips?: string;
     state?: string;
@@ -49,6 +61,7 @@ export interface PollResultsResponse {
         parameterName: string;
         newValue: any;
     }[];
+    telemetry?: TelemetryItem[];
 }
 
 export class SkillprintClient {
@@ -132,8 +145,6 @@ export class SkillprintClient {
         }
 
         this.lastScreenshotBlob = screenshots[screenshots.length - 1];
-
-        console.log(screenshots, this.lastScreenshotBlob);
 
         const formData = new FormData();
         formData.append('is_last_chunk', isLastChunk.toString().toLowerCase());

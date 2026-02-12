@@ -9,7 +9,8 @@ import FirstGameBadge from '../../components/FirstGameBadge';
 import { getGameConfig } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
-import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse } from '../../lib/skillprintSdk';
+import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
+import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 
 interface GameClientProps {
     slug: string;
@@ -121,6 +122,9 @@ export default function GameClient({ slug }: GameClientProps) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [pollForSessionTips, setPollForSessionTips] = useState(false);
     const [lastSessionResponse, setLastSessionResponse] = useState<PollResultsResponse | null>(null);
+    const [currentAdjustment, setCurrentAdjustment] = useState<Adjustment | null>(null);
+    const processedAdjustmentsRef = useRef<Set<string>>(new Set());
+    const lastAdjustmentTimeRef = useRef<number>(0);
 
     const getApiKey = () => {
         if (typeof document === 'undefined') return '';
@@ -149,8 +153,6 @@ export default function GameClient({ slug }: GameClientProps) {
         if (event.origin !== window.location.origin) return;
 
         const { type, data } = event.data;
-
-        console.log(event.type, event.data);
 
         if (type == 'screenshot') {
             handleScreenshot(event);
@@ -247,9 +249,51 @@ export default function GameClient({ slug }: GameClientProps) {
 
                 if (polledRes && polledRes.state === "OPEN") {
                     setLastSessionResponse(polledRes);
-                }
 
-                console.log("Polling for session tips", pollForSessionTips);
+                    // Process telemetry adjustments
+                    if (polledRes.telemetry && polledRes.telemetry.length > 0) {
+                        try {
+                            const now = Date.now();
+                            // Check cooldown (30 seconds)
+                            if (now - lastAdjustmentTimeRef.current >= 30000) {
+                                // Find the latest adjustment we haven't processed yet
+                                // Sort by date descending to get latest first
+                                const sortedTelemetry = [...polledRes.telemetry].sort((a, b) =>
+                                    new Date(b.adjustment.createDate).getTime() - new Date(a.adjustment.createDate).getTime()
+                                );
+
+                                // Find the first one that hasn't been processed
+                                const latestItem = sortedTelemetry.find(item => {
+                                    const adj = item.adjustment;
+                                    const adjId = `${adj.gameSlug}-${adj.createDate}-${adj.parameterName}`;
+                                    return !processedAdjustmentsRef.current.has(adjId);
+                                });
+
+                                if (latestItem && latestItem.adjustment) {
+                                    const adj = latestItem.adjustment;
+                                    const adjId = `${adj.gameSlug}-${adj.createDate}-${adj.parameterName}`;
+
+                                    console.log("Applying game adjustment:", adj);
+                                    processedAdjustmentsRef.current.add(adjId);
+                                    lastAdjustmentTimeRef.current = now;
+
+                                    // Send to iframe
+                                    if (iframeRef.current?.contentWindow) {
+                                        iframeRef.current.contentWindow.postMessage({
+                                            type: 'ADJUST_GAME',
+                                            data: adj
+                                        }, '*');
+                                    }
+
+                                    // Show banner
+                                    setCurrentAdjustment(adj);
+                                }
+                            }
+                        } catch (err) {
+                            console.error("Error processing telemetry:", err);
+                        }
+                    }
+                }
 
                 if (pollForSessionTips) {
                     setTimeout(poll, 2000);
@@ -390,6 +434,7 @@ export default function GameClient({ slug }: GameClientProps) {
             setGameResults(exitResults);
             setGameState('completed');
             stopIframe();
+            setPollForSessionTips(false);
 
             // Check for first game badge on early exit too? Maybe only on full completion?
             // Let's show it on any completion for now to encourage the user.
@@ -398,7 +443,7 @@ export default function GameClient({ slug }: GameClientProps) {
                 pollResults();
             }
 
-            // Check for first game badge
+            // Check for first game adge
             const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
             if (!hasSeenBadge) {
                 setShowBadge(true);
@@ -423,6 +468,9 @@ export default function GameClient({ slug }: GameClientProps) {
         setIsEarlyExit(false);
         setIsCalculating(false);
         setCalculationError(undefined);
+        setCurrentAdjustment(null);
+        processedAdjustmentsRef.current.clear();
+        lastAdjustmentTimeRef.current = 0;
 
         // Initialize Skillprint Session
         const sessionId = crypto.randomUUID();
@@ -481,6 +529,15 @@ export default function GameClient({ slug }: GameClientProps) {
                         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                         onLoad={handleIframeLoad}
                     />
+
+                    {/* Adjustment Banner */}
+                    {currentAdjustment && (
+                        <GameAdjustmentBanner
+                            parameterName={currentAdjustment.parameterName}
+                            parameterValue={currentAdjustment.parameterValue}
+                            onDismiss={() => setCurrentAdjustment(null)}
+                        />
+                    )}
 
                     {/* Floating exit button - only show when iframe is loaded */}
                     {isIframeLoaded && (

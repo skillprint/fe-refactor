@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "public/lib/skillprint-js-sdk/main-manager.js", "public/lib/skillprint-js-sdk/api-client.js", "public/lib/skillprint-js-sdk/api-models.js", "public/lib/skillprint-js-sdk/config.js", "public/lib/skillprint-js-sdk/constants.js"],
   "exclude": ["node_modules"]
 }
