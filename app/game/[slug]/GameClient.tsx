@@ -114,7 +114,11 @@ export default function GameClient({ slug }: GameClientProps) {
     const skillprintSessionIdRef = useRef<string>('');
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    const [pollForSessionTips, setPollForSessionTips] = useState(false);
+
+
+    // Actually, I will replace the state with a Ref completely.
+
+    const shouldPollRef = useRef(false);
     const [lastSessionResponse, setLastSessionResponse] = useState<PollResultsResponse | null>(null);
     const [currentAdjustment, setCurrentAdjustment] = useState<Adjustment | null>(null);
     const processedAdjustmentsRef = useRef<Set<string>>(new Set());
@@ -136,7 +140,8 @@ export default function GameClient({ slug }: GameClientProps) {
     const handleIframeLoad = () => {
         setIsIframeLoaded(true);
         setGameStartTime(Date.now());
-        setPollForSessionTips(true);
+        // Do not set shouldPollRef.current = true here. It is already set in useEffect,
+        // and setting it here can re-enable polling during exit/navigation race conditions.
 
         // Set up message listener for communication with the game
         window.addEventListener('message', handleGameMessage);
@@ -196,7 +201,11 @@ export default function GameClient({ slug }: GameClientProps) {
 
         const poll = async () => {
             try {
+                if (!shouldPollRef.current) return;
+
                 const polledRes = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
+
+                if (!shouldPollRef.current) return;
 
                 if (polledRes && polledRes.state === "OPEN") {
                     setLastSessionResponse(polledRes);
@@ -246,12 +255,12 @@ export default function GameClient({ slug }: GameClientProps) {
                     }
                 }
 
-                if (pollForSessionTips) {
+                if (shouldPollRef.current) {
                     setTimeout(poll, 2000);
                 }
             } catch (e) {
                 console.error('Polling error', e);
-                if (pollForSessionTips) {
+                if (shouldPollRef.current) {
                     setTimeout(poll, 2000);
                 }
             }
@@ -275,7 +284,7 @@ export default function GameClient({ slug }: GameClientProps) {
             bonus: data.bonus || Math.floor(Math.random() * 20)
         };
 
-        setPollForSessionTips(false);
+        shouldPollRef.current = false;
         stopIframe();
 
         // Record the game session
@@ -378,7 +387,7 @@ export default function GameClient({ slug }: GameClientProps) {
             };
 
             stopIframe();
-            setPollForSessionTips(false);
+            shouldPollRef.current = false;
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
                 skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
@@ -429,14 +438,18 @@ export default function GameClient({ slug }: GameClientProps) {
 
         try {
             client.startSession(sessionId, Mood.FOCUS, decodedSlug);
-            setPollForSessionTips(true);
+            shouldPollRef.current = true;
             pollSessionTips();
         } catch (e) {
             console.error('Failed to start Skillprint session', e);
         }
 
         injectJavascriptIntoIframe();
-    }, [slug, setPollForSessionTips, pollForSessionTips]);
+
+        return () => {
+            shouldPollRef.current = false;
+        };
+    }, [slug]);
 
     // Cleanup message listener
     useEffect(() => {

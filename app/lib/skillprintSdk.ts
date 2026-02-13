@@ -109,6 +109,7 @@ export class SkillprintClient {
     private readonly STOP_SESSION_ENDPOINT = '/games/api/sessions/{sessionId}/stop/';
     private readonly CREATE_USER_ENDPOINT = '/partners/api/users/add/';
     private readonly GET_USER_TOKEN_ENDPOINT = '/partners/api/users/auth/token/';
+    private readonly GET_USER_PROFILE_ENDPOINT = '/scoring/api/profiles/';
 
 
     constructor(options: SkillprintConfigOptions) {
@@ -139,6 +140,10 @@ export class SkillprintClient {
         if (this.logger) {
             this.logger(message, level);
         }
+    }
+
+    setUserToken(token: string) {
+        this.userToken = token;
     }
 
     async startSession(sessionId: string, targetMood: string, gameName: string): Promise<boolean> {
@@ -317,7 +322,7 @@ export class SkillprintClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Api-Key dVVoaBUz.ez1rZLc0bhnxd7DqKhovQqSpx0tLwnrA`
+                'Authorization': `Api-Key WAwuSkup.eUVwODb46ImgWADaPKB6rE9rNViiPcTo`
             },
             body: JSON.stringify(requestData)
         });
@@ -343,7 +348,7 @@ export class SkillprintClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Api-Key dVVoaBUz.ez1rZLc0bhnxd7DqKhovQqSpx0tLwnrA`
+                'Authorization': `Api-Key WAwuSkup.eUVwODb46ImgWADaPKB6rE9rNViiPcTo`
 
             },
             body: JSON.stringify(requestData)
@@ -371,37 +376,43 @@ export class SkillprintClient {
         }
     }
 
-    // async getUserProfile(userId: string): Promise<UserProfile> {
-    //     const url = `${this.baseUrl}${this.GET_USER_PROFILE_ENDPOINT.replace('{userId}', userId)}`;
-    //     this.log(`Getting user profile: GET ${url}`, LogLevel.INFO);
+    async getUserProfile(): Promise<any> {
+        const url = `${this.baseUrl}${this.GET_USER_PROFILE_ENDPOINT}`;
+        this.log(`Getting user profile: GET ${url}`, LogLevel.INFO);
 
-    //     try {
-    //         const response = await fetch(url, {
-    //             method: 'GET',
-    //             headers: {
-    //                 // 'Authorization': `Api-Key ${this.apiKey}`,
-    //                 'Accept': 'application/json'
-    //             }
-    //         });
+        let headers: any = {
+            'Content-Type': 'application/json',
+            'Authorization': `Api-Key WAwuSkup.eUVwODb46ImgWADaPKB6rE9rNViiPcTo`
+        };
 
-    //         const text = await response.text();
+        if (this.userToken) {
+            headers['X-Auth-Token'] = `Token ${this.userToken}`;
+        }
 
-    //         if (response.ok) {
-    //             this.log(`GetUserProfile successful.`, LogLevel.INFO);
-    //             try {
-    //                 const parsedResponse: UserProfile = JSON.parse(text);
-    //                 return parsedResponse;
-    //             } catch (parseError: any) {
-    //                 this.log(`GetUserProfile JSON parsing error: ${parseError.message}`, LogLevel.ERROR);
-    //                 throw parseError;
-    //             }
-    //         } else {
-    //             this.log(`GetUserProfile Error: ${response.status}. Response: ${text}`, LogLevel.ERROR);
-    //             throw new Error(`${response.status} | ${text}`);
-    //         }
-    //     } catch (error: any) {
-    //         this.log(`GetUserProfile Error: ${error.message}`, LogLevel.ERROR);
-    //         throw error;
-    //     }
-    // }
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers
+            });
+
+            const text = await response.text();
+
+            if (response.ok) {
+                this.log(`GetUserProfile successful. Response: ${text}`, LogLevel.INFO);
+                try {
+                    const parsedResponse = JSON.parse(text);
+                    return parsedResponse;
+                } catch (parseError: any) {
+                    this.log(`GetUserProfile JSON parsing error: ${parseError.message}`, LogLevel.ERROR);
+                    throw parseError;
+                }
+            } else {
+                this.log(`GetUserProfile Error: ${response.status}. Response: ${text}`, LogLevel.ERROR);
+                throw new Error(`${response.status} | ${text}`);
+            }
+        } catch (error: any) {
+            this.log(`GetUserProfile Error: ${error.message}`, LogLevel.ERROR);
+            throw error;
+        }
+    }
 }

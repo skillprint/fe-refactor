@@ -7,6 +7,8 @@ import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
 
+import { useUserSession } from './hooks/useUserSession';
+
 // Skills data
 const skills = [
   {
@@ -183,6 +185,7 @@ const gradients = [
 ];
 
 export default function Home() {
+  useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<typeof allGames>([]);
   const [showTooltip, setShowTooltip] = useState(false);

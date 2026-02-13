@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { useTheme } from '../components/ThemeProvider';
 import { GameSessionManager } from '../components/GameSessionManager';
 import { useGameSessions } from '../hooks/useGameSessions';
+import { useUserProfile } from '../hooks/useUserProfile';
 import BuckyballLoading from '../components/BuckyballLoading';
 import SkillprintVisualization from '../components/Skillprint';
 
@@ -52,6 +53,7 @@ export default function Skillprint() {
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
   const { count, isLoaded, markViewed, profileViewed } = useGameSessions();
+  const { fetchUserProfile } = useUserProfile();
 
   useEffect(() => {
     if (isLoaded && count >= 3 && !profileViewed) {
@@ -87,7 +89,6 @@ export default function Skillprint() {
         <h1 className="text-3xl font-bold text-foreground mb-6">
           Your Skillprint
         </h1>
-
         {!isLoaded ? (
           <div className="flex justify-center py-20">
             <BuckyballLoading />
@@ -343,6 +344,27 @@ export default function Skillprint() {
                 }}
                 className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
                 Reset
+              </button>
+            </div>
+            <div className="flex items-center justify-between border-t border-border pt-6">
+              <div>
+                <h3 className="text-lg font-medium text-foreground">
+                  Debug Profile
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Fetch profile data to console
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  toast.promise(fetchUserProfile(), {
+                    loading: 'Fetching profile...',
+                    success: 'Check console for profile data!',
+                    error: 'Failed to fetch profile',
+                  });
+                }}
+                className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                Fetch Data
               </button>
             </div>
           </div>
