@@ -44,7 +44,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         } else if (theme === 'skillprint') {
             root.setAttribute('data-theme', 'skillprint');
             root.classList.add('skillprint');
-            root.classList.add('dark'); // Add dark class to enable dark mode tailwind utilities since it's a dark theme
         } else {
             // Light theme (default)
             root.removeAttribute('data-theme');
