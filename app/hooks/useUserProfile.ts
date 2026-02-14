@@ -5,7 +5,7 @@ import { useUserSession } from './useUserSession';
 import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
 
 export function useUserProfile() {
-    const { userToken, userId } = useUserSession();
+    const { userToken, userId, setToken } = useUserSession();
 
     const getApiKey = () => {
         if (typeof document === 'undefined') return '';
@@ -46,8 +46,8 @@ export function useUserProfile() {
                         if (newToken) {
                             console.log('Token refreshed, retrying profile fetch...');
 
-                            // Update local storage so the session persists
-                            localStorage.setItem('userToken', newToken);
+                            // Update session state and localStorage
+                            setToken(newToken);
 
                             // Update the client instance
                             client.setUserToken(newToken);

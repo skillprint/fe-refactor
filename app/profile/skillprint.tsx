@@ -48,7 +48,7 @@ export const updateSetting = (name: string, value: string, setter: (val: string)
 
 export default function Skillprint() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -301,27 +301,33 @@ export default function Skillprint() {
               </div>
             </div>
 
-            {/* Theme Toggle */}
+            {/* Theme Selector */}
             <div className="flex items-center justify-between border-b border-border pb-6">
               <div>
                 <h3 className="text-lg font-medium text-foreground">
                   Appearance
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Switch between light and dark themes
+                  Customize your interface theme
                 </p>
               </div>
-              <button
-                onClick={toggleTheme}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${theme === 'dark' ? 'bg-primary' : 'bg-input'
-                  }`}
-              >
-                <span className="sr-only">Enable dark mode</span>
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                />
-              </button>
+              <div className="relative">
+                <select
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value as any)}
+                  className="appearance-none bg-secondary text-foreground px-4 py-2 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer transition-opacity hover:opacity-80"
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                  <option value="midnight">Midnight</option>
+                  <option value="skillprint">Skillprint</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-between">

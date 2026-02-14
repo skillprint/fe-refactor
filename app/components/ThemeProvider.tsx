@@ -2,11 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'midnight' | 'skillprint';
 
 interface ThemeContextType {
     theme: Theme;
-    toggleTheme: () => void;
+    setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Check local storage or default to light
         const savedTheme = localStorage.getItem('theme') as Theme;
-        if (savedTheme) {
+        if (savedTheme && ['light', 'dark', 'midnight', 'skillprint'].includes(savedTheme)) {
             setTheme(savedTheme);
         } else {
             // Default to light as requested
@@ -31,19 +31,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return;
 
         const root = document.documentElement;
+        // Remove all possible theme classes/attributes first
+        root.classList.remove('dark', 'midnight', 'skillprint');
+        root.removeAttribute('data-theme');
+
         if (theme === 'dark') {
             root.setAttribute('data-theme', 'dark');
             root.classList.add('dark');
+        } else if (theme === 'midnight') {
+            root.setAttribute('data-theme', 'midnight');
+            root.classList.add('midnight'); // Optional, but consistent
+        } else if (theme === 'skillprint') {
+            root.setAttribute('data-theme', 'skillprint');
+            root.classList.add('skillprint');
+            root.classList.add('dark'); // Add dark class to enable dark mode tailwind utilities since it's a dark theme
         } else {
+            // Light theme (default)
             root.removeAttribute('data-theme');
-            root.classList.remove('dark');
         }
         localStorage.setItem('theme', theme);
     }, [theme, mounted]);
-
-    const toggleTheme = () => {
-        setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-    };
 
     // Prevent hydration mismatch by rendering nothing until mounted, 
     // or render children with default theme (light) to avoid flash if possible.
@@ -53,7 +60,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // To avoid flash, we might need a script in head, but for now this is fine.
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider value={{ theme, setTheme }}>
             {children}
         </ThemeContext.Provider>
     );

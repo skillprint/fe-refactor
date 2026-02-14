@@ -87,9 +87,15 @@ export function useUserSession() {
         initializeUser();
     }, [searchParams, pathname, router]);
 
+    const setToken = (token: string) => {
+        localStorage.setItem('userToken', token);
+        setUserToken(token);
+    };
+
     return {
         getUserId: () => userId,
         getUserToken: () => userToken,
+        setToken,
         userId,
         userToken
     };
