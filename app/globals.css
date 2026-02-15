@@ -164,6 +164,12 @@
   
   --font-sans: var(--font-outfit);
   --font-mono: var(--font-geist-mono);
+
+  --animate-subtle-fade: subtle-fade 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  @keyframes subtle-fade {
+    0%, 100% { color: #999; }
+    50% { color: #333; }
+  }
 }
 
 body {

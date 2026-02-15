@@ -51,7 +51,7 @@ export default function TopNav() {
                         <Link href="/" className="flex items-center gap-2">
                             <Image src="/logo192.png" alt="Skillprint Logo" width={24} height={24} className="w-6 h-6 rounded-full" />
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold bg-gradient-to-r from-green-300 to-lime-300 bg-clip-text text-transparent leading-none text-shadow-sm">
+                                <span className="text-xl font-bold bg-clip-text leading-none text-shadow-sm animate-subtle-fade">
                                     Skillprint
                                 </span>
                             </div>

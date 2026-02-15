@@ -25,6 +25,27 @@ function GamesPageContent() {
   const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
 
 
+  /* ... inside GamesPageContent ... */
+
+  // Games to exclude (blacklist)
+  const BLACKLISTED_GAMES = ['infinite-runner-3d', 'hextris', 'fruit-ninja', 'plastoblasto', 'flappy-bird-1', 'lastwar-frontline', 'line-color'];
+
+  // Calculate available skills and moods based on existing games (excluding blacklisted ones)
+  const availableSkillSlugs = new Set(
+    gamesBySkill
+      .filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug))
+      .flatMap((game: any) => game.skills.map((s: any) => s.slug))
+  );
+
+  const availableMoodSlugs = new Set(
+    gamesByMood
+      .filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug))
+      .flatMap((game: any) => game.moods.map((m: any) => m.slug))
+  );
+
+  const visibleSkills = skills.filter((skill: any) => availableSkillSlugs.has(skill.slug));
+  const visibleMoods = moods.filter((mood: any) => availableMoodSlugs.has(mood.slug));
+
   const filteredSkillsGames = gamesBySkill.filter((game: any) => {
     // First apply tab filtering
     let matchesTab = true;
@@ -60,7 +81,7 @@ function GamesPageContent() {
   // Apply deduplication
   let filteredGames = nonDedupedFilteredGames.filter((game: any, index: number) => {
     // TODO: import these games
-    if (['infinite-runner-3d', 'hextris', 'fruit-ninja', 'plastoblasto', 'flappy-bird-1', 'lastwar-frontline', 'line-color'].includes(game.slug)) {
+    if (BLACKLISTED_GAMES.includes(game.slug)) {
       return false;
     };
     return nonDedupedFilteredGames.findIndex((g: any) => g.slug === game.slug) === index;
@@ -225,7 +246,7 @@ function GamesPageContent() {
           {!isSearchActive && (
             <div className="bg-card px-4 py-2 border-b border-border">
               <div className="flex flex-wrap gap-2">
-                {(activeTab === 'moods' ? moods : skills).map((item: any) => {
+                {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
                   const color = getColorForSlug(item.slug);
                   const isSelected = selectedFilterSlug === item.slug;
                   return (
@@ -254,7 +275,7 @@ function GamesPageContent() {
           {isSearchActive && (
             <div className="bg-card px-4 py-2 border-b border-border">
               <div className="flex flex-wrap gap-2">
-                {(activeTab === 'moods' ? moods : skills).map((item: any) => {
+                {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
                   const color = getColorForSlug(item.slug);
                   const isSelected = selectedFilterSlug === item.slug;
                   return (
