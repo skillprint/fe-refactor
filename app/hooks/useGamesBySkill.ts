@@ -19,17 +19,23 @@ export function useGamesBySkill() {
         const fetchGames = async () => {
             setIsLoading(true);
             try {
-                const skills = await getSkills();
-                const moods = await getMoods();
+                // Fetch basics first
+                const [skillsData, moodsData] = await Promise.all([
+                    getSkills(),
+                    getMoods()
+                ]);
 
-                const gamesBySkill = await Promise.all(skills.map((skill: any) => getCatalogItemsBySkill(skill.slug)));
-                const gamesByMood = await Promise.all(moods.map((mood: any) => getCatalogItemsByMood(mood.slug)));
+                // Then fetch dependent game data
+                // The API calls here are cached in api.ts so repeated calls are cheap
+                const gamesBySkillRaw = await Promise.all(skillsData.map((skill: any) => getCatalogItemsBySkill(skill.slug)));
+                const gamesByMoodRaw = await Promise.all(moodsData.map((mood: any) => getCatalogItemsByMood(mood.slug)));
 
-                setSkills(skills);
-                setMoods(moods);
-                setGamesBySkill(gamesBySkill.map((game: any) => game.results).flat());
-                setGamesByMood(gamesByMood.map((game: any) => game.results).flat());
+                setSkills(skillsData);
+                setMoods(moodsData);
+                setGamesBySkill(gamesBySkillRaw.map((game: any) => game.results).flat());
+                setGamesByMood(gamesByMoodRaw.map((game: any) => game.results).flat());
             } catch (error) {
+                console.error('Error fetching games data:', error);
                 setError(error as Error);
             }
             setIsLoading(false);
