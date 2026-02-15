@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Apple/Calm Light Theme */
+  /* Skillprint Theme (Light) - Default */
   --background: #f5f5f7;
   --foreground: #1d1d1f;
   
@@ -11,26 +11,29 @@
   --popover: #ffffff;
   --popover-foreground: #1d1d1f;
   
-  --primary: #007aff;
+  --primary: #543DEB;
   --primary-foreground: #ffffff;
   
-  --secondary: #e5e5ea;
-  --secondary-foreground: #1d1d1f;
+  --secondary: #05DF91;
+  --secondary-foreground: #000000;
   
   --muted: #e5e5ea;
   --muted-foreground: #86868b;
   
-  --accent: #007aff;
-  --accent-foreground: #ffffff;
+  --accent: #26B8FF;
+  --accent-foreground: #000000;
   
-  --destructive: #ff3b30;
+  --destructive: #FF4F8E;
   --destructive-foreground: #ffffff;
-
+  
   --border: #d2d2d7;
   --input: #d2d2d7;
-  --ring: #007aff;
+  --ring: #05DF91;
   
   --radius: 1rem;
+
+  /* Font Override */
+  --font-sans: var(--font-inter);
 }
 
 [data-theme="dark"] {
@@ -95,8 +98,8 @@
   --ring: #818cf8;
 }
 
-[data-theme="skillprint"] {
-  /* Skillprint Theme (Light) */
+[data-theme="light"] {
+  /* Apple/Calm Light Theme */
   --background: #f5f5f7;
   --foreground: #1d1d1f;
   
@@ -106,27 +109,24 @@
   --popover: #ffffff;
   --popover-foreground: #1d1d1f;
   
-  --primary: #543DEB;
+  --primary: #007aff;
   --primary-foreground: #ffffff;
   
-  --secondary: #05DF91;
-  --secondary-foreground: #000000;
+  --secondary: #e5e5ea;
+  --secondary-foreground: #1d1d1f;
   
   --muted: #e5e5ea;
   --muted-foreground: #86868b;
   
-  --accent: #26B8FF;
-  --accent-foreground: #000000;
+  --accent: #007aff;
+  --accent-foreground: #ffffff;
   
-  --destructive: #FF4F8E;
+  --destructive: #ff3b30;
   --destructive-foreground: #ffffff;
   
   --border: #d2d2d7;
   --input: #d2d2d7;
-  --ring: #05DF91;
-
-  /* Font Override */
-  --font-sans: var(--font-inter);
+  --ring: #007aff;
 }
 
 @theme inline {

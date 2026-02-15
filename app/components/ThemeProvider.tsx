@@ -12,7 +12,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setTheme] = useState<Theme>('light');
+    const [theme, setTheme] = useState<Theme>('skillprint');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -22,7 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             setTheme(savedTheme);
         } else {
             // Default to light as requested
-            setTheme('light');
+            setTheme('skillprint');
         }
         setMounted(true);
     }, []);
@@ -32,7 +32,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
         const root = document.documentElement;
         // Remove all possible theme classes/attributes first
-        root.classList.remove('dark', 'midnight', 'skillprint');
+        root.classList.remove('dark', 'midnight', 'skillprint', 'light');
         root.removeAttribute('data-theme');
 
         if (theme === 'dark') {
@@ -41,11 +41,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         } else if (theme === 'midnight') {
             root.setAttribute('data-theme', 'midnight');
             root.classList.add('midnight'); // Optional, but consistent
-        } else if (theme === 'skillprint') {
-            root.setAttribute('data-theme', 'skillprint');
-            root.classList.add('skillprint');
+        } else if (theme === 'light') {
+            root.setAttribute('data-theme', 'light');
+            root.classList.add('light');
         } else {
-            // Light theme (default)
+            // Skillprint (default)
             root.removeAttribute('data-theme');
         }
         localStorage.setItem('theme', theme);
