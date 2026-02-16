@@ -5,7 +5,6 @@ import { notFound, useRouter } from 'next/navigation';
 import { useUserSession } from '../../hooks/useUserSession';
 import BottomTabs from '../../components/BottomTabs';
 import FloatingExitButton from '../../components/FloatingExitButton';
-import FirstGameBadge from '../../components/FirstGameBadge';
 import { getGameConfig, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
@@ -112,8 +111,6 @@ export default function GameClient({ slug }: GameClientProps) {
     const [isIframeLoaded, setIsIframeLoaded] = useState(false);
     const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
-    const [showBadge, setShowBadge] = useState(false);
-    const [nextGameSlug, setNextGameSlug] = useState<string>('');
     const skillprintSessionIdRef = useRef<string>('');
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -310,15 +307,7 @@ export default function GameClient({ slug }: GameClientProps) {
             skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
         }
 
-        // Check for first game badge
-        const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
-        if (!hasSeenBadge) {
-            // Pick a random next game
-            const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
-            const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];
-            setNextGameSlug(randomGame);
-            setShowBadge(true);
-        }
+
 
         // Navigate to review page with sessionId
         if (skillprintSessionIdRef.current) {
@@ -400,15 +389,7 @@ export default function GameClient({ slug }: GameClientProps) {
                 skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
             }
 
-            // Check for first game badge on early exit too
-            const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
-            if (!hasSeenBadge) {
-                // Pick a random next game
-                const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
-                const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];
-                setNextGameSlug(randomGame);
-                setShowBadge(true);
-            }
+
 
             // Navigate to review page with sessionId
             if (skillprintSessionIdRef.current) {
@@ -417,13 +398,7 @@ export default function GameClient({ slug }: GameClientProps) {
         }
     };
 
-    const handleBadgeDismiss = () => {
-        setShowBadge(false);
-        // Set cookie to expire in 1 year
-        const date = new Date();
-        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-        document.cookie = `first_game_badge_seen=true; expires=${date.toUTCString()}; path=/`;
-    };
+
 
     // Reset state when slug changes
     useEffect(() => {
@@ -534,10 +509,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
 
 
-            {/* First Game Badge Popup */}
-            {showBadge && (
-                <FirstGameBadge onDismiss={handleBadgeDismiss} nextGameSlug={nextGameSlug} />
-            )}
+
         </div>
     );
 }

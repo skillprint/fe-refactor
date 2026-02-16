@@ -7,6 +7,8 @@ import { getGameDetails } from '../../../config/gameConfig';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
 import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
+import FirstGameBadge from '../../../components/FirstGameBadge';
+import { knownGameSlugs } from '../../../config/gameConfig';
 
 interface GameResults {
     score?: number;
@@ -31,6 +33,8 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     const [calculationError, setCalculationError] = useState<string | undefined>(undefined);
     const [closedSessionResult, setClosedSessionResult] = useState<PollResultsResponse | null>(null);
     const [gameResults, setGameResults] = useState<GameResults | null>(null);
+    const [showBadge, setShowBadge] = useState(false);
+    const [nextGameSlug, setNextGameSlug] = useState<string>('');
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
@@ -148,6 +152,28 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
             isCancelled = true;
         };
     }, [sessionId, userToken]);
+
+    useEffect(() => {
+        // Check for first game badge
+        const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
+        if (!hasSeenBadge) {
+            // Pick a random next game
+            const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
+            const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];
+            setNextGameSlug(randomGame);
+
+            // Short delay to ensure it appears nicely
+            setTimeout(() => setShowBadge(true), 500);
+        }
+    }, [decodedSlug]);
+
+    const handleBadgeDismiss = () => {
+        setShowBadge(false);
+        // Set cookie to expire in 1 year
+        const date = new Date();
+        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+        document.cookie = `first_game_badge_seen=true; expires=${date.toUTCString()}; path=/`;
+    };
 
     const handlePlayAgain = () => {
         setIsLoading(true);
@@ -385,6 +411,9 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                     )}
                 </div>
             </div>
+            {showBadge && (
+                <FirstGameBadge onDismiss={handleBadgeDismiss} nextGameSlug={nextGameSlug} />
+            )}
         </div >
     );
 }
