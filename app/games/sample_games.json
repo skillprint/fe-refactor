@@ -1,0 +1,245 @@
+{
+    "count": 4,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "name": "0hh1",
+            "slug": "0hh1-e28b593f-4355-4b9e-8444-6f9e04ca1846",
+            "artStyles": [
+                "2D",
+                "Portrait"
+            ],
+            "genres": [
+                "Puzzle"
+            ],
+            "gameplayTags": [
+                "Unlimited Time",
+                "Unlimited Tries"
+            ],
+            "themes": [],
+            "goals": [
+                "Solve"
+            ],
+            "iosStoreLink": null,
+            "androidStoreLink": null,
+            "externalWebUrl": "https://skillprint-games-production.s3.us-west-2.amazonaws.com/e28b593f-4355-4b9e-8444-6f9e04ca1846/index.html",
+            "shortDescription": "Practice deductive reasoning patterns in this logic-based puzzle game.",
+            "longDescription": "Each row and column must have an equal number of red and blue tiles, without repeating the same pattern of red and blue tiles. Use your deductive reasoning skills to correctly complete the game board.",
+            "suggestedDuration": {
+                "days": 0,
+                "seconds": 180
+            },
+            "url": "https://skillprint-games-production.s3.us-west-2.amazonaws.com/e28b593f-4355-4b9e-8444-6f9e04ca1846/index.html",
+            "screenshot": "https://skillprint-api-static.s3.us-west-2.amazonaws.com/static/images/Ohh1.png",
+            "thumbnail": null,
+            "skills": [
+                {
+                    "name": "Deduction",
+                    "slug": "deduction"
+                }
+            ],
+            "moods": [
+                {
+                    "name": "Focus",
+                    "slug": "focus"
+                },
+                {
+                    "name": "Grit",
+                    "slug": "grit"
+                }
+            ],
+            "orientation": "portrait",
+            "exitButtonPosition": "TOP_RIGHT"
+        },
+        {
+            "name": "3D Infinite Runner",
+            "slug": "infinite-runner-3d",
+            "artStyles": [],
+            "genres": [],
+            "gameplayTags": [],
+            "themes": [],
+            "goals": [],
+            "iosStoreLink": null,
+            "androidStoreLink": null,
+            "externalWebUrl": null,
+            "shortDescription": "infinite-runner-3d (or endless runner) is a type of 3D platformer game where the player character runs continuously through a procedurally generated, ever-changing 3D environment. The primary objective is to last as long as possible by dodging obstacles, collecting coins or power-ups, and performing other actions to achieve the highest score before falling or hitting an obstacle.",
+            "longDescription": "infinite-runner-3d (or endless runner) is a type of 3D platformer game where the player character runs continuously through a procedurally generated, ever-changing 3D environment. The primary objective is to last as long as possible by dodging obstacles, collecting coins or power-ups, and performing other actions to achieve the highest score before falling or hitting an obstacle.",
+            "suggestedDuration": {
+                "days": 0,
+                "seconds": 480
+            },
+            "url": null,
+            "screenshot": "https://github.com/Tomaszal/runner-unity3d/raw/master/Screenshots/2.png",
+            "thumbnail": null,
+            "skills": [
+                {
+                    "name": "Planning",
+                    "slug": "planning"
+                },
+                {
+                    "name": "Visualization",
+                    "slug": "visualization"
+                },
+                {
+                    "name": "Perceptual Speed",
+                    "slug": "perceptual-speed"
+                },
+                {
+                    "name": "Timing",
+                    "slug": "timing"
+                },
+                {
+                    "name": "Spatial",
+                    "slug": "spatial"
+                }
+            ],
+            "moods": [
+                {
+                    "name": "Relax",
+                    "slug": "relax"
+                },
+                {
+                    "name": "Focus",
+                    "slug": "focus"
+                },
+                {
+                    "name": "Grit",
+                    "slug": "grit"
+                }
+            ],
+            "orientation": "portrait",
+            "exitButtonPosition": "TOP_RIGHT"
+        },
+        {
+            "name": "Last War Zombie Frontline",
+            "slug": "lastwar-frontline",
+            "artStyles": [],
+            "genres": [],
+            "gameplayTags": [],
+            "themes": [],
+            "goals": [],
+            "iosStoreLink": null,
+            "androidStoreLink": null,
+            "externalWebUrl": null,
+            "shortDescription": "Last War: Frontline is a fast-paced action-puzzle mode within the strategic world of Last War: Survival. You control rapid-fire units to strategically blast through barriers, recruit new soldiers, collect powerful weapons, and expand your army to conquer challenging, multi-stage levels and dominate the battlefield.",
+            "longDescription": "Last War: Frontline (also known as \"Frontline Breakthrough\") is an intense mini-game within the popular strategy title, Last War: Survival, which is a blend of Merge and Tower Defense gameplay set in a zombie apocalypse.\r\n\r\nIn the Frontline mode, the focus shifts to a tactical, rapid-fire sequence. Your goal is to strategically use your firepower to break barrels and obstacles to quickly recruit more soldiers and acquire powerful temporary weapons. You must make split-second decisions on which numbered barriers to attack to maximize your troop count, as a larger army is essential for defeating the final boss of each level and progressing through the ever-more-challenging frontline. It offers a unique, challenging experience that helps you boost your overall power in the main game.",
+            "suggestedDuration": {
+                "days": 0,
+                "seconds": 180
+            },
+            "url": null,
+            "screenshot": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMLyeKb7jCzeyGUXVnJwtrou2IP9P-oUN3yw&s",
+            "thumbnail": null,
+            "skills": [
+                {
+                    "name": "Planning",
+                    "slug": "planning"
+                },
+                {
+                    "name": "Visualization",
+                    "slug": "visualization"
+                },
+                {
+                    "name": "Perceptual Speed",
+                    "slug": "perceptual-speed"
+                },
+                {
+                    "name": "Timing",
+                    "slug": "timing"
+                },
+                {
+                    "name": "Attention",
+                    "slug": "attention"
+                },
+                {
+                    "name": "Action",
+                    "slug": "action"
+                }
+            ],
+            "moods": [
+                {
+                    "name": "Relax",
+                    "slug": "relax"
+                },
+                {
+                    "name": "Focus",
+                    "slug": "focus"
+                },
+                {
+                    "name": "Grit",
+                    "slug": "grit"
+                },
+                {
+                    "name": "Curiosity",
+                    "slug": "curiosity"
+                }
+            ],
+            "orientation": "portrait",
+            "exitButtonPosition": "TOP_RIGHT"
+        },
+        {
+            "name": "Fruit Ninja",
+            "slug": "fruit-ninja",
+            "artStyles": [],
+            "genres": [],
+            "gameplayTags": [],
+            "themes": [],
+            "goals": [],
+            "iosStoreLink": null,
+            "androidStoreLink": null,
+            "externalWebUrl": null,
+            "shortDescription": "Experience the thrill of slicing and dicing fresh fruit in this fast-paced action game! Swipe your finger across the screen to slash through flying fruits while avoiding dangerous bombs. Test your reflexes and aim for the highest score in this addictive arcade-style game that's easy to learn but challenging to master.",
+            "longDescription": "Fruit Ninja Game\r\nShort Description\r\n\r\nExperience the thrill of slicing and dicing fresh fruit in this fast-paced action game! Swipe your finger across the screen to slash through flying fruits while avoiding dangerous bombs. Test your reflexes and aim for the highest score in this addictive arcade-style game that's easy to learn but challenging to master.\r\nLong Description & How to Play\r\nOverview\r\n\r\nFruit Ninja is an exciting arcade game that challenges players to slice through various fruits using swift finger movements. The game combines quick reflexes, precise timing, and strategic thinking as you aim to achieve the highest possible score while avoiding obstacles.\r\nHow to Play\r\n\r\nBasic Controls:\r\n\r\n    Swipe your finger across the screen to create slashing motions\r\n    Each swipe acts as a blade that cuts through any fruit it touches\r\n    You can perform multiple slashes in quick succession for combo attacks\r\n\r\nGameplay Mechanics:\r\n\r\n    Fruits are launched into the air from the bottom of the screen in random patterns\r\n    Different fruits appear with varying point values (watermelons, apples, oranges, pineapples, etc.)\r\n    Slice as many fruits as possible before they fall off the screen\r\n    Missing three fruits will end your game\r\n    Special golden fruits provide bonus points when sliced\r\n\r\nObstacles to Avoid:\r\n\r\n    Bombs: Black explosive devices that end your game instantly if sliced\r\n    Bombs often appear mixed with fruits, requiring careful precision\r\n    Use short, controlled swipes near bombs to avoid accidental contact",
+            "suggestedDuration": {
+                "days": 0,
+                "seconds": 180
+            },
+            "url": null,
+            "screenshot": "https://pixiapi.com/wp-content/uploads/2023/12/fruit-ninja-game-icon.jpg",
+            "thumbnail": null,
+            "skills": [
+                {
+                    "name": "Planning",
+                    "slug": "planning"
+                },
+                {
+                    "name": "Visualization",
+                    "slug": "visualization"
+                },
+                {
+                    "name": "Perceptual Speed",
+                    "slug": "perceptual-speed"
+                },
+                {
+                    "name": "Timing",
+                    "slug": "timing"
+                },
+                {
+                    "name": "Attention",
+                    "slug": "attention"
+                },
+                {
+                    "name": "Spatial",
+                    "slug": "spatial"
+                }
+            ],
+            "moods": [
+                {
+                    "name": "Relax",
+                    "slug": "relax"
+                },
+                {
+                    "name": "Focus",
+                    "slug": "focus"
+                },
+                {
+                    "name": "Grit",
+                    "slug": "grit"
+                }
+            ],
+            "orientation": "portrait",
+            "exitButtonPosition": "TOP_RIGHT"
+        }
+    ]
+}

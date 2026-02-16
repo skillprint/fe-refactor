@@ -5,6 +5,32 @@ import { notFound, useRouter } from 'next/navigation';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
 import { getGameBySlug } from '../../../api/api';
 
+const SKILL_ICONS: Record<string, string> = {
+    // Explicit mappings for known deviations or preferred naming
+    'Deduction': '/images/skills/DeductiveReasoning.png',
+    'Attention': '/images/skills/SelectiveAttention.png',
+    'Memory': '/images/skills/Memorization.png',
+    'Logic': '/images/skills/DeductiveReasoning.png', // Fallback
+    // Direct matches that might need help
+    'Perceptual Speed': '/images/skills/PerceptualSpeed.png',
+    'Speed Of Closure': '/images/skills/SpeedOfClosure.png',
+    'Selective Attention': '/images/skills/SelectiveAttention.png',
+    'Task Switching': '/images/skills/TaskSwitching.png',
+    'Information Ordering': '/images/skills/InformationOrdering.png',
+    'Inductive Reasoning': '/images/skills/InductiveReasoning.png',
+    'Deductive Reasoning': '/images/skills/DeductiveReasoning.png',
+    'Number Facility': '/images/skills/NumberFacility.png',
+    'Visualization': '/images/skills/Visualization.png',
+};
+
+const MOOD_ICONS: Record<string, string> = {
+    'Focus': '/images/mindsets/Focus.png',
+    'Relax': '/images/mindsets/Relax.png',
+    'Collaboration': '/images/mindsets/Collaboration.png',
+    'Innovate': '/images/mindsets/Innovate.png',
+    // Fallbacks or missing icons can use default handling or be added here
+};
+
 interface GameInterstitialClientProps {
     slug: string;
 }
@@ -52,7 +78,7 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
     return (
         <div className="font-sans min-h-screen bg-background">
-            <div className="flex flex-col min-h-screen pb-32">
+            <div className="flex flex-col min-h-screen pb-2">
                 {/* Header */}
                 <header className="bg-card shadow-sm border-b border-border">
                     <div className="px-4 py-4">
@@ -66,44 +92,35 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                                 </svg>
                             </button>
                             <h1 className="text-xl font-semibold text-foreground">
-                                Game Details
+                                {gameDetails.name}
                             </h1>
                         </div>
                     </div>
                 </header>
 
-                {/* Game Preview Section */}
-                <main className="flex-1 px-4 py-6">
-                    <div className="max-w-2xl mx-auto">
-                        {/* Game Title and Image */}
-                        <div className="bg-card rounded-lg shadow-sm border border-border mb-6">
-                            {displayImage ? (
-                                <div className="w-full h-48 sm:h-64 relative">
-                                    <img
-                                        src={displayImage}
-                                        alt={gameDetails.name}
-                                        className="w-full h-full object-cover rounded-t-lg"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-t-lg flex items-center justify-center">
-                                    <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            )}
 
-                            <div className="p-6">
-                                <div className="text-center mb-6">
-                                    <h2 className="text-3xl font-bold text-foreground mb-4">
-                                        {gameDetails.name}
-                                    </h2>
-                                    <p className="text-lg text-muted-foreground">
-                                        {gameDetails.description}
-                                    </p>
-                                </div>
-                            </div>
+                {/* Game Title and Image */}
+                <div className="bg-card mb-2">
+                    {displayImage ? (
+                        <div className="w-full h-48 sm:h-64 relative">
+                            <img
+                                src={displayImage}
+                                alt={gameDetails.name}
+                                className="w-full h-full object-cover"
+                            />
                         </div>
+                    ) : (
+                        <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                            <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    )}
+                </div>
+
+                {/* Game Preview Section */}
+                <main className="flex-1 px-2 py-2">
+                    <div className="max-w-2xl mx-auto">
 
                         {/* Game Information */}
                         <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
@@ -138,18 +155,68 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                                 </div>
                             )}
 
-                            {gameDetails.skills && (
-                                <div className="mb-4">
-                                    <span className="text-sm font-medium text-muted-foreground">Skills Developed:</span>
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                        {gameDetails.skills.map((skill: string, index: number) => (
-                                            <span
-                                                key={index}
-                                                className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
-                                            >
-                                                {skill}
-                                            </span>
-                                        ))}
+                            {/* Skills Section */}
+                            {(gameApiData?.skills?.length > 0 || (!gameApiData && gameDetails.skills)) && (
+                                <div className="mb-6">
+                                    <h4 className="text-sm font-medium text-muted-foreground mb-3">Skills Developed</h4>
+                                    <div className="flex flex-wrap gap-3">
+                                        {(gameApiData?.skills || gameDetails.skills?.map(s => ({ name: s, slug: s.toLowerCase().replace(/ /g, '-') }))).map((skill: any, index: number) => {
+                                            const iconPath = SKILL_ICONS[skill.name] || SKILL_ICONS[skill.name.replace(/\s+/g, '')] || `/images/skills/${skill.name.replace(/\s+/g, '')}.png`;
+                                            // Fallback to text if image fails to load is handled by the browser alt, but we can't check existence easily here.
+                                            // We will try to use the map first.
+
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg shadow-sm"
+                                                >
+                                                    <img
+                                                        src={iconPath}
+                                                        alt={skill.name}
+                                                        className="w-5 h-5 object-contain rounded-[4px]"
+                                                        onError={(e) => {
+                                                            e.currentTarget.onerror = null;
+                                                            e.currentTarget.src = '/logo192.png';
+                                                        }}
+                                                    />
+                                                    <span className="text-sm font-medium text-foreground">
+                                                        {skill.name}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Moods Section */}
+                            {gameApiData?.moods?.length > 0 && (
+                                <div className="mb-6">
+                                    <h4 className="text-sm font-medium text-muted-foreground mb-3">Moods</h4>
+                                    <div className="flex flex-wrap gap-3">
+                                        {gameApiData.moods.map((mood: any, index: number) => {
+                                            const iconPath = MOOD_ICONS[mood.name] || `/images/mindsets/${mood.name.replace(/\s+/g, '')}.png`;
+
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg shadow-sm"
+                                                >
+                                                    <img
+                                                        src={iconPath}
+                                                        alt={mood.name}
+                                                        className="w-5 h-5 object-contain rounded-[4px]"
+                                                        onError={(e) => {
+                                                            e.currentTarget.onerror = null;
+                                                            e.currentTarget.src = '/logo192.png';
+                                                        }}
+                                                    />
+                                                    <span className="text-sm font-medium text-foreground">
+                                                        {mood.name}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
