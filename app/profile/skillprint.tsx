@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import TopNav from '../components/TopNav';
@@ -54,15 +54,40 @@ export default function Skillprint() {
   const [apiKey, setApiKey] = useState('');
   const { count, isLoaded, markViewed, profileViewed } = useGameSessions();
   const { fetchUserProfile, profile, isLoading, error } = useUserProfile();
+  const [processedProfile, setProcessedProfile] = useState<any>(null);
+
+  const MOOD_COLORS: Record<string, string> = {
+    focus: '#8F48F1', relax: '#10B981', innovate: '#F59E0B', collaborate: '#3B82F6',
+  };
 
   useEffect(() => {
-    if (profile) {
-      console.log('Profile loaded in component:', profile);
+    if (profile && profile.results && profile.results.length > 0) {
+      console.log('Processing profile:', profile);
+      const p = profile.results[0];
+      const history = p.flowScoreHistory || [];
+      const latestMoodsMap = new Map();
+      history.forEach((entry: any) => {
+        const mood = entry.targetMood;
+        const current = latestMoodsMap.get(mood);
+        if (!current || new Date(entry.timestamp) > new Date(current.timestamp)) {
+          latestMoodsMap.set(mood, entry);
+        }
+      });
+      setProcessedProfile({ ...p, latestMoods: Array.from(latestMoodsMap.values()) });
     }
-    if (error) {
-      console.error('Profile load error in component:', error);
+  }, [profile]);
+
+  useEffect(() => {
+    if (processedProfile?.latestMoods) {
+      setSkills(processedProfile.latestMoods.map((m: any) => ({
+        id: m.targetMood,
+        name: m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1),
+        level: Math.round(m.score * 100),
+        category: 'Mindset',
+        color: MOOD_COLORS[m.targetMood.toLowerCase()] || '#8F48F1'
+      })));
     }
-  }, [profile, error]);
+  }, [processedProfile]);
 
   useEffect(() => {
     if (isLoaded && count >= 3 && !profileViewed) {
@@ -70,19 +95,40 @@ export default function Skillprint() {
     }
   }, [isLoaded, count, markViewed, profileViewed]);
 
-  const userSkills = skills.map(s => s.name);
-  const hasScoreBySkill = skills.reduce((acc, s) => ({ ...acc, [s.name]: true }), {});
+  const userSkills = sampleSkills.map(s => s.name);
+  const hasScoreBySkill = {};
 
-  // Example moods since none are in state currently
   const userMoods = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
-  const hasScoreByMood = userMoods.reduce((acc, m) => ({ ...acc, [m]: true }), {});
+  const hasScoreByMood = React.useMemo(() => {
+    const acc: { [key: string]: boolean } = {};
+    if (processedProfile?.latestMoods) {
+      processedProfile.latestMoods.forEach((m: any) => {
+        acc[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
+      });
+    }
+    return acc;
+  }, [processedProfile]);
 
   useEffect(() => {
     // Load settings from cookies
-
     setUserId(getCookie('user_id') || '');
     setApiKey(getCookie('api_key') || '');
   }, []);
+
+  const formatDuration = (timeStr: string) => {
+    if (!timeStr) return '0h 0m';
+    try {
+      // Format "00:00:00.107634" -> "0h 0m" or similar
+      // If it is just seconds? The sample is "00:00:00.107634".
+      const [h, m] = timeStr.split(':');
+      if (parseInt(h) === 0 && parseInt(m) === 0) {
+        return '< 1m';
+      }
+      return `${parseInt(h)}h ${parseInt(m)}m`;
+    } catch (e) {
+      return timeStr;
+    }
+  };
 
   const handleSkillClick = (skillName: string) => {
     // Navigate to skill detail page with the skill name as a parameter
@@ -102,7 +148,7 @@ export default function Skillprint() {
           <div className="flex justify-center py-20">
             <BuckyballLoading />
           </div>
-        ) : count < 3 ? (
+        ) : (count < 3 && !processedProfile) ? (
           <div className="bg-card rounded-lg shadow p-8 text-center border border-border mb-8">
             <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🔒</span>
@@ -174,6 +220,36 @@ export default function Skillprint() {
                 size={600}
               />
             </div>
+
+            {/* Stats Section */}
+            {processedProfile && (
+              <div className="grid grid-cols-3 gap-4 my-8">
+                <div className="bg-card p-4 rounded-xl border border-border text-center shadow-sm">
+                  <div className="text-2xl font-bold text-primary">
+                    {processedProfile.totalSessions}
+                  </div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">
+                    Total Sessions
+                  </div>
+                </div>
+                <div className="bg-card p-4 rounded-xl border border-border text-center shadow-sm">
+                  <div className="text-2xl font-bold text-primary">
+                    {formatDuration(processedProfile.totalTimePlayed)}
+                  </div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">
+                    Time Played
+                  </div>
+                </div>
+                <div className="bg-card p-4 rounded-xl border border-border text-center shadow-sm">
+                  <div className="text-2xl font-bold text-primary">
+                    {Math.round(processedProfile.avgFlowScore * 100)}
+                  </div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">
+                    Avg Flow Score
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="py-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">
