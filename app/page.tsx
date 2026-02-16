@@ -203,7 +203,7 @@ export default function Home() {
     // Check for spotlight cookie
     const hasSeenSpotlight = document.cookie.split('; ').find(row => row.startsWith('spotlight_dismissed='));
     if (!hasSeenSpotlight) {
-      setShowTooltip(true);
+      // setShowTooltip(true);
     }
 
     // Randomly select a skill on component mount

@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { newGameSlugs } from '../config/newGames';
+import BuckyballLoading from '../components/BuckyballLoading';
 
 type FilterType = 'moods' | 'skills';
 
@@ -303,8 +304,8 @@ function GamesPageContent() {
 
         {/* Loading */}
         {isLoading && (
-          <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-16 w-16 mt-8 border-b-2 border-primary"></div>
+          <div className="flex justify-center items-center h-full mt-10">
+            <BuckyballLoading />
           </div>
         )}
 
@@ -313,7 +314,7 @@ function GamesPageContent() {
           {filteredGames.length === 0 ? (
             <div className="text-center">
               <p className="text-muted-foreground text-lg font-semibold">
-                {isLoading ? 'Loading games...' : ''}
+                {/* {isLoading ? 'Loading games...' : ''} */}
                 {!isLoading && !searchQuery ? 'No games found with the selected filter.' : !isLoading && searchQuery ? 'No games found matching your search.' : ''}
               </p>
             </div>

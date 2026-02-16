@@ -81,6 +81,10 @@ export interface MoodScores {
     targetMood: string;
 }
 
+export interface UserProfile {
+    [key: string]: any;
+}
+
 export interface PollResultsResponse {
     gameplayTips?: string;
     state?: string;
@@ -213,6 +217,7 @@ export class SkillprintClient {
         if (isLastChunk) {
             const fetchedResponse = await fetch(this.testEmptyDataBase64String);
             const blob = await fetchedResponse.blob();
+            console.log(fetchedResponse, blob);
             formData.append('screenshot_0', blob, 'screenshot_0.jpg');
         } else {
             screenshots.forEach((screenshot, i) => {
@@ -224,9 +229,7 @@ export class SkillprintClient {
             });
         }
 
-        let headers: any = {
-            'Content-Type': 'application/json',
-        };
+        let headers: any = {};
 
         if (this.userToken) {
             headers['X-Auth-Token'] = `Token ${this.userToken}`;
@@ -376,7 +379,9 @@ export class SkillprintClient {
         }
     }
 
-    async getUserProfile(): Promise<any> {
+
+
+    async getUserProfile(): Promise<UserProfile> {
         const url = `${this.baseUrl}${this.GET_USER_PROFILE_ENDPOINT}`;
         this.log(`Getting user profile: GET ${url}`, LogLevel.INFO);
 

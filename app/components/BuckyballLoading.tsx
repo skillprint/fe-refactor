@@ -2,27 +2,20 @@ import React from 'react';
 
 const BuckyballLoading = () => {
     return (
-        <div className="flex justify-center items-center w-full h-full min-h-[200px]">
-            <svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="goo">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-                        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
-                        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-                    </filter>
-                </defs>
-                <g filter="url(#goo)">
-                    <circle r="30" fill="var(--primary)">
-                        <animate attributeName="cx" values="40;160;40" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" />
-                        <animate attributeName="cy" values="40;160;40" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" />
-                    </circle>
-                    <circle r="30" fill="var(--primary)">
-                        <animate attributeName="cx" values="160;40;160" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" />
-                        <animate attributeName="cy" values="160;40;160" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" />
-                    </circle>
-                </g>
-            </svg>
-        </div>
+        <svg width="80" height="80" viewBox="0 0 50 50">
+            <circle cx="40" cy="25" r="4" fill="#05DF91">
+                <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0s" repeatCount="indefinite"></animate>
+                <animate attributeName="fill-opacity" values="1;0.5;1" dur="1.5s" begin="0s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cx="17.500000000000004" cy="37.99038105676658" r="4" fill="#03ee9bff">
+                <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0.2s" repeatCount="indefinite"></animate>
+                <animate attributeName="fill-opacity" values="1;0.5;1" dur="1.5s" begin="0.2s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cx="17.499999999999993" cy="12.009618943233423" r="4" fill="#C2EE14">
+                <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0.4s" repeatCount="indefinite"></animate>
+                <animate attributeName="fill-opacity" values="1;0.5;1" dur="1.5s" begin="0.4s" repeatCount="indefinite"></animate>
+            </circle>
+        </svg>
     );
 };
 

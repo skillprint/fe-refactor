@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
 
@@ -87,10 +87,11 @@ export function useUserSession() {
         initializeUser();
     }, [searchParams, pathname, router]);
 
-    const setToken = (token: string) => {
+
+    const setToken = useCallback((token: string) => {
         localStorage.setItem('userToken', token);
         setUserToken(token);
-    };
+    }, []);
 
     return {
         getUserId: () => userId,

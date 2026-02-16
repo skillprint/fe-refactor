@@ -1,11 +1,15 @@
 'use client';
 
-import { useCallback } from 'react';
+
+import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from './useUserSession';
-import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
+import { SkillprintClient, LogLevel, UserProfile } from '../lib/skillprintSdk';
 
 export function useUserProfile() {
     const { userToken, userId, setToken } = useUserSession();
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
 
     const getApiKey = () => {
         if (typeof document === 'undefined') return '';
@@ -20,12 +24,13 @@ export function useUserProfile() {
             return null;
         }
 
+        setIsLoading(true);
+        setError(null);
+
         const client = new SkillprintClient({
             apiKey: getApiKey(),
             baseUrl: BASE_URL,
             logger: (msg, level) => {
-                // The user requested to "only output diagnostic information in the js console"
-                // So we log everything to console for now
                 console.log(`[Skillprint SDK] [${level}] ${msg}`);
             }
         });
@@ -33,9 +38,10 @@ export function useUserProfile() {
         client.setUserToken(userToken);
 
         try {
-            const profile = await client.getUserProfile();
-            console.log('User Profile Data:', profile);
-            return profile;
+            const profileData = await client.getUserProfile();
+            console.log('User Profile Data:', profileData);
+            setProfile(profileData);
+            return profileData;
         } catch (error: any) {
             // Check for 401 Unauthorized
             if (error.message && error.message.includes('401')) {
@@ -55,23 +61,41 @@ export function useUserProfile() {
                             // Retry the profile fetch
                             const retryProfile = await client.getUserProfile();
                             console.log('User Profile Data (retried):', retryProfile);
+                            setProfile(retryProfile);
                             return retryProfile;
                         } else {
                             console.error('Failed to obtain a new token during refresh.');
+                            setError(new Error('Failed to refresh token'));
                         }
-                    } catch (refreshError) {
+                    } catch (refreshError: any) {
                         console.error('Failed to refresh token:', refreshError);
+                        setError(refreshError);
                     }
                 } else {
                     console.warn('Cannot refresh token: No userId available.');
+                    setError(new Error('Cannot refresh token: No userId available'));
                 }
+            } else {
+                console.error('Failed to fetch user profile:', error);
+                setError(error);
             }
-            console.error('Failed to fetch user profile:', error);
             return null;
+        } finally {
+            setIsLoading(false);
         }
-    }, [userToken, userId]);
+    }, [userToken, userId, setToken]);
+
+    // Automatically fetch profile when token is available
+    useEffect(() => {
+        if (userToken) {
+            fetchUserProfile();
+        }
+    }, [userToken, fetchUserProfile]);
 
     return {
+        profile,
+        isLoading,
+        error,
         fetchUserProfile
     };
 }

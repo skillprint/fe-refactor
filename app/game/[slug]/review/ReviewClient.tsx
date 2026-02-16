@@ -170,7 +170,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                                 {Object.entries(closedSessionResult.skillScores.metrics)
                                                     .filter(([_, metric]) => metric.score > 0)
                                                     .map(([skillName, metric]) => (
-                                                        <div key={skillName} className="bg-secondary rounded-lg p-3">
+                                                        <div key={skillName} className="bg-background border border-border/50 shadow-sm rounded-lg p-3">
                                                             <div className="flex flex-col">
                                                                 <span className="text-xs font-medium text-muted-foreground capitalize mb-1">
                                                                     {skillName.replace(/-/g, ' ')}
@@ -201,7 +201,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                             <h4 className="text-md font-semibold text-foreground mb-3">Mood Analysis</h4>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {/* Target Mood */}
-                                                <div className="bg-secondary rounded-lg p-3">
+                                                <div className="bg-background border border-border/50 shadow-sm rounded-lg p-3">
                                                     <div className="flex flex-col">
                                                         <span className="text-xs font-medium text-muted-foreground mb-1">
                                                             Target Mood
@@ -214,7 +214,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
                                                 {/* Flow Score */}
                                                 {closedSessionResult.moodScores.flowScore > 0 && (
-                                                    <div className="bg-secondary rounded-lg p-3">
+                                                    <div className="bg-background border border-border/50 shadow-sm rounded-lg p-3">
                                                         <div className="flex flex-col">
                                                             <span className="text-xs font-medium text-muted-foreground mb-1">
                                                                 Flow Score
@@ -238,7 +238,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
                                                 {/* Confidence */}
                                                 {closedSessionResult.moodScores.confidence > 0 && (
-                                                    <div className="bg-secondary rounded-lg p-3">
+                                                    <div className="bg-background border border-border/50 shadow-sm rounded-lg p-3">
                                                         <div className="flex flex-col">
                                                             <span className="text-xs font-medium text-muted-foreground mb-1">
                                                                 Confidence
@@ -283,7 +283,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                             )}
 
                             {/* Stats Grid */}
-                            {gameResults && (
+                            {/* {gameResults && (
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     {gameResults.time !== undefined && (
                                         <div className="bg-secondary rounded-lg p-4 text-center">
@@ -294,14 +294,14 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                         </div>
                                     )}
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Action Buttons */}
                             <div className="space-y-3">
                                 <button
                                     onClick={handlePlayAgain}
                                     disabled={isLoading}
-                                    className="w-full bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                                    className="w-full bg-primary hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer flex items-center justify-center"
                                 >
                                     {isLoading ? (
                                         <>
@@ -323,7 +323,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
                                 <button
                                     onClick={handleViewProfile}
-                                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                                    className="w-full bg-transparent border border-primary text-primary hover:bg-primary/10 font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-sm cursor-pointer flex items-center justify-center"
                                 >
                                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -333,7 +333,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
                                 <button
                                     onClick={handleBackToGames}
-                                    className="w-full bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+                                    className="w-full bg-transparent text-muted-foreground hover:text-primary font-medium py-2 transition-colors duration-300 underline-offset-4 hover:underline cursor-pointer"
                                 >
                                     Back to Games
                                 </button>
@@ -342,6 +342,6 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

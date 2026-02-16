@@ -53,7 +53,16 @@ export default function Skillprint() {
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
   const { count, isLoaded, markViewed, profileViewed } = useGameSessions();
-  const { fetchUserProfile } = useUserProfile();
+  const { fetchUserProfile, profile, isLoading, error } = useUserProfile();
+
+  useEffect(() => {
+    if (profile) {
+      console.log('Profile loaded in component:', profile);
+    }
+    if (error) {
+      console.error('Profile load error in component:', error);
+    }
+  }, [profile, error]);
 
   useEffect(() => {
     if (isLoaded && count >= 3 && !profileViewed) {
