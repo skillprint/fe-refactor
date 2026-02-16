@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import TopNav from "./components/TopNav";
 import ProgressBanner from "./components/ProgressBanner";
@@ -187,7 +187,7 @@ const gradients = [
   'from-indigo-500 to-purple-500',
 ];
 
-export default function Home() {
+function HomeContent() {
   useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<typeof allGames>([]);
@@ -668,8 +668,14 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><BuckyballLoading /></div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
