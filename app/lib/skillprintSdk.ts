@@ -165,12 +165,7 @@ export class SkillprintClient {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
-        const slugToGameId = this.GAME_SLUG_TO_NAME_MAP[gameName];
-
-        if (!slugToGameId) {
-            this.log(`Game not found: ${gameName}`, LogLevel.ERROR);
-            throw new Error(`Game not found: ${gameName}`);
-        }
+        const slugToGameId = this.GAME_SLUG_TO_NAME_MAP[gameName] || gameName;
 
         const requestData: StartSessionRequest = {
             sessionId,
