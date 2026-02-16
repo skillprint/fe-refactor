@@ -327,7 +327,7 @@ function HomeContent() {
                   Your Profile is Unlocked!
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Great job! You've played {count} sessions and revealed your unique cognitive breakdown.
+                  Great job! You've played enough sessions and revealed your unique cognitive breakdown.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <Link

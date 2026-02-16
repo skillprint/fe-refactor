@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserSession } from '../../../hooks/useUserSession';
 import { getGameDetails } from '../../../config/gameConfig';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
+import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 
 interface GameResults {
@@ -88,15 +89,40 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
                     if (isCancelled) return;
 
+
                     if (polledRes && polledRes.state === "CLOSED") {
                         setIsCalculating(false);
                         setClosedSessionResult(polledRes);
 
+                        let flowScore = 0;
+                        if (polledRes.moodScores?.flowScore) {
+                            flowScore = Math.round(polledRes.moodScores.flowScore * 100);
+                        }
+
+                        // Update the session in local storage with the real score
+                        const storedSessions = getGameSessions();
+                        const currentSession = storedSessions.find(s => s.id === sessionId);
+
+                        if (currentSession) {
+                            // Update score and potentially other metadata
+                            currentSession.score = flowScore;
+                            // You might want to update other fields from the closed session result if available
+                            if (polledRes.moodScores?.targetMood) {
+                                if (!currentSession.metadata) currentSession.metadata = {};
+                                currentSession.metadata.targetMood = polledRes.moodScores.targetMood;
+                                currentSession.metadata.moodScores = polledRes.moodScores;
+                            }
+
+                            saveGameSession(currentSession);
+                            // Trigger an update event so other components (like GameSessionManager) refresh immediately
+                            window.dispatchEvent(new Event('skillprint_storage_update'));
+                        }
+
                         // Extract game results from session data if available
                         // This is a placeholder - adjust based on your actual data structure
                         const results: GameResults = {
-                            score: 0, // Extract from polledRes if available
-                            time: 0,
+                            score: flowScore,
+                            time: currentSession?.duration || 0,
                             level: 1,
                             achievements: [],
                             accuracy: 0,

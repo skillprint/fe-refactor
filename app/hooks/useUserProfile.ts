@@ -1,12 +1,13 @@
 'use client';
 
-
 import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from './useUserSession';
 import { SkillprintClient, LogLevel, UserProfile } from '../lib/skillprintSdk';
+import { useGameSessions } from './useGameSessions';
 
 export function useUserProfile() {
     const { userToken, userId, setToken } = useUserSession();
+    const { count, isLoaded: isSessionsLoaded } = useGameSessions();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -85,12 +86,12 @@ export function useUserProfile() {
         }
     }, [userToken, userId, setToken]);
 
-    // Automatically fetch profile when token is available
+    // Automatically fetch profile when token is available and user has played at least 3 games
     useEffect(() => {
-        if (userToken) {
+        if (userToken && isSessionsLoaded && count >= 3) {
             fetchUserProfile();
         }
-    }, [userToken, fetchUserProfile]);
+    }, [userToken, fetchUserProfile, isSessionsLoaded, count]);
 
     return {
         profile,
