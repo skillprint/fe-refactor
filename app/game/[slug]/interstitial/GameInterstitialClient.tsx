@@ -48,7 +48,7 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
         router.push('/games');
     };
 
-    const displayImage = gameApiData?.image || gameDetails.image;
+    const displayImage = gameDetails.image || gameApiData?.image;
 
     return (
         <div className="font-sans min-h-screen bg-background">

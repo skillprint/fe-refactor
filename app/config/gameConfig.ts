@@ -186,7 +186,7 @@ export const gameDetails: Record<string, GameDetails> = {
   '2048': {
     name: '2048',
     description: 'Slide tiles to reach 2048',
-    image: '/games/live/2048/screenshot.png',
+    image: '/images/activities/covers/2048-538b61b2-9953-4f0b-8b99-0b99812ca315.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -196,7 +196,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'alchemy': {
     name: 'Alchemy',
     description: 'Combine elements to create new ones',
-    image: '/games/live/Alchemy/icon_144.png',
+    image: '/images/activities/covers/alchemy-0d0a33e5-d249-42d2-91cc-a734b00e6113.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '10-30 minutes',
@@ -206,7 +206,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'box-tower': {
     name: 'Box Tower',
     description: 'Stack boxes as high as you can!',
-    image: '/games/live/Box Tower/box-tower.png',
+    image: '/images/activities/covers/box-tower-befd1b5c-b07f-4463-8137-fadfdb6fc8de.png',
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -216,7 +216,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'bubble-spirit': {
     name: 'Bubble Spirit',
     description: 'Pop bubbles in this puzzle game',
-    image: '/games/live/Bubble Spirit/bubble-spirit.png',
+    image: '/images/activities/covers/bubble-spirit-d1e8e962-1243-4e94-a9f4-351dec27ae8a.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '5-10 minutes',
@@ -226,6 +226,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'change-word': {
     name: 'Change Word',
     description: 'Transform words letter by letter',
+    image: '/images/activities/covers/change-word-0bc38905-8138-43f2-9ff5-a01a5f038782.png',
     category: 'Word Game',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -244,6 +245,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'flapcat-steampunk': {
     name: 'Flapcat Steampunk',
     description: 'Navigate through obstacles',
+    image: '/images/activities/covers/flapcat-steampunk-fe310887-b4c3-4cbb-96d4-575e5786.png',
     category: 'Arcade',
     difficulty: 'Hard',
     estimatedTime: '1-3 minutes',
@@ -253,6 +255,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'fruit-boom': {
     name: 'Fruit Boom',
     description: 'Match and explode fruits',
+    image: '/images/activities/covers/fruit-boom-cfc9640c-477d-437b-9d2f-54f972163c09.png',
     category: 'Match-3',
     difficulty: 'Easy',
     estimatedTime: '5-10 minutes',
@@ -262,6 +265,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'garden-match': {
     name: 'Garden Match',
     description: 'Match garden items in this puzzle',
+    image: '/images/activities/covers/garden-match-f883d184-cb16-434c-a866-6eaff7bd05b2.png',
     category: 'Match-3',
     difficulty: 'Easy',
     estimatedTime: '5-15 minutes',
@@ -271,6 +275,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'hextris': {
     name: 'Hextris',
     description: 'Rotate and match hexagons',
+    image: '/images/activities/covers/hextris-475aff99-6346-4ea4-b432-dc8aa51f2178.png',
     category: 'Puzzle',
     difficulty: 'Hard',
     estimatedTime: '3-8 minutes',
@@ -280,6 +285,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'i-love-hue': {
     name: 'I Love Hue',
     description: 'Arrange colors in perfect harmony',
+    image: '/images/activities/covers/i-love-hue-115ad80c-adb3-47fb-8be7-4b683133a94e.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-20 minutes',
@@ -289,6 +295,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'impossible-10': {
     name: 'Impossible 10',
     description: 'Solve the impossible puzzle',
+    image: '/images/activities/covers/impossible-10-9a3114bb-a36a-46b4-bbe6-059bd7921b3d.png',
     category: 'Puzzle',
     difficulty: 'Hard',
     estimatedTime: '15-45 minutes',
@@ -307,6 +314,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'mine-rusher': {
     name: 'Mine Rusher',
     description: 'Navigate through the minefield',
+    image: '/images/activities/covers/mine-rusher-08ac08e4-61d5-4ac8-8cef-d29273cf8448.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -316,6 +324,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'snake-attack': {
     name: 'Snake Attack',
     description: 'Grow your snake by eating food',
+    image: '/images/activities/covers/snake-attack-3b730898-fe67-4e51-a655-57c81bd3efbc.png',
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -325,6 +334,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'space-trip': {
     name: 'Space Trip',
     description: 'Explore space in this adventure',
+    image: '/images/activities/covers/space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20.png',
     category: 'Adventure',
     difficulty: 'Medium',
     estimatedTime: '10-25 minutes',
@@ -334,6 +344,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'ultimate-sudoku': {
     name: 'Ultimate Sudoku',
     description: 'Solve number puzzles',
+    image: '/images/activities/covers/ultimate-sudoku-c5f5177d-6a3e-43f6-b2d2-6a7a78c88e.png',
     category: 'Puzzle',
     difficulty: 'Hard',
     estimatedTime: '15-60 minutes',
@@ -343,7 +354,7 @@ export const gameDetails: Record<string, GameDetails> = {
   '0hh1': {
     name: '0h h1',
     description: 'A logic game with red and blue tiles',
-    image: '/games/live/0hh1/static/screenshot.png',
+    image: '/images/activities/covers/0hh1-e28b593f-4355-4b9e-8444-6f9e04ca1846.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -353,7 +364,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'brick-out': {
     name: 'Brick Out',
     description: 'Break all the bricks',
-    image: '/games/live/Brick Out/brick-out.png',
+    image: '/images/activities/covers/brick-out-54e74305-8000-4605-b6b7-cf9412dd285b.png',
     category: 'Arcade',
     difficulty: 'Easy',
     estimatedTime: '3-8 minutes',
@@ -363,7 +374,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'colorize-2': {
     name: 'Colorize 2',
     description: 'Fill the board with color',
-    image: '/games/live/Colorize 2/screenshot.png',
+    image: '/images/activities/covers/colorize-2-79f1475d-c180-43e0-a496-0123c3972709.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-10 minutes',
@@ -383,7 +394,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'fruit-sorting': {
     name: 'Fruit Sorting',
     description: 'Sort the fruits into the right baskets',
-    image: '/games/live/Fruit Sorting/icon_144.png',
+    image: '/images/activities/covers/fruit-sorting-2-778da931-ec64-4123-9aa0-2b21c7994d.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-5 minutes',
@@ -393,7 +404,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'gems-of-hanoi': {
     name: 'Gems of Hanoi',
     description: 'Classic Tower of Hanoi puzzle',
-    image: '/games/live/Gems of Hanoi/screenshot.png',
+    image: '/images/activities/covers/gems-of-hanoi-0403925f-1ccc-49fb-9c6d-027bd770da50.png',
     category: 'Puzzle',
     difficulty: 'Hard',
     estimatedTime: '10-20 minutes',
@@ -403,7 +414,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'gummy-blocks': {
     name: 'Gummy Blocks',
     description: 'Fit the gummy blocks into the grid',
-    image: '/games/live/Gummy Blocks/gummy-blocks.png',
+    image: '/images/activities/covers/gummy-blocks-018b6d5d-9048-40aa-b79a-b7e4435ddb9a.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -413,7 +424,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'hiding-master': {
     name: 'Hiding Master',
     description: 'Hide from the seeker',
-    image: '/games/live/Hiding Master/screenshot.png',
+    image: '/images/activities/covers/hiding-master-1b6f8771-e9e6-41ea-a408-d3fbbfac2a21.png',
     category: 'Arcade',
     difficulty: 'Easy',
     estimatedTime: '2-5 minutes',
@@ -423,7 +434,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'mahjong-deluxe': {
     name: 'Mahjong Deluxe',
     description: 'Classic tile-matching game',
-    image: '/games/live/Mahjong Deluxe/screenshot.png',
+    image: '/images/activities/covers/mahjong-deluxe-77a68085-f806-48c8-a3a8-a11450f3d80.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-20 minutes',
@@ -433,7 +444,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'match-doodle': {
     name: 'Match Doodle',
     description: 'Draw to match items',
-    image: '/games/live/Match Doodle/icon_144.png',
+    image: '/images/activities/covers/match-doodle-2-6697ba5a-8a64-42f6-adbd-6546dc65583.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-8 minutes',
@@ -443,7 +454,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'photo-hunt': {
     name: 'Photo Hunt',
     description: 'Find the differences between photos',
-    image: '/games/live/Photo Hunt/icon_144.png',
+    image: '/images/activities/covers/photo-hunt-a9cba04f-8ccb-41e8-9569-af32e6bb2653.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-10 minutes',
@@ -453,7 +464,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'space-adventure-pinball': {
     name: 'Space Adventure Pinball',
     description: 'Classic pinball in space',
-    image: '/games/live/Space Adventure Pinball/space-adventure-pinball.png',
+    image: '/images/activities/covers/space-adventure-pinball-fff717d3-9edc-4534-a4a2-9b.png',
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -473,7 +484,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'star-puzzles': {
     name: 'Star Puzzles',
     description: 'Collect stars in this logic puzzle',
-    image: '/games/live/Star Puzzles/icon_144.png',
+    image: '/images/activities/covers/star-puzzles-c2b7b115-b851-419e-8052-cad293bac997.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -483,7 +494,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'sumagi': {
     name: 'Sumagi',
     description: 'Sum matching game',
-    image: '/games/live/Sumagi/icon_144.png',
+    image: '/images/activities/covers/sumagi-2-dbdafb8b-be06-4d5b-adc7-0868c2ecfaaf.png',
     category: 'Puzzle',
     difficulty: 'Hard',
     estimatedTime: '5-15 minutes',
@@ -493,7 +504,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'sweet-memory': {
     name: 'Sweet Memory',
     description: 'Memory matching with sweets',
-    image: '/games/live/Sweet Memory/icon_144.png',
+    image: '/images/activities/covers/sweet-memory-2-6b558e2a-cf49-4ea7-be60-2a8dda06b60.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-5 minutes',
@@ -503,7 +514,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'whack-em-all': {
     name: 'Whack \'em All',
     description: 'Whack the moles!',
-    image: '/games/live/Whack \'em All/screenshot.png',
+    image: '/images/activities/covers/whack-em-all-b32fb0b4-2558-4b45-bad7-f419733bdb3a.png',
     category: 'Arcade',
     difficulty: 'Easy',
     estimatedTime: '1-3 minutes',
