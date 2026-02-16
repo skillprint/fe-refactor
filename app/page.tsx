@@ -11,6 +11,7 @@ import { useUserSession } from './hooks/useUserSession';
 import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
 import SkillprintVisualization from './components/Skillprint';
+import { getGameDetails } from './config/gameConfig';
 
 // Skills data
 const skills = [
@@ -19,7 +20,7 @@ const skills = [
     name: 'Memory',
     color: 'bg-indigo-100 text-indigo-800',
     gradient: 'from-indigo-500 to-purple-500',
-    icon: '🧠',
+    image: '/images/skills/Memorization.png',
     description: 'Enhance your recall and retention abilities'
   },
   {
@@ -27,7 +28,7 @@ const skills = [
     name: 'Logic',
     color: 'bg-red-100 text-red-800',
     gradient: 'from-red-500 to-pink-500',
-    icon: '🧩',
+    image: '/images/skills/DeductiveReasoning.png',
     description: 'Sharpen your reasoning and problem-solving'
   },
   {
@@ -35,7 +36,7 @@ const skills = [
     name: 'Speed',
     color: 'bg-orange-100 text-orange-800',
     gradient: 'from-orange-500 to-yellow-500',
-    icon: '⚡',
+    image: '/images/skills/PerceptualSpeed.png',
     description: 'Improve your reaction time and quick thinking'
   },
   {
@@ -43,7 +44,7 @@ const skills = [
     name: 'Pattern Recognition',
     color: 'bg-teal-100 text-teal-800',
     gradient: 'from-teal-500 to-cyan-500',
-    icon: '🔍',
+    image: '/images/skills/InductiveReasoning.png',
     description: 'Develop your ability to identify patterns'
   },
   {
@@ -51,7 +52,7 @@ const skills = [
     name: 'Coordination',
     color: 'bg-emerald-100 text-emerald-800',
     gradient: 'from-emerald-500 to-green-500',
-    icon: '🎯',
+    image: '/images/skills/TaskSwitching.png',
     description: 'Build hand-eye coordination skills'
   },
 ];
@@ -60,25 +61,25 @@ const moods = [
   {
     id: 'relax',
     name: 'Relax',
-    icon: '🧘',
+    image: '/images/mindsets/Relax.png',
     gradient: 'from-emerald-400 to-teal-500'
   },
   {
     id: 'focus',
     name: 'Focus',
-    icon: '🎯',
+    image: '/images/mindsets/Focus.png',
     gradient: 'from-indigo-400 to-blue-500'
   },
   {
-    id: 'energize',
-    name: 'Energize',
-    icon: '⚡',
+    id: 'collaborate',
+    name: 'Collaborate',
+    image: '/images/mindsets/Collaboration.png',
     gradient: 'from-orange-400 to-red-500'
   },
   {
     id: 'creativity',
     name: 'Creative',
-    icon: '🎨',
+    image: '/images/mindsets/Innovate.png',
     gradient: 'from-pink-400 to-purple-500'
   },
 ];
@@ -190,7 +191,7 @@ const gradients = [
 function HomeContent() {
   useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
-  const [skillGames, setSkillGames] = useState<typeof allGames>([]);
+  const [skillGames, setSkillGames] = useState<any[]>([]);
   const [showTooltip, setShowTooltip] = useState(false);
 
   // Fetch games for the "New Games" section using the 'relax' mood
@@ -213,10 +214,16 @@ function HomeContent() {
     const randomSkill = skills[Math.floor(Math.random() * skills.length)];
     setFeaturedSkill(randomSkill);
 
-    // Filter games that have this skill
+    // Filter games that have this skill and add image from config
     const gamesForSkill = allGames.filter(game =>
       game.skills.includes(randomSkill.id)
-    );
+    ).map(game => {
+      const details = getGameDetails(game.slug);
+      return {
+        ...game,
+        image: details?.image
+      };
+    });
     setSkillGames(gamesForSkill);
   }, []);
 
@@ -486,16 +493,13 @@ function HomeContent() {
                     href={`/games?tab=moods&filter=${mood.id}`}
                     className="flex-shrink-0 group"
                   >
-                    <div className="flex items-center gap-4 px-5 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${mood.gradient} flex items-center justify-center text-2xl shadow-inner text-white`}>
-                        {mood.icon}
+                    <div className="flex items-center gap-4 px-3 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+                      <div className={`rounded-xl flex items-center justify-center`}>
+                        <img src={mood.image} alt={mood.name} className="w-8 h-8 object-contain rounded-xl" />
                       </div>
                       <div>
                         <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
                           {mood.name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
-                          Mood
                         </span>
                       </div>
                     </div>
@@ -516,16 +520,13 @@ function HomeContent() {
                     href={`/games?tab=skills&filter=${skill.id}`}
                     className="flex-shrink-0 group"
                   >
-                    <div className="flex items-center gap-4 px-5 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${skill.gradient} flex items-center justify-center text-2xl shadow-inner text-white`}>
-                        {skill.icon}
+                    <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+                      <div className={`rounded-xl flex items-center justify-center`}>
+                        <img src={skill.image} alt={skill.name} className="w-8 h-8 object-contain rounded-xl" />
                       </div>
                       <div>
                         <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
                           {skill.name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
-                          Skill
                         </span>
                       </div>
                     </div>
@@ -537,11 +538,13 @@ function HomeContent() {
         </div>
 
         {/* Featured Skill Section */}
-        <div className="px-4 sm:px-8 py-8 bg-secondary">
+        <div className="px-4 sm:px-8 py-8 border-t border-border bg-white border-b">
           <div className="mb-6">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-4xl">{featuredSkill.icon}</span>
+                <div className={`${featuredSkill.gradient} flex items-center justify-center`}>
+                  <img src={featuredSkill.image} alt={featuredSkill.name} className="w-10 h-10 object-contain rounded-xl" />
+                </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-foreground mb-1">
                     Featured Skill: {featuredSkill.name}
@@ -571,6 +574,8 @@ function HomeContent() {
             </div>
           </div>
 
+
+
           {/* Horizontal scrollable skill game cards */}
           <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
             <div className="flex gap-4 min-w-min">
@@ -582,18 +587,37 @@ function HomeContent() {
                     className="block group flex-shrink-0 w-64"
                   >
                     <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                      {/* Skill-themed header */}
-                      <div className={`h-24 bg-gradient-to-br ${featuredSkill.gradient} relative flex items-center justify-center`}>
-                        <span className="text-5xl opacity-30">{featuredSkill.icon}</span>
-                        {/* Play icon overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                          <div className="bg-card/95 rounded-full p-3">
-                            <svg className="w-6 h-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
+                      {/* Game Image or Gradient Fallback */}
+                      {game.image ? (
+                        <div className="h-32 w-full relative">
+                          <img
+                            src={game.image}
+                            alt={game.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Play icon overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+                            <div className="bg-card/95 rounded-full p-3">
+                              <svg className="w-6 h-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className={`h-32 bg-gradient-to-br ${featuredSkill.gradient} relative flex items-center justify-center overflow-hidden`}>
+                          <img src={featuredSkill.image} alt={featuredSkill.name} className="w-20 h-20 opacity-20 object-contain absolute -bottom-4 -right-4 invert brightness-0 rotate-12" />
+                          <img src={featuredSkill.image} alt={featuredSkill.name} className="w-12 h-12 object-contain relative z-10 invert brightness-0" />
+                          {/* Play icon overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+                            <div className="bg-card/95 rounded-full p-3">
+                              <svg className="w-6 h-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Card content */}
                       <div className="p-4">
