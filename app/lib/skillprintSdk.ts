@@ -297,7 +297,7 @@ export class SkillprintClient {
         }
     }
 
-    async createOrGetUserToken(customPlayerId) {
+    async createOrGetUserToken(customPlayerId: string) {
         if (!customPlayerId) {
             throw new Error('Custom player ID cannot be null or empty');
         }
@@ -311,13 +311,13 @@ export class SkillprintClient {
                 await this.createUser(customPlayerId);
                 // User created successfully, now get token
                 return await this.getUserToken(customPlayerId);
-            } catch (createError) {
+            } catch (createError: any) {
                 throw new Error(`Failed to create user: ${createError.message}`);
             }
         }
     }
 
-    async createUser(internalId) {
+    async createUser(internalId: string) {
         const url = `${this.baseUrl}${this.CREATE_USER_ENDPOINT}`;
         this.logger?.(`Creating user: POST ${url} with internalId: ${internalId}`, LogLevel.INFO);
 
