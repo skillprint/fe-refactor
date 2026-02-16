@@ -31,6 +31,7 @@ export interface SkillprintConfigOptions {
     apiKey: string;
     baseUrl: string;
     logger?: (message: string, level: LogLevel) => void;
+    userToken?: string;
 }
 
 interface StartSessionRequest {
@@ -121,14 +122,20 @@ export class SkillprintClient {
         this.apiKey = options.apiKey;
         this.logger = options.logger;
 
-        this.setupUser().then(() => {
-            this.log('User setup complete.', LogLevel.INFO);
-        }).catch((error: any) => {
-            this.log(`User setup failed: ${error.message}`, LogLevel.ERROR);
-        });
+        if (options.userToken) {
+            this.userToken = options.userToken;
+        } else {
+            this.setupUser().then(() => {
+                this.log('User setup complete.', LogLevel.INFO);
+            }).catch((error: any) => {
+                this.log(`User setup failed: ${error.message}`, LogLevel.ERROR);
+            });
+        }
     }
 
     async setupUser(): Promise<void> {
+        if (this.userToken) return;
+
         // check if user id in cookie
         const userId = getCookie('user_id')
         if (userId) {

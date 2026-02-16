@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { notFound, useRouter } from 'next/navigation';
+import { useUserSession } from '../../hooks/useUserSession';
 import BottomTabs from '../../components/BottomTabs';
 import FloatingExitButton from '../../components/FloatingExitButton';
 import FirstGameBadge from '../../components/FirstGameBadge';
@@ -107,6 +108,7 @@ export const mapSlugToGamePath = (slug: string) => {
 
 export default function GameClient({ slug }: GameClientProps) {
     const router = useRouter();
+    const { userToken } = useUserSession();
     const [isIframeLoaded, setIsIframeLoaded] = useState(false);
     const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
@@ -428,11 +430,15 @@ export default function GameClient({ slug }: GameClientProps) {
         skillprintSessionIdRef.current = sessionId;
         const apiKey = getApiKey();
 
+        // Try to get token from hook or localStorage directly for immediate availability
+        const tokenToUse = userToken || localStorage.getItem('userToken');
+
         // Use staging by default as per existing code
         const client = new SkillprintClient({
             apiKey,
             baseUrl: 'https://api.skillprint.co/',
-            logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`)
+            logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
+            userToken: tokenToUse || undefined
         });
         skillprintClientRef.current = client;
 
@@ -450,6 +456,13 @@ export default function GameClient({ slug }: GameClientProps) {
             shouldPollRef.current = false;
         };
     }, [slug]);
+
+    // Update token if it changes (e.g. loads asynchronously)
+    useEffect(() => {
+        if (skillprintClientRef.current && userToken) {
+            skillprintClientRef.current.setUserToken(userToken);
+        }
+    }, [userToken]);
 
     // Cleanup message listener
     useEffect(() => {

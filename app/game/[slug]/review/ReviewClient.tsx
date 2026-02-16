@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUserSession } from '../../../hooks/useUserSession';
 import { getGameDetails } from '../../../config/gameConfig';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
 
@@ -22,6 +23,7 @@ interface ReviewClientProps {
 
 export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     const router = useRouter();
+    const { userToken } = useUserSession();
     const [isLoading, setIsLoading] = useState(false);
     const [isCalculating, setIsCalculating] = useState(true);
     const [calculationError, setCalculationError] = useState<string | undefined>(undefined);
@@ -42,6 +44,8 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
     // Poll for results when component mounts
     useEffect(() => {
+        let isCancelled = false;
+
         if (!sessionId) {
             setCalculationError('No session ID provided');
             setIsCalculating(false);
@@ -49,28 +53,39 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         }
 
         const pollResults = async () => {
+            if (isCancelled) return;
             setIsCalculating(true);
             setCalculationError(undefined);
 
             const apiKey = getApiKey();
+            // Try to get token from hook or localStorage directly
+            const tokenToUse = userToken || localStorage.getItem('userToken');
+
             const client = new SkillprintClient({
                 apiKey,
                 baseUrl: 'https://api.skillprint.co/',
-                logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`)
+                logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
+                userToken: tokenToUse || undefined
             });
 
             const startTime = Date.now();
             const timeout = 20000; // 20 seconds
 
             const poll = async () => {
+                if (isCancelled) return;
+
                 if (Date.now() - startTime > timeout) {
-                    setIsCalculating(false);
-                    setCalculationError('Score calculation took longer than expected. Please try again.');
+                    if (!isCancelled) {
+                        setIsCalculating(false);
+                        setCalculationError('Score calculation took longer than expected. Please try again.');
+                    }
                     return;
                 }
 
                 try {
                     const polledRes = await client.pollParameterResults(sessionId);
+
+                    if (isCancelled) return;
 
                     if (polledRes && polledRes.state === "CLOSED") {
                         setIsCalculating(false);
@@ -89,11 +104,11 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                         };
                         setGameResults(results);
                     } else {
-                        setTimeout(poll, 2000);
+                        if (!isCancelled) setTimeout(poll, 2000);
                     }
                 } catch (e) {
                     console.error('Polling error', e);
-                    setTimeout(poll, 2000);
+                    if (!isCancelled) setTimeout(poll, 2000);
                 }
             };
 
@@ -101,7 +116,11 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         };
 
         pollResults();
-    }, [sessionId]);
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [sessionId, userToken]);
 
     const handlePlayAgain = () => {
         setIsLoading(true);
