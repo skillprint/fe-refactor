@@ -520,7 +520,7 @@ function HomeContent() {
                     href={`/games?tab=skills&filter=${skill.id}`}
                     className="flex-shrink-0 group"
                   >
-                    <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 bg-white">
                       <div className={`rounded-xl flex items-center justify-center`}>
                         <img src={skill.image} alt={skill.name} className="w-8 h-8 object-contain rounded-xl" />
                       </div>
