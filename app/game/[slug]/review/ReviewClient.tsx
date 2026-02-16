@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserSession } from '../../../hooks/useUserSession';
 import { getGameDetails } from '../../../config/gameConfig';
+import { getGameBySlug } from '../../../api/api';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
 import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
@@ -41,6 +42,21 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
     // Get game details
     const gameDetails = getGameDetails(decodedSlug);
+    const [gameApiData, setGameApiData] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchGameData = async () => {
+            try {
+                const data = await getGameBySlug(decodedSlug);
+                if (data) {
+                    setGameApiData(data);
+                }
+            } catch (error) {
+                console.error("Error fetching game data:", error);
+            }
+        };
+        fetchGameData();
+    }, [decodedSlug]);
 
     const getApiKey = () => {
         if (typeof document === 'undefined') return '';
@@ -194,18 +210,41 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
+    const displayImage = gameDetails?.image || gameApiData?.image;
+
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="bg-card rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-2xl p-6 text-center text-white">
-                    <div className="w-20 h-20 mx-auto mb-4 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold mb-2">Game Complete!</h2>
-                    <p className="text-blue-100">{gameDetails?.name || decodedSlug}</p>
+                <div className={`relative ${displayImage ? 'h-64' : ''} rounded-t-2xl overflow-hidden`}>
+                    {displayImage ? (
+                        <>
+                            <img
+                                src={displayImage}
+                                alt={gameDetails?.name || decodedSlug}
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-6 text-center">
+                                <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-2xl font-bold mb-2">Game Complete!</h2>
+                                <p className="text-blue-100">{gameDetails?.name || decodedSlug}</p>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center text-white h-full flex flex-col items-center justify-center">
+                            <div className="w-20 h-20 mx-auto mb-4 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold mb-2">Game Complete!</h2>
+                            <p className="text-blue-100">{gameDetails?.name || decodedSlug}</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Results Content */}
