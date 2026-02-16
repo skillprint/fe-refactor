@@ -6,7 +6,7 @@ import { useUserSession } from '../../hooks/useUserSession';
 import BottomTabs from '../../components/BottomTabs';
 import FloatingExitButton from '../../components/FloatingExitButton';
 import FirstGameBadge from '../../components/FirstGameBadge';
-import { getGameConfig } from '../../config/gameConfig';
+import { getGameConfig, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
@@ -113,6 +113,7 @@ export default function GameClient({ slug }: GameClientProps) {
     const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
     const [showBadge, setShowBadge] = useState(false);
+    const [nextGameSlug, setNextGameSlug] = useState<string>('');
     const skillprintSessionIdRef = useRef<string>('');
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -312,6 +313,10 @@ export default function GameClient({ slug }: GameClientProps) {
         // Check for first game badge
         const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
         if (!hasSeenBadge) {
+            // Pick a random next game
+            const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
+            const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];
+            setNextGameSlug(randomGame);
             setShowBadge(true);
         }
 
@@ -398,6 +403,10 @@ export default function GameClient({ slug }: GameClientProps) {
             // Check for first game badge on early exit too
             const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
             if (!hasSeenBadge) {
+                // Pick a random next game
+                const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
+                const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];
+                setNextGameSlug(randomGame);
                 setShowBadge(true);
             }
 
@@ -527,7 +536,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
             {/* First Game Badge Popup */}
             {showBadge && (
-                <FirstGameBadge onDismiss={handleBadgeDismiss} />
+                <FirstGameBadge onDismiss={handleBadgeDismiss} nextGameSlug={nextGameSlug} />
             )}
         </div>
     );

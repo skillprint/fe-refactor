@@ -12,6 +12,8 @@ import { useGameSessions } from '../hooks/useGameSessions';
 import { useUserProfile } from '../hooks/useUserProfile';
 import BuckyballLoading from '../components/BuckyballLoading';
 import SkillprintVisualization from '../components/Skillprint';
+import FirstGameBadge from '../components/FirstGameBadge';
+import { knownGameSlugs } from '../config/gameConfig';
 
 interface Skill {
   id: string;
@@ -55,6 +57,8 @@ export default function Skillprint() {
   const { count, isLoaded, markViewed, profileViewed } = useGameSessions();
   const { fetchUserProfile, profile, isLoading, error } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
+  const [showBadge, setShowBadge] = useState(false);
+  const [nextGameSlug, setNextGameSlug] = useState<string>('');
 
   const MOOD_COLORS: Record<string, string> = {
     focus: '#8F48F1', relax: '#10B981', innovate: '#F59E0B', collaborate: '#3B82F6',
@@ -133,6 +137,12 @@ export default function Skillprint() {
   const handleSkillClick = (skillName: string) => {
     // Navigate to skill detail page with the skill name as a parameter
     router.push(`/profile/skill/${encodeURIComponent(skillName)}`);
+  };
+
+  const handleTestBadge = () => {
+    const randomGame = knownGameSlugs[Math.floor(Math.random() * knownGameSlugs.length)];
+    setNextGameSlug(randomGame);
+    setShowBadge(true);
   };
 
 
@@ -458,9 +468,28 @@ export default function Skillprint() {
                 Fetch Data
               </button>
             </div>
+
+            <div className="flex items-center justify-between border-t border-border pt-6">
+              <div>
+                <h3 className="text-lg font-medium text-foreground">
+                  Test First Game Badge
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Show the "First Game Played" popup
+                </p>
+              </div>
+              <button
+                onClick={handleTestBadge}
+                className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                Test Popup
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      {showBadge && (
+        <FirstGameBadge onDismiss={() => setShowBadge(false)} nextGameSlug={nextGameSlug} />
+      )}
     </div>
   );
 }

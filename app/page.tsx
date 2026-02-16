@@ -8,6 +8,9 @@ import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
 
 import { useUserSession } from './hooks/useUserSession';
+import { useGameSessions } from './hooks/useGameSessions';
+import { useUserProfile } from './hooks/useUserProfile';
+import SkillprintVisualization from './components/Skillprint';
 
 // Skills data
 const skills = [
@@ -224,6 +227,52 @@ export default function Home() {
     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
     document.cookie = `spotlight_dismissed=true; expires=${date.toUTCString()}; path=/`;
   };
+
+  // Skillprint Visualization Logic
+  const { count, isLoaded } = useGameSessions();
+  const { fetchUserProfile, profile } = useUserProfile();
+  const [processedProfile, setProcessedProfile] = useState<any>(null);
+  const [hasScoreByMood, setHasScoreByMood] = useState<{ [key: string]: boolean }>({});
+
+  const sampleSkillsForVis = [
+    { id: '1', name: 'Problem Solving', level: 85, category: 'Cognitive', color: '#3B82F6' },
+    { id: '2', name: 'Memory', level: 78, category: 'Cognitive', color: '#10B981' },
+    { id: '3', name: 'Speed', level: 92, category: 'Cognitive', color: '#F59E0B' },
+    { id: '4', name: 'Accuracy', level: 88, category: 'Cognitive', color: '#EF4444' },
+    { id: '5', name: 'Pattern Recognition', level: 76, category: 'Cognitive', color: '#8B5CF6' },
+    { id: '6', name: 'Spatial Awareness', level: 82, category: 'Cognitive', color: '#06B6D4' },
+    { id: '7', name: 'Logic', level: 89, category: 'Cognitive', color: '#84CC16' },
+    { id: '8', name: 'Creativity', level: 71, category: 'Cognitive', color: '#F97316' },
+  ];
+  const userSkillsForVis = sampleSkillsForVis.map(s => s.name);
+  const userMoodsForVis = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
+
+  useEffect(() => {
+    if (profile && profile.results && profile.results.length > 0) {
+      const p = profile.results[0];
+      const history = p.flowScoreHistory || [];
+      const latestMoodsMap = new Map();
+      history.forEach((entry: any) => {
+        const mood = entry.targetMood;
+        const current = latestMoodsMap.get(mood);
+        if (!current || new Date(entry.timestamp) > new Date(current.timestamp)) {
+          latestMoodsMap.set(mood, entry);
+        }
+      });
+      setProcessedProfile({ ...p, latestMoods: Array.from(latestMoodsMap.values()) });
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    const acc: { [key: string]: boolean } = {};
+    if (processedProfile?.latestMoods) {
+      processedProfile.latestMoods.forEach((m: any) => {
+        acc[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
+      });
+    }
+    setHasScoreByMood(acc);
+  }, [processedProfile]);
+
   return (
     <div className="font-sans min-h-screen bg-background">
       {/* Spotlight Overlay */}
@@ -236,7 +285,7 @@ export default function Home() {
       <div className="flex flex-col min-h-screen pb-32">
         <TopNav />
         <ProgressBanner />
-        {/* Hero Section */}
+        {/* Hero Section
         <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-500 dark:to-purple-500 px-8 py-12 sm:py-16">
           <div className="max-w-4xl">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 dark:text-white">
@@ -267,7 +316,44 @@ export default function Home() {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
+
+        {/* Skillprint View for Active Users */}
+        {isLoaded && count >= 3 && (
+          <div className="px-4 sm:px-8 py-12 bg-card border-b border-border">
+            <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
+              <div className="flex-1 space-y-6">
+                <h2 className="text-3xl font-bold text-foreground">
+                  Your Profile is Unlocked!
+                </h2>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Great job! You've played {count} sessions and revealed your unique cognitive breakdown.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                  <Link
+                    href="/profile"
+                    className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-primary-foreground bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 hover:shadow-primary/25"
+                  >
+                    View Full Analysis
+                    <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="flex-1 w-full max-w-[500px] bg-background/50 rounded-3xl p-6 border border-border/50 shadow-inner">
+                <SkillprintVisualization
+                  userSkills={userSkillsForVis}
+                  userMoods={userMoodsForVis}
+                  hasScoreBySkill={{}}
+                  hasScoreByMood={hasScoreByMood}
+                  size={400}
+                  initialState="reset"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* New Games Section */}
         <div className="px-4 sm:px-8 py-8 relative">

@@ -281,7 +281,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                     )}
 
                                     {/* Display parameter updates if available */}
-                                    {closedSessionResult.parameterUpdates && closedSessionResult.parameterUpdates.length > 0 && (
+                                    {/* {closedSessionResult.parameterUpdates && closedSessionResult.parameterUpdates.length > 0 && (
                                         <div>
                                             <h4 className="text-md font-semibold text-foreground mb-3">Parameter Updates</h4>
                                             <div className="space-y-3">
@@ -295,7 +295,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                                 ))}
                                             </div>
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
                             )}
 
