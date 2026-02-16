@@ -289,7 +289,7 @@ function HomeContent() {
           onClick={dismissTooltip}
         />
       )}
-      <div className="flex flex-col min-h-screen pb-32">
+      <div className="flex flex-col min-h-screen">
         <TopNav />
         <ProgressBanner />
         {/* Hero Section
@@ -363,7 +363,7 @@ function HomeContent() {
         )}
 
         {/* New Games Section */}
-        <div className="px-4 sm:px-8 py-8 relative">
+        <div className="px-4 sm:px-8 py-8 relative bg-white border-b border-border">
           {/* Tooltip for first item - Positioned relative to the section */}
           {showTooltip && (
             <div className="absolute top-24 left-80 sm:left-96 z-[60] w-64 bg-popover p-4 rounded-xl shadow-2xl border border-border animate-bounce-slight">
@@ -470,7 +470,7 @@ function HomeContent() {
         </div>
 
         {/* Browse by Mood & Skill Section */}
-        <div className="px-4 sm:px-8 py-8">
+        <div className="px-4 sm:px-8 py-8 bg-[#efefef]">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Explore by Mood & Skill
@@ -648,7 +648,7 @@ function HomeContent() {
         </div>
 
         {/* Quick Stats or Additional Content */}
-        <div className="px-4 sm:px-8 py-8 bg-card mt-8">
+        <div className="px-4 sm:px-8 py-8 bg-[#efefef]">
           <div className="max-w-4xl">
             <h2 className="text-2xl font-bold text-foreground mb-6">
               What would you like to do today?

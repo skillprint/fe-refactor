@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import { useUserSession } from '../../hooks/useUserSession';
-import BottomTabs from '../../components/BottomTabs';
 import FloatingExitButton from '../../components/FloatingExitButton';
 import { getGameConfig, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
@@ -502,9 +501,6 @@ export default function GameClient({ slug }: GameClientProps) {
                         />
                     )}
                 </main>
-
-                {/* Bottom tabs - hide when iframe is loaded and hideBottomTabs is true */}
-                {(!isIframeLoaded || !gameConfig.hideBottomTabs) && <BottomTabs />}
             </div>
 
 

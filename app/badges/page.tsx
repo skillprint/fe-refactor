@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomTabs from '../components/BottomTabs';
 
 interface Badge {
     id: string;
@@ -271,8 +270,6 @@ export default function BadgesPage() {
                     </div>
                 </div>
             )}
-
-            <BottomTabs />
         </div>
     );
 }

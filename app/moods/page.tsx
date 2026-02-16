@@ -1,5 +1,3 @@
-import BottomTabs from "../components/BottomTabs";
-
 export default function MoodsPage() {
   return (
     <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -13,7 +11,6 @@ export default function MoodsPage() {
           </p>
         </div>
       </div>
-      <BottomTabs />
     </div>
   );
 } 
