@@ -1,14 +1,16 @@
 import ReviewClient from './ReviewClient';
 
 interface ReviewPageProps {
-    params: {
+    params: Promise<{
         slug: string;
-    };
-    searchParams: {
+    }>;
+    searchParams: Promise<{
         sessionId?: string;
-    };
+    }>;
 }
 
-export default function ReviewPage({ params, searchParams }: ReviewPageProps) {
-    return <ReviewClient slug={params.slug} sessionId={searchParams.sessionId} />;
+export default async function ReviewPage({ params, searchParams }: ReviewPageProps) {
+    const { slug } = await params;
+    const { sessionId } = await searchParams;
+    return <ReviewClient slug={slug} sessionId={sessionId} />;
 }
