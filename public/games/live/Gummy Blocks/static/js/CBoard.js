@@ -261,7 +261,8 @@ function CBoard(iX,iY,oParentContainer){
             playSound("position",1,false);
             
             this.setCellValues(iStartRow,iStartCol,aListPos,oInfos.type);
-            s_oGame.refreshScore(oInfos.num_cell);
+            var iPieceScore = Math.floor(oInfos.num_cell * (window.SCORE_MULTIPLIER || 1.0));
+            s_oGame.refreshScore(iPieceScore);
             
             oPiece.unload();
             _aCurPieces[iIndex] = null;
@@ -371,7 +372,8 @@ function CBoard(iX,iY,oParentContainer){
                  playSound("combo",1,false);
             }
             //SCORE MULTIPLIER
-            var iAmountScore = 5* (aRowsToClear.length+aColsToClear.length)*(aRowsToClear.length+aColsToClear.length+1);
+            var iBaseScore = 5* (aRowsToClear.length+aColsToClear.length)*(aRowsToClear.length+aColsToClear.length+1);
+            var iAmountScore = Math.floor(iBaseScore * (window.SCORE_MULTIPLIER || 1.0));
             s_oGame.refreshScore(iAmountScore);
             
             return true;

@@ -22,18 +22,21 @@ const shouldLogDataUrl = () => {
 
 const getElementForScreenshot = () => {
     const urlPath = window.location.pathname;
+
+    console.log(urlPath);
+
     // console.log(urlPath);
     const canvasPathNames = [
-        '/public/games/live/Garden%20Match/static/index.html',
-        '/public/games/live/Box%20Tower/static/index.html',
-        '/public/games/live/Change%20Word/static/index.html',
-        '/public/games/live/Flapcat%20Steampunk/static/index.html',
-        // '/public/games/live/Fruit%20Boom/static/index.html',
-        '/public/games/live/Fruit%20Sorting/static/index.html',
-        '/public/games/live/Gummy%20Blocks/static/index.html',
-        '/public/games/live/Impossible%2010/static/index.html',
-        '/public/games/live/Mahjong%20Deluxe/static/index.html',
-        '/public/games/live/Space%20Trip/static/index.html',
+        '/games/live/Garden%20Match/static/index.html',
+        '/games/live/Box%20Tower/static/index.html',
+        '/games/live/Change%20Word/static/index.html',
+        '/games/live/Flapcat%20Steampunk/static/index.html',
+        // '/games/live/Fruit%20Boom/static/index.html',
+        '/games/live/Fruit%20Sorting/static/index.html',
+        '/games/live/Gummy%20Blocks/static/index.html',
+        '/games/live/Impossible%2010/static/index.html',
+        '/games/live/Mahjong%20Deluxe/static/index.html',
+        '/games/live/Space%20Trip/static/index.html',
 
     ];
     const bodyPathNames = ['/games/live/SkillprintLib/skillprint.html', '/games/live/SkillprintLib/skillprint.html'];

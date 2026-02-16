@@ -79,7 +79,7 @@ function CCreditsPanel(){
     };
     
     this._onLogoButRelease = function(){
-        window.open("http://www.codethislab.com/index.php?&l=en");
+        // window.open("http://www.codethislab.com/index.php?&l=en");
     };
     
     this._init();

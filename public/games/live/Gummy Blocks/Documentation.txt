@@ -20,3 +20,48 @@ LEVEL_FAILED => Player cannot play a block
 	- 0 (score)
 	- 2020-08-01T08:34:01.527Z (timestamp)
 ---------------
+
+===============
+Gummy Blocks Adjustable Parameters
+===============
+The game supports dynamic parameter adjustments via iframe postMessage.
+Adjustments are applied in real-time through the skillprintShim.js file.
+
+Available Parameters:
+---------------
+1. boardRows (default: 10)
+   - Range: 5-12
+   - Description: Number of rows on the game board
+   - Effect: Lower values make the game harder (less space)
+   
+2. boardCols (default: 10)
+   - Range: 5-12
+   - Description: Number of columns on the game board
+   - Effect: Lower values make the game harder (less space)
+   
+3. piecesToPlace (default: 3)
+   - Range: 1-5
+   - Description: Number of pieces available before spawning new ones
+   - Effect: Lower values make the game harder (fewer options to choose from)
+   
+4. scoreMultiplier (default: 1.0)
+   - Range: 0.1-3.0
+   - Description: Multiplier applied to all scoring
+   - Effect: Lower values make it harder to achieve high scores
+   
+5. gameSpeed (default: 30)
+   - Range: 15-60
+   - Description: Game FPS/speed
+   - Effect: Higher values make the game faster/harder
+
+Usage Example:
+---------------
+To adjust parameters via iframe postMessage:
+{
+  "parameterName": "piecesToPlace",
+  "parameterValue": 2
+}
+
+Note: Changes to boardRows, boardCols, and gameSpeed require
+a game restart to take full effect.
+---------------
