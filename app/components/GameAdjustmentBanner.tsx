@@ -35,16 +35,20 @@ export default function GameAdjustmentBanner({ parameterName, parameterValue, on
     useEffect(() => {
         console.log("Showing banner");
         setIsVisible(true);
+        let dismissTimer: ReturnType<typeof setTimeout>;
         const timer = setTimeout(() => {
             setIsVisible(false);
-            if (onDismiss) {
-                console.log("Hiding banner");
-                setTimeout(onDismiss, 500); // Allow exit animation
-            }
+            dismissTimer = setTimeout(() => {
+                if (onDismiss) onDismiss();
+            }, 500);
         }, 3000); // Show for 3 seconds
 
-        return () => clearTimeout(timer);
-    }, [parameterName, parameterValue, onDismiss]);
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(dismissTimer);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [parameterName, parameterValue]);
 
     if (!isVisible && !parameterName) return null;
 
