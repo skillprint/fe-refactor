@@ -47,11 +47,16 @@ export default function FTUECarousel() {
     const slides: Slide[] = [
         {
             title: 'Build Skills Through Play',
-            description: 'Transform learning into an engaging adventure. Play interactive games designed to develop real-world skills while having fun.',
-            gradient: 'from-purple-600 via-pink-600 to-red-600',
+            description: 'To get started, we need you to play a few games to get a profile calculated. Unlock your personalized profile by playing interactive games designed to develop real-world skills while you play.',
+            gradient: 'from-secondary via-accent to-destructive',
             icon: (
                 <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    {/* User Profile */}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    {/* Stats / Building */}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-4m3 4v-6m3 6v-3" />
+                    {/* Game / Play Indicator */}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 10l4 2-4 2V10z" fill="currentColor" fillOpacity="0.2" />
                 </svg>
             ),
         },
@@ -154,13 +159,15 @@ export default function FTUECarousel() {
             aria-modal="true"
             aria-labelledby="ftue-title"
         >
-            {/* Skip Button */}
+            {/* Close Button */}
             <button
                 onClick={handleSkip}
-                className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium px-4 py-2 rounded-full hover:bg-white/10"
-                aria-label="Skip introduction"
+                className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors duration-200 p-2 rounded-full hover:bg-white/10 z-50"
+                aria-label="Close"
             >
-                Skip
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
 
             {/* Main Content Container */}
@@ -253,11 +260,6 @@ export default function FTUECarousel() {
                             </button>
                         </div>
                     </div>
-                </div>
-
-                {/* Progress Text */}
-                <div className="text-center mt-4 text-white/60 text-sm">
-                    {currentSlide + 1} of {slides.length}
                 </div>
             </div>
 

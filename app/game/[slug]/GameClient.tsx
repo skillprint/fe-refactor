@@ -443,7 +443,8 @@ export default function GameClient({ slug }: GameClientProps) {
         skillprintClientRef.current = client;
 
         try {
-            client.startSession(sessionId, Mood.FOCUS, decodedSlug);
+            const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
+            client.startSession(sessionId, targetMood, decodedSlug);
             shouldPollRef.current = true;
             pollSessionTips();
         } catch (e) {

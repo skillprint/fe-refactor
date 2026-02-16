@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
+import { getGameBySlug } from '../../../api/api';
 
 interface GameInterstitialClientProps {
     slug: string;
@@ -11,6 +12,7 @@ interface GameInterstitialClientProps {
 export default function GameInterstitialClient({ slug }: GameInterstitialClientProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [gameApiData, setGameApiData] = useState<any>(null);
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
@@ -18,6 +20,20 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
     // Get game configuration and details
     const gameConfig = getGameConfig(decodedSlug);
     const gameDetails = getGameDetails(decodedSlug);
+
+    useEffect(() => {
+        const fetchGameData = async () => {
+            try {
+                const data = await getGameBySlug(decodedSlug);
+                if (data) {
+                    setGameApiData(data);
+                }
+            } catch (error) {
+                console.error("Error fetching game data:", error);
+            }
+        };
+        fetchGameData();
+    }, [decodedSlug]);
 
     if (!gameDetails) {
         notFound();
@@ -31,6 +47,8 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
     const handleBackToGames = () => {
         router.push('/games');
     };
+
+    const displayImage = gameApiData?.image || gameDetails.image;
 
     return (
         <div className="font-sans min-h-screen bg-background">
@@ -58,29 +76,32 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                 <main className="flex-1 px-4 py-6">
                     <div className="max-w-2xl mx-auto">
                         {/* Game Title and Image */}
-                        <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
-                            <div className="text-center mb-6">
-                                <h2 className="text-3xl font-bold text-foreground mb-2">
-                                    {gameDetails.name}
-                                </h2>
-                                {gameDetails.image ? (
-                                    <div className="w-32 h-32 mx-auto mb-4">
-                                        <img
-                                            src={gameDetails.image}
-                                            alt={gameDetails.name}
-                                            className="w-full h-full object-cover rounded-lg"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
-                                        <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                )}
-                                <p className="text-lg text-muted-foreground">
-                                    {gameDetails.description}
-                                </p>
+                        <div className="bg-card rounded-lg shadow-sm border border-border mb-6">
+                            {displayImage ? (
+                                <div className="w-full h-48 sm:h-64 relative">
+                                    <img
+                                        src={displayImage}
+                                        alt={gameDetails.name}
+                                        className="w-full h-full object-cover rounded-t-lg"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-t-lg flex items-center justify-center">
+                                    <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            )}
+
+                            <div className="p-6">
+                                <div className="text-center mb-6">
+                                    <h2 className="text-3xl font-bold text-foreground mb-4">
+                                        {gameDetails.name}
+                                    </h2>
+                                    <p className="text-lg text-muted-foreground">
+                                        {gameDetails.description}
+                                    </p>
+                                </div>
                             </div>
                         </div>
 

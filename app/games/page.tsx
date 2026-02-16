@@ -98,12 +98,19 @@ function GamesPageContent() {
   const handleTabChange = (tab: FilterType) => {
     setActiveTab(tab);
     setSelectedFilterSlug(null);
+    localStorage.removeItem('targetMood');
     setIsSearchActive(false);
     setSearchQuery('');
   };
 
   const handleFilterSelect = (filterSlug: string) => {
-    setSelectedFilterSlug(selectedFilterSlug === filterSlug ? null : filterSlug);
+    const newValue = selectedFilterSlug === filterSlug ? null : filterSlug;
+    setSelectedFilterSlug(newValue);
+    if (newValue) {
+      localStorage.setItem('targetMood', newValue);
+    } else {
+      localStorage.removeItem('targetMood');
+    }
   };
 
   const handleSearchToggle = () => {

@@ -143,3 +143,9 @@ export const getMoods = async () => {
 export const getSkills = async () => {
     return await get(skills_path, true);
 };
+
+export const getGameBySlug = async (slug: string) => {
+    const url = `${catalog_path}?slug=${slug}`;
+    const response = await get(url, true);
+    return response.results && response.results.length > 0 ? response.results[0] : null;
+};

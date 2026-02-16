@@ -161,12 +161,7 @@ export class SkillprintClient {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
-        // Validate mood
-        if (!Object.values(Mood).includes(targetMood as Mood)) {
-            const validMoods = Object.values(Mood).join(', ');
-            this.log(`Invalid targetMood: '${targetMood}'. Valid moods are: ${validMoods}.`, LogLevel.ERROR);
-            throw new Error(`Invalid targetMood: '${targetMood}'`);
-        }
+
 
         const requestData: StartSessionRequest = {
             sessionId,
