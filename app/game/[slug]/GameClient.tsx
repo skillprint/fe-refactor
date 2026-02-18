@@ -397,7 +397,7 @@ export default function GameClient({ slug }: GameClientProps) {
                 timestamp: Date.now(),
                 duration: currentTime,
                 score: exitResults.score,
-                completed: false, // Not completed if exited early
+                completed: true, // Mark as completed for playbook tracking when exiting to review
                 metadata: {
                     level: exitResults.level,
                     accuracy: exitResults.accuracy,
