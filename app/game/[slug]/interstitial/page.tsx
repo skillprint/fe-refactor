@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { gameDetails, knownGameSlugs } from '../../../config/gameConfig';
 import GameInterstitialClient from './GameInterstitialClient';
 
@@ -16,5 +17,9 @@ export default async function GameInterstitial({ params }: GameInterstitialProps
     return null;
   }
 
-  return <GameInterstitialClient slug={slug} />;
+  return (
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Loading...</div>}>
+      <GameInterstitialClient slug={slug} />
+    </Suspense>
+  );
 }

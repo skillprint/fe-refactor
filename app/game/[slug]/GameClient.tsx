@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useUserSession } from '../../hooks/useUserSession';
 import FloatingExitButton from '../../components/FloatingExitButton';
 import { getGameConfig, knownGameSlugs } from '../../config/gameConfig';
@@ -268,6 +268,10 @@ export default function GameClient({ slug }: GameClientProps) {
         setTimeout(poll, 2000);
     };
 
+    const searchParams = useSearchParams();
+    const source = searchParams.get('source');
+    const playbookId = searchParams.get('playbookId');
+
     const handleGameComplete = (data: any) => {
         const endTime = Date.now();
         const playTime = Math.floor((endTime - gameStartTime) / 1000);
@@ -297,7 +301,9 @@ export default function GameClient({ slug }: GameClientProps) {
             metadata: {
                 level: results.level,
                 accuracy: results.accuracy,
-                mistakes: results.mistakes
+                mistakes: results.mistakes,
+                source,
+                playbookId
             }
         };
         saveGameSession(session);
@@ -383,6 +389,24 @@ export default function GameClient({ slug }: GameClientProps) {
 
             stopIframe();
             shouldPollRef.current = false;
+
+            // Record the game session
+            const session: GameSession = {
+                id: Math.random().toString(36).substr(2, 9),
+                gameSlug: decodedSlug,
+                timestamp: Date.now(),
+                duration: currentTime,
+                score: exitResults.score,
+                completed: false, // Not completed if exited early
+                metadata: {
+                    level: exitResults.level,
+                    accuracy: exitResults.accuracy,
+                    mistakes: exitResults.mistakes,
+                    source,
+                    playbookId
+                }
+            };
+            saveGameSession(session);
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
                 skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);

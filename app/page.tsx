@@ -10,6 +10,7 @@ import BuckyballLoading from './components/BuckyballLoading';
 import { useUserSession } from './hooks/useUserSession';
 import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
+import { PlaybookWidget } from './components/PlaybookWidget';
 import SkillprintVisualization from './components/Skillprint';
 import { getGameDetails } from './config/gameConfig';
 
@@ -292,6 +293,10 @@ function HomeContent() {
       <div className="flex flex-col min-h-screen">
         <TopNav />
         <ProgressBanner />
+
+        <div className="px-4 sm:px-8 py-8 bg-background">
+          <PlaybookWidget />
+        </div>
         {/* Hero Section
         <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-500 dark:to-purple-500 px-8 py-12 sm:py-16">
           <div className="max-w-4xl">

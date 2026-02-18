@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
 import { getGameBySlug } from '../../../api/api';
 
@@ -65,9 +65,19 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
         notFound();
     }
 
+    const searchParams = useSearchParams();
+    const source = searchParams.get('source');
+    const playbookId = searchParams.get('playbookId');
+
     const handleStartGame = () => {
         setIsLoading(true);
-        router.push(`/game/${encodeURIComponent(decodedSlug)}`);
+        const params = new URLSearchParams();
+        if (source) params.set('source', source);
+        if (playbookId) params.set('playbookId', playbookId);
+
+        const queryString = params.toString();
+        const url = `/game/${encodeURIComponent(decodedSlug)}${queryString ? `?${queryString}` : ''}`;
+        router.push(url);
     };
 
     const handleBackToGames = () => {

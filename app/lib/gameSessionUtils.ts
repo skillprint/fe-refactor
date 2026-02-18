@@ -43,6 +43,7 @@ export const saveGameSession = (session: GameSession): void => {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    window.dispatchEvent(new Event('skillprint_storage_update'));
 };
 
 /**
@@ -59,6 +60,7 @@ export const clearGameSessions = (): void => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(PROFILE_VIEWED_KEY);
+    window.dispatchEvent(new Event('skillprint_storage_update'));
 };
 
 const PROFILE_VIEWED_KEY = 'skillprint_profile_viewed';
