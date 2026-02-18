@@ -14,6 +14,7 @@ import BuckyballLoading from '../components/BuckyballLoading';
 import SkillprintVisualization from '../components/Skillprint';
 import FirstGameBadge from '../components/FirstGameBadge';
 import { knownGameSlugs } from '../config/gameConfig';
+import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
 
 interface Skill {
   id: string;
@@ -59,6 +60,7 @@ export default function Skillprint() {
   const [processedProfile, setProcessedProfile] = useState<any>(null);
   const [showBadge, setShowBadge] = useState(false);
   const [nextGameSlug, setNextGameSlug] = useState<string>('');
+  const { goal, setGoal } = useGoal();
 
   const MOOD_COLORS: Record<string, string> = {
     focus: '#8F48F1', relax: '#10B981', innovate: '#F59E0B', collaborate: '#3B82F6',
@@ -392,6 +394,39 @@ export default function Skillprint() {
                     className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Enter API Key"
                   />
+                </div>
+
+                {/* Goal Setting */}
+                <div className="border-b border-border pb-6">
+                  <h3 className="text-lg font-medium text-foreground mb-4">
+                    My Goal
+                  </h3>
+                  <div className="grid gap-3">
+                    {GOAL_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setGoal(option.id)}
+                        className={`p-4 rounded-xl text-left transition-all duration-200 border ${goal === option.id
+                          ? 'bg-primary/20 border-primary shadow-sm'
+                          : 'bg-card border-input hover:bg-secondary/50'
+                          }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className={`font-semibold ${goal === option.id ? 'text-primary' : 'text-foreground'}`}>
+                            {option.title}
+                          </h4>
+                          {goal === option.id && (
+                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+                              Active
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {option.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

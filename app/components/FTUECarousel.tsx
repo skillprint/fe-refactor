@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
 
 interface Slide {
     title: string;
@@ -20,6 +21,7 @@ export default function FTUECarousel() {
     const [isVisible, setIsVisible] = useState(false);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+    const { goal, setGoal } = useGoal();
 
     useEffect(() => {
         // Check if FTUE has been completed
@@ -59,6 +61,42 @@ export default function FTUECarousel() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 10l4 2-4 2V10z" fill="currentColor" fillOpacity="0.2" />
                 </svg>
             ),
+        },
+        {
+            title: 'Set Your Goal',
+            description: 'Why do you want to use Skillprint?',
+            gradient: 'from-purple-600 via-violet-600 to-indigo-600',
+            icon: null,
+            content: (
+                <div className="flex flex-col gap-3 mt-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    {GOAL_OPTIONS.map((option) => (
+                        <button
+                            key={option.id}
+                            onClick={() => setGoal(option.id)}
+                            className={`p-4 rounded-xl text-left transition-all duration-200 border ${goal === option.id
+                                ? 'bg-white text-purple-900 border-white shadow-xl scale-[1.02]'
+                                : 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/30'
+                                }`}
+                        >
+                            <div className="flex items-center justify-between mb-1">
+                                <h3 className="font-bold text-lg">{option.title}</h3>
+                                {goal === option.id && (
+                                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                            </div>
+                            <ul className="space-y-1 mt-2 list-none">
+                                {option.details.map((detail, idx) => (
+                                    <li key={idx} className={`text-sm flex list-none items-start gap-2 ${goal === option.id ? 'text-purple-800/80' : 'text-white/60'}`}>
+                                        {detail}
+                                    </li>
+                                ))}
+                            </ul>
+                        </button>
+                    ))}
+                </div>
+            )
         },
         {
             title: 'Explore different moods and skills through gameplay',
@@ -292,6 +330,21 @@ export default function FTUECarousel() {
 
         .animate-slide-in-left {
           animation: slide-in-left 0.5s ease-out;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.5);
         }
       `}</style>
         </div >
