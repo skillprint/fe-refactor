@@ -10,6 +10,7 @@ import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils'
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import FirstGameBadge from '../../../components/FirstGameBadge';
 import RecommendedGameTile from '../../../components/RecommendedGameTile';
+import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
 
 interface GameResults {
@@ -37,6 +38,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     const [gameResults, setGameResults] = useState<GameResults | null>(null);
     const [showBadge, setShowBadge] = useState(false);
     const [nextGameSlug, setNextGameSlug] = useState<string>('');
+    const [playbookId, setPlaybookId] = useState<string | null>(null);
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
@@ -58,6 +60,16 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         };
         fetchGameData();
     }, [decodedSlug]);
+
+    useEffect(() => {
+        if (sessionId) {
+            const storedSessions = getGameSessions();
+            const session = storedSessions.find(s => s.id === sessionId);
+            if (session?.metadata?.playbookId) {
+                setPlaybookId(session.metadata.playbookId);
+            }
+        }
+    }, [sessionId]);
 
     const getApiKey = () => {
         if (typeof document === 'undefined') return '';
@@ -450,7 +462,11 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
                             {/* Recommended Game Tile */}
                             <div className="mt-8">
-                                <RecommendedGameTile />
+                                {playbookId ? (
+                                    <NextPlaybookGameTile playbookId={playbookId} />
+                                ) : (
+                                    <RecommendedGameTile />
+                                )}
                             </div>
                         </>
                     )}
