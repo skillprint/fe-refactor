@@ -72,8 +72,8 @@ export function WelcomeScreen() {
                     </div>
 
                     {/* Social Provider Stubs */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center justify-center">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-center w-full">
                             <GoogleLogin
                                 onSuccess={credentialResponse => {
                                     if (credentialResponse.credential) {
@@ -87,8 +87,11 @@ export function WelcomeScreen() {
                                     console.error('Google Login Failed');
                                 }}
                                 useOneTap
-                                theme="filled_black"
-                                shape="pill"
+                                theme="outline"
+                                size="large"
+                                text="continue_with"
+                                shape="rectangular"
+                                width="384"
                             />
                         </div>
                     </div>

@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loginWithGoogle = (googleId: string) => {
         setStatus('social');
         localStorage.setItem('auth_status', 'social');
+        localStorage.setItem('user_id', googleId); // Added to sync with localStorage
         // Treat the googleId as the local user_id setting so the profile data fetches properly
         const date = new Date();
         date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
