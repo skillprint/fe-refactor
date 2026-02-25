@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import TopNav from '../components/TopNav';
 import ProgressBanner from '../components/ProgressBanner';
+import RecommendedGameTile from '../components/RecommendedGameTile';
 import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
@@ -415,6 +416,7 @@ function GamesPageContent() {
           </main>
         ) : (
           <main className="flex-1 px-4 py-6">
+            {!searchQuery && !selectedFilterSlug && <RecommendedGameTile />}
             {/* Games Grid */}
             {filteredGames.length === 0 ? (
               <div className="text-center">

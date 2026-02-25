@@ -149,3 +149,8 @@ export const getGameBySlug = async (slug: string) => {
     const response = await get(url, true);
     return response.results && response.results.length > 0 ? response.results[0] : null;
 };
+
+export const getRecommendations = async (limit: number = 1) => {
+    const url = `games/api/recommendations/?limit=${limit}`;
+    return await get(url, false);
+};
