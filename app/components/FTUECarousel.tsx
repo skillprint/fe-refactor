@@ -64,7 +64,7 @@ export default function FTUECarousel() {
         },
         {
             title: 'Set Your Goal',
-            description: 'Why do you want to use Skillprint?',
+            description: 'Why do you want to use Skillprint? Games are adaptive and will adjust depending on your goals and how you play.',
             gradient: 'from-purple-600 via-violet-600 to-indigo-600',
             icon: null,
             content: (
