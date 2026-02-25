@@ -10,8 +10,11 @@ import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { newGameSlugs } from '../config/newGames';
 import BuckyballLoading from '../components/BuckyballLoading';
+import { PLAYBOOKS } from '../hooks/usePlaybook';
+import { useGameSessions } from '../hooks/useGameSessions';
+import { getGameDetails } from '../config/gameConfig';
 
-type FilterType = 'moods' | 'skills';
+type FilterType = 'moods' | 'skills' | 'playbooks';
 
 function GamesPageContent() {
   const searchParams = useSearchParams();
@@ -24,6 +27,7 @@ function GamesPageContent() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
+  const { sessions } = useGameSessions();
 
 
   /* ... inside GamesPageContent ... */
@@ -200,6 +204,15 @@ function GamesPageContent() {
                 >
                   Skills
                 </button>
+                <button
+                  onClick={() => handleTabChange('playbooks')}
+                  className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'playbooks'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  Playbooks
+                </button>
                 {/* search button */}
                 <button
                   onClick={handleSearchToggle}
@@ -251,7 +264,7 @@ function GamesPageContent() {
           )}
 
           {/* Filter Options */}
-          {!isSearchActive && (
+          {!isSearchActive && activeTab !== 'playbooks' && (
             <div className="bg-card px-4 py-2 border-b border-border">
               <div className="flex flex-wrap gap-2">
                 {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
@@ -280,7 +293,7 @@ function GamesPageContent() {
           )}
 
           {/* Filter Options - Show when search is active but tab is not 'all' */}
-          {isSearchActive && (
+          {isSearchActive && activeTab !== 'playbooks' && (
             <div className="bg-card px-4 py-2 border-b border-border">
               <div className="flex flex-wrap gap-2">
                 {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
@@ -316,87 +329,173 @@ function GamesPageContent() {
           </div>
         )}
 
-        {/* Games Grid */}
-        <main className="flex-1 px-4 py-6">
-          {filteredGames.length === 0 ? (
-            <div className="text-center">
-              <p className="text-muted-foreground text-lg font-semibold">
-                {/* {isLoading ? 'Loading games...' : ''} */}
-                {!isLoading && !searchQuery ? 'No games found with the selected filter.' : !isLoading && searchQuery ? 'No games found matching your search.' : ''}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredGames.map((game: any) => (
-                <Link
-                  key={game.slug + Math.random().toString()}
-                  href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
-                  className="block group"
-                >
-                  <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200">
-                    {game.screenshot && (
-                      <div className="relative h-40 w-full bg-secondary">
-                        <Image
-                          src={game.screenshot}
-                          alt={game.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {game.name}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mt-2 line-clamp-2">
-                        {game.description}
-                      </p>
+        {/* Playbooks Grid */}
+        {activeTab === 'playbooks' ? (
+          <main className="flex-1 px-4 py-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.values(PLAYBOOKS).map((playbook) => {
+                // Find next uncompleted game
+                let nextGameSlug = playbook.games[0];
+                let completedCount = 0;
 
-                      {/* Game Tags */}
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {game.moods.map((moodId: any) => {
-                          const mood = moods.find((m: any) => m.id === moodId);
-                          if (!mood) return null;
-                          const color = getColorForSlug(mood.slug);
-                          return (
-                            <span
-                              key={moodId}
-                              className="px-2 py-1 rounded-full text-xs font-medium text-white"
-                              style={{ backgroundColor: color }}
-                            >
-                              {mood.name}
-                            </span>
-                          );
-                        })}
-                        {game.skills.map((skillId: any) => {
-                          const skill = skills.find((s: any) => s.id === skillId);
-                          if (!skill) return null;
-                          const color = getColorForSlug(skill.slug);
-                          return (
-                            <span
-                              key={skillId}
-                              className="px-2 py-1 rounded-full text-xs font-medium text-white"
-                              style={{ backgroundColor: color }}
-                            >
-                              {skill.name}
-                            </span>
-                          );
-                        })}
+                for (let i = 0; i < playbook.games.length; i++) {
+                  const slug = playbook.games[i];
+                  const isCompleted = sessions.some(s => s.gameSlug === slug && s.metadata?.playbookId === playbook.id && s.completed);
+                  if (isCompleted) {
+                    completedCount++;
+                  } else if (nextGameSlug === playbook.games[0] && completedCount === i) {
+                    nextGameSlug = slug;
+                  }
+                }
+                const isFinished = completedCount === playbook.games.length;
+                const percentComplete = Math.round((completedCount / playbook.games.length) * 100);
+                const firstGameDetails = getGameDetails(playbook.games[0]);
+
+                return (
+                  <Link
+                    key={playbook.id}
+                    href={isFinished ? '#' : `/game/${encodeURIComponent(nextGameSlug)}/interstitial?source=playbook&playbookId=${playbook.id}`}
+                    className={`block group ${isFinished ? 'cursor-not-allowed opacity-80' : ''}`}
+                  >
+                    <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
+                      {isFinished && (
+                        <div className="absolute top-3 right-3 z-20 bg-green-500 text-white p-1.5 rounded-full shadow-md">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+
+                      <div className="h-32 w-full relative bg-secondary/20">
+                        {firstGameDetails?.image ? (
+                          <img
+                            src={firstGameDetails.image}
+                            alt={playbook.title}
+                            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${isFinished ? 'grayscale' : ''}`}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 opacity-80" />
+                        )}
+
+                        {/* Goal Badge overlay */}
+                        <div className="absolute top-3 left-3 z-20">
+                          <span className="bg-background/90 backdrop-blur-sm text-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm border border-border/50">
+                            {playbook.goal}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="mt-3 flex items-center text-primary text-sm font-medium">
-                        Play Now
-                        <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                          {playbook.title}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mt-2 mb-4 flex-1">
+                          {playbook.description}
+                        </p>
+
+                        {/* Progress Meter inside card */}
+                        <div className="mt-auto">
+                          <div className="flex justify-between text-xs font-semibold mb-1.5">
+                            <span className="text-muted-foreground">{completedCount} of {playbook.games.length} games</span>
+                            <span className={isFinished ? 'text-green-500' : 'text-primary'}>{percentComplete}%</span>
+                          </div>
+                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 ease-out ${isFinished ? 'bg-green-500' : 'bg-primary'}`}
+                              style={{ width: `${percentComplete}%` }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
-          )}
-        </main>
+          </main>
+        ) : (
+          <main className="flex-1 px-4 py-6">
+            {/* Games Grid */}
+            {filteredGames.length === 0 ? (
+              <div className="text-center">
+                <p className="text-muted-foreground text-lg font-semibold">
+                  {/* {isLoading ? 'Loading games...' : ''} */}
+                  {!isLoading && !searchQuery ? 'No games found with the selected filter.' : !isLoading && searchQuery ? 'No games found matching your search.' : ''}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredGames.map((game: any) => (
+                  <Link
+                    key={game.slug + Math.random().toString()}
+                    href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
+                    className="block group"
+                  >
+                    <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200">
+                      {game.screenshot && (
+                        <div className="relative h-40 w-full bg-secondary">
+                          <Image
+                            src={game.screenshot}
+                            alt={game.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {game.name}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mt-2 line-clamp-2">
+                          {game.description}
+                        </p>
+
+                        {/* Game Tags */}
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {game.moods.map((moodId: any) => {
+                            const mood = moods.find((m: any) => m.id === moodId);
+                            if (!mood) return null;
+                            const color = getColorForSlug(mood.slug);
+                            return (
+                              <span
+                                key={moodId}
+                                className="px-2 py-1 rounded-full text-xs font-medium text-white"
+                                style={{ backgroundColor: color }}
+                              >
+                                {mood.name}
+                              </span>
+                            );
+                          })}
+                          {game.skills.map((skillId: any) => {
+                            const skill = skills.find((s: any) => s.id === skillId);
+                            if (!skill) return null;
+                            const color = getColorForSlug(skill.slug);
+                            return (
+                              <span
+                                key={skillId}
+                                className="px-2 py-1 rounded-full text-xs font-medium text-white"
+                                style={{ backgroundColor: color }}
+                              >
+                                {skill.name}
+                              </span>
+                            );
+                          })}
+                        </div>
+
+                        <div className="mt-3 flex items-center text-primary text-sm font-medium">
+                          Play Now
+                          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </main>
+        )}
 
         {/* Bottom tabs */}
 
