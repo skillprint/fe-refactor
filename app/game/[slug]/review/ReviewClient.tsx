@@ -9,6 +9,7 @@ import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSd
 import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import FirstGameBadge from '../../../components/FirstGameBadge';
+import RecommendedGameTile from '../../../components/RecommendedGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
 
 interface GameResults {
@@ -445,6 +446,11 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                 >
                                     Back to Games
                                 </button>
+                            </div>
+
+                            {/* Recommended Game Tile */}
+                            <div className="mt-8">
+                                <RecommendedGameTile />
                             </div>
                         </>
                     )}

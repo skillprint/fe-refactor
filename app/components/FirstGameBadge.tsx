@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
-import Link from 'next/link';
-import { getGameDetails } from '../config/gameConfig';
 
 interface FirstGameBadgeProps {
     onDismiss: () => void;
@@ -10,7 +8,6 @@ interface FirstGameBadgeProps {
 
 export default function FirstGameBadge({ onDismiss, nextGameSlug }: FirstGameBadgeProps) {
     const [isVisible, setIsVisible] = useState(false);
-    const nextGame = nextGameSlug ? getGameDetails(nextGameSlug) : null;
 
     useEffect(() => {
         // Trigger animation on mount with a small delay
@@ -70,44 +67,7 @@ export default function FirstGameBadge({ onDismiss, nextGameSlug }: FirstGameBad
                         Congratulations! Play <span className="font-bold text-yellow-600 dark:text-yellow-400">2 more games</span> to unlock your unique Skillprint profile.
                     </p>
 
-                    {nextGame && nextGameSlug && (
-                        <div className="mb-6 text-left">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Recommended Next Game</p>
-                            <Link href={`/game/${encodeURIComponent(nextGameSlug)}/interstitial`} onClick={handleDismiss}>
-                                <div className="group bg-gray-50 dark:bg-gray-700 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-                                    <div className="flex">
-                                        <div className="w-24 h-24 relative flex-shrink-0">
-                                            {nextGame.image ? (
-                                                <img
-                                                    src={nextGame.image}
-                                                    alt={nextGame.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
-                                                    <span className="text-2xl">🎮</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-3 flex-1 flex flex-col justify-center">
-                                            <h3 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-500 transition-colors">
-                                                {nextGame.name}
-                                            </h3>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
-                                                {nextGame.description}
-                                            </p>
-                                            <div className="flex items-center text-xs font-bold text-blue-500">
-                                                Play Now
-                                                <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-                        </div>
-                    )}
+
 
                     <button
                         onClick={handleDismiss}
