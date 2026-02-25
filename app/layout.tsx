@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard } from "./components/AuthGuard";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -38,15 +39,17 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
-        <AuthProvider>
-          <ThemeProvider>
-            <AuthGuard>
-              <FTUECarousel />
-              <Toaster position="top-center" />
-              {children}
-            </AuthGuard>
-          </ThemeProvider>
-        </AuthProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id'}>
+          <AuthProvider>
+            <ThemeProvider>
+              <AuthGuard>
+                <FTUECarousel />
+                <Toaster position="top-center" />
+                {children}
+              </AuthGuard>
+            </ThemeProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

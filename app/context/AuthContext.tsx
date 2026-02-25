@@ -8,6 +8,7 @@ interface AuthContextType {
     status: AuthStatus;
     isLoading: boolean;
     loginAsGuest: () => void;
+    loginWithGoogle: (googleId: string) => void;
     logout: () => void;
 }
 
@@ -36,8 +37,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('auth_status', 'loggedOut');
     };
 
+    const loginWithGoogle = (googleId: string) => {
+        setStatus('social');
+        localStorage.setItem('auth_status', 'social');
+        // Treat the googleId as the local user_id setting so the profile data fetches properly
+        const date = new Date();
+        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+        document.cookie = `user_id=${googleId}; expires=${date.toUTCString()}; path=/`;
+    };
+
     return (
-        <AuthContext.Provider value={{ status, isLoading, loginAsGuest, logout }}>
+        <AuthContext.Provider value={{ status, isLoading, loginAsGuest, loginWithGoogle, logout }}>
             {children}
         </AuthContext.Provider>
     );
