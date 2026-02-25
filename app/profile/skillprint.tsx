@@ -15,6 +15,7 @@ import SkillprintVisualization from '../components/Skillprint';
 import FirstGameBadge from '../components/FirstGameBadge';
 import { knownGameSlugs } from '../config/gameConfig';
 import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
+import { useAuth } from '../context/AuthContext';
 
 interface Skill {
   id: string;
@@ -61,6 +62,7 @@ export default function Skillprint() {
   const [showBadge, setShowBadge] = useState(false);
   const [nextGameSlug, setNextGameSlug] = useState<string>('');
   const { goal, setGoal } = useGoal();
+  const { logout } = useAuth();
 
   const MOOD_COLORS: Record<string, string> = {
     focus: '#8F48F1', relax: '#10B981', innovate: '#F59E0B', collaborate: '#3B82F6',
@@ -517,6 +519,22 @@ export default function Skillprint() {
                 onClick={handleTestBadge}
                 className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
                 Test Popup
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-border pt-6">
+              <div>
+                <h3 className="text-lg font-medium text-foreground text-destructive">
+                  Logout
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  End your current session
+                </p>
+              </div>
+              <button
+                onClick={logout}
+                className="px-6 py-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                Logout
               </button>
             </div>
           </div>

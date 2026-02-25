@@ -12,6 +12,8 @@ import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
 import { PlaybookWidget } from './components/PlaybookWidget';
 import SkillprintVisualization from './components/Skillprint';
+import { WelcomeScreen } from './components/WelcomeScreen';
+import { useAuth } from './context/AuthContext';
 import { getGameDetails } from './config/gameConfig';
 
 // Skills data
@@ -702,6 +704,20 @@ function HomeContent() {
 }
 
 export default function Home() {
+  const { status, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <BuckyballLoading />
+      </div>
+    );
+  }
+
+  if (status === 'loggedOut') {
+    return <WelcomeScreen />;
+  }
+
   return (
     <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><BuckyballLoading /></div>}>
       <HomeContent />

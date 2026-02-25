@@ -4,7 +4,8 @@ import "./globals.css";
 import FTUECarousel from "./components/FTUECarousel";
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
-
+import { AuthProvider } from "./context/AuthContext";
+import { AuthGuard } from "./components/AuthGuard";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -37,11 +38,15 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
-        <ThemeProvider>
-          <FTUECarousel />
-          <Toaster position="top-center" />
-          {children}
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <AuthGuard>
+              <FTUECarousel />
+              <Toaster position="top-center" />
+              {children}
+            </AuthGuard>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
