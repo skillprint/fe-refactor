@@ -26,6 +26,7 @@ export default function RecommendedGameTile() {
     return (
         <div className="mb-6">
             <h2 className="text-xl font-bold mb-3 text-foreground">Recommended for You</h2>
+            <p className="text-muted-foreground text-sm mb-3">We've picked a game just for you based on your goals to help improve your Skillprint.</p>
             <Link
                 href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
                 className="block group"

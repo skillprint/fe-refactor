@@ -161,7 +161,7 @@ export class SkillprintClient {
         this.userToken = token;
     }
 
-    async startSession(sessionId: string, targetMood: string, gameName: string): Promise<boolean> {
+    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false): Promise<boolean> {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
@@ -193,6 +193,42 @@ export class SkillprintClient {
                 return true;
             } else {
                 const text = await response.text();
+
+                if (response.status === 401 && !isRetry) {
+                    try {
+                        const errorData = JSON.parse(text);
+                        if (errorData.detail && errorData.detail.toLowerCase() === "invalid token.") {
+                            this.log(`Token invalid, attempting to refresh and retry...`, LogLevel.WARNING);
+                            this.userToken = null;
+                            if (typeof localStorage !== 'undefined') {
+                                localStorage.removeItem('userToken');
+                            }
+
+                            // Re-fetch token using context's userId if possible, or fallback
+                            let currentUserId = typeof localStorage !== 'undefined' ? localStorage.getItem('userId') : null;
+                            if (!currentUserId && typeof document !== 'undefined') {
+                                currentUserId = getCookie('user_id') || null;
+                            }
+
+                            if (currentUserId) {
+                                this.userToken = await this.createOrGetUserToken(currentUserId);
+                                if (typeof localStorage !== 'undefined' && this.userToken) {
+                                    localStorage.setItem('userToken', this.userToken);
+                                }
+                            } else {
+                                await this.setupUser();
+                                if (typeof localStorage !== 'undefined' && this.userToken) {
+                                    localStorage.setItem('userToken', this.userToken);
+                                }
+                            }
+
+                            return await this.startSession(sessionId, targetMood, gameName, true);
+                        }
+                    } catch (e) {
+                        this.log(`Failed to parse 401 response or refresh token: ${e}`, LogLevel.ERROR);
+                    }
+                }
+
                 this.log(`StartSession Error: ${response.status}. Response: ${text}`, LogLevel.ERROR);
                 throw new Error(`${response.status} | ${text}`);
             }
