@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
 import { getGameBySlug } from '../../../api/api';
+import { getAdaptiveParametersForGame } from '../../../utils/adaptiveParameters';
 
 const SKILL_ICONS: Record<string, string> = {
     // Explicit mappings for known deviations or preferred naming
@@ -228,6 +229,31 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                                             );
                                         })}
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Adaptive Features Section */}
+                            {getAdaptiveParametersForGame(decodedSlug).length > 0 && (
+                                <div className="mb-6">
+                                    <h4 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                        </svg>
+                                        What Adapts to You
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {getAdaptiveParametersForGame(decodedSlug).map((paramName, index) => (
+                                            <span
+                                                key={index}
+                                                className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 text-sm font-medium rounded-md border border-indigo-100 dark:border-indigo-800/30"
+                                            >
+                                                {paramName}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        This game dynamically adjusts these features based on your performance and goals during gameplay.
+                                    </p>
                                 </div>
                             )}
 
