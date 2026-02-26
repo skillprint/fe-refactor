@@ -92,6 +92,34 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'hextris':
+            // 1-3 sets easy comboTime, 4-6 mod speedModifier, 7-9 extreme
+            // Note: Hextris combo times appear to be multipliers or fixed integers, while speedModifier defaults to ~1
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'comboTime', parameterValue: 1000 }]; // Very long combo time
+                case 2: return [{ parameterName: 'speedModifier', parameterValue: 0.5 }]; // Slow shapes
+                case 3:
+                    return [
+                        { parameterName: 'comboTime', parameterValue: 1000 },
+                        { parameterName: 'speedModifier', parameterValue: 0.5 }
+                    ]; // Complete easy mode
+                case 4: return [{ parameterName: 'speedModifier', parameterValue: 1 }]; // Default speed
+                case 5: return [{ parameterName: 'comboTime', parameterValue: 200 }]; // Default combo
+                case 6:
+                    return [
+                        { parameterName: 'speedModifier', parameterValue: 1.5 },
+                        { parameterName: 'comboTime', parameterValue: 100 }
+                    ]; // Fast and challenging
+                case 7: return [{ parameterName: 'speedModifier', parameterValue: 2 }]; // Very fast
+                case 8: return [{ parameterName: 'speedModifier', parameterValue: 3 }]; // Ludicrous speed
+                case 9:
+                    return [
+                        { parameterName: 'speedModifier', parameterValue: 4 },
+                        { parameterName: 'comboTime', parameterValue: 50 }
+                    ]; // Impossible mode
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
