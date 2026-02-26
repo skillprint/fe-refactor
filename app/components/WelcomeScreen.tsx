@@ -33,13 +33,35 @@ export function WelcomeScreen() {
     return (
         <div className={`relative min-h-screen flex items-center justify-center overflow-hidden bg-background transition-all duration-500 ease-in-out ${isExiting ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
             {/* Dynamic Background Elements */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20 dark:opacity-30">
-                {circles.map((circle, i) => (
-                    <div
-                        key={i}
-                        className={`absolute ${circle.bg} ${circle.size} ${circle.top} ${circle.left} rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob ${circle.delay}`}
-                    />
-                ))}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-gradient-to-b from-transparent to-slate-900/40 dark:to-background/60">
+                {/* Soft ambient wave layers at the bottom */}
+                <div className="absolute inset-x-0 bottom-0 overflow-hidden h-[50vh] mix-blend-multiply dark:mix-blend-lighten opacity-80 dark:opacity-40">
+                    <svg className="absolute bottom-0 w-[200%] h-full animate-wave-slower origin-bottom text-blue-700" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                        <path fill="currentColor" opacity="0.6" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        <path fill="currentColor" opacity="0.6" transform="translate(1440, 0)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
+                    <svg className="absolute bottom-0 w-[200%] h-[85%] animate-wave-reverse origin-bottom text-indigo-700" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                        <path fill="currentColor" opacity="0.7" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        <path fill="currentColor" opacity="0.7" transform="translate(1440, 0)" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
+                    <svg className="absolute bottom-0 w-[200%] h-[70%] animate-wave-slow origin-bottom text-purple-700" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                        <path fill="currentColor" opacity="0.8" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        <path fill="currentColor" opacity="0.8" transform="translate(1440, 0)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
+                    <svg className="absolute bottom-0 w-[200%] h-[55%] animate-wave origin-bottom text-blue-900" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                        <path fill="currentColor" opacity="0.9" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        <path fill="currentColor" opacity="0.9" transform="translate(1440, 0)" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
+                </div>
+
+                <div className="absolute inset-0 opacity-20 dark:opacity-30">
+                    {circles.map((circle, i) => (
+                        <div
+                            key={i}
+                            className={`absolute ${circle.bg} ${circle.size} ${circle.top} ${circle.left} rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob ${circle.delay}`}
+                        />
+                    ))}
+                </div>
             </div>
 
             <div className={`relative z-10 w-full max-w-md p-8 sm:p-10 mx-4 bg-card/60 backdrop-blur-xl border border-border rounded-3xl shadow-2xl transition-all duration-500 ${isExiting ? 'scale-95 translate-y-4' : 'scale-100 translate-y-0'}`}>

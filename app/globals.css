@@ -170,6 +170,23 @@
     0% { color: #999; }
     100% { color: #333; }
   }
+
+  --animate-wave-fast: wave 12s linear infinite;
+  --animate-wave: wave 18s linear infinite;
+  --animate-wave-slow: wave 25s linear infinite;
+  --animate-wave-slower: wave 35s linear infinite;
+  
+  --animate-wave-reverse: wave-reverse 22s linear infinite;
+  
+  @keyframes wave {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  @keyframes wave-reverse {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0%); }
+  }
 }
 
 body {
