@@ -12,7 +12,7 @@ interface Slide {
     content?: React.ReactNode;
 }
 
-
+import { useAuth } from '../context/AuthContext';
 
 const COOKIE_NAME = 'ftue_completed';
 const COOKIE_EXPIRY_DAYS = 365;
@@ -22,18 +22,22 @@ export default function FTUECarousel() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
     const { goal, setGoal } = useGoal();
+    const { status } = useAuth();
 
     useEffect(() => {
+        // Only trigger FTUE if the user has formally logged in (bypassing Welcome screen)
+        if (status === 'loggedOut') return;
+
         // Check if FTUE has been completed
         const hasCompletedFTUE = document.cookie
             .split('; ')
             .find(row => row.startsWith(`${COOKIE_NAME}=`));
 
         if (!hasCompletedFTUE) {
-            // Small delay to ensure smooth entrance animation
-            setTimeout(() => setIsVisible(true), 100);
+            // Small delay to ensure smooth entrance animation after WelcomeScreen fades
+            setTimeout(() => setIsVisible(true), 150);
         }
-    }, []);
+    }, [status]);
 
     const setCookie = () => {
         const expiryDate = new Date();
