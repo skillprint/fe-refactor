@@ -21,3 +21,11 @@ window.addEventListener('message', function (event) {
         window.adjustGame(event.data.data);
     }
 });
+
+// Forward keydown events to the parent window for the GameAdjustmentTester
+window.addEventListener('keydown', function (event) {
+    if (/^[1-9]$/.test(event.key)) {
+        console.log('[skillprintShim] Key intercepted in iframe:', event.key);
+        window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
+    }
+}, true); // Use capture phase to intercept before the game calls preventDefault()

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 
 interface GameAdjustmentTesterProps {
     iframeRef: React.RefObject<HTMLIFrameElement | null>;
@@ -10,14 +11,16 @@ interface GameAdjustmentTesterProps {
 export default function GameAdjustmentTester({ iframeRef, slug }: GameAdjustmentTesterProps) {
     useEffect(() => {
         console.log('GameAdjustmentTester mounted for game:', slug);
-        const handleKeyDown = (event: KeyboardEvent) => {
+
+        const processKey = (keyString: string) => {
             // Only respond to keys 1-9
-            if (!/^[1-9]$/.test(event.key)) {
+            if (!/^[1-9]$/.test(keyString)) {
                 return;
             }
 
-            const key = parseInt(event.key, 10);
-            const adjustments = getAdjustmentsForGame(slug, key);
+            const key = parseInt(keyString, 10);
+            const unifiedSlug = unifiedSlugFromBESlug(slug);
+            const adjustments = getAdjustmentsForGame(unifiedSlug, key);
 
             console.log('Sending manual test adjustment:', adjustments);
 
@@ -31,12 +34,28 @@ export default function GameAdjustmentTester({ iframeRef, slug }: GameAdjustment
                     }, '*');
                 });
             } else if (adjustments && adjustments.length === 0) {
-                console.log(`No adjustments mapped for key ${key} in game ${slug}`);
+                console.log(`No adjustments mapped for key ${key} in game ${unifiedSlug}`);
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        const handleKeyDown = (event: KeyboardEvent) => {
+            console.log('[GameAdjustmentTester] Native keydown intercepted:', event.key);
+            processKey(event.key);
+        };
+
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data && event.data.type === 'skillprint_keydown') {
+                console.log('[GameAdjustmentTester] Iframe keydown message received:', event.data.key);
+                processKey(event.data.key);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown, true); // Use capture phase
+        window.addEventListener('message', handleMessage);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown, true);
+            window.removeEventListener('message', handleMessage);
+        };
     }, [iframeRef, slug]);
 
     return null; // This is a behavioral component only
