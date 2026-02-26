@@ -1,0 +1,35 @@
+window.adjustGame = function (obj) {
+    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+        const { parameterName, parameterValue } = obj;
+
+        if (parameterName === "startTiles") {
+            // Apply it broadly to the game manager start options
+            if (window.gameManager) {
+                window.gameManager.startTiles = parameterValue;
+            } else {
+                // If it hasn't booted yet, hook it
+                const originalGameManager = window.GameManager;
+                window.GameManager = function (size, InputManager, Actuator, StorageManager) {
+                    const gm = new originalGameManager(size, InputManager, Actuator, StorageManager);
+                    gm.startTiles = parameterValue;
+                    window.gameManager = gm; // save reference for future adjustments
+                    return gm;
+                };
+            }
+        }
+    }
+}
+
+window.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'ADJUST_GAME') {
+        window.adjustGame(event.data.data);
+    }
+});
+
+// Forward keydown events to the parent window for the GameAdjustmentTester
+window.addEventListener('keydown', function (event) {
+    if (/^[1-9]$/.test(event.key)) {
+        console.log('[skillprintShim - 2048] Key intercepted in iframe:', event.key);
+        window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
+    }
+}, true); // Use capture phase to intercept before the game calls preventDefault()

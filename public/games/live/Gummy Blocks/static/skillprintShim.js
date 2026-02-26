@@ -19,8 +19,8 @@
 //   "parameterValue": 2
 // }
 
-window.adjustGame = function(obj) {
-    if(typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+window.adjustGame = function (obj) {
+    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
 
         // Validate that the value is a number
@@ -29,7 +29,7 @@ window.adjustGame = function(obj) {
             return;
         }
 
-        switch(parameterName) {
+        switch (parameterName) {
             case "boardRows":
                 // Adjust number of rows (min 5, max 12)
                 if (parameterValue >= 5 && parameterValue <= 12) {
@@ -94,4 +94,18 @@ window.adjustGame = function(obj) {
 if (typeof window.SCORE_MULTIPLIER === 'undefined') {
     window.SCORE_MULTIPLIER = 1.0;
 }
+
+window.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'ADJUST_GAME') {
+        window.adjustGame(event.data.data);
+    }
+});
+
+// Forward keydown events to the parent window for the GameAdjustmentTester
+window.addEventListener('keydown', function (event) {
+    if (/^[1-9]$/.test(event.key)) {
+        console.log('[skillprintShim - Gummy Blocks] Key intercepted in iframe:', event.key);
+        window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
+    }
+}, true); // Use capture phase to intercept before the game calls preventDefault()
 

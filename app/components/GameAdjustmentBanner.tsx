@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 interface GameAdjustmentBannerProps {
     parameterName: string;
-    parameterValue: number;
+    parameterValue: any;
     onDismiss?: () => void;
 }
 
@@ -15,7 +15,13 @@ const PARAMETER_LABELS: Record<string, string> = {
 
 const getParameterLabel = (name: string) => PARAMETER_LABELS[name] || name.replace(/([A-Z])/g, ' $1').trim();
 
-const formatValue = (name: string, value: number) => {
+const formatValue = (name: string, value: any) => {
+    if (Array.isArray(value)) {
+        return `[${value.join(', ')}]`;
+    }
+    if (typeof value !== 'number') {
+        return String(value);
+    }
     // Round to 1 decimal for cleanliness
     const rounded = Math.round(value * 10) / 10;
 

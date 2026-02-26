@@ -527,7 +527,11 @@ export default function GameClient({ slug }: GameClientProps) {
                     )}
 
                     {/* Hidden keyboard adjustment tester */}
-                    <GameAdjustmentTester iframeRef={iframeRef} slug={decodedSlug} />
+                    <GameAdjustmentTester
+                        iframeRef={iframeRef}
+                        slug={decodedSlug}
+                        onAdjustment={(adj) => setCurrentAdjustment(adj)}
+                    />
                 </main>
             </div>
 
