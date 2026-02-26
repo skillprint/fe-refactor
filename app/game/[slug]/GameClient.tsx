@@ -9,6 +9,7 @@ import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
+import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 
 interface GameClientProps {
     slug: string;
@@ -524,6 +525,9 @@ export default function GameClient({ slug }: GameClientProps) {
                             onClick={handleExitGame}
                         />
                     )}
+
+                    {/* Hidden keyboard adjustment tester */}
+                    <GameAdjustmentTester iframeRef={iframeRef} slug={decodedSlug} />
                 </main>
             </div>
 
