@@ -7,7 +7,7 @@ import { setupCache } from 'axios-cache-interceptor';
 // Use local proxy during development to avoid CORS
 // The /api/ path will be rewritten to https://api.staging.skillprint.co/ by next.config.ts
 // For production static builds, you'll need to configure CORS on your API server or CloudFront
-const BASE_URL = "https://api.staging.skillprint.co/";
+const BASE_URL = "https://api.skillprint.co/";
 
 // console.log(BASE_URL);
 
@@ -153,4 +153,13 @@ export const getGameBySlug = async (slug: string) => {
 export const getRecommendations = async (limit: number = 1) => {
     const url = `games/api/recommendations/?limit=${limit}`;
     return await get(url, false);
+};
+
+export const submitMoodSurvey = async (data: { score: number, game: string, mood: string }, token?: string | null) => {
+    const url = `games/api/surveys/mood/`;
+    const headers: any = { "Content-Type": "application/json" };
+    if (token) {
+        headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    return await post(url, data, headers);
 };

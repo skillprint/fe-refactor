@@ -12,6 +12,7 @@ import FirstGameBadge from '../../../components/FirstGameBadge';
 import RecommendedGameTile from '../../../components/RecommendedGameTile';
 import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
+import MoodSurveyWidget from '../../../components/MoodSurveyWidget';
 
 interface GameResults {
     score?: number;
@@ -298,6 +299,14 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                 <div className="mb-6 space-y-6">
                                     <h3 className="text-lg font-semibold text-foreground mb-4">Your Skillprint Analysis</h3>
 
+                                    {/* Mood Survey Widget */}
+                                    {closedSessionResult?.moodScores?.targetMood && (
+                                        <MoodSurveyWidget
+                                            gameSlug={decodedSlug}
+                                            targetMood={closedSessionResult.moodScores.targetMood}
+                                        />
+                                    )}
+
                                     {/* Skill Scores Section */}
                                     {closedSessionResult.skillScores && closedSessionResult.skillScores.metrics && (
                                         <div>
@@ -431,6 +440,8 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                     )}
                                 </div>
                             )} */}
+
+
 
                             {/* Action Buttons */}
                             <div className="space-y-3">
