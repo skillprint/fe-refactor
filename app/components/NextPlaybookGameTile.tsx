@@ -6,6 +6,7 @@ import { getGameDetails } from '../config/gameConfig';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
+import { useAuth } from '../context/AuthContext';
 
 interface NextPlaybookGameTileProps {
     playbookId: string;
@@ -13,11 +14,12 @@ interface NextPlaybookGameTileProps {
 
 export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTileProps) {
     const { sessions } = useGameSessions();
+    const { status } = useAuth();
 
     // Find playbook
     const playbook = Object.values(PLAYBOOKS).find(p => p.id === playbookId);
 
-    if (!playbook) return null;
+    if (!playbook || status === 'partner') return null;
 
     // Find next game
     let nextGameSlug = playbook.games[0];

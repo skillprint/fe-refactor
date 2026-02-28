@@ -83,33 +83,35 @@ export default function TopNav() {
                         <div className="mx-1 h-6 w-px bg-border hidden sm:block"></div>
 
                         {/* Profile Group */}
-                        <div className="flex items-center gap-2">
-                            {status === 'social' && userProfile && (
-                                <div className="flex items-center gap-2 hidden sm:flex animate-fade-in">
-                                    <span className="text-sm font-medium text-foreground whitespace-nowrap">Hi, {userProfile.firstName}</span>
-                                    {userProfile.picture && (
-                                        <img src={userProfile.picture} alt="Profile" className="w-8 h-8 rounded-full border border-border/50 shadow-sm" referrerPolicy="no-referrer" />
-                                    )}
-                                </div>
-                            )}
+                        {!(status === 'partner' && (!userProfile || (!userProfile.firstName && !userProfile.picture))) && (
+                            <div className="flex items-center gap-2">
+                                {(status === 'social' || status === 'partner') && userProfile && userProfile.firstName && (
+                                    <div className="flex items-center gap-2 hidden sm:flex animate-fade-in">
+                                        <span className="text-sm font-medium text-foreground whitespace-nowrap">Hi, {userProfile.firstName}</span>
+                                        {userProfile.picture && (
+                                            <img src={userProfile.picture} alt="Profile" className="w-8 h-8 rounded-full border border-border/50 shadow-sm" referrerPolicy="no-referrer" />
+                                        )}
+                                    </div>
+                                )}
 
-                            {allLinks.filter(l => l.name === 'Profile').map((link) => {
-                                const active = isActive(link.href);
-                                return (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className={`transition-colors p-2 rounded-md ${active
-                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                                            }`}
-                                        title={link.name}
-                                    >
-                                        {link.icon}
-                                    </Link>
-                                );
-                            })}
-                        </div>
+                                {allLinks.filter(l => l.name === 'Profile').map((link) => {
+                                    const active = isActive(link.href);
+                                    return (
+                                        <Link
+                                            key={link.href}
+                                            href={link.href}
+                                            className={`transition-colors p-2 rounded-md ${active
+                                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                                                }`}
+                                            title={link.name}
+                                        >
+                                            {link.icon}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type AuthStatus = 'loggedOut' | 'guest' | 'social';
+type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner';
 
 interface AuthContextType {
     status: AuthStatus;
@@ -21,6 +21,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [userProfile, setUserProfile] = useState<{ firstName: string; picture?: string } | null>(null);
 
     useEffect(() => {
+        // Partner Mode Detection
+        if (typeof window !== 'undefined' && window.self !== window.top) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const partnerUserId = urlParams.get('user_id');
+            const firstName = urlParams.get('first_name');
+            const profileImage = urlParams.get('profile_image');
+
+            if (partnerUserId) {
+                setStatus('partner');
+                setUserProfile({
+                    firstName: firstName || '',
+                    picture: profileImage || undefined
+                });
+
+                localStorage.setItem('auth_status', 'partner');
+                localStorage.setItem('user_id', partnerUserId);
+
+                if (firstName || profileImage) {
+                    localStorage.setItem('user_profile', JSON.stringify({
+                        firstName: firstName || '',
+                        picture: profileImage || undefined
+                    }));
+                } else {
+                    localStorage.removeItem('user_profile');
+                }
+
+                const date = new Date();
+                date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+                document.cookie = `user_id=${partnerUserId}; expires=${date.toUTCString()}; path=/`;
+
+                setIsLoading(false);
+                return;
+            }
+        }
+
+        // If not embedded, ensure partner mode is cleared
+        if (typeof window !== 'undefined' && window.self === window.top) {
+            const currentStatus = localStorage.getItem('auth_status');
+            if (currentStatus === 'partner') {
+                localStorage.setItem('auth_status', 'loggedOut');
+                localStorage.removeItem('user_profile');
+            }
+        }
+
         // Check local storage on mount
         const storedStatus = localStorage.getItem('auth_status') as AuthStatus | null;
         if (storedStatus) {

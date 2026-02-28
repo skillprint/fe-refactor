@@ -14,6 +14,7 @@ import BuckyballLoading from '../components/BuckyballLoading';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { getGameDetails } from '../config/gameConfig';
+import { useAuth } from '../context/AuthContext';
 
 type FilterType = 'moods' | 'skills' | 'playbooks';
 
@@ -22,8 +23,9 @@ function GamesPageContent() {
   const initialTab = (searchParams.get('tab') as FilterType) || 'moods';
   const initialFilter = searchParams.get('filter');
   const isNewFilter = initialFilter === 'new';
+  const { status } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<FilterType>(initialTab);
+  const [activeTab, setActiveTab] = useState<FilterType>(initialTab === 'playbooks' && status === 'partner' ? 'moods' : initialTab);
   const [selectedFilterSlug, setSelectedFilterSlug] = useState<string | null>(isNewFilter ? null : initialFilter);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -289,15 +291,17 @@ function GamesPageContent() {
                 >
                   Skills
                 </button>
-                <button
-                  onClick={() => handleTabChange('playbooks')}
-                  className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'playbooks'
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                >
-                  Playbooks
-                </button>
+                {status !== 'partner' && (
+                  <button
+                    onClick={() => handleTabChange('playbooks')}
+                    className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'playbooks'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    Playbooks
+                  </button>
+                )}
                 {/* search button */}
                 <button
                   onClick={handleSearchToggle}

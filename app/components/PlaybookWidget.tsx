@@ -4,11 +4,13 @@ import React from 'react';
 import Link from 'next/link';
 import { usePlaybook } from '../hooks/usePlaybook';
 import { getGameDetails } from '../config/gameConfig';
+import { useAuth } from '../context/AuthContext';
 
 export const PlaybookWidget: React.FC = () => {
     const { currentPlaybook, progress, isLoaded } = usePlaybook();
+    const { status } = useAuth();
 
-    if (!isLoaded || !currentPlaybook) {
+    if (!isLoaded || !currentPlaybook || status === 'partner') {
         return null;
     }
 
@@ -25,8 +27,8 @@ export const PlaybookWidget: React.FC = () => {
                                 Current Playbook
                             </span>
                             <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${currentPlaybook.goal === 'focus' ? 'bg-indigo-100 text-indigo-800' :
-                                    currentPlaybook.goal === 'learning' ? 'bg-emerald-100 text-emerald-800' :
-                                        'bg-orange-100 text-orange-800'
+                                currentPlaybook.goal === 'learning' ? 'bg-emerald-100 text-emerald-800' :
+                                    'bg-orange-100 text-orange-800'
                                 }`}>
                                 {currentPlaybook.goal}
                             </span>
@@ -79,10 +81,10 @@ export const PlaybookWidget: React.FC = () => {
                                 <Link
                                     href={isLocked ? '#' : `/game/${encodeURIComponent(slug)}/interstitial?source=playbook&playbookId=${currentPlaybook.id}`}
                                     className={`block bg-background rounded-xl border-2 transition-all duration-300 relative overflow-hidden ${isCurrent
-                                            ? 'border-primary ring-4 ring-primary/10 shadow-lg scale-105 z-10'
-                                            : isCompleted
-                                                ? 'border-green-500/50'
-                                                : 'border-border hover:border-primary/50'
+                                        ? 'border-primary ring-4 ring-primary/10 shadow-lg scale-105 z-10'
+                                        : isCompleted
+                                            ? 'border-green-500/50'
+                                            : 'border-border hover:border-primary/50'
                                         } ${isLocked ? 'cursor-not-allowed pointer-events-none' : ''}`}
                                 >
                                     {/* Status Badge */}

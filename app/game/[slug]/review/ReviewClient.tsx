@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserSession } from '../../../hooks/useUserSession';
+import { useAuth } from '../../../context/AuthContext';
 import { getGameDetails } from '../../../config/gameConfig';
 import { getGameBySlug } from '../../../api/api';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
@@ -32,6 +33,7 @@ interface ReviewClientProps {
 export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
+    const { status } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [isCalculating, setIsCalculating] = useState(true);
     const [calculationError, setCalculationError] = useState<string | undefined>(undefined);
@@ -191,7 +193,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     useEffect(() => {
         // Check for first game badge
         const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
-        if (!hasSeenBadge) {
+        if (!hasSeenBadge && status !== 'partner') {
             // Pick a random next game
             const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
             const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];

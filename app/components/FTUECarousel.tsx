@@ -26,7 +26,7 @@ export default function FTUECarousel() {
 
     useEffect(() => {
         // Only trigger FTUE if the user has formally logged in (bypassing Welcome screen)
-        if (status === 'loggedOut') return;
+        if (status === 'loggedOut' || status === 'partner') return;
 
         // Check if FTUE has been completed
         const hasCompletedFTUE = document.cookie
