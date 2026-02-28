@@ -28,7 +28,7 @@ export default function ProgressBanner() {
     return (
         <div
             onClick={handleClick}
-            className={`sticky top-[4rem] z-[9] border-b border-white/20 cursor-pointer group transition-all duration-300 hover:shadow-lg ${isProfileReady
+            className={`sticky top-[4rem] z-[40] border-b border-white/20 cursor-pointer group transition-all duration-300 hover:shadow-lg ${isProfileReady
                 ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:shadow-teal-500/30'
                 : 'bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:shadow-purple-500/30'
                 }`}
