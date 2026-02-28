@@ -203,7 +203,7 @@ export function WelcomeScreen() {
                                         )}
                                     />
                                 </div>
-                                <div className="flex items-center justify-center w-full">
+                                {/* <div className="flex items-center justify-center w-full">
                                     <button
                                         onClick={linkedInLogin}
                                         className="flex items-center justify-center gap-2 w-full max-w-[384px] h-[40px] px-4 py-2 bg-white border border-[#747775] rounded text-[#1F1F1F] font-medium transition-colors hover:bg-gray-50"
@@ -214,7 +214,7 @@ export function WelcomeScreen() {
                                         </svg>
                                         Continue with LinkedIn
                                     </button>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     )}
