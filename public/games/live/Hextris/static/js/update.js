@@ -25,9 +25,9 @@ function update(dt) {
 
 	for (i = 0; i < MainHex.blocks.length; i++) {
 		for (j = 0; j < MainHex.blocks[i].length; j++) {
-			if (MainHex.blocks[i][j].checked ==1 ) {
-				consolidateBlocks(MainHex,MainHex.blocks[i][j].attachedLane,MainHex.blocks[i][j].getIndex());
-				MainHex.blocks[i][j].checked=0;
+			if (MainHex.blocks[i][j].checked == 1) {
+				consolidateBlocks(MainHex, MainHex.blocks[i][j].attachedLane, MainHex.blocks[i][j].getIndex());
+				MainHex.blocks[i][j].checked = 0;
 			}
 		}
 	}
@@ -37,7 +37,7 @@ function update(dt) {
 		for (j = 0; j < MainHex.blocks[i].length; j++) {
 			block = MainHex.blocks[i][j];
 			if (block.deleted == 2) {
-				MainHex.blocks[i].splice(j,1);
+				MainHex.blocks[i].splice(j, 1);
 				blockDestroyed();
 				if (j < lowestDeletedIndex) lowestDeletedIndex = j;
 				j--;
@@ -62,10 +62,29 @@ function update(dt) {
 		}
 	}
 
-	for(i = 0; i < blocks.length;i++){
+	for (i = 0; i < blocks.length; i++) {
 		if (blocks[i].removed == 1) {
-			blocks.splice(i,1);
+			blocks.splice(i, 1);
 			i--;
+		}
+	}
+
+	if (typeof window.lastStateTime === 'undefined') window.lastStateTime = 0;
+	if (Date.now() - window.lastStateTime > 500) {
+		window.lastStateTime = Date.now();
+		try {
+			var state = {
+				score: typeof score !== 'undefined' ? score : 0,
+				difficulty: typeof waveone !== 'undefined' ? waveone.difficulty : 0,
+				blocksOnScreen: typeof blocks !== 'undefined' ? blocks.length : 0,
+				lockedBlocks: typeof MainHex !== 'undefined' && MainHex.blocks ? MainHex.blocks.reduce(function (acc, val) { return acc + val.length; }, 0) : 0,
+				gameState: typeof gameState !== 'undefined' ? gameState : 0
+			};
+			if (window.parent) {
+				window.parent.postMessage({ type: 'gameState', data: state }, '*');
+			}
+		} catch (e) {
+			console.error("Error broadcasting state", e);
 		}
 	}
 
