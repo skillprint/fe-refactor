@@ -1,7 +1,7 @@
 function Hex(sideLength) {
 	this.playThrough = 0;
-	this.fillColor = [44,62,80];
-	this.tempColor = [44,62,80];
+	this.fillColor = [44, 62, 80];
+	this.tempColor = [44, 62, 80];
 	this.angularVelocity = 0;
 	this.position = 0;
 	this.dy = 0;
@@ -20,19 +20,19 @@ function Hex(sideLength) {
 	this.lastColorScored = "#000";
 	this.comboTime = 1;
 	this.texts = [];
-		this.lastRotate = Date.now();
+	this.lastRotate = Date.now();
 	for (var i = 0; i < this.sides; i++) {
 		this.blocks.push([]);
 	}
 
-	this.shake = function(obj) { //lane as in particle lane
+	this.shake = function (obj) { //lane as in particle lane
 		var angle = 30 + obj.lane * 60;
 		angle *= Math.PI / 180;
 		var dx = Math.cos(angle) * obj.magnitude;
 		var dy = Math.sin(angle) * obj.magnitude;
 		gdx -= dx;
 		gdy += dy;
-		obj.magnitude /= 2 * this.dt;
+		obj.magnitude *= Math.pow(0.5, this.dt);
 		if (obj.magnitude < 1) {
 			for (var i = 0; i < this.shakes.length; i++) {
 				if (this.shakes[i] == obj) {
@@ -42,12 +42,12 @@ function Hex(sideLength) {
 		}
 	};
 
-	this.addBlock = function(block) {
+	this.addBlock = function (block) {
 		if (!(gameState == 1 || gameState === 0)) return;
 		block.settled = 1;
 		block.tint = 0.6;
 		var lane = this.sides - block.fallingLane;// -this.position;
-		this.shakes.push({lane:block.fallingLane, magnitude:4.5 * (window.devicePixelRatio ? window.devicePixelRatio : 1) * (settings.scale)});
+		this.shakes.push({ lane: block.fallingLane, magnitude: 4.5 * (window.devicePixelRatio ? window.devicePixelRatio : 1) * (settings.scale) });
 		lane += this.position;
 		lane = (lane + this.sides) % this.sides;
 		block.distFromHex = MainHex.sideLength / 2 * Math.sqrt(3) + block.height * this.blocks[lane].length;
@@ -56,7 +56,7 @@ function Hex(sideLength) {
 		block.checked = 1;
 	};
 
-	this.doesBlockCollide = function(block, position, tArr) {
+	this.doesBlockCollide = function (block, position, tArr) {
 		if (block.settled) {
 			return;
 		}
@@ -70,7 +70,7 @@ function Hex(sideLength) {
 					block.checked = 1;
 				} else {
 					block.settled = 0;
-					block.iter = 1.5 + (waveone.difficulty/15) * 3;
+					block.iter = 1.5 + (waveone.difficulty / 15) * 3;
 				}
 			} else {
 				if (arr[position - 1].settled && block.distFromHex - block.iter * this.dt * settings.scale - arr[position - 1].distFromHex - arr[position - 1].height <= 0) {
@@ -80,14 +80,14 @@ function Hex(sideLength) {
 				}
 				else {
 					block.settled = 0;
-					block.iter = 1.5 + (waveone.difficulty/15) * 3;
+					block.iter = 1.5 + (waveone.difficulty / 15) * 3;
 				}
 			}
 		} else {
 			var lane = this.sides - block.fallingLane;//  -this.position;
 			lane += this.position;
 
-			lane = (lane+this.sides) % this.sides;
+			lane = (lane + this.sides) % this.sides;
 			var arr = this.blocks[lane];
 
 			if (arr.length > 0) {
@@ -104,8 +104,8 @@ function Hex(sideLength) {
 		}
 	};
 
-	this.rotate = function(steps) {
-				if(Date.now()-this.lastRotate<75 && !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) ) return;
+	this.rotate = function (steps) {
+		if (Date.now() - this.lastRotate < 75 && !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) return;
 		if (!(gameState === 1 || gameState === 0)) return;
 		this.position += steps;
 		if (!history[this.ct]) {
@@ -124,21 +124,21 @@ function Hex(sideLength) {
 		}
 
 		this.position = this.position % this.sides;
-		this.blocks.forEach(function(blocks) {
-			blocks.forEach(function(block) {
+		this.blocks.forEach(function (blocks) {
+			blocks.forEach(function (block) {
 				block.targetAngle = block.targetAngle - steps * 60;
 			});
 		});
 
 		this.targetAngle = this.targetAngle - steps * 60;
-				this.lastRotate = Date.now();
+		this.lastRotate = Date.now();
 	};
 
-	this.draw = function() {
-		this.x = trueCanvas.width/2;
+	this.draw = function () {
+		this.x = trueCanvas.width / 2;
 
 		if (gameState != -2) {
-			this.y = trueCanvas.height/2;
+			this.y = trueCanvas.height / 2;
 		}
 		this.sideLength = settings.hexWidth;
 		gdx = 0;
@@ -149,7 +149,7 @@ function Hex(sideLength) {
 		if (this.angle > this.targetAngle) {
 			this.angularVelocity -= angularVelocityConst * this.dt;
 		}
-		else if(this.angle < this.targetAngle) {
+		else if (this.angle < this.targetAngle) {
 			this.angularVelocity += angularVelocityConst * this.dt;
 		}
 
@@ -160,11 +160,11 @@ function Hex(sideLength) {
 		else {
 			this.angle += this.angularVelocity;
 		}
- 
-		drawPolygon(this.x + gdx, this.y + gdy + this.dy, this.sides, this.sideLength, this.angle,arrayToColor(this.fillColor) , 0, 'rgba(0,0,0,0)');
+
+		drawPolygon(this.x + gdx, this.y + gdy + this.dy, this.sides, this.sideLength, this.angle, arrayToColor(this.fillColor), 0, 'rgba(0,0,0,0)');
 	};
 }
 
-function arrayToColor(arr){
-	return 'rgb(' + arr[0]+ ','+arr[1]+','+arr[2]+')';
+function arrayToColor(arr) {
+	return 'rgb(' + arr[0] + ',' + arr[1] + ',' + arr[2] + ')';
 }
