@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import { cookies } from 'next/headers';
+import { db } from '@vercel/postgres';
 
 export async function POST(req: Request) {
     try {
         const { targetMode, targetValue, optionalPrompt } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY;
+        const cookieStore = await cookies();
+        const userId = cookieStore.get('user_id')?.value || 'anonymous';
 
         if (!apiKey) {
             return NextResponse.json({ error: 'Missing GEMINI_API_KEY' }, { status: 500 });
@@ -152,12 +156,25 @@ IMPORTANT CRITERIA:
                     const fileId = crypto.randomUUID();
                     const fileName = `${targetMode}-${targetValue.replace(/\\s+/g, '-')}-${fileId}.html`.toLowerCase();
                     const gamesDir = path.join(process.cwd(), 'public', 'games', 'generated');
+                    const fileUrlStr = `/games/generated/${fileName}`;
 
                     await fs.mkdir(gamesDir, { recursive: true });
                     await fs.writeFile(path.join(gamesDir, fileName), finalHtmlContent, 'utf-8');
 
+                    // Save the generated game to the database
+                    if (userId && userId !== 'anonymous') {
+                        try {
+                            await db.sql`
+                                INSERT INTO generated_games (user_id, target_mode, target_value, optional_prompt, file_url)
+                                VALUES (${userId}, ${targetMode}, ${targetValue}, ${optionalPrompt || null}, ${fileUrlStr})
+                            `;
+                        } catch (dbError) {
+                            console.error("Failed to save game to database:", dbError);
+                        }
+                    }
+
                     // Send a final message to the client indicating the file is ready
-                    const finalMarker = `\\n\\n___FILE_READY___:/games/generated/${fileName}`;
+                    const finalMarker = `\\n\\n___FILE_READY___:${fileUrlStr}`;
                     controller.enqueue(encoder.encode(finalMarker));
 
                 } catch (error) {

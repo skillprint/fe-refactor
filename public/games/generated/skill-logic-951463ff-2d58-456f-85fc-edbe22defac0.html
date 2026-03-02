@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Nodes - Logic Puzzle</title>
+    <style>
+        :root {
+            --bg-color: #0a0a16;
+            --panel-bg: rgba(20, 20, 40, 0.8);
+            --primary: #00f3ff;
+            --primary-glow: rgba(0, 243, 255, 0.6);
+            --secondary: #ff00ea;
+            --node-off: #1a1a2e;
+            --node-off-border: #2a2a4e;
+            --text-main: #e0e0ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 0, 234, 0.05), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 10;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--primary-glow), 0 0 20px var(--primary-glow);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(255, 0, 234, 0.6);
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #aaa;
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+
+        /* Buttons */
+        button {
+            background: transparent;
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 15px 40px;
+            border: 2px solid var(--primary);
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2) inset, 0 0 10px rgba(0, 243, 255, 0.2);
+            outline: none;
+        }
+
+        button:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Game UI */
+        #ui-layer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 0 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #ui-layer.visible {
+            opacity: 1;
+        }
+
+        .stat {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+
+        #btn-reset {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-color: #aaa;
+            color: #aaa;
+            box-shadow: none;
+        }
+
+        #btn-reset:hover {
+            background: #aaa;
+            color: var(--bg-color);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* Grid */
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            width: 90vmin;
+            max-width: 400px;
+            height: 90vmin;
+            max-height: 400px;
+            perspective: 1000px;
+        }
+
+        .node {
+            background-color: var(--node-off);
+            border: 2px solid var(--node-off-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            transform-style: preserve-3d;
+        }
+
+        .node:active {
+            transform: scale(0.9);
+        }
+
+        .node.on {
+            background-color: var(--primary);
+            border-color: #fff;
+            box-shadow: 
+                0 0 15px var(--primary-glow),
+                inset 0 0 20px rgba(255,255,255,0.8);
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px var(--primary-glow), inset 0 0 15px rgba(255,255,255,0.6); }
+            100% { box-shadow: 0 0 25px var(--primary), inset 0 0 25px rgba(255,255,255,1); }
+        }
+
+        /* Decorative SVG Background */
+        .svg-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <svg class="svg-bg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <pattern id="gridPattern" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#00f3ff" stroke-width="0.5"/>
+            </pattern>
+        </defs>
+        <rect width="100" height="100" fill="url(#gridPattern)" />
+    </svg>
+
+    <div id="game-container">
+        
+        <!-- UI Header -->
+        <div id="ui-layer">
+            <div class="stat">MOVES: <span id="move-counter">0</span></div>
+            <button id="btn-reset">Restart</button>
+        </div>
+
+        <!-- Game Board -->
+        <div id="grid-container"></div>
+
+        <!-- Start Screen -->
+        <div id="screen-start" class="screen active">
+            <h1>Quantum<br>Nodes</h1>
+            <p>A logic puzzle. Clicking a node toggles its state and the state of its directly adjacent neighbors. Your goal: <strong>Turn off all nodes.</strong></p>
+            <button id="btn-start">Initialize</button>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="screen-win" class="screen">
+            <h2>SYSTEM STABILIZED</h2>
+            <p>Sequence resolved efficiently.</p>
+            <p>Total Moves: <strong id="final-moves" style="color: var(--primary); font-size: 1.5rem;">0</strong></p>
+            <button id="btn-play-again">Re-engage</button>
+        </div>
+
+    </div>
+
+    <script>
+        const GRID_SIZE = 5;
+        let grid = [];
+        let moves = 0;
+        let isPlaying = false;
+
+        // DOM Elements
+        const gridContainer = document.getElementById('grid-container');
+        const moveCounter = document.getElementById('move-counter');
+        const finalMoves = document.getElementById('final-moves');
+        const screenStart = document.getElementById('screen-start');
+        const screenWin = document.getElementById('screen-win');
+        const uiLayer = document.getElementById('ui-layer');
+        
+        const btnStart = document.getElementById('btn-start');
+        const btnReset = document.getElementById('btn-reset');
+        const btnPlayAgain = document.getElementById('btn-play-again');
+
+        // Audio Synthesis (Web Audio API) for sound effects without external files
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'win') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+                osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.6);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            }
+        }
+
+        // Initialize Grid DOM and Data
+        function initGrid() {
+            gridContainer.innerHTML = '';
+            grid = [];
+            for (let r = 0; r < GRID_SIZE; r++) {
+                let row = [];
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    row.push(false);
+                    const node = document.createElement('div');
+                    node.classList.add('node');
+                    node.dataset.row = r;
+                    node.dataset.col = c;
+                    node.addEventListener('click', handleNodeClick);
+                    gridContainer.appendChild(node);
+                }
+                grid.push(row);
+            }
+        }
+
+        // Handle interactions
+        function handleNodeClick(e) {
+            if (!isPlaying) return;
+            const r = parseInt(e.target.dataset.row);
+            const c = parseInt(e.target.dataset.col);
+            
+            toggleNodeAndNeighbors(r, c);
+            moves++;
+            updateUI();
+            playSound('click');
+            checkWinCondition();
+        }
+
+        // Core Logic: Toggle state
+        function toggle(r, c) {
+            if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
+                grid[r][c] = !grid[r][c];
+                const index = r * GRID_SIZE + c;
+                const nodeEl = gridContainer.children[index];
+                if (grid[r][c]) {
+                    nodeEl.classList.add('on');
+                } else {
+                    nodeEl.classList.remove('on');
+                }
+            }
+        }
+
+        function toggleNodeAndNeighbors(r, c) {
+            toggle(r, c);       // Center
+            toggle(r - 1, c);   // Top
+            toggle(r + 1, c);   // Bottom
+            toggle(r, c - 1);   // Left
+            toggle(r, c + 1);   // Right
+        }
+
+        // Level Generation (Guarantees solvability by simulating random clicks from a solved state)
+        function generateLevel() {
+            // Reset to all off
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (grid[r][c]) toggle(r, c);
+                }
+            }
+            
+            // Simulate random clicks to scramble
+            const scrambleMoves = 15 + Math.floor(Math.random() * 10);
+            for (let i = 0; i < scrambleMoves; i++) {
+                const randR = Math.floor(Math.random() * GRID_SIZE);
+                const randC = Math.floor(Math.random() * GRID_SIZE);
+                toggleNodeAndNeighbors(randR, randC);
+            }
+
+            // Edge case: if random clicks accidentally solved it, scramble once more
+            if (isSolved()) {
+                toggleNodeAndNeighbors(0, 0);
+            }
+        }
+
+        function isSolved() {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (grid[r][c]) return false;
+                }
+            }
+            return true;
+        }
+
+        function checkWinCondition() {
+            if (isSolved()) {
+                isPlaying = false;
+                playSound('win');
+                setTimeout(() => {
+                    finalMoves.innerText = moves;
+                    screenWin.classList.add('active');
+                    uiLayer.classList.remove('visible');
+                }, 500);
+            }
+        }
+
+        function updateUI() {
+            moveCounter.innerText = moves;
+        }
+
+        function startGame() {
+            screenStart.classList.remove('active');
+            screenWin.classList.remove('active');
+            uiLayer.classList.add('visible');
+            moves = 0;
+            updateUI();
+            generateLevel();
+            isPlaying = true;
+            
+            // Resume audio context on first user interaction
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Event Listeners
+        btnStart.addEventListener('click', startGame);
+        btnReset.addEventListener('click', startGame);
+        btnPlayAgain.addEventListener('click', startGame);
+
+        // Boot
+        initGrid();
+
+    </script>
+</body>
+</html>
