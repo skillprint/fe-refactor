@@ -3,13 +3,13 @@ import { sequelize } from '../db';
 import { User } from './User';
 
 export class GeneratedGame extends Model {
-    public id!: string;
-    public user_id!: string;
-    public target_mode!: 'mood' | 'skill';
-    public target_value!: string;
-    public optional_prompt!: string | null;
-    public file_url!: string;
-    public created_at!: Date;
+    declare id: string;
+    declare user_id: string;
+    declare target_mode: 'mood' | 'skill';
+    declare target_value: string;
+    declare optional_prompt: string | null;
+    declare file_url: string;
+    declare created_at: Date;
 }
 
 GeneratedGame.init(

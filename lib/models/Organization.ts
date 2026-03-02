@@ -1,27 +1,33 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../db';
 
-export class User extends Model {
+export class Organization extends Model {
     declare id: string;
-    declare first_name: string;
-    declare profile_image: string | null;
+    declare name: string;
+    declare username: string;
+    declare password_hash: string;
     declare created_at: Date;
 }
 
-User.init(
+Organization.init(
     {
         id: {
-            type: DataTypes.STRING,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
-            // the user_id from social logins might not be a uuid, so we'll use a standard string
         },
-        first_name: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        profile_image: {
+        username: {
             type: DataTypes.STRING,
-            allowNull: true,
+            allowNull: false,
+            unique: true,
+        },
+        password_hash: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
         created_at: {
             type: DataTypes.DATE,
@@ -30,8 +36,8 @@ User.init(
     },
     {
         sequelize,
-        modelName: 'User',
-        tableName: 'users',
+        modelName: 'Organization',
+        tableName: 'organizations',
         timestamps: false,
     }
 );

@@ -1,38 +1,22 @@
-import { db } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+import { Organization } from '@/lib/models/Organization';
+import { sequelize } from '@/lib/db';
 
 export async function GET() {
-    const client = await db.connect();
-
     try {
-        // Create the test table if it doesn't exist
-        await client.sql`
-      CREATE TABLE IF NOT EXISTS test_data (
-        id SERIAL PRIMARY KEY,
-        message VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
+        const orgs = await Organization.findAll();
+        const rawQuery = await sequelize.query('SELECT * FROM organizations', { type: 'SELECT' });
 
-        // Insert a test row
-        const insertResult = await client.sql`
-      INSERT INTO test_data (message)
-      VALUES ('Hello, Database!')
-      RETURNING *;
-    `;
-
-        // Return the inserted row
         return NextResponse.json({
             success: true,
-            data: insertResult.rows[0],
+            sequelize_models: orgs,
+            raw_query: rawQuery
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Database Error:', error);
         return NextResponse.json(
-            { error: 'Failed to access the database' },
+            { error: 'Failed to access the database', details: error.message },
             { status: 500 }
         );
-    } finally {
-        client.release();
     }
 }

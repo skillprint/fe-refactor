@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Umzug, SequelizeStorage } from 'umzug';
 import { sequelize } from '@/lib/db';
 import * as initialSchema from '@/migrations/00-initial-schema';
+import * as createOrganizations from '@/migrations/01-create-organizations';
 
 export async function GET() {
     try {
@@ -11,6 +12,11 @@ export async function GET() {
                     name: '00-initial-schema',
                     up: async () => initialSchema.up({ context: sequelize, name: '00-initial-schema' }),
                     down: async () => initialSchema.down({ context: sequelize, name: '00-initial-schema' }),
+                },
+                {
+                    name: '01-create-organizations',
+                    up: async () => createOrganizations.up({ context: sequelize, name: '01-create-organizations' }),
+                    down: async () => createOrganizations.down({ context: sequelize, name: '01-create-organizations' }),
                 }
             ],
             context: sequelize,

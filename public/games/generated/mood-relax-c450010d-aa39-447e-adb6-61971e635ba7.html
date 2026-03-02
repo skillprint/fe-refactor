@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Abyssal Drift</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500&display=swap');
+
+        :root {
+            --bg-top: #020b16;
+            --bg-bottom: #0a1f3a;
+            --accent: #8ecae6;
+            --text-light: #e0fbfc;
+            --glass-bg: rgba(10, 31, 58, 0.6);
+            --glass-border: rgba(142, 202, 230, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+            font-family: 'Quicksand', sans-serif;
+            color: var(--text-light);
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .screen {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateY(0);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateY(20px);
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(142, 202, 230, 0.5);
+        }
+
+        p {
+            font-weight: 300;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            box-shadow: 0 0 10px rgba(142, 202, 230, 0.1);
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: var(--bg-top);
+            box-shadow: 0 0 20px rgba(142, 202, 230, 0.4);
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            opacity: 0.8;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .fade-out {
+            opacity: 0;
+        }
+
+        #instructions {
+            font-size: 0.9rem;
+            margin-top: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="hud" class="hidden">Essence: <span id="score">0</span></div>
+
+    <div id="start-screen" class="ui-layer">
+        <div class="screen">
+            <h1>Abyssal Drift</h1>
+            <p>A relaxing journey through the deep.</p>
+            <button class="btn" id="start-btn">Drift Away</button>
+            <div id="instructions">Click, tap, or press Space to rise gently.</div>
+        </div>
+    </div>
+
+    <div id="game-over-screen" class="ui-layer hidden">
+        <div class="screen">
+            <h1>Rest</h1>
+            <p>You drifted too close to the coral.</p>
+            <p>Essence Gathered: <span id="final-score">0</span></p>
+            <button class="btn" id="restart-btn">Awaken</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * Audio Engine - Generative Ambient Music & SFX
+ */
+class AudioEngine {
+    constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.bgmInterval = null;
+        this.isPlaying = false;
+        // C Pentatonic scale frequencies
+        this.scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+    }
+
+    init() {
+        if (this.ctx) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.6;
+        
+        // Master filter for underwater feel
+        this.masterFilter = this.ctx.createBiquadFilter();
+        this.masterFilter.type = 'lowpass';
+        this.masterFilter.frequency.value = 800;
+        
+        this.masterGain.connect(this.masterFilter);
+        this.masterFilter.connect(this.ctx.destination);
+    }
+
+    playTone(freq, type, attack, decay, vol, filterFreq = 2000) {
+        if (!this.ctx || this.ctx.state !== 'running') return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+        filter.type = 'lowpass';
+        filter.frequency.value = filterFreq;
+
+        gain.gain.setValueAtTime(0, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + attack);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + attack + decay);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + attack + decay);
+    }
+
+    startAmbient() {
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        this.isPlaying = true;
+        
+        // Base drone
+        this.playTone(65.41, 'sine', 2, 10, 0.1, 400);
+
+        const playRandomNote = () => {
+            if (!this.isPlaying) return;
+            const freq = this.scale[Math.floor(Math.random() * this.scale.length)];
+            // Slow attack, long release sine waves for ambient feel
+            this.playTone(freq, 'sine', 2, 4 + Math.random() * 4, 0.05, 600);
+            
+            // Schedule next note
+            this.bgmTimeout = setTimeout(playRandomNote, 1000 + Math.random() * 3000);
+        };
+        
+        playRandomNote();
+    }
+
+    stopAmbient() {
+        this.isPlaying = false;
+        clearTimeout(this.bgmTimeout);
+    }
+
+    playThrust() {
+        this.init();
+        // Gentle whoosh
+        this.playTone(150 + Math.random()*50, 'sine', 0.5, 1, 0.02, 300);
+    }
+
+    playCollect() {
+        this.init();
+        // Soft chime
+        const freq = this.scale[Math.floor(Math.random() * this.scale.length)] * 2;
+        this.playTone(freq, 'sine', 0.1, 1.5, 0.08, 1500);
+    }
+
+    playGameOver() {
+        this.init();
+        // Deep detuned thud
+        this.playTone(100, 'triangle', 0.1, 3, 0.1, 300);
+        this.playTone(95, 'sine', 0.1, 3, 0.1, 300);
+    }
+}
+
+const audio = new AudioEngine();
+
+/**
+ * Game Entities
+ */
+class Jellyfish {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vy = 0;
+        this.gravity = 0.04; // Very low gravity
+        this.thrust = -1.2;  // Gentle thrust
+        this.radius = 15;
+        this.time = 0;
+    }
+
+    swim() {
+        this.vy = this.thrust;
+        audio.playThrust();
+    }
+
+    update() {
+        this.vy += this.gravity;
+        this.y += this.vy;
+        this.time += 0.05;
+
+        // Ceiling/Floor limits (gentle bounce)
+        if (this.y < this.radius) {
+            this.y = this.radius;
+            this.vy = 0;
+        }
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        
+        // Tilt based on velocity
+        ctx.rotate(this.vy * 0.1);
+
+        // Glow
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = 'rgba(142, 202, 230, 0.8)';
+        
+        // Body (Dome)
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, Math.PI, 0);
+        ctx.fillStyle = 'rgba(224, 251, 252, 0.7)';
+        ctx.fill();
+
+        // Bottom of dome
+        ctx.beginPath();
+        ctx.moveTo(-this.radius, 0);
+        ctx.quadraticCurveTo(0, 5, this.radius, 0);
+        ctx.fillStyle = 'rgba(142, 202, 230, 0.5)';
+        ctx.fill();
+
+        // Tentacles
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(224, 251, 252, 0.4)';
+        ctx.lineWidth = 2;
+        
+        for (let i = -1; i <= 1; i++) {
+            ctx.beginPath();
+            let startX = i * (this.radius * 0.5);
+            ctx.moveTo(startX, 0);
+            
+            // Swaying motion using sine waves
+            let sway1 = Math.sin(this.time + i) * 5;
+            let sway2 = Math.cos(this.time * 0.8 + i) * 8;
+            
+            ctx.quadraticCurveTo(startX + sway1, 15, startX + sway2, 30 + Math.sin(this.time)*5);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+}
+
+class Obstacle {
+    constructor(x, canvasHeight) {
+        this.x = x;
+        this.width = 40;
+        this.gap = 250; // Wide, forgiving gap
+        
+        // Randomize gap position, keeping it within bounds
+        const minHeight = 50;
+        const maxPos = canvasHeight - minHeight - this.gap;
+        this.topHeight = Math.max(minHeight, Math.random() * maxPos);
+        
+        this.passed = false;
+        
+        // Visual variation
+        this.swayOffset = Math.random() * Math.PI * 2;
+    }
+
+    update(speed) {
+        this.x -= speed;
+    }
+
+    drawSeaweed(ctx, x, y, width, height, isTop, time) {
+        ctx.save();
+        ctx.fillStyle = '#114b5f';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        
+        const segments = 5;
+        const segmentHeight = height / segments;
+        
+        ctx.beginPath();
+        if (isTop) {
+            ctx.moveTo(x, 0);
+            for(let i=1; i<=segments; i++) {
+                let sway = Math.sin(time * 0.5 + this.swayOffset + i*0.5) * 10;
+                ctx.lineTo(x + sway, i * segmentHeight);
+            }
+            ctx.lineTo(x + width, height);
+            for(let i=segments-1; i>=0; i--) {
+                let sway = Math.sin(time * 0.5 + this.swayOffset + i*0.5) * 10;
+                ctx.lineTo(x + width + sway, i * segmentHeight);
+            }
+        } else {
+            const startY = y + height;
+            ctx.moveTo(x, startY);
+            for(let i=1; i<=segments; i++) {
+                let sway = Math.sin(time * 0.5 + this.swayOffset + i*0.5) * 10;
+                ctx.lineTo(x + sway, startY - (i * segmentHeight));
+            }
+            ctx.lineTo(x + width, y);
+            for(let i=segments-1; i>=0; i--) {
+                let sway = Math.sin(time * 0.5 + this.swayOffset + i*0.5) * 10;
+                ctx.lineTo(x + width + sway, startY - (i * segmentHeight));
+            }
+        }
+        ctx.fill();
+        ctx.restore();
+    }
+
+    draw(ctx, canvasHeight, time) {
+        // Top coral/seaweed
+        this.drawSeaweed(ctx, this.x, 0, this.width, this.topHeight, true, time);
+        
+        // Bottom coral/seaweed
+        const bottomY = this.topHeight + this.gap;
+        const bottomHeight = canvasHeight - bottomY;
+        this.drawSeaweed(ctx, this.x, bottomY, this.width, bottomHeight, false, time);
+    }
+
+    checkCollision(player) {
+        // Simple AABB collision with slight forgiveness (smaller hitbox)
+        const hitMargin = 5;
+        
+        // Check X bounds
+        if (player.x + player.radius - hitMargin > this.x && 
+            player.x - player.radius + hitMargin < this.x + this.width) {
+            
+            // Check Y bounds
+            if (player.y - player.radius + hitMargin < this.topHeight || 
+                player.y + player.radius - hitMargin > this.topHeight + this.gap) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+class Collectible {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 6;
+        this.collected = false;
+        this.baseY = y;
+        this.time = Math.random() * 10;
+    }
+
+    update(speed) {
+        this.x -= speed;
+        this.time += 0.05;
+        this.y = this.baseY + Math.sin(this.time) * 10; // Bobbing motion
+    }
+
+    draw(ctx) {
+        if (this.collected) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffb703';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ffb703';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    checkCollision(player) {
+        if (this.collected) return false;
+        const dx = this.x - player.x;
+        const dy = this.y - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < this.radius + player.radius) {
+            this.collected = true;
+            return true;
+        }
+        return false;
+    }
+}
+
+class ParticleSystem {
+    constructor(width, height) {
+        this.particles = [];
+        this.width = width;
+        this.height = height;
+        // Pre-fill some bubbles
+        for(let i=0; i<30; i++) {
+            this.particles.push(this.createParticle(Math.random() * height));
+        }
+    }
+
+    createParticle(yPos) {
+        return {
+            x: Math.random() * this.width,
+            y: yPos || this.height + 10,
+            size: Math.random() * 3 + 1,
+            speedY: Math.random() * 1 + 0.5,
+            speedX: (Math.random() - 0.5) * 0.5,
+            opacity: Math.random() * 0.5 + 0.1
+        };
+    }
+
+    update() {
+        // Add new occasionally
+        if (Math.random() < 0.05) {
+            this.particles.push(this.createParticle());
+        }
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            let p = this.particles[i];
+            p.y -= p.speedY;
+            p.x += p.speedX;
+            
+            // Wobble
+            p.x += Math.sin(p.y * 0.05) * 0.5;
+
+            if (p.y < -10) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        for (let p of this.particles) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+}
+
+/**
+ * Main Game Controller
+ */
+class Game {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        
+        this.uiStart = document.getElementById('start-screen');
+        this.uiGameOver = document.getElementById('game-over-screen');
+        this.uiHud = document.getElementById('hud');
+        this.scoreEl = document.getElementById('score');
+        this.finalScoreEl = document.getElementById('final-score');
+        
+        this.state = 'START'; // START, PLAYING, GAMEOVER
+        this.score = 0;
+        this.globalTime = 0;
+        this.scrollSpeed = 1.5; // Slow, relaxing pace
+        
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        this.particles = new ParticleSystem(this.width, this.height);
+        
+        this.bindEvents();
+        this.loop();
+    }
+
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        if(this.particles) {
+            this.particles.width = this.width;
+            this.particles.height = this.height;
+        }
+    }
+
+    bindEvents() {
+        document.getElementById('start-btn').addEventListener('click', () => this.start());
+        document.getElementById('restart-btn').addEventListener('click', () => this.start());
+
+        const handleInput = (e) => {
+            if (e.type === 'keydown' && e.code !== 'Space') return;
+            if (this.state === 'PLAYING') {
+                this.player.swim();
+            }
+        };
+
+        window.addEventListener('mousedown', handleInput);
+        window.addEventListener('touchstart', handleInput, {passive: false});
+        window.addEventListener('keydown', handleInput);
+        
+        // Prevent default touch behavior (scrolling)
+        window.addEventListener('touchmove', (e) => {
+            if(this.state === 'PLAYING') e.preventDefault();
+        }, {passive: false});
+    }
+
+    start() {
+        this.player = new Jellyfish(this.width * 0.3, this.height / 2);
+        this.obstacles = [];
+        this.collectibles = [];
+        this.score = 0;
+        this.scoreEl.innerText = this.score;
+        this.globalTime = 0;
+        this.frames = 0;
+        
+        this.uiStart.classList.add('hidden');
+        this.uiGameOver.classList.add('hidden');
+        this.uiHud.classList.remove('hidden');
+        
+        this.state = 'PLAYING';
+        
+        audio.startAmbient();
+    }
+
+    gameOver() {
+        this.state = 'GAMEOVER';
+        this.finalScoreEl.innerText = this.score;
+        this.uiHud.classList.add('hidden');
+        this.uiGameOver.classList.remove('hidden');
+        audio.stopAmbient();
+        audio.playGameOver();
+    }
+
+    update() {
+        if (this.state !== 'PLAYING') return;
+
+        this.globalTime += 0.016;
+        this.frames++;
+        
+        this.player.update();
+        
+        // Check floor collision
+        if (this.player.y > this.height + this.player.radius) {
+            this.gameOver();
+        }
+
+        // Spawn Obstacles
+        if (this.frames % 200 === 0) { // Wide spacing
+            let obs = new Obstacle(this.width, this.height);
+            this.obstacles.push(obs);
+            
+            // Spawn collectible in the gap
+            this.collectibles.push(new Collectible(
+                this.width + obs.width/2, 
+                obs.topHeight + obs.gap/2
+            ));
+        }
+
+        // Update Obstacles
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            let obs = this.obstacles[i];
+            obs.update(this.scrollSpeed);
+            
+            if (obs.checkCollision(this.player)) {
+                this.gameOver();
+            }
+
+            if (obs.x + obs.width < 0) {
+                this.obstacles.splice(i, 1);
+            }
+        }
+
+        // Update Collectibles
+        for (let i = this.collectibles.length - 1; i >= 0; i--) {
+            let col = this.collectibles[i];
+            col.update(this.scrollSpeed);
+            
+            if (col.checkCollision(this.player)) {
+                this.score++;
+                this.scoreEl.innerText = this.score;
+                audio.playCollect();
+            }
+
+            if (col.x + col.radius < 0 || col.collected) {
+                this.collectibles.splice(i, 1);
+            }
+        }
+    }
+
+    drawBackground() {
+        // Clear with slight transparency for motion blur effect on particles, 
+        // but solid enough to clear previous frame.
+        this.ctx.fillStyle = 'rgba(2, 11, 22, 1)';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        // Draw distant parallax elements (simple blurred shapes)
+        this.ctx.save();
+        this.ctx.fillStyle = 'rgba(10, 31, 58, 0.5)';
+        this.ctx.filter = 'blur(20px)';
+        
+        let t = this.globalTime * 0.2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, this.height);
+        for(let x=0; x<=this.width; x+=100) {
+            let y = this.height - 100 + Math.sin(x*0.005 + t) * 50;
+            this.ctx.lineTo(x, y);
+        }
+        this.ctx.lineTo(this.width, this.height);
+        this.ctx.fill();
+        this.ctx.restore();
+    }
+
+    draw() {
+        this.drawBackground();
+        
+        // Always update and draw particles for ambiance
+        this.particles.update();
+        this.particles.draw(this.ctx);
+
+        if (this.state === 'START') {
+            // Draw a dummy jellyfish floating
+            let dummyY = this.height/2 + Math.sin(Date.now()*0.002)*20;
+            let j = new Jellyfish(this.width/2, dummyY);
+            j.time = Date.now()*0.005;
+            j.draw(this.ctx);
+            return;
+        }
+
+        for (let obs of this.obstacles) {
+            obs.draw(this.ctx, this.height, this.globalTime);
+        }
+
+        for (let col of this.collectibles) {
+            col.draw(this.ctx);
+        }
+
+        if (this.player) {
+            this.player.draw(this.ctx);
+        }
+    }
+
+    loop() {
+        this.update();
+        this.draw();
+        requestAnimationFrame(() => this.loop());
+    }
+}
+
+// Initialize on load
+window.onload = () => {
+    new Game();
+};
+</script>
+</body>
+</html>

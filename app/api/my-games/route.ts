@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
+import jwt from 'jsonwebtoken';
 
-export async function GET() {
+export async function GET(req: Request) {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('user_id')?.value;
+    let userId = cookieStore.get('user_id')?.value;
+
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+            const token = authHeader.split(' ')[1];
+            const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'skillprint-fallback-secret-key-123');
+            if (decoded && decoded.id) {
+                userId = decoded.id;
+            }
+        } catch (err) {
+            console.warn('Invalid or expired JWT provided', err);
+        }
+    }
 
     if (!userId || userId === 'anonymous') {
         return NextResponse.json({ error: 'Unauthorized', games: [] }, { status: 401 });

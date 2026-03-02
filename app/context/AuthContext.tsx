@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner';
+type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner' | 'organization';
 
 interface AuthContextType {
     status: AuthStatus;
@@ -10,6 +10,7 @@ interface AuthContextType {
     userProfile: { firstName: string; picture?: string } | null;
     loginAsGuest: () => void;
     loginWithSocialId: (socialId: string, profile: { firstName: string; picture?: string }) => void;
+    loginAsOrg: (token: string, profile: { firstName: string }) => void;
     logout: () => void;
 }
 
@@ -91,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserProfile(null);
         localStorage.setItem('auth_status', 'loggedOut');
         localStorage.removeItem('user_profile');
+        localStorage.removeItem('org_token');
     };
 
     const loginWithSocialId = (socialId: string, profile: { firstName: string; picture?: string }) => {
@@ -105,8 +107,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document.cookie = `user_id=${socialId}; expires=${date.toUTCString()}; path=/`;
     };
 
+    const loginAsOrg = (token: string, profile: { firstName: string }) => {
+        setStatus('organization');
+        setUserProfile(profile);
+        localStorage.setItem('auth_status', 'organization');
+        localStorage.setItem('user_profile', JSON.stringify(profile));
+        localStorage.setItem('org_token', token);
+        // Cookies are set dynamically by the API, but we maintain the frontend state here.
+    };
+
     return (
-        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, loginWithSocialId, logout }}>
+        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, loginWithSocialId, loginAsOrg, logout }}>
             {children}
         </AuthContext.Provider>
     );

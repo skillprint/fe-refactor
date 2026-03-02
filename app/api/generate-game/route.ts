@@ -5,13 +5,27 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { User } from '@/lib/models/User';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
+import jwt from 'jsonwebtoken';
 
 export async function POST(req: Request) {
     try {
         const { targetMode, targetValue, optionalPrompt } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY;
         const cookieStore = await cookies();
-        const userId = cookieStore.get('user_id')?.value || 'anonymous';
+        let userId = cookieStore.get('user_id')?.value || 'anonymous';
+        const authHeader = req.headers.get('Authorization');
+
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const token = authHeader.split(' ')[1];
+                const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'skillprint-fallback-secret-key-123');
+                if (decoded && decoded.id) {
+                    userId = decoded.id;
+                }
+            } catch (err) {
+                console.warn('Invalid or expired JWT provided', err);
+            }
+        }
 
         if (!apiKey) {
             return NextResponse.json({ error: 'Missing GEMINI_API_KEY' }, { status: 500 });

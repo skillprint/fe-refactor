@@ -9,10 +9,17 @@ import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props
 import { useLinkedIn } from 'react-linkedin-login-oauth2';
 
 export function WelcomeScreen() {
-    const { loginAsGuest, loginWithSocialId } = useAuth();
+    const { loginAsGuest, loginWithSocialId, loginAsOrg } = useAuth();
     const [isHovered, setIsHovered] = useState<string | null>(null);
     const [isCompletingLogin, setIsCompletingLogin] = useState(false);
     const [isExiting, setIsExiting] = useState(false);
+
+    // Org Login State
+    const [isOrgLoginVisible, setIsOrgLoginVisible] = useState(false);
+    const [orgUsername, setOrgUsername] = useState('');
+    const [orgPassword, setOrgPassword] = useState('');
+    const [orgError, setOrgError] = useState('');
+    const [isLoggingInOrg, setIsLoggingInOrg] = useState(false);
 
     const { linkedInLogin } = useLinkedIn({
         clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || 'dummy-client-id',
@@ -58,6 +65,33 @@ export function WelcomeScreen() {
                 action();
             }, 500); // Wait for transition fade out to complete
         }, 300); // Show spinner briefly 
+    };
+
+    const handleOrgLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setOrgError('');
+        setIsLoggingInOrg(true);
+
+        try {
+            const res = await fetch('/api/auth/org/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: orgUsername, password: orgPassword })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Login failed');
+            }
+
+            handleLoginAction(() => {
+                loginAsOrg(data.token, { firstName: data.organization.name });
+            });
+        } catch (err: any) {
+            setOrgError(err.message);
+            setIsLoggingInOrg(false);
+        }
     };
 
     // Decorative ambient circles
@@ -216,6 +250,59 @@ export function WelcomeScreen() {
                                     </button>
                                 </div> */}
                             </div>
+
+                            <div className="mt-4 pt-4 border-t border-border">
+                                {!isOrgLoginVisible ? (
+                                    <button
+                                        onClick={() => setIsOrgLoginVisible(true)}
+                                        className="w-full text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition"
+                                    >
+                                        Organization / Partner Login →
+                                    </button>
+                                ) : (
+                                    <form onSubmit={handleOrgLogin} className="flex flex-col gap-3 animate-fade-in">
+                                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Organization Portal</h3>
+                                        {orgError && (
+                                            <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 p-2 rounded border border-red-200 dark:border-red-800/30">
+                                                {orgError}
+                                            </div>
+                                        )}
+                                        <input
+                                            type="text"
+                                            placeholder="Username"
+                                            value={orgUsername}
+                                            onChange={(e) => setOrgUsername(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                                            required
+                                        />
+                                        <input
+                                            type="password"
+                                            placeholder="Password"
+                                            value={orgPassword}
+                                            onChange={(e) => setOrgPassword(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                                            required
+                                        />
+                                        <div className="flex gap-2 mt-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsOrgLoginVisible(false)}
+                                                className="flex-1 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={isLoggingInOrg}
+                                                className="flex-1 px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow-sm transition disabled:opacity-50"
+                                            >
+                                                {isLoggingInOrg ? 'Logging in...' : 'Sign In'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+
                         </div>
                     )}
                 </div>
