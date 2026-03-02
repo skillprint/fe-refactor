@@ -1,38 +1,47 @@
-import { db } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+import { Umzug, SequelizeStorage } from 'umzug';
+import { sequelize } from '@/lib/db';
+import * as initialSchema from '@/migrations/00-initial-schema';
 
 export async function GET() {
-    const client = await db.connect();
-
     try {
-        await client.sql`
-            CREATE TABLE IF NOT EXISTS generated_games (
-                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                user_id VARCHAR(255) NOT NULL,
-                target_mode VARCHAR(50) NOT NULL,
-                target_value VARCHAR(255) NOT NULL,
-                optional_prompt TEXT,
-                file_url VARCHAR(500) NOT NULL,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-        `;
+        const umzug = new Umzug({
+            migrations: [
+                {
+                    name: '00-initial-schema',
+                    up: async () => initialSchema.up({ context: sequelize, name: '00-initial-schema' }),
+                    down: async () => initialSchema.down({ context: sequelize, name: '00-initial-schema' }),
+                }
+            ],
+            context: sequelize,
+            storage: new SequelizeStorage({ sequelize }),
+            logger: console,
+        });
 
-        // Create an index on user_id for faster listing queries
-        await client.sql`
-            CREATE INDEX IF NOT EXISTS idx_generated_games_user_id ON generated_games(user_id);
-        `;
+        // Drop the old manually created generated_games table to ensure a clean migration stack
+        // This drops the raw schema so our new Umzug migration can build it with foreign keys
+        await sequelize.getQueryInterface().dropTable('generated_games').catch(() => null);
+
+        const pending = await umzug.pending();
+        if (pending.length > 0) {
+            await umzug.up();
+            return NextResponse.json({
+                success: true,
+                message: `Successfully executed ${pending.length} migration(s).`,
+                migrations: pending.map(p => p.name)
+            });
+        }
 
         return NextResponse.json({
             success: true,
-            message: 'Successfully migrated the generated_games table.',
+            message: 'No pending migrations.'
         });
-    } catch (error) {
+
+    } catch (error: any) {
         console.error('Migration Error:', error);
         return NextResponse.json(
-            { error: 'Failed to run migration.' },
+            { error: 'Failed to run umzug migration.', details: error.message },
             { status: 500 }
         );
-    } finally {
-        client.release();
     }
 }

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Grid - Logic Puzzle</title>
+    <style>
+        :root {
+            --bg-color: #0a0a16;
+            --panel-bg: #15152a;
+            --text-main: #e0e0ff;
+            --text-muted: #8a8aab;
+            --accent: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.6);
+            --cell-off: #22223b;
+            --cell-off-border: #333355;
+            --grid-size: 5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 0, 255, 0.05), transparent 25%);
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            background-color: var(--bg-color);
+            z-index: 10;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        button {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) inset, 0 0 15px rgba(0, 240, 255, 0.2);
+            outline: none;
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Game UI */
+        #game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .stats-box {
+            background: var(--panel-bg);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--cell-off-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stats-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        /* Grid */
+        #grid-container {
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--cell-off-border);
+            margin-bottom: 2rem;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-size), 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+        }
+
+        .cell {
+            background-color: var(--cell-off);
+            border: 1px solid var(--cell-off-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40%;
+            height: 40%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .cell:hover {
+            border-color: rgba(0, 240, 255, 0.5);
+        }
+
+        .cell.on {
+            background-color: var(--accent);
+            border-color: #fff;
+            box-shadow: 0 0 15px var(--accent-glow), inset 0 0 10px rgba(255,255,255,0.5);
+            transform: scale(0.95);
+        }
+
+        .cell.on::after {
+            background: #fff;
+            box-shadow: 0 0 10px #fff;
+            width: 50%;
+            height: 50%;
+        }
+
+        /* Small logic icon */
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .icon-node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .icon-node:nth-child(1) { top: 10px; left: 30px; }
+        .icon-node:nth-child(2) { bottom: 10px; left: 10px; }
+        .icon-node:nth-child(3) { bottom: 10px; right: 10px; }
+        .icon-line {
+            position: absolute;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .icon-line:nth-child(4) { width: 4px; height: 45px; top: 25px; left: 25px; transform: rotate(-30deg); }
+        .icon-line:nth-child(5) { width: 4px; height: 45px; top: 25px; right: 25px; transform: rotate(30deg); }
+        .icon-line:nth-child(6) { width: 45px; height: 4px; bottom: 18px; left: 18px; }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+            box-shadow: none;
+        }
+        .btn-small:hover {
+            background: var(--text-muted);
+            color: var(--bg-color);
+            box-shadow: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="icon">
+                <div class="icon-node"></div>
+                <div class="icon-node"></div>
+                <div class="icon-node"></div>
+                <div class="icon-line"></div>
+                <div class="icon-line"></div>
+                <div class="icon-line"></div>
+            </div>
+            <h1>Neon Grid</h1>
+            <p>A quick logic puzzle.<br>Clicking a node toggles its state and the state of its <span class="highlight">adjacent neighbors</span>.</p>
+            <p>Goal: Turn <span class="highlight">all lights OFF</span>.</p>
+            <button onclick="startGame()">Initialize Sequence</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div id="game-header">
+                <div class="stats-box">
+                    <div class="stats-label">Moves</div>
+                    <div class="stats-value" id="move-counter">0</div>
+                </div>
+                <button class="btn-small" onclick="resetGame()">Restart</button>
+            </div>
+            
+            <div id="grid-container">
+                <div id="grid"></div>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="win-screen" class="screen">
+            <h1>System Restored</h1>
+            <p>Puzzle solved successfully.</p>
+            <div class="stats-box" style="margin-bottom: 2rem;">
+                <div class="stats-label">Total Moves</div>
+                <div class="stats-value" id="final-moves">0</div>
+            </div>
+            <button onclick="startGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const SIZE = 5;
+        let board = [];
+        let moves = 0;
+        let isPlaying = false;
+
+        // DOM Elements
+        const screens = {
+            start: document.getElementById('start-screen'),
+            game: document.getElementById('game-screen'),
+            win: document.getElementById('win-screen')
+        };
+        const gridEl = document.getElementById('grid');
+        const moveCounterEl = document.getElementById('move-counter');
+        const finalMovesEl = document.getElementById('final-moves');
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        function createGrid() {
+            gridEl.innerHTML = '';
+            board = [];
+            for (let r = 0; r < SIZE; r++) {
+                board[r] = [];
+                for (let c = 0; c < SIZE; c++) {
+                    board[r][c] = false; // false = off
+                    
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    
+                    // Touch/Click event
+                    cell.addEventListener('pointerdown', (e) => {
+                        if (!isPlaying) return;
+                        e.preventDefault(); // Prevent double firing on touch
+                        handleCellClick(r, c);
+                    });
+                    
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Core logic: toggle cell and neighbors
+        function toggleLogic(r, c) {
+            const coords = [
+                [r, c],     // center
+                [r-1, c],   // top
+                [r+1, c],   // bottom
+                [r, c-1],   // left
+                [r, c+1]    // right
+            ];
+
+            coords.forEach(([row, col]) => {
+                if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) {
+                    board[row][col] = !board[row][col];
+                }
+            });
+        }
+
+        function updateDOM() {
+            const cells = gridEl.children;
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    const index = r * SIZE + c;
+                    if (board[r][c]) {
+                        cells[index].classList.add('on');
+                    } else {
+                        cells[index].classList.remove('on');
+                    }
+                }
+            }
+        }
+
+        function handleCellClick(r, c) {
+            toggleLogic(r, c);
+            moves++;
+            moveCounterEl.innerText = moves;
+            updateDOM();
+            checkWin();
+        }
+
+        // Generate a solvable puzzle by simulating random valid moves
+        function generatePuzzle() {
+            // Start with all off
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    board[r][c] = false;
+                }
+            }
+            
+            // Apply random toggles (between 10 and 25 moves to scramble)
+            const scrambleMoves = Math.floor(Math.random() * 15) + 10;
+            for (let i = 0; i < scrambleMoves; i++) {
+                const r = Math.floor(Math.random() * SIZE);
+                const c = Math.floor(Math.random() * SIZE);
+                toggleLogic(r, c);
+            }
+
+            // Edge case: if random generation accidentally solves it, scramble again
+            if (isSolved()) {
+                generatePuzzle();
+            }
+        }
+
+        function isSolved() {
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    if (board[r][c]) return false; // Found an 'ON' light
+                }
+            }
+            return true;
+        }
+
+        function checkWin() {
+            if (isSolved()) {
+                isPlaying = false;
+                setTimeout(() => {
+                    finalMovesEl.innerText = moves;
+                    switchScreen('win');
+                }, 400); // slight delay to see final light turn off
+            }
+        }
+
+        function startGame() {
+            moves = 0;
+            moveCounterEl.innerText = moves;
+            createGrid();
+            generatePuzzle();
+            updateDOM();
+            isPlaying = true;
+            switchScreen('game');
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+    </script>
+</body>
+</html>

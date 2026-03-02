@@ -3,7 +3,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
-import { db } from '@vercel/postgres';
+import { User } from '@/lib/models/User';
+import { GeneratedGame } from '@/lib/models/GeneratedGame';
 
 export async function POST(req: Request) {
     try {
@@ -161,15 +162,27 @@ IMPORTANT CRITERIA:
                     await fs.mkdir(gamesDir, { recursive: true });
                     await fs.writeFile(path.join(gamesDir, fileName), finalHtmlContent, 'utf-8');
 
-                    // Save the generated game to the database
+                    // Save the generated game to the database via Sequelize ORM
                     if (userId && userId !== 'anonymous') {
                         try {
-                            await db.sql`
-                                INSERT INTO generated_games (user_id, target_mode, target_value, optional_prompt, file_url)
-                                VALUES (${userId}, ${targetMode}, ${targetValue}, ${optionalPrompt || null}, ${fileUrlStr})
-                            `;
+                            // First optionally create the User placeholder if not seeded
+                            await User.findOrCreate({
+                                where: { id: userId },
+                                defaults: {
+                                    first_name: 'Anonymous Creator',
+                                    profile_image: null,
+                                }
+                            });
+
+                            await GeneratedGame.create({
+                                user_id: userId,
+                                target_mode: targetMode,
+                                target_value: targetValue,
+                                optional_prompt: optionalPrompt || null,
+                                file_url: fileUrlStr
+                            });
                         } catch (dbError) {
-                            console.error("Failed to save game to database:", dbError);
+                            console.error("Failed to save game to database ORM:", dbError);
                         }
                     }
 
