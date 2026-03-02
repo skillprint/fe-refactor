@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S Y S T E M_F O C U S</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&display=swap');
+
+        :root {
+            --bg-color: #050508;
+            --text-main: #a9adc1;
+            --text-glow: rgba(169, 173, 193, 0.4);
+            --accent: #00ffcc;
+            --accent-glow: rgba(0, 255, 204, 0.6);
+            --danger: #ff3366;
+            --danger-glow: rgba(255, 51, 102, 0.6);
+            --ui-bg: rgba(15, 15, 20, 0.8);
+            --border-color: #1e2233;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Fira Code', monospace;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* CRT Effect Overlay */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .crt::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+            z-index: 101;
+            pointer-events: none;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 700px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Start Screen */
+        #start-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent-glow);
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 50px;
+            opacity: 0.7;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 15px 30px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            outline: none;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 0;
+        }
+
+        .btn:hover {
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Game Screen */
+        #game-screen {
+            background: var(--ui-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .status-indicators span {
+            margin-left: 15px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-right: 5px;
+            box-shadow: 0 0 8px var(--accent-glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; box-shadow: 0 0 12px var(--accent-glow); }
+            100% { opacity: 0.5; }
+        }
+
+        #story-text-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+
+        #story-text-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #story-text-container::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+        }
+
+        .story-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            text-shadow: 0 0 2px var(--text-glow);
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.1rem;
+            background-color: var(--accent);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        #choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 120px;
+        }
+
+        .choice-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px;
+            text-align: left;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .choice-btn::before {
+            content: '>';
+            color: var(--accent);
+            margin-right: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .choice-btn:hover {
+            border-color: var(--accent);
+            color: #fff;
+            background: rgba(0, 255, 204, 0.05);
+            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.1);
+        }
+
+        .choice-btn:hover::before {
+            opacity: 1;
+        }
+
+        .choice-btn.danger:hover {
+            border-color: var(--danger);
+            background: rgba(255, 51, 102, 0.05);
+            box-shadow: inset 0 0 10px rgba(255, 51, 102, 0.1);
+        }
+        .choice-btn.danger:hover::before {
+            color: var(--danger);
+        }
+
+        /* End Screen */
+        #end-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #end-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .win-text {
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .lose-text {
+            color: var(--danger);
+            text-shadow: 0 0 15px var(--danger-glow);
+        }
+
+        #end-desc {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        /* Utility */
+        .system-msg {
+            color: var(--accent);
+            font-style: italic;
+        }
+        .warning-msg {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body class="crt">
+
+    <div id="app-container">
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="title">S Y S T E M _ F O C U S</div>
+            <div class="subtitle">A neural-link terminal adventure. Stay sharp.</div>
+            <button class="btn" onclick="startGame()">[ INITIALIZE CONNECTION ]</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="header">
+                <div id="location-display">LOC: UNKNOWN</div>
+                <div class="status-indicators">
+                    <span><div class="status-dot"></div>SYS: ONLINE</span>
+                    <span id="inventory-display">INV: EMPTY</span>
+                </div>
+            </div>
+            
+            <div id="story-text-container" onclick="skipTyping()">
+                <div id="story-text" class="story-text"></div>
+                <span id="cursor" class="cursor"></span>
+            </div>
+
+            <div id="choices-container">
+                <!-- Choices injected here via JS -->
+            </div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="screen">
+            <div id="end-title"></div>
+            <div id="end-desc"></div>
+            <button class="btn" onclick="resetGame()">[ REBOOT SEQUENCE ]</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Game State & Data ---
+        let state = {
+            inventory: [],
+            currentNode: 'boot',
+            isTyping: false,
+            typeoutInterval: null,
+            fullTextToType: "",
+            currentTypedText: "",
+            flags: {
+                coreFixed: false,
+                memoryExtracted: false
+            }
+        };
+
+        const typeSpeed = 25; // ms per character
+
+        // Story Graph
+        const storyData = {
+            'boot': {
+                location: "SYS_BOOT",
+                text: "Establishing neural handshake...\n[OK]\nBypassing corrupted sectors...\n[OK]\n\nWelcome, Operator. The mainframe has suffered a critical logic cascade. The Primary Output Terminal is locked.\n\nYour objective: Restore the Logic Core and unlock the Output Terminal. Focus is required to navigate the corrupted architecture.",
+                choices: [
+                    { text: "ENTER MAIN DIRECTORY", target: 'nexus' }
+                ]
+            },
+            'nexus': {
+                location: "DIR_NEXUS",
+                text: "You are in the Central Nexus. Data streams flow sluggishly around you, illuminating three primary pathways.\n\nThe system hums with a latent, unstable energy.",
+                choices: [
+                    { text: "ACCESS MEMORY_BANKS", target: 'memory' },
+                    { text: "ACCESS LOGIC_CORE", target: 'core' },
+                    { text: "ACCESS OUTPUT_TERMINAL", target: 'output' }
+                ]
+            },
+            'memory': {
+                location: "SEC_MEMORY",
+                text: () => {
+                    if (state.flags.memoryExtracted) {
+                        return "The memory banks stretch into the digital void. The sector is empty; you have already extracted the usable data.";
+                    }
+                    return "The memory banks are heavily fragmented. Shards of broken code float in the datascape. Among the debris, a single, intact <span class='system-msg'>[Logic Fragment]</span> pulsates with a steady cyan light.";
+                },
+                choices: [
+                    { 
+                        text: "EXTRACT LOGIC FRAGMENT", 
+                        target: 'nexus', 
+                        condition: () => !state.flags.memoryExtracted,
+                        action: () => {
+                            state.inventory.push('Logic Fragment');
+                            state.flags.memoryExtracted = true;
+                            updateInventoryUI();
+                        }
+                    },
+                    { text: "RETURN TO NEXUS", target: 'nexus' }
+                ]
+            },
+            'core': {
+                location: "SEC_CORE",
+                text: () => {
+                    if (state.flags.coreFixed) {
+                        return "The Logic Core is spinning smoothly, emitting a low, satisfying thrum. It is fully operational.";
+                    }
+                    return "You enter the Logic Core. It is misaligned and grinding heavily. A critical receptor slot is empty, violently throwing off <span class='warning-msg'>[Corrupted Sparks]</span>.";
+                },
+                choices: [
+                    {
+                        text: "INSERT LOGIC FRAGMENT",
+                        target: 'core_fixed',
+                        condition: () => !state.flags.coreFixed && state.inventory.includes('Logic Fragment'),
+                        action: () => {
+                            // Remove fragment, add key
+                            state.inventory = state.inventory.filter(i => i !== 'Logic Fragment');
+                            state.inventory.push('Access Key');
+                            state.flags.coreFixed = true;
+                            updateInventoryUI();
+                        }
+                    },
+                    {
+                        text: "EXAMINE SPARKS",
+                        target: 'death_sparks',
+                        condition: () => !state.flags.coreFixed,
+                        isDanger: true
+                    },
+                    { text: "RETURN TO NEXUS", target: 'nexus' }
+                ]
+            },
+            'core_fixed': {
+                location: "SEC_CORE",
+                text: "You insert the Logic Fragment into the receptor. The grinding stops instantly. The Core realigns, and a compiled <span class='system-msg'>[Access Key]</span> is transferred to your local buffer.",
+                choices: [
+                    { text: "RETURN TO NEXUS", target: 'nexus' }
+                ]
+            },
+            'output': {
+                location: "SEC_OUTPUT",
+                text: () => {
+                    if (state.inventory.includes('Access Key')) {
+                        return "You approach the Primary Output Terminal. It detects the Access Key in your buffer.\n\n<span class='system-msg'>[ AUTHENTICATING... ]\n[ ACCESS GRANTED ]</span>\n\nThe terminal unlocks, ready to transmit the restoration sequence.";
+                    }
+                    return "You approach the Primary Output Terminal. A massive firewall blocks your path.\n\n<span class='warning-msg'>[ ERROR: UNAUTHORIZED. ACCESS KEY REQUIRED. ]</span>";
+                },
+                choices: [
+                    {
+                        text: "INITIATE RESTORATION (WIN)",
+                        target: 'win',
+                        condition: () => state.inventory.includes('Access Key')
+                    },
+                    { text: "RETURN TO NEXUS", target: 'nexus' }
+                ]
+            },
+            'death_sparks': {
+                location: "FATAL_ERROR",
+                text: "You reach out to analyze the corrupted sparks. \n\nInstantly, a bio-feedback loop surges through your neural link. The pain is blinding as the corrupt code rewrites your sensory inputs.\n\n<span class='warning-msg'>[ CONNECTION SEVERED ]</span>",
+                isEnd: true,
+                endType: 'lose'
+            },
+            'win': {
+                location: "SYS_RESTORED",
+                text: "Restoration sequence initiated.\n\nCorrupted sectors purged. Logic pathways optimized. Mainframe integrity at 100%.\n\nExcellent focus, Operator. Disconnecting neural link safely...",
+                isEnd: true,
+                endType: 'win'
+            }
+        };
+
+        // --- Core Functions ---
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function updateInventoryUI() {
+            const invDisplay = document.getElementById('inventory-display');
+            if (state.inventory.length === 0) {
+                invDisplay.innerText = "INV: EMPTY";
+            } else {
+                invDisplay.innerText = "INV: [" + state.inventory.join(', ') + "]";
+            }
+        }
+
+        function startGame() {
+            switchScreen('game-screen');
+            goToNode('boot');
+        }
+
+        function resetGame() {
+            state = {
+                inventory: [],
+                currentNode: 'boot',
+                isTyping: false,
+                typeoutInterval: null,
+                fullTextToType: "",
+                currentTypedText: "",
+                flags: { coreFixed: false, memoryExtracted: false }
+            };
+            updateInventoryUI();
+            switchScreen('start-screen');
+        }
+
+        function goToNode(nodeId) {
+            const node = storyData[nodeId];
+            state.currentNode = nodeId;
+
+            // Update Header
+            document.getElementById('location-display').innerText = "LOC: " + node.location;
+
+            // Clear choices
+            const choicesContainer = document.getElementById('choices-container');
+            choicesContainer.innerHTML = '';
+            choicesContainer.style.opacity = '0'; // Hide while typing
+
+            // Get Text (handle functions vs strings)
+            let textToDisplay = typeof node.text === 'function' ? node.text() : node.text;
+            
+            // Start Typing
+            startTyping(textToDisplay, () => {
+                if (node.isEnd) {
+                    setTimeout(() => triggerEndScreen(node.endType), 1500);
+                } else {
+                    renderChoices(node.choices);
+                }
+            });
+        }
+
+        function startTyping(htmlText, callback) {
+            if (state.typeoutInterval) clearInterval(state.typeoutInterval);
+            
+            state.isTyping = true;
+            state.fullTextToType = htmlText;
+            state.currentTypedText = "";
+            
+            const textElement = document.getElementById('story-text');
+            textElement.innerHTML = "";
+            
+            // To handle HTML tags during typing, we parse it into an array of text chars and complete HTML tags
+            const tokens = parseHTMLForTyping(htmlText);
+            let tokenIndex = 0;
+
+            state.typeoutInterval = setInterval(() => {
+                if (tokenIndex < tokens.length) {
+                    state.currentTypedText += tokens[tokenIndex];
+                    textElement.innerHTML = state.currentTypedText;
+                    
+                    // Auto-scroll to bottom
+                    const container = document.getElementById('story-text-container');
+                    container.scrollTop = container.scrollHeight;
+                    
+                    tokenIndex++;
+                } else {
+                    finishTyping(callback);
+                }
+            }, typeSpeed);
+        }
+
+        function parseHTMLForTyping(htmlString) {
+            const tokens = [];
+            let currentStr = "";
+            let inTag = false;
+
+            for (let i = 0; i < htmlString.length; i++) {
+                const char = htmlString[i];
+                if (char === '<') {
+                    inTag = true;
+                    if (currentStr) tokens.push(currentStr);
+                    currentStr = char;
+                } else if (char === '>') {
+                    inTag = false;
+                    currentStr += char;
+                    tokens.push(currentStr);
+                    currentStr = "";
+                } else {
+                    if (inTag) {
+                        currentStr += char;
+                    } else {
+                        tokens.push(char); // Push single character for typing effect
+                    }
+                }
+            }
+            if (currentStr) tokens.push(currentStr);
+            return tokens;
+        }
+
+        function skipTyping() {
+            if (state.isTyping) {
+                finishTyping();
+                const node = storyData[state.currentNode];
+                if (node.isEnd) {
+                    setTimeout(() => triggerEndScreen(node.endType), 1000);
+                } else {
+                    renderChoices(node.choices);
+                }
+            }
+        }
+
+        function finishTyping(callback) {
+            clearInterval(state.typeoutInterval);
+            state.isTyping = false;
+            document.getElementById('story-text').innerHTML = state.fullTextToType;
+            if (callback) callback();
+        }
+
+        function renderChoices(choices) {
+            const container = document.getElementById('choices-container');
+            container.innerHTML = '';
+            
+            choices.forEach(choice => {
+                // Check condition if it exists
+                if (choice.condition && !choice.condition()) return;
+
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                if (choice.isDanger) btn.classList.add('danger');
+                btn.innerText = choice.text;
+                
+                btn.onclick = () => {
+                    if (state.isTyping) return; // Prevent clicking while typing
+                    if (choice.action) choice.action();
+                    goToNode(choice.target);
+                };
+                
+                container.appendChild(btn);
+            });
+
+            // Fade in choices
+            container.style.transition = "opacity 0.5s ease";
+            container.style.opacity = '1';
+        }
+
+        function triggerEndScreen(type) {
+            switchScreen('end-screen');
+            const titleElement = document.getElementById('end-title');
+            const descElement = document.getElementById('end-desc');
+
+            if (type === 'win') {
+                titleElement.innerHTML = "<span class='win-text'>SYSTEM RESTORED</span>";
+                descElement.innerText = "The mainframe is back online. Your focus and logical deduction saved the network from total collapse.";
+            } else {
+                titleElement.innerHTML = "<span class='lose-text'>FATAL EXCEPTION</span>";
+                descElement.innerText = "Your neural link was severed due to critical error. The system remains corrupted.";
+            }
+        }
+
+    </script>
+</body>
+</html>
