@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Drift - Relax</title>
+    <style>
+        :root {
+            --bg-color: #050510;
+            --cyan: #00FFFF;
+            --pink: #FF007F;
+            --purple: #B026FF;
+            --yellow: #FFD700;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            user-select: none;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            background: rgba(5, 5, 16, 0.85);
+            padding: 40px;
+            border: 2px solid var(--cyan);
+            border-radius: 15px;
+            box-shadow: 0 0 20px var(--cyan), inset 0 0 20px var(--cyan);
+            text-align: center;
+            pointer-events: auto;
+            transition: opacity 0.5s ease;
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--pink);
+            text-shadow: 0 0 15px var(--pink), 0 0 30px var(--pink);
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #ddd;
+            margin-bottom: 30px;
+            text-shadow: 0 0 5px var(--cyan);
+        }
+
+        button {
+            background: transparent;
+            color: var(--cyan);
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border: 2px solid var(--cyan);
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px var(--cyan), inset 0 0 10px var(--cyan);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--cyan);
+            color: var(--bg-color);
+            box-shadow: 0 0 30px var(--cyan), inset 0 0 20px var(--cyan);
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--yellow);
+            text-shadow: 0 0 10px var(--yellow);
+            display: none;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none !important;
+        }
+
+        #controls-hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 1rem;
+            display: none;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hud">DATA: <span id="score">0</span></div>
+    
+    <div id="controls-hint">Use Left/Right Arrows or A/D to drift. Relax and collect data.</div>
+
+    <div id="ui-layer">
+        <div id="start-screen" class="screen">
+            <h1>Neon Drift</h1>
+            <p>A relaxing journey through the synthwave grid.<br>Collect energy orbs. No rush, no end.</p>
+            <button id="start-btn">Begin Journey</button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // --- GAME CONFIGURATION & ADJUSTABILITY ---
+        window.CONFIG = {
+            speed: 6,              // Forward speed of the world
+            turnSpeed: 12,         // How fast the player moves laterally
+            orbSpawnRate: 0.03,    // Chance per frame to spawn an orb
+            gridColor: '#00FFFF',  // Cyan
+            orbColor: '#FF007F',   // Pink
+            glowIntensity: 15,     // Base shadow blur
+            horizonY: 0.45         // Percentage of screen height for horizon
+        };
+
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                if (window.CONFIG[parameterName] !== undefined) {
+                    window.CONFIG[parameterName] = parameterValue;
+                    console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                    window.parent.postMessage({ type: 'ADJUSTMENT_MADE', parameterName, parameterValue }, '*');
+                }
+            }
+        };
+
+        // Testing bindings (Keys 1-9)
+        window.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case '1': window.adjustGame({ parameterName: 'speed', parameterValue: 3 }); break; // Very slow, relaxing
+                case '2': window.adjustGame({ parameterName: 'speed', parameterValue: 12 }); break; // Faster cruise
+                case '3': window.adjustGame({ parameterName: 'orbSpawnRate', parameterValue: 0.1 }); break; // Lots of orbs
+                case '4': window.adjustGame({ parameterName: 'orbSpawnRate', parameterValue: 0.01 }); break; // Sparse orbs
+                case '5': window.adjustGame({ parameterName: 'gridColor', parameterValue: '#FF007F' }); break; // Pink grid
+                case '6': window.adjustGame({ parameterName: 'gridColor', parameterValue: '#00FFFF' }); break; // Cyan grid
+                case '7': window.adjustGame({ parameterName: 'glowIntensity', parameterValue: 5 }); break; // Dim glow
+                case '8': window.adjustGame({ parameterName: 'glowIntensity', parameterValue: 30 }); break; // High glow
+                case '9': window.adjustGame({ parameterName: 'turnSpeed', parameterValue: 20 }); break; // Snappy turns
+            }
+        });
+
+        // --- CORE ENGINE ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimize
+        let width, height, cx, cy;
+        
+        const uiLayer = document.getElementById('ui-layer');
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const hud = document.getElementById('hud');
+        const scoreEl = document.getElementById('score');
+        const controlsHint = document.getElementById('controls-hint');
+
+        let gameState = 'START'; // START, PLAY
+        let score = 0;
+        let lastTime = 0;
+        let gridOffset = 0;
+
+        // Input
+        const keys = { ArrowLeft: false, ArrowRight: false, a: false, d: false };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            cx = width / 2;
+            cy = height / 2;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.addEventListener('keydown', (e) => {
+            if(keys.hasOwnProperty(e.key)) keys[e.key] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if(keys.hasOwnProperty(e.key)) keys[e.key] = false;
+        });
+
+        // Touch support for mobile relaxation
+        let touchX = null;
+        window.addEventListener('touchstart', (e) => touchX = e.touches[0].clientX);
+        window.addEventListener('touchmove', (e) => {
+            if (!touchX) return;
+            let diff = e.touches[0].clientX - touchX;
+            if (diff < -20) { keys.ArrowLeft = true; keys.ArrowRight = false; }
+            else if (diff > 20) { keys.ArrowRight = true; keys.ArrowLeft = false; }
+            else { keys.ArrowLeft = false; keys.ArrowRight = false; }
+        });
+        window.addEventListener('touchend', () => { touchX = null; keys.ArrowLeft = false; keys.ArrowRight = false; });
+
+        // --- GAME ENTITIES ---
+
+        // Pseudo-3D Projection
+        const fov = 350;
+        function project(x, y, z) {
+            if (z <= 0) return null;
+            const scale = fov / (fov + z);
+            const px = cx + x * scale;
+            const py = (height * window.CONFIG.horizonY) + y * scale;
+            return { x: px, y: py, scale: scale };
+        }
+
+        class Player {
+            constructor() {
+                this.x = 0; // Logical X (-1000 to 1000)
+                this.y = 150; // Fixed Y offset down
+                this.z = 100; // Fixed Z near camera
+                this.targetX = 0;
+            }
+
+            update() {
+                if (keys.ArrowLeft || keys.a) this.targetX -= window.CONFIG.turnSpeed * 2;
+                if (keys.ArrowRight || keys.d) this.targetX += window.CONFIG.turnSpeed * 2;
+                
+                // Clamp
+                this.targetX = Math.max(-800, Math.min(800, this.targetX));
+                
+                // Smooth interpolation for relaxing movement
+                this.x += (this.targetX - this.x) * 0.1;
+            }
+
+            draw() {
+                const p = project(this.x, this.y, this.z);
+                if (!p) return;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                
+                // Tilt based on movement
+                const tilt = (this.targetX - this.x) * 0.005;
+                ctx.rotate(tilt);
+
+                ctx.beginPath();
+                ctx.moveTo(0, -20 * p.scale);
+                ctx.lineTo(25 * p.scale, 15 * p.scale);
+                ctx.lineTo(0, 5 * p.scale);
+                ctx.lineTo(-25 * p.scale, 15 * p.scale);
+                ctx.closePath();
+
+                ctx.fillStyle = '#050510';
+                ctx.fill();
+
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = window.CONFIG.gridColor;
+                ctx.shadowBlur = window.CONFIG.glowIntensity;
+                ctx.shadowColor = window.CONFIG.gridColor;
+                ctx.stroke();
+
+                // Engine glow
+                ctx.beginPath();
+                ctx.arc(0, 10 * p.scale, 5 * p.scale, 0, Math.PI * 2);
+                ctx.fillStyle = window.CONFIG.orbColor;
+                ctx.shadowColor = window.CONFIG.orbColor;
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        class Orb {
+            constructor() {
+                this.x = (Math.random() * 1600) - 800; // -800 to 800
+                this.y = 120; // Slightly above ground
+                this.z = 2000; // Spawn far away
+                this.active = true;
+                this.radius = 15;
+                this.bobOffset = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.z -= window.CONFIG.speed;
+                if (this.z < 10) this.active = false;
+            }
+
+            draw(time) {
+                if (!this.active) return;
+                
+                // Gentle bobbing motion
+                let bobY = this.y + Math.sin(time * 0.003 + this.bobOffset) * 20;
+                const p = project(this.x, bobY, this.z);
+                
+                if (!p) return;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, this.radius * p.scale, 0, Math.PI * 2);
+                ctx.fillStyle = window.CONFIG.orbColor;
+                ctx.shadowBlur = window.CONFIG.glowIntensity * 1.5;
+                ctx.shadowColor = window.CONFIG.orbColor;
+                ctx.fill();
+                
+                // Inner core
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, this.radius * 0.4 * p.scale, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFF';
+                ctx.shadowBlur = 0;
+                ctx.fill();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, z, color) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+                this.vx = (Math.random() - 0.5) * 20;
+                this.vy = (Math.random() - 0.5) * 20;
+                this.vz = (Math.random() - 0.5) * 20;
+                this.life = 1.0;
+                this.decay = 0.02 + Math.random() * 0.03;
+                this.color = color;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.z += this.vz;
+                this.life -= this.decay;
+            }
+            draw() {
+                if (this.life <= 0) return;
+                const p = project(this.x, this.y, this.z);
+                if (!p) return;
+
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3 * p.scale, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = window.CONFIG.glowIntensity;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        // --- SCENERY ---
+        function drawBackground() {
+            // Deep space gradient
+            let bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, '#020108');
+            bgGrad.addColorStop(window.CONFIG.horizonY - 0.05, '#1a0b2e');
+            bgGrad.addColorStop(window.CONFIG.horizonY, '#FF007F'); // Horizon line glow
+            bgGrad.addColorStop(window.CONFIG.horizonY + 0.01, '#050510');
+            bgGrad.addColorStop(1, '#020205');
+            
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        function drawSun() {
+            let sunY = height * window.CONFIG.horizonY;
+            let sunRadius = Math.min(width, height) * 0.2;
+            
+            ctx.save();
+            ctx.translate(cx, sunY);
+            
+            // Sun gradient
+            let sunGrad = ctx.createLinearGradient(0, -sunRadius, 0, sunRadius);
+            sunGrad.addColorStop(0, '#FFD700');
+            sunGrad.addColorStop(0.5, '#FF007F');
+            sunGrad.addColorStop(1, '#B026FF');
+
+            ctx.fillStyle = sunGrad;
+            ctx.shadowBlur = 50;
+            ctx.shadowColor = '#FF007F';
+
+            // Draw sun with retro cutouts
+            ctx.beginPath();
+            ctx.arc(0, 0, sunRadius, Math.PI, 0); // Top half solid
+            ctx.fill();
+
+            // Bottom half with slices
+            for (let i = 0.1; i < 1; i += 0.15) {
+                let sliceHeight = sunRadius * 0.08 * (1 - i); // Thinner slices at bottom
+                let yStart = sunRadius * i;
+                
+                // Calculate width of slice using circle equation
+                let xDist = Math.sqrt(Math.max(0, sunRadius*sunRadius - yStart*yStart));
+                
+                ctx.fillRect(-xDist, yStart, xDist * 2, sliceHeight);
+            }
+            ctx.restore();
+        }
+
+        function drawMountains() {
+            ctx.fillStyle = '#050510'; // Dark silhouette
+            ctx.strokeStyle = window.CONFIG.gridColor;
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = window.CONFIG.glowIntensity / 2;
+            ctx.shadowColor = window.CONFIG.gridColor;
+
+            let horizon = height * window.CONFIG.horizonY;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, horizon);
+            
+            // Procedural-ish jagged lines
+            let peakHeights = [0.1, 0.25, 0.15, 0.3, 0.1, 0.2, 0.05];
+            let step = width / peakHeights.length;
+            
+            for(let i=0; i<peakHeights.length; i++) {
+                ctx.lineTo(i * step + step/2, horizon - height * peakHeights[i]);
+                ctx.lineTo((i+1) * step, horizon);
+            }
+            
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            
+            ctx.fill();
+            // Just stroke the top edge
+            ctx.beginPath();
+            ctx.moveTo(0, horizon);
+            for(let i=0; i<peakHeights.length; i++) {
+                ctx.lineTo(i * step + step/2, horizon - height * peakHeights[i]);
+                ctx.lineTo((i+1) * step, horizon);
+            }
+            ctx.stroke();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = window.CONFIG.gridColor;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = window.CONFIG.glowIntensity;
+            ctx.shadowColor = window.CONFIG.gridColor;
+
+            const groundY = 200; // Logical Y depth for floor
+            
+            ctx.beginPath();
+            // Vertical lines radiating from center
+            for (let x = -2000; x <= 2000; x += 200) {
+                let pStart = project(x, groundY, 2000);
+                let pEnd = project(x, groundY, 10);
+                if (pStart && pEnd) {
+                    ctx.moveTo(pStart.x, pStart.y);
+                    ctx.lineTo(pEnd.x, pEnd.y);
+                }
+            }
+
+            // Horizontal moving lines
+            gridOffset = (gridOffset + window.CONFIG.speed) % 200;
+            for (let z = 0; z <= 2000; z += 200) {
+                let actualZ = z - gridOffset;
+                if (actualZ < 10) continue; // Don't draw behind camera
+                
+                let pLeft = project(-2000, groundY, actualZ);
+                let pRight = project(2000, groundY, actualZ);
+                
+                if (pLeft && pRight) {
+                    ctx.moveTo(pLeft.x, pLeft.y);
+                    ctx.lineTo(pRight.x, pRight.y);
+                }
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset
+        }
+
+        // --- GAME STATE ---
+        let player = new Player();
+        let orbs = [];
+        let particles = [];
+
+        function spawnOrb() {
+            if (Math.random() < window.CONFIG.orbSpawnRate) {
+                orbs.push(new Orb());
+            }
+        }
+
+        function createExplosion(x, y, z, color) {
+            for(let i=0; i<15; i++) {
+                particles.push(new Particle(x, y, z, color));
+            }
+        }
+
+        function checkCollisions() {
+            // Because of forced perspective, collision is pseudo-3D
+            for (let i = orbs.length - 1; i >= 0; i--) {
+                let o = orbs[i];
+                // Check if orb is near player Z plane
+                if (Math.abs(o.z - player.z) < 50) {
+                    // Check X distance
+                    if (Math.abs(o.x - player.x) < 80) {
+                        // Collected!
+                        score += 10;
+                        scoreEl.innerText = score;
+                        createExplosion(o.x, o.y, o.z, window.CONFIG.orbColor);
+                        orbs.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            hud.style.display = 'block';
+            controlsHint.style.display = 'block';
+            gameState = 'PLAY';
+            score = 0;
+            scoreEl.innerText = score;
+            orbs = [];
+            particles = [];
+            player.x = 0;
+            player.targetX = 0;
+            
+            // Fade out controls hint after 5 seconds
+            setTimeout(() => {
+                controlsHint.style.opacity = '0';
+                controlsHint.style.transition = 'opacity 2s';
+            }, 5000);
+        }
+
+        startBtn.addEventListener('click', startGame);
+
+        // --- MAIN LOOP ---
+        function loop(timestamp) {
+            ctx.clearRect(0, 0, width, height);
+
+            drawBackground();
+            drawSun();
+            drawMountains();
+            
+            if (gameState === 'PLAY') {
+                drawGrid();
+                
+                player.update();
+                spawnOrb();
+                
+                // Sort orbs by Z descending for proper painter's algorithm
+                orbs.sort((a, b) => b.z - a.z);
+                
+                orbs.forEach(o => {
+                    o.update();
+                    o.draw(timestamp);
+                });
+                
+                checkCollisions();
+                
+                // Cleanup inactive orbs
+                orbs = orbs.filter(o => o.active);
+
+                player.draw();
+
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                particles = particles.filter(p => p.life > 0);
+            } else {
+                // Background animation for start screen
+                drawGrid();
+                gridOffset = (gridOffset + 1) % 200;
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // Start animation
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+</html>

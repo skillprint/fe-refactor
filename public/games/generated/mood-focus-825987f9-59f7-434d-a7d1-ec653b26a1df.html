@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Focus: Distraction Protocol</title>
+    <style>
+        :root {
+            --bg-color: #1a1c2c;
+            --text-color: #f4f4f4;
+            --accent-color: #e43b44;
+            --ui-bg: #29366f;
+            --grid-bg: #181425;
+            --grid-border: #3b5dc9;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            user-select: none;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            box-shadow: 0 0 0 4px var(--grid-border), 0 0 20px rgba(0,0,0,0.8);
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(26, 28, 44, 0.95);
+            z-index: 10;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            font-size: 48px;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 0 var(--accent-color);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 18px;
+            max-width: 600px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .pixel-btn {
+            background: var(--ui-bg);
+            border: 4px solid var(--text-color);
+            color: var(--text-color);
+            padding: 15px 30px;
+            font-size: 24px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: inset -4px -4px 0 rgba(0,0,0,0.3), 4px 4px 0 #000;
+            transition: all 0.1s;
+        }
+
+        .pixel-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.3), 0 0 0 #000;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .hud-target {
+            background: var(--ui-bg);
+            border: 4px solid var(--grid-border);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 20px;
+            box-shadow: 4px 4px 0 #000;
+            align-self: center;
+            margin-top: 10px;
+        }
+
+        #target-canvas {
+            width: 48px;
+            height: 48px;
+            image-rendering: pixelated;
+        }
+
+        .flash {
+            animation: flashAnim 0.2s ease-out;
+        }
+
+        @keyframes flashAnim {
+            0% { background-color: rgba(228, 59, 68, 0.5); }
+            100% { background-color: transparent; }
+        }
+
+        #debug-panel {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="ui-layer" class="hidden">
+            <div class="hud-top">
+                <div>SCORE: <span id="scoreVal">0</span></div>
+                <div>TIME: <span id="timeVal">30</span></div>
+            </div>
+            <div class="hud-target">
+                <span>FIND:</span>
+                <canvas id="target-canvas" width="32" height="32"></canvas>
+            </div>
+            <div style="flex-grow: 1;"></div>
+        </div>
+
+        <div id="start-screen" class="screen">
+            <h1>Pixel Focus</h1>
+            <p>Find the exact target object in the grid. Ignore the distractions. Maintain your focus. Faster finds yield higher scores.</p>
+            <p style="font-size: 14px; color: #aaa;">Test adjustments with keys 1-9.</p>
+            <button class="pixel-btn" id="start-btn">Initiate Protocol</button>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h1>Focus Lost</h1>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button class="pixel-btn" id="restart-btn">Try Again</button>
+        </div>
+        
+        <div id="flash-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index: 20;"></div>
+        <div id="debug-panel">Keys 1-9: Adjust Params</div>
+    </div>
+
+<script>
+/**
+ * PIXEL FOCUS: DISTRACTION PROTOCOL
+ * A game designed to induce focus by requiring visual search amidst active distractions.
+ */
+
+// --- CONFIGURATION & ADJUSTABILITY ---
+const GAME_CONFIG = {
+    grid_size: 5,           // NxN grid
+    time_limit: 45,         // Starting time in seconds
+    distraction_count: 8,   // Number of flying distractions
+    distraction_speed: 3,   // Base speed of distractions
+    jiggle_force: 1,        // How much grid items shake (0 = still)
+    time_bonus: 2,          // Time added per correct find
+    penalty_time: 3,        // Time deducted for wrong click
+    colors: ['#e43b44', '#4ce600', '#0095e9', '#f3f315', '#ff77a8', '#ffffff'],
+    bg_color: '#181425'
+};
+
+// Global AdjustGame function as requested
+window.adjustGame = function(obj) {
+    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+        const { parameterName, parameterValue } = obj;
+        if (GAME_CONFIG.hasOwnProperty(parameterName)) {
+            GAME_CONFIG[parameterName] = parameterValue;
+            console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+            
+            // Apply immediate effects if necessary
+            if (parameterName === 'grid_size' && gameState === 'play') {
+                generateLevel();
+            }
+            if (parameterName === 'distraction_count' && gameState === 'play') {
+                initDistractions();
+            }
+        } else {
+            console.warn(`Parameter ${parameterName} not found in config.`);
+        }
+    }
+};
+
+// Key bindings for testing adjustments (1-9)
+window.addEventListener('keydown', function(event) {
+    switch(event.key) {
+        case '1': window.adjustGame({ parameterName: 'grid_size', parameterValue: 3 }); break; // Easy Grid
+        case '2': window.adjustGame({ parameterName: 'grid_size', parameterValue: 8 }); break; // Hard Grid
+        case '3': window.adjustGame({ parameterName: 'distraction_count', parameterValue: 0 }); break; // No Distractions
+        case '4': window.adjustGame({ parameterName: 'distraction_count', parameterValue: 25 }); break; // High Distractions
+        case '5': window.adjustGame({ parameterName: 'distraction_speed', parameterValue: 1 }); break; // Slow Distractions
+        case '6': window.adjustGame({ parameterName: 'distraction_speed', parameterValue: 10 }); break; // Fast Distractions
+        case '7': window.adjustGame({ parameterName: 'jiggle_force', parameterValue: 0 }); break; // Steady Items
+        case '8': window.adjustGame({ parameterName: 'jiggle_force', parameterValue: 5 }); break; // Shaky Items
+        case '9': window.adjustGame({ parameterName: 'time_limit', parameterValue: GAME_CONFIG.time_limit + 10 }); 
+                  if(gameState==='play') timeRemaining += 10; break; // Add Time
+    }
+});
+
+// --- ASSETS (Inline Pixel Art) ---
+// 8x8 pixel shapes (1 = draw, 0 = skip)
+const SHAPES = [
+    [ "00111100", "01111110", "11111111", "11111111", "11111111", "11111111", "01111110", "00111100" ], // Circle/Orb
+    [ "11111111", "10000001", "10111101", "10111101", "10111101", "10111101", "10000001", "11111111" ], // Box
+    [ "00011000", "00111100", "01111110", "11111111", "11111111", "00111100", "00111100", "00111100" ], // Mushroom/Tree
+    [ "01100110", "11111111", "11111111", "01111110", "00111100", "00011000", "00000000", "00000000" ], // Heart
+    [ "00111100", "01100110", "01100110", "00111100", "00011000", "00011000", "00111000", "00011000" ], // Key
+    [ "11000011", "01100110", "00111100", "00111100", "00111100", "00111100", "01100110", "11000011" ]  // Hourglass
+];
+
+// --- GAME STATE ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const targetCanvas = document.getElementById('target-canvas');
+const targetCtx = targetCanvas.getContext('2d');
+
+// Optimize canvas for pixel art
+ctx.imageSmoothingEnabled = false;
+targetCtx.imageSmoothingEnabled = false;
+
+let gameState = 'start'; // start, play, over
+let score = 0;
+let timeRemaining = 0;
+let lastFrameTime = 0;
+let gridItems = [];
+let targetItem = null;
+let distractions = [];
+let particles = [];
+let gridRect = { x: 0, y: 0, w: 0, h: 0 };
+let cellPadding = 10;
+
+// DOM Elements
+const uiLayer = document.getElementById('ui-layer');
+const startScreen = document.getElementById('start-screen');
+const gameOverScreen = document.getElementById('game-over-screen');
+const scoreEl = document.getElementById('scoreVal');
+const timeEl = document.getElementById('timeVal');
+const finalScoreEl = document.getElementById('final-score');
+const flashOverlay = document.getElementById('flash-overlay');
+
+// --- RENDERING HELPERS ---
+function drawSprite(context, shapeIdx, colorIdx, x, y, size) {
+    const shape = SHAPES[shapeIdx];
+    const color = GAME_CONFIG.colors[colorIdx];
+    const pixelSize = size / 8; // 8x8 sprite
+
+    context.fillStyle = color;
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            if (shape[r][c] === '1') {
+                context.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
+            }
+        }
+    }
+    
+    // Outline (optional, enhances pixel look)
+    context.fillStyle = 'rgba(0,0,0,0.3)';
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            if (shape[r][c] === '1') {
+                // simple shading on bottom right of pixels
+                context.fillRect(x + c * pixelSize + pixelSize - 1, y + r * pixelSize + pixelSize - 1, 1, 1);
+            }
+        }
+    }
+}
+
+// --- CORE LOGIC ---
+
+function startGame() {
+    gameState = 'play';
+    score = 0;
+    timeRemaining = GAME_CONFIG.time_limit;
+    scoreEl.innerText = score;
+    timeEl.innerText = timeRemaining.toFixed(1);
+    
+    startScreen.classList.add('hidden');
+    gameOverScreen.classList.add('hidden');
+    uiLayer.classList.remove('hidden');
+    
+    initDistractions();
+    generateLevel();
+    
+    lastFrameTime = performance.now();
+    requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+    gameState = 'over';
+    uiLayer.classList.add('hidden');
+    gameOverScreen.classList.remove('hidden');
+    finalScoreEl.innerText = score;
+}
+
+function generateLevel() {
+    gridItems = [];
+    const cols = GAME_CONFIG.grid_size;
+    const rows = GAME_CONFIG.grid_size;
+    
+    // Calculate grid layout
+    const maxGridWidth = canvas.width * 0.8;
+    const maxGridHeight = canvas.height * 0.6;
+    const cellSize = Math.min(maxGridWidth / cols, maxGridHeight / rows);
+    
+    gridRect.w = cols * cellSize;
+    gridRect.h = rows * cellSize;
+    gridRect.x = (canvas.width - gridRect.w) / 2;
+    gridRect.y = (canvas.height - gridRect.h) / 2 + 30; // offset for UI
+
+    // Generate pool of items
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            gridItems.push({
+                r: r,
+                c: c,
+                x: gridRect.x + c * cellSize,
+                y: gridRect.y + r * cellSize,
+                size: cellSize,
+                shapeIdx: Math.floor(Math.random() * SHAPES.length),
+                colorIdx: Math.floor(Math.random() * GAME_CONFIG.colors.length),
+                baseX: gridRect.x + c * cellSize,
+                baseY: gridRect.y + r * cellSize
+            });
+        }
+    }
+
+    // Pick a target
+    const targetIndex = Math.floor(Math.random() * gridItems.length);
+    const t = gridItems[targetIndex];
+    targetItem = { shapeIdx: t.shapeIdx, colorIdx: t.colorIdx };
+
+    // Draw target on UI canvas
+    targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+    drawSprite(targetCtx, targetItem.shapeIdx, targetItem.colorIdx, 0, 0, 32);
+}
+
+function initDistractions() {
+    distractions = [];
+    for(let i=0; i<GAME_CONFIG.distraction_count; i++) {
+        spawnDistraction();
+    }
+}
+
+function spawnDistraction() {
+    const size = Math.random() * 40 + 10;
+    const isHorizontal = Math.random() > 0.5;
+    let x, y, vx, vy;
+
+    if (isHorizontal) {
+        x = Math.random() > 0.5 ? -size : canvas.width + size;
+        y = Math.random() * canvas.height;
+        vx = (x < 0 ? 1 : -1) * (Math.random() * GAME_CONFIG.distraction_speed + 1);
+        vy = (Math.random() - 0.5) * 2;
+    } else {
+        x = Math.random() * canvas.width;
+        y = Math.random() > 0.5 ? -size : canvas.height + size;
+        vx = (Math.random() - 0.5) * 2;
+        vy = (y < 0 ? 1 : -1) * (Math.random() * GAME_CONFIG.distraction_speed + 1);
+    }
+
+    distractions.push({
+        x: x, y: y, vx: vx, vy: vy, size: size,
+        color: GAME_CONFIG.colors[Math.floor(Math.random() * GAME_CONFIG.colors.length)],
+        type: Math.floor(Math.random() * 3) // 0: rect, 1: noise line, 2: hollow rect
+    });
+}
+
+function createParticles(x, y, color) {
+    for(let i=0; i<15; i++) {
+        particles.push({
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            life: 1,
+            color: color
+        });
+    }
+}
+
+// --- UPDATE & DRAW LOOPS ---
+
+function update(dt) {
+    if (gameState !== 'play') return;
+
+    // Timer
+    timeRemaining -= dt;
+    if (timeRemaining <= 0) {
+        timeRemaining = 0;
+        endGame();
+    }
+    timeEl.innerText = Math.ceil(timeRemaining);
+
+    // Update Distractions
+    // Keep array length matching config dynamically
+    while(distractions.length < GAME_CONFIG.distraction_count) spawnDistraction();
+    if(distractions.length > GAME_CONFIG.distraction_count) distractions.pop();
+
+    for (let i = distractions.length - 1; i >= 0; i--) {
+        let d = distractions[i];
+        d.x += d.vx;
+        d.y += d.vy;
+        
+        // Remove if far off screen
+        if (d.x < -100 || d.x > canvas.width + 100 || d.y < -100 || d.y > canvas.height + 100) {
+            distractions.splice(i, 1);
+            spawnDistraction();
+        }
+    }
+
+    // Update Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2;
+        if (p.life <= 0) particles.splice(i, 1);
+    }
+
+    // Jiggle Grid Items
+    if (GAME_CONFIG.jiggle_force > 0) {
+        gridItems.forEach(item => {
+            if (Math.random() > 0.8) {
+                item.x = item.baseX + (Math.random() - 0.5) * GAME_CONFIG.jiggle_force * 5;
+                item.y = item.baseY + (Math.random() - 0.5) * GAME_CONFIG.jiggle_force * 5;
+            } else {
+                // slowly return to base
+                item.x += (item.baseX - item.x) * 0.2;
+                item.y += (item.baseY - item.y) * 0.2;
+            }
+        });
+    }
+}
+
+function draw() {
+    // Clear background
+    ctx.fillStyle = GAME_CONFIG.bg_color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (gameState !== 'play') return;
+
+    // Draw Grid Area Background
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(gridRect.x - 5, gridRect.y - 5, gridRect.w + 10, gridRect.h + 10);
+    ctx.strokeStyle = '#3b5dc9';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(gridRect.x - 5, gridRect.y - 5, gridRect.w + 10, gridRect.h + 10);
+
+    // Draw Items
+    const itemDrawSize = gridItems[0].size - cellPadding * 2;
+    gridItems.forEach(item => {
+        drawSprite(ctx, item.shapeIdx, item.colorIdx, item.x + cellPadding, item.y + cellPadding, itemDrawSize);
+    });
+
+    // Draw Distractions (The "Distraction" part of Focus)
+    distractions.forEach(d => {
+        ctx.fillStyle = d.color;
+        ctx.strokeStyle = d.color;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.7; // slightly transparent to not be entirely unfair
+
+        if (d.type === 0) {
+            ctx.fillRect(d.x, d.y, d.size, d.size);
+        } else if (d.type === 1) {
+            // Glitch line
+            ctx.fillRect(d.x, d.y, d.size * 3, Math.max(2, d.size/5));
+        } else {
+            ctx.strokeRect(d.x, d.y, d.size, d.size);
+        }
+        ctx.globalAlpha = 1.0;
+    });
+
+    // Draw Particles
+    particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fillRect(p.x, p.y, 6, 6);
+    });
+    ctx.globalAlpha = 1.0;
+}
+
+function gameLoop(timestamp) {
+    const dt = (timestamp - lastFrameTime) / 1000;
+    lastFrameTime = timestamp;
+
+    update(dt);
+    draw();
+
+    if (gameState === 'play') {
+        requestAnimationFrame(gameLoop);
+    }
+}
+
+// --- INPUT HANDLING ---
+
+function handleInput(x, y) {
+    if (gameState !== 'play') return;
+
+    // Check if clicked inside grid
+    if (x >= gridRect.x && x <= gridRect.x + gridRect.w &&
+        y >= gridRect.y && y <= gridRect.y + gridRect.h) {
+        
+        let clickedItem = null;
+        for (let item of gridItems) {
+            if (x >= item.x && x <= item.x + item.size &&
+                y >= item.y && y <= item.y + item.size) {
+                clickedItem = item;
+                break;
+            }
+        }
+
+        if (clickedItem) {
+            if (clickedItem.shapeIdx === targetItem.shapeIdx && clickedItem.colorIdx === targetItem.colorIdx) {
+                // Correct
+                score += 10;
+                timeRemaining += GAME_CONFIG.time_bonus;
+                scoreEl.innerText = score;
+                createParticles(x, y, GAME_CONFIG.colors[clickedItem.colorIdx]);
+                generateLevel(); // Next round
+            } else {
+                // Wrong
+                timeRemaining -= GAME_CONFIG.penalty_time;
+                triggerFlash();
+            }
+        }
+    }
+}
+
+function triggerFlash() {
+    flashOverlay.classList.remove('flash');
+    void flashOverlay.offsetWidth; // trigger reflow
+    flashOverlay.classList.add('flash');
+}
+
+// Event Listeners
+canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    handleInput(x, y);
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touch = e.touches[0];
+    const x = (touch.clientX - rect.left) * scaleX;
+    const y = (touch.clientY - rect.top) * scaleY;
+    handleInput(x, y);
+}, {passive: false});
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('restart-btn').addEventListener('click', startGame);
+
+// Initial draw to set background
+draw();
+
+</script>
+</body>
+</html>

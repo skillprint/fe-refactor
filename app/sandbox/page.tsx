@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import GameAdjustmentBanner from '../components/GameAdjustmentBanner';
 
 const MOODS = [
     'relax', 'focus', 'creativity', 'collaborate', 'grit', 'joy', 'curiosity', 'empathy', 'awe'
@@ -13,6 +14,8 @@ export default function GameSandboxPage() {
     const [targetMode, setTargetMode] = useState<'mood' | 'skill'>('mood');
     const [targetValue, setTargetValue] = useState(MOODS[0]);
     const [optionalPrompt, setOptionalPrompt] = useState('');
+    const [artStyleId, setArtStyleId] = useState('');
+    const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationOutput, setGenerationOutput] = useState('');
@@ -26,6 +29,32 @@ export default function GameSandboxPage() {
             outputRef.current.scrollTop = outputRef.current.scrollHeight;
         }
     }, [generationOutput]);
+
+    const [currentAdjustment, setCurrentAdjustment] = useState<{ parameterName: string, parameterValue: any } | null>(null);
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.origin !== window.location.origin) return;
+            if (event.data?.type === 'ADJUSTMENT_MADE') {
+                setCurrentAdjustment({
+                    parameterName: event.data.parameterName,
+                    parameterValue: event.data.parameterValue
+                });
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
+
+    useEffect(() => {
+        fetch('/api/art-styles')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setArtStyles(data);
+            })
+            .catch(err => console.error("Could not fetch art styles", err));
+    }, []);
 
     useEffect(() => {
         // reset target value when mode changes
@@ -42,7 +71,7 @@ export default function GameSandboxPage() {
             const response = await fetch('/api/generate-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetMode, targetValue, optionalPrompt }),
+                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined }),
             });
 
             if (!response.ok || !response.body) {
@@ -137,6 +166,22 @@ export default function GameSandboxPage() {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Art Style (Optional)
+                        </label>
+                        <select
+                            value={artStyleId}
+                            onChange={(e) => setArtStyleId(e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3"
+                        >
+                            <option value="">None / Default</option>
+                            {artStyles.map(style => (
+                                <option key={style.id} value={style.id}>{style.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Optional Prompt
                         </label>
                         <textarea
@@ -200,7 +245,14 @@ export default function GameSandboxPage() {
                             </a>
                         </div>
 
-                        <div className="flex-1 w-full bg-black mt-[45px] relative">
+                        <div className="flex-1 w-full bg-black mt-[45px] relative overflow-hidden">
+                            {currentAdjustment && (
+                                <GameAdjustmentBanner
+                                    parameterName={currentAdjustment.parameterName}
+                                    parameterValue={currentAdjustment.parameterValue}
+                                    onDismiss={() => setCurrentAdjustment(null)}
+                                />
+                            )}
                             <iframe
                                 src={gameUrl}
                                 title="Generated Game"

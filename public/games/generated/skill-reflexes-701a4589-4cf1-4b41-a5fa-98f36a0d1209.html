@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Reflex Dash</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050510;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            box-shadow: 0 0 0 4px #444, 0 0 30px #0ff5;
+            background-color: #0a0a1a;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated; /* Crucial for pixel art style */
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(10, 10, 26, 0.85);
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            color: #0ff;
+            text-shadow: 4px 4px 0 #005555;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 12px;
+            color: #ccc;
+            text-align: center;
+            line-height: 2;
+            max-width: 80%;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .highlight-green { color: #0f0; }
+        .highlight-red { color: #f00; }
+
+        button {
+            background: #000;
+            border: 4px solid #fff;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 6px 6px 0 #555;
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: #222;
+        }
+
+        button:active {
+            transform: translate(6px, 6px);
+            box-shadow: 0 0 0 #555;
+        }
+
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 20px;
+            z-index: 5;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000;
+            display: flex;
+            justify-content: space-between;
+            width: 760px;
+            pointer-events: none;
+        }
+
+        #controls-hint {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+            z-index: 5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-wrapper">
+    <div id="hud" class="hidden">
+        <span id="scoreDisplay">SCORE: 0</span>
+        <span id="multiplierDisplay">SPD: 1.0x</span>
+    </div>
+
+    <div id="start-screen" class="ui-layer">
+        <h1>PIXEL<br>REFLEX</h1>
+        <p>Use <span class="highlight-green">LEFT/RIGHT ARROWS</span> or <span class="highlight-green">A/D</span> to move.</p>
+        <p>Catch the <span class="highlight-green">GREEN DATA</span> (+10 pts).</p>
+        <p>Dodge the <span class="highlight-red">RED VIRUS</span> (Game Over).</p>
+        <p>Missing Data costs 5 pts!</p>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="game-over-screen" class="ui-layer hidden">
+        <h1 style="color: #f00; text-shadow: 4px 4px 0 #500;">SYSTEM<br>CRASH</h1>
+        <p id="final-score" style="font-size: 24px; color: #fff; margin: 20px 0;">SCORE: 0</p>
+        <button onclick="startGame()">Reboot</button>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div id="controls-hint">Adjust: 1-9 | Move: Arrows/AD</div>
+</div>
+
+<script>
+    // --- GAME CONFIGURATION & ADJUSTABILITY ---
+    const GAME_CONFIG = {
+        player_speed: 500,        // Pixels per second
+        player_width: 48,         // Width of the player block
+        fall_speed_base: 250,     // Initial falling speed of objects
+        spawn_rate_base: 800,     // Initial ms between spawns
+        bad_chance: 0.35,         // Probability (0-1) of spawning a red virus
+        bg_speed: 100             // Speed of background starfield
+    };
+
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            if (GAME_CONFIG.hasOwnProperty(parameterName)) {
+                GAME_CONFIG[parameterName] = parameterValue;
+                console.log(`[AdjustGame] ${parameterName} set to ${parameterValue}`);
+                
+                // Apply immediate physical changes if needed
+                if (parameterName === 'player_width' && player) {
+                    player.width = parameterValue;
+                }
+            } else {
+                console.warn(`[AdjustGame] Unknown parameter: ${parameterName}`);
+            }
+        }
+    };
+
+    // Test bindings for keys 1-9
+    window.addEventListener('keydown', function(event) {
+        // Only trigger if we are playing to avoid messing with UI focus, though standard keydown is fine
+        switch(event.key) {
+            case '1': window.adjustGame({ parameterName: 'player_speed', parameterValue: 250 }); break; // Sluggish
+            case '2': window.adjustGame({ parameterName: 'player_speed', parameterValue: 800 }); break; // Hyper fast
+            case '3': window.adjustGame({ parameterName: 'fall_speed_base', parameterValue: 100 }); break; // Slow fall
+            case '4': window.adjustGame({ parameterName: 'fall_speed_base', parameterValue: 500 }); break; // Fast fall
+            case '5': window.adjustGame({ parameterName: 'spawn_rate_base', parameterValue: 1500 }); break; // Sparse spawn
+            case '6': window.adjustGame({ parameterName: 'spawn_rate_base', parameterValue: 300 }); break; // Swarm spawn
+            case '7': window.adjustGame({ parameterName: 'bad_chance', parameterValue: 0.1 }); break; // Mostly good
+            case '8': window.adjustGame({ parameterName: 'bad_chance', parameterValue: 0.8 }); break; // Mostly bad
+            case '9': window.adjustGame({ parameterName: 'player_width', parameterValue: 96 }); break; // Wide player
+        }
+    });
+
+    // --- GAME ENGINE ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false; // Force pixel art rendering
+
+    // UI Elements
+    const startScreen = document.getElementById('start-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const hud = document.getElementById('hud');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const multiplierDisplay = document.getElementById('multiplierDisplay');
+    const finalScoreDisplay = document.getElementById('final-score');
+
+    // Game State
+    let state = 'START'; // START, PLAYING, GAMEOVER
+    let lastTime = 0;
+    let score = 0;
+    let spawnTimer = 0;
+    let difficultyMultiplier = 1;
+    
+    // Entities
+    let player = { x: 0, y: 0, width: GAME_CONFIG.player_width, height: 24, vx: 0 };
+    let entities = [];
+    let particles = [];
+    let stars = [];
+
+    // Input
+    const keys = {};
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    // Initialization
+    function initStars() {
+        stars = [];
+        for(let i=0; i<50; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() > 0.8 ? 4 : 2,
+                speedMult: Math.random() * 0.5 + 0.5
+            });
+        }
+    }
+
+    function startGame() {
+        state = 'PLAYING';
+        score = 0;
+        difficultyMultiplier = 1;
+        entities = [];
+        particles = [];
+        spawnTimer = GAME_CONFIG.spawn_rate_base;
+        
+        player.width = GAME_CONFIG.player_width;
+        player.x = canvas.width / 2 - player.width / 2;
+        player.y = canvas.height - 50;
+        player.vx = 0;
+
+        initStars();
+
+        startScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        hud.classList.remove('hidden');
+        
+        updateHUD();
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function gameOver() {
+        state = 'GAMEOVER';
+        hud.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+        finalScoreDisplay.innerText = `SCORE: ${score}`;
+        createExplosion(player.x + player.width/2, player.y + player.height/2, '#0ff', 50);
+    }
+
+    // Visual Effects
+    function createExplosion(x, y, color, count=15) {
+        for(let i=0; i<count; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 400,
+                vy: (Math.random() - 0.5) * 400,
+                life: Math.random() * 0.5 + 0.2,
+                maxLife: 0.7,
+                color: color,
+                size: Math.random() > 0.5 ? 8 : 4
+            });
+        }
+    }
+
+    function updateHUD() {
+        scoreDisplay.innerText = `SCORE: ${score}`;
+        multiplierDisplay.innerText = `SPD: ${difficultyMultiplier.toFixed(1)}x`;
+    }
+
+    // Core Loop
+    function update(dt) {
+        if (state !== 'PLAYING') return;
+
+        // Difficulty scaling based on score
+        difficultyMultiplier = 1 + Math.max(0, score) * 0.005;
+
+        // Player Movement
+        if (keys['ArrowLeft'] || keys['KeyA']) {
+            player.vx = -GAME_CONFIG.player_speed;
+        } else if (keys['ArrowRight'] || keys['KeyD']) {
+            player.vx = GAME_CONFIG.player_speed;
+        } else {
+            player.vx = 0;
+        }
+
+        player.x += player.vx * dt;
+
+        // Screen Boundaries
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+        // Background Stars
+        stars.forEach(star => {
+            star.y += GAME_CONFIG.bg_speed * star.speedMult * difficultyMultiplier * dt;
+            if (star.y > canvas.height) {
+                star.y = 0;
+                star.x = Math.random() * canvas.width;
+            }
+        });
+
+        // Spawning
+        spawnTimer -= dt * 1000;
+        if (spawnTimer <= 0) {
+            const isBad = Math.random() < GAME_CONFIG.bad_chance;
+            const size = 24;
+            entities.push({
+                x: Math.random() * (canvas.width - size),
+                y: -size,
+                width: size,
+                height: size,
+                type: isBad ? 'bad' : 'good',
+                speed: GAME_CONFIG.fall_speed_base * difficultyMultiplier * (Math.random() * 0.4 + 0.8) // slight speed variation
+            });
+            
+            // Spawn rate gets faster as difficulty increases
+            spawnTimer = GAME_CONFIG.spawn_rate_base / Math.sqrt(difficultyMultiplier);
+        }
+
+        // Entity Update & Collision
+        for (let i = entities.length - 1; i >= 0; i--) {
+            let e = entities[i];
+            e.y += e.speed * dt;
+
+            // AABB Collision Detection
+            if (e.x < player.x + player.width &&
+                e.x + e.width > player.x &&
+                e.y < player.y + player.height &&
+                e.y + e.height > player.y) {
+                
+                if (e.type === 'good') {
+                    score += 10;
+                    createExplosion(e.x + e.width/2, e.y + e.height/2, '#0f0', 10);
+                    updateHUD();
+                } else {
+                    createExplosion(e.x + e.width/2, e.y + e.height/2, '#f00', 30);
+                    gameOver();
+                }
+                entities.splice(i, 1);
+                continue;
+            }
+
+            // Missed entity
+            if (e.y > canvas.height) {
+                if (e.type === 'good') {
+                    score = Math.max(0, score - 5); // Penalty
+                    updateHUD();
+                }
+                entities.splice(i, 1);
+            }
+        }
+
+        // Particles Update
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+            }
+        }
+    }
+
+    function drawPixelRect(x, y, w, h, mainColor, highlightColor, shadowColor) {
+        // Shadow
+        ctx.fillStyle = shadowColor;
+        ctx.fillRect(Math.floor(x)+4, Math.floor(y)+4, w, h);
+        // Main
+        ctx.fillStyle = mainColor;
+        ctx.fillRect(Math.floor(x), Math.floor(y), w, h);
+        // Highlight
+        ctx.fillStyle = highlightColor;
+        ctx.fillRect(Math.floor(x)+4, Math.floor(y)+4, w-8, h-8);
+    }
+
+    function draw() {
+        // Clear screen
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Stars
+        ctx.fillStyle = '#555';
+        stars.forEach(star => {
+            ctx.fillRect(Math.floor(star.x), Math.floor(star.y), star.size, star.size);
+        });
+
+        if (state === 'PLAYING' || state === 'GAMEOVER') {
+            // Draw Entities
+            entities.forEach(e => {
+                if (e.type === 'good') {
+                    drawPixelRect(e.x, e.y, e.width, e.height, '#0a0', '#0f0', '#050');
+                } else {
+                    drawPixelRect(e.x, e.y, e.width, e.height, '#a00', '#f00', '#500');
+                    // Add virus detail
+                    ctx.fillStyle = '#ff0';
+                    ctx.fillRect(Math.floor(e.x)+8, Math.floor(e.y)+8, e.width-16, e.height-16);
+                }
+            });
+
+            // Draw Player
+            if (state === 'PLAYING') {
+                // Player ship styling
+                drawPixelRect(player.x, player.y, player.width, player.height, '#0aa', '#0ff', '#055');
+                // Thruster
+                ctx.fillStyle = Math.random() > 0.5 ? '#f90' : '#f00';
+                ctx.fillRect(Math.floor(player.x) + 8, Math.floor(player.y) + player.height, player.width - 16, 8 + Math.random()*8);
+            }
+
+            // Draw Particles
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                // Fade out effect by skipping rendering randomly based on life
+                if (Math.random() < (p.life / p.maxLife)) {
+                    ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+                }
+            });
+        }
+    }
+
+    function gameLoop(timestamp) {
+        let dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+        
+        // Cap dt to prevent huge jumps if tab is inactive
+        if (dt > 0.1) dt = 0.1; 
+
+        update(dt);
+        draw();
+
+        if (state === 'PLAYING' || particles.length > 0) {
+            requestAnimationFrame(gameLoop);
+        } else if (state === 'START') {
+             // Draw initial background
+             initStars();
+             draw();
+        }
+    }
+
+    // Initial draw
+    initStars();
+    draw();
+
+</script>
+</body>
+</html>

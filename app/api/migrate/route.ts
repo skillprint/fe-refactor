@@ -3,6 +3,7 @@ import { Umzug, SequelizeStorage } from 'umzug';
 import { sequelize } from '@/lib/db';
 import * as initialSchema from '@/migrations/00-initial-schema';
 import * as createOrganizations from '@/migrations/01-create-organizations';
+import * as createArtStyles from '@/migrations/02-create-art-styles';
 
 export async function GET() {
     try {
@@ -17,6 +18,11 @@ export async function GET() {
                     name: '01-create-organizations',
                     up: async () => createOrganizations.up({ context: sequelize, name: '01-create-organizations' }),
                     down: async () => createOrganizations.down({ context: sequelize, name: '01-create-organizations' }),
+                },
+                {
+                    name: '02-create-art-styles',
+                    up: async () => createArtStyles.up({ context: sequelize, name: '02-create-art-styles' }),
+                    down: async () => createArtStyles.down({ context: sequelize, name: '02-create-art-styles' }),
                 }
             ],
             context: sequelize,

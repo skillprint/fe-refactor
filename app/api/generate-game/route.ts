@@ -5,11 +5,12 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { User } from '@/lib/models/User';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
+import { ArtStyle } from '@/lib/models/ArtStyle';
 import jwt from 'jsonwebtoken';
 
 export async function POST(req: Request) {
     try {
-        const { targetMode, targetValue, optionalPrompt } = await req.json();
+        const { targetMode, targetValue, optionalPrompt, artStyleId } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY;
         const cookieStore = await cookies();
         let userId = cookieStore.get('user_id')?.value || 'anonymous';
@@ -51,6 +52,18 @@ export async function POST(req: Request) {
             }
         }
 
+        let artStyleContext = '';
+        if (artStyleId) {
+            try {
+                const style = await ArtStyle.findByPk(artStyleId);
+                if (style) {
+                    artStyleContext = `\nART STYLE REQUIREMENT:\n${style.prompt_context}\n`;
+                }
+            } catch (dbErr) {
+                console.warn("Failed to fetch art style:", dbErr);
+            }
+        }
+
         const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file (using embedded CSS and JavaScript).
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
@@ -62,7 +75,9 @@ IMPORTANT CRITERIA:
 
 ${promptContext}
 
-${moodContext}`;
+${moodContext}
+
+${artStyleContext}`;
 
         const requestBody = {
             contents: [
