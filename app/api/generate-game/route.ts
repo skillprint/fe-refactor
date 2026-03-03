@@ -39,6 +39,18 @@ export async function POST(req: Request) {
             console.warn('Could not read game-prompt-context.md', err);
         }
 
+        let moodContext = '';
+        if (targetMode === 'mood' && targetValue) {
+            const safeMoodName = targetValue.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const moodContextPath = path.join(process.cwd(), 'app', 'api', 'generate-game', `${safeMoodName}-game-context.md`);
+            try {
+                moodContext = await fs.readFile(moodContextPath, 'utf-8');
+            } catch (err) {
+                // Not all moods will have a specific context file, so just ignore it if missing
+                console.log(`No specific context found for mood: ${targetValue} at ${moodContextPath}`);
+            }
+        }
+
         const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file (using embedded CSS and JavaScript).
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
@@ -48,7 +60,9 @@ IMPORTANT CRITERIA:
 3. VISUALS: Ensure the game is visually stunning with a modern UI. Include a Start Screen, a Game Loop canvas or DOM area, and a Game Over screen. Use smooth CSS animations and nice color palettes.
 4. FORMAT: Return ONLY the raw HTML code block within \`\`\`html ... \`\`\` markers. Print your response efficiently and without extra conversational text.
 
-${promptContext}`;
+${promptContext}
+
+${moodContext}`;
 
         const requestBody = {
             contents: [
