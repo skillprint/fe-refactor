@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus: Zenith Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color: #050508;
+            --primary-color: #00f3ff;
+            --secondary-color: #bc13fe;
+            --danger-color: #ff0055;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(5, 5, 8, 0.85);
+            padding: 40px 60px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none !important;
+        }
+
+        h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--danger-color);
+            text-shadow: 0 0 10px var(--danger-color);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #a0a0a0;
+            max-width: 400px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            font-weight: 600;
+            color: var(--bg-color);
+            background: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px var(--primary-color);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--primary-color);
+            background: #fff;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hud-element {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        #score-display {
+            color: var(--primary-color);
+        }
+
+        #combo-display {
+            color: var(--secondary-color);
+        }
+
+        /* Subtle scanline effect */
+        #game-container::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+    </style>
+<script src="/games/lib/physics.js"></script>
+<script src="/games/lib/sound.js"></script>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="hud" class="hidden">
+        <div id="score-display">SCORE: 0</div>
+        <div id="combo-display">COMBO: x1</div>
+    </div>
+
+    <div class="ui-layer">
+        <div id="start-screen" class="screen">
+            <h1>Zenith</h1>
+            <p>Maintain focus. Move your mouse to rotate the core. Catch the incoming energy orbs with the cyan arc. Do not let them hit the dark shield.</p>
+            <button class="btn" id="start-btn">Engage</button>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h2>Focus Lost</h2>
+            <div style="font-size: 1.5rem; margin-bottom: 10px;">Final Score: <span id="final-score" style="color: var(--primary-color)">0</span></div>
+            <div style="font-size: 1.2rem; margin-bottom: 30px; color: #a0a0a0;">Max Combo: <span id="max-combo">0</span></div>
+            <button class="btn" id="restart-btn">Re-engage</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * GAME CONFIGURATION & ADJUSTABILITY
+     */
+    window.GAME_CONFIG = {
+        rotation_speed: 0.15,       // Interpolation speed for ring rotation (0.01 - 1)
+        orb_speed_base: 3.0,        // Base speed of incoming orbs
+        orb_spawn_rate: 1200,       // Base spawn rate in ms
+        catcher_width: Math.PI / 3, // Width of the catching arc (radians)
+        max_health: 3,              // Number of misses allowed
+        difficulty_scaling: 0.02,   // How much speed increases per score
+        visual_glow: 15             // Intensity of neon glow
+    };
+
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            if (window.GAME_CONFIG.hasOwnProperty(parameterName)) {
+                window.GAME_CONFIG[parameterName] = parameterValue;
+                console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                
+                // Special handling for dynamic updates if needed
+                if (parameterName === 'max_health' && gameState === 'playing') {
+                    health = Math.min(health, parameterValue);
+                }
+
+                window.parent.postMessage({ type: 'ADJUSTMENT_MADE', parameterName, parameterValue }, '*');
+            }
+        }
+    };
+
+    window.addEventListener('keydown', function(event) {
+        switch(event.key) {
+            case '1': window.adjustGame({ parameterName: 'rotation_speed', parameterValue: 0.05 }); break;
+            case '2': window.adjustGame({ parameterName: 'rotation_speed', parameterValue: 0.3 }); break;
+            case '3': window.adjustGame({ parameterName: 'orb_speed_base', parameterValue: 1.5 }); break;
+            case '4': window.adjustGame({ parameterName: 'orb_speed_base', parameterValue: 6.0 }); break;
+            case '5': window.adjustGame({ parameterName: 'orb_spawn_rate', parameterValue: 2000 }); break;
+            case '6': window.adjustGame({ parameterName: 'orb_spawn_rate', parameterValue: 500 }); break;
+            case '7': window.adjustGame({ parameterName: 'catcher_width', parameterValue: Math.PI / 6 }); break;
+            case '8': window.adjustGame({ parameterName: 'catcher_width', parameterValue: Math.PI }); break;
+            case '9': window.adjustGame({ parameterName: 'max_health', parameterValue: 99 }); break;
+        }
+    });
+
+    window.parent.postMessage({
+        type: 'REGISTER_ADJUSTMENTS',
+        mappings: {
+            '1': { parameterName: 'rotation_speed', description: 'Sluggish Rotation', value: 0.05 },
+            '2': { parameterName: 'rotation_speed', description: 'Snappy Rotation', value: 0.3 },
+            '3': { parameterName: 'orb_speed_base', description: 'Slow Orbs', value: 1.5 },
+            '4': { parameterName: 'orb_speed_base', description: 'Fast Orbs', value: 6.0 },
+            '5': { parameterName: 'orb_spawn_rate', description: 'Slow Spawning', value: 2000 },
+            '6': { parameterName: 'orb_spawn_rate', description: 'Fast Spawning', value: 500 },
+            '7': { parameterName: 'catcher_width', description: 'Narrow Catcher (Hard)', value: Math.PI / 6 },
+            '8': { parameterName: 'catcher_width', description: 'Wide Catcher (Easy)', value: Math.PI },
+            '9': { parameterName: 'max_health', description: 'Invincible Mode', value: 99 }
+        }
+    }, '*');
+
+    /**
+     * CORE GAME LOGIC
+     */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // UI Elements
+    const startScreen = document.getElementById('start-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const hud = document.getElementById('hud');
+    const scoreDisplay = document.getElementById('score-display');
+    const comboDisplay = document.getElementById('combo-display');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const maxComboDisplay = document.getElementById('max-combo');
+
+    // Game Variables
+    let width, height, cx, cy;
+    let gameState = 'start'; // start, playing, gameover
+    let score = 0;
+    let combo = 1;
+    let maxCombo = 1;
+    let health = window.GAME_CONFIG.max_health;
+    let lastTime = 0;
+    let spawnTimer = 0;
+    let currentSpawnRate = window.GAME_CONFIG.orb_spawn_rate;
+    
+    // Input
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetAngle = 0;
+
+    // Entities
+    const ringRadius = 80;
+    let currentRingAngle = 0;
+    let orbs = [];
+    let particles = [];
+    let screenShake = 0;
+
+    // Colors
+    const colors = {
+        bg: '#050508',
+        primary: '#00f3ff',
+        secondary: '#bc13fe',
+        danger: '#ff0055',
+        shield: '#1a1a24'
+    };
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        cx = width / 2;
+        cy = height / 2;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Input handling
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (gameState === 'playing') {
+            targetAngle = Math.atan2(mouseY - cy, mouseX - cx);
+        }
+    });
+
+    // Touch support
+    window.addEventListener('touchmove', (e) => {
+        if(e.touches.length > 0) {
+            mouseX = e.touches[0].clientX;
+            mouseY = e.touches[0].clientY;
+            if (gameState === 'playing') {
+                targetAngle = Math.atan2(mouseY - cy, mouseX - cx);
+            }
+        }
+    }, {passive: false});
+
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('restart-btn').addEventListener('click', startGame);
+
+    class Orb {
+        constructor() {
+            // Spawn outside the screen
+            const spawnAngle = Math.random() * Math.PI * 2;
+            const spawnDist = Math.max(width, height) / 2 + 50;
+            this.x = cx + Math.cos(spawnAngle) * spawnDist;
+            this.y = cy + Math.sin(spawnAngle) * spawnDist;
+            this.angle = spawnAngle;
+            this.distance = spawnDist;
+            this.radius = 8;
+            
+            // Speed scales with score
+            const speedMultiplier = 1 + (score * window.GAME_CONFIG.difficulty_scaling);
+            this.speed = window.GAME_CONFIG.orb_speed_base * speedMultiplier;
+            this.markedForDeletion = false;
+            
+            // Visuals
+            this.trail = [];
+        }
+
+        update() {
+            this.distance -= this.speed;
+            this.x = cx + Math.cos(this.angle) * this.distance;
+            this.y = cy + Math.sin(this.angle) * this.distance;
+
+            this.trail.push({x: this.x, y: this.y});
+            if (this.trail.length > 10) this.trail.shift();
+
+            // Collision check
+            if (this.distance <= ringRadius + this.radius) {
+                this.checkCollision();
+            }
+        }
+
+        checkCollision() {
+            // Normalize angles for comparison
+            let diff = Math.atan2(Math.sin(this.angle - currentRingAngle), Math.cos(this.angle - currentRingAngle));
+            
+            if (Math.abs(diff) <= window.GAME_CONFIG.catcher_width / 2) {
+                // Caught
+                score += 10 * combo;
+                combo++;
+                if (combo > maxCombo) maxCombo = combo;
+                createParticles(this.x, this.y, colors.primary);
+            } else {
+                // Missed (Hit shield)
+                combo = 1;
+                health--;
+                createParticles(this.x, this.y, colors.danger);
+                screenShake = 15;
+                
+                if (health <= 0) {
+                    endGame();
+                }
+            }
+            updateHUD();
+            this.markedForDeletion = true;
+        }
+
+        draw(ctx) {
+            // Draw trail
+            if (this.trail.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                for (let i = 1; i < this.trail.length; i++) {
+                    ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                }
+                ctx.strokeStyle = `rgba(0, 243, 255, 0.4)`;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            // Draw Orb
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = colors.primary;
+            ctx.shadowBlur = window.GAME_CONFIG.visual_glow;
+            ctx.shadowColor = colors.primary;
+            ctx.fill();
+            ctx.shadowBlur = 0; // reset
+        }
+    }
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 3 + 1;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.life = 1.0;
+            this.decay = Math.random() * 0.05 + 0.02;
+            this.size = Math.random() * 3 + 1;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life -= this.decay;
+        }
+        draw(ctx) {
+            ctx.globalAlpha = Math.max(0, this.life);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+        }
+    }
+
+    function createParticles(x, y, color) {
+        for (let i = 0; i < 15; i++) {
+            particles.push(new Particle(x, y, color));
+        }
+    }
+
+    function startGame() {
+        score = 0;
+        combo = 1;
+        maxCombo = 1;
+        health = window.GAME_CONFIG.max_health;
+        orbs = [];
+        particles = [];
+        currentSpawnRate = window.GAME_CONFIG.orb_spawn_rate;
+        spawnTimer = 0;
+        screenShake = 0;
+        
+        // Initial angle towards mouse if available, else 0
+        currentRingAngle = targetAngle || 0;
+
+        startScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        hud.classList.remove('hidden');
+        
+        updateHUD();
+        gameState = 'playing';
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+        gameState = 'gameover';
+        hud.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+        finalScoreDisplay.innerText = score;
+        maxComboDisplay.innerText = maxCombo;
+    }
+
+    function updateHUD() {
+        scoreDisplay.innerText = `SCORE: ${score}`;
+        comboDisplay.innerText = `COMBO: x${combo}`;
+        
+        // Pulse combo text if high
+        if (combo > 5) {
+            comboDisplay.style.color = colors.secondary;
+            comboDisplay.style.textShadow = `0 0 15px ${colors.secondary}`;
+        } else {
+            comboDisplay.style.color = colors.primary;
+            comboDisplay.style.textShadow = `0 0 10px rgba(255,255,255,0.5)`;
+        }
+    }
+
+    // Helper to smoothly interpolate angles avoiding the 360 wrap issue
+    function lerpAngle(a, b, t) {
+        let diff = b - a;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        return a + diff * t;
+    }
+
+    function drawCore(ctx) {
+        // Draw Health indicator (center circles)
+        for (let i = 0; i < window.GAME_CONFIG.max_health; i++) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, 15 + i * 12, 0, Math.PI * 2);
+            ctx.lineWidth = 2;
+            if (i < health) {
+                ctx.strokeStyle = `rgba(0, 243, 255, ${0.8 - i*0.2})`;
+            } else {
+                ctx.strokeStyle = `rgba(255, 0, 85, 0.3)`;
+            }
+            ctx.stroke();
+        }
+
+        // Draw Base Shield (Dark Ring)
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = colors.shield;
+        ctx.stroke();
+
+        // Draw Catcher Arc
+        const halfWidth = window.GAME_CONFIG.catcher_width / 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringRadius, currentRingAngle - halfWidth, currentRingAngle + halfWidth);
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = colors.primary;
+        ctx.lineCap = 'round';
+        ctx.shadowBlur = window.GAME_CONFIG.visual_glow;
+        ctx.shadowColor = colors.primary;
+        ctx.stroke();
+        ctx.shadowBlur = 0; // reset
+        ctx.lineCap = 'butt';
+    }
+
+    function gameLoop(timestamp) {
+        if (gameState !== 'playing') return;
+
+        const deltaTime = timestamp - lastTime;
+        lastTime = timestamp;
+
+        // Screen shake logic
+        let shakeX = 0;
+        let shakeY = 0;
+        if (screenShake > 0) {
+            shakeX = (Math.random() - 0.5) * screenShake;
+            shakeY = (Math.random() - 0.5) * screenShake;
+            screenShake *= 0.9;
+            if (screenShake < 0.5) screenShake = 0;
+        }
+
+        // Clear canvas
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(shakeX, shakeY);
+
+        // Update Ring Angle (Smooth interpolation requires focus)
+        currentRingAngle = lerpAngle(currentRingAngle, targetAngle, window.GAME_CONFIG.rotation_speed);
+
+        // Spawn logic
+        spawnTimer += deltaTime;
+        // Decrease spawn rate as score increases, clamped to a minimum
+        const speedMultiplier = 1 + (score * window.GAME_CONFIG.difficulty_scaling * 0.5);
+        const dynamicSpawnRate = Math.max(300, window.GAME_CONFIG.orb_spawn_rate / speedMultiplier);
+
+        if (spawnTimer >= dynamicSpawnRate) {
+            orbs.push(new Orb());
+            spawnTimer = 0;
+        }
+
+        // Update and Draw Orbs
+        for (let i = orbs.length - 1; i >= 0; i--) {
+            orbs[i].update();
+            orbs[i].draw(ctx);
+            if (orbs[i].markedForDeletion) {
+                orbs.splice(i, 1);
+            }
+        }
+
+        // Draw Core
+        drawCore(ctx);
+
+        // Update and Draw Particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update();
+            particles[i].draw(ctx);
+            if (particles[i].life <= 0) {
+                particles.splice(i, 1);
+            }
+        }
+
+        ctx.restore();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Initial draw for background
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, width, height);
+    
+    // Draw decorative dormant core
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(0, 243, 255, 0.2)';
+    ctx.stroke();
+
+</script>
+</body>
+</html>

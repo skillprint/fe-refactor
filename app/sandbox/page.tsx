@@ -10,16 +10,23 @@ const SKILLS = [
     'problem solving', 'memory', 'logic', 'spatial reasoning', 'attention', 'pattern recognition', 'reaction time'
 ];
 
+const AVAILABLE_LIBRARIES = [
+    { id: 'physics', name: 'Physics' },
+    { id: 'sound', name: 'Sound' }
+];
+
 export default function GameSandboxPage() {
     const [targetMode, setTargetMode] = useState<'mood' | 'skill'>('mood');
     const [targetValue, setTargetValue] = useState(MOODS[0]);
     const [optionalPrompt, setOptionalPrompt] = useState('');
     const [artStyleId, setArtStyleId] = useState('');
+    const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
     const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationOutput, setGenerationOutput] = useState('');
     const [gameUrl, setGameUrl] = useState<string | null>(null);
+    const [tokenUsage, setTokenUsage] = useState<{ promptTokenCount?: number, candidatesTokenCount?: number, totalTokenCount?: number } | null>(null);
 
     const outputRef = useRef<HTMLPreElement>(null);
 
@@ -31,6 +38,7 @@ export default function GameSandboxPage() {
     }, [generationOutput]);
 
     const [currentAdjustment, setCurrentAdjustment] = useState<{ parameterName: string, parameterValue: any } | null>(null);
+    const [adjustmentMappings, setAdjustmentMappings] = useState<Record<string, { parameterName: string, description: string, value: any }> | null>(null);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -40,6 +48,8 @@ export default function GameSandboxPage() {
                     parameterName: event.data.parameterName,
                     parameterValue: event.data.parameterValue
                 });
+            } else if (event.data?.type === 'REGISTER_ADJUSTMENTS' && event.data.mappings) {
+                setAdjustmentMappings(event.data.mappings);
             }
         };
 
@@ -66,12 +76,15 @@ export default function GameSandboxPage() {
         setIsGenerating(true);
         setGenerationOutput('');
         setGameUrl(null);
+        setAdjustmentMappings(null);
+        setCurrentAdjustment(null);
+        setTokenUsage(null);
 
         try {
             const response = await fetch('/api/generate-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined }),
+                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined, libraries: selectedLibraries }),
             });
 
             if (!response.ok || !response.body) {
@@ -90,6 +103,14 @@ export default function GameSandboxPage() {
                 if (value) {
                     const chunk = decoder.decode(value, { stream: true });
                     buffer += chunk;
+
+                    const tokenMatch = buffer.match(/\n___TOKEN_USAGE___:({.*?})\n/);
+                    if (tokenMatch) {
+                        try {
+                            setTokenUsage(JSON.parse(tokenMatch[1]));
+                        } catch (e) { }
+                        buffer = buffer.replace(tokenMatch[0], '');
+                    }
 
                     if (buffer.includes('___FILE_READY___:')) {
                         const parts = buffer.split('___FILE_READY___:');
@@ -193,6 +214,28 @@ export default function GameSandboxPage() {
                         />
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Include Common Libraries
+                        </label>
+                        <div className="space-y-2">
+                            {AVAILABLE_LIBRARIES.map(lib => (
+                                <label key={lib.id} className="flex items-center space-x-3 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-700 dark:border-gray-600 hover:cursor-pointer"
+                                        checked={selectedLibraries.includes(lib.id)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) setSelectedLibraries([...selectedLibraries, lib.id]);
+                                            else setSelectedLibraries(selectedLibraries.filter(id => id !== lib.id));
+                                        }}
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300 font-medium">{lib.name}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
                     <button
                         onClick={handleGenerate}
                         disabled={isGenerating}
@@ -208,6 +251,33 @@ export default function GameSandboxPage() {
                             </span>
                         ) : 'Generate Game'}
                     </button>
+
+                    {/* Token Debug Panel */}
+                    {(tokenUsage || isGenerating) && (
+                        <div className="mt-8 p-4 bg-gray-50 border border-gray-200 dark:bg-gray-900/50 dark:border-gray-700 rounded-lg shadow-sm">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Debug Info</h3>
+                            {tokenUsage ? (
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <p className="text-gray-500 text-xs text-opacity-80">Prompt Tokens</p>
+                                        <p className="font-mono text-indigo-400 font-bold">{tokenUsage.promptTokenCount?.toLocaleString() || 0}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-500 text-xs text-opacity-80">Output Tokens</p>
+                                        <p className="font-mono text-green-400 font-bold">{tokenUsage.candidatesTokenCount?.toLocaleString() || 0}</p>
+                                    </div>
+                                    <div className="col-span-2 pt-2 border-t border-gray-200 dark:border-gray-700 mt-1">
+                                        <p className="text-gray-500 text-xs text-opacity-80">Total Tokens</p>
+                                        <p className="font-mono text-white font-bold">{tokenUsage.totalTokenCount?.toLocaleString() || 0}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-sm text-gray-400 animate-pulse font-mono">
+                                    Streaming response...
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -260,6 +330,38 @@ export default function GameSandboxPage() {
                                 sandbox="allow-scripts allow-same-origin allow-pointer-lock"
                             />
                         </div>
+                        {adjustmentMappings && (
+                            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 shrink-0 overflow-y-auto max-h-[30vh]">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                    </svg>
+                                    Use Keys 1-9 to Test Parameters
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {Object.entries(adjustmentMappings).map(([key, mapping]) => (
+                                        <div key={key} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/50 transition-colors hover:border-indigo-200 dark:hover:border-indigo-800">
+                                            <div className="flex-shrink-0 w-7 h-7 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center font-mono text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm mt-0.5">
+                                                {key}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                                                    {mapping.description || mapping.parameterName}
+                                                </p>
+                                                <div className="mt-1 flex items-center justify-between gap-2">
+                                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono truncate">
+                                                        {mapping.parameterName}
+                                                    </p>
+                                                    <span className="inline-flex rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 text-[10px] font-medium text-indigo-600 dark:text-indigo-400 font-mono border border-indigo-100 dark:border-indigo-800/50">
+                                                        {JSON.stringify(mapping.value)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

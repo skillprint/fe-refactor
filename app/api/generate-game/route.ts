@@ -7,10 +7,11 @@ import { User } from '@/lib/models/User';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
 import { ArtStyle } from '@/lib/models/ArtStyle';
 import jwt from 'jsonwebtoken';
+import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        const { targetMode, targetValue, optionalPrompt, artStyleId } = await req.json();
+        const { targetMode, targetValue, optionalPrompt, artStyleId, libraries = [] } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY;
         const cookieStore = await cookies();
         let userId = cookieStore.get('user_id')?.value || 'anonymous';
@@ -64,6 +65,8 @@ export async function POST(req: Request) {
             }
         }
 
+        const libContext = await prepareLibraries(libraries, apiKey);
+
         const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file (using embedded CSS and JavaScript).
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
@@ -77,13 +80,18 @@ ${promptContext}
 
 ${moodContext}
 
-${artStyleContext}`;
+${artStyleContext}
+
+${libContext}`;
 
         const requestBody = {
+            systemInstruction: {
+                parts: [{ text: systemPrompt }]
+            },
             contents: [
                 {
                     role: "user",
-                    parts: [{ text: systemPrompt }]
+                    parts: [{ text: `Generate the ${targetMode} game for: ${targetValue}` }]
                 }
             ],
             generationConfig: {
@@ -164,6 +172,11 @@ ${artStyleContext}`;
                                             fullOutputText += textPart;
                                             controller.enqueue(encoder.encode(textPart));
                                         }
+
+                                        if (data.usageMetadata && data.candidates?.[0]?.finishReason) {
+                                            // Ensure this is properly streamed back
+                                            controller.enqueue(encoder.encode(`\n___TOKEN_USAGE___:${JSON.stringify(data.usageMetadata)}\n`));
+                                        }
                                     } catch (e) {
                                         console.error('Error parsing SSE data:', e instanceof Error ? e.message : String(e));
                                     }
@@ -189,6 +202,10 @@ ${artStyleContext}`;
                                         fullOutputText += textPart;
                                         controller.enqueue(encoder.encode(textPart));
                                     }
+
+                                    if (data.usageMetadata && data.candidates?.[0]?.finishReason) {
+                                        controller.enqueue(encoder.encode(`\n___TOKEN_USAGE___:${JSON.stringify(data.usageMetadata)}\n`));
+                                    }
                                 } catch (e) { }
                             }
                         }
@@ -204,6 +221,16 @@ ${artStyleContext}`;
                         const matchHtml = fullOutputText.match(new RegExp("<!DOCTYPE html>[\\\\s\\\\S]*<\\\\/html>", "i"));
                         if (matchHtml) {
                             finalHtmlContent = matchHtml[0];
+                        }
+                    }
+
+                    // Dynamically inject library scripts into the head if they don't already exist in the generated HTML
+                    if (libraries && libraries.length > 0) {
+                        const injectedScripts = libraries.map((lib: string) => `<script src="/games/lib/${lib}.js"></script>`).join('\n');
+                        if (finalHtmlContent.includes('</head>')) {
+                            finalHtmlContent = finalHtmlContent.replace('</head>', `${injectedScripts}\n</head>`);
+                        } else {
+                            finalHtmlContent = `${injectedScripts}\n${finalHtmlContent}`;
                         }
                     }
 

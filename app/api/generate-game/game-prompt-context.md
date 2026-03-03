@@ -39,4 +39,18 @@ window.addEventListener('keydown', function(event) {
 \`\`\`
 
 Ensure you include this testing code so that simply pressing 1-9 in the browser will alter the live game state.
-    
+
+## 4. Announce Adjustments
+When the game has loaded, it MUST emit a message to the parent window declaring the adjustments mapped to the keys 1-9. This allows the testing environment to display them to the user.
+The payload must match the following structure exactly:
+```javascript
+window.parent.postMessage({
+    type: 'REGISTER_ADJUSTMENTS',
+    mappings: {
+        '1': { parameterName: 'hero_speed', description: 'Decrease Hero Speed', value: 10 },
+        '2': { parameterName: 'hero_speed', description: 'Increase Hero Speed', value: 20 }
+        // ... add the rest of your bindings mapped to keys 1 to 9
+    }
+}, '*');
+```
+Make sure you include this `postMessage` call globally so that it executes immediately when the game loads!
