@@ -31,6 +31,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing GEMINI_API_KEY' }, { status: 500 });
         }
 
+        const promptContextPath = path.join(process.cwd(), 'app', 'api', 'generate-game', 'game-prompt-context.md');
+        let promptContext = '';
+        try {
+            promptContext = await fs.readFile(promptContextPath, 'utf-8');
+        } catch (err) {
+            console.warn('Could not read game-prompt-context.md', err);
+        }
+
         const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file (using embedded CSS and JavaScript).
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
@@ -38,7 +46,9 @@ IMPORTANT CRITERIA:
 1. CODE COMPLETENESS: You MUST write actual, working game logic (update loops, collision detection, win/loss states, score tracking). DO NOT output placeholders or "Hello World" stubs.
 2. ASSETS: You DO NOT have access to external image or sound files. Therefore, you MUST generate rich inline game assets. Use CSS shapes, inline SVG data URIs, or emojis to create detailed characters, enemies, environments, and items.
 3. VISUALS: Ensure the game is visually stunning with a modern UI. Include a Start Screen, a Game Loop canvas or DOM area, and a Game Over screen. Use smooth CSS animations and nice color palettes.
-4. FORMAT: Return ONLY the raw HTML code block within \`\`\`html ... \`\`\` markers. Print your response efficiently and without extra conversational text.`;
+4. FORMAT: Return ONLY the raw HTML code block within \`\`\`html ... \`\`\` markers. Print your response efficiently and without extra conversational text.
+
+${promptContext}`;
 
         const requestBody = {
             contents: [

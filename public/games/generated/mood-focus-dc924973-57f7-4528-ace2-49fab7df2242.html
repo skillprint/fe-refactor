@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Type - Focus</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #0d1117;
+            --text-main: #c9d1d9;
+            --text-dim: #484f58;
+            --highlight: #58a6ff;
+            --success: #238636;
+            --warning: #d29922;
+            --error: #f85149;
+            --font-family: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-color 0.1s ease;
+        }
+
+        body.error-flash {
+            background-color: #3a1d1d;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        /* Start & Game Over Screens */
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+            color: var(--text-main);
+            text-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .blink {
+            animation: blinker 1.5s linear infinite;
+            color: var(--highlight);
+            font-weight: bold;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0.3; }
+        }
+
+        /* Game Screen */
+        #game-header {
+            position: absolute;
+            top: 2rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2rem;
+            font-size: 1.5rem;
+            color: var(--text-dim);
+        }
+
+        #score-val, #combo-val {
+            color: var(--highlight);
+            font-weight: bold;
+        }
+
+        #word-display {
+            font-size: 5rem;
+            font-weight: 700;
+            letter-spacing: 0.1rem;
+            position: relative;
+            display: flex;
+        }
+
+        .typed {
+            color: var(--highlight);
+            text-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+        }
+
+        .untyped {
+            color: var(--text-dim);
+        }
+
+        .cursor {
+            position: absolute;
+            bottom: -10px;
+            width: 1ch;
+            height: 4px;
+            background-color: var(--highlight);
+            transition: left 0.1s ease;
+        }
+
+        #timer-container {
+            position: absolute;
+            bottom: 20%;
+            width: 60%;
+            height: 4px;
+            background-color: var(--text-dim);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: var(--success);
+            transform-origin: left;
+            will-change: transform, background-color;
+        }
+
+        /* Visual embellishments */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.3;
+        }
+
+        /* Adjustments Info */
+        #adjust-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            z-index: 100;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div id="app">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>Zen Type</h1>
+            <div class="subtitle">Find your focus.<br>Type the words before time fades.<br>Mistakes break your flow.</div>
+            <div class="blink">Press ENTER to begin</div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div id="game-header">
+                <div>Score: <span id="score-val">0</span></div>
+                <div>Flow: <span id="combo-val">x1</span></div>
+            </div>
+            
+            <div id="word-display">
+                <span id="text-typed" class="typed"></span>
+                <span id="text-untyped" class="untyped"></span>
+                <div id="cursor" class="cursor"></div>
+            </div>
+
+            <div id="timer-container">
+                <div id="timer-bar"></div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen">
+            <h1>Focus Lost</h1>
+            <div class="subtitle">Final Score: <span id="final-score" style="color: var(--highlight)">0</span></div>
+            <div class="blink">Press ENTER to restart</div>
+        </div>
+    </div>
+
+    <div id="adjust-info">Press 1-9 to test parameters</div>
+
+    <script>
+        /**
+         * GAME CONFIGURATION & ADJUSTABILITY
+         * These parameters dictate the flow and difficulty of the game.
+         */
+        window.GAME_CONFIG = {
+            base_time_ms: 4000,       // Starting time allowed per word
+            min_time_ms: 1000,        // Absolute minimum time per word
+            time_decay_factor: 0.96,  // Multiplier applied to max time after each word (speeds up game)
+            penalty_ms: 400,          // Time deducted for a wrong keystroke
+            score_base: 10,           // Base score per word
+            combo_multiplier: 0.5     // Extra score multiplier per combo level
+        };
+
+        // Standard adjustGame function as requested
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                if (window.GAME_CONFIG.hasOwnProperty(parameterName)) {
+                    window.GAME_CONFIG[parameterName] = parameterValue;
+                    console.log(`[AdjustGame] Set ${parameterName} to ${parameterValue}`);
+                    showToast(`Adjusted ${parameterName}: ${parameterValue}`);
+                }
+            }
+        };
+
+        // Key bindings 1-9 for testing adjustability
+        window.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case '1': window.adjustGame({ parameterName: 'base_time_ms', parameterValue: 6000 }); break; // Easier start
+                case '2': window.adjustGame({ parameterName: 'base_time_ms', parameterValue: 2500 }); break; // Harder start
+                case '3': window.adjustGame({ parameterName: 'time_decay_factor', parameterValue: 1.0 }); break; // No speedup
+                case '4': window.adjustGame({ parameterName: 'time_decay_factor', parameterValue: 0.90 }); break; // Fast speedup
+                case '5': window.adjustGame({ parameterName: 'penalty_ms', parameterValue: 0 }); break; // No penalty
+                case '6': window.adjustGame({ parameterName: 'penalty_ms', parameterValue: 1000 }); break; // Harsh penalty
+                case '7': window.adjustGame({ parameterName: 'min_time_ms', parameterValue: 2000 }); break; // Higher floor
+                case '8': window.adjustGame({ parameterName: 'min_time_ms', parameterValue: 500 }); break; // Lower floor
+                case '9': window.adjustGame({ parameterName: 'score_base', parameterValue: 100 }); break; // High score mode
+            }
+        });
+
+        // Simple toast for visual feedback on adjustments
+        function showToast(msg) {
+            const el = document.getElementById('adjust-info');
+            const originalText = "Press 1-9 to test parameters";
+            el.innerText = msg;
+            el.style.color = "var(--highlight)";
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                el.innerText = originalText;
+                el.style.color = "var(--text-dim)";
+            }, 2000);
+        }
+
+        /**
+         * GAME LOGIC & STATE
+         */
+        const words = [
+            "focus", "breathe", "clarity", "vision", "steady", "rhythm", "flow", 
+            "zen", "mind", "presence", "awareness", "calm", "stillness", "momentum", 
+            "drive", "purpose", "align", "sync", "execute", "precision", "logic",
+            "syntax", "system", "kernel", "thread", "process", "memory", "cache",
+            "buffer", "stream", "socket", "packet", "node", "graph", "vector",
+            "matrix", "tensor", "cipher", "hash", "token", "routine", "module",
+            "breathe", "inhale", "exhale", "center", "balance", "harmony", "void"
+        ];
+
+        let state = 'START'; // START, PLAYING, GAMEOVER
+        let score = 0;
+        let combo = 1;
+        let currentWord = "";
+        let typedText = "";
+        
+        let maxTimeForWord = 0;
+        let currentTimeLeft = 0;
+        let lastFrameTime = 0;
+        let animationFrameId;
+
+        // DOM Elements
+        const screens = {
+            START: document.getElementById('start-screen'),
+            PLAYING: document.getElementById('game-screen'),
+            GAMEOVER: document.getElementById('game-over-screen')
+        };
+        const elTyped = document.getElementById('text-typed');
+        const elUntyped = document.getElementById('text-untyped');
+        const elCursor = document.getElementById('cursor');
+        const elTimerBar = document.getElementById('timer-bar');
+        const elScore = document.getElementById('score-val');
+        const elCombo = document.getElementById('combo-val');
+        const elFinalScore = document.getElementById('final-score');
+
+        function setScreen(newState) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[newState].classList.add('active');
+            state = newState;
+        }
+
+        function initGame() {
+            score = 0;
+            combo = 1;
+            maxTimeForWord = window.GAME_CONFIG.base_time_ms;
+            updateScoreUI();
+            setScreen('PLAYING');
+            pickNextWord();
+            
+            lastFrameTime = performance.now();
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function pickNextWord() {
+            const availableWords = words.filter(w => w !== currentWord);
+            currentWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+            typedText = "";
+            
+            // Apply decay to time, bounded by min_time
+            maxTimeForWord = Math.max(
+                window.GAME_CONFIG.min_time_ms, 
+                maxTimeForWord * window.GAME_CONFIG.time_decay_factor
+            );
+            currentTimeLeft = maxTimeForWord;
+            
+            updateWordUI();
+        }
+
+        function updateWordUI() {
+            elTyped.innerText = typedText;
+            const untyped = currentWord.substring(typedText.length);
+            elUntyped.innerText = untyped;
+
+            // Position cursor
+            if (untyped.length > 0) {
+                // Calculate position based on character width (monospace makes this easier, but let's rely on DOM)
+                // Since it's flex, we can just position it under the first character of untyped
+                elCursor.style.left = `${elTyped.offsetWidth}px`;
+                elCursor.style.display = 'block';
+            } else {
+                elCursor.style.display = 'none';
+            }
+        }
+
+        function updateScoreUI() {
+            elScore.innerText = Math.floor(score);
+            elCombo.innerText = `x${combo}`;
+            if (combo > 1) {
+                elCombo.style.color = "var(--highlight)";
+            } else {
+                elCombo.style.color = "var(--text-dim)";
+            }
+        }
+
+        function flashError() {
+            document.body.classList.add('error-flash');
+            setTimeout(() => {
+                document.body.classList.remove('error-flash');
+            }, 100);
+        }
+
+        function endGame() {
+            cancelAnimationFrame(animationFrameId);
+            elFinalScore.innerText = Math.floor(score);
+            setScreen('GAMEOVER');
+        }
+
+        function gameLoop(timestamp) {
+            if (state !== 'PLAYING') return;
+
+            const dt = timestamp - lastFrameTime;
+            lastFrameTime = timestamp;
+
+            currentTimeLeft -= dt;
+
+            if (currentTimeLeft <= 0) {
+                endGame();
+                return;
+            }
+
+            // Render Timer
+            const pct = Math.max(0, currentTimeLeft / maxTimeForWord);
+            elTimerBar.style.transform = `scaleX(${pct})`;
+
+            // Color shift based on time left
+            if (pct > 0.5) {
+                elTimerBar.style.backgroundColor = 'var(--success)';
+            } else if (pct > 0.25) {
+                elTimerBar.style.backgroundColor = 'var(--warning)';
+            } else {
+                elTimerBar.style.backgroundColor = 'var(--error)';
+            }
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // Input Handling
+        window.addEventListener('keydown', (e) => {
+            // Prevent default scrolling for space, etc.
+            if (e.key === ' ' || e.key === 'Enter') {
+                if (state !== 'PLAYING') e.preventDefault();
+            }
+
+            if (state === 'START' || state === 'GAMEOVER') {
+                if (e.key === 'Enter') {
+                    initGame();
+                }
+                return;
+            }
+
+            if (state === 'PLAYING') {
+                // Ignore modifier keys and non-character keys
+                if (e.key.length > 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+
+                const expectedChar = currentWord[typedText.length];
+
+                if (e.key.toLowerCase() === expectedChar.toLowerCase()) {
+                    // Correct keystroke
+                    typedText += expectedChar;
+                    updateWordUI();
+
+                    if (typedText === currentWord) {
+                        // Word complete
+                        const timeBonusPct = currentTimeLeft / maxTimeForWord;
+                        const points = window.GAME_CONFIG.score_base * (1 + (combo - 1) * window.GAME_CONFIG.combo_multiplier) * (1 + timeBonusPct);
+                        score += points;
+                        combo++;
+                        updateScoreUI();
+                        pickNextWord();
+                    }
+                } else {
+                    // Wrong keystroke
+                    combo = 1;
+                    currentTimeLeft -= window.GAME_CONFIG.penalty_ms;
+                    updateScoreUI();
+                    flashError();
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>

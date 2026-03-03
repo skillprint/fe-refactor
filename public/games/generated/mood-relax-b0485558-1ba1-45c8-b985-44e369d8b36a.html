@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tranquil Tides</title>
+    <style>
+        :root {
+            --ui-bg: rgba(0, 31, 63, 0.6);
+            --ui-border: rgba(0, 180, 216, 0.3);
+            --text-main: #caf0f8;
+            --text-glow: 0 0 10px rgba(0, 180, 216, 0.8);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #001f3f;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .screen {
+            background: var(--ui-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--ui-border);
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            display: none;
+        }
+
+        .screen.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        h1 {
+            color: var(--text-main);
+            font-size: 3rem;
+            margin: 0 0 10px 0;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-shadow: var(--text-glow);
+        }
+
+        p {
+            color: #90e0ef;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .controls-hint {
+            font-size: 0.9rem;
+            color: #48cae4;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        button {
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            border: none;
+            border-radius: 30px;
+            padding: 15px 40px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+            font-family: inherit;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.6);
+            background: linear-gradient(135deg, #0096c7, #48cae4);
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: none;
+            pointer-events: none;
+        }
+
+        .hud-text {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            font-weight: 300;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            margin: 5px 0;
+            letter-spacing: 1px;
+        }
+
+        #flash {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Adjustability Info */
+        #dev-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.7rem;
+            pointer-events: none;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+    <div id="flash"></div>
+
+    <div id="ui-layer">
+        <div id="start-screen" class="screen active">
+            <h1>TRANQUIL TIDES</h1>
+            <p>Drift through the endless ocean.</p>
+            <div class="controls-hint">Hold SPACE, UP Arrow, or Touch to swim upwards.</div>
+            <button onclick="startGame()">Dive In</button>
+        </div>
+
+        <div id="game-over-screen" class="screen">
+            <h1>PEACEFUL REST</h1>
+            <p id="final-score-text">Distance: 0m | Pearls: 0</p>
+            <button onclick="resetGame()">Swim Again</button>
+        </div>
+    </div>
+
+    <div id="hud">
+        <div class="hud-text" id="score-display">Distance: 0m</div>
+        <div class="hud-text" id="pearl-display">Pearls: 0</div>
+    </div>
+
+    <div id="dev-info">
+        Press 1-9 to test adjustability<br>
+        <span id="last-adjustment"></span>
+    </div>
+
+<script>
+    /**
+     * GAME CONFIGURATION & ADJUSTABILITY
+     */
+    window.GAME_CONFIG = {
+        game_speed: 2.5,          // Base horizontal scrolling speed
+        gravity: 0.04,            // Downward pull
+        swim_lift: -1.2,          // Upward force when interacting
+        max_velocity_y: 3,        // Terminal velocity
+        obstacle_spawn_rate: 180, // Frames between coral spawns
+        pearl_spawn_rate: 300,    // Frames between pearl spawns
+        bg_color_top: '#0077b6',  // Gradient top
+        bg_color_bottom: '#001219',// Gradient bottom
+        turtle_color: '#2a9d8f'   // Shell color
+    };
+
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            if (parameterName in window.GAME_CONFIG) {
+                window.GAME_CONFIG[parameterName] = parameterValue;
+                console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                document.getElementById('last-adjustment').innerText = `Adjusted ${parameterName}: ${parameterValue}`;
+            }
+        }
+    };
+
+    // Keyboard testing for adjustability
+    window.addEventListener('keydown', (e) => {
+        // Prevent default scrolling for space and arrows
+        if(['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
+            e.preventDefault();
+        }
+
+        switch(e.key) {
+            case '1': window.adjustGame({parameterName: 'game_speed', parameterValue: 1.5}); break; // Slower
+            case '2': window.adjustGame({parameterName: 'game_speed', parameterValue: 4.0}); break; // Faster
+            case '3': window.adjustGame({parameterName: 'gravity', parameterValue: 0.01}); break; // Floatier
+            case '4': window.adjustGame({parameterName: 'gravity', parameterValue: 0.08}); break; // Heavier
+            case '5': window.adjustGame({parameterName: 'obstacle_spawn_rate', parameterValue: 300}); break; // Less obstacles
+            case '6': window.adjustGame({parameterName: 'obstacle_spawn_rate', parameterValue: 90}); break; // More obstacles
+            case '7': window.adjustGame({parameterName: 'bg_color_top', parameterValue: '#48cae4'}); break; // Lighter water
+            case '8': window.adjustGame({parameterName: 'bg_color_top', parameterValue: '#023e8a'}); break; // Darker water
+            case '9': window.adjustGame({parameterName: 'turtle_color', parameterValue: '#e9c46a'}); break; // Golden turtle
+        }
+    });
+
+    /**
+     * ENGINE & SETUP
+     */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Game State
+    let state = 'start'; // start, playing, gameover
+    let frameCount = 0;
+    let score = 0;
+    let pearlsCollected = 0;
+    let isInteracting = false;
+    let animationId;
+
+    // Entities
+    let turtle;
+    let obstacles = [];
+    let pearls = [];
+    let particles = [];
+    let backgroundBubbles = [];
+    let lightRays = [];
+
+    // UI Elements
+    const startScreen = document.getElementById('start-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const hud = document.getElementById('hud');
+    const scoreDisplay = document.getElementById('score-display');
+    const pearlDisplay = document.getElementById('pearl-display');
+    const finalScoreText = document.getElementById('final-score-text');
+    const flash = document.getElementById('flash');
+
+    /**
+     * AUDIO SYSTEM (Web Audio API)
+     * Designed for a relaxing, ambient mood.
+     */
+    let audioCtx;
+    let masterGain;
+    let ambientInterval;
+
+    function initAudio() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.4;
+        masterGain.connect(audioCtx.destination);
+    }
+
+    function playAmbientDrone() {
+        if (!audioCtx || state !== 'playing') return;
+        const scale = [196.00, 220.00, 261.63, 293.66, 329.63]; // G3, A3, C4, D4, E4 (Pentatonic)
+        
+        ambientInterval = setInterval(() => {
+            if (state !== 'playing') {
+                clearInterval(ambientInterval);
+                return;
+            }
+            
+            let freq = scale[Math.floor(Math.random() * scale.length)];
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.value = freq * 0.5; // Lower octave
+            
+            osc.connect(gain);
+            gain.connect(masterGain);
+            
+            let now = audioCtx.currentTime;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.15, now + 3); // Very slow attack
+            gain.gain.linearRampToValueAtTime(0, now + 8);    // Very slow release
+            
+            osc.start(now);
+            osc.stop(now + 8);
+        }, 4000);
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(masterGain);
+        let now = audioCtx.currentTime;
+
+        if (type === 'pearl') {
+            // Soft chime
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, now); // A5
+            osc.frequency.exponentialRampToValueAtTime(1760, now + 0.1);
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } else if (type === 'hit') {
+            // Soft thud
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.5);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+    }
+
+    /**
+     * CLASSES
+     */
+    class Turtle {
+        constructor() {
+            this.x = width * 0.2;
+            this.y = height / 2;
+            this.vy = 0;
+            this.radius = 15; // Hitbox radius
+            this.width = 40;
+            this.height = 25;
+            this.flipperAngle = 0;
+        }
+
+        update() {
+            if (isInteracting) {
+                this.vy += window.GAME_CONFIG.swim_lift * 0.1; // Smooth application of lift
+            } else {
+                this.vy += window.GAME_CONFIG.gravity;
+            }
+
+            // Terminal velocity
+            if (this.vy > window.GAME_CONFIG.max_velocity_y) this.vy = window.GAME_CONFIG.max_velocity_y;
+            if (this.vy < -window.GAME_CONFIG.max_velocity_y) this.vy = -window.GAME_CONFIG.max_velocity_y;
+
+            this.y += this.vy;
+
+            // Boundaries (soft bounce to keep it relaxing)
+            if (this.y < this.radius) {
+                this.y = this.radius;
+                this.vy = 0;
+            }
+            if (this.y > height - this.radius) {
+                this.y = height - this.radius;
+                this.vy = 0;
+            }
+
+            // Animation
+            if (isInteracting) {
+                this.flipperAngle += 0.2;
+            } else {
+                this.flipperAngle = Math.sin(frameCount * 0.05) * 0.5;
+            }
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            // Tilt based on vertical velocity
+            let targetRotation = this.vy * 0.1;
+            ctx.rotate(targetRotation);
+
+            // Draw Flippers
+            ctx.fillStyle = '#21867a';
+            ctx.save(); // Back flipper
+            ctx.translate(-10, 5);
+            ctx.rotate(-this.flipperAngle * 0.5);
+            ctx.beginPath(); ctx.ellipse(0, 0, 12, 6, Math.PI/4, 0, Math.PI*2); ctx.fill();
+            ctx.restore();
+
+            ctx.save(); // Front flipper
+            ctx.translate(5, 10);
+            ctx.rotate(this.flipperAngle);
+            ctx.beginPath(); ctx.ellipse(0, 0, 15, 7, Math.PI/6, 0, Math.PI*2); ctx.fill();
+            ctx.restore();
+
+            // Draw Head
+            ctx.fillStyle = '#21867a';
+            ctx.beginPath();
+            ctx.arc(18, -2, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Shell
+            ctx.fillStyle = window.GAME_CONFIG.turtle_color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 20, 14, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Shell pattern (simple)
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, 12, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Debug Hitbox
+            // ctx.strokeStyle = 'red'; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.stroke();
+        }
+    }
+
+    class Coral {
+        constructor() {
+            this.x = width;
+            this.w = 60 + Math.random() * 40;
+            // Determine if top or bottom coral
+            this.isTop = Math.random() > 0.5;
+            
+            // Gap logic to ensure playability
+            let minHeight = height * 0.2;
+            let maxHeight = height * 0.6;
+            this.h = minHeight + Math.random() * (maxHeight - minHeight);
+            
+            this.y = this.isTop ? 0 : height - this.h;
+            
+            // Generate organic shape points
+            this.points = [];
+            let segments = 5;
+            let segmentHeight = this.h / segments;
+            for(let i=0; i<=segments; i++) {
+                let currentY = this.isTop ? (i * segmentHeight) : (height - this.h + i * segmentHeight);
+                let xOffset = (Math.random() - 0.5) * 20;
+                if(i === 0 && this.isTop) xOffset = 0;
+                if(i === segments && !this.isTop) xOffset = 0;
+                
+                // Taper the ends
+                let currentW = this.w;
+                if (this.isTop && i === segments) currentW *= 0.3;
+                if (!this.isTop && i === 0) currentW *= 0.3;
+
+                this.points.push({x: xOffset, y: currentY, w: currentW});
+            }
+            
+            this.color = `hsl(${280 + Math.random()*40}, 50%, 40%)`; // Soft purples/pinks
+        }
+
+        update() {
+            this.x -= window.GAME_CONFIG.game_speed;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, 0);
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            
+            // Draw organic shape
+            if (this.isTop) {
+                ctx.moveTo(-this.points[0].w/2, 0);
+                for(let i=0; i<this.points.length; i++) {
+                    ctx.lineTo(this.points[i].x - this.points[i].w/2, this.points[i].y);
+                }
+                for(let i=this.points.length-1; i>=0; i--) {
+                    ctx.lineTo(this.points[i].x + this.points[i].w/2, this.points[i].y);
+                }
+            } else {
+                ctx.moveTo(-this.points[this.points.length-1].w/2, height);
+                for(let i=this.points.length-1; i>=0; i--) {
+                    ctx.lineTo(this.points[i].x - this.points[i].w/2, this.points[i].y);
+                }
+                for(let i=0; i<this.points.length; i++) {
+                    ctx.lineTo(this.points[i].x + this.points[i].w/2, this.points[i].y);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Soft gradient overlay for depth
+            let grad = ctx.createLinearGradient(0, this.isTop ? 0 : height, 0, this.isTop ? this.h : height-this.h);
+            grad.addColorStop(0, 'rgba(0,0,0,0.3)');
+            grad.addColorStop(1, 'rgba(255,255,255,0.1)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Simple AABB collision for the main trunk
+        checkCollision(tx, ty, tr) {
+            // Simplify organic shape to a central bounding box slightly smaller than visual width
+            let boxX = this.x - this.w * 0.3;
+            let boxW = this.w * 0.6;
+            let boxY = this.isTop ? 0 : height - this.h;
+            let boxH = this.h;
+
+            // Circle-Rectangle collision
+            let testX = tx;
+            let testY = ty;
+
+            if (tx < boxX) testX = boxX;
+            else if (tx > boxX + boxW) testX = boxX + boxW;
+
+            if (ty < boxY) testY = boxY;
+            else if (ty > boxY + boxH) testY = boxY + boxH;
+
+            let distX = tx - testX;
+            let distY = ty - testY;
+            let distance = Math.sqrt((distX*distX) + (distY*distY));
+
+            return distance <= tr;
+        }
+    }
+
+    class Pearl {
+        constructor() {
+            this.x = width + 50;
+            this.y = height * 0.2 + Math.random() * (height * 0.6);
+            this.radius = 8;
+            this.baseY = this.y;
+            this.angle = Math.random() * Math.PI * 2;
+        }
+
+        update() {
+            this.x -= window.GAME_CONFIG.game_speed;
+            // Gentle bobbing
+            this.y = this.baseY + Math.sin(this.angle) * 15;
+            this.angle += 0.05;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            // Glow
+            let pulse = Math.sin(frameCount * 0.1) * 0.5 + 0.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius + 5 + pulse * 5, 0, Math.PI*2);
+            ctx.fillStyle = `rgba(255, 243, 176, ${0.2 + pulse*0.2})`;
+            ctx.fill();
+
+            // Core
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = '#fff3b0';
+            ctx.fill();
+            
+            // Highlight
+            ctx.beginPath();
+            ctx.arc(-2, -2, 3, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fill();
+
+            ctx.restore();
+        }
+    }
+
+    class Bubble {
+        constructor(x, y, isForeground) {
+            this.x = x || Math.random() * width;
+            this.y = y || height + Math.random() * 100;
+            this.radius = Math.random() * 4 + 1;
+            this.speed = Math.random() * 1 + 0.5;
+            this.wobble = Math.random() * Math.PI * 2;
+            this.isForeground = isForeground;
+        }
+        update() {
+            this.y -= this.speed;
+            this.x += Math.sin(this.wobble) * 0.5;
+            this.wobble += 0.05;
+            // Parallax effect
+            this.x -= window.GAME_CONFIG.game_speed * (this.isForeground ? 1 : 0.3);
+
+            if (this.y < -10 || this.x < -10) {
+                this.y = height + 10;
+                this.x = Math.random() * width + (this.isForeground ? width : 0);
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${this.isForeground ? 0.4 : 0.1})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.isForeground ? 0.1 : 0.05})`;
+            ctx.fill();
+        }
+    }
+
+    class LightRay {
+        constructor() {
+            this.x = Math.random() * width;
+            this.w = 50 + Math.random() * 150;
+            this.angle = Math.PI / 6 + (Math.random() - 0.5) * 0.2; // roughly 30 degrees
+            this.opacity = Math.random() * 0.05 + 0.02;
+            this.phase = Math.random() * Math.PI * 2;
+        }
+        draw() {
+            let currentOpacity = this.opacity + Math.sin(frameCount * 0.02 + this.phase) * 0.02;
+            if(currentOpacity < 0) currentOpacity = 0;
+
+            ctx.save();
+            ctx.fillStyle = `rgba(144, 224, 239, ${currentOpacity})`;
+            ctx.beginPath();
+            ctx.moveTo(this.x, 0);
+            ctx.lineTo(this.x + this.w, 0);
+            
+            // Calculate bottom points based on angle
+            let bottomX1 = this.x + Math.tan(this.angle) * height;
+            let bottomX2 = this.x + this.w + Math.tan(this.angle) * height;
+            
+            ctx.lineTo(bottomX2, height);
+            ctx.lineTo(bottomX1, height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    /**
+     * INPUT HANDLING
+     */
+    function handleInputStart(e) {
+        if (e.type === 'keydown' && !['Space', 'ArrowUp'].includes(e.code)) return;
+        isInteracting = true;
+    }
+
+    function handleInputEnd(e) {
+        if (e.type === 'keyup' && !['Space', 'ArrowUp'].includes(e.code)) return;
+        isInteracting = false;
+    }
+
+    window.addEventListener('keydown', handleInputStart);
+    window.addEventListener('keyup', handleInputEnd);
+    canvas.addEventListener('mousedown', () => isInteracting = true);
+    canvas.addEventListener('mouseup', () => isInteracting = false);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isInteracting = true; }, {passive: false});
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); isInteracting = false; }, {passive: false});
+
+    /**
+     * GAME LOOP & LOGIC
+     */
+    function initEnvironment() {
+        backgroundBubbles = [];
+        lightRays = [];
+        for(let i=0; i<50; i++) backgroundBubbles.push(new Bubble(null, null, false));
+        for(let i=0; i<5; i++) lightRays.push(new LightRay());
+    }
+
+    function startGame() {
+        initAudio();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        
+        startScreen.classList.remove('active');
+        gameOverScreen.classList.remove('active');
+        hud.style.display = 'block';
+        
+        resetGameVariables();
+        initEnvironment();
+        
+        state = 'playing';
+        playAmbientDrone();
+        loop();
+    }
+
+    function resetGameVariables() {
+        turtle = new Turtle();
+        obstacles = [];
+        pearls = [];
+        particles = []; // For foreground bubbles
+        score = 0;
+        pearlsCollected = 0;
+        frameCount = 0;
+        isInteracting = false;
+        updateHUD();
+    }
+
+    function resetGame() {
+        flash.style.opacity = '1';
+        setTimeout(() => {
+            resetGameVariables();
+            gameOverScreen.classList.remove('active');
+            hud.style.display = 'block';
+            state = 'playing';
+            playAmbientDrone();
+            flash.style.opacity = '0';
+        }, 500);
+    }
+
+    function gameOver() {
+        state = 'gameover';
+        playSound('hit');
+        
+        // Soft white flash
+        flash.style.opacity = '0.5';
+        setTimeout(() => flash.style.opacity = '0', 200);
+
+        hud.style.display = 'none';
+        finalScoreText.innerText = `Distance: ${Math.floor(score)}m | Pearls: ${pearlsCollected}`;
+        gameOverScreen.classList.add('active');
+    }
+
+    function updateHUD() {
+        scoreDisplay.innerText = `Distance: ${Math.floor(score)}m`;
+        pearlDisplay.innerText = `Pearls: ${pearlsCollected}`;
+    }
+
+    function drawBackground() {
+        // Gradient background mapped to adjustability
+        let grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, window.GAME_CONFIG.bg_color_top);
+        grad.addColorStop(1, window.GAME_CONFIG.bg_color_bottom);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw Light Rays
+        lightRays.forEach(ray => ray.draw());
+
+        // Draw Background Bubbles
+        backgroundBubbles.forEach(b => { b.update(); b.draw(); });
+    }
+
+    function loop() {
+        if (state !== 'playing') {
+            if(state === 'start') {
+                drawBackground();
+                requestAnimationFrame(loop);
+            }
+            return;
+        }
+
+        ctx.clearRect(0, 0, width, height);
+        drawBackground();
+
+        frameCount++;
+        score += window.GAME_CONFIG.game_speed * 0.05;
+        if(frameCount % 10 === 0) updateHUD();
+
+        // Spawn logic
+        if (frameCount % Math.floor(window.GAME_CONFIG.obstacle_spawn_rate) === 0) {
+            obstacles.push(new Coral());
+        }
+        if (frameCount % Math.floor(window.GAME_CONFIG.pearl_spawn_rate) === 0) {
+            pearls.push(new Pearl());
+        }
+        // Occasional foreground bubble
+        if (Math.random() < 0.05) {
+            particles.push(new Bubble(width + 10, null, true));
+        }
+
+        // Update & Draw Entities
+        turtle.update();
+        turtle.draw();
+
+        // Obstacles
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let obs = obstacles[i];
+            obs.update();
+            obs.draw();
+
+            if (obs.checkCollision(turtle.x, turtle.y, turtle.radius)) {
+                gameOver();
+            }
+
+            if (obs.x + obs.w < 0) obstacles.splice(i, 1);
+        }
+
+        // Pearls
+        for (let i = pearls.length - 1; i >= 0; i--) {
+            let p = pearls[i];
+            p.update();
+            p.draw();
+
+            // Collision with pearl
+            let dx = turtle.x - p.x;
+            let dy = turtle.y - p.y;
+            if (Math.sqrt(dx*dx + dy*dy) < turtle.radius + p.radius) {
+                pearlsCollected++;
+                score += 50; // Bonus score
+                playSound('pearl');
+                pearls.splice(i, 1);
+                updateHUD();
+                
+                // Visual pop effect
+                for(let j=0; j<5; j++) {
+                    let b = new Bubble(p.x, p.y, true);
+                    b.speed = Math.random() * 2 - 1;
+                    b.wobble = Math.random() * 5;
+                    particles.push(b);
+                }
+            } else if (p.x + p.radius < 0) {
+                pearls.splice(i, 1);
+            }
+        }
+
+        // Foreground Particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            p.update();
+            p.draw();
+            if (p.y < 0 || p.x < 0) particles.splice(i, 1);
+        }
+
+        animationId = requestAnimationFrame(loop);
+    }
+
+    // Initial draw for background before start
+    initEnvironment();
+    loop();
+
+</script>
+</body>
+</html>
