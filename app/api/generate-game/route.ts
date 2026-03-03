@@ -14,8 +14,8 @@ export async function POST(req: Request) {
     try {
         let { targetMode, targetValue, optionalPrompt, artStyleId, genreId, libraries = [] } = await req.json();
 
-        // Always include global standard libraries
-        libraries = Array.from(new Set([...libraries, 'physics', 'sound', 'skillprint-adjustment']));
+        // Always include skillprint-adjustment (remove physics/sound generic stubs as Phaser has them built-in)
+        libraries = Array.from(new Set([...libraries, 'skillprint-adjustment']));
 
         const apiKey = process.env.GEMINI_API_KEY;
         const cookieStore = await cookies();
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
         const libContext = await prepareLibraries(libraries, apiKey);
 
-        const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file (using embedded CSS and JavaScript).
+        const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file using the Phaser 3 game engine (version 3.80.1 or later). Include all logic, CSS, and Phaser initializations within this HTML file.
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
 IMPORTANT CRITERIA:
@@ -244,13 +244,15 @@ ${libContext}`;
                     }
 
                     // Dynamically inject library scripts into the head if they don't already exist in the generated HTML
+                    let injectedScripts = `<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>\n`;
                     if (libraries && libraries.length > 0) {
-                        const injectedScripts = libraries.map((lib: string) => `<script src="/games/lib/${lib}.js"></script>`).join('\n');
-                        if (finalHtmlContent.includes('</head>')) {
-                            finalHtmlContent = finalHtmlContent.replace('</head>', `${injectedScripts}\n</head>`);
-                        } else {
-                            finalHtmlContent = `${injectedScripts}\n${finalHtmlContent}`;
-                        }
+                        injectedScripts += libraries.map((lib: string) => `<script src="/games/lib/${lib}.js"></script>`).join('\n') + '\n';
+                    }
+
+                    if (finalHtmlContent.includes('</head>')) {
+                        finalHtmlContent = finalHtmlContent.replace('</head>', `${injectedScripts}</head>`);
+                    } else {
+                        finalHtmlContent = `${injectedScripts}${finalHtmlContent}`;
                     }
 
                     const fileId = crypto.randomUUID();

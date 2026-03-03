@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Focus: Precision Catch</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(15, 15, 26, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #a0a0b0;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: transparent;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .btn:hover {
+            background: #00ffff;
+            color: #0f0f1a;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .score-text { color: #00ff00; }
+        .lives-text { color: #ff0055; }
+
+        /* Instructions formatting */
+        .instructions {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        .instructions span.green { color: #00ff00; font-weight: bold;}
+        .instructions span.red { color: #ff0055; font-weight: bold;}
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="hud" class="hidden">
+        <div id="scoreDisplay" class="score-text">Score: 0</div>
+        <div id="livesDisplay" class="lives-text">Lives: 3</div>
+    </div>
+
+    <div id="startScreen" class="overlay">
+        <h1>Focus Stream</h1>
+        <div class="instructions">
+            <p>Maintain your attention.</p>
+            <p>Catch the <span class="green">Green Orbs</span>.<br>Avoid the <span class="red">Red Cubes</span>.</p>
+            <p>Move mouse to control paddle.</p>
+        </div>
+        <button class="btn" id="startBtn">Enter State</button>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+        <h1>Focus Lost</h1>
+        <p id="finalScore">Final Score: 0</p>
+        <button class="btn" id="restartBtn">Re-focus</button>
+    </div>
+</div>
+
+<script>
+    // --- Audio System (Web Audio API) ---
+    const AudioSys = {
+        ctx: null,
+        init: function() {
+            if (!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        },
+        play: function(type) {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            if (type === 'catch') {
+                // Pleasant high ping
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(1600, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'hit') {
+                // Harsh low buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'over') {
+                // Descending sad tone
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.8);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            }
+        }
+    };
+
+    // --- Game Parameters & Adjustability ---
+    window.GAME_PARAMS = {
+        baseFallSpeed: 150,
+        spawnDelay: 1000,
+        paddleWidth: 120,
+        difficultyMultiplier: 1.0
+    };
+
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            
+            if (parameterName === 'fall_speed') {
+                window.GAME_PARAMS.baseFallSpeed = parameterValue;
+            } else if (parameterName === 'spawn_rate') {
+                window.GAME_PARAMS.spawnDelay = parameterValue;
+                if (window.game && window.game.scene.isActive('PlayScene')) {
+                    window.game.scene.getScene('PlayScene').updateSpawnTimer();
+                }
+            } else if (parameterName === 'paddle_width') {
+                window.GAME_PARAMS.paddleWidth = parameterValue;
+                if (window.game && window.game.scene.isActive('PlayScene')) {
+                    window.game.scene.getScene('PlayScene').updatePaddleSize();
+                }
+            }
+            console.log(`[Skillprint] Adjusted ${parameterName} to ${parameterValue}`);
+        }
+    };
+
+    // Register with Skillprint
+    if (window.Skillprint) {
+        window.Skillprint.registerAdjustments({
+            '1': { parameterName: 'fall_speed', description: 'Slower Fall Speed', value: 100 },
+            '2': { parameterName: 'fall_speed', description: 'Faster Fall Speed', value: 300 },
+            '3': { parameterName: 'spawn_rate', description: 'Slower Spawn (Easier)', value: 1500 },
+            '4': { parameterName: 'spawn_rate', description: 'Faster Spawn (Harder)', value: 600 },
+            '5': { parameterName: 'paddle_width', description: 'Smaller Paddle', value: 70 },
+            '6': { parameterName: 'paddle_width', description: 'Larger Paddle', value: 180 }
+        });
+    }
+
+    // --- Phaser Scenes ---
+
+    class BootScene extends Phaser.Scene {
+        constructor() { super('BootScene'); }
+        
+        create() {
+            // Generate inline textures
+            const g = this.make.graphics({x: 0, y: 0, add: false});
+            
+            // Paddle texture
+            g.fillStyle(0x00ffff, 1);
+            g.fillRoundedRect(0, 0, 100, 16, 8);
+            g.generateTexture('paddle', 100, 16);
+            g.clear();
+
+            // Good Target (Green Orb)
+            g.fillStyle(0x00ff00, 1);
+            g.fillCircle(16, 16, 16);
+            // Add a little inner glow
+            g.fillStyle(0xccffcc, 0.8);
+            g.fillCircle(12, 12, 6);
+            g.generateTexture('orb', 32, 32);
+            g.clear();
+
+            // Bad Target (Red Cube)
+            g.fillStyle(0xff0055, 1);
+            g.fillRect(0, 0, 32, 32);
+            // Add border
+            g.lineStyle(2, 0xffaacc, 1);
+            g.strokeRect(1, 1, 30, 30);
+            g.generateTexture('cube', 32, 32);
+            g.clear();
+
+            // Particle
+            g.fillStyle(0xffffff, 1);
+            g.fillCircle(4, 4, 4);
+            g.generateTexture('particle', 8, 8);
+
+            this.scene.start('MenuScene');
+        }
+    }
+
+    class MenuScene extends Phaser.Scene {
+        constructor() { super('MenuScene'); }
+        create() {
+            // Scene is managed by HTML UI overlay
+        }
+    }
+
+    class PlayScene extends Phaser.Scene {
+        constructor() { super('PlayScene'); }
+
+        init() {
+            this.score = 0;
+            this.lives = 3;
+            this.gameActive = true;
+            window.GAME_PARAMS.difficultyMultiplier = 1.0;
+        }
+
+        create() {
+            // Background grid for focus
+            this.add.grid(400, 300, 800, 600, 40, 40, 0x0f0f1a, 1, 0x1f1f3a, 0.5);
+
+            // Paddle
+            this.paddle = this.physics.add.image(400, 550, 'paddle');
+            this.paddle.setImmovable(true);
+            this.paddle.body.allowGravity = false;
+            this.updatePaddleSize();
+
+            // Groups
+            this.orbs = this.physics.add.group();
+            this.cubes = this.physics.add.group();
+
+            // Particles
+            this.particles = this.add.particles(0, 0, 'particle', {
+                speed: { min: 50, max: 150 },
+                scale: { start: 1, end: 0 },
+                lifespan: 400,
+                emitting: false
+            });
+
+            // Collisions
+            this.physics.add.overlap(this.paddle, this.orbs, this.catchOrb, null, this);
+            this.physics.add.overlap(this.paddle, this.cubes, this.hitCube, null, this);
+
+            // Input
+            this.input.on('pointermove', (pointer) => {
+                if (this.gameActive) {
+                    // Smooth follow
+                    this.paddle.x = Phaser.Math.Clamp(pointer.x, this.paddle.displayWidth/2, 800 - this.paddle.displayWidth/2);
+                }
+            });
+
+            // Spawning
+            this.setupSpawner();
+
+            // Difficulty ramping
+            this.difficultyTimer = this.time.addEvent({
+                delay: 5000,
+                callback: this.increaseDifficulty,
+                callbackScope: this,
+                loop: true
+            });
+
+            this.updateHUD();
+        }
+
+        updatePaddleSize() {
+            if (this.paddle) {
+                this.paddle.setDisplaySize(window.GAME_PARAMS.paddleWidth, 16);
+                this.paddle.body.setSize(window.GAME_PARAMS.paddleWidth, 16);
+            }
+        }
+
+        setupSpawner() {
+            if (this.spawnTimer) this.spawnTimer.remove();
+            
+            let currentDelay = Math.max(300, window.GAME_PARAMS.spawnDelay / window.GAME_PARAMS.difficultyMultiplier);
+
+            this.spawnTimer = this.time.addEvent({
+                delay: currentDelay,
+                callback: this.spawnObject,
+                callbackScope: this,
+                loop: true
+            });
+        }
+
+        updateSpawnTimer() {
+            this.setupSpawner();
+        }
+
+        increaseDifficulty() {
+            window.GAME_PARAMS.difficultyMultiplier += 0.05;
+            this.setupSpawner(); // Recalculate spawn rate
+        }
+
+        spawnObject() {
+            if (!this.gameActive) return;
+
+            const x = Phaser.Math.Between(32, 800 - 32);
+            const isOrb = Phaser.Math.Between(1, 100) <= 65; // 65% chance for good item
+
+            let obj;
+            if (isOrb) {
+                obj = this.orbs.create(x, -30, 'orb');
+            } else {
+                obj = this.cubes.create(x, -30, 'cube');
+            }
+
+            // Calculate speed
+            let speed = window.GAME_PARAMS.baseFallSpeed * window.GAME_PARAMS.difficultyMultiplier;
+            // Add slight random variance
+            speed += Phaser.Math.Between(-20, 20);
+            
+            obj.setVelocityY(speed);
+            // Slight rotation for visual interest
+            obj.setAngularVelocity(Phaser.Math.Between(-50, 50));
+        }
+
+        update() {
+            if (!this.gameActive) return;
+
+            // Cleanup off-screen objects and handle missed orbs
+            this.orbs.getChildren().forEach(orb => {
+                if (orb.y > 620) {
+                    // Missed an orb! Focus penalty.
+                    this.loseLife();
+                    orb.destroy();
+                }
+            });
+
+            this.cubes.getChildren().forEach(cube => {
+                if (cube.y > 620) {
+                    cube.destroy(); // Successfully avoided
+                }
+            });
+        }
+
+        catchOrb(paddle, orb) {
+            AudioSys.play('catch');
+            
+            // Visual feedback
+            this.particles.setTint(0x00ff00);
+            this.particles.emitParticleAt(orb.x, orb.y, 10);
+            
+            orb.destroy();
+            this.score += 10;
+            this.updateHUD();
+
+            // Flash paddle
+            this.paddle.setTint(0x00ff00);
+            this.time.delayedCall(100, () => this.paddle.clearTint());
+        }
+
+        hitCube(paddle, cube) {
+            AudioSys.play('hit');
+
+            // Visual feedback
+            this.particles.setTint(0xff0055);
+            this.particles.emitParticleAt(cube.x, cube.y, 15);
+
+            cube.destroy();
+            
+            // Screen shake for negative feedback
+            this.cameras.main.shake(150, 0.01);
+            
+            // Flash red
+            this.paddle.setTint(0xff0055);
+            this.time.delayedCall(100, () => this.paddle.clearTint());
+
+            this.loseLife();
+        }
+
+        loseLife() {
+            this.lives--;
+            this.updateHUD();
+            
+            if (this.lives <= 0) {
+                this.gameOver();
+            }
+        }
+
+        updateHUD() {
+            document.getElementById('scoreDisplay').innerText = `Score: ${this.score}`;
+            document.getElementById('livesDisplay').innerText = `Lives: ${this.lives}`;
+        }
+
+        gameOver() {
+            this.gameActive = false;
+            this.physics.pause();
+            this.difficultyTimer.remove();
+            this.spawnTimer.remove();
+            
+            AudioSys.play('over');
+            
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('finalScore').innerText = `Final Score: ${this.score}`;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+    }
+
+    // --- Game Initialization ---
+    const config = {
+        type: Phaser.AUTO,
+        parent: 'game-container',
+        width: 800,
+        height: 600,
+        backgroundColor: '#0f0f1a',
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 }, // We manage velocity manually for consistent falling
+                debug: false
+            }
+        },
+        scene: [BootScene, MenuScene, PlayScene]
+    };
+
+    window.game = new Phaser.Game(config);
+
+    // --- UI Logic ---
+    document.getElementById('startBtn').addEventListener('click', () => {
+        AudioSys.init();
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+        window.game.scene.start('PlayScene');
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+        document.getElementById('gameOverScreen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+        window.game.scene.start('PlayScene');
+    });
+
+</script>
+</body>
+</html>
