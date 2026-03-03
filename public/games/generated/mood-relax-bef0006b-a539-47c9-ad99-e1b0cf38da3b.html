@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Crossing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        :root {
+            --ui-bg: rgba(44, 62, 80, 0.85);
+            --ui-text: #ecf0f1;
+            --ui-accent: #a8e6cf;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            overflow: hidden;
+            font-family: 'Courier Prime', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 600px;
+            max-height: 900px;
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--ui-bg);
+            color: var(--ui-text);
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-align: center;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            color: var(--ui-accent);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: var(--ui-accent);
+            border: 4px solid #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+        }
+
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .heart {
+            color: #ff8b94;
+        }
+
+        #adjustment-toast {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 20;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .controls-hint {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+    </style>
+<script src="/games/lib/physics.js"></script>
+<script src="/games/lib/sound.js"></script>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="hud">
+        <div id="scoreDisplay">Score: 0</div>
+        <div id="livesDisplay"></div>
+    </div>
+
+    <div id="startScreen" class="screen">
+        <h1>Zen Crossing</h1>
+        <p>A gentle journey.<br>Guide the little duck across the streams and paths.<br>Take your time.</p>
+        <button class="btn" id="startBtn">Begin Journey</button>
+        <div class="controls-hint">Use Arrow Keys or WASD to move.<br>Keys 1-9 to adjust settings.</div>
+    </div>
+
+    <div id="gameOverScreen" class="screen hidden">
+        <h1>Rest Time</h1>
+        <p id="finalScoreText">You traveled far.<br>Score: 0</p>
+        <button class="btn" id="restartBtn">Wake Up</button>
+    </div>
+
+    <div id="adjustment-toast"></div>
+</div>
+
+<script>
+    /**
+     * GAME CONFIGURATION & ADJUSTABLE PARAMETERS
+     */
+    const CONFIG = {
+        baseSpeed: 1.0,        // Multiplier for moving obstacles
+        density: 0.5,          // Probability of obstacles spawning
+        theme: 'day',          // 'day', 'sunset', 'night'
+        invincible: false,     // If true, no lives lost
+        gridSize: 20,          // Logical pixel size of one grid square
+        cols: 13,              // Number of columns in logical grid
+        rowsVis: 17,           // Number of visible rows
+    };
+
+    const THEMES = {
+        day: {
+            grass: ['#a8e6cf', '#98d6bf'],
+            water: ['#dcedc1', '#cce0b1'],
+            road:  ['#f3e9d2', '#e3d9c2'],
+            log:   '#c38d9e',
+            turtle:'#ffaaa5',
+            duck:  '#ffd3b6',
+            duckBeak: '#ff8b94'
+        },
+        sunset: {
+            grass: ['#ffaaa5', '#ef9a95'],
+            water: ['#ff8b94', '#ef7b84'],
+            road:  ['#d4a5a5', '#c49595'],
+            log:   '#8b5a6e',
+            turtle:'#e3d9c2',
+            duck:  '#ffeb9b',
+            duckBeak: '#ffb347'
+        },
+        night: {
+            grass: ['#2c3e50', '#1c2e40'],
+            water: ['#34495e', '#24394e'],
+            road:  ['#7f8c8d', '#6f7c7d'],
+            log:   '#2c3e50',
+            turtle:'#95a5a6',
+            duck:  '#ecf0f1',
+            duckBeak: '#e74c3c'
+        }
+    };
+
+    /**
+     * ADJUSTMENT INTERFACE
+     */
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            
+            if (CONFIG.hasOwnProperty(parameterName)) {
+                CONFIG[parameterName] = parameterValue;
+            }
+            
+            console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+            
+            // Show toast
+            const toast = document.getElementById('adjustment-toast');
+            toast.textContent = `${parameterName}: ${parameterValue}`;
+            toast.style.opacity = 1;
+            clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => { toast.style.opacity = 0; }, 2000);
+
+            // Notify parent
+            if (window.parent) {
+                window.parent.postMessage({ type: 'ADJUSTMENT_MADE', parameterName, parameterValue }, '*');
+            }
+        }
+    };
+
+    // Register adjustments on load
+    window.onload = () => {
+        if (window.parent) {
+            window.parent.postMessage({
+                type: 'REGISTER_ADJUSTMENTS',
+                mappings: {
+                    '1': { parameterName: 'baseSpeed', description: 'Slower Flow', value: 0.5 },
+                    '2': { parameterName: 'baseSpeed', description: 'Normal Flow', value: 1.0 },
+                    '3': { parameterName: 'baseSpeed', description: 'Faster Flow', value: 1.5 },
+                    '4': { parameterName: 'density', description: 'Sparse Obstacles', value: 0.3 },
+                    '5': { parameterName: 'density', description: 'Dense Obstacles', value: 0.8 },
+                    '6': { parameterName: 'theme', description: 'Day Theme', value: 'day' },
+                    '7': { parameterName: 'theme', description: 'Sunset Theme', value: 'sunset' },
+                    '8': { parameterName: 'theme', description: 'Night Theme', value: 'night' },
+                    '9': { parameterName: 'invincible', description: 'Toggle Zen Mode (Invincible)', value: true }
+                }
+            }, '*');
+        }
+    };
+
+    // Keyboard bindings for adjustments
+    window.addEventListener('keydown', function(event) {
+        const keyMap = {
+            '1': { parameterName: 'baseSpeed', parameterValue: 0.5 },
+            '2': { parameterName: 'baseSpeed', parameterValue: 1.0 },
+            '3': { parameterName: 'baseSpeed', parameterValue: 1.5 },
+            '4': { parameterName: 'density', parameterValue: 0.3 },
+            '5': { parameterName: 'density', parameterValue: 0.8 },
+            '6': { parameterName: 'theme', parameterValue: 'day' },
+            '7': { parameterName: 'theme', parameterValue: 'sunset' },
+            '8': { parameterName: 'theme', parameterValue: 'night' },
+            '9': { parameterName: 'invincible', parameterValue: !CONFIG.invincible }
+        };
+
+        if (keyMap[event.key]) {
+            window.adjustGame(keyMap[event.key]);
+        }
+    });
+
+    /**
+     * GAME ENGINE
+     */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // UI Elements
+    const startScreen = document.getElementById('startScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const livesDisplay = document.getElementById('livesDisplay');
+    const finalScoreText = document.getElementById('finalScoreText');
+
+    // Logical resolution
+    const LOGICAL_WIDTH = CONFIG.cols * CONFIG.gridSize; // 13 * 20 = 260
+    const LOGICAL_HEIGHT = CONFIG.rowsVis * CONFIG.gridSize; // 17 * 20 = 340
+    let scale = 1;
+
+    function resizeCanvas() {
+        const container = document.getElementById('game-container');
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        
+        const scaleX = canvas.width / LOGICAL_WIDTH;
+        const scaleY = canvas.height / LOGICAL_HEIGHT;
+        scale = Math.min(scaleX, scaleY); // Keep aspect ratio, letterbox if needed
+        
+        // Center the logical canvas
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset
+        ctx.translate(
+            (canvas.width - LOGICAL_WIDTH * scale) / 2,
+            (canvas.height - LOGICAL_HEIGHT * scale) / 2
+        );
+        ctx.scale(scale, scale);
+        ctx.imageSmoothingEnabled = false;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Game State
+    let state = 'START'; // START, PLAYING, GAMEOVER, RESETTING
+    let score = 0;
+    let maxScore = 0;
+    let lives = 3;
+    let cameraY = 0;
+    let targetCameraY = 0;
+    let rows = [];
+    let particles = [];
+    let lastTime = 0;
+
+    // Player Entity
+    const player = {
+        gridX: Math.floor(CONFIG.cols / 2),
+        gridY: 0,
+        x: 0,
+        y: 0,
+        targetX: 0,
+        targetY: 0,
+        dir: 'up', // up, down, left, right
+        isMoving: false,
+        moveTimer: 0,
+        moveDuration: 0.15, // seconds
+        safeGridY: 0 // Last safe row for reset
+    };
+
+    // Row Types
+    const ROW_TYPES = ['grass', 'water', 'road'];
+
+    class Obstacle {
+        constructor(x, y, type, speed, width, dir) {
+            this.x = x;
+            this.y = y;
+            this.type = type; // 'log', 'turtle'
+            this.speed = speed;
+            this.width = width;
+            this.dir = dir; // 1 (right), -1 (left)
+        }
+
+        update(dt) {
+            this.x += this.speed * this.dir * CONFIG.baseSpeed * dt;
+            // Wrap around
+            if (this.dir === 1 && this.x > LOGICAL_WIDTH + 20) {
+                this.x = -this.width;
+            } else if (this.dir === -1 && this.x < -this.width - 20) {
+                this.x = LOGICAL_WIDTH + 20;
+            }
+        }
+
+        draw(ctx, themeColors) {
+            const h = CONFIG.gridSize;
+            if (this.type === 'log') {
+                ctx.fillStyle = themeColors.log;
+                ctx.fillRect(this.x, this.y + 2, this.width, h - 4);
+                // Wood grain details
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.fillRect(this.x + 5, this.y + 4, this.width - 10, 2);
+                ctx.fillRect(this.x + 2, this.y + 10, this.width - 15, 2);
+            } else if (this.type === 'turtle') {
+                ctx.fillStyle = themeColors.turtle;
+                // Body
+                ctx.fillRect(this.x + 2, this.y + 4, this.width - 4, h - 8);
+                // Shell detail
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(this.x + 4, this.y + 6, this.width - 8, h - 12);
+                // Head
+                ctx.fillStyle = themeColors.turtle;
+                if (this.dir === 1) {
+                    ctx.fillRect(this.x + this.width - 2, this.y + 6, 4, h - 12);
+                } else {
+                    ctx.fillRect(this.x - 2, this.y + 6, 4, h - 12);
+                }
+            }
+        }
+    }
+
+    class GameRow {
+        constructor(gridY) {
+            this.gridY = gridY;
+            this.y = -gridY * CONFIG.gridSize;
+            
+            // Generate pattern: mostly grass at start
+            if (gridY > -3) {
+                this.type = 'grass';
+            } else {
+                // Randomly pick type, ensuring not too many of same type
+                const rand = Math.random();
+                if (rand < 0.4) this.type = 'grass';
+                else if (rand < 0.7) this.type = 'water';
+                else this.type = 'road';
+            }
+
+            this.obstacles = [];
+            this.dir = Math.random() > 0.5 ? 1 : -1;
+            this.speed = 20 + Math.random() * 30; // pixels per second
+            this.altColor = Math.random() > 0.5;
+
+            if (this.type !== 'grass') {
+                this.generateObstacles();
+            } else {
+                // Add some static scenery (flowers/rocks)
+                this.scenery = [];
+                for(let i=0; i<CONFIG.cols; i++) {
+                    if (Math.random() < 0.1 && i !== player.gridX) {
+                        this.scenery.push(i);
+                    }
+                }
+            }
+        }
+
+        generateObstacles() {
+            const obsType = this.type === 'water' ? 'log' : 'turtle';
+            const numObstacles = Math.floor(Math.random() * 2) + Math.floor(CONFIG.density * 3);
+            const spacing = LOGICAL_WIDTH / Math.max(1, numObstacles);
+            
+            for (let i = 0; i < numObstacles; i++) {
+                const width = (obsType === 'log') ? (40 + Math.random() * 40) : 20;
+                const x = i * spacing + Math.random() * (spacing / 2);
+                this.obstacles.push(new Obstacle(x, this.y, obsType, this.speed, width, this.dir));
+            }
+        }
+
+        update(dt) {
+            for (let obs of this.obstacles) {
+                obs.update(dt);
+            }
+        }
+
+        draw(ctx, themeColors) {
+            // Draw base row
+            if (this.type === 'grass') {
+                ctx.fillStyle = this.altColor ? themeColors.grass[0] : themeColors.grass[1];
+            } else if (this.type === 'water') {
+                ctx.fillStyle = this.altColor ? themeColors.water[0] : themeColors.water[1];
+            } else if (this.type === 'road') {
+                ctx.fillStyle = this.altColor ? themeColors.road[0] : themeColors.road[1];
+            }
+            ctx.fillRect(0, this.y, LOGICAL_WIDTH, CONFIG.gridSize);
+
+            // Draw scenery for grass
+            if (this.type === 'grass') {
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                for (let sx of this.scenery) {
+                    ctx.fillRect(sx * CONFIG.gridSize + 8, this.y + 8, 4, 4);
+                }
+            }
+
+            // Draw obstacles
+            for (let obs of this.obstacles) {
+                obs.draw(ctx, themeColors);
+            }
+        }
+    }
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 50;
+            this.vy = (Math.random() - 0.5) * 50 - 20;
+            this.life = 1.0;
+            this.color = color;
+            this.size = 2 + Math.random() * 3;
+        }
+        update(dt) {
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+            this.vy += 100 * dt; // gravity
+            this.life -= dt * 2;
+        }
+        draw(ctx) {
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = Math.max(0, this.life);
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.globalAlpha = 1.0;
+        }
+    }
+
+    function initGame() {
+        score = 0;
+        maxScore = 0;
+        lives = 3;
+        cameraY = 0;
+        targetCameraY = 0;
+        rows = [];
+        particles = [];
+        
+        player.gridX = Math.floor(CONFIG.cols / 2);
+        player.gridY = -2;
+        player.x = player.gridX * CONFIG.gridSize;
+        player.y = -player.gridY * CONFIG.gridSize;
+        player.targetX = player.x;
+        player.targetY = player.y;
+        player.dir = 'up';
+        player.isMoving = false;
+        player.safeGridY = player.gridY;
+
+        // Generate initial rows
+        for (let i = 5; i >= -CONFIG.rowsVis - 5; i--) {
+            rows.push(new GameRow(i));
+        }
+
+        updateHUD();
+    }
+
+    function spawnParticles(x, y, color, count) {
+        for(let i=0; i<count; i++) {
+            particles.push(new Particle(x, y, color));
+        }
+    }
+
+    function updateHUD() {
+        scoreDisplay.textContent = `Score: ${maxScore}`;
+        let hearts = '';
+        for(let i=0; i<lives; i++) hearts += '♥';
+        livesDisplay.innerHTML = `<span class="heart">${hearts}</span>`;
+    }
+
+    function handleInput(key) {
+        if (state !== 'PLAYING' || player.isMoving) return;
+
+        let dx = 0;
+        let dy = 0;
+
+        if (key === 'ArrowUp' || key === 'w') { dy = -1; player.dir = 'up'; }
+        else if (key === 'ArrowDown' || key === 's') { dy = 1; player.dir = 'down'; }
+        else if (key === 'ArrowLeft' || key === 'a') { dx = -1; player.dir = 'left'; }
+        else if (key === 'ArrowRight' || key === 'd') { dx = 1; player.dir = 'right'; }
+
+        if (dx !== 0 || dy !== 0) {
+            const newGridX = player.gridX + dx;
+            const newGridY = player.gridY + dy;
+
+            // Bounds check X
+            if (newGridX >= 0 && newGridX < CONFIG.cols) {
+                // Prevent moving backwards too far off camera
+                const screenY = (-newGridY * CONFIG.gridSize) - targetCameraY;
+                if (screenY < LOGICAL_HEIGHT) {
+                    player.gridX = newGridX;
+                    player.gridY = newGridY;
+                    player.targetX = player.gridX * CONFIG.gridSize;
+                    player.targetY = -player.gridY * CONFIG.gridSize;
+                    player.isMoving = true;
+                    player.moveTimer = 0;
+
+                    // Update score
+                    if (-player.gridY > maxScore) {
+                        maxScore = -player.gridY;
+                        updateHUD();
+                    }
+
+                    // Update Camera target
+                    const idealScreenY = LOGICAL_HEIGHT * 0.6;
+                    targetCameraY = player.targetY - idealScreenY;
+
+                    // Record safe zone
+                    const currentRow = rows.find(r => r.gridY === player.gridY);
+                    if (currentRow && currentRow.type === 'grass') {
+                        player.safeGridY = player.gridY;
+                    }
+                }
+            }
+        }
+    }
+
+    // Input Listeners
+    window.addEventListener('keydown', (e) => {
+        handleInput(e.key);
+    });
+
+    // Touch support (simple swipes)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    window.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: false});
+
+    window.addEventListener('touchend', e => {
+        if(state !== 'PLAYING') return;
+        e.preventDefault();
+        let touchEndX = e.changedTouches[0].screenX;
+        let touchEndY = e.changedTouches[0].screenY;
+        let dx = touchEndX - touchStartX;
+        let dy = touchEndY - touchStartY;
+        
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (Math.abs(dx) > 30) handleInput(dx > 0 ? 'ArrowRight' : 'ArrowLeft');
+        } else {
+            if (Math.abs(dy) > 30) handleInput(dy > 0 ? 'ArrowDown' : 'ArrowUp');
+            else handleInput('ArrowUp'); // Tap to move forward
+        }
+    }, {passive: false});
+
+
+    function loseLife(reason) {
+        if (CONFIG.invincible || state !== 'PLAYING') return;
+        
+        lives--;
+        updateHUD();
+        state = 'RESETTING';
+        
+        const themeColors = THEMES[CONFIG.theme];
+        const color = reason === 'water' ? themeColors.water[0] : '#ffffff';
+        spawnParticles(player.x + CONFIG.gridSize/2, player.y + CONFIG.gridSize/2, color, 30);
+
+        setTimeout(() => {
+            if (lives <= 0) {
+                state = 'GAMEOVER';
+                finalScoreText.innerHTML = `You traveled far.<br>Score: ${maxScore}`;
+                gameOverScreen.classList.remove('hidden');
+            } else {
+                // Reset to last safe row
+                player.gridY = player.safeGridY;
+                player.gridX = Math.floor(CONFIG.cols / 2);
+                player.x = player.gridX * CONFIG.gridSize;
+                player.y = -player.gridY * CONFIG.gridSize;
+                player.targetX = player.x;
+                player.targetY = player.y;
+                player.isMoving = false;
+                
+                const idealScreenY = LOGICAL_HEIGHT * 0.6;
+                targetCameraY = player.targetY - idealScreenY;
+                cameraY = targetCameraY; // Snap camera back
+                
+                state = 'PLAYING';
+            }
+        }, 1000);
+    }
+
+    function checkCollisions() {
+        if (state !== 'PLAYING' || player.isMoving) return;
+
+        const currentRow = rows.find(r => r.gridY === player.gridY);
+        if (!currentRow) return;
+
+        const pRect = {
+            x: player.x + 4,
+            y: player.y + 4,
+            w: CONFIG.gridSize - 8,
+            h: CONFIG.gridSize - 8
+        };
+
+        if (currentRow.type === 'road') {
+            // Hit by turtle
+            for (let obs of currentRow.obstacles) {
+                if (pRect.x < obs.x + obs.width &&
+                    pRect.x + pRect.w > obs.x &&
+                    pRect.y < obs.y + CONFIG.gridSize &&
+                    pRect.y + pRect.h > obs.y) {
+                    loseLife('road');
+                    return;
+                }
+            }
+        } else if (currentRow.type === 'water') {
+            // Must be on a log
+            let onLog = false;
+            let logSpeed = 0;
+            let logDir = 0;
+
+            for (let obs of currentRow.obstacles) {
+                // More forgiving collision for logs
+                if (player.x + CONFIG.gridSize/2 > obs.x && 
+                    player.x + CONFIG.gridSize/2 < obs.x + obs.width) {
+                    onLog = true;
+                    logSpeed = obs.speed;
+                    logDir = obs.dir;
+                    break;
+                }
+            }
+
+            if (!onLog) {
+                loseLife('water');
+            } else {
+                // Move player with log
+                // Convert speed to dt movement in update loop, but here we just adjust target
+                // Actually, easiest way is to drift X
+                // We handle drift in the update loop
+            }
+        }
+    }
+
+    function update(dt) {
+        if (state === 'START' || state === 'GAMEOVER') return;
+
+        // Smooth Camera
+        cameraY += (targetCameraY - cameraY) * 5 * dt;
+
+        // Generate new rows ahead
+        const highestRowY = Math.min(...rows.map(r => r.gridY));
+        if (highestRowY > player.gridY - CONFIG.rowsVis) {
+            rows.push(new GameRow(highestRowY - 1));
+        }
+
+        // Cleanup old rows behind
+        rows = rows.filter(r => r.gridY > player.gridY + 5);
+
+        // Update rows (obstacles)
+        for (let r of rows) {
+            r.update(dt);
+        }
+
+        // Update Particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update(dt);
+            if (particles[i].life <= 0) particles.splice(i, 1);
+        }
+
+        if (state === 'PLAYING') {
+            // Player Movement Interpolation
+            if (player.isMoving) {
+                player.moveTimer += dt;
+                let t = player.moveTimer / player.moveDuration;
+                if (t >= 1) {
+                    t = 1;
+                    player.isMoving = false;
+                    player.x = player.targetX;
+                    player.y = player.targetY;
+                } else {
+                    // Ease out
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    player.x = player.x + (player.targetX - player.x) * ease;
+                    player.y = player.y + (player.targetY - player.y) * ease;
+                }
+            } else {
+                // Log drifting
+                const currentRow = rows.find(r => r.gridY === player.gridY);
+                if (currentRow && currentRow.type === 'water') {
+                    let onLog = false;
+                    for (let obs of currentRow.obstacles) {
+                        if (player.x + CONFIG.gridSize/2 > obs.x && 
+                            player.x + CONFIG.gridSize/2 < obs.x + obs.width) {
+                            
+                            // Drift
+                            const drift = obs.speed * obs.dir * CONFIG.baseSpeed * dt;
+                            player.x += drift;
+                            player.targetX = player.x;
+                            
+                            // Update gridX based on drift
+                            player.gridX = Math.round(player.x / CONFIG.gridSize);
+                            
+                            // Fall off edge
+                            if (player.x < -CONFIG.gridSize || player.x > LOGICAL_WIDTH) {
+                                loseLife('water');
+                            }
+                            
+                            onLog = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            checkCollisions();
+        }
+    }
+
+    function drawDuck(ctx, x, y, size, dir, themeColors) {
+        ctx.save();
+        ctx.translate(x + size/2, y + size/2);
+        
+        // Hop animation scale
+        let scaleY = 1;
+        if (player.isMoving) {
+            const t = player.moveTimer / player.moveDuration;
+            scaleY = 1 + Math.sin(t * Math.PI) * 0.3; // Stretch up
+            ctx.translate(0, -Math.sin(t * Math.PI) * 5); // Jump arc
+        }
+        ctx.scale(1, scaleY);
+        
+        // Rotation based on dir
+        if (dir === 'left') ctx.rotate(-Math.PI/2);
+        else if (dir === 'right') ctx.rotate(Math.PI/2);
+        else if (dir === 'down') ctx.rotate(Math.PI);
+
+        // Body
+        ctx.fillStyle = themeColors.duck;
+        ctx.fillRect(-size/2 + 2, -size/2 + 2, size - 4, size - 4);
+        
+        // Beak
+        ctx.fillStyle = themeColors.duckBeak;
+        ctx.fillRect(-size/4, -size/2 - 2, size/2, 4);
+        
+        // Eyes
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(-size/4 - 1, -size/4, 2, 2);
+        ctx.fillRect(size/4 - 1, -size/4, 2, 2);
+
+        ctx.restore();
+    }
+
+    function draw() {
+        const themeColors = THEMES[CONFIG.theme];
+        
+        // Clear background
+        ctx.fillStyle = '#1a1a1a'; // Base off-screen color
+        ctx.fillRect(-LOGICAL_WIDTH, -LOGICAL_HEIGHT, LOGICAL_WIDTH*3, LOGICAL_HEIGHT*3);
+
+        ctx.save();
+        // Apply Camera
+        ctx.translate(0, -cameraY);
+
+        // Draw Rows
+        // Sort by Y to draw back to front
+        rows.sort((a, b) => a.y - b.y);
+        for (let r of rows) {
+            // Only draw visible rows
+            if (r.y > cameraY - CONFIG.gridSize && r.y < cameraY + LOGICAL_HEIGHT + CONFIG.gridSize) {
+                r.draw(ctx, themeColors);
+            }
+        }
+
+        // Draw Player
+        if (state !== 'RESETTING' || Math.floor(Date.now() / 100) % 2 === 0) {
+            drawDuck(ctx, player.x, player.y, CONFIG.gridSize, player.dir, themeColors);
+        }
+
+        // Draw Particles
+        for(let p of particles) {
+            p.draw(ctx);
+        }
+
+        ctx.restore();
+
+        // Draw Vignette / Fog for relaxing mood
+        const gradient = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
+        if (CONFIG.theme === 'night') {
+            gradient.addColorStop(0, 'rgba(0,0,0,0.8)');
+            gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.8)');
+        } else if (CONFIG.theme === 'sunset') {
+            gradient.addColorStop(0, 'rgba(255,139,148,0.3)');
+            gradient.addColorStop(1, 'rgba(255,170,165,0.1)');
+        } else {
+            gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+            gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        }
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    }
+
+    function loop(timestamp) {
+        let dt = (timestamp - lastTime) / 1000;
+        if (dt > 0.1) dt = 0.1; // Cap dt
+        lastTime = timestamp;
+
+        update(dt);
+        draw();
+
+        requestAnimationFrame(loop);
+    }
+
+    // Buttons
+    document.getElementById('startBtn').addEventListener('click', () => {
+        startScreen.classList.add('hidden');
+        initGame();
+        state = 'PLAYING';
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+        gameOverScreen.classList.add('hidden');
+        initGame();
+        state = 'PLAYING';
+    });
+
+    // Start Loop
+    requestAnimationFrame((t) => {
+        lastTime = t;
+        initGame(); // Init background for start screen
+        state = 'START';
+        loop(t);
+    });
+
+</script>
+</body>
+</html>

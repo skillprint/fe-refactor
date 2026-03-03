@@ -6,7 +6,7 @@ async function testGenerate() {
         body: JSON.stringify({
             targetMode: 'mood',
             targetValue: 'focus',
-            libraries: ['physics', 'sound']
+            optionalPrompt: 'A simple test game using physics, sound, and skillprint-adjustment.'
         })
     });
 

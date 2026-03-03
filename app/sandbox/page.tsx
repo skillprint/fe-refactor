@@ -10,17 +10,11 @@ const SKILLS = [
     'problem solving', 'memory', 'logic', 'spatial reasoning', 'attention', 'pattern recognition', 'reaction time'
 ];
 
-const AVAILABLE_LIBRARIES = [
-    { id: 'physics', name: 'Physics' },
-    { id: 'sound', name: 'Sound' }
-];
-
 export default function GameSandboxPage() {
     const [targetMode, setTargetMode] = useState<'mood' | 'skill'>('mood');
     const [targetValue, setTargetValue] = useState(MOODS[0]);
     const [optionalPrompt, setOptionalPrompt] = useState('');
     const [artStyleId, setArtStyleId] = useState('');
-    const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
     const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
 
     const [isGenerating, setIsGenerating] = useState(false);
@@ -84,7 +78,7 @@ export default function GameSandboxPage() {
             const response = await fetch('/api/generate-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined, libraries: selectedLibraries }),
+                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined }),
             });
 
             if (!response.ok || !response.body) {
@@ -212,28 +206,6 @@ export default function GameSandboxPage() {
                             rows={4}
                             className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-3 text-sm resize-none"
                         />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Include Common Libraries
-                        </label>
-                        <div className="space-y-2">
-                            {AVAILABLE_LIBRARIES.map(lib => (
-                                <label key={lib.id} className="flex items-center space-x-3 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-700 dark:border-gray-600 hover:cursor-pointer"
-                                        checked={selectedLibraries.includes(lib.id)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) setSelectedLibraries([...selectedLibraries, lib.id]);
-                                            else setSelectedLibraries(selectedLibraries.filter(id => id !== lib.id));
-                                        }}
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300 font-medium">{lib.name}</span>
-                                </label>
-                            ))}
-                        </div>
                     </div>
 
                     <button

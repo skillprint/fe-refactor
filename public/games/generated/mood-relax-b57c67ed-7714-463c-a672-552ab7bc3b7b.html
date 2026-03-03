@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peaceful Pond Crossing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #e8f5e9;
+            --text-color: #2e7d32;
+            --btn-color: #81c784;
+            --btn-hover: #66bb6a;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+            transition: background-color 1s ease;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 3/4;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #aed581; /* Default grass color */
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(232, 245, 233, 0.85);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.8s ease, visibility 0.8s;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        p {
+            color: #4caf50;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: bold;
+            color: white;
+            background-color: var(--btn-color);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(129, 199, 132, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 187, 106, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .controls-hint {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #81c784;
+            display: flex;
+            gap: 10px;
+        }
+
+        .key {
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: var(--text-color);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        #adjustment-toast {
+            position: absolute;
+            bottom: 20px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+<script src="/games/lib/sound.js"></script>
+<script src="/games/lib/physics.js"></script>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div class="score-display" id="score">Steps: 0</div>
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="start-screen" class="ui-layer">
+            <h1>Peaceful Pond</h1>
+            <p>Take a gentle journey forward.</p>
+            <button onclick="startGame()">Begin Journey</button>
+            <div class="controls-hint">
+                <span>Use</span>
+                <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>
+                <span>or</span>
+                <span class="key">Arrows</span>
+            </div>
+        </div>
+
+        <div id="game-over-screen" class="ui-layer hidden">
+            <h1 id="end-title">A Gentle Splash...</h1>
+            <p id="end-desc">You took <span id="final-score">0</span> peaceful steps.</p>
+            <button onclick="resetGame()">Breathe & Try Again</button>
+        </div>
+
+        <div id="adjustment-toast">Adjusted</div>
+    </div>
+
+<script>
+    /**
+     * GAME CONFIGURATION & ADJUSTABLE PARAMETERS
+     */
+    const CONFIG = {
+        gridSize: 40,
+        cols: 11,
+        rows: 15, // Visible rows
+        baseSpeed: 0.4, // Adjustable
+        densityMultiplier: 1.0, // Adjustable
+        theme: 'spring', // Adjustable
+        themes: {
+            spring: { grass: '#aed581', water: '#81d4fa', path: '#d7ccc8', bg: '#e8f5e9' },
+            autumn: { grass: '#ffb74d', water: '#4fc3f7', path: '#a1887f', bg: '#fff3e0' },
+            twilight: { grass: '#7e57c2', water: '#3f51b5', path: '#5c6bc0', bg: '#ede7f6' }
+        }
+    };
+
+    // Global state
+    let canvas, ctx;
+    let gameState = 'start'; // start, playing, dead
+    let score = 0;
+    let cameraY = 0;
+    let lastTime = 0;
+    let lanes = [];
+    let frog;
+    let keys = {};
+
+    // Emojis for rendering
+    const ASSETS = {
+        frog: '🐸',
+        log: '🪵',
+        lilypad: '🪷',
+        snail: '🐌',
+        turtle: '🐢',
+        flower: '🌸',
+        rock: '🪨'
+    };
+
+    /**
+     * ADJUSTABILITY API IMPLEMENTATION
+     */
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            
+            if (parameterName === 'base_speed') {
+                CONFIG.baseSpeed = parseFloat(parameterValue);
+            } else if (parameterName === 'entity_density') {
+                CONFIG.densityMultiplier = parseFloat(parameterValue);
+            } else if (parameterName === 'theme') {
+                CONFIG.theme = parameterValue;
+                document.body.style.backgroundColor = CONFIG.themes[CONFIG.theme].bg;
+            }
+
+            console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+            showToast(`Adjusted ${parameterName.replace('_', ' ')}`);
+            
+            window.parent.postMessage({ type: 'ADJUSTMENT_MADE', parameterName, parameterValue }, '*');
+        }
+    };
+
+    function showToast(msg) {
+        const toast = document.getElementById('adjustment-toast');
+        toast.textContent = msg;
+        toast.style.opacity = 1;
+        setTimeout(() => toast.style.opacity = 0, 2000);
+    }
+
+    // Register adjustments on load
+    window.onload = () => {
+        window.parent.postMessage({
+            type: 'REGISTER_ADJUSTMENTS',
+            mappings: {
+                '1': { parameterName: 'base_speed', description: 'Very Slow Movement', value: 0.2 },
+                '2': { parameterName: 'base_speed', description: 'Normal Movement', value: 0.4 },
+                '3': { parameterName: 'base_speed', description: 'Brisk Movement', value: 0.8 },
+                '4': { parameterName: 'entity_density', description: 'Sparse Obstacles', value: 0.5 },
+                '5': { parameterName: 'entity_density', description: 'Normal Obstacles', value: 1.0 },
+                '6': { parameterName: 'entity_density', description: 'Dense Obstacles', value: 1.5 },
+                '7': { parameterName: 'theme', description: 'Spring Theme', value: 'spring' },
+                '8': { parameterName: 'theme', description: 'Autumn Theme', value: 'autumn' },
+                '9': { parameterName: 'theme', description: 'Twilight Theme', value: 'twilight' }
+            }
+        }, '*');
+        init();
+    };
+
+    // Keydown listener for testing adjustments (1-9)
+    window.addEventListener('keydown', function(event) {
+        const keyMap = {
+            '1': { parameterName: 'base_speed', parameterValue: 0.2 },
+            '2': { parameterName: 'base_speed', parameterValue: 0.4 },
+            '3': { parameterName: 'base_speed', parameterValue: 0.8 },
+            '4': { parameterName: 'entity_density', parameterValue: 0.5 },
+            '5': { parameterName: 'entity_density', parameterValue: 1.0 },
+            '6': { parameterName: 'entity_density', parameterValue: 1.5 },
+            '7': { parameterName: 'theme', parameterValue: 'spring' },
+            '8': { parameterName: 'theme', parameterValue: 'autumn' },
+            '9': { parameterName: 'theme', parameterValue: 'twilight' }
+        };
+
+        if (keyMap[event.key]) {
+            window.adjustGame(keyMap[event.key]);
+        }
+        
+        // Game controls
+        keys[event.key] = true;
+        if(gameState === 'playing') handleInput(event.key);
+    });
+
+    window.addEventListener('keyup', function(event) {
+        keys[event.key] = false;
+    });
+
+    /**
+     * GAME CLASSES
+     */
+    class Frog {
+        constructor() {
+            this.gridX = Math.floor(CONFIG.cols / 2);
+            this.gridY = 0; // Starts at 0, moves negative (up)
+            this.pixelX = this.gridX * CONFIG.gridSize;
+            this.pixelY = 0;
+            this.targetPixelX = this.pixelX;
+            this.targetPixelY = this.pixelY;
+            this.isMoving = false;
+            this.riding = null; // Entity the frog is currently on
+        }
+
+        update(dt) {
+            // Smooth movement interpolation
+            const speed = 0.3 * dt;
+            if (Math.abs(this.pixelX - this.targetPixelX) > 1) {
+                this.pixelX += (this.targetPixelX - this.pixelX) * 0.3;
+            } else {
+                this.pixelX = this.targetPixelX;
+            }
+
+            if (Math.abs(this.pixelY - this.targetPixelY) > 1) {
+                this.pixelY += (this.targetPixelY - this.pixelY) * 0.3;
+            } else {
+                this.pixelY = this.targetPixelY;
+            }
+
+            // If riding a log/turtle, move with it
+            if (this.riding && !this.isMoving) {
+                this.pixelX += this.riding.speed * this.riding.direction * dt * 0.06;
+                this.gridX = Math.round(this.pixelX / CONFIG.gridSize);
+                this.targetPixelX = this.pixelX;
+                
+                // Gently push off screen bounds
+                if (this.pixelX < -CONFIG.gridSize/2 || this.pixelX > CONFIG.cols * CONFIG.gridSize + CONFIG.gridSize/2) {
+                     triggerGentleGameOver("Drifted away...");
+                }
+            }
+
+            this.isMoving = (this.pixelX !== this.targetPixelX || this.pixelY !== this.targetPixelY);
+        }
+
+        draw(ctx, drawY) {
+            ctx.font = `${CONFIG.gridSize * 0.8}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            // Gentle hop bounce effect based on difference between pixel and target
+            const bounce = Math.abs(this.pixelY - this.targetPixelY) * 0.5;
+            ctx.fillText(ASSETS.frog, this.pixelX + CONFIG.gridSize/2, drawY + CONFIG.gridSize/2 - bounce);
+        }
+
+        move(dx, dy) {
+            if (this.isMoving) return;
+            
+            const newGridX = this.gridX + dx;
+            const newGridY = this.gridY + dy;
+
+            // Bounds check horizontal
+            if (newGridX >= 0 && newGridX < CONFIG.cols) {
+                this.gridX = newGridX;
+                this.targetPixelX = this.gridX * CONFIG.gridSize;
+            }
+            
+            // Bounds check vertical (don't go too far back)
+            if (newGridY <= 0 && newGridY >= cameraY - 2) {
+                this.gridY = newGridY;
+                this.targetPixelY = this.gridY * CONFIG.gridSize;
+                
+                if (dy < 0) {
+                    const steps = Math.abs(this.gridY);
+                    if (steps > score) {
+                        score = steps;
+                        document.getElementById('score').innerText = `Steps: ${score}`;
+                    }
+                }
+            }
+            this.riding = null; // Detach when hopping
+        }
+    }
+
+    class Entity {
+        constructor(x, y, type, speed, direction, width) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+            this.baseSpeed = speed;
+            this.direction = direction;
+            this.width = width; // in grid units
+        }
+
+        get speed() {
+            return this.baseSpeed * CONFIG.baseSpeed;
+        }
+
+        update(dt) {
+            this.x += this.speed * this.direction * dt * 0.06;
+            
+            // Wrap around
+            if (this.direction === 1 && this.x > CONFIG.cols * CONFIG.gridSize) {
+                this.x = -this.width * CONFIG.gridSize;
+            } else if (this.direction === -1 && this.x < -this.width * CONFIG.gridSize) {
+                this.x = CONFIG.cols * CONFIG.gridSize;
+            }
+        }
+
+        draw(ctx, drawY) {
+            ctx.font = `${CONFIG.gridSize * 0.8}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            for(let i=0; i<this.width; i++) {
+                let emoji = this.type;
+                if(this.type === 'log') emoji = ASSETS.log;
+                if(this.type === 'lilypad') emoji = ASSETS.lilypad;
+                if(this.type === 'snail') emoji = ASSETS.snail;
+                if(this.type === 'turtle') emoji = ASSETS.turtle;
+                
+                ctx.fillText(emoji, this.x + (i * CONFIG.gridSize) + CONFIG.gridSize/2, drawY + CONFIG.gridSize/2);
+            }
+        }
+    }
+
+    class Lane {
+        constructor(gridY) {
+            this.gridY = gridY;
+            this.entities = [];
+            this.generateType();
+        }
+
+        generateType() {
+            // First few lanes are always safe grass
+            if (this.gridY > -3) {
+                this.type = 'grass';
+                return;
+            }
+
+            const rand = Math.random();
+            if (rand < 0.4) this.type = 'grass';
+            else if (rand < 0.7) this.type = 'water';
+            else this.type = 'path';
+
+            this.populate();
+        }
+
+        populate() {
+            if (this.type === 'grass') {
+                // Static decorations
+                const numDecor = Math.floor(Math.random() * 3 * CONFIG.densityMultiplier);
+                for(let i=0; i<numDecor; i++) {
+                    const x = Math.floor(Math.random() * CONFIG.cols) * CONFIG.gridSize;
+                    const isFlower = Math.random() > 0.5;
+                    this.entities.push({
+                        x: x, 
+                        draw: (ctx, y) => {
+                            ctx.font = `${CONFIG.gridSize * 0.6}px Arial`;
+                            ctx.fillText(isFlower ? ASSETS.flower : ASSETS.rock, x + CONFIG.gridSize/2, y + CONFIG.gridSize/2);
+                        },
+                        update: () => {}
+                    });
+                }
+            } else {
+                // Moving entities
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                let speed = (0.5 + Math.random() * 1.5);
+                let entityType, width;
+
+                if (this.type === 'water') {
+                    entityType = Math.random() > 0.3 ? 'log' : (Math.random() > 0.5 ? 'lilypad' : 'turtle');
+                    width = entityType === 'log' ? Math.floor(Math.random() * 2) + 2 : 1;
+                    if(entityType === 'lilypad') speed *= 0.2; // Lilypads drift very slowly
+                } else if (this.type === 'path') {
+                    entityType = 'snail';
+                    width = 1;
+                    speed *= 0.5; // Snails are slow
+                }
+
+                const numEntities = Math.max(1, Math.floor((Math.random() * 3 + 1) * CONFIG.densityMultiplier));
+                const spacing = (CONFIG.cols * CONFIG.gridSize) / numEntities;
+
+                for (let i = 0; i < numEntities; i++) {
+                    const x = i * spacing + (Math.random() * 20);
+                    this.entities.push(new Entity(x, this.gridY * CONFIG.gridSize, entityType, speed, direction, width));
+                }
+            }
+        }
+
+        update(dt) {
+            this.entities.forEach(e => e.update(dt));
+        }
+
+        draw(ctx, drawY) {
+            const colors = CONFIG.themes[CONFIG.theme];
+            ctx.fillStyle = colors[this.type];
+            ctx.fillRect(0, drawY, canvas.width, CONFIG.gridSize);
+            
+            // Soft subtle border
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(0, drawY, canvas.width, 1);
+
+            this.entities.forEach(e => e.draw(ctx, drawY));
+        }
+    }
+
+    /**
+     * CORE LOGIC
+     */
+    function init() {
+        canvas = document.getElementById('gameCanvas');
+        ctx = canvas.getContext('2d');
+        
+        // Setup resolution
+        const wrapper = document.getElementById('game-wrapper');
+        canvas.width = wrapper.clientWidth;
+        canvas.height = wrapper.clientHeight;
+        
+        // Adjust grid based on width
+        CONFIG.gridSize = canvas.width / CONFIG.cols;
+        CONFIG.rows = Math.ceil(canvas.height / CONFIG.gridSize);
+
+        document.body.style.backgroundColor = CONFIG.themes[CONFIG.theme].bg;
+        
+        requestAnimationFrame(gameLoop);
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        resetGameState();
+        gameState = 'playing';
+    }
+
+    function resetGame() {
+        document.getElementById('game-over-screen').classList.add('hidden');
+        resetGameState();
+        gameState = 'playing';
+    }
+
+    function resetGameState() {
+        score = 0;
+        document.getElementById('score').innerText = `Steps: 0`;
+        cameraY = 0;
+        frog = new Frog();
+        lanes = [];
+        // Generate initial lanes
+        for (let i = 2; i >= -CONFIG.rows - 5; i--) {
+            lanes.push(new Lane(i));
+        }
+    }
+
+    function triggerGentleGameOver(reason) {
+        if(gameState !== 'playing') return;
+        gameState = 'dead';
+        
+        setTimeout(() => {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('end-title').innerText = reason || "A Gentle Splash...";
+            document.getElementById('game-over-screen').classList.remove('hidden');
+        }, 500); // Gentle delay
+    }
+
+    function handleInput(key) {
+        if (!frog) return;
+        if (key === 'ArrowUp' || key === 'w' || key === 'W') frog.move(0, -1);
+        if (key === 'ArrowDown' || key === 's' || key === 'S') frog.move(0, 1);
+        if (key === 'ArrowLeft' || key === 'a' || key === 'A') frog.move(-1, 0);
+        if (key === 'ArrowRight' || key === 'd' || key === 'D') frog.move(1, 0);
+    }
+
+    function checkCollisions() {
+        if (!frog || frog.isMoving) return;
+
+        const currentLane = lanes.find(l => l.gridY === frog.gridY);
+        if (!currentLane) return;
+
+        let safe = true;
+        let ridingEntity = null;
+
+        if (currentLane.type === 'water') {
+            safe = false; // Default to drowning unless on a platform
+            // Check intersection with logs/lilypads/turtles
+            for (let e of currentLane.entities) {
+                // Simple AABB collision logic tailored for grid/pixel mix
+                const frogLeft = frog.pixelX + 5;
+                const frogRight = frog.pixelX + CONFIG.gridSize - 5;
+                const entityLeft = e.x;
+                const entityRight = e.x + (e.width * CONFIG.gridSize);
+
+                if (frogRight > entityLeft && frogLeft < entityRight) {
+                    safe = true;
+                    ridingEntity = e;
+                    break;
+                }
+            }
+            if (!safe) {
+                triggerGentleGameOver("Slipped into the pond...");
+            } else {
+                frog.riding = ridingEntity;
+            }
+        } else if (currentLane.type === 'path') {
+            // Check intersection with snails (bad)
+             for (let e of currentLane.entities) {
+                if(e.update === undefined) continue; // skip decor
+                const frogCenter = frog.pixelX + CONFIG.gridSize/2;
+                const entityLeft = e.x;
+                const entityRight = e.x + (e.width * CONFIG.gridSize);
+                
+                // More forgiving hitbox for snails
+                if (frogCenter > entityLeft + 10 && frogCenter < entityRight - 10) {
+                    triggerGentleGameOver("Bumped by a snail...");
+                }
+            }
+        }
+    }
+
+    function updateCamera() {
+        // Keep frog in the lower middle of the screen
+        const targetCameraY = frog.gridY + Math.floor(CONFIG.rows * 0.7);
+        
+        if (targetCameraY < cameraY) {
+            // Smooth camera pan
+            cameraY += (targetCameraY - cameraY) * 0.1;
+        }
+
+        // Generate new lanes ahead
+        const highestLane = Math.min(...lanes.map(l => l.gridY));
+        if (highestLane > cameraY - CONFIG.rows - 5) {
+            lanes.push(new Lane(highestLane - 1));
+        }
+
+        // Clean up old lanes behind
+        lanes = lanes.filter(l => l.gridY < cameraY + 5);
+    }
+
+    function gameLoop(timestamp) {
+        const dt = timestamp - lastTime;
+        lastTime = timestamp;
+
+        if (gameState === 'playing' || gameState === 'dead') {
+            // Update
+            lanes.forEach(l => l.update(dt));
+            if(gameState === 'playing') {
+                frog.update(dt);
+                checkCollisions();
+                updateCamera();
+            }
+
+            // Draw
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Sort lanes by Y so they draw back to front
+            lanes.sort((a,b) => b.gridY - a.gridY);
+
+            lanes.forEach(lane => {
+                // Calculate screen Y position based on camera
+                // cameraY is negative as we go up.
+                // 0 should be near the bottom.
+                const drawY = (lane.gridY - cameraY) * CONFIG.gridSize + (canvas.height - CONFIG.gridSize*2);
+                
+                // Only draw if roughly on screen
+                if(drawY > -CONFIG.gridSize*2 && drawY < canvas.height + CONFIG.gridSize) {
+                    lane.draw(ctx, drawY);
+                }
+            });
+
+            if(frog) {
+                const frogDrawY = (frog.gridY - cameraY) * CONFIG.gridSize + (canvas.height - CONFIG.gridSize*2);
+                frog.draw(ctx, frogDrawY);
+            }
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+        const wrapper = document.getElementById('game-wrapper');
+        if(canvas) {
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+            CONFIG.gridSize = canvas.width / CONFIG.cols;
+            CONFIG.rows = Math.ceil(canvas.height / CONFIG.gridSize);
+            // Re-sync positions if needed
+            if(frog) {
+                frog.pixelX = frog.gridX * CONFIG.gridSize;
+                frog.targetPixelX = frog.pixelX;
+            }
+        }
+    });
+
+</script>
+</body>
+</html>

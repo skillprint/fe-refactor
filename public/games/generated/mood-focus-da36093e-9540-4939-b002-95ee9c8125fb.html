@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Focus: Deep Descent</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color: #050510;
+            --primary-color: #00ffff;
+            --secondary-color: #ff0055;
+            --text-color: #ffffff;
+            --wall-color: #1a1a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 800px;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 5, 16, 0.85);
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #aaaaaa;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .instructions span {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        button {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) inset, 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        button:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #score-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Scanlines effect for focus */
+        #scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.3;
+        }
+    </style>
+<script src="/games/lib/physics.js"></script>
+<script src="/games/lib/sound.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="scanlines"></div>
+        
+        <div id="hud" class="hidden">
+            <div id="score-display">0000</div>
+        </div>
+
+        <div id="start-screen" class="screen">
+            <h1>Deep Descent</h1>
+            <div class="instructions">
+                <p>Maintain continuous focus to navigate the cavern.</p>
+                <p>Hold <span>[UP ARROW]</span> or <span>[W]</span> to thrust upwards.</p>
+                <p>Release to fall. Avoid the glowing walls.</p>
+            </div>
+            <button id="start-btn">Engage Focus</button>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h1 style="color: var(--secondary-color); text-shadow: 0 0 20px rgba(255, 0, 85, 0.5);">Signal Lost</h1>
+            <p id="final-score-text" style="font-size: 2rem; color: white; margin-bottom: 10px;">Distance: 0</p>
+            <p>Focus broken.</p>
+            <button id="restart-btn">Re-engage</button>
+        </div>
+    </div>
+
+    <!-- Skillprint Adjustment Library -->
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+
+    <script>
+        /**
+         * GAME CONFIGURATION & ADJUSTABILITY
+         * These parameters dictate the physics and difficulty of the game.
+         */
+        const CONFIG = {
+            gravity: 0.18,          // Downward pull
+            thrustPower: 0.35,      // Upward force when key is pressed
+            scrollSpeed: 4.5,       // Horizontal speed of the cave
+            caveGap: 280,           // Vertical distance between top and bottom walls
+            roughness: 0.05,        // How jagged the cave walls are
+            damping: 0.98           // Velocity decay
+        };
+
+        // Skillprint Window Adjustment Interface
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                if (CONFIG.hasOwnProperty(parameterName)) {
+                    CONFIG[parameterName] = parameterValue;
+                    console.log(`[Adjust Game] Set ${parameterName} to ${parameterValue}`);
+                }
+            }
+        };
+
+        // Register adjustments for testing (Keys 1-9)
+        window.onload = function() {
+            if (window.Skillprint && typeof window.Skillprint.registerAdjustments === 'function') {
+                window.Skillprint.registerAdjustments({
+                    '1': { parameterName: 'gravity', description: 'Decrease Gravity', value: 0.10 },
+                    '2': { parameterName: 'gravity', description: 'Increase Gravity', value: 0.25 },
+                    '3': { parameterName: 'thrustPower', description: 'Decrease Thrust', value: 0.20 },
+                    '4': { parameterName: 'thrustPower', description: 'Increase Thrust', value: 0.50 },
+                    '5': { parameterName: 'caveGap', description: 'Wider Cave', value: 400 },
+                    '6': { parameterName: 'caveGap', description: 'Narrower Cave', value: 180 },
+                    '7': { parameterName: 'scrollSpeed', description: 'Slower Speed', value: 3.0 },
+                    '8': { parameterName: 'scrollSpeed', description: 'Faster Speed', value: 6.5 },
+                    '9': { parameterName: 'roughness', description: 'High Roughness', value: 0.1 }
+                });
+            }
+        };
+
+        /**
+         * AUDIO SYSTEM (Web Audio API)
+         * Generates procedural sounds to enhance focus and provide feedback.
+         */
+        class AudioSystem {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.engineOsc = null;
+                this.engineGain = null;
+                this.isEngineRunning = false;
+            }
+
+            init() {
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            // Continuous rumble for thrust
+            startEngine() {
+                if (this.isEngineRunning) return;
+                this.isEngineRunning = true;
+                
+                this.engineOsc = this.ctx.createOscillator();
+                this.engineOsc.type = 'sawtooth';
+                this.engineOsc.frequency.setValueAtTime(40, this.ctx.currentTime); // Deep rumble
+                
+                this.engineGain = this.ctx.createGain();
+                this.engineGain.gain.setValueAtTime(0, this.ctx.currentTime);
+                this.engineGain.gain.linearRampToValueAtTime(0.1, this.ctx.currentTime + 0.1);
+                
+                // Lowpass filter to muffle the sawtooth
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 200;
+
+                this.engineOsc.connect(filter);
+                filter.connect(this.engineGain);
+                this.engineGain.connect(this.ctx.destination);
+                
+                this.engineOsc.start();
+            }
+
+            stopEngine() {
+                if (!this.isEngineRunning || !this.engineGain) return;
+                this.isEngineRunning = false;
+                
+                this.engineGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.1);
+                setTimeout(() => {
+                    if (this.engineOsc && !this.isEngineRunning) {
+                        this.engineOsc.stop();
+                        this.engineOsc.disconnect();
+                        this.engineOsc = null;
+                    }
+                }, 100);
+            }
+
+            // White noise burst for collision
+            playCrash() {
+                const bufferSize = this.ctx.sampleRate * 0.5; // 0.5 seconds
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(1000, this.ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.4);
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                noise.start();
+            }
+
+            // High pitched ping for milestones
+            playMilestone() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, this.ctx.currentTime); // A5
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.5);
+            }
+        }
+
+        const audio = new AudioSystem();
+
+        /**
+         * GAME LOGIC & RENDERING
+         */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        
+        // UI Elements
+        const screens = {
+            start: document.getElementById('start-screen'),
+            gameOver: document.getElementById('game-over-screen'),
+            hud: document.getElementById('hud')
+        };
+        const scoreDisplay = document.getElementById('score-display');
+        const finalScoreText = document.getElementById('final-score-text');
+
+        // Game State
+        let gameState = 'START'; // START, PLAYING, GAMEOVER
+        let animationId;
+        let score = 0;
+        let distance = 0;
+        let lastMilestone = 0;
+
+        // Input State
+        const keys = { thrust: false };
+
+        // Resize handler
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Input Listeners
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
+                keys.thrust = true;
+                if (gameState === 'PLAYING') audio.startEngine();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
+                keys.thrust = false;
+                audio.stopEngine();
+            }
+        });
+
+        // Touch support for mobile focus
+        window.addEventListener('touchstart', (e) => {
+            if(e.target.tagName !== 'BUTTON') {
+                keys.thrust = true;
+                if (gameState === 'PLAYING') audio.startEngine();
+            }
+        }, {passive: false});
+        window.addEventListener('touchend', () => {
+            keys.thrust = false;
+            audio.stopEngine();
+        });
+
+        /**
+         * ENTITIES
+         */
+
+        class Particle {
+            constructor(x, y, vx, vy, life, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.life = life;
+                this.maxLife = life;
+                this.color = color;
+                this.size = Math.random() * 3 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+            draw(ctx) {
+                const alpha = Math.max(0, this.life / this.maxLife);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        class Player {
+            constructor() {
+                this.radius = 12;
+                this.reset();
+                this.particles = [];
+            }
+
+            reset() {
+                this.x = canvas.width * 0.2; // Fixed X position
+                this.y = canvas.height / 2;
+                this.vy = 0;
+                this.particles = [];
+            }
+
+            update() {
+                // Physics
+                if (keys.thrust) {
+                    this.vy -= CONFIG.thrustPower;
+                    // Emit thrust particles
+                    for(let i=0; i<2; i++) {
+                        this.particles.push(new Particle(
+                            this.x - this.radius, 
+                            this.y + (Math.random() * 10 - 5),
+                            -Math.random() * 2 - 1, // Move left relative to ship
+                            Math.random() * 2 - 1,
+                            20 + Math.random() * 10,
+                            '#00ffff'
+                        ));
+                    }
+                }
+
+                this.vy += CONFIG.gravity;
+                this.vy *= CONFIG.damping;
+                this.y += this.vy;
+
+                // Update particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update();
+                    if (this.particles[i].life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            }
+
+            draw(ctx) {
+                // Draw particles
+                this.particles.forEach(p => p.draw(ctx));
+
+                // Draw Ship (Orb)
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00ffff';
+                ctx.fillStyle = '#ffffff';
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Core
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#00ffff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Terrain {
+            constructor() {
+                this.points = []; // Array of objects: { x, topY, bottomY }
+                this.segmentWidth = 20;
+                this.noiseOffset = Math.random() * 1000;
+                this.reset();
+            }
+
+            reset() {
+                this.points = [];
+                this.noiseOffset = Math.random() * 1000;
+                let currentMidY = canvas.height / 2;
+                
+                // Pre-fill screen with terrain
+                for (let x = 0; x < canvas.width + this.segmentWidth * 2; x += this.segmentWidth) {
+                    this.addPoint(x, currentMidY);
+                }
+            }
+
+            // Simple pseudo-random noise generator
+            noise(x) {
+                return Math.sin(x * 0.01) * 50 + Math.sin(x * 0.05) * 20 + Math.cos(x * 0.1) * 10;
+            }
+
+            addPoint(x, midY) {
+                // Calculate center line using noise
+                this.noiseOffset += CONFIG.roughness;
+                let targetMidY = canvas.height/2 + this.noise(this.noiseOffset) * (canvas.height * 0.005);
+                
+                // Smooth transition
+                let newMidY = midY + (targetMidY - midY) * 0.1;
+
+                // Keep within bounds
+                const margin = CONFIG.caveGap / 2 + 50;
+                if (newMidY < margin) newMidY = margin;
+                if (newMidY > canvas.height - margin) newMidY = canvas.height - margin;
+
+                this.points.push({
+                    x: x,
+                    topY: newMidY - CONFIG.caveGap / 2,
+                    bottomY: newMidY + CONFIG.caveGap / 2,
+                    midY: newMidY
+                });
+            }
+
+            update() {
+                // Move points left
+                for (let i = 0; i < this.points.length; i++) {
+                    this.points[i].x -= CONFIG.scrollSpeed;
+                }
+
+                // Remove off-screen points
+                if (this.points[0].x < -this.segmentWidth) {
+                    this.points.shift();
+                }
+
+                // Add new points on the right
+                const lastPoint = this.points[this.points.length - 1];
+                if (lastPoint.x < canvas.width + this.segmentWidth) {
+                    this.addPoint(lastPoint.x + this.segmentWidth, lastPoint.midY);
+                }
+            }
+
+            draw(ctx) {
+                // Draw Top Wall
+                ctx.fillStyle = '#0a0a1a';
+                ctx.strokeStyle = '#00ffff';
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00ffff';
+                
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, 0);
+                for (let i = 0; i < this.points.length; i++) {
+                    ctx.lineTo(this.points[i].x, this.points[i].topY);
+                }
+                ctx.lineTo(this.points[this.points.length - 1].x, 0);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.beginPath();
+                for (let i = 0; i < this.points.length; i++) {
+                    if(i===0) ctx.moveTo(this.points[i].x, this.points[i].topY);
+                    else ctx.lineTo(this.points[i].x, this.points[i].topY);
+                }
+                ctx.stroke();
+
+                // Draw Bottom Wall
+                ctx.shadowColor = '#ff0055';
+                ctx.strokeStyle = '#ff0055';
+                
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, canvas.height);
+                for (let i = 0; i < this.points.length; i++) {
+                    ctx.lineTo(this.points[i].x, this.points[i].bottomY);
+                }
+                ctx.lineTo(this.points[this.points.length - 1].x, canvas.height);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                for (let i = 0; i < this.points.length; i++) {
+                    if(i===0) ctx.moveTo(this.points[i].x, this.points[i].bottomY);
+                    else ctx.lineTo(this.points[i].x, this.points[i].bottomY);
+                }
+                ctx.stroke();
+                
+                ctx.shadowBlur = 0; // Reset
+            }
+
+            checkCollision(player) {
+                // Find the terrain segment the player is currently over
+                for (let i = 0; i < this.points.length - 1; i++) {
+                    const p1 = this.points[i];
+                    const p2 = this.points[i+1];
+                    
+                    if (player.x >= p1.x && player.x <= p2.x) {
+                        // Linear interpolation to find exact boundary Y at player's X
+                        const t = (player.x - p1.x) / (p2.x - p1.x);
+                        const topBound = p1.topY + t * (p2.topY - p1.topY);
+                        const bottomBound = p1.bottomY + t * (p2.bottomY - p1.bottomY);
+
+                        // Check circle collision (simplified to bounding box for focus on speed)
+                        if (player.y - player.radius < topBound || player.y + player.radius > bottomBound) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                // Out of bounds (top/bottom of canvas fallback)
+                if (player.y < 0 || player.y > canvas.height) return true;
+                return false;
+            }
+        }
+
+        const player = new Player();
+        const terrain = new Terrain();
+
+        // Screen Management
+        function showScreen(screenName) {
+            screens.start.classList.add('hidden');
+            screens.gameOver.classList.add('hidden');
+            screens.hud.classList.add('hidden');
+
+            if (screenName === 'START') screens.start.classList.remove('hidden');
+            if (screenName === 'GAMEOVER') screens.gameOver.classList.remove('hidden');
+            if (screenName === 'PLAYING') screens.hud.classList.remove('hidden');
+        }
+
+        // Main Game Loop
+        function loop() {
+            if (gameState !== 'PLAYING') return;
+
+            // Clear Canvas
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Update
+            player.update();
+            terrain.update();
+            
+            // Score tracking
+            distance += CONFIG.scrollSpeed / 10;
+            score = Math.floor(distance);
+            scoreDisplay.innerText = score.toString().padStart(4, '0');
+
+            // Audio Feedback Milestones
+            if (score - lastMilestone >= 100) {
+                audio.playMilestone();
+                lastMilestone = score;
+                // Slight difficulty increase over time to induce flow/focus
+                CONFIG.scrollSpeed += 0.05;
+            }
+
+            // Draw
+            terrain.draw(ctx);
+            player.draw(ctx);
+
+            // Collision
+            if (terrain.checkCollision(player)) {
+                gameOver();
+            } else {
+                animationId = requestAnimationFrame(loop);
+            }
+        }
+
+        function startGame() {
+            audio.init();
+            player.reset();
+            terrain.reset();
+            score = 0;
+            distance = 0;
+            lastMilestone = 0;
+            scoreDisplay.innerText = '0000';
+            
+            // Reset dynamic difficulty
+            CONFIG.scrollSpeed = 4.5; 
+
+            gameState = 'PLAYING';
+            showScreen('PLAYING');
+            
+            if(keys.thrust) audio.startEngine();
+            
+            loop();
+        }
+
+        function gameOver() {
+            gameState = 'GAMEOVER';
+            audio.stopEngine();
+            audio.playCrash();
+            
+            // Draw explosion effect
+            ctx.fillStyle = 'rgba(255, 0, 85, 0.5)';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius * 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            finalScoreText.innerText = `Distance: ${score}`;
+            showScreen('GAMEOVER');
+        }
+
+        // Button Listeners
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+
+        // Initial render background
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    </script>
+</body>
+</html>

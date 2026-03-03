@@ -11,7 +11,11 @@ import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        const { targetMode, targetValue, optionalPrompt, artStyleId, libraries = [] } = await req.json();
+        let { targetMode, targetValue, optionalPrompt, artStyleId, libraries = [] } = await req.json();
+
+        // Always include global standard libraries
+        libraries = Array.from(new Set([...libraries, 'physics', 'sound', 'skillprint-adjustment']));
+
         const apiKey = process.env.GEMINI_API_KEY;
         const cookieStore = await cookies();
         let userId = cookieStore.get('user_id')?.value || 'anonymous';
