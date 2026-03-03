@@ -4,6 +4,7 @@ import { sequelize } from '@/lib/db';
 import * as initialSchema from '@/migrations/00-initial-schema';
 import * as createOrganizations from '@/migrations/01-create-organizations';
 import * as createArtStyles from '@/migrations/02-create-art-styles';
+import * as createGenres from '@/migrations/03-create-genres';
 
 export async function GET() {
     try {
@@ -23,6 +24,11 @@ export async function GET() {
                     name: '02-create-art-styles',
                     up: async () => createArtStyles.up({ context: sequelize, name: '02-create-art-styles' }),
                     down: async () => createArtStyles.down({ context: sequelize, name: '02-create-art-styles' }),
+                },
+                {
+                    name: '03-create-genres',
+                    up: async () => createGenres.up({ context: sequelize, name: '03-create-genres' }),
+                    down: async () => createGenres.down({ context: sequelize, name: '03-create-genres' }),
                 }
             ],
             context: sequelize,

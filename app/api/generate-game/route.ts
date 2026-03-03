@@ -6,12 +6,13 @@ import { cookies } from 'next/headers';
 import { User } from '@/lib/models/User';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
 import { ArtStyle } from '@/lib/models/ArtStyle';
+import { Genre } from '@/lib/models/Genre';
 import jwt from 'jsonwebtoken';
 import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        let { targetMode, targetValue, optionalPrompt, artStyleId, libraries = [] } = await req.json();
+        let { targetMode, targetValue, optionalPrompt, artStyleId, genreId, libraries = [] } = await req.json();
 
         // Always include global standard libraries
         libraries = Array.from(new Set([...libraries, 'physics', 'sound', 'skillprint-adjustment']));
@@ -69,6 +70,18 @@ export async function POST(req: Request) {
             }
         }
 
+        let genreContext = '';
+        if (genreId) {
+            try {
+                const genre = await Genre.findByPk(genreId);
+                if (genre) {
+                    genreContext = `\nGENRE REQUIREMENT:\n${genre.prompt_context}\n`;
+                }
+            } catch (dbErr) {
+                console.warn("Failed to fetch genre:", dbErr);
+            }
+        }
+
         const libContext = await prepareLibraries(libraries, apiKey);
 
         const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file (using embedded CSS and JavaScript).
@@ -85,6 +98,8 @@ ${promptContext}
 ${moodContext}
 
 ${artStyleContext}
+
+${genreContext}
 
 ${libContext}`;
 

@@ -15,7 +15,9 @@ export default function GameSandboxPage() {
     const [targetValue, setTargetValue] = useState(MOODS[0]);
     const [optionalPrompt, setOptionalPrompt] = useState('');
     const [artStyleId, setArtStyleId] = useState('');
+    const [genreId, setGenreId] = useState('');
     const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
+    const [genres, setGenres] = useState<{ id: string, name: string }[]>([]);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationOutput, setGenerationOutput] = useState('');
@@ -58,6 +60,13 @@ export default function GameSandboxPage() {
                 if (Array.isArray(data)) setArtStyles(data);
             })
             .catch(err => console.error("Could not fetch art styles", err));
+
+        fetch('/api/genres')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setGenres(data);
+            })
+            .catch(err => console.error("Could not fetch genres", err));
     }, []);
 
     useEffect(() => {
@@ -78,7 +87,7 @@ export default function GameSandboxPage() {
             const response = await fetch('/api/generate-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined }),
+                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined, genreId: genreId || undefined }),
             });
 
             if (!response.ok || !response.body) {
@@ -191,6 +200,22 @@ export default function GameSandboxPage() {
                             <option value="">None / Default</option>
                             {artStyles.map(style => (
                                 <option key={style.id} value={style.id}>{style.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Game Genre (Optional)
+                        </label>
+                        <select
+                            value={genreId}
+                            onChange={(e) => setGenreId(e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3"
+                        >
+                            <option value="">None / Default</option>
+                            {genres.map(genre => (
+                                <option key={genre.id} value={genre.id}>{genre.name}</option>
                             ))}
                         </select>
                     </div>
