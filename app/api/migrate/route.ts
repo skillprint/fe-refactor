@@ -5,6 +5,8 @@ import * as initialSchema from '@/migrations/00-initial-schema';
 import * as createOrganizations from '@/migrations/01-create-organizations';
 import * as createArtStyles from '@/migrations/02-create-art-styles';
 import * as createGenres from '@/migrations/03-create-genres';
+import * as addGameTitle from '@/migrations/04-add-game-title';
+import * as addGameIcon from '@/migrations/05-add-game-icon';
 
 export async function GET() {
     try {
@@ -29,16 +31,22 @@ export async function GET() {
                     name: '03-create-genres',
                     up: async () => createGenres.up({ context: sequelize, name: '03-create-genres' }),
                     down: async () => createGenres.down({ context: sequelize, name: '03-create-genres' }),
+                },
+                {
+                    name: '04-add-game-title',
+                    up: async () => addGameTitle.up({ context: sequelize, name: '04-add-game-title' }),
+                    down: async () => addGameTitle.down({ context: sequelize, name: '04-add-game-title' }),
+                },
+                {
+                    name: '05-add-game-icon',
+                    up: async () => addGameIcon.up({ context: sequelize, name: '05-add-game-icon' }),
+                    down: async () => addGameIcon.down({ context: sequelize, name: '05-add-game-icon' }),
                 }
             ],
             context: sequelize,
             storage: new SequelizeStorage({ sequelize }),
             logger: console,
         });
-
-        // Drop the old manually created generated_games table to ensure a clean migration stack
-        // This drops the raw schema so our new Umzug migration can build it with foreign keys
-        await sequelize.getQueryInterface().dropTable('generated_games').catch(() => null);
 
         const pending = await umzug.pending();
         if (pending.length > 0) {

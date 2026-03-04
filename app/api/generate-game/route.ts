@@ -92,6 +92,7 @@ IMPORTANT CRITERIA:
 2. ASSETS: You DO NOT have access to external image or sound files. Therefore, you MUST generate rich inline game assets. Use CSS shapes, inline SVG data URIs, or emojis to create detailed characters, enemies, environments, and items.
 3. VISUALS: Ensure the game is visually stunning with a modern UI. Include a Start Screen, a Game Loop canvas or DOM area, and a Game Over screen. Use smooth CSS animations and nice color palettes.
 4. FORMAT: Return ONLY the raw HTML code block within \`\`\`html ... \`\`\` markers. Print your response efficiently and without extra conversational text.
+5. METADATA: You MUST include a \`<meta name="game-icon" content="[EMOJI]">\` tag in the \`<head>\` of the generated HTML, replacing [EMOJI] with a single fitting emoji.
 
 ${promptContext}
 
@@ -263,6 +264,20 @@ ${libContext}`;
                     await fs.mkdir(gamesDir, { recursive: true });
                     await fs.writeFile(path.join(gamesDir, fileName), finalHtmlContent, 'utf-8');
 
+                    // Extract title from HTML
+                    let gameTitle = null;
+                    const titleMatch = finalHtmlContent.match(/<title>(.*?)<\/title>/i);
+                    if (titleMatch && titleMatch[1]) {
+                        gameTitle = titleMatch[1].trim();
+                    }
+
+                    // Extract icon from HTML
+                    let gameIcon = null;
+                    const iconMatch = finalHtmlContent.match(/<meta[^>]*name=["']game-icon["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+                    if (iconMatch && iconMatch[1]) {
+                        gameIcon = iconMatch[1].trim();
+                    }
+
                     // Save the generated game to the database via Sequelize ORM
                     if (userId && userId !== 'anonymous') {
                         try {
@@ -280,7 +295,9 @@ ${libContext}`;
                                 target_mode: targetMode,
                                 target_value: targetValue,
                                 optional_prompt: optionalPrompt || null,
-                                file_url: fileUrlStr
+                                file_url: fileUrlStr,
+                                title: gameTitle,
+                                icon: gameIcon
                             });
                         } catch (dbError) {
                             console.error("Failed to save game to database ORM:", dbError);

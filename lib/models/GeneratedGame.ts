@@ -9,6 +9,8 @@ export class GeneratedGame extends Model {
     declare target_value: string;
     declare optional_prompt: string | null;
     declare file_url: string;
+    declare title: string | null;
+    declare icon: string | null;
     declare created_at: Date;
 }
 
@@ -42,6 +44,14 @@ GeneratedGame.init(
         file_url: {
             type: DataTypes.STRING(500),
             allowNull: false,
+        },
+        title: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        icon: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
         created_at: {
             type: DataTypes.DATE,

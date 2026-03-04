@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 
     try {
         const games = await GeneratedGame.findAll({
-            where: { user_id: userId },
+            // where: { user_id: userId },
             order: [['created_at', 'DESC']]
         });
 

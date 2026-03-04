@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus: Vector Run</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0F172A; /* Slate 900 */
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modern UI Overlays */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .ui-layer.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        h1 {
+            color: #F8FAFC;
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        p.subtitle {
+            color: #94A3B8;
+            font-size: 1.2rem;
+            margin: 0 0 40px 0;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            background-color: #38BDF8; /* Light Blue 400 */
+            color: #0F172A;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background-color: #7DD3FC;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .score-display {
+            color: #F8FAFC;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        #controls-hint {
+            position: absolute;
+            bottom: 20px;
+            color: #64748B;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+    </style>
+    <!-- Include Phaser 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
+    <!-- Include Skillprint Adjustment Library -->
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="ui-layer active">
+            <h1>Focus</h1>
+            <p class="subtitle">Maintain your flow. Jump over gaps and avoid red spikes. The speed will increase.</p>
+            <button class="btn" id="start-btn">Start Run</button>
+            <div id="controls-hint">SPACE / CLICK / TAP TO JUMP</div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="ui-layer">
+            <h1>Focus Broken</h1>
+            <div class="score-display">Score: <span id="final-score">0</span></div>
+            <button class="btn" id="restart-btn">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. GAME CONFIGURATION & ADJUSTABILITY
+        // ==========================================
+        
+        window.GAME_CONFIG = {
+            baseSpeed: 350,      // Starting horizontal speed
+            gravity: 2000,       // Downward force
+            jumpForce: -800,     // Upward force on jump
+            gapMin: 100,         // Minimum gap between platforms
+            gapMax: 250,         // Maximum gap between platforms
+            spikeChance: 30,     // Percentage chance to spawn a spike on a platform
+            speedAcceleration: 0.005 // How fast speed multiplier increases per frame
+        };
+
+        // Adjustment Interface
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                if (window.GAME_CONFIG.hasOwnProperty(parameterName)) {
+                    window.GAME_CONFIG[parameterName] = parameterValue;
+                    console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                    
+                    // Apply immediate effects if game is running
+                    if (window.gameInstance && window.gameInstance.scene.isActive('PlayScene')) {
+                        const playScene = window.gameInstance.scene.getScene('PlayScene');
+                        if (parameterName === 'gravity') {
+                            playScene.player.body.setGravityY(parameterValue);
+                        }
+                    }
+                }
+            }
+        };
+
+        // Register with Skillprint
+        window.Skillprint.registerAdjustments({
+            '1': { parameterName: 'baseSpeed', description: 'Decrease Base Speed', value: 250 },
+            '2': { parameterName: 'baseSpeed', description: 'Increase Base Speed', value: 500 },
+            '3': { parameterName: 'gravity', description: 'Low Gravity', value: 1200 },
+            '4': { parameterName: 'gravity', description: 'High Gravity', value: 3000 },
+            '5': { parameterName: 'jumpForce', description: 'Weaker Jump', value: -600 },
+            '6': { parameterName: 'jumpForce', description: 'Stronger Jump', value: -1000 },
+            '7': { parameterName: 'gapMax', description: 'Smaller Gaps', value: 150 },
+            '8': { parameterName: 'gapMax', description: 'Larger Gaps', value: 400 },
+            '9': { parameterName: 'spikeChance', description: 'More Spikes', value: 70 }
+        });
+
+
+        // ==========================================
+        // 2. PHASER GAME LOGIC
+        // ==========================================
+
+        // --- Colors ---
+        const COLORS = {
+            bg: 0x0F172A,      // Slate 900
+            player: 0x38BDF8,  // Light Blue 400
+            platform: 0x475569,// Slate 600
+            spike: 0xF43F5E,   // Rose 500
+            text: '#F8FAFC'    // Slate 50
+        };
+
+        class BootScene extends Phaser.Scene {
+            constructor() { super('BootScene'); }
+
+            create() {
+                // Generate inline textures using Graphics
+                const g = this.make.graphics({x: 0, y: 0, add: false});
+
+                // 1x1 White Pixel (used for scaling platforms)
+                g.fillStyle(0xffffff, 1);
+                g.fillRect(0, 0, 1, 1);
+                g.generateTexture('pixel', 1, 1);
+
+                // Player (Square)
+                g.clear();
+                g.fillStyle(COLORS.player, 1);
+                g.fillRect(0, 0, 32, 32);
+                g.generateTexture('player', 32, 32);
+
+                // Spike (Triangle)
+                g.clear();
+                g.fillStyle(COLORS.spike, 1);
+                g.beginPath();
+                g.moveTo(16, 0);
+                g.lineTo(32, 32);
+                g.lineTo(0, 32);
+                g.closePath();
+                g.fillPath();
+                g.generateTexture('spike', 32, 32);
+
+                // Particle (Small square)
+                g.clear();
+                g.fillStyle(COLORS.player, 1);
+                g.fillRect(0, 0, 8, 8);
+                g.generateTexture('particle', 8, 8);
+
+                this.scene.start('PlayScene');
+            }
+        }
+
+        class PlayScene extends Phaser.Scene {
+            constructor() { super('PlayScene'); }
+
+            init() {
+                this.speedMultiplier = 1;
+                this.score = 0;
+                this.isGameOver = false;
+                this.lastPlatform = null;
+                
+                // Coyote time & Jump buffer
+                this.lastGroundedTime = 0;
+                this.jumpBufferTime = 0;
+                this.coyoteDuration = 100; // ms
+                this.jumpBufferDuration = 100; // ms
+            }
+
+            create() {
+                // Background
+                this.cameras.main.setBackgroundColor(COLORS.bg);
+
+                // Groups
+                this.platforms = this.physics.add.group();
+                this.spikes = this.physics.add.group();
+
+                // Player
+                this.player = this.physics.add.sprite(150, 300, 'player');
+                this.player.setOrigin(0.5, 0.5);
+                this.player.body.setGravityY(window.GAME_CONFIG.gravity);
+                this.player.body.setSize(28, 28); // Slightly smaller hitbox for fairness
+
+                // Trail Particles
+                this.trailEmitter = this.add.particles(0, 0, 'particle', {
+                    speed: { min: -50, max: 50 },
+                    angle: { min: 0, max: 360 },
+                    scale: { start: 1, end: 0 },
+                    alpha: { start: 0.5, end: 0 },
+                    lifespan: 400,
+                    blendMode: 'ADD',
+                    frequency: 50,
+                    follow: this.player,
+                    followOffset: { x: -10, y: 0 }
+                });
+
+                // Initial Platform
+                this.addPlatform(0, 450, 800);
+
+                // Score Text
+                this.scoreText = this.add.text(20, 20, '0', {
+                    fontFamily: 'Inter',
+                    fontSize: '32px',
+                    fontWeight: '900',
+                    color: COLORS.text,
+                    alpha: 0.8
+                });
+                this.scoreText.setDepth(100);
+
+                // Collisions
+                this.physics.add.collider(this.player, this.platforms, this.onPlatformCollide, null, this);
+                this.physics.add.overlap(this.player, this.spikes, this.hitSpike, null, this);
+
+                // Input
+                this.input.on('pointerdown', this.handleJumpInput, this);
+                this.input.keyboard.on('keydown-SPACE', this.handleJumpInput, this);
+
+                // Start game paused until UI tells it to go
+                this.scene.pause();
+            }
+
+            addPlatform(x, y, width) {
+                // Create platform using scaled pixel
+                const plat = this.platforms.create(x, y, 'pixel');
+                plat.setOrigin(0, 0);
+                plat.setDisplaySize(width, 40);
+                plat.setTint(COLORS.platform);
+                
+                // Physics setup
+                plat.body.setSize(width, 40);
+                plat.body.setImmovable(true);
+                plat.body.setAllowGravity(false);
+                
+                this.lastPlatform = plat;
+
+                // Attempt to add a spike
+                if (x > 800 && Phaser.Math.Between(0, 100) < window.GAME_CONFIG.spikeChance) {
+                    // Don't place spike too close to edges
+                    if (width > 150) {
+                        const spikeX = x + Phaser.Math.Between(50, width - 50);
+                        const spike = this.spikes.create(spikeX, y, 'spike');
+                        spike.setOrigin(0.5, 1); // Bottom center
+                        spike.body.setImmovable(true);
+                        spike.body.setAllowGravity(false);
+                        // Make spike hitbox smaller for precise focus gameplay
+                        spike.body.setSize(16, 24); 
+                        spike.body.setOffset(8, 8);
+                    }
+                }
+            }
+
+            generateEnvironment() {
+                if (!this.lastPlatform) return;
+
+                const rightEdge = this.lastPlatform.x + this.lastPlatform.displayWidth;
+                
+                // If the last platform's right edge is coming onto the screen, generate the next one
+                if (rightEdge < this.cameras.main.width + 200) {
+                    const gap = Phaser.Math.Between(window.GAME_CONFIG.gapMin, window.GAME_CONFIG.gapMax);
+                    const width = Phaser.Math.Between(150, 400);
+                    
+                    // Calculate reachable Y
+                    // Max jump height = (v^2) / (2g)
+                    const maxJumpH = Math.abs(Math.pow(window.GAME_CONFIG.jumpForce, 2) / (2 * window.GAME_CONFIG.gravity));
+                    
+                    let yOffset = Phaser.Math.Between(-100, 100);
+                    let newY = this.lastPlatform.y + yOffset;
+                    
+                    // Clamp Y to keep it on screen and reachable
+                    newY = Phaser.Math.Clamp(newY, 200, 500);
+
+                    this.addPlatform(rightEdge + gap, newY, width);
+                }
+            }
+
+            handleJumpInput() {
+                if (this.isGameOver) return;
+                this.jumpBufferTime = this.time.now;
+            }
+
+            executeJump() {
+                this.player.setVelocityY(window.GAME_CONFIG.jumpForce);
+                this.jumpBufferTime = 0;
+                this.lastGroundedTime = 0;
+
+                // Visual feedback: squash and stretch
+                this.tweens.add({
+                    targets: this.player,
+                    scaleY: 1.3,
+                    scaleX: 0.7,
+                    duration: 100,
+                    yoyo: true,
+                    ease: 'Sine.easeInOut'
+                });
+
+                // Jump particles
+                this.add.particles(this.player.x, this.player.y + 16, 'particle', {
+                    speed: { min: 50, max: 150 },
+                    angle: { min: 240, max: 300 },
+                    scale: { start: 1, end: 0 },
+                    lifespan: 300,
+                    count: 10
+                });
+            }
+
+            onPlatformCollide() {
+                // Reset rotation on landing
+                if (this.player.body.touching.down) {
+                    this.player.setRotation(0);
+                }
+            }
+
+            hitSpike() {
+                if (this.isGameOver) return;
+                this.triggerGameOver();
+            }
+
+            triggerGameOver() {
+                this.isGameOver = true;
+                this.physics.pause();
+                this.trailEmitter.stop();
+                
+                // Death animation
+                this.add.particles(this.player.x, this.player.y, 'particle', {
+                    speed: { min: 50, max: 300 },
+                    angle: { min: 0, max: 360 },
+                    scale: { start: 1.5, end: 0 },
+                    tint: COLORS.spike,
+                    lifespan: 600,
+                    count: 30
+                });
+                this.player.setVisible(false);
+
+                // Notify UI
+                setTimeout(() => {
+                    document.getElementById('final-score').innerText = Math.floor(this.score);
+                    document.getElementById('game-over-screen').classList.add('active');
+                }, 500);
+            }
+
+            update(time, delta) {
+                if (this.isGameOver) return;
+
+                // Increase speed multiplier slowly to demand focus
+                this.speedMultiplier += window.GAME_CONFIG.speedAcceleration * (delta / 1000);
+                const currentSpeed = window.GAME_CONFIG.baseSpeed * this.speedMultiplier;
+
+                // Update score based on distance/speed
+                this.score += (currentSpeed * (delta / 1000)) * 0.1;
+                this.scoreText.setText(Math.floor(this.score));
+
+                // Move platforms and spikes
+                this.platforms.getChildren().forEach(plat => {
+                    plat.body.velocity.x = -currentSpeed;
+                    if (plat.x + plat.displayWidth < -100) plat.destroy();
+                });
+
+                this.spikes.getChildren().forEach(spike => {
+                    spike.body.velocity.x = -currentSpeed;
+                    if (spike.x < -100) spike.destroy();
+                });
+
+                this.generateEnvironment();
+
+                // --- Jump Logic (Focus on responsive feel) ---
+                const isGrounded = this.player.body.touching.down;
+                
+                if (isGrounded) {
+                    this.lastGroundedTime = time;
+                }
+
+                const canJump = (time - this.lastGroundedTime) <= this.coyoteDuration;
+                const wantsToJump = (time - this.jumpBufferTime) <= this.jumpBufferDuration;
+
+                if (canJump && wantsToJump) {
+                    this.executeJump();
+                }
+
+                // Visual: Rotate player while in air
+                if (!isGrounded) {
+                    this.player.rotation += 0.1;
+                }
+
+                // Death by falling
+                if (this.player.y > this.cameras.main.height + 50) {
+                    this.triggerGameOver();
+                }
+                
+                // Keep player at fixed X roughly
+                if(this.player.x < 150) {
+                    this.player.setVelocityX(50);
+                } else if (this.player.x > 150) {
+                    this.player.setVelocityX(0);
+                    this.player.setX(150);
+                }
+            }
+        }
+
+        // --- Game Setup ---
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#0F172A',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 }, // Handled on player
+                    debug: false
+                }
+            },
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            scene: [BootScene, PlayScene]
+        };
+
+        window.gameInstance = new Phaser.Game(config);
+
+        // --- UI Interaction ---
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('start-screen').classList.remove('active');
+            const playScene = window.gameInstance.scene.getScene('PlayScene');
+            playScene.scene.resume();
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            document.getElementById('game-over-screen').classList.remove('active');
+            const playScene = window.gameInstance.scene.getScene('PlayScene');
+            playScene.scene.restart();
+            playScene.scene.resume();
+        });
+
+    </script>
+</body>
+</html>
