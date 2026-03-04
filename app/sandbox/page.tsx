@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import GameAdjustmentBanner from '../components/GameAdjustmentBanner';
 
 const MOODS = [
@@ -10,10 +11,13 @@ const SKILLS = [
     'problem solving', 'memory', 'logic', 'spatial reasoning', 'attention', 'pattern recognition', 'reaction time'
 ];
 
-export default function GameSandboxPage() {
+function GameSandboxContent() {
+    const searchParams = useSearchParams();
+    const editParam = searchParams.get('edit');
     const [targetMode, setTargetMode] = useState<'mood' | 'skill'>('mood');
     const [targetValue, setTargetValue] = useState(MOODS[0]);
     const [optionalPrompt, setOptionalPrompt] = useState('');
+    const [refinePrompt, setRefinePrompt] = useState('');
     const [artStyleId, setArtStyleId] = useState('');
     const [genreId, setGenreId] = useState('');
     const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
@@ -21,8 +25,25 @@ export default function GameSandboxPage() {
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationOutput, setGenerationOutput] = useState('');
-    const [gameUrl, setGameUrl] = useState<string | null>(null);
+    const [gameUrl, setGameUrl] = useState<string | null>(editParam ? `/sandbox/${editParam}` : null);
     const [tokenUsage, setTokenUsage] = useState<{ promptTokenCount?: number, candidatesTokenCount?: number, totalTokenCount?: number } | null>(null);
+
+    // If edit param changes, update gameUrl
+    useEffect(() => {
+        if (editParam) {
+            setGameUrl(`/sandbox/${editParam}`);
+            // Infer targetMode & targetValue from editParam (e.g. mood-focus-1234)
+            const parts = editParam.split('-');
+            if (parts.length >= 2) {
+                const mode = parts[0] as 'mood' | 'skill';
+                const val = parts[1];
+                if (['mood', 'skill'].includes(mode)) {
+                    setTargetMode(mode);
+                    setTargetValue(val);
+                }
+            }
+        }
+    }, [editParam]);
 
     const outputRef = useRef<HTMLPreElement>(null);
 
@@ -75,7 +96,22 @@ export default function GameSandboxPage() {
         else setTargetValue(SKILLS[0]);
     }, [targetMode]);
 
-    const handleGenerate = async () => {
+    const handleGenerate = async (isRefine: boolean = false, promptOverride?: string) => {
+        let existingCode = undefined;
+        let promptToSend = optionalPrompt;
+
+        if (isRefine && gameUrl) {
+            promptToSend = promptOverride || refinePrompt;
+            try {
+                // Fetch the actual HTML content
+                const fetchUrl = gameUrl.startsWith('/sandbox/') ? `/games/generated/${gameUrl.split('/').pop()}.html` : gameUrl;
+                const htmlResponse = await fetch(fetchUrl);
+                existingCode = await htmlResponse.text();
+            } catch (err) {
+                console.error("Failed to fetch existing game code", err);
+            }
+        }
+
         setIsGenerating(true);
         setGenerationOutput('');
         setGameUrl(null);
@@ -87,7 +123,7 @@ export default function GameSandboxPage() {
             const response = await fetch('/api/generate-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetMode, targetValue, optionalPrompt, artStyleId: artStyleId || undefined, genreId: genreId || undefined }),
+                body: JSON.stringify({ targetMode, targetValue, optionalPrompt: promptToSend, existingCode, artStyleId: artStyleId || undefined, genreId: genreId || undefined }),
             });
 
             if (!response.ok || !response.body) {
@@ -234,7 +270,7 @@ export default function GameSandboxPage() {
                     </div>
 
                     <button
-                        onClick={handleGenerate}
+                        onClick={() => handleGenerate(false)}
                         disabled={isGenerating}
                         className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
@@ -248,6 +284,55 @@ export default function GameSandboxPage() {
                             </span>
                         ) : 'Generate Game'}
                     </button>
+
+                    {gameUrl && !isGenerating && (
+                        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                Edit & Refine Game
+                            </h3>
+
+                            <div className="mb-4">
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                                    Quick Improvements
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {['Make it harder', 'Make it easier', 'Add a score counter', 'Improve colors', 'Add a start screen'].map(preset => (
+                                        <button
+                                            key={preset}
+                                            onClick={() => handleGenerate(true, preset)}
+                                            className="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-800/50 transition-colors border border-indigo-100 dark:border-indigo-800/50"
+                                        >
+                                            {preset}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                                    Custom Instructions
+                                </label>
+                                <textarea
+                                    value={refinePrompt}
+                                    onChange={(e) => setRefinePrompt(e.target.value)}
+                                    placeholder="e.g. Change the background to neon blue..."
+                                    rows={3}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-3 text-sm resize-none"
+                                />
+                            </div>
+
+                            <button
+                                onClick={() => handleGenerate(true)}
+                                disabled={isGenerating || !refinePrompt.trim()}
+                                className="w-full flex justify-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Apply Changes
+                            </button>
+                        </div>
+                    )}
 
                     {/* Token Debug Panel */}
                     {(tokenUsage || isGenerating) && (
@@ -363,5 +448,13 @@ export default function GameSandboxPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function GameSandboxPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center min-h-[calc(100vh-64px)]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}>
+            <GameSandboxContent />
+        </Suspense>
     );
 }

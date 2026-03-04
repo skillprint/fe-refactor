@@ -292,12 +292,18 @@ export default function MyGamesPage() {
                                         <p className="text-sm text-gray-400 dark:text-gray-500 italic">No prompt provided</p>
                                     )}
                                 </div>
-                                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+                                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 flex gap-3">
                                     <Link
                                         href={gameRouteUrl}
-                                        className="block w-full text-center text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                        className="block flex-1 text-center py-2 text-sm font-semibold text-indigo-600 border border-indigo-200 dark:border-indigo-800 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
                                     >
                                         Play Game
+                                    </Link>
+                                    <Link
+                                        href={`/sandbox?edit=${gameRouteUrl.replace('/sandbox/', '')}`}
+                                        className="block flex-1 text-center py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        Edit Game
                                     </Link>
                                 </div>
                             </div>

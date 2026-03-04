@@ -12,7 +12,7 @@ import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        let { targetMode, targetValue, optionalPrompt, artStyleId, genreId, libraries = [] } = await req.json();
+        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [] } = await req.json();
 
         // Always include skillprint-adjustment (remove physics/sound generic stubs as Phaser has them built-in)
         libraries = Array.from(new Set([...libraries, 'skillprint-adjustment']));
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
         const libContext = await prepareLibraries(libraries, apiKey);
 
-        const systemPrompt = `You are an expert web game developer. Your task is to generate a fully playable, interactive, and visually appealing web game in a single HTML file using the Phaser 3 game engine (version 3.80.1 or later). Include all logic, CSS, and Phaser initializations within this HTML file.
+        const systemPrompt = `You are an expert web game developer. Your task is to ${existingCode ? 'refine an existing' : 'generate a fully playable, interactive, and visually appealing'} web game in a single HTML file using the Phaser 3 game engine (version 3.80.1 or later). Include all logic, CSS, and Phaser initializations within this HTML file.
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
 IMPORTANT CRITERIA:
@@ -104,6 +104,11 @@ ${genreContext}
 
 ${libContext}`;
 
+        let userPromptText = `Generate the ${targetMode} game for: ${targetValue}`;
+        if (existingCode) {
+            userPromptText = `Please refine the following existing game code based on the new instructions. Remember to return the complete HTML file.\n\nEXISTING CODE:\n\`\`\`html\n${existingCode}\n\`\`\``;
+        }
+
         const requestBody = {
             systemInstruction: {
                 parts: [{ text: systemPrompt }]
@@ -111,7 +116,7 @@ ${libContext}`;
             contents: [
                 {
                     role: "user",
-                    parts: [{ text: `Generate the ${targetMode} game for: ${targetValue}` }]
+                    parts: [{ text: userPromptText }]
                 }
             ],
             generationConfig: {
@@ -119,7 +124,7 @@ ${libContext}`;
             }
         };
 
-        let modelName = 'gemini-3.1-pro-preview';
+        let modelName = process.env.GAME_GENERATIVE_MODEL || 'gemini-3.1-pro-preview';
         let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
         const fetchHeaders = {
@@ -135,7 +140,7 @@ ${libContext}`;
 
         if (!response.ok && response.status === 404) {
             // fallback to 1.5 pro if 3.1 pro is not available on this API endpoint yet
-            modelName = 'gemini-1.5-pro';
+            modelName = process.env.GAME_GENERATIVE_MODEL_FALLBACK || 'gemini-1.5-pro';
             apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
             response = await fetch(apiUrl, {
                 method: 'POST',
