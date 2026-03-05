@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="game-icon" content="💡">
+    <title>Lights Out Logic</title>
+    <style>
+        body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background-color:#222; color:white; font-family:sans-serif; flex-direction:column; }
+        .grid { display:grid; grid-template-columns:repeat(3, 100px); gap:10px; margin-top:20px; }
+        .cell { width:100px; height:100px; background-color:#555; border-radius:10px; cursor:pointer; transition:background-color 0.3s; }
+        .cell.on { background-color:#f1c40f; box-shadow:0 0 15px #f1c40f; }
+    </style>
+</head>
+<body>
+    <h1>Turn all lights off</h1>
+    <div class="grid" id="grid"></div>
+    <script>
+        const grid = document.getElementById('grid');
+        const size = 3;
+        let state = [
+            [true, false, true],
+            [false, true, false],
+            [true, false, true]
+        ];
+
+        function toggle(x, y) {
+            if (x >= 0 && x < size && y >= 0 && y < size) {
+                state[y][x] = !state[y][x];
+            }
+        }
+
+        function clickCell(x, y) {
+            toggle(x, y);
+            toggle(x-1, y);
+            toggle(x+1, y);
+            toggle(x, y-1);
+            toggle(x, y+1);
+            render();
+            checkWin();
+        }
+
+        function render() {
+            grid.innerHTML = '';
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell' + (state[y][x] ? ' on' : '');
+                    cell.onclick = () => clickCell(x, y);
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function checkWin() {
+            const hasOn = state.flat().some(light => light);
+            if (!hasOn) {
+                setTimeout(() => alert('You win!'), 100);
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>

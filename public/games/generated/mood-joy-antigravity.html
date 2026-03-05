@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="game-icon" content="😊">
+    <title>Joyful Catch</title>
+</head>
+<body style="margin:0; overflow:hidden; background-color:#87CEEB; color:#333; font-family:sans-serif;">
+    <h1 style="text-align:center; color:white; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Catch the Smiles!</h1>
+    <div id="score" style="position:absolute; top:20px; left:20px; font-size:24px; font-weight:bold; color:white;">Score: 0</div>
+    <div id="player" style="position:absolute; bottom:20px; left:50%; width:100px; height:20px; background-color:#FFD700; border-radius:10px; transform:translateX(-50%);"></div>
+    <script>
+        const player = document.getElementById('player');
+        const scoreEl = document.getElementById('score');
+        let score = 0;
+        let playerX = window.innerWidth / 2;
+
+        window.addEventListener('mousemove', (e) => {
+            playerX = e.clientX;
+            player.style.left = playerX + 'px';
+        });
+
+        function spawnSmile() {
+            const smile = document.createElement('div');
+            smile.innerText = '😊';
+            smile.style.position = 'absolute';
+            smile.style.fontSize = '40px';
+            smile.style.top = '-50px';
+            smile.style.left = Math.random() * (window.innerWidth - 40) + 'px';
+            document.body.appendChild(smile);
+
+            let y = -50;
+            let speed = Math.random() * 3 + 2;
+
+            function fall() {
+                y += speed;
+                smile.style.top = y + 'px';
+
+                // Check collision
+                const rect = smile.getBoundingClientRect();
+                const pRect = player.getBoundingClientRect();
+
+                if (rect.bottom >= pRect.top && rect.top <= pRect.bottom && rect.right >= pRect.left && rect.left <= pRect.right) {
+                    score++;
+                    scoreEl.innerText = 'Score: ' + score;
+                    smile.remove();
+                    return;
+                }
+
+                if (y > window.innerHeight) {
+                    smile.remove();
+                } else {
+                    requestAnimationFrame(fall);
+                }
+            }
+            requestAnimationFrame(fall);
+
+            setTimeout(spawnSmile, Math.random() * 1000 + 500);
+        }
+
+        spawnSmile();
+    </script>
+</body>
+</html>

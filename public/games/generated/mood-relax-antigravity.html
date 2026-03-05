@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="game-icon" content="🌊">
+    <title>Relaxing Ripples</title>
+    <style>
+        body { margin:0; background:radial-gradient(circle, #1a2a6c, #112); height:100vh; overflow:hidden; }
+        .ripple {
+            position:absolute;
+            border-radius:50%;
+            border:2px solid rgba(255, 255, 255, 0.7);
+            transform:translate(-50%, -50%);
+            animation: rippleAnim 4s ease-out forwards;
+            pointer-events:none;
+        }
+        @keyframes rippleAnim {
+            0% { width:0; height:0; opacity:1; }
+            100% { width:300px; height:300px; opacity:0; }
+        }
+    </style>
+</head>
+<body>
+    <div style="position:absolute; top:20px; width:100%; text-align:center; color:rgba(255,255,255,0.5); font-family:sans-serif;">
+        Click anywhere to relax
+    </div>
+    <script>
+        window.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            document.body.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 4000);
+        });
+    </script>
+</body>
+</html>

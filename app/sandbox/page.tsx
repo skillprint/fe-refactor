@@ -24,6 +24,7 @@ function GameSandboxContent() {
     const [ollamaModel, setOllamaModel] = useState('qwen2.5-coder:14b');
     const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
     const [genres, setGenres] = useState<{ id: string, name: string }[]>([]);
+    const [parameters, setParameters] = useState<{ name: string, value: string }[]>([{ name: '', value: '' }]);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationOutput, setGenerationOutput] = useState('');
@@ -133,7 +134,8 @@ function GameSandboxContent() {
                     artStyleId: artStyleId || undefined,
                     genreId: genreId || undefined,
                     modelProvider,
-                    modelName: modelProvider === 'ollama' ? ollamaModel : undefined
+                    modelName: modelProvider === 'ollama' ? ollamaModel : undefined,
+                    parameters: parameters.filter(p => p.name.trim() !== '' && p.value.trim() !== '')
                 }),
             });
 
@@ -303,6 +305,61 @@ function GameSandboxContent() {
                                 <option key={genre.id} value={genre.id}>{genre.name}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Game Parameters
+                            </label>
+                            <button
+                                onClick={() => setParameters([...parameters, { name: '', value: '' }])}
+                                type="button"
+                                className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                            >
+                                + Add Parameter
+                            </button>
+                        </div>
+                        <div className="space-y-2">
+                            {parameters.map((param, index) => (
+                                <div key={index} className="flex space-x-2 items-center">
+                                    <input
+                                        type="text"
+                                        placeholder="Name (e.g. speed)"
+                                        value={param.name}
+                                        onChange={(e) => {
+                                            const newParams = [...parameters];
+                                            newParams[index].name = e.target.value;
+                                            setParameters(newParams);
+                                        }}
+                                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3 text-sm"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Value (e.g. 10)"
+                                        value={param.value}
+                                        onChange={(e) => {
+                                            const newParams = [...parameters];
+                                            newParams[index].value = e.target.value;
+                                            setParameters(newParams);
+                                        }}
+                                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3 text-sm"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const newParams = parameters.filter((_, i) => i !== index);
+                                            setParameters(newParams.length > 0 ? newParams : [{ name: '', value: '' }]);
+                                        }}
+                                        type="button"
+                                        className="text-gray-400 hover:text-red-500 transition-colors p-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <div>

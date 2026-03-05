@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="game-icon" content="🎯">
+    <title>Attention Test</title>
+</head>
+<body style="margin:0; padding:0; background-color:#333; color:white; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh;">
+    <div id="game" style="text-align:center;">
+        <h1>Attention Test</h1>
+        <div id="box" style="width:200px; height:200px; background-color:red; margin:20px auto; border-radius:10px; cursor:pointer;"></div>
+        <p id="msg">Wait for green...</p>
+    </div>
+    <script>
+        const box = document.getElementById('box');
+        const msg = document.getElementById('msg');
+        let state = 'waiting';
+        let timer;
+        let startTime;
+
+        function startRound() {
+            state = 'waiting';
+            box.style.backgroundColor = 'red';
+            msg.innerText = 'Wait for green...';
+            timer = setTimeout(() => {
+                state = 'ready';
+                box.style.backgroundColor = 'green';
+                msg.innerText = 'CLICK NOW!';
+                startTime = Date.now();
+            }, Math.random() * 3000 + 1000);
+        }
+
+        box.addEventListener('mousedown', () => {
+            if (state === 'waiting') {
+                clearTimeout(timer);
+                msg.innerText = 'Too early! Try again.';
+                setTimeout(startRound, 1500);
+            } else if (state === 'ready') {
+                const rt = Date.now() - startTime;
+                msg.innerText = 'Reaction time: ' + rt + 'ms! Good job.';
+                state = 'clicked';
+                setTimeout(startRound, 2000);
+            }
+        });
+
+        startRound();
+    </script>
+</body>
+</html>

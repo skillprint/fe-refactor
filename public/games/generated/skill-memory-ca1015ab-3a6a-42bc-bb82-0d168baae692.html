@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Match Game</title>
+    <style>
+        body { text-align: center; margin-top: 50px; }
+        .card { width: 100px; height: 100px; background-color: #f0f0f0; display: inline-block; margin: 10px; border-radius: 10px; line-height: 100px; font-size: 2em; cursor: pointer; }
+        .flipped { background-color: #ffcc00; }
+    </style>
+</head>
+<body>
+    <h1>Memory Match Game</h1>
+    <div id="gameBoard"></div>
+    <script>
+        const cards = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        let flippedCards = [];
+        let matchedCards = [];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createBoard() {
+            shuffle(cards);
+            const board = document.getElementById('gameBoard');
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.index = index;
+                cardElement.textContent = '';
+                cardElement.addEventListener('click', flipCard);
+                board.appendChild(cardElement);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length >= 2) return;
+
+            this.classList.add('flipped');
+            this.textContent = cards[this.dataset.index];
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                setTimeout(checkForMatch, 1000);
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            if (cards[card1.dataset.index] === cards[card2.dataset.index]) {
+                matchedCards.push(...flippedCards);
+                if (matchedCards.length === cards.length) {
+                    alert('Congratulations! You won!');
+                    setTimeout(createBoard, 1000);
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '';
+                card2.textContent = '';
+            }
+            flippedCards = [];
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>

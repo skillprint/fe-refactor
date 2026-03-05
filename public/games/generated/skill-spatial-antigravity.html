@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="game-icon" content="🧩">
+    <title>Spatial Match</title>
+</head>
+<body style="margin:0; background-color:#2c3e50; color:#ecf0f1; font-family:sans-serif; display:flex; flex-direction:column; align-items:center;">
+    <h1 style="margin-top:20px;">Match the Shape</h1>
+    <div style="display:flex; gap:50px; margin-top:50px;">
+        <div id="target" style="width:150px; height:150px; background-color:rgba(255,255,255,0.2); border:5px dashed #ecf0f1; display:flex; justify-content:center; align-items:center;"></div>
+        <div id="options" style="display:flex; flex-direction:column; gap:20px;"></div>
+    </div>
+    <script>
+        const targetEl = document.getElementById('target');
+        const optionsEl = document.getElementById('options');
+        
+        const shapes = [
+            'border-radius:0;', 
+            'border-radius:50%;', 
+            'clip-path: polygon(50% 0%, 0% 100%, 100% 100%);'
+        ];
+
+        function nextRound() {
+            optionsEl.innerHTML = '';
+            const correctShape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            // Set target
+            targetEl.innerHTML = `<div style="width:100px; height:100px; background-color:#e74c3c; ${correctShape}"></div>`;
+
+            // Mix options
+            let opts = [...shapes];
+            opts.sort(() => Math.random() - 0.5);
+
+            opts.forEach(shape => {
+                const btn = document.createElement('div');
+                btn.style = `width:80px; height:80px; background-color:#3498db; cursor:pointer; ${shape}`;
+                btn.onclick = () => {
+                    if (shape === correctShape) {
+                        alert('Correct!');
+                        nextRound();
+                    } else {
+                        btn.style.backgroundColor = '#e74c3c';
+                        setTimeout(() => btn.style.backgroundColor = '#3498db', 500);
+                    }
+                };
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        nextRound();
+    </script>
+</body>
+</html>

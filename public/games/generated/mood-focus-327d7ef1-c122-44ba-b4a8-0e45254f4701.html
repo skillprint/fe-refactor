@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #gameArea { margin-top: 50px; }
+        #message { font-size: 24px; margin-bottom: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+    <meta name="game-icon" content="🎮">
+</head>
+<body>
+
+    <h1>Focus Game</h1>
+    <div id="gameArea">
+        <p id="message">Click the button when you're ready to start focusing!</p>
+        <button onclick="startGame()">Start</button>
+        <div id="timer" style="display:none; margin-top: 20px;">Time Elapsed: <span id="timeElapsed">0</span> seconds</div>
+    </div>
+
+    <script>
+        let startTime;
+
+        function startGame() {
+            document.getElementById('message').innerText = 'Focus now!';
+            document.getElementById('timer').style.display = 'block';
+            startTime = new Date().getTime();
+            updateTimer();
+        }
+
+        function updateTimer() {
+            const currentTime = new Date().getTime();
+            const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+            document.getElementById('timeElapsed').innerText = elapsedSeconds;
+            requestAnimationFrame(updateTimer);
+        }
+    </script>
+
+</body>
+</html>

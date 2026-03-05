@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relaxing Color Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+        }
+        #colorBox {
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            transition: background-color 0.5s ease;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <meta name="game-icon" content="🎮">
+    <div id="colorBox"></div>
+    <h1>Click to Relax</h1>
+    <script>
+        const colorBox = document.getElementById('colorBox');
+        let colors = ['#ff6347', '#7fff00', '#4682b4', '#daa520', '#ff4500'];
+        
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        colorBox.addEventListener('click', () => {
+            colorBox.style.backgroundColor = getRandomColor();
+        });
+    </script>
+</body>
+</html>

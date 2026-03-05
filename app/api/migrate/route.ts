@@ -9,6 +9,7 @@ import * as addGameTitle from '@/migrations/04-add-game-title';
 import * as addGameIcon from '@/migrations/05-add-game-icon';
 import * as createOrgMembers from '@/migrations/06-create-org-members';
 import * as createOrgGames from '@/migrations/07-create-org-games';
+import * as createGameParameters from '@/migrations/08-create-game-parameters';
 
 export async function GET() {
     try {
@@ -53,6 +54,11 @@ export async function GET() {
                     name: '07-create-org-games',
                     up: async () => createOrgGames.up({ context: sequelize as any, name: '07-create-org-games' } as any),
                     down: async () => createOrgGames.down({ context: sequelize as any, name: '07-create-org-games' } as any),
+                },
+                {
+                    name: '08-create-game-parameters',
+                    up: async () => createGameParameters.up({ context: sequelize as any, name: '08-create-game-parameters' } as any),
+                    down: async () => createGameParameters.down({ context: sequelize as any, name: '08-create-game-parameters' } as any),
                 }
             ],
             context: sequelize,

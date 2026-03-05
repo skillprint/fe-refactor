@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relaxing Bubble Pop Game</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background-color: #f0f8ff; 
+            margin: 0; 
+        }
+        canvas { 
+            border: 2px solid #4682b4; 
+            box-shadow: 0 0 10px rgba(69, 139, 116, 0.5); 
+        }
+    </style>
+</head>
+<body>
+    <meta name="game-icon" content="🎮">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let bubbles = [];
+        const bubbleColor = '#add8e6';
+        const maxBubbles = 30;
+        const popRadius = 15;
+
+        function createBubble() {
+            if (bubbles.length < maxBubbles) {
+                bubbles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 20 + 10
+                });
+            }
+        }
+
+        function drawBubbles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let bubble of bubbles) {
+                ctx.beginPath();
+                ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+                ctx.fillStyle = bubbleColor;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        function checkPop(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                const distanceX = mouseX - bubbles[i].x;
+                const distanceY = mouseY - bubbles[i].y;
+                const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+                if (distance < popRadius) {
+                    bubbles.splice(i, 1);
+                }
+            }
+        }
+
+        setInterval(createBubble, 300);
+        canvas.addEventListener('click', checkPop);
+
+        function gameLoop() {
+            drawBubbles();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>

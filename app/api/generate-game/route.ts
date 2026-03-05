@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { User } from '@/lib/models/User';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
+import { GameParameter } from '@/lib/models/GameParameter';
 import { ArtStyle } from '@/lib/models/ArtStyle';
 import { Genre } from '@/lib/models/Genre';
 import jwt from 'jsonwebtoken';
@@ -12,7 +13,7 @@ import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [], modelProvider = 'gemini', modelName } = await req.json();
+        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [], modelProvider = 'gemini', modelName, parameters = [] } = await req.json();
 
         // Always include skillprint-adjustment (remove physics/sound generic stubs as Phaser has them built-in)
         libraries = Array.from(new Set([...libraries, 'skillprint-adjustment']));
@@ -84,6 +85,12 @@ export async function POST(req: Request) {
 
         const libContext = await prepareLibraries(libraries, apiKey);
 
+        let parameterContext = '';
+        if (parameters && parameters.length > 0) {
+            const paramsList = parameters.map((p: any) => `- ${p.name}: ${p.value}`).join('\n');
+            parameterContext = `\nGAME PARAMETERS REQUIREMENT:\nThe generated game MUST natively support and utilize the following parameters. You must implement these parameters in the game logic and ensure they are adjustable at runtime (e.g. through a global object like \`window.gameParameters\` or well-defined variables that the game references).\n\nParameters to implement:\n${paramsList}\n`;
+        }
+
         const systemPrompt = `You are an expert web game developer. Your task is to ${existingCode ? 'refine an existing' : 'generate a fully playable, interactive, and visually appealing'} web game in a single HTML file using the Phaser 3 game engine (version 3.80.1 or later). Include all logic, CSS, and Phaser initializations within this HTML file.
 The game MUST target the requested ${targetMode}: ${targetValue}.
 ${optionalPrompt ? `Additional instructions provided by user: ${optionalPrompt}` : ''}
@@ -101,6 +108,8 @@ ${moodContext}
 ${artStyleContext}
 
 ${genreContext}
+
+${parameterContext}
 
 ${libContext}`;
 
@@ -345,6 +354,7 @@ ${libContext}`;
                             });
 
                             await GeneratedGame.create({
+                                id: fileId, // Use the fileId as the game's uuid so we can retrieve it
                                 user_id: userId,
                                 target_mode: targetMode,
                                 target_value: targetValue,
@@ -353,6 +363,16 @@ ${libContext}`;
                                 title: gameTitle,
                                 icon: gameIcon
                             });
+
+                            if (parameters && parameters.length > 0) {
+                                for (const p of parameters) {
+                                    await GameParameter.create({
+                                        game_id: fileId,
+                                        name: p.name,
+                                        value: typeof p.value === 'string' ? p.value : JSON.stringify(p.value)
+                                    });
+                                }
+                            }
                         } catch (dbError) {
                             console.error("Failed to save game to database ORM:", dbError);
                         }

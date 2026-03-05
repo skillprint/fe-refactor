@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Mood Game</title>
+    <meta name="game-icon" content="🎮">
+    <style>
+        body { text-align: center; margin-top: 50px; }
+        #colorBox { width: 200px; height: 200px; background-color: white; margin: auto; }
+        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Paint Your Mood!</h1>
+    <div id="colorBox"></div>
+    <button onclick="changeColor()">Change Color</button>
+
+    <script>
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function changeColor() {
+            const colorBox = document.getElementById('colorBox');
+            colorBox.style.backgroundColor = getRandomColor();
+        }
+    </script>
+</body>
+</html>

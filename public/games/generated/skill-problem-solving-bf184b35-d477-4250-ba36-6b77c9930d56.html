@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Math Quiz</title>
+<meta name="game-icon" content="🎮">
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+  #quiz { display: inline-block; border: 1px solid #ccc; padding: 20px; }
+  input[type="number"] { width: 40px; text-align: center; }
+  button { padding: 10px 20px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div id="quiz">
+  <h1>Quick Math Quiz!</h1>
+  <p>Solve: <span id="question">0 + 0</span></p>
+  <input type="number" id="answer">
+  <button onclick="checkAnswer()">Submit</button>
+  <p id="result"></p>
+</div>
+
+<script>
+let num1 = Math.floor(Math.random() * 10);
+let num2 = Math.floor(Math.random() * 10);
+document.getElementById('question').innerText = `${num1} + ${num2}`;
+
+function checkAnswer() {
+  const userAnswer = parseInt(document.getElementById('answer').value, 10);
+  const correctAnswer = num1 + num2;
+  if (userAnswer === correctAnswer) {
+    document.getElementById('result').innerText = 'Correct!';
+    document.getElementById('result').style.color = 'green';
+  } else {
+    document.getElementById('result').innerText = `Wrong! The answer is ${correctAnswer}.`;
+    document.getElementById('result').style.color = 'red';
+  }
+}
+</script>
+
+</body>
+</html>

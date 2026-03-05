@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Game</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #game { text-align: center; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>Logic Game</h1>
+        <p>What is the result of (4 + 5) * 3 - 6?</p>
+        <input type="number" id="answer" placeholder="Enter your answer">
+        <button onclick="checkAnswer()">Submit</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value;
+            const correctAnswer = 30; // (4 + 5) * 3 - 6
+            const resultDiv = document.getElementById('result');
+
+            if (userAnswer == correctAnswer) {
+                resultDiv.textContent = 'Correct!';
+                resultDiv.style.color = 'green';
+            } else {
+                resultDiv.textContent = 'Wrong, try again!';
+                resultDiv.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

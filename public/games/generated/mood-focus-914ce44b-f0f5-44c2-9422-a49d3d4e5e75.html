@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Focus Game</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+        #game-container { text-align: center; padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        #score { font-size: 24px; margin-bottom: 20px; }
+        #start-button { padding: 10px 20px; font-size: 18px; cursor: pointer; border: none; background-color: #6200ea; color: white; border-radius: 5px; }
+        #start-button:hover { background-color: #3700b3; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Mood Focus Game</h1>
+        <p>Click the button to focus and increase your mood score!</p>
+        <div id="score">Score: 0</div>
+        <button id="start-button">Focus Now</button>
+    </div>
+
+    <script>
+        let score = 0;
+        const scoreDisplay = document.getElementById('score');
+        const startButton = document.getElementById('start-button');
+
+        startButton.addEventListener('click', () => {
+            score += Math.floor(Math.random() * 10) + 1; // Random score between 1 and 10
+            scoreDisplay.textContent = `Score: ${score}`;
+        });
+    </script>
+</body>
+</html>

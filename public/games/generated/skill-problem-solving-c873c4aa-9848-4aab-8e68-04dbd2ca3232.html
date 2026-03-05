@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Web Game</title>
+    <meta name="game-icon" content="🎮">
+    <style>
+        body { text-align: center; margin-top: 50px; }
+        #gameArea { margin: auto; width: 200px; height: 200px; border: 1px solid black; position: relative; }
+        .block { width: 50px; height: 50px; background-color: red; position: absolute; }
+    </style>
+</head>
+<body>
+    <h1>Move the Red Block!</h1>
+    <div id="gameArea">
+        <div class="block" style="top: 75px; left: 75px;" id="block"></div>
+    </div>
+    <p>Use arrow keys to move the block. Collect all targets.</p>
+    <div id="targets">
+        <div class="target" style="top: 25px; left: 25px;"></div>
+        <div class="target" style="top: 25px; right: 25px;"></div>
+        <div class="target" style="bottom: 25px; left: 25px;"></div>
+        <div class="target" style="bottom: 25px; right: 25px;"></div>
+    </div>
+    <p id="status">Targets collected: 0</p>
+
+    <script>
+        const block = document.getElementById('block');
+        let status = document.getElementById('status');
+        let targetsCollected = 0;
+        const targets = document.querySelectorAll('.target');
+
+        function moveBlock(event) {
+            let top = parseInt(block.style.top, 10);
+            let left = parseInt(block.style.left, 10);
+
+            switch (event.key) {
+                case 'ArrowUp':
+                    top -= 10;
+                    break;
+                case 'ArrowDown':
+                    top += 10;
+                    break;
+                case 'ArrowLeft':
+                    left -= 10;
+                    break;
+                case 'ArrowRight':
+                    left += 10;
+                    break;
+            }
+
+            block.style.top = `${top}px`;
+            block.style.left = `${left}px`;
+
+            checkCollision();
+        }
+
+        function checkCollision() {
+            targets.forEach(target => {
+                const targetRect = target.getBoundingClientRect();
+                const blockRect = block.getBoundingClientRect();
+
+                if (blockRect.right >= targetRect.left &&
+                    blockRect.bottom >= targetRect.top &&
+                    blockRect.left <= targetRect.right &&
+                    blockRect.top <= targetRect.bottom) {
+
+                    target.style.display = 'none';
+                    targetsCollected++;
+                    status.textContent = `Targets collected: ${targetsCollected}`;
+                }
+            });
+        }
+
+        document.addEventListener('keydown', moveBlock);
+    </script>
+</body>
+</html>

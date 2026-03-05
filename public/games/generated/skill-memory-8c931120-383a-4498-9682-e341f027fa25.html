@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f7f7f7; }
+        .game-container { display: grid; grid-template-columns: repeat(4, 50px); grid-gap: 10px; }
+        .card { width: 50px; height: 50px; background-color: #fff; border: 1px solid #ccc; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+    </style>
+</head>
+<body>
+<meta name="game-icon" content="🎮">
+<div id="game-container" class="game-container"></div>
+
+<script>
+    const gameContainer = document.getElementById('game-container');
+    const cardValues = ['A', 'B', 'C', 'D'].flatMap(val => [val, val]);
+    let selectedCards = [];
+    let matchedPairs = 0;
+
+    function createBoard() {
+        shuffle(cardValues);
+        cardValues.forEach(value => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.textContent = '';
+            card.addEventListener('click', () => flipCard(card, value));
+            gameContainer.appendChild(card);
+        });
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function flipCard(card, value) {
+        if (selectedCards.length < 2 && !card.textContent) {
+            card.textContent = value;
+            selectedCards.push({ card, value });
+
+            if (selectedCards.length === 2) {
+                setTimeout(() => {
+                    checkForMatch();
+                }, 1000);
+            }
+        }
+    }
+
+    function checkForMatch() {
+        const [first, second] = selectedCards;
+        if (first.value === second.value) {
+            matchedPairs++;
+            if (matchedPairs === cardValues.length / 2) {
+                alert('Congratulations! You won!');
+            }
+        } else {
+            first.card.textContent = '';
+            second.card.textContent = '';
+        }
+        selectedCards = [];
+    }
+
+    createBoard();
+</script>
+</body>
+</html>
