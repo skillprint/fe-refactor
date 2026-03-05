@@ -7,6 +7,8 @@ import * as createArtStyles from '@/migrations/02-create-art-styles';
 import * as createGenres from '@/migrations/03-create-genres';
 import * as addGameTitle from '@/migrations/04-add-game-title';
 import * as addGameIcon from '@/migrations/05-add-game-icon';
+import * as createOrgMembers from '@/migrations/06-create-org-members';
+import * as createOrgGames from '@/migrations/07-create-org-games';
 
 export async function GET() {
     try {
@@ -41,6 +43,16 @@ export async function GET() {
                     name: '05-add-game-icon',
                     up: async () => addGameIcon.up({ context: sequelize, name: '05-add-game-icon' }),
                     down: async () => addGameIcon.down({ context: sequelize, name: '05-add-game-icon' }),
+                },
+                {
+                    name: '06-create-org-members',
+                    up: async () => createOrgMembers.up({ context: sequelize as any, name: '06-create-org-members' } as any),
+                    down: async () => createOrgMembers.down({ context: sequelize as any, name: '06-create-org-members' } as any),
+                },
+                {
+                    name: '07-create-org-games',
+                    up: async () => createOrgGames.up({ context: sequelize as any, name: '07-create-org-games' } as any),
+                    down: async () => createOrgGames.down({ context: sequelize as any, name: '07-create-org-games' } as any),
                 }
             ],
             context: sequelize,

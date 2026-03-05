@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="game-icon" content="🚀">
+<title>Focus Runner</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+  }
+  #gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  .start-screen, .game-over-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+  }
+  .start-screen.active, .game-over-screen.active {
+    display: flex;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+<div id="gameContainer">
+  <div class="start-screen active" id="startScreen">
+    <h1>Focus Runner</h1>
+    <p>Press Space to Start</p>
+  </div>
+  <div class="game-over-screen" id="gameOverScreen">
+    <h1>Game Over</h1>
+    <p>Your Score: <span id="finalScore">0</span></p>
+    <p>Press Space to Restart</p>
+  </div>
+</div>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+<script>
+const config = {
+  type: Phaser.AUTO,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 500 },
+      debug: false
+    }
+  },
+  scene: {
+    preload: preload,
+    create: create,
+    update: update
+  }
+};
+
+const game = new Phaser.Game(config);
+
+let player;
+let platforms;
+let cursors;
+let score = 0;
+let scoreText;
+
+const HERO_SPEED = 200;
+const ENEMY_SPAWN_RATE = 1500;
+const GRAVITY = 500;
+
+window.adjustGame = function(obj) {
+  if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+    const { parameterName, parameterValue } = obj;
+    switch (parameterName) {
+      case 'hero_speed':
+        HERO_SPEED = parameterValue;
+        break;
+      case 'enemy_spawn_rate':
+        ENEMY_SPAWN_RATE = parameterValue;
+        break;
+      case 'gravity':
+        game.physics.arcade.gravity.y = GRAVITY = parameterValue;
+        break;
+    }
+    console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+  }
+}
+
+window.Skillprint.registerAdjustments({
+  '1': { parameterName: 'hero_speed', description: 'Decrease Hero Speed', value: 150 },
+  '2': { parameterName: 'hero_speed', description: 'Increase Hero Speed', value: 250 },
+  '3': { parameterName: 'enemy_spawn_rate', description: 'Decrease Enemy Spawn Rate', value: 1000 },
+  '4': { parameterName: 'enemy_spawn_rate', description: 'Increase Enemy Spawn Rate', value: 2000 },
+  '5': { parameterName: 'gravity', description: 'Decrease Gravity', value: 300 },
+  '6': { parameterName: 'gravity', description: 'Increase Gravity', value: 700 }
+});
+
+function preload() {
+  this.load.image('sky', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+  this.load.image('ground', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+  this.load.spritesheet('dude', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', { frameWidth: 32, frameHeight: 48 });
+}
+
+function create() {
+  this.add.image(400, 300, 'sky');
+  
+  platforms = this.physics.add.staticGroup();
+  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+  platforms.create(600, 400, 'ground');
+  platforms.create(50, 250, 'ground');
+  platforms.create(750, 220, 'ground');
+
+  player = this.physics.add.sprite(100, 450, 'dude');
+
+  player.setBounce(0.2);
+  player.setCollideWorldBounds(true);
+
+  this.anims.create({
+    key: 'left',
+    frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  this.anims.create({
+    key: 'turn',
+    frames: [{ key: 'dude', frame: 4 }],
+    frameRate: 20
+  });
+
+  this.anims.create({
+    key: 'right',
+    frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+    frameRate: 10,
+    repeat: -1
+  });
+
+  cursors = this.input.keyboard.createCursorKeys();
+
+  scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#fff' });
+
+  this.physics.add.collider(player, platforms);
+
+  this.time.addEvent({
+    delay: ENEMY_SPAWN_RATE,
+    callback: spawnEnemy,
+    callbackScope: this,
+    loop: true
+  });
+}
+
+function update() {
+  if (cursors.left.isDown) {
+    player.setVelocityX(-HERO_SPEED);
+    player.anims.play('left', true);
+  } else if (cursors.right.isDown) {
+    player.setVelocityX(HERO_SPEED);
+    player.anims.play('right', true);
+  } else {
+    player.setVelocityX(0);
+    player.anims.play('turn');
+  }
+
+  if (cursors.up.isDown && player.body.touching.down) {
+    player.setVelocityY(-330);
+  }
+}
+
+function spawnEnemy() {
+  const enemy = this.physics.add.sprite(Math.random() * config.width, -50, 'dude');
+  enemy.setGravityY(200);
+  enemy.setCollideWorldBounds(true);
+  enemy.setBounce(1);
+  enemy.setVelocityX((Math.random() > 0.5 ? 1 : -1) * (Math.random() * 100 + 50));
+  this.physics.add.collider(enemy, platforms);
+  this.physics.add.collider(player, enemy, () => {
+    this.scene.stop();
+    document.getElementById('gameOverScreen').classList.add('active');
+    document.getElementById('finalScore').innerText = score;
+  });
+}
+
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space') {
+    if (document.getElementById('startScreen').classList.contains('active')) {
+      document.getElementById('startScreen').classList.remove('active');
+      game.scene.start();
+    } else if (document.getElementById('gameOverScreen').classList.contains('active')) {
+      document.getElementById('gameOverScreen').classList.remove('active');
+      score = 0;
+      scoreText.setText('score: 0');
+      game.scene.restart();
+    }
+  }
+});
+</script>
+</body>
+</html>

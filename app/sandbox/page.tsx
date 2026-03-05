@@ -20,6 +20,8 @@ function GameSandboxContent() {
     const [refinePrompt, setRefinePrompt] = useState('');
     const [artStyleId, setArtStyleId] = useState('');
     const [genreId, setGenreId] = useState('');
+    const [modelProvider, setModelProvider] = useState<'gemini' | 'ollama'>('gemini');
+    const [ollamaModel, setOllamaModel] = useState('qwen2.5-coder:14b');
     const [artStyles, setArtStyles] = useState<{ id: string, name: string }[]>([]);
     const [genres, setGenres] = useState<{ id: string, name: string }[]>([]);
 
@@ -123,7 +125,16 @@ function GameSandboxContent() {
             const response = await fetch('/api/generate-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetMode, targetValue, optionalPrompt: promptToSend, existingCode, artStyleId: artStyleId || undefined, genreId: genreId || undefined }),
+                body: JSON.stringify({
+                    targetMode,
+                    targetValue,
+                    optionalPrompt: promptToSend,
+                    existingCode,
+                    artStyleId: artStyleId || undefined,
+                    genreId: genreId || undefined,
+                    modelProvider,
+                    modelName: modelProvider === 'ollama' ? ollamaModel : undefined
+                }),
             });
 
             if (!response.ok || !response.body) {
@@ -208,6 +219,44 @@ function GameSandboxContent() {
                             </button>
                         </div>
                     </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Model Provider</label>
+                        <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                            <button
+                                onClick={() => setModelProvider('gemini')}
+                                className={"flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all " + (modelProvider === 'gemini' ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white')}
+                            >
+                                Gemini
+                            </button>
+                            <button
+                                onClick={() => setModelProvider('ollama')}
+                                className={"flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all " + (modelProvider === 'ollama' ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white')}
+                            >
+                                Ollama Local
+                            </button>
+                        </div>
+                    </div>
+
+                    {modelProvider === 'ollama' && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Ollama Model
+                            </label>
+                            <select
+                                value={ollamaModel}
+                                onChange={(e) => setOllamaModel(e.target.value)}
+                                className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3 text-sm"
+                            >
+                                <option value="qwen2.5-coder:14b">qwen2.5-coder:14b</option>
+                                <option value="qwen2.5-coder:32b">qwen2.5-coder:32b</option>
+                                <option value="deepseek-coder-v2">deepseek-coder-v2</option>
+                                <option value="llama3.1">llama3.1 (8B)</option>
+                                <option value="codestral">codestral</option>
+                                <option value="llama3.2:3b">llama3.2:3b (Fast)</option>
+                            </select>
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 capitalize">

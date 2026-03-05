@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relax Platformer</title>
+<style>
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #e0f7fa;
+    font-family: 'Inter', sans-serif;
+}
+#game-container {
+    width: 800px;
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+}
+.start-screen, .game-over-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #4a148c;
+    font-size: 2em;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    color: #fff;
+    background-color: #4a148c;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+button:hover {
+    background-color: #3700b3;
+}
+</style>
+<meta name="game-icon" content="🌟">
+<script src="/games/lib/skillprint-adjustment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+<div id="game-container">
+    <div class="start-screen">
+        Relax Platformer
+        <button onclick="startGame()">Start Game</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="game-over-screen">
+        Game Over!
+        <p>Score: <span id="final-score">0</span></p>
+        <button onclick="restartGame()">Restart Game</button>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script>
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    parent: 'game-container',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+const game = new Phaser.Game(config);
+let player;
+let coins;
+let scoreText;
+let score = 0;
+
+function preload() {
+    this.load.image('ground', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGwtcnVsZT0ibm9uZSI+PHJlY3QgeD0iOSIgeT0iOSIgd2lkdGg9Ijc4NCIgaGVpZ2h0PSIyMCIgcng9IjEiIGZpbGw9IiNmZjU5OGQiLz48cmVjdCB4PSI3ODUiIHk9iOSIgd2lkdGg9IjIxOCIgaGVpZ2h0PSIyMCIgcng9IjEiIGZpbGw9IiNmZjU5OGQiLz48cmVjdCB4PSIxIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ2OCIgaWQ9Imdyb3VuZCIgZmlsbD0iI2YxOTk5MCIvPjwvZz48L3N2Zz4=');
+    this.load.image('coin', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjZmYxODAwIiBpZD0ib2xkIj48cmVjdCB4PSIxOCIgeT0iMiIgd2lkdGg9IjMiIGhlaWdodD0iMzgiIHJ4PSIyIi8+PHJlY3QgeD0iMTQiIHk9IjYiIHdpZHRoPSI0IiBoZWlnaHQ9Ijc2IiByeD0iMiIvPjxyZWN0IHg9IjEwIiB5PSIxNCIgd2lkdGg9IjQiIGhlaWdodD0iNjciIHYxLjUyNTQzIiByeD0iMiIvPjxyZWN0IHg9IjYiIHk9IjE2IiB3aWR0aD0iMyIgaGVpZ2h0PSI1NiIgdjEuMjUyNTEiIHI9IjIiLz48cmVjdCB4PSIzIiB5PSIxOCIgd2lkdGg9IjQiIGhlaWdodD0iNTMiIHYxLjQ3ODI1IiByeD0iMiIvPjxyZWN0IHg9IjIiIHk9IjIwIiB3aWR0aD0iNiIgaGVpZ2h0PSIyOSIgdjEuMzk4NzQiIHI9IjIiLz48cmVjdCB4PSI1IiB5PSIyMiIgd2lkdGg9IjUiIGhlaWdodD0iMjciIHYxLjYwNTcyIiByeD0iMiIvPjxyZWN0IHg9IjQiIHk9IjI1IiB3aWR0aD0iNCIgaGVpZ2h0PSIxOSIgdjEuNDA4MzEiIHI9IjIiLz48cmVjdCB4PSIzIiB5PSIyNyIgd2lkdGg9IjYiIGhlaWdodD0xOCIgdjEuNTI1NDMiIHI9IjIiLz48cmVjdCB4PSIyIiB5PSIyOSIgd2lkdGg9IjciIGhlaWdodD0xNiIgdjEuNzk4NzQiIHI9IjIiLz48cmVjdCB4PSIxIiB5PSIzMSIgd2lkdGg9IjkiIGhlaWdodD0xNCIgdjEuNTI1NDMiIHI9IjIiLz48cmVjdCB4PSIwIiB5PSIzMyIgd2lkdGg9IjExIiBoZWlnaHQ9IDEyIiByeD0iMiIvPjwvZz48L3N2Zz4=');
+    this.load.image('player', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjZmYxODAwIiBpZD0icHJvZ3JhbCI+PHJlY3QgeD0iMTQiIHk9IjE2IiB3aWR0aD0iMjAiIGhlaWdodD0yMCByeD0iMiIvPjxyZWN0IHg9IjIwIiB5PSIxOCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE0IiByeD0iMiIvPjxjaXJjbGUgeD0iMTYiIHk9IjM0IiByPSIyIi8+PHJlY3QgeD0iMTEiIHk9IjM2IiB3aWR0aD0iIjEwIiBoZWlnaHQ9IjMiIHI9IjEiLz48cmVjdCB4PSIxNSIgeT0iNDAiIHdpZHRoPSIyIiBoZWlnaHQ9IjE0IiByeD0iMSIvPjwvZz48L3N2Zz4=');
+}
+
+function create() {
+    this.add.image(400, 300, 'ground').setScale(1.5).setImmovable(true);
+
+    player = this.physics.add.sprite(100, 450, 'player');
+    player.setBounce(0.2);
+    player.setCollideWorldBounds(true);
+
+    coins = this.physics.add.group({
+        key: 'coin',
+        repeat: 11,
+        setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+    coins.children.iterate(function (child) {
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    });
+
+    this.physics.add.collider(player, coins, collectCoin, null, this);
+
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#4a148c' });
+}
+
+function update() {
+    if (this.input.keyboard.isDown(Phaser.Input.Keyboard.KeyCodes.LEFT)) {
+        player.setVelocityX(-window.HERO_SPEED);
+    } else if (this.input.keyboard.isDown(Phaser.Input.Keyboard.KeyCodes.RIGHT)) {
+        player.setVelocityX(window.HERO_SPEED);
+    } else {
+        player.setVelocityX(0);
+    }
+
+    if (this.input.keyboard.isDown(Phaser.Input.Keyboard.KeyCodes.UP) && player.body.touching.down) {
+        player.setVelocityY(-330);
+    }
+}
+
+function collectCoin(player, coin) {
+    coin.disableBody(true, true);
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+    if (coins.countActive(true) === 0) {
+        coins.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true);
+        });
+    }
+}
+
+function startGame() {
+    document.querySelector('.start-screen').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+    game.scene.start();
+}
+
+function restartGame() {
+    score = 0;
+    scoreText.setText('Score: 0');
+    coins.children.iterate(function (child) {
+        child.enableBody(true, child.x, 0, true, true);
+    });
+    player.setPosition(100, 450);
+    document.querySelector('.game-over-screen').style.display = 'none';
+    game.scene.start();
+}
+
+window.HERO_SPEED = 160;
+window.GRAVITY = 300;
+
+window.adjustGame = function(obj) {
+    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+        const { parameterName, parameterValue } = obj;
+        if (parameterName === 'HERO_SPEED') {
+            window.HERO_SPEED = parameterValue;
+        }
+        if (parameterName === 'GRAVITY') {
+            window.GRAVITY = parameterValue;
+        }
+    }
+}
+
+window.addEventListener('load', function() {
+    window.game = new Phaser.Game({
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        scene: {
+            create: create,
+            update: update
+        },
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: window.GRAVITY }
+            }
+        }
+    });
+});
+
+window.game.scene.start('default');
+
+window.addEventListener('beforeunload', function() {
+    document.querySelector('.start-screen').style.display = 'block';
+    document.getElementById('gameCanvas').style.display = 'none';
+    document.querySelector('.game-over-screen').style.display = 'none';
+});

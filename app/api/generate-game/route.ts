@@ -12,7 +12,7 @@ import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [] } = await req.json();
+        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [], modelProvider = 'gemini', modelName } = await req.json();
 
         // Always include skillprint-adjustment (remove physics/sound generic stubs as Phaser has them built-in)
         libraries = Array.from(new Set([...libraries, 'skillprint-adjustment']));
@@ -124,38 +124,61 @@ ${libContext}`;
             }
         };
 
-        let modelName = process.env.GAME_GENERATIVE_MODEL || 'gemini-3.1-pro-preview';
-        let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
+        let response: Response;
+        let isOllama = modelProvider === 'ollama';
 
-        const fetchHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': 'text/event-stream'
-        };
+        if (isOllama) {
+            const ollamaModelName = modelName || 'qwen2.5-coder:14b';
+            const apiUrl = 'http://localhost:11434/api/generate';
+            const ollamaBody = {
+                model: ollamaModelName,
+                system: systemPrompt,
+                prompt: userPromptText,
+                stream: true,
+                options: {
+                    temperature: 0.7
+                }
+            };
 
-        let response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: fetchHeaders,
-            body: JSON.stringify(requestBody),
-        });
+            response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ollamaBody),
+            });
+        } else {
+            let geminiModelName = modelName || process.env.GAME_GENERATIVE_MODEL || 'gemini-3.1-pro-preview';
+            let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
-        if (!response.ok && response.status === 404) {
-            // fallback to 1.5 pro if 3.1 pro is not available on this API endpoint yet
-            modelName = process.env.GAME_GENERATIVE_MODEL_FALLBACK || 'gemini-1.5-pro';
-            apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
+            const fetchHeaders = {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream'
+            };
+
             response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: fetchHeaders,
                 body: JSON.stringify(requestBody),
             });
+
+            if (!response.ok && response.status === 404) {
+                // fallback to 1.5 pro if 3.1 pro is not available on this API endpoint yet
+                geminiModelName = process.env.GAME_GENERATIVE_MODEL_FALLBACK || 'gemini-1.5-pro';
+                apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: fetchHeaders,
+                    body: JSON.stringify(requestBody),
+                });
+            }
         }
 
         if (!response.ok) {
             const errorText = await response.text();
-            return NextResponse.json({ error: `Gemini API Error: ${response.statusText}`, details: errorText }, { status: response.status });
+            return NextResponse.json({ error: `${isOllama ? 'Ollama' : 'Gemini'} API Error: ${response.statusText}`, details: errorText }, { status: response.status });
         }
 
         if (!response.body) {
-            return NextResponse.json({ error: 'No response body from Gemini' }, { status: 500 });
+            return NextResponse.json({ error: `No response body from ${isOllama ? 'Ollama' : 'Gemini'}` }, { status: 500 });
         }
 
         const encoder = new TextEncoder();
@@ -173,16 +196,34 @@ ${libContext}`;
                         if (done) break;
 
                         buffer += decoder.decode(value, { stream: true });
-                        let parts = buffer.split(/\r?\n\r?\n/);
+                        let parts = buffer.split(/\r?\n/);
                         buffer = parts.pop() || "";
 
                         for (const part of parts) {
                             if (part.trim() === '') continue;
-                            const lines = part.split(/\r?\n/);
-                            for (const line of lines) {
-                                if (line.startsWith('data: ')) {
-                                    const dataStr = line.substring(6).trim();
-                                    // Check if it's not empty or a [DONE] equivalent
+
+                            if (isOllama) {
+                                try {
+                                    const data = JSON.parse(part);
+                                    if (data.response) {
+                                        fullOutputText += data.response;
+                                        controller.enqueue(encoder.encode(data.response));
+                                    }
+                                    if (data.done && data.eval_count) {
+                                        const usage = {
+                                            promptTokenCount: data.prompt_eval_count,
+                                            candidatesTokenCount: data.eval_count,
+                                            totalTokenCount: data.prompt_eval_count + data.eval_count
+                                        };
+                                        controller.enqueue(encoder.encode(`\n___TOKEN_USAGE___:${JSON.stringify(usage)}\n`));
+                                    }
+                                } catch (e) {
+                                    // ignore parse errors for partial lines
+                                }
+                            } else {
+                                // Gemini SSE parsing
+                                if (part.startsWith('data: ')) {
+                                    const dataStr = part.substring(6).trim();
                                     if (dataStr === '[DONE]') continue;
                                     if (!dataStr) continue;
 
@@ -199,7 +240,6 @@ ${libContext}`;
                                         }
 
                                         if (data.usageMetadata && data.candidates?.[0]?.finishReason) {
-                                            // Ensure this is properly streamed back
                                             controller.enqueue(encoder.encode(`\n___TOKEN_USAGE___:${JSON.stringify(data.usageMetadata)}\n`));
                                         }
                                     } catch (e) {
@@ -211,27 +251,36 @@ ${libContext}`;
                     }
 
                     // Process remaining buffer
-                    const lines = buffer.split(/\r?\n/);
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const dataStr = line.substring(6).trim();
-                            if (dataStr && dataStr !== '[DONE]') {
-                                try {
-                                    const data = JSON.parse(dataStr);
-                                    const parts = data.candidates?.[0]?.content?.parts || [];
-                                    let textPart = "";
-                                    for (const p of parts) {
-                                        if (p.text) textPart += p.text;
-                                    }
-                                    if (textPart) {
-                                        fullOutputText += textPart;
-                                        controller.enqueue(encoder.encode(textPart));
-                                    }
+                    if (buffer.trim() !== '') {
+                        if (isOllama) {
+                            try {
+                                const data = JSON.parse(buffer);
+                                if (data.response) {
+                                    fullOutputText += data.response;
+                                    controller.enqueue(encoder.encode(data.response));
+                                }
+                            } catch (e) { }
+                        } else {
+                            if (buffer.startsWith('data: ')) {
+                                const dataStr = buffer.substring(6).trim();
+                                if (dataStr && dataStr !== '[DONE]') {
+                                    try {
+                                        const data = JSON.parse(dataStr);
+                                        const parts = data.candidates?.[0]?.content?.parts || [];
+                                        let textPart = "";
+                                        for (const p of parts) {
+                                            if (p.text) textPart += p.text;
+                                        }
+                                        if (textPart) {
+                                            fullOutputText += textPart;
+                                            controller.enqueue(encoder.encode(textPart));
+                                        }
 
-                                    if (data.usageMetadata && data.candidates?.[0]?.finishReason) {
-                                        controller.enqueue(encoder.encode(`\n___TOKEN_USAGE___:${JSON.stringify(data.usageMetadata)}\n`));
-                                    }
-                                } catch (e) { }
+                                        if (data.usageMetadata && data.candidates?.[0]?.finishReason) {
+                                            controller.enqueue(encoder.encode(`\n___TOKEN_USAGE___:${JSON.stringify(data.usageMetadata)}\n`));
+                                        }
+                                    } catch (e) { }
+                                }
                             }
                         }
                     }
@@ -243,7 +292,7 @@ ${libContext}`;
                         finalHtmlContent = match[1];
                     } else {
                         // Fallback if no markdown blocks
-                        const matchHtml = fullOutputText.match(new RegExp("<!DOCTYPE html>[\\\\s\\\\S]*<\\\\/html>", "i"));
+                        const matchHtml = fullOutputText.match(new RegExp("<!DOCTYPE html>[\\s\\S]*<\\/html>", "i"));
                         if (matchHtml) {
                             finalHtmlContent = matchHtml[0];
                         }
