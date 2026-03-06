@@ -8,6 +8,9 @@ const Sparkles = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/s
 const CheckCircle2 = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>;
 const Circle = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /></svg>;
 
+import BuckyballLoading from '@/app/components/BuckyballLoading';
+import TopNav from '@/app/components/TopNav';
+
 interface Game {
     id: string;
     title: string | null;
@@ -15,7 +18,13 @@ interface Game {
     target_value: string;
     icon: string | null;
     is_active: boolean;
+    associated_skill: string[] | null;
+    associated_mood: string[] | null;
 }
+
+// Standardized tags aligned with the rest of the application
+const AVAILABLE_SKILLS = ['memory', 'logic', 'speed', 'pattern recognition', 'coordination'];
+const AVAILABLE_MOODS = ['relax', 'focus', 'collaborate', 'creative'];
 
 export default function OrgGamesPage() {
     const [activeTab, setActiveTab] = useState<"sandbox" | "list">("list");
@@ -59,6 +68,30 @@ export default function OrgGamesPage() {
             }
         } catch {
             setGames(games);
+            toast.error("Network error");
+        }
+    };
+
+    const updateGameAssociation = async (gameId: string, field: 'associated_skill' | 'associated_mood', value: string[] | null) => {
+        // Optimistic update is handled by onChange/onBlur directly setting state.
+        // This function is for API call and error handling.
+        try {
+            const res = await fetch("/api/org/games", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ generated_game_id: gameId, [field]: value }),
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+                // Fetch again on error to revert correctly
+                fetchGames();
+                toast.error("Failed to update association");
+            } else {
+                toast.success("Updated successfully");
+            }
+        } catch {
+            fetchGames();
             toast.error("Network error");
         }
     };
@@ -151,6 +184,119 @@ export default function OrgGamesPage() {
                                             {game.is_active ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
                                             {game.is_active ? "Active in Catalog" : "Activate Game"}
                                         </button>
+
+                                        {game.is_active && (
+                                            <div className="mt-4 pt-4 border-t border-neutral-800 space-y-3">
+                                                <div className="flex gap-4 mb-4">
+                                                    <div className="flex-1 relative">
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5 ml-1">
+                                                            Associated Skills
+                                                        </label>
+                                                        <div className="flex flex-wrap gap-2 mb-2">
+                                                            {(game.associated_skill || []).map(skill => (
+                                                                <span key={skill} className="px-2 py-1 text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 rounded-md flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800">
+                                                                    {skill}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const newSkills = (game.associated_skill || []).filter(s => s !== skill);
+                                                                            const finalVal = newSkills.length > 0 ? newSkills : null;
+                                                                            setGames(games.map(g => g.id === game.id ? { ...g, associated_skill: finalVal } : g));
+                                                                            updateGameAssociation(game.id, 'associated_skill', finalVal);
+                                                                        }}
+                                                                        className="hover:text-red-500 text-indigo-400 dark:hover:text-red-400 transition-colors cursor-pointer p-0.5 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800"
+                                                                    >
+                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                                    </button>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            list="skills-list"
+                                                            placeholder="Add skill (press Enter)..."
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    const val = (e.currentTarget.value || '').toLowerCase().trim();
+                                                                    if (val && !AVAILABLE_SKILLS.includes(val)) {
+                                                                        toast.error(`Invalid skill. Must be one of: ${AVAILABLE_SKILLS.join(', ')}`);
+                                                                    } else if (val) {
+                                                                        const current = game.associated_skill || [];
+                                                                        if (!current.includes(val)) {
+                                                                            const finalVal = [...current, val];
+                                                                            setGames(games.map(g => g.id === game.id ? { ...g, associated_skill: finalVal } : g));
+                                                                            updateGameAssociation(game.id, 'associated_skill', finalVal);
+                                                                        }
+                                                                        e.currentTarget.value = '';
+                                                                    }
+                                                                }
+                                                            }}
+                                                            onBlur={(e) => { e.target.value = ''; }}
+                                                            className="w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all placeholder:font-normal placeholder:text-gray-400"
+                                                        />
+                                                        <datalist id="skills-list">
+                                                            {AVAILABLE_SKILLS.map(skill => (
+                                                                <option key={skill} value={skill} />
+                                                            ))}
+                                                        </datalist>
+                                                    </div>
+                                                    <div className="flex-1 relative">
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5 ml-1">
+                                                            Associated Moods
+                                                        </label>
+                                                        <div className="flex flex-wrap gap-2 mb-2">
+                                                            {(game.associated_mood || []).map(mood => (
+                                                                <span key={mood} className="px-2 py-1 text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 rounded-md flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800">
+                                                                    {mood}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const newMoods = (game.associated_mood || []).filter(m => m !== mood);
+                                                                            const finalVal = newMoods.length > 0 ? newMoods : null;
+                                                                            setGames(games.map(g => g.id === game.id ? { ...g, associated_mood: finalVal } : g));
+                                                                            updateGameAssociation(game.id, 'associated_mood', finalVal);
+                                                                        }}
+                                                                        className="hover:text-red-500 text-emerald-400 dark:hover:text-red-400 transition-colors cursor-pointer p-0.5 rounded-full hover:bg-emerald-200 dark:hover:bg-emerald-800"
+                                                                    >
+                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                                    </button>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            list="moods-list"
+                                                            placeholder="Add mood (press Enter)..."
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    const val = (e.currentTarget.value || '').toLowerCase().trim();
+                                                                    if (val && !AVAILABLE_MOODS.includes(val)) {
+                                                                        toast.error(`Invalid mood. Must be one of: ${AVAILABLE_MOODS.join(', ')}`);
+                                                                    } else if (val) {
+                                                                        const current = game.associated_mood || [];
+                                                                        if (!current.includes(val)) {
+                                                                            const finalVal = [...current, val];
+                                                                            setGames(games.map(g => g.id === game.id ? { ...g, associated_mood: finalVal } : g));
+                                                                            updateGameAssociation(game.id, 'associated_mood', finalVal);
+                                                                        }
+                                                                        e.currentTarget.value = '';
+                                                                    }
+                                                                }
+                                                            }}
+                                                            onBlur={(e) => { e.target.value = ''; }}
+                                                            className="w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all placeholder:font-normal placeholder:text-gray-400"
+                                                        />
+                                                        <datalist id="moods-list">
+                                                            {AVAILABLE_MOODS.map(mood => (
+                                                                <option key={mood} value={mood} />
+                                                            ))}
+                                                        </datalist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

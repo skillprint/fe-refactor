@@ -8,6 +8,8 @@ export class OrganizationGame extends Model {
     declare organization_id: string;
     declare generated_game_id: string;
     declare is_active: boolean;
+    declare associated_skill: string[] | null;
+    declare associated_mood: string[] | null;
     declare created_at: Date;
 }
 
@@ -38,6 +40,16 @@ OrganizationGame.init(
             type: DataTypes.BOOLEAN,
             defaultValue: false,
             allowNull: false,
+        },
+        associated_skill: {
+            type: DataTypes.ARRAY(DataTypes.STRING),
+            allowNull: true,
+            defaultValue: [],
+        },
+        associated_mood: {
+            type: DataTypes.ARRAY(DataTypes.STRING),
+            allowNull: true,
+            defaultValue: [],
         },
         created_at: {
             type: DataTypes.DATE,

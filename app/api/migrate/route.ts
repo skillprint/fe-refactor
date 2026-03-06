@@ -10,6 +10,8 @@ import * as addGameIcon from '@/migrations/05-add-game-icon';
 import * as createOrgMembers from '@/migrations/06-create-org-members';
 import * as createOrgGames from '@/migrations/07-create-org-games';
 import * as createGameParameters from '@/migrations/08-create-game-parameters';
+import * as addOrgGameFields from '@/migrations/09-add-org-game-fields';
+import * as addOrgArrayFields from '@/migrations/10-org-games-array-fields';
 
 export async function GET() {
     try {
@@ -59,6 +61,16 @@ export async function GET() {
                     name: '08-create-game-parameters',
                     up: async () => createGameParameters.up({ context: sequelize as any, name: '08-create-game-parameters' } as any),
                     down: async () => createGameParameters.down({ context: sequelize as any, name: '08-create-game-parameters' } as any),
+                },
+                {
+                    name: '09-add-org-game-fields',
+                    up: async () => addOrgGameFields.up({ context: sequelize as any, name: '09-add-org-game-fields' } as any),
+                    down: async () => addOrgGameFields.down({ context: sequelize as any, name: '09-add-org-game-fields' } as any),
+                },
+                {
+                    name: '10-org-games-array-fields',
+                    up: async () => addOrgArrayFields.up({ context: sequelize as any, name: '10-org-games-array-fields' } as any),
+                    down: async () => addOrgArrayFields.down({ context: sequelize as any, name: '10-org-games-array-fields' } as any),
                 }
             ],
             context: sequelize,
