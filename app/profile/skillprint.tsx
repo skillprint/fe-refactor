@@ -50,6 +50,13 @@ export const updateSetting = (name: string, value: string, setter: (val: string)
   document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
 };
 
+export const queryParamDebug = (): boolean => {
+  // check query string
+  const searchParams = new URLSearchParams(window.location.search);
+  const debug = process.env.NODE_ENV === 'development' || searchParams.get('debug') === 'true';
+  return debug;
+}
+
 export default function Skillprint() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -63,6 +70,8 @@ export default function Skillprint() {
   const [nextGameSlug, setNextGameSlug] = useState<string>('');
   const { goal, setGoal } = useGoal();
   const { logout } = useAuth();
+
+  const isDebug = queryParamDebug();
 
   const MOOD_COLORS: Record<string, string> = {
     focus: '#8F48F1', relax: '#10B981', innovate: '#F59E0B', collaborate: '#3B82F6',
@@ -434,94 +443,100 @@ export default function Skillprint() {
             </div>
 
             {/* Theme Selector */}
-            <div className="flex items-center justify-between border-b border-border pb-6">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">
-                  Appearance
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Customize your interface theme
-                </p>
-              </div>
-              <div className="relative">
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value as any)}
-                  className="appearance-none bg-secondary text-foreground px-4 py-2 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer transition-opacity hover:opacity-80"
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="midnight">Midnight</option>
-                  <option value="skillprint">Skillprint</option>
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+            {isDebug && (
+              <div className="flex items-center justify-between border-b border-border pb-6">
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">
+                    Appearance
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Customize your interface theme
+                  </p>
+                </div>
+                <div className="relative">
+                  <select
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value as any)}
+                    className="appearance-none bg-secondary text-foreground px-4 py-2 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer transition-opacity hover:opacity-80"
+                  >
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="midnight">Midnight</option>
+                    <option value="skillprint">Skillprint</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">
-                  Reset First-Time Experience
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Clear all first-time user experience flags to see the welcome carousel again
-                </p>
+            {isDebug && (
+              <div className="flex items-center justify-between border-b border-border pb-6">
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">
+                    Reset First-Time Experience
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Clear all first-time user experience flags to see the welcome carousel again
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    // Delete the FTUE cookie
+                    document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    // delete the first badge cookie
+                    document.cookie = 'first_game_badge_seen=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    // Show confirmation
+                    toast.success('Settings reset! Refresh the page to see the welcome experience again.');
+                  }}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                  Reset
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  // Delete the FTUE cookie
-                  document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                  // delete the first badge cookie
-                  document.cookie = 'first_game_badge_seen=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                  // Show confirmation
-                  toast.success('Settings reset! Refresh the page to see the welcome experience again.');
-                }}
-                className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
-                Reset
-              </button>
-            </div>
-            <div className="flex items-center justify-between border-t border-border pt-6">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">
-                  Debug Profile
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Fetch profile data to console
-                </p>
+            )}
+            {isDebug && (
+              <div className="flex items-center justify-between border-t border-border pt-6">
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">
+                    Debug Profile
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Fetch profile data to console
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    toast.promise(fetchUserProfile(), {
+                      loading: 'Fetching profile...',
+                      success: 'Check console for profile data!',
+                      error: 'Failed to fetch profile',
+                    });
+                  }}
+                  className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                  Fetch Data
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  toast.promise(fetchUserProfile(), {
-                    loading: 'Fetching profile...',
-                    success: 'Check console for profile data!',
-                    error: 'Failed to fetch profile',
-                  });
-                }}
-                className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
-                Fetch Data
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between border-t border-border pt-6">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">
-                  Test First Game Badge
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Show the "First Game Played" popup
-                </p>
+            )}
+            {isDebug && (
+              <div className="flex items-center justify-between border-t border-border pt-6">
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">
+                    Test First Game Badge
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Show the "First Game Played" popup
+                  </p>
+                </div>
+                <button
+                  onClick={handleTestBadge}
+                  className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
+                  Test Popup
+                </button>
               </div>
-              <button
-                onClick={handleTestBadge}
-                className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-105">
-                Test Popup
-              </button>
-            </div>
-
+            )}
             <div className="flex items-center justify-between border-t border-border pt-6">
               <div>
                 <h3 className="text-lg font-medium text-foreground text-destructive">

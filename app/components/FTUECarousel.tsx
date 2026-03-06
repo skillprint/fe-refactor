@@ -196,7 +196,7 @@ export default function FTUECarousel() {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-500"
+            className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-500"
             role="dialog"
             aria-modal="true"
             aria-labelledby="ftue-title"

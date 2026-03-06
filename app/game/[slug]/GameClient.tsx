@@ -10,6 +10,7 @@ import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
+import { getGameBySlug } from '../../api/api';
 
 interface GameClientProps {
     slug: string;
@@ -26,83 +27,86 @@ interface GameResults {
 }
 
 export const unifiedSlugFromBESlug = (slug: string) => {
-    if (slug.indexOf('0hh1') >= 0) return '0hh1';
-    if (slug.indexOf('2048') >= 0) return '2048';
-    if (slug.indexOf('alchemy') >= 0) return 'alchemy';
-    if (slug.indexOf('box-tower') >= 0) return 'box-tower';
-    if (slug.indexOf('brick-out') >= 0) return 'brick-out';
-    if (slug.indexOf('bubble-spirit') >= 0) return 'bubble-spirit';
-    if (slug.indexOf('change-word') >= 0) return 'change-word';
-    if (slug.indexOf('colorize-2') >= 0) return 'colorize-2';
-    if (slug.indexOf('flapcat-steampunk-2') >= 0) return 'flapcat-steampunk-2';
-    if (slug.indexOf('flapcat-steampunk') >= 0) return 'flapcat-steampunk';
-    if (slug.indexOf('fruit-boom') >= 0) return 'fruit-boom';
-    if (slug.indexOf('fruit-sorting') >= 0) return 'fruit-sorting';
-    if (slug.indexOf('garden-match') >= 0) return 'garden-match';
-    if (slug.indexOf('gems-of-hanoi') >= 0) return 'gems-of-hanoi';
-    if (slug.indexOf('gummy-blocks') >= 0) return 'gummy-blocks';
-    if (slug.indexOf('hextris') >= 0) return 'hextris';
-    if (slug.indexOf('hiding-master') >= 0) return 'hiding-master';
-    if (slug.indexOf('i-love-hue') >= 0) return 'i-love-hue';
-    if (slug.indexOf('impossible-10') >= 0) return 'impossible-10';
-    if (slug.indexOf('katana-fruits') >= 0) return 'katana-fruits';
-    if (slug.indexOf('mahjong-deluxe') >= 0) return 'mahjong-deluxe';
-    if (slug.indexOf('match-doodle') >= 0) return 'match-doodle';
-    if (slug.indexOf('mine-rusher') >= 0) return 'mine-rusher';
-    if (slug.indexOf('photo-hunt') >= 0) return 'photo-hunt';
-    if (slug.indexOf('snake-attack') >= 0) return 'snake-attack';
-    if (slug.indexOf('space-adventure-pinball') >= 0) return 'space-adventure-pinball';
-    if (slug.indexOf('space-trip') >= 0) return 'space-trip';
-    if (slug.indexOf('stacks-tower') >= 0) return 'stacks-tower';
-    if (slug.indexOf('star-puzzles') >= 0) return 'star-puzzles';
-    if (slug.indexOf('sumagi') >= 0) return 'sumagi';
-    if (slug.indexOf('sweet-memory') >= 0) return 'sweet-memory';
-    if (slug.indexOf('ultimate-sudoku') >= 0) return 'ultimate-sudoku';
-    if (slug.indexOf('whack-em-all') >= 0) return 'whack-em-all';
+    const lowerSlug = slug.toLowerCase().replace(/\s+/g, '-');
+    if (lowerSlug.indexOf('0hh1') >= 0 || lowerSlug.indexOf('0h-h1') >= 0) return '0hh1';
+    if (lowerSlug.indexOf('2048') >= 0) return '2048';
+    if (lowerSlug.indexOf('alchemy') >= 0) return 'alchemy';
+    if (lowerSlug.indexOf('box-tower') >= 0) return 'box-tower';
+    if (lowerSlug.indexOf('brick-out') >= 0) return 'brick-out';
+    if (lowerSlug.indexOf('bubble-spirit') >= 0) return 'bubble-spirit';
+    if (lowerSlug.indexOf('change-word') >= 0) return 'change-word';
+    if (lowerSlug.indexOf('colorize-2') >= 0) return 'colorize-2';
+    if (lowerSlug.indexOf('flapcat-steampunk-2') >= 0) return 'flapcat-steampunk-2';
+    if (lowerSlug.indexOf('flapcat-steampunk') >= 0) return 'flapcat-steampunk';
+    if (lowerSlug.indexOf('fruit-boom') >= 0) return 'fruit-boom';
+    if (lowerSlug.indexOf('fruit-sorting') >= 0) return 'fruit-sorting';
+    if (lowerSlug.indexOf('garden-match') >= 0) return 'garden-match';
+    if (lowerSlug.indexOf('gems-of-hanoi') >= 0) return 'gems-of-hanoi';
+    if (lowerSlug.indexOf('gummy-blocks') >= 0) return 'gummy-blocks';
+    if (lowerSlug.indexOf('hextris') >= 0) return 'hextris';
+    if (lowerSlug.indexOf('hiding-master') >= 0) return 'hiding-master';
+    if (lowerSlug.indexOf('i-love-hue') >= 0) return 'i-love-hue';
+    if (lowerSlug.indexOf('impossible-10') >= 0) return 'impossible-10';
+    if (lowerSlug.indexOf('katana-fruits') >= 0) return 'katana-fruits';
+    if (lowerSlug.indexOf('mahjong-deluxe') >= 0) return 'mahjong-deluxe';
+    if (lowerSlug.indexOf('match-doodle') >= 0) return 'match-doodle';
+    if (lowerSlug.indexOf('mine-rusher') >= 0) return 'mine-rusher';
+    if (lowerSlug.indexOf('photo-hunt') >= 0) return 'photo-hunt';
+    if (lowerSlug.indexOf('snake-attack') >= 0) return 'snake-attack';
+    if (lowerSlug.indexOf('space-adventure-pinball') >= 0) return 'space-adventure-pinball';
+    if (lowerSlug.indexOf('space-trip') >= 0) return 'space-trip';
+    if (lowerSlug.indexOf('stacks-tower') >= 0) return 'stacks-tower';
+    if (lowerSlug.indexOf('star-puzzles') >= 0) return 'star-puzzles';
+    if (lowerSlug.indexOf('sumagi') >= 0) return 'sumagi';
+    if (lowerSlug.indexOf('sweet-memory') >= 0) return 'sweet-memory';
+    if (lowerSlug.indexOf('ultimate-sudoku') >= 0) return 'ultimate-sudoku';
+    if (lowerSlug.indexOf('whack-em-all') >= 0 || lowerSlug.indexOf('whack') >= 0) return 'whack-em-all';
 
     return slug;
 }
 
 
+export const SLUG_TO_DIR_MAP: Record<string, string> = {
+    '0hh1': '0hh1',
+    '2048': '2048',
+    'alchemy': 'Alchemy',
+    'box-tower': 'Box Tower',
+    'brick-out': 'Brick Out',
+    'bubble-spirit': 'Bubble Spirit',
+    'change-word': 'Change Word',
+    'colorize-2': 'Colorize 2',
+    'flapcat-steampunk': 'Flapcat Steampunk',
+    'flapcat-steampunk-2': 'Flapcat Steampunk 2',
+    'fruit-boom': 'Fruit Boom',
+    'fruit-sorting': 'Fruit Sorting',
+    'garden-match': 'Garden Match',
+    'gems-of-hanoi': 'Gems of Hanoi',
+    'gummy-blocks': 'Gummy Blocks',
+    'hextris': 'Hextris',
+    'hiding-master': 'Hiding Master',
+    'i-love-hue': 'I Love Hue',
+    'impossible-10': 'Impossible 10',
+    'katana-fruits': 'Katana Fruits',
+    'mahjong-deluxe': 'Mahjong Deluxe',
+    'match-doodle': 'Match Doodle',
+    'mine-rusher': 'Mine Rusher',
+    'photo-hunt': 'Photo Hunt',
+    'snake-attack': 'Snake Attack',
+    'space-adventure-pinball': 'Space Adventure Pinball',
+    'space-trip': 'Space Trip',
+    'stacks-tower': 'Stacks Tower',
+    'star-puzzles': 'Star Puzzles',
+    'sumagi': 'Sumagi',
+    'sweet-memory': 'Sweet Memory',
+    'ultimate-sudoku': 'Ultimate Sudoku',
+    'whack-em-all': "Whack 'em All"
+};
+
 export const mapSlugToGamePath = (slug: string) => {
     const unifiedSlug = unifiedSlugFromBESlug(slug);
-
-    switch (unifiedSlug) {
-        case '0hh1': return '/games/live/0hh1/static/index.html';
-        case '2048': return '/games/live/2048/static/index.html';
-        case 'alchemy': return '/games/live/Alchemy/static/index.html';
-        case 'box-tower': return '/games/live/Box Tower/static/index.html';
-        case 'brick-out': return '/games/live/Brick Out/static/index.html';
-        case 'bubble-spirit': return '/games/live/Bubble Spirit/static/index.html';
-        case 'change-word': return '/games/live/Change Word/static/index.html';
-        case 'colorize-2': return '/games/live/Colorize 2/static/index.html';
-        case 'flapcat-steampunk': return '/games/live/Flapcat Steampunk/static/index.html';
-        case 'flapcat-steampunk-2': return '/games/live/Flapcat Steampunk 2/static/index.html';
-        case 'fruit-boom': return '/games/live/Fruit Boom/static/index.html';
-        case 'fruit-sorting': return '/games/live/Fruit Sorting/static/index.html';
-        case 'garden-match': return '/games/live/Garden Match/static/index.html';
-        case 'gems-of-hanoi': return '/games/live/Gems of Hanoi/static/index.html';
-        case 'gummy-blocks': return '/games/live/Gummy Blocks/static/index.html';
-        case 'hextris': return '/games/live/Hextris/static/index.html';
-        case 'hiding-master': return '/games/live/Hiding Master/static/index.html';
-        case 'i-love-hue': return '/games/live/I Love Hue/static/index.html';
-        case 'impossible-10': return '/games/live/Impossible 10/static/index.html';
-        case 'katana-fruits': return '/games/live/Katana Fruits/static/index.html';
-        case 'mahjong-deluxe': return '/games/live/Mahjong Deluxe/static/index.html';
-        case 'match-doodle': return '/games/live/Match Doodle/static/index.html';
-        case 'mine-rusher': return '/games/live/Mine Rusher/static/index.html';
-        case 'photo-hunt': return '/games/live/Photo Hunt/static/index.html';
-        case 'snake-attack': return '/games/live/Snake Attack/static/index.html';
-        case 'space-adventure-pinball': return '/games/live/Space Adventure Pinball/static/index.html';
-        case 'space-trip': return '/games/live/Space Trip/static/index.html';
-        case 'stacks-tower': return '/games/live/Stacks Tower/static/index.html';
-        case 'star-puzzles': return '/games/live/Star Puzzles/static/index.html';
-        case 'sumagi': return '/games/live/Sumagi/static/index.html';
-        case 'sweet-memory': return '/games/live/Sweet Memory/static/index.html';
-        case 'ultimate-sudoku': return '/games/live/Ultimate Sudoku/static/index.html';
-        case 'whack-em-all': return "/games/live/Whack 'em All/static/index.html";
-        default: return `/games/live/${slug}/static/index.html`;
-    }
+    const dir = SLUG_TO_DIR_MAP[unifiedSlug];
+    if (dir) return `/games/live/${dir}/static/index.html`;
+    return `/games/live/${slug}/static/index.html`;
 };
 
 export default function GameClient({ slug }: GameClientProps) {
@@ -132,10 +136,50 @@ export default function GameClient({ slug }: GameClientProps) {
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
-    const gamePath = mapSlugToGamePath(decodedSlug);
+
+    const [gamePath, setGamePath] = useState<string>('');
+    const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
 
     // Get game configuration
     const gameConfig = getGameConfig(decodedSlug);
+
+    useEffect(() => {
+        let isMounted = true;
+        const resolvePath = async () => {
+            try {
+                const normalizedSlug = unifiedSlugFromBESlug(decodedSlug);
+                const apiData = await getGameBySlug(normalizedSlug);
+
+                let targetSlug = decodedSlug;
+
+                // Validate that the API returned the expected game, avoiding fallbacks like Hextris.
+                if (apiData && apiData.slug) {
+                    const returnedUnified = unifiedSlugFromBESlug(apiData.slug);
+                    if (returnedUnified === normalizedSlug) {
+                        targetSlug = apiData.slug;
+                    }
+                }
+
+                if (isMounted) {
+                    setGamePath(mapSlugToGamePath(targetSlug));
+                }
+            } catch (error) {
+                console.error("Error fetching game slug mapping", error);
+                if (isMounted) {
+                    setGamePath(mapSlugToGamePath(decodedSlug));
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingGamePath(false);
+                }
+            }
+        };
+        resolvePath();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [decodedSlug]);
 
     const handleIframeLoad = () => {
         setIsIframeLoaded(true);
@@ -497,15 +541,27 @@ export default function GameClient({ slug }: GameClientProps) {
             <div className="flex flex-col min-h-screen">
                 {/* Game iframe */}
                 <main className="flex-1 relative">
-                    <iframe
-                        ref={iframeRef}
-                        src={gamePath}
-                        className="w-full h-full min-h-screen border-0"
-                        title={`${decodedSlug} Game`}
-                        allowFullScreen
-                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-                        onLoad={handleIframeLoad}
-                    />
+                    {isLoadingGamePath ? (
+                        <div className="w-full h-full min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 border-0">
+                            <div className="flex flex-col items-center gap-4">
+                                <svg className="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span className="text-gray-500 dark:text-gray-400 font-medium">Loading Game...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <iframe
+                            ref={iframeRef}
+                            src={gamePath}
+                            className="w-full h-full min-h-screen border-0"
+                            title={`${decodedSlug} Game`}
+                            allowFullScreen
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                            onLoad={handleIframeLoad}
+                        />
+                    )}
 
                     {/* Adjustment Banner */}
                     {currentAdjustment && (
