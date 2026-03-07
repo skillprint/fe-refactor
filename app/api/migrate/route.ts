@@ -12,6 +12,7 @@ import * as createOrgGames from '@/migrations/07-create-org-games';
 import * as createGameParameters from '@/migrations/08-create-game-parameters';
 import * as addOrgGameFields from '@/migrations/09-add-org-game-fields';
 import * as addOrgArrayFields from '@/migrations/10-org-games-array-fields';
+import * as createPlaybooks from '@/migrations/11-create-playbooks';
 
 export async function GET() {
     try {
@@ -71,6 +72,11 @@ export async function GET() {
                     name: '10-org-games-array-fields',
                     up: async () => addOrgArrayFields.up({ context: sequelize as any, name: '10-org-games-array-fields' } as any),
                     down: async () => addOrgArrayFields.down({ context: sequelize as any, name: '10-org-games-array-fields' } as any),
+                },
+                {
+                    name: '11-create-playbooks',
+                    up: async () => createPlaybooks.up({ context: sequelize, name: '11-create-playbooks' }),
+                    down: async () => createPlaybooks.down({ context: sequelize, name: '11-create-playbooks' }),
                 }
             ],
             context: sequelize,
