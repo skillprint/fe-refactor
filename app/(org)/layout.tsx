@@ -23,6 +23,7 @@ export default async function OrgLayout({
     const navItems = [
         { name: "Dashboard", href: "/org/dashboard", icon: LayoutDashboard },
         { name: "Playbooks", href: "/org/playbooks", icon: BookOpen },
+        { name: "Challenges", href: "/org/challenges", icon: BookOpen },
         { name: "Settings", href: "/org/settings", icon: Settings },
         { name: "Analytics", href: "/org/analytics", icon: LineChart },
         { name: "Games", href: "/org/games", icon: Gamepad2 },

@@ -14,6 +14,7 @@ import RecommendedGameTile from '../../../components/RecommendedGameTile';
 import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
 import MoodSurveyWidget from '../../../components/MoodSurveyWidget';
+import ChallengeWidget from '../../../components/ChallengeWidget';
 
 interface GameResults {
     score?: number;
@@ -486,6 +487,10 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                                 >
                                     Back to Games
                                 </button>
+                            </div>
+
+                            <div className="mt-8">
+                                <ChallengeWidget currentGameId={gameApiData?.id} />
                             </div>
 
                             {/* Recommended Game Tile */}

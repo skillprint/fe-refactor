@@ -13,6 +13,7 @@ import * as createGameParameters from '@/migrations/08-create-game-parameters';
 import * as addOrgGameFields from '@/migrations/09-add-org-game-fields';
 import * as addOrgArrayFields from '@/migrations/10-org-games-array-fields';
 import * as createPlaybooks from '@/migrations/11-create-playbooks';
+import * as createChallenges from '@/migrations/12-create-challenges';
 
 export async function GET() {
     try {
@@ -77,6 +78,11 @@ export async function GET() {
                     name: '11-create-playbooks',
                     up: async () => createPlaybooks.up({ context: sequelize, name: '11-create-playbooks' }),
                     down: async () => createPlaybooks.down({ context: sequelize, name: '11-create-playbooks' }),
+                },
+                {
+                    name: '12-create-challenges',
+                    up: async () => createChallenges.up({ context: sequelize, name: '12-create-challenges' }),
+                    down: async () => createChallenges.down({ context: sequelize, name: '12-create-challenges' }),
                 }
             ],
             context: sequelize,
