@@ -26,6 +26,10 @@ export default function OrgSettingsPage() {
     const [inviteRole, setInviteRole] = useState("member");
     const [inviting, setInviting] = useState(false);
 
+    // Email Test State
+    const [testEmailAddress, setTestEmailAddress] = useState("");
+    const [sendingTest, setSendingTest] = useState(false);
+
     useEffect(() => {
         fetchMembers();
     }, []);
@@ -88,6 +92,32 @@ export default function OrgSettingsPage() {
             }
         } catch (error) {
             toast.error("Internal error");
+        }
+    };
+
+    const handleTestEmail = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!testEmailAddress.trim()) return;
+
+        setSendingTest(true);
+        try {
+            const res = await fetch("/api/mail", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ to: testEmailAddress }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                toast.success("Test email sent successfully!");
+                setTestEmailAddress("");
+            } else {
+                toast.error(data.error || "Failed to send test email");
+            }
+        } catch (error) {
+            toast.error("Internal error sending email");
+        } finally {
+            setSendingTest(false);
         }
     };
 
@@ -189,6 +219,36 @@ export default function OrgSettingsPage() {
                                 className="w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-[0_0_15px_rgba(234,88,12,0.3)] hover:shadow-[0_0_20px_rgba(234,88,12,0.5)] transform hover:-translate-y-0.5"
                             >
                                 {inviting ? "Adding..." : "Add to Organization"}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="p-6 rounded-2xl border border-neutral-800 bg-neutral-900/30 backdrop-blur-sm">
+                        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            Test Email Connectivity
+                        </h2>
+                        <form onSubmit={handleTestEmail} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Test Email Address</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={testEmailAddress}
+                                    onChange={(e) => setTestEmailAddress(e.target.value)}
+                                    placeholder="Enter an email to test..."
+                                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-all placeholder:text-neutral-600"
+                                />
+                                <p className="text-xs text-neutral-500 mt-2">
+                                    Send a rich HTML and plaintext fallback test email via Twilio SendGrid.
+                                </p>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={sendingTest}
+                                className="w-full py-2.5 px-4 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all duration-200"
+                            >
+                                {sendingTest ? "Sending..." : "Send Test Email"}
                             </button>
                         </form>
                     </div>
