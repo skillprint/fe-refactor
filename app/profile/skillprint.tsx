@@ -53,7 +53,7 @@ export const updateSetting = (name: string, value: string, setter: (val: string)
 export const queryParamDebug = (): boolean => {
   // check query string
   const searchParams = new URLSearchParams(window.location.search);
-  const debug = process.env.NODE_ENV === 'development' || searchParams.get('debug') === 'true';
+  const debug = searchParams.get('debug') === 'true';
   return debug;
 }
 
@@ -364,9 +364,11 @@ export default function Skillprint() {
         </div> */}
 
         {/* Game Sessions Section */}
-        <div className="mt-8">
-          <GameSessionManager />
-        </div>
+        {isDebug && (
+          <div className="mt-8">
+            <GameSessionManager />
+          </div>
+        )}
 
         {/* Settings Section */}
         <div className="mt-8">
@@ -375,37 +377,45 @@ export default function Skillprint() {
           </h2>
           <div className="bg-card rounded-lg shadow p-6 space-y-6">
             {/* API Configuration */}
+
             <div className="space-y-4 border-b border-border pb-6">
-              <h3 className="text-lg font-medium text-foreground">
-                API Configuration
-              </h3>
+              {isDebug && (
+
+                <h3 className="text-lg font-medium text-foreground">
+                  API Configuration
+                </h3>
+              )}
               <div className="grid gap-4">
-                <div>
-                  <label htmlFor="user_id" className="block text-sm font-medium text-muted-foreground mb-1">
-                    User ID
-                  </label>
-                  <input
-                    type="text"
-                    id="user_id"
-                    value={userId}
-                    onChange={(e) => updateSetting('user_id', e.target.value, setUserId)}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Enter User ID"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="api_key" className="block text-sm font-medium text-muted-foreground mb-1">
-                    API Key
-                  </label>
-                  <input
-                    type="password"
-                    id="api_key"
-                    value={apiKey}
-                    onChange={(e) => updateSetting('api_key', e.target.value, setApiKey)}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Enter API Key"
-                  />
-                </div>
+                {isDebug && (
+                  <div>
+                    <label htmlFor="user_id" className="block text-sm font-medium text-muted-foreground mb-1">
+                      User ID
+                    </label>
+                    <input
+                      type="text"
+                      id="user_id"
+                      value={userId}
+                      onChange={(e) => updateSetting('user_id', e.target.value, setUserId)}
+                      className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Enter User ID"
+                    />
+                  </div>
+                )}
+                {isDebug && (
+                  <div>
+                    <label htmlFor="api_key" className="block text-sm font-medium text-muted-foreground mb-1">
+                      API Key
+                    </label>
+                    <input
+                      type="password"
+                      id="api_key"
+                      value={apiKey}
+                      onChange={(e) => updateSetting('api_key', e.target.value, setApiKey)}
+                      className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Enter API Key"
+                    />
+                  </div>
+                )}
 
                 {/* Goal Setting */}
                 <div className="border-b border-border pb-6">
