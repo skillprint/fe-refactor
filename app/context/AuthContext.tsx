@@ -16,9 +16,9 @@ interface AuthContextType {
 
 
 const safeStorage = {
-    getItem: (key: string) => { try { return safeStorage.getItem(key); } catch (e) { return null; } },
-    setItem: (key: string, value: string) => { try { safeStorage.setItem(key, value); } catch (e) {} },
-    removeItem: (key: string) => { try { safeStorage.removeItem(key); } catch (e) {} }
+    getItem: (key: string): string | null => { try { return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null; } catch (e) { return null; } },
+    setItem: (key: string, value: string) => { try { if (typeof window !== 'undefined') window.localStorage.setItem(key, value); } catch (e) { } },
+    removeItem: (key: string) => { try { if (typeof window !== 'undefined') window.localStorage.removeItem(key); } catch (e) { } }
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
