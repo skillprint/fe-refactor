@@ -28,12 +28,13 @@ const Skillprint: React.FC<SkillprintProps> = ({
     userMoods,
     hasScoreBySkill,
     hasScoreByMood,
-    size = 600,
+    size = 1200,
     initialState = 'reset',
 }) => {
     const router = useRouter();
     const [viewState, setViewState] = useState<string>(initialState);
     const containerRef = React.useRef<HTMLDivElement>(null);
+    const [isMobile, setIsMobile] = useState<boolean>(false);
     const [tooltipState, setTooltipState] = useState<{
         visible: boolean;
         data: { group: string; slug: string } | null;
@@ -42,6 +43,15 @@ const Skillprint: React.FC<SkillprintProps> = ({
 
     // Add timeout ref
     const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+    React.useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize(); // Initial check on mount
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleNodeHover = (node: { group: string; slug: string; rect: DOMRect } | null) => {
         // Clear any pending hide timeout if hovering a new node or re-entering
@@ -133,21 +143,21 @@ const Skillprint: React.FC<SkillprintProps> = ({
             translate: { dx: 0, dy: 0 },
             scale: 1.3,
             rotate: '0deg',
-            textSize: 13,
+            textSize: isMobile ? 18 : 20,
         },
         skills: {
             state: 'skills',
             translate: { dx: 0, dy: 0 },
             scale: 1.3,
             rotate: '0deg',
-            textSize: 13,
+            textSize: isMobile ? 18 : 20,
         },
         mindsets: {
             state: 'mindsets',
             translate: { dx: 0, dy: 0 },
             scale: 1.3,
             rotate: '0deg',
-            textSize: 13,
+            textSize: isMobile ? 18 : 20,
         },
         // 'moods' is alias for 'mindsets' in logic mostly
         moods: {
@@ -155,14 +165,14 @@ const Skillprint: React.FC<SkillprintProps> = ({
             translate: { dx: 0, dy: 0 },
             scale: 1.0,
             rotate: '0deg',
-            textSize: 13,
+            textSize: isMobile ? 18 : 20,
         },
         traits: {
             state: 'traits',
             translate: { dx: 0, dy: 0 },
             scale: 1.0,
             rotate: '0deg',
-            textSize: 13,
+            textSize: isMobile ? 18 : 20,
         }
     };
 
@@ -187,6 +197,9 @@ const Skillprint: React.FC<SkillprintProps> = ({
         );
     }, [userSkills, userMoods, hasScoreBySkill, hasScoreByMood, currentPosition]);
 
+    const windowWidth = window.innerWidth;
+    const overrideWidth = Math.min(windowWidth - 40, 800);
+
     return (
         <div className="flex flex-col items-center justify-center md:p-4">
             {/* Controls */}
@@ -210,14 +223,15 @@ const Skillprint: React.FC<SkillprintProps> = ({
                 ref={containerRef}
                 className="relative bg-card rounded-xl flex items-center justify-center mb-8 md:p-0 w-full md:w-auto"
                 style={{
-                    maxWidth: size,
+                    maxWidth: overrideWidth,
+                    width: overrideWidth,
                     height: 'auto',
                     aspectRatio: '1 / 1'
                 }}
             >
                 <SkillprintGraph
                     data={graphData}
-                    size={size}
+                    size={overrideWidth}
                     width="100%"
                     height="100%"
                     state={currentPosition.state}
