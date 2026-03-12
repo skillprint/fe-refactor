@@ -11,7 +11,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!isLoading) {
-            if (status === 'loggedOut' && pathname !== '/') {
+            // Whitelisted paths that don't require login
+            const isPublicRoute = pathname === '/' || pathname.startsWith('/test-embed');
+            const isEmbedded = typeof window !== 'undefined' && window.self !== window.top;
+
+            if (status === 'loggedOut' && !isPublicRoute && !isEmbedded) {
                 router.push('/');
             }
         }
