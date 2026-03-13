@@ -111,7 +111,7 @@ function GamesPageContent() {
   };
 
   const handleFilterSelect = (filterSlug: string) => {
-    const newValue = selectedFilterSlug === filterSlug ? null : filterSlug;
+    const newValue = (filterSlug === 'all' || selectedFilterSlug === filterSlug) ? null : filterSlug;
     setSelectedFilterSlug(newValue);
     if (newValue) {
       localStorage.setItem('targetMood', newValue);
@@ -353,38 +353,18 @@ function GamesPageContent() {
           )}
 
           {/* Filter Options */}
-          {!isSearchActive && activeTab !== 'playbooks' && (
+          {activeTab !== 'playbooks' && (
             <div className="bg-card px-4 py-2 border-b border-border">
               <div className="flex flex-wrap gap-2">
-                {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
-                  const color = getColorForSlug(item.slug);
-                  const isSelected = selectedFilterSlug === item.slug;
-                  return (
-                    <button
-                      key={item.slug}
-                      onClick={() => handleFilterSelect(item.slug)}
-                      className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 border ${isSelected
-                        ? 'text-white shadow-md transform scale-105'
-                        : 'bg-transparent hover:bg-secondary text-foreground border-transparent'
-                        }`}
-                      style={{
-                        backgroundColor: isSelected ? color : undefined,
-                        borderColor: isSelected ? color : 'transparent',
-                        color: isSelected ? '#ffffff' : undefined
-                      }}
-                    >
-                      {item.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Filter Options - Show when search is active but tab is not 'all' */}
-          {isSearchActive && activeTab !== 'playbooks' && (
-            <div className="bg-card px-4 py-2 border-b border-border">
-              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => handleFilterSelect('all')}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 border ${!selectedFilterSlug || selectedFilterSlug === 'all'
+                    ? 'bg-foreground text-background shadow-md transform scale-105 border-foreground'
+                    : 'bg-transparent hover:bg-secondary text-foreground border-transparent'
+                    }`}
+                >
+                  All
+                </button>
                 {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
                   const color = getColorForSlug(item.slug);
                   const isSelected = selectedFilterSlug === item.slug;
