@@ -1,3 +1,5 @@
+import { inactiveGames } from './inactiveGames';
+
 export interface GameConfig {
   exitButtonPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   hideBottomTabs?: boolean;
@@ -608,6 +610,21 @@ export function getGameConfig(gameSlug: string): GameConfig {
 export function getGameDetails(gameSlug: string): GameDetails | null {
   // Normalize the slug for matching (lowercase, replace spaces with hyphens)
   const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
+
+  // Check inactive games first
+  const inactiveMatch = inactiveGames.find(game => game.slug === normalizedSlug);
+  if (inactiveMatch) {
+    return {
+      name: inactiveMatch.name,
+      description: inactiveMatch.description,
+      image: inactiveMatch.screenshot,
+      category: 'Inactive',
+      difficulty: 'Medium',
+      estimatedTime: '5-15 minutes',
+      skills: inactiveMatch.skills,
+      instructions: inactiveMatch.description
+    } as GameDetails;
+  }
 
   // Try to find exact match first
   if (gameDetails[normalizedSlug]) {

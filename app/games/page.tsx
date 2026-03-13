@@ -10,13 +10,14 @@ import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { newGameSlugs } from '../config/newGames';
+import { inactiveGames } from '../config/inactiveGames';
 import BuckyballLoading from '../components/BuckyballLoading';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { getGameDetails } from '../config/gameConfig';
 import { useAuth } from '../context/AuthContext';
 
-type FilterType = 'moods' | 'skills' | 'playbooks';
+type FilterType = 'moods' | 'skills' | 'playbooks' | 'inactive';
 
 function GamesPageContent() {
   const searchParams = useSearchParams();
@@ -84,7 +85,15 @@ function GamesPageContent() {
     return matchesTab && matchesSearch;
   });
 
-  const nonDedupedFilteredGames = activeTab === 'skills' ? filteredSkillsGames : filteredMoodGames;
+  const filteredInactiveGames = inactiveGames.filter((game: any) => {
+    const matchesSearch = searchQuery === '' ||
+      game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (game.description && game.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    return matchesSearch;
+  });
+
+  const nonDedupedFilteredGames = activeTab === 'inactive' ? filteredInactiveGames : activeTab === 'skills' ? filteredSkillsGames : filteredMoodGames;
 
   // Apply deduplication
   let filteredGames = nonDedupedFilteredGames.filter((game: any, index: number) => {
@@ -302,6 +311,15 @@ function GamesPageContent() {
                     Playbooks
                   </button>
                 )}
+                <button
+                  onClick={() => handleTabChange('inactive')}
+                  className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'inactive'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  Inactive
+                </button>
                 {/* search button */}
                 <button
                   onClick={handleSearchToggle}
@@ -353,7 +371,7 @@ function GamesPageContent() {
           )}
 
           {/* Filter Options */}
-          {activeTab !== 'playbooks' && (
+          {activeTab !== 'playbooks' && activeTab !== 'inactive' && (
             <div className="bg-card px-4 py-2 border-b border-border">
               <div className="flex flex-wrap gap-2">
                 <button

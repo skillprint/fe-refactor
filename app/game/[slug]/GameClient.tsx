@@ -102,8 +102,29 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'whack-em-all': "Whack 'em All"
 };
 
+export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
+    'airport-rush': 'Airport Rush',
+    'circle-word': 'Circle Word',
+    'color-bump': 'Color Bump',
+    'crossy-chicken': 'Crossy Chicken',
+    'jigsaw-puzzle': 'Jigsaw Puzzle',
+    'jumper-frog': 'Jumper Frog',
+    'miner-block': 'Miner Block',
+    'pipe-flow': 'Pipe Flow',
+    'slide': 'Slide',
+    'sweet-candy-saga': 'Sweet Candy Saga',
+    'twenty-one': 'Twenty-One',
+    'unlock-blox': 'Unlock Blox',
+    'word-search': 'Word Search',
+    'zig-zag-switch': 'Zig Zag Switch'
+};
+
 export const mapSlugToGamePath = (slug: string) => {
     const unifiedSlug = unifiedSlugFromBESlug(slug);
+
+    const inactiveDir = INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug];
+    if (inactiveDir) return `/games/inactive/${inactiveDir}/static/index.html`;
+
     const dir = SLUG_TO_DIR_MAP[unifiedSlug];
     if (dir) return `/games/live/${dir}/static/index.html`;
     return `/games/live/${slug}/static/index.html`;
