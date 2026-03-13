@@ -19,58 +19,98 @@ The following games have been instrumented to accept `ADJUST_GAME` messages from
     *   `landingTimer`: Modifies the time it takes for a plane to land.
     *   `terminalStopTimer`: Changes how long a plane remains stopped at a terminal.
 
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ planeMoveSpeed: 0.2 }` (Very Slow)
+- `2`: `{ planeMoveSpeed: 0.5 }`
+- `3`: `{ planeMoveSpeed: 0.8 }`
+- `4`: `{ planeMoveSpeed: 1 }` (Default)
+- `5`: `{ planeMoveSpeed: 1.2 }`
+- `6`: `{ planeMoveSpeed: 1.5 }`
+- `7`: `{ planeMoveSpeed: 2 }`
+- `8`: `{ planeMoveSpeed: 3 }`
+- `9`: `{ planeMoveSpeed: 5 }` (Very Fast)
+
+---
+
 ### Circle Word
 *   **Parameters:**
     *   `timer`: Adjusts the time limit given for each word sequence in the level.
     *   `angleSpeed`: Modifies the rotation speed of the letters in the circle (in both directions).
 
-### Color Bump
-*   **Parameters:**
-    *   `speedModifier`: A generic speed multiplier applied by overriding `performance.now()` and `Date.now()`. This scales the game's internal timestep.
-
-### Crossy Chicken
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Jigsaw Puzzle
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Jumper Frog
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Miner Block
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Pipe Flow
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Slide
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Sweet Candy Saga
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Twenty-One
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Unlock Blox
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Word Search
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
-
-### Zig Zag Switch
-*   **Parameters:**
-    *   `speedModifier`: Generic speed multiplier (overrides standard timing functions).
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ angleSpeed: 60 }` (Easy / Slow)
+- `2`: `{ angleSpeed: 50 }`
+- `3`: `{ angleSpeed: 40 }`
+- `4`: `{ angleSpeed: 30 }` (Default)
+- `5`: `{ angleSpeed: 25 }`
+- `6`: `{ angleSpeed: 20 }`
+- `7`: `{ angleSpeed: 15 }`
+- `8`: `{ angleSpeed: 10 }`
+- `9`: `{ angleSpeed: 5 }` (Very Fast)
 
 ---
-*Note: The `speedModifier` is widely used for minified or densely constructed HTML5 games. It hooks into the browser's time-fetching functions (`performance.now()` and `Date.now()`) to linearly scale the passage of time observed by the game loop, making it universally applicable for adjusting game speed without needing access to obfuscated internal variables.*
+
+### Generic Speed Scaling Games
+
+The follow games use a generic time-scaling method (`speedModifier`) implemented by overriding `performance.now()` and `Date.now()`. This multiplier uniformly scales the speed of animations, timers, and physics.
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ speedModifier: 0.2 }` (Very Slow)
+- `2`: `{ speedModifier: 0.5 }`
+- `3`: `{ speedModifier: 0.8 }`
+- `4`: `{ speedModifier: 1 }` (Default)
+- `5`: `{ speedModifier: 1.2 }`
+- `6`: `{ speedModifier: 1.5 }`
+- `7`: `{ speedModifier: 2 }`
+- `8`: `{ speedModifier: 3 }`
+- `9`: `{ speedModifier: 5 }` (Very Fast)
+
+This mapping applies to the following games:
+
+#### Color Bump
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Crossy Chicken
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Jigsaw Puzzle
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Jumper Frog
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Miner Block
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Pipe Flow
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Slide
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Sweet Candy Saga
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Twenty-One
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Unlock Blox
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Word Search
+*   **Parameters:**
+    *   `speedModifier`
+
+#### Zig Zag Switch
+*   **Parameters:**
+    *   `speedModifier`

@@ -375,6 +375,59 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'airport-rush':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'planeMoveSpeed', parameterValue: 0.2 }]; // Very Slow
+                case 2: return [{ parameterName: 'planeMoveSpeed', parameterValue: 0.5 }];
+                case 3: return [{ parameterName: 'planeMoveSpeed', parameterValue: 0.8 }];
+                case 4: return [{ parameterName: 'planeMoveSpeed', parameterValue: 1 }]; // Default
+                case 5: return [{ parameterName: 'planeMoveSpeed', parameterValue: 1.2 }];
+                case 6: return [{ parameterName: 'planeMoveSpeed', parameterValue: 1.5 }];
+                case 7: return [{ parameterName: 'planeMoveSpeed', parameterValue: 2 }];
+                case 8: return [{ parameterName: 'planeMoveSpeed', parameterValue: 3 }];
+                case 9: return [{ parameterName: 'planeMoveSpeed', parameterValue: 5 }]; // Very Fast
+                default:
+                    return [];
+            }
+        case 'circle-word':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'angleSpeed', parameterValue: 60 }]; // Easy (Slow)
+                case 2: return [{ parameterName: 'angleSpeed', parameterValue: 50 }];
+                case 3: return [{ parameterName: 'angleSpeed', parameterValue: 40 }];
+                case 4: return [{ parameterName: 'angleSpeed', parameterValue: 30 }]; // Default
+                case 5: return [{ parameterName: 'angleSpeed', parameterValue: 25 }];
+                case 6: return [{ parameterName: 'angleSpeed', parameterValue: 20 }];
+                case 7: return [{ parameterName: 'angleSpeed', parameterValue: 15 }];
+                case 8: return [{ parameterName: 'angleSpeed', parameterValue: 10 }];
+                case 9: return [{ parameterName: 'angleSpeed', parameterValue: 5 }]; // Very Fast
+                default:
+                    return [];
+            }
+        case 'color-bump':
+        case 'crossy-chicken':
+        case 'jigsaw-puzzle':
+        case 'jumper-frog':
+        case 'miner-block':
+        case 'pipe-flow':
+        case 'slide':
+        case 'sweet-candy-saga':
+        case 'twenty-one':
+        case 'unlock-blox':
+        case 'word-search':
+        case 'zig-zag-switch':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'speedModifier', parameterValue: 0.2 }]; // Very Slow
+                case 2: return [{ parameterName: 'speedModifier', parameterValue: 0.5 }];
+                case 3: return [{ parameterName: 'speedModifier', parameterValue: 0.8 }];
+                case 4: return [{ parameterName: 'speedModifier', parameterValue: 1 }]; // Default
+                case 5: return [{ parameterName: 'speedModifier', parameterValue: 1.2 }];
+                case 6: return [{ parameterName: 'speedModifier', parameterValue: 1.5 }];
+                case 7: return [{ parameterName: 'speedModifier', parameterValue: 2 }];
+                case 8: return [{ parameterName: 'speedModifier', parameterValue: 3 }];
+                case 9: return [{ parameterName: 'speedModifier', parameterValue: 5 }]; // Very Fast
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
