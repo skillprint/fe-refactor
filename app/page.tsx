@@ -631,7 +631,7 @@ function HomeContent() {
                         <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                           {game.name}
                         </h3>
-                        <p className="text-muted-foreground text-sm mb-3">
+                        <p className="text-muted-foreground text-sm mb-3 line-clamp-2 min-h-[40px] h-[40px]">
                           {game.description}
                         </p>
 

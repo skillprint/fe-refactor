@@ -208,7 +208,7 @@ export default function Skillprint() {
                     <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                       Hextris
                     </h3>
-                    <p className="text-muted-foreground text-sm mb-3">
+                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2 min-h-[40px] h-[40px]">
                       Rotate and match hexagons
                     </p>
                     <div className="flex items-center text-primary text-sm font-medium">
