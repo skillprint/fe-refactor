@@ -424,47 +424,36 @@ function HomeContent() {
                   <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
                     <Link
                       href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                      className="block group flex-shrink-0 w-72"
+                      className="block group flex-shrink-0 w-80"
                     >
-                      <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        {/* Gradient header or Game Image */}
-                        <div className={`h-32 bg-gradient-to-br ${gradients[index % gradients.length]} relative`}>
-                          {game.screenshot && (
+                      <div className={`bg-gradient-to-br ${gradients[index % gradients.length]} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
+                        <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                          <div>
+                            <div className="flex gap-2 text-white/90 mb-2">
+                              {/* Use basic icon for 'new' or no icon just the pill */}
+                              <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
+                                NEW
+                              </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                              {game.name}
+                            </h3>
+                          </div>
+
+                          <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                            Play
+                          </button>
+                        </div>
+
+                        {game.screenshot && (
+                          <div className="relative aspect-square h-full shrink-0">
                             <img
                               src={game.screenshot}
                               alt={game.name}
                               className="w-full h-full object-cover"
                             />
-                          )}
-                          <div className="absolute top-3 right-3 bg-card text-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                            NEW
                           </div>
-                          {/* Play icon overlay */}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                            <div className="bg-card/90 rounded-full p-4">
-                              <svg className="w-8 h-8 text-foreground" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card content */}
-                        <div className="p-4">
-                          <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                            {game.name}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                            {game.description}
-                          </p>
-
-                          <div className="flex items-center text-primary text-sm font-medium">
-                            Play Now
-                            <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </Link>
                   </div>
@@ -591,57 +580,33 @@ function HomeContent() {
                   <Link
                     key={game.slug}
                     href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                    className="block group flex-shrink-0 w-64"
+                    className="block group flex-shrink-0 w-80"
                   >
-                    <div className="bg-card rounded-xl shadow-md border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                      {/* Game Image or Gradient Fallback */}
+                    <div className={`bg-gradient-to-br ${featuredSkill.gradient} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
+                      <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                            {game.name}
+                          </h3>
+                        </div>
+                        <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                          Play
+                        </button>
+                      </div>
+
                       {game.image ? (
-                        <div className="h-32 w-full relative">
+                        <div className="relative aspect-square h-full shrink-0">
                           <img
                             src={game.image}
                             alt={game.name}
                             className="w-full h-full object-cover"
                           />
-                          {/* Play icon overlay */}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                            <div className="bg-card/95 rounded-full p-3">
-                              <svg className="w-6 h-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                          </div>
                         </div>
                       ) : (
-                        <div className={`h-32 bg-gradient-to-br ${featuredSkill.gradient} relative flex items-center justify-center overflow-hidden`}>
-                          <img src={featuredSkill.image} alt={featuredSkill.name} className="w-20 h-20 opacity-20 object-contain absolute -bottom-4 -right-4 invert brightness-0 rotate-12" />
-                          <img src={featuredSkill.image} alt={featuredSkill.name} className="w-12 h-12 object-contain relative z-10 invert brightness-0" />
-                          {/* Play icon overlay */}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-                            <div className="bg-card/95 rounded-full p-3">
-                              <svg className="w-6 h-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                          </div>
+                        <div className="relative aspect-square h-full shrink-0 flex items-center justify-center bg-black/10">
+                          <img src={featuredSkill.image} alt={featuredSkill.name} className="w-16 h-16 object-contain invert brightness-0 opacity-50" />
                         </div>
                       )}
-
-                      {/* Card content */}
-                      <div className="p-4">
-                        <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                          {game.name}
-                        </h3>
-                        <p className="text-muted-foreground text-sm mb-3 line-clamp-2 min-h-[40px] h-[40px]">
-                          {game.description}
-                        </p>
-
-                        <div className="flex items-center text-primary text-sm font-medium">
-                          Play Now
-                          <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </div>
                     </div>
                   </Link>
                 ))
