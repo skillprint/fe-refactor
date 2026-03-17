@@ -43,9 +43,18 @@ export default function RecommendedGameTile() {
                             >
                                 <div className="flex-1 p-5 flex flex-col justify-between items-start">
                                     <div>
-                                        <div className="flex gap-2 text-white/90 mb-2">
+                                        <div className="flex gap-2 text-white/90 mb-2 items-center">
                                             <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
                                                 RECOMMENDED
+                                            </div>
+                                            <div className="relative group/tooltip">
+                                                <svg className="w-4 h-4 opacity-70 hover:opacity-100 transition-opacity cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-xs font-normal Normal rounded-lg shadow-xl opacity-0 invisible group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all z-20 pointer-events-none text-center">
+                                                    We've picked a game just for you based on your goals to help improve your Skillprint.
+                                                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                                                </div>
                                             </div>
                                         </div>
                                         <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
