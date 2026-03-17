@@ -29,29 +29,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [userProfile, setUserProfile] = useState<{ firstName: string; picture?: string } | null>(null);
 
     useEffect(() => {
-        // Partner Mode Detection
-        if (typeof window !== 'undefined' && window.self !== window.top) {
+        if (typeof window !== 'undefined') {
+            const isEmbedded = window.self !== window.top;
             const urlParams = new URLSearchParams(window.location.search);
-            const partnerUserId = urlParams.get('user_id') || urlParams.get('userId');
+            const urlUserId = urlParams.get('user_id') || urlParams.get('userId');
             const firstName = urlParams.get('first_name');
             const profileImage = urlParams.get('profile_image');
 
-            // Also check localStorage if not in URL, since useUserSession might have removed it
-            const existingUserId = safeStorage.getItem('userId');
-            const activeUserId = partnerUserId || existingUserId;
-
-            if (activeUserId) {
-                setStatus('partner');
+            if (urlUserId) {
+                const newStatus = isEmbedded ? 'partner' : 'social';
+                setStatus(newStatus);
                 setUserProfile({
                     firstName: firstName || '',
                     picture: profileImage || undefined
                 });
 
-                safeStorage.setItem('auth_status', 'partner');
-                safeStorage.setItem('user_id', activeUserId);
-                if (partnerUserId) {
-                    safeStorage.setItem('userId', partnerUserId);
-                }
+                safeStorage.setItem('auth_status', newStatus);
+                safeStorage.setItem('user_id', urlUserId);
+                safeStorage.setItem('userId', urlUserId);
 
                 if (firstName || profileImage) {
                     safeStorage.setItem('user_profile', JSON.stringify({
@@ -64,23 +59,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 const date = new Date();
                 date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                document.cookie = `user_id=${activeUserId}; expires=${date.toUTCString()}; path=/`;
+                document.cookie = `user_id=${urlUserId}; expires=${date.toUTCString()}; path=/`;
 
                 setIsLoading(false);
                 return;
             }
-        }
 
-        // If not embedded, ensure partner mode is cleared
-        if (typeof window !== 'undefined' && window.self === window.top) {
-            const currentStatus = safeStorage.getItem('auth_status');
-            if (currentStatus === 'partner') {
-                safeStorage.setItem('auth_status', 'loggedOut');
-                safeStorage.removeItem('user_profile');
+            if (isEmbedded) {
+                const existingUserId = safeStorage.getItem('userId');
+                if (existingUserId) {
+                    safeStorage.setItem('auth_status', 'partner');
+                    safeStorage.setItem('user_id', existingUserId);
+                    const date = new Date();
+                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+                    document.cookie = `user_id=${existingUserId}; expires=${date.toUTCString()}; path=/`;
+                }
+            } else {
+                const currentStatus = safeStorage.getItem('auth_status');
+                if (currentStatus === 'partner') {
+                    safeStorage.setItem('auth_status', 'loggedOut');
+                    safeStorage.removeItem('user_profile');
+                }
             }
         }
 
-        // Check local storage on mount
         const storedStatus = safeStorage.getItem('auth_status') as AuthStatus | null;
         if (storedStatus) {
             setStatus(storedStatus);
