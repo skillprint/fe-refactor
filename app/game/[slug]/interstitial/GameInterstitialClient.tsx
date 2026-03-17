@@ -131,7 +131,35 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
 
                 {/* Game Preview Section */}
                 <main className="flex-1 px-2 py-2">
+                    <div className="max-w-2xl mx-auto mb-6">
+                        <button
+                            onClick={handleStartGame}
+                            disabled={isLoading}
+                            className="w-full bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </>
+                            ) : (
+                                <div className="flex items-center">
+                                    <div className="w-4 h-4 mr-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+                                            <path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z" />
+                                        </svg>
+                                    </div>
+                                    Play
+                                </div>
+                            )}
+                        </button>
+                    </div>
+
                     <div className="max-w-2xl mx-auto">
+
 
                         {/* Game Information */}
                         <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
@@ -268,7 +296,7 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        {/* <div className="flex flex-col sm:flex-row gap-4">
                             <button
                                 onClick={handleStartGame}
                                 disabled={isLoading}
@@ -295,10 +323,10 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
                             >
                                 Back to Games
                             </button>
-                        </div>
+                        </div> */}
                     </div>
                 </main>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
