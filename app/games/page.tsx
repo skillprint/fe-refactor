@@ -467,65 +467,45 @@ function GamesPageContent() {
                     href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
                     className="block group"
                   >
-                    <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200">
-                      {game.screenshot && (
-                        <div className="relative h-40 w-full bg-secondary">
-                          <Image
-                            src={game.screenshot}
-                            alt={game.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {game.name}
-                        </h3>
-                        <p className="text-muted-foreground text-sm mt-2 line-clamp-2">
-                          {game.description}
-                        </p>
+                    {(() => {
+                      let tileColor = '#6366F1';
+                      if (selectedFilterSlug && selectedFilterSlug !== 'all') {
+                        tileColor = getColorForSlug(selectedFilterSlug);
+                      } else if (activeTab === 'skills' && game.skills?.length > 0) {
+                        tileColor = getColorForSlug(skills.find((s: any) => s.id === game.skills[0])?.slug || 'focus');
+                      } else if (game.moods?.length > 0) {
+                        const firstMood = moods.find((m: any) => m.id === game.moods[0]);
+                        tileColor = getColorForSlug(firstMood?.slug || 'focus');
+                      }
 
-                        {/* Game Tags */}
-                        <div className="mt-3 flex flex-wrap gap-1">
-                          {game.moods.map((moodId: any) => {
-                            const mood = moods.find((m: any) => m.id === moodId);
-                            if (!mood) return null;
-                            const color = getColorForSlug(mood.slug);
-                            return (
-                              <span
-                                key={moodId}
-                                className="px-2 py-1 rounded-full text-xs font-medium text-white"
-                                style={{ backgroundColor: color }}
-                              >
-                                {mood.name}
-                              </span>
-                            );
-                          })}
-                          {game.skills.map((skillId: any) => {
-                            const skill = skills.find((s: any) => s.id === skillId);
-                            if (!skill) return null;
-                            const color = getColorForSlug(skill.slug);
-                            return (
-                              <span
-                                key={skillId}
-                                className="px-2 py-1 rounded-full text-xs font-medium text-white"
-                                style={{ backgroundColor: color }}
-                              >
-                                {skill.name}
-                              </span>
-                            );
-                          })}
+                      return (
+                        <div
+                          className="rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44"
+                          style={{ backgroundColor: tileColor }}
+                        >
+                          <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                            <div>
+                              <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                                {game.name}
+                              </h3>
+                            </div>
+                            <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                              Play
+                            </button>
+                          </div>
+                          {game.screenshot && (
+                            <div className="relative aspect-square h-full shrink-0">
+                              <Image
+                                src={game.screenshot}
+                                alt={game.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
                         </div>
-
-                        <div className="mt-3 flex items-center text-primary text-sm font-medium">
-                          Play Now
-                          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
                   </Link>
                 ))}
               </div>

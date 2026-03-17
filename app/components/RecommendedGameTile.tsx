@@ -32,33 +32,40 @@ export default function RecommendedGameTile() {
                     href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
                     className="block group"
                 >
-                    <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        {game.screenshot && (
-                            <div className="relative h-40 w-full bg-secondary">
-                                <Image
-                                    src={game.screenshot}
-                                    alt={game.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        )}
-                        <div className="p-4">
-                            <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {game.name}
-                            </h3>
-                            <p className="text-muted-foreground text-sm mt-2 line-clamp-2">
-                                {game.description}
-                            </p>
+                    {(() => {
+                        // For RecommendedGameTile we don't have direct access to getColorForSlug from page.tsx, 
+                        // so we can use a simpler fallback or hardcode to a primary color.
+                        // Since 'focus' mapping is '#6366F1' lets use that as default, or implement a basic version.
+                        const tileColor = '#6366F1';
 
-                            <div className="mt-3 flex items-center text-primary text-sm font-medium">
-                                Play Now
-                                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                        return (
+                            <div
+                                className="rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44"
+                                style={{ backgroundColor: tileColor }}
+                            >
+                                <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                                            {game.name}
+                                        </h3>
+                                    </div>
+                                    <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                                        Play
+                                    </button>
+                                </div>
+                                {game.screenshot && (
+                                    <div className="relative aspect-square h-full shrink-0">
+                                        <Image
+                                            src={game.screenshot}
+                                            alt={game.name}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    </div>
+                        );
+                    })()}
                 </Link>
             </div>
         </div>
