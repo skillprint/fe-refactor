@@ -25,8 +25,6 @@ export default function RecommendedGameTile() {
 
     return (
         <div className="mb-6">
-            <h2 className="text-xl font-bold mb-3 text-foreground">Recommended for You</h2>
-            <p className="text-muted-foreground text-sm mb-3 line-clamp-2 min-h-[40px] h-[40px]">We've picked a game just for you based on your goals to help improve your Skillprint.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link
                     href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
@@ -45,6 +43,11 @@ export default function RecommendedGameTile() {
                             >
                                 <div className="flex-1 p-5 flex flex-col justify-between items-start">
                                     <div>
+                                        <div className="flex gap-2 text-white/90 mb-2">
+                                            <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
+                                                RECOMMENDED
+                                            </div>
+                                        </div>
                                         <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
                                             {game.name}
                                         </h3>
