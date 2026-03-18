@@ -15,6 +15,8 @@ const moods_path = `games/api/moods/`;
 const skills_path = `games/api/skills/`;
 const catalog_path = `games/api/catalog/`;
 const skillprint_path = `games/api/skillprint/`;
+const visualize_skill_profile_path = `scoring/api/skill-progression/`;
+const visualize_mood_profile_path = `scoring/api/mood-visualization/`;
 const add_user_path = `partners/api/users/add/`;
 const add_user_token = `partners/api/users/auth/token/`;
 
@@ -34,7 +36,7 @@ const getApiKey = () => {
 const inFlightRequests = new Map<string, Promise<any>>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-export const get = async (path: string, useCache = false) => {
+export const get = async (path: string, useCache = false, customHeaders: any = {}) => {
     const fullPath = `${BASE_URL}${path}`;
 
     if (useCache) {
@@ -65,6 +67,7 @@ export const get = async (path: string, useCache = false) => {
 
     const headers = {
         "Content-Type": "application/json",
+        ...customHeaders
         // "Authorization": `Api-Key ${getApiKey()}`
     }
 
@@ -124,6 +127,24 @@ export const addUserToken = async (user: any) => {
 export const getSkillprint = async () => {
     const url = `${skillprint_path}`;
     return await get(url, true);
+};
+
+export const getVisualizeSkillProfile = async (token?: string | null) => {
+    const url = `${visualize_skill_profile_path}`;
+    const headers: any = {};
+    if (token) {
+        headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    return await get(url, true, headers);
+};
+
+export const getVisualizeMoodProfile = async (token?: string | null) => {
+    const url = `${visualize_mood_profile_path}`;
+    const headers: any = {};
+    if (token) {
+        headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    return await get(url, true, headers);
 };
 
 export const getCatalogItemsBySkill = async (skill_name: string) => {
