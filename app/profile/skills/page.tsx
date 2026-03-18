@@ -66,45 +66,33 @@ export default function VisualizeSkillProfileTestPage() {
                             </section>
                         )}
 
-                        {/* Weekly Sessions */}
-                        {data.weeklySessions && (
-                            <section>
-                                <h2 className="text-xl font-semibold mb-4 text-foreground">Weekly Sessions</h2>
-                                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-                                    {data.weeklySessions.filter((s: any) => s.mood !== null).length > 0 ? (
-                                        <ul className="divide-y divide-border">
-                                            {data.weeklySessions
-                                                .filter((s: any) => s.mood !== null)
-                                                .map((session: any, i: number) => (
-                                                    <li key={i} className="p-4 flex justify-between items-center hover:bg-secondary/50 transition-colors">
-                                                        <span className="font-medium text-foreground">{new Date(session.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                                                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm item-capitalize capitalize font-medium">{session.mood}</span>
-                                                    </li>
-                                                ))}
-                                        </ul>
-                                    ) : (
-                                        <div className="p-6 text-muted-foreground text-center">No recorded moods this week.</div>
-                                    )}
-                                </div>
-                            </section>
-                        )}
-
                         {/* Yearly Summary */}
-                        {data.yearlySummary && data.yearlySummary.length > 0 && (
+                        {data.yearlySummary && Object.keys(data.yearlySummary).length > 0 && (
                             <section>
-                                <h2 className="text-xl font-semibold mb-4 text-foreground">Yearly Summary</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {data.yearlySummary.map((summary: any, i: number) => (
-                                        <div key={i} className="bg-card p-6 rounded-xl shadow-sm border border-border relative overflow-hidden group hover:border-primary/50 transition-colors">
-                                            <h3 className="text-2xl font-bold capitalize mb-4 text-foreground">{summary.mood}</h3>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
-                                                    <span className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">Duration</span>
-                                                    <span className="font-semibold text-foreground">{summary.duration}</span>
+                                <h2 className="text-xl font-semibold mb-4 text-foreground">Skill Breakdown (Yearly)</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {Object.entries(data.yearlySummary).map(([skillName, details]: [string, any]) => (
+                                        <div key={skillName} className="bg-card p-6 rounded-xl shadow-sm border border-border relative overflow-hidden group hover:border-primary/50 transition-colors">
+                                            <h3 className="text-lg font-bold capitalize mb-4 text-foreground">{skillName.replace('-', ' ')}</h3>
+
+                                            <div className="mb-4">
+                                                <div className="flex justify-between items-end mb-1">
+                                                    <span className="text-2xl font-bold text-primary">{details.progress}</span>
+                                                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Score</span>
                                                 </div>
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">Momentum</span>
-                                                    <span className="font-semibold text-primary">{summary.momentumScore}</span>
+                                                <div className="w-full bg-secondary rounded-full h-2">
+                                                    <div className="bg-primary h-2 rounded-full" style={{ width: `${details.progress}%` }}></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
+                                                    <span className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">Rating</span>
+                                                    <span className="font-semibold text-foreground">{details.rating}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
+                                                    <span className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">Entries</span>
+                                                    <span className="font-semibold text-foreground">{details.entriesCount}</span>
                                                 </div>
                                             </div>
                                         </div>
