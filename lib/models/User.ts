@@ -5,6 +5,7 @@ export class User extends Model {
     declare id: string;
     declare first_name: string;
     declare profile_image: string | null;
+    declare role: 'skillprint_admin' | 'player';
     declare created_at: Date;
 }
 
@@ -22,6 +23,11 @@ User.init(
         profile_image: {
             type: DataTypes.STRING,
             allowNull: true,
+        },
+        role: {
+            type: DataTypes.ENUM('skillprint_admin', 'player'),
+            defaultValue: 'player',
+            allowNull: false,
         },
         created_at: {
             type: DataTypes.DATE,

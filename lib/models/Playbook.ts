@@ -47,7 +47,7 @@ Playbook.init(
             defaultValue: [],
         },
         game_ids: {
-            type: DataTypes.ARRAY(DataTypes.UUID),
+            type: DataTypes.ARRAY(DataTypes.STRING),
             allowNull: true,
             defaultValue: [],
         },

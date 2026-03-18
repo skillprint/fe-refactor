@@ -7,7 +7,7 @@ export class OrganizationMember extends Model {
     declare id: string;
     declare organization_id: string;
     declare user_id: string;
-    declare role: 'admin' | 'member';
+    declare role: 'admin' | 'coach' | 'member';
     declare created_at: Date;
 }
 
@@ -35,7 +35,7 @@ OrganizationMember.init(
             }
         },
         role: {
-            type: DataTypes.ENUM('admin', 'member'),
+            type: DataTypes.ENUM('admin', 'coach', 'member'),
             defaultValue: 'member',
             allowNull: false,
         },

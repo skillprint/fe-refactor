@@ -25,6 +25,7 @@ export default function OrgSettingsPage() {
     const [inviteUserId, setInviteUserId] = useState("");
     const [inviteRole, setInviteRole] = useState("member");
     const [inviting, setInviting] = useState(false);
+    const [updatingRoleFor, setUpdatingRoleFor] = useState<string | null>(null);
 
     // Email Test State
     const [testEmailAddress, setTestEmailAddress] = useState("");
@@ -92,6 +93,29 @@ export default function OrgSettingsPage() {
             }
         } catch (error) {
             toast.error("Internal error");
+        }
+    };
+
+    const handleRoleUpdate = async (userId: string, newRole: string) => {
+        setUpdatingRoleFor(userId);
+        try {
+            const res = await fetch("/api/org/members", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, role: newRole }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                toast.success("Role updated successfully!");
+                setMembers(members.map((m) => m.user_id === userId ? { ...m, role: newRole } : m));
+            } else {
+                toast.error(data.error || "Failed to update role");
+            }
+        } catch (error) {
+            toast.error("Internal error");
+        } finally {
+            setUpdatingRoleFor(null);
         }
     };
 
@@ -163,13 +187,26 @@ export default function OrgSettingsPage() {
                                         </div>
 
                                         <div className="flex items-center gap-4">
-                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${member.role === 'admin'
-                                                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                                : 'bg-neutral-800 text-neutral-400'
-                                                }`}>
-                                                {member.role === 'admin' ? <Shield className="w-3 h-3" /> : null}
-                                                {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
-                                            </span>
+                                            <div className="relative">
+                                                <select
+                                                    value={member.role}
+                                                    onChange={(e) => handleRoleUpdate(member.user_id, e.target.value)}
+                                                    disabled={updatingRoleFor === member.user_id}
+                                                    className={`appearance-none text-xs font-semibold px-2.5 py-1 pr-7 rounded-full flex items-center gap-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-colors cursor-pointer disabled:opacity-50 ${member.role === 'admin'
+                                                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                                        : member.role === 'coach'
+                                                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                                            : 'bg-neutral-800 text-neutral-400 border border-neutral-700'
+                                                        }`}
+                                                >
+                                                    <option value="admin">Admin</option>
+                                                    <option value="coach">Coach</option>
+                                                    <option value="member">Member</option>
+                                                </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-current opacity-70">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                </div>
+                                            </div>
                                             <button
                                                 onClick={() => handleRemove(member.user_id)}
                                                 className="p-2 text-neutral-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
@@ -210,6 +247,7 @@ export default function OrgSettingsPage() {
                                     className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-all appearance-none"
                                 >
                                     <option value="member">Member</option>
+                                    <option value="coach">Coach</option>
                                     <option value="admin">Admin</option>
                                 </select>
                             </div>
