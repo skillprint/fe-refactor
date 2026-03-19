@@ -21,6 +21,7 @@ interface Game {
     is_active: boolean;
     associated_skill: string[] | null;
     associated_mood: string[] | null;
+    file_url: string;
 }
 
 // Standardized tags aligned with the rest of the application
@@ -29,7 +30,7 @@ const AVAILABLE_MOODS = ['relax', 'focus', 'collaborate', 'creative'];
 
 export default function OrgGamesPage() {
     const [activeTab, setActiveTab] = useState<"sandbox" | "list">("list");
-    const [playingGameId, setPlayingGameId] = useState<string | null>(null);
+    const [playingGame, setPlayingGame] = useState<Game | null>(null);
     const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -188,7 +189,7 @@ export default function OrgGamesPage() {
                                                 {game.is_active ? "Active" : "Activate"}
                                             </button>
                                             <button
-                                                onClick={() => setPlayingGameId(game.id)}
+                                                onClick={() => setPlayingGame(game)}
                                                 className="py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 hover:border-orange-500/40"
                                             >
                                                 <PlayIcon className="w-4 h-4" />
@@ -328,16 +329,16 @@ export default function OrgGamesPage() {
             </div>
 
             {/* Game Preview Modal */}
-            {playingGameId && (
+            {playingGame && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="w-full max-w-5xl h-[85vh] bg-neutral-900 rounded-2xl border border-neutral-800 overflow-hidden flex flex-col shadow-2xl">
                         <div className="flex justify-between items-center p-4 border-b border-neutral-800 bg-neutral-900/50">
                             <div className="flex items-center gap-3">
                                 <Gamepad2 className="w-5 h-5 text-orange-500" />
-                                <h3 className="font-bold text-white text-lg">Game Preview</h3>
+                                <h3 className="font-bold text-white text-lg">{playingGame.title || 'Game Preview'}</h3>
                             </div>
                             <button
-                                onClick={() => setPlayingGameId(null)}
+                                onClick={() => setPlayingGame(null)}
                                 className="text-neutral-400 hover:text-white hover:bg-neutral-800 p-2 rounded-xl transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -345,9 +346,9 @@ export default function OrgGamesPage() {
                         </div>
                         <div className="flex-1 w-full bg-black relative">
                             <iframe
-                                src={`/games/generated/${playingGameId}.html`}
+                                src={playingGame.file_url}
                                 className="absolute inset-0 w-full h-full border-0"
-                                title="Game Preview Sandbox"
+                                title={playingGame.title || "Game Preview"}
                                 sandbox="allow-scripts allow-same-origin allow-pointer-lock"
                             />
                         </div>
