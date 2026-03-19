@@ -39,7 +39,7 @@ export default function RecommendedGameTile() {
                         className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-row h-44"
                         style={{ backgroundColor: tileColor }}
                     >
-                        <div className="flex-1 p-5 flex flex-col justify-between items-start relative z-50">
+                        <div className="flex-1 p-5 flex flex-col justify-between items-start relative z-2">
                             <div>
                                 <div className="flex gap-2 text-white/90 mb-2 items-center">
                                     <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">

@@ -7,6 +7,7 @@ export class Playbook extends Model {
     declare organization_id: string;
     declare title: string;
     declare description: string | null;
+    declare slug: string | null;
     declare associated_skills: string[] | null;
     declare associated_moods: string[] | null;
     declare game_ids: string[] | null;
@@ -31,6 +32,10 @@ Playbook.init(
         title: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        slug: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
         description: {
             type: DataTypes.TEXT,

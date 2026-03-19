@@ -523,46 +523,46 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Reaction Time', 'Hand-Eye Coordination'],
     instructions: 'Tap the moles as they pop up. Avoid hitting the bombs.'
   },
-  'infinite-runner-3d': {
-    name: 'Infinite Runner 3D',
-    description: 'Run and jump in this 3D infinite runner',
-    image: '/games/live/Infinite Runner 3D/icon_144.png',
-    category: 'Arcade',
-    difficulty: 'Medium',
-    estimatedTime: '2-5 minutes',
-    skills: ['Timing', 'Precision'],
-    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
-  },
-  'flappy-bird-1': {
-    name: 'Flappy Bird',
-    description: 'Flappy Bird',
-    image: '/games/live/Flappy Bird/icon_144.png',
-    category: 'Arcade',
-    difficulty: 'Medium',
-    estimatedTime: '2-5 minutes',
-    skills: ['Timing', 'Precision'],
-    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
-  },
-  'lastwar-frontline': {
-    name: 'Last War Frontline',
-    description: 'Last War Frontline',
-    image: '/games/live/Last War Frontline/icon_144.png',
-    category: 'Arcade',
-    difficulty: 'Medium',
-    estimatedTime: '2-5 minutes',
-    skills: ['Timing', 'Precision'],
-    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
-  },
-  'fruit-ninja': {
-    name: 'Fruit Ninja',
-    description: 'Fruit Ninja',
-    image: '/games/live/Fruit Ninja/icon_144.png',
-    category: 'Arcade',
-    difficulty: 'Medium',
-    estimatedTime: '2-5 minutes',
-    skills: ['Timing', 'Precision'],
-    instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
-  },
+  // 'infinite-runner-3d': {
+  //   name: 'Infinite Runner 3D',
+  //   description: 'Run and jump in this 3D infinite runner',
+  //   image: '/games/live/Infinite Runner 3D/icon_144.png',
+  //   category: 'Arcade',
+  //   difficulty: 'Medium',
+  //   estimatedTime: '2-5 minutes',
+  //   skills: ['Timing', 'Precision'],
+  //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  // },
+  // 'flappy-bird-1': {
+  //   name: 'Flappy Bird',
+  //   description: 'Flappy Bird',
+  //   image: '/games/live/Flappy Bird/icon_144.png',
+  //   category: 'Arcade',
+  //   difficulty: 'Medium',
+  //   estimatedTime: '2-5 minutes',
+  //   skills: ['Timing', 'Precision'],
+  //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  // },
+  // '  ': {
+  //   name: 'Last War Frontline',
+  //   description: 'Last War Frontline',
+  //   image: '/games/live/Last War Frontline/icon_144.png',
+  //   category: 'Arcade',
+  //   difficulty: 'Medium',
+  //   estimatedTime: '2-5 minutes',
+  //   skills: ['Timing', 'Precision'],
+  //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  // },
+  // 'fruit-ninja': {
+  //   name: 'Fruit Ninja',
+  //   description: 'Fruit Ninja',
+  //   image: '/games/live/Fruit Ninja/icon_144.png',
+  //   category: 'Arcade',
+  //   difficulty: 'Medium',
+  //   estimatedTime: '2-5 minutes',
+  //   skills: ['Timing', 'Precision'],
+  //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  // },
   'line-color': {
     name: 'Line Color',
     description: 'Line Color',

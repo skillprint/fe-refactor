@@ -311,7 +311,7 @@ function GamesPageContent() {
                     Playbooks
                   </button>
                 )}
-                <button
+                {/* <button
                   onClick={() => handleTabChange('inactive')}
                   className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'inactive'
                     ? 'bg-primary/10 text-primary'
@@ -319,7 +319,7 @@ function GamesPageContent() {
                     }`}
                 >
                   Inactive
-                </button>
+                </button> */}
                 {/* search button */}
                 <button
                   onClick={handleSearchToggle}

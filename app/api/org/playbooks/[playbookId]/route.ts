@@ -38,7 +38,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ playbook
         }
 
         const { playbookId } = await params;
-        const { title, description, associated_skills, associated_moods, game_ids } = await req.json();
+        const { uuid, id, title, description, associated_skills, associated_moods, game_ids } = await req.json();
 
         const playbook = await Playbook.findOne({
             where: { id: playbookId, organization_id: orgId }
@@ -49,6 +49,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ playbook
         }
 
         if (title !== undefined) playbook.title = title;
+        const erroringUuid = uuid || id;
+        if (erroringUuid !== undefined) playbook.slug = erroringUuid;
         if (description !== undefined) playbook.description = description;
         if (associated_skills !== undefined) playbook.associated_skills = associated_skills;
         if (associated_moods !== undefined) playbook.associated_moods = associated_moods;

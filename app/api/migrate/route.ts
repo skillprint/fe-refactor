@@ -14,6 +14,8 @@ import * as addOrgGameFields from '@/migrations/09-add-org-game-fields';
 import * as addOrgArrayFields from '@/migrations/10-org-games-array-fields';
 import * as createPlaybooks from '@/migrations/11-create-playbooks';
 import * as createChallenges from '@/migrations/12-create-challenges';
+import * as addSlugToPlaybooks from '@/migrations/13-add-slug-to-playbooks';
+import * as changeGameIdsType from '@/migrations/14-change-game-ids-type';
 
 export async function GET() {
     try {
@@ -83,6 +85,16 @@ export async function GET() {
                     name: '12-create-challenges',
                     up: async () => createChallenges.up({ context: sequelize, name: '12-create-challenges' }),
                     down: async () => createChallenges.down({ context: sequelize, name: '12-create-challenges' }),
+                },
+                {
+                    name: '13-add-slug-to-playbooks',
+                    up: async () => addSlugToPlaybooks.up({ context: sequelize, name: '13-add-slug-to-playbooks' }),
+                    down: async () => addSlugToPlaybooks.down({ context: sequelize, name: '13-add-slug-to-playbooks' }),
+                },
+                {
+                    name: '14-change-game-ids-type',
+                    up: async () => changeGameIdsType.up({ context: sequelize, name: '14-change-game-ids-type' }),
+                    down: async () => changeGameIdsType.down({ context: sequelize, name: '14-change-game-ids-type' }),
                 }
             ],
             context: sequelize,

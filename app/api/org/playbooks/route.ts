@@ -32,7 +32,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { title, description, associated_skills, associated_moods, game_ids } = await req.json();
+        const { uuid, id, title, description, associated_skills, associated_moods, game_ids } = await req.json();
 
         if (!title) {
             return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
         const playbook = await Playbook.create({
             organization_id: orgId,
             title,
+            slug: uuid || id || null,
             description: description || null,
             associated_skills: associated_skills || [],
             associated_moods: associated_moods || [],
