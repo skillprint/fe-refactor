@@ -12,6 +12,7 @@ export class GeneratedGame extends Model {
     declare title: string | null;
     declare icon: string | null;
     declare created_at: Date;
+    declare deleted_at: Date | null;
 }
 
 GeneratedGame.init(
@@ -56,6 +57,10 @@ GeneratedGame.init(
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
+        },
+        deleted_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     },
     {

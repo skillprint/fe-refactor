@@ -8,6 +8,7 @@ const Sparkles = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/s
 const CheckCircle2 = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>;
 const Circle = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /></svg>;
 const PlayIcon = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
+const Trash2 = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>;
 
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import TopNav from '@/app/components/TopNav';
@@ -31,6 +32,7 @@ const AVAILABLE_MOODS = ['relax', 'focus', 'collaborate', 'creative'];
 export default function OrgGamesPage() {
     const [activeTab, setActiveTab] = useState<"sandbox" | "list">("list");
     const [playingGame, setPlayingGame] = useState<Game | null>(null);
+    const [gameToDelete, setGameToDelete] = useState<Game | null>(null);
     const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -96,6 +98,30 @@ export default function OrgGamesPage() {
         } catch {
             fetchGames();
             toast.error("Network error");
+        }
+    };
+
+    const confirmDelete = async () => {
+        if (!gameToDelete) return;
+
+        try {
+            const res = await fetch("/api/org/games", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: gameToDelete.id })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setGames(games.filter(g => g.id !== gameToDelete.id));
+                toast.success("Game deleted successfully");
+            } else {
+                toast.error(data.error || "Failed to delete game");
+            }
+        } catch {
+            toast.error("Network error");
+        } finally {
+            setGameToDelete(null);
         }
     };
 
@@ -194,6 +220,13 @@ export default function OrgGamesPage() {
                                             >
                                                 <PlayIcon className="w-4 h-4" />
                                                 Play
+                                            </button>
+                                            <button
+                                                onClick={() => setGameToDelete(game)}
+                                                className="py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-center transition-all duration-300 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40"
+                                                title="Delete Game"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
 
@@ -351,6 +384,34 @@ export default function OrgGamesPage() {
                                 title={playingGame.title || "Game Preview"}
                                 sandbox="allow-scripts allow-same-origin allow-pointer-lock"
                             />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {gameToDelete && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="w-full max-w-md bg-neutral-900 rounded-2xl border border-neutral-800 p-6 shadow-2xl flex flex-col gap-6">
+                        <div>
+                            <h3 className="text-xl font-bold text-white mb-2">Delete Game?</h3>
+                            <p className="text-neutral-400 text-sm">
+                                Are you sure you want to delete <span className="text-white font-medium">{gameToDelete.title || 'this game'}</span>? This action cannot be undone and will remove the game from your catalog.
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-3 w-full">
+                            <button
+                                onClick={() => setGameToDelete(null)}
+                                className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors text-neutral-300 bg-neutral-800 hover:bg-neutral-700 hover:text-white"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.2)]"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
