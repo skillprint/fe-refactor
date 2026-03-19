@@ -17,6 +17,7 @@ import * as createChallenges from '@/migrations/12-create-challenges';
 import * as addSlugToPlaybooks from '@/migrations/13-add-slug-to-playbooks';
 import * as changeGameIdsType from '@/migrations/14-change-game-ids-type';
 import * as addDeletedAtToGames from '@/migrations/15-add-deleted-at-to-games';
+import * as createGameVariants from '@/migrations/16-create-game-variants';
 
 export async function GET() {
     try {
@@ -101,6 +102,11 @@ export async function GET() {
                     name: '15-add-deleted-at-to-games',
                     up: async () => addDeletedAtToGames.up({ context: sequelize, name: '15-add-deleted-at-to-games' }),
                     down: async () => addDeletedAtToGames.down({ context: sequelize, name: '15-add-deleted-at-to-games' }),
+                },
+                {
+                    name: '16-create-game-variants',
+                    up: async () => createGameVariants.up({ context: sequelize, name: '16-create-game-variants' }),
+                    down: async () => createGameVariants.down({ context: sequelize, name: '16-create-game-variants' }),
                 }
             ],
             context: sequelize,

@@ -13,7 +13,7 @@ const SKILLS = [
 
 function GameSandboxContent() {
     const searchParams = useSearchParams();
-    const editParam = searchParams.get('edit');
+    const editId = searchParams.get('editId');
     const [targetMode, setTargetMode] = useState<'mood' | 'skill'>('mood');
     const [targetValue, setTargetValue] = useState(MOODS[0]);
     const [optionalPrompt, setOptionalPrompt] = useState('');
@@ -28,25 +28,34 @@ function GameSandboxContent() {
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationOutput, setGenerationOutput] = useState('');
-    const [gameUrl, setGameUrl] = useState<string | null>(editParam ? `/sandbox/${editParam}` : null);
+    const [gameUrl, setGameUrl] = useState<string | null>(null);
     const [tokenUsage, setTokenUsage] = useState<{ promptTokenCount?: number, candidatesTokenCount?: number, totalTokenCount?: number } | null>(null);
 
-    // If edit param changes, update gameUrl
+    // If editId param is passed, update game config
     useEffect(() => {
-        if (editParam) {
-            setGameUrl(`/sandbox/${editParam}`);
-            // Infer targetMode & targetValue from editParam (e.g. mood-focus-1234)
-            const parts = editParam.split('-');
-            if (parts.length >= 2) {
-                const mode = parts[0] as 'mood' | 'skill';
-                const val = parts[1];
-                if (['mood', 'skill'].includes(mode)) {
-                    setTargetMode(mode);
-                    setTargetValue(val);
-                }
-            }
+        if (editId) {
+            // Fetch game data to prepopulate sandbox
+            fetch(`/api/org/games/${editId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.game) {
+                        setTargetMode(data.game.target_mode);
+                        setTargetValue(data.game.target_value);
+                        if (data.game.optional_prompt) setOptionalPrompt(data.game.optional_prompt);
+                        setGameUrl(data.game.file_url);
+                        if (data.parameters && data.parameters.length > 0) {
+                            setParameters(data.parameters.map((p: any) => ({
+                                name: p.name,
+                                value: typeof p.value === 'string' ? p.value : JSON.stringify(p.value)
+                            })));
+                        } else {
+                            setParameters([{ name: '', value: '' }]);
+                        }
+                    }
+                })
+                .catch(err => console.error("Could not fetch game for edit", err));
         }
-    }, [editParam]);
+    }, [editId]);
 
     const outputRef = useRef<HTMLPreElement>(null);
 
@@ -135,7 +144,8 @@ function GameSandboxContent() {
                     genreId: genreId || undefined,
                     modelProvider,
                     modelName: modelProvider === 'ollama' ? ollamaModel : undefined,
-                    parameters: parameters.filter(p => p.name.trim() !== '' && p.value.trim() !== '')
+                    parameters: parameters.filter(p => p.name.trim() !== '' && p.value.trim() !== ''),
+                    editGameId: editId || undefined
                 }),
             });
 

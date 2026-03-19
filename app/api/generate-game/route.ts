@@ -8,12 +8,13 @@ import { GeneratedGame } from '@/lib/models/GeneratedGame';
 import { GameParameter } from '@/lib/models/GameParameter';
 import { ArtStyle } from '@/lib/models/ArtStyle';
 import { Genre } from '@/lib/models/Genre';
+import { GameVariant } from '@/lib/models/GameVariant';
 import jwt from 'jsonwebtoken';
 import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
     try {
-        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [], modelProvider = 'gemini', modelName, parameters = [] } = await req.json();
+        let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [], modelProvider = 'gemini', modelName, parameters = [], editGameId } = await req.json();
 
         // Always include skillprint-adjustment (remove physics/sound generic stubs as Phaser has them built-in)
         libraries = Array.from(new Set([...libraries, 'skillprint-adjustment']));
@@ -319,8 +320,8 @@ ${libContext}`;
                         finalHtmlContent = `${injectedScripts}${finalHtmlContent}`;
                     }
 
-                    const fileId = crypto.randomUUID();
-                    const fileName = `${targetMode}-${targetValue.replace(/\\s+/g, '-')}-${fileId}.html`.toLowerCase();
+                    const newFileId = crypto.randomUUID();
+                    const fileName = `${targetMode}-${targetValue.replace(/\\s+/g, '-')}-${newFileId}.html`.toLowerCase();
                     const gamesDir = path.join(process.cwd(), 'public', 'games', 'generated');
                     const fileUrlStr = `/games/generated/${fileName}`;
 
@@ -353,24 +354,53 @@ ${libContext}`;
                                 }
                             });
 
-                            await GeneratedGame.create({
-                                id: fileId, // Use the fileId as the game's uuid so we can retrieve it
-                                user_id: userId,
-                                target_mode: targetMode,
-                                target_value: targetValue,
-                                optional_prompt: optionalPrompt || null,
-                                file_url: fileUrlStr,
-                                title: gameTitle,
-                                icon: gameIcon
-                            });
-
-                            if (parameters && parameters.length > 0) {
-                                for (const p of parameters) {
-                                    await GameParameter.create({
-                                        game_id: fileId,
-                                        name: p.name,
-                                        value: typeof p.value === 'string' ? p.value : JSON.stringify(p.value)
+                            if (editGameId) {
+                                const existingGame = await GeneratedGame.findOne({ where: { id: editGameId, user_id: userId } });
+                                if (existingGame) {
+                                    await GameVariant.create({
+                                        game_id: editGameId,
+                                        file_url: existingGame.file_url,
                                     });
+
+                                    existingGame.file_url = fileUrlStr;
+                                    if (gameTitle) existingGame.title = gameTitle;
+                                    if (gameIcon) existingGame.icon = gameIcon;
+                                    // Optionally update prompt
+                                    if (optionalPrompt) existingGame.optional_prompt = optionalPrompt;
+
+                                    await existingGame.save();
+
+                                    if (parameters && parameters.length > 0) {
+                                        await GameParameter.destroy({ where: { game_id: editGameId } });
+                                        for (const p of parameters) {
+                                            await GameParameter.create({
+                                                game_id: editGameId,
+                                                name: p.name,
+                                                value: typeof p.value === 'string' ? p.value : JSON.stringify(p.value)
+                                            });
+                                        }
+                                    }
+                                }
+                            } else {
+                                await GeneratedGame.create({
+                                    id: newFileId, // Use the newFileId as the game's uuid so we can retrieve it
+                                    user_id: userId,
+                                    target_mode: targetMode,
+                                    target_value: targetValue,
+                                    optional_prompt: optionalPrompt || null,
+                                    file_url: fileUrlStr,
+                                    title: gameTitle,
+                                    icon: gameIcon
+                                });
+
+                                if (parameters && parameters.length > 0) {
+                                    for (const p of parameters) {
+                                        await GameParameter.create({
+                                            game_id: newFileId,
+                                            name: p.name,
+                                            value: typeof p.value === 'string' ? p.value : JSON.stringify(p.value)
+                                        });
+                                    }
                                 }
                             }
                         } catch (dbError) {
