@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4D Memory: Temporal Rift</title>
+    <meta name="game-icon" content="⏳">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050508;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            color: #ffffff;
+        }
+        
+        #game-container {
+            box-shadow: 0 0 80px rgba(0, 255, 204, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Subtle UI overlay for dimension names */
+        #dimension-label {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron';
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: rgba(255,255,255,0.4);
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+<div id="game-container"></div>
+
+<script>
+    /**
+     * 4D Memory: Temporal Rift
+     * A high-concept memory game requiring cross-dimensional problem solving.
+     * Players must match symbols that exist across multiple "time layers".
+     */
+
+    // --- Global Configuration & Adjustability ---
+    window.GAME_CONFIG = {
+        cols: 4,
+        rows: 3,
+        periods: 3,
+        peekDuration: 1000,
+        flipSpeed: 200,
+        difficulty: 'Normal',
+        colors: {
+            past: { bg: 0x1a120c, card: 0x5c3d2e, accent: 0xff8c42, text: 0xffe4e1, name: 'ANCIENT ARCHIVE' },
+            present: { bg: 0x0a1414, card: 0x1a4d4d, accent: 0x00ffcc, text: 0xe0fbfc, name: 'STABLE REALITY' },
+            future: { bg: 0x0f051a, card: 0x3d1a5c, accent: 0xbd00ff, text: 0xf1e4ff, name: 'NEON VOID' },
+            symbol: 0xffffff,
+            cardFront: 0x111118
+        }
+    };
+
+    window.adjustGame = function(obj) {
+        if (!obj || !obj.parameterName) return;
+        const { parameterName, parameterValue } = obj;
+        let requiresRestart = false;
+
+        if (parameterName === 'peek_duration') {
+            window.GAME_CONFIG.peekDuration = parameterValue;
+        } else if (parameterName === 'periods') {
+            if (window.GAME_CONFIG.periods !== parameterValue) {
+                window.GAME_CONFIG.periods = parameterValue;
+                requiresRestart = true;
+            }
+        } else if (parameterName === 'grid_size') {
+            if (parameterValue === 12) { window.GAME_CONFIG.cols = 4; window.GAME_CONFIG.rows = 3; }
+            if (parameterValue === 16) { window.GAME_CONFIG.cols = 4; window.GAME_CONFIG.rows = 4; }
+            requiresRestart = true;
+        } else if (parameterName === 'flip_speed') {
+            window.GAME_CONFIG.flipSpeed = parameterValue;
+        }
+
+        console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+
+        if (requiresRestart && window.gameInstance) {
+            const gameScene = window.gameInstance.scene.getScene('GameScene');
+            if (gameScene && gameScene.scene.isActive()) {
+                gameScene.scene.restart();
+            }
+        }
+    };
+
+    // Registering Adjustments
+    window.Skillprint.registerAdjustments({
+        '1': { parameterName: 'peek_duration', description: 'Fast Peek (400ms)', value: 400 },
+        '2': { parameterName: 'peek_duration', description: 'Slow Peek (2000ms)', value: 2000 },
+        '3': { parameterName: 'periods', description: 'Dual Dimensions (2)', value: 2 },
+        '4': { parameterName: 'periods', description: 'Triple Dimensions (3)', value: 3 },
+        '5': { parameterName: 'grid_size', description: 'Compact Grid (4x3)', value: 12 },
+        '6': { parameterName: 'grid_size', description: 'Large Grid (4x4)', value: 16 },
+        '7': { parameterName: 'flip_speed', description: 'Snap Flip (100ms)', value: 100 },
+        '8': { parameterName: 'flip_speed', description: 'Smooth Flip (400ms)', value: 400 }
+    });
+
+    // --- Helper Functions ---
+    function getPeriodData(index) {
+        const keys = ['past', 'present', 'future'];
+        return window.GAME_CONFIG.colors[keys[index % keys.length]];
+    }
+
+    function drawSymbol(graphics, id, size) {
+        graphics.clear();
+        graphics.lineStyle(3, 0xffffff, 0.9);
+        const s = size / 2;
+
+        switch(id) {
+            case 0: graphics.strokeCircle(0, 0, s); break;
+            case 1: graphics.strokeRect(-s, -s, size, size); break;
+            case 2: graphics.strokeTriangle(0, -s, s, s, -s, s); break;
+            case 3: graphics.beginPath(); graphics.moveTo(0, -s); graphics.lineTo(s, 0); graphics.lineTo(0, s); graphics.lineTo(-s, 0); graphics.closePath(); graphics.strokePath(); break;
+            case 4: graphics.moveTo(-s, -s); graphics.lineTo(s, s); graphics.moveTo(s, -s); graphics.lineTo(-s, s); graphics.strokePath(); break;
+            case 5: graphics.strokeCircle(0, 0, s*0.6); graphics.strokeCircle(0, 0, s); break;
+            case 6: graphics.fillStyle(0xffffff, 0.7); graphics.fillCircle(0, 0, s*0.8); break;
+            case 7: graphics.fillStyle(0xffffff, 0.7); graphics.fillRect(-s*0.8, -s*0.8, size*0.8, size*0.8); break;
+            case 8: graphics.beginPath(); for (let i=0; i<6; i++) { let a = (i * 60) * Math.PI / 180; graphics[i===0?'moveTo':'lineTo'](Math.cos(a)*s, Math.sin(a)*s); } graphics.closePath(); graphics.strokePath(); break;
+            case 9: graphics.strokeRect(-s, -s/4, size, s/2); break;
+            case 10: graphics.strokeRect(-s/4, -s, s/2, size); break;
+            case 11: graphics.strokeTriangle(0, s, s, -s, -s, -s); break;
+            case 12: graphics.strokeCircle(0,0,s); graphics.strokeCircle(0,0,s/2); break;
+            case 13: graphics.beginPath(); graphics.moveTo(-s, 0); graphics.lineTo(s, 0); graphics.moveTo(0, -s); graphics.lineTo(0, s); graphics.strokePath(); break;
+            case 14: graphics.strokeRect(-s/2, -s/2, s, s); graphics.strokeRect(-s, -s, size, size); break;
+            case 15: graphics.strokeCircle(-s/2, -s/2, s/4); graphics.strokeCircle(s/2, s/2, s/4); graphics.strokeCircle(-s/2, s/2, s/4); graphics.strokeCircle(s/2, -s/2, s/4); break;
+            default: graphics.strokeCircle(0,0,s);
+        }
+    }
+
+    // --- Game Objects ---
+    class Card extends Phaser.GameObjects.Container {
+        constructor(scene, x, y, width, height, period, symbolId) {
+            super(scene, x, y);
+            this.period = period;
+            this.symbolId = symbolId;
+            this.isFlipped = false;
+            this.isMatched = false;
+            this.cardWidth = width;
+            this.cardHeight = height;
+
+            const pData = getPeriodData(period);
+
+            // Back
+            this.bgDown = scene.add.graphics();
+            this.bgDown.fillStyle(pData.card, 1);
+            this.bgDown.fillRoundedRect(-width/2, -height/2, width, height, 12);
+            this.bgDown.lineStyle(1, 0xffffff, 0.1);
+            this.bgDown.strokeRoundedRect(-width/2, -height/2, width, height, 12);
+            
+            // Decorative pattern
+            this.bgDown.lineStyle(1, 0xffffff, 0.05);
+            for(let i=1; i<=3; i++) {
+                this.bgDown.strokeCircle(0, 0, (width/7) * i);
+            }
+
+            // Front
+            this.bgUp = scene.add.graphics();
+            this.bgUp.fillStyle(window.GAME_CONFIG.colors.cardFront, 1);
+            this.bgUp.fillRoundedRect(-width/2, -height/2, width, height, 12);
+            this.bgUp.lineStyle(3, pData.accent, 1);
+            this.bgUp.strokeRoundedRect(-width/2 + 2, -height/2 + 2, width - 4, height - 4, 10);
+
+            // Symbol
+            this.symbol = scene.add.graphics();
+            drawSymbol(this.symbol, symbolId, Math.min(width, height) * 0.45);
+
+            this.bgUp.setVisible(false);
+            this.symbol.setVisible(false);
+
+            this.add([this.bgDown, this.bgUp, this.symbol]);
+            this.setSize(width, height);
+            this.setInteractive({ useHandCursor: true });
+            
+            this.on('pointerdown', () => scene.handleCardClick(this));
+            this.on('pointerover', () => { if(!this.isFlipped && !this.isMatched) scene.tweens.add({targets:this, scale:1.05, duration:100}); });
+            this.on('pointerout', () => { if(!this.isFlipped && !this.isMatched) scene.tweens.add({targets:this, scale:1, duration:100}); });
+        }
+
+        flipUp() {
+            this.isFlipped = true;
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 0,
+                duration: window.GAME_CONFIG.flipSpeed / 2,
+                onComplete: () => {
+                    this.bgDown.setVisible(false);
+                    this.bgUp.setVisible(true);
+                    this.symbol.setVisible(true);
+                    this.scene.tweens.add({ targets: this, scaleX: 1, duration: window.GAME_CONFIG.flipSpeed / 2 });
+                }
+            });
+        }
+
+        flipDown() {
+            this.isFlipped = false;
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 0,
+                duration: window.GAME_CONFIG.flipSpeed / 2,
+                onComplete: () => {
+                    this.bgUp.setVisible(false);
+                    this.symbol.setVisible(false);
+                    this.bgDown.setVisible(true);
+                    this.scene.tweens.add({ targets: this, scaleX: 1, duration: window.GAME_CONFIG.flipSpeed / 2 });
+                }
+            });
+        }
+
+        setMatched() {
+            this.isMatched = true;
+            this.scene.tweens.add({
+                targets: this,
+                scale: 0.8,
+                alpha: 0.2,
+                duration: 500,
+                ease: 'Expo.out'
+            });
+            this.disableInteractive();
+        }
+    }
+
+    // --- Scenes ---
+    class BootScene extends Phaser.Scene {
+        constructor() { super('BootScene'); }
+        create() { this.scene.start('MenuScene'); }
+    }
+
+    class MenuScene extends Phaser.Scene {
+        constructor() { super('MenuScene'); }
+        create() {
+            const cx = this.cameras.main.centerX;
+            const cy = this.cameras.main.centerY;
+            
+            this.cameras.main.setBackgroundColor(0x050508);
+
+            // --- REFINED SUBTLE ICON ---
+            const iconContainer = this.add.container(cx, cy - 180);
+            
+            // Outer Ring (static)
+            const outerRing = this.add.graphics();
+            outerRing.lineStyle(1, 0x00ffcc, 0.2);
+            outerRing.strokeCircle(0, 0, 75);
+            
+            // Rotating Ring
+            const rotRing = this.add.graphics();
+            rotRing.lineStyle(2, 0x00ffcc, 0.6);
+            rotRing.beginPath();
+            rotRing.arc(0, 0, 75, 0, Math.PI * 0.4);
+            rotRing.strokePath();
+            this.tweens.add({
+                targets: rotRing,
+                angle: 360,
+                duration: 8000,
+                repeat: -1
+            });
+
+            // Inner Pulsing Ring
+            const pulseRing = this.add.graphics();
+            pulseRing.lineStyle(1, 0x00ffcc, 0.4);
+            pulseRing.strokeCircle(0, 0, 60);
+            this.tweens.add({
+                targets: pulseRing,
+                scale: 1.1,
+                alpha: 0,
+                duration: 2000,
+                repeat: -1
+            });
+
+            // The core icon (Subtle Hourglass)
+            const coreIcon = this.add.text(0, 0, '⏳', { fontSize: '64px' }).setOrigin(0.5);
+            coreIcon.setAlpha(0.85);
+            
+            iconContainer.add([outerRing, rotRing, pulseRing, coreIcon]);
+            
+            this.tweens.add({
+                targets: iconContainer,
+                y: cy - 195,
+                duration: 3000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+
+            // Title
+            this.add.text(cx, cy - 60, '4D MEMORY', {
+                fontFamily: 'Orbitron', fontSize: '58px', fontWeight: '900', color: '#00ffcc', letterSpacing: '10px'
+            }).setOrigin(0.5);
+            
+            this.add.text(cx, cy + 15, 'TEMPORAL RIFT COLLAPSE', {
+                fontFamily: 'Inter', fontSize: '14px', color: '#666', letterSpacing: '4px', fontWeight: '300'
+            }).setOrigin(0.5);
+
+            // Play Button
+            const btnBg = this.add.graphics();
+            btnBg.fillStyle(0x00ffcc, 1);
+            btnBg.fillRoundedRect(-140, -30, 280, 60, 4);
+            
+            const btnText = this.add.text(0, 0, 'INITIALIZE SEQUENCE', {
+                fontFamily: 'Orbitron', fontSize: '16px', fontWeight: 'bold', color: '#000'
+            }).setOrigin(0.5);
+
+            const btnContainer = this.add.container(cx, cy + 130, [btnBg, btnText]);
+            btnContainer.setSize(280, 60);
+            btnContainer.setInteractive({ useHandCursor: true });
+            
+            btnContainer.on('pointerover', () => this.tweens.add({targets:btnContainer, scale:1.05, duration:150}));
+            btnContainer.on('pointerout', () => this.tweens.add({targets:btnContainer, scale:1, duration:150}));
+            btnContainer.on('pointerdown', () => this.scene.start('GameScene'));
+            
+            // Background particles
+            for(let i=0; i<30; i++) {
+                const px = Phaser.Math.Between(0, 800);
+                const py = Phaser.Math.Between(0, 750);
+                const dot = this.add.circle(px, py, 1, 0x00ffcc, 0.2);
+                this.tweens.add({
+                    targets: dot,
+                    alpha: 0.5,
+                    duration: Phaser.Math.Between(1000, 3000),
+                    yoyo: true,
+                    repeat: -1
+                });
+            }
+        }
+    }
+
+    class GameScene extends Phaser.Scene {
+        constructor() { super('GameScene'); }
+
+        create() {
+            this.cfg = window.GAME_CONFIG;
+            this.currentPeriod = 0;
+            this.cards = [];
+            this.selectedCards = [];
+            this.matchesFound = 0;
+            this.moves = 0;
+            this.isProcessing = false;
+            
+            this.totalPairs = (this.cfg.cols * this.cfg.rows * this.cfg.periods) / 2;
+
+            this.cameras.main.setBackgroundColor(getPeriodData(this.currentPeriod).bg);
+
+            this.createUI();
+            this.createDeck();
+            this.createTimeSelector();
+            
+            this.switchPeriod(0, true);
+        }
+
+        createUI() {
+            const w = this.scale.width;
+            
+            const topBar = this.add.graphics();
+            topBar.fillStyle(0x000000, 0.6);
+            topBar.fillRect(0, 0, w, 80);
+            topBar.lineStyle(1, 0xffffff, 0.05);
+            topBar.moveTo(0, 80);
+            topBar.lineTo(w, 80);
+            topBar.strokePath();
+
+            this.scoreText = this.add.text(40, 40, 'RIFTS: 0 / ' + this.totalPairs, {
+                fontFamily: 'Orbitron', fontSize: '16px', color: '#00ffcc'
+            }).setOrigin(0, 0.5);
+            
+            this.movesText = this.add.text(w / 2, 40, 'SEQ: 0', {
+                fontFamily: 'Orbitron', fontSize: '16px', color: '#888'
+            }).setOrigin(0.5);
+
+            this.dimLabel = this.add.text(w / 2, 105, '', {
+                fontFamily: 'Orbitron', fontSize: '12px', letterSpacing: '6px', color: '#ffffff', alpha: 0.4
+            }).setOrigin(0.5);
+
+            // Buffer UI (showing currently flipped cards)
+            this.bufferSlots = [];
+            for(let i=0; i<2; i++) {
+                const bx = w - 100 + (i * 60);
+                const by = 40;
+                const slotBg = this.add.graphics();
+                slotBg.lineStyle(1, 0xffffff, 0.1);
+                slotBg.strokeRoundedRect(bx - 22, by - 22, 44, 44, 4);
+                const slotContent = this.add.container(bx, by);
+                this.bufferSlots.push({ bg: slotBg, content: slotContent });
+            }
+        }
+
+        updateBufferUI() {
+            this.bufferSlots.forEach(slot => slot.content.removeAll(true));
+            this.selectedCards.forEach((card, index) => {
+                if(index >= 2) return;
+                const slot = this.bufferSlots[index].content;
+                const pData = getPeriodData(card.period);
+                
+                const bg = this.add.graphics();
+                bg.fillStyle(window.GAME_CONFIG.colors.cardFront, 1);
+                bg.fillRoundedRect(-18, -18, 36, 36, 4);
+                bg.lineStyle(2, pData.accent, 1);
+                bg.strokeRoundedRect(-18, -18, 36, 36, 4);
+                
+                const sym = this.add.graphics();
+                drawSymbol(sym, card.symbolId, 18);
+                
+                slot.add([bg, sym]);
+                slot.setScale(0);
+                this.tweens.add({ targets: slot, scale: 1, duration: 200, ease: 'Back.out' });
+            });
+        }
+
+        createDeck() {
+            const totalCards = this.cfg.cols * this.cfg.rows * this.cfg.periods;
+            let pairIds = [];
+            for (let i = 0; i < totalCards / 2; i++) {
+                pairIds.push(i % 16);
+                pairIds.push(i % 16);
+            }
+            
+            Phaser.Utils.Array.Shuffle(pairIds);
+
+            const gridW = this.scale.width;
+            const gridH = this.scale.height - 240;
+            const startY = 120;
+            const padding = 15;
+            const cellW = (gridW - padding * (this.cfg.cols + 1)) / this.cfg.cols;
+            const cellH = (gridH - padding * (this.cfg.rows + 1)) / this.cfg.rows;
+            const cardSize = Math.min(cellW, cellH, 100);
+            
+            const offsetX = (gridW - (this.cfg.cols * cardSize + (this.cfg.cols - 1) * padding)) / 2;
+            const offsetY = startY + (gridH - (this.cfg.rows * cardSize + (this.cfg.rows - 1) * padding)) / 2;
+
+            let idIndex = 0;
+            for (let p = 0; p < this.cfg.periods; p++) {
+                for (let r = 0; r < this.cfg.rows; r++) {
+                    for (let c = 0; c < this.cfg.cols; c++) {
+                        const x = offsetX + c * (cardSize + padding) + cardSize/2;
+                        const y = offsetY + r * (cardSize + padding) + cardSize/2;
+                        
+                        const card = new Card(this, x, y, cardSize, cardSize, p, pairIds[idIndex]);
+                        this.add.existing(card);
+                        card.setVisible(false);
+                        this.cards.push(card);
+                        idIndex++;
+                    }
+                }
+            }
+        }
+
+        createTimeSelector() {
+            const w = this.scale.width;
+            const h = this.scale.height;
+            const barH = 100;
+            const startY = h - barH;
+
+            const bg = this.add.graphics();
+            bg.fillStyle(0x000000, 0.8);
+            bg.fillRect(0, startY, w, barH);
+            bg.lineStyle(1, 0xffffff, 0.05);
+            bg.moveTo(0, startY);
+            bg.lineTo(w, startY);
+            bg.strokePath();
+
+            this.periodButtons = [];
+            const btnW = 160;
+            const btnH = 40;
+            const spacing = 20;
+            const totalW = (btnW * this.cfg.periods) + (spacing * (this.cfg.periods - 1));
+            const startX = (w - totalW) / 2;
+
+            for (let i = 0; i < this.cfg.periods; i++) {
+                const pData = getPeriodData(i);
+                const bx = startX + i * (btnW + spacing) + btnW/2;
+                const by = startY + barH/2;
+
+                const btnBg = this.add.graphics();
+                btnBg.fillStyle(0xffffff, 0.05);
+                btnBg.fillRoundedRect(-btnW/2, -btnH/2, btnW, btnH, 4);
+                
+                const text = this.add.text(0, 0, pData.name.split(' ')[0], {
+                    fontFamily: 'Orbitron', fontSize: '12px', fontWeight: 'bold', color: '#555'
+                }).setOrigin(0.5);
+
+                const container = this.add.container(bx, by, [btnBg, text]);
+                container.setSize(btnW, btnH);
+                container.setInteractive({ useHandCursor: true });
+                
+                container.on('pointerdown', () => this.switchPeriod(i));
+                this.periodButtons.push({ container, bg: btnBg, text: text, index: i });
+            }
+        }
+
+        updateTimeSelectorUI() {
+            this.periodButtons.forEach(btn => {
+                const pData = getPeriodData(btn.index);
+                btn.bg.clear();
+                if (btn.index === this.currentPeriod) {
+                    btn.bg.fillStyle(pData.accent, 1);
+                    btn.bg.fillRoundedRect(-80, -20, 160, 40, 4);
+                    btn.text.setColor('#000');
+                    btn.container.setScale(1.05);
+                } else {
+                    btn.bg.fillStyle(0xffffff, 0.05);
+                    btn.bg.fillRoundedRect(-80, -20, 160, 40, 4);
+                    btn.text.setColor('#555');
+                    btn.container.setScale(1.0);
+                }
+            });
+        }
+
+        switchPeriod(newPeriod, initial = false) {
+            if (!initial && this.currentPeriod === newPeriod) return;
+            
+            const oldPeriod = this.currentPeriod;
+            this.currentPeriod = newPeriod;
+            const pData = getPeriodData(newPeriod);
+
+            this.dimLabel.setText(pData.name);
+            this.updateTimeSelectorUI();
+
+            this.tweens.addCounter({
+                from: 0, to: 100, duration: 500,
+                onUpdate: (tween) => {
+                    const c1 = Phaser.Display.Color.IntegerToColor(getPeriodData(oldPeriod).bg);
+                    const c2 = Phaser.Display.Color.IntegerToColor(pData.bg);
+                    const color = Phaser.Display.Color.Interpolate.ColorWithColor(c1, c2, 100, tween.getValue());
+                    this.cameras.main.setBackgroundColor(Phaser.Display.Color.GetColor(color.r, color.g, color.b));
+                }
+            });
+
+            this.cards.forEach(card => {
+                if (card.period === newPeriod) {
+                    card.setVisible(true);
+                    card.setAlpha(0);
+                    this.tweens.add({ targets: card, alpha: card.isMatched ? 0.2 : 1, duration: 300 });
+                } else {
+                    if (card.visible) {
+                        this.tweens.add({
+                            targets: card, alpha: 0, duration: 200,
+                            onComplete: () => card.setVisible(false)
+                        });
+                    }
+                }
+            });
+        }
+
+        handleCardClick(card) {
+            if (this.isProcessing || card.isFlipped || card.isMatched || this.selectedCards.length >= 2) return;
+
+            card.flipUp();
+            this.selectedCards.push(card);
+            this.updateBufferUI();
+
+            if (this.selectedCards.length === 2) {
+                this.isProcessing = true;
+                this.moves++;
+                this.movesText.setText('SEQ: ' + this.moves);
+
+                const [c1, c2] = this.selectedCards;
+
+                if (c1.symbolId === c2.symbolId) {
+                    this.time.delayedCall(400, () => {
+                        c1.setMatched();
+                        c2.setMatched();
+                        this.matchesFound++;
+                        this.scoreText.setText(`RIFTS: ${this.matchesFound} / ${this.totalPairs}`);
+                        this.selectedCards = [];
+                        this.updateBufferUI();
+                        this.isProcessing = false;
+                        
+                        if (this.matchesFound === this.totalPairs) {
+                            this.time.delayedCall(800, () => this.scene.start('GameOverScene', { moves: this.moves }));
+                        }
+                    });
+                } else {
+                    this.time.delayedCall(this.cfg.peekDuration, () => {
+                        c1.flipDown();
+                        c2.flipDown();
+                        this.selectedCards = [];
+                        this.updateBufferUI();
+                        this.isProcessing = false;
+                    });
+                }
+            }
+        }
+    }
+
+    class GameOverScene extends Phaser.Scene {
+        constructor() { super('GameOverScene'); }
+        init(data) { this.moves = data.moves; }
+
+        create() {
+            const cx = this.cameras.main.centerX;
+            const cy = this.cameras.main.centerY;
+            this.cameras.main.setBackgroundColor(0x050508);
+
+            this.add.text(cx, cy - 80, 'TIMELINE STABILIZED', {
+                fontFamily: 'Orbitron', fontSize: '38px', fontWeight: '900', color: '#00ffcc'
+            }).setOrigin(0.5);
+            
+            this.add.text(cx, cy, `COGNITIVE EFFICIENCY: ${Math.max(5, 100 - (this.moves - this.totalPairs) * 5)}%`, {
+                fontFamily: 'Inter', fontSize: '18px', color: '#aaa', letterSpacing: '2px'
+            }).setOrigin(0.5);
+
+            const btnBg = this.add.graphics();
+            btnBg.fillStyle(0x00ffcc, 1);
+            btnBg.fillRoundedRect(-120, -25, 240, 50, 4);
+            
+            const btnText = this.add.text(0, 0, 'NEW SEQUENCE', {
+                fontFamily: 'Orbitron', fontSize: '16px', fontWeight: 'bold', color: '#000'
+            }).setOrigin(0.5);
+
+            const btnContainer = this.add.container(cx, cy + 100, [btnBg, btnText]);
+            btnContainer.setSize(240, 50);
+            btnContainer.setInteractive({ useHandCursor: true });
+            
+            btnContainer.on('pointerover', () => this.tweens.add({targets:btnContainer, scale:1.1, duration:100}));
+            btnContainer.on('pointerout', () => this.tweens.add({targets:btnContainer, scale:1, duration:100}));
+            btnContainer.on('pointerdown', () => this.scene.start('GameScene'));
+        }
+    }
+
+    // --- Phaser Initialization ---
+    const config = {
+        type: Phaser.AUTO,
+        parent: 'game-container',
+        width: 800,
+        height: 750,
+        scale: {
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        scene: [BootScene, MenuScene, GameScene, GameOverScene],
+        render: { pixelArt: false, antialias: true }
+    };
+
+    window.gameInstance = new Phaser.Game(config);
+
+</script>
+</body>
+</html>
