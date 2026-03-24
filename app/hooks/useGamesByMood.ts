@@ -15,7 +15,9 @@ export function useGamesByMood(moodSlug: string) {
             try {
                 const data = await getCatalogItemsByMood(moodSlug);
                 // The API returns { results: [...] } based on useGamesBySkill.ts
-                setGames(data.results || []);
+                const filterOutStringTitles = ["hextris", "last war zombie", "flappy-bird"];
+                const filteredGames = data.results.filter((game: any) => !filterOutStringTitles.includes(game.title));
+                setGames(filteredGames || []);
             } catch (err) {
                 setError(err as Error);
             } finally {

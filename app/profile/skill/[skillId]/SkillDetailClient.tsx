@@ -154,7 +154,7 @@ export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
 
     return (
         <div className="font-sans min-h-screen bg-background">
-            <div className="p-8 pb-32">
+            <div className="p-8 pb-32 max-w-[1440px] w-full mx-auto">
                 {/* Header */}
                 <div className="mb-6">
                     <button

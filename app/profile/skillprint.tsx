@@ -163,7 +163,7 @@ export default function Skillprint() {
     <div className="font-sans min-h-screen bg-background">
       <TopNav />
       {/* <ProgressBanner /> */}
-      <div className="p-8 pb-32">
+      <div className="p-8 pb-32 max-w-[1440px] w-full mx-auto">
         <h1 className="text-3xl font-bold text-foreground mb-6">
           Your Skillprint
         </h1>

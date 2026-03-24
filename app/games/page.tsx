@@ -280,7 +280,7 @@ function GamesPageContent() {
 
           {/* Tab Menu */}
           <div className="bg-card shadow-sm border-b border-border">
-            <div className="px-4">
+            <div className="max-w-[1440px] w-full mx-auto px-4">
               <div className="flex space-x-1 py-1">
                 <button
                   onClick={() => handleTabChange('moods')}
@@ -338,8 +338,8 @@ function GamesPageContent() {
 
           {/* Search Box - Overlaps filter menu when active */}
           {isSearchActive && (
-            <div className="bg-card px-4 py-3 border-b border-border shadow-sm">
-              <div className="relative">
+            <div className="bg-card border-b border-border shadow-sm">
+              <div className="max-w-[1440px] w-full mx-auto px-4 py-3 relative">
                 <input
                   type="text"
                   placeholder="Search games..."
@@ -372,8 +372,8 @@ function GamesPageContent() {
 
           {/* Filter Options */}
           {activeTab !== 'playbooks' && activeTab !== 'inactive' && (
-            <div className="bg-card px-4 py-2 border-b border-border">
-              <div className="flex flex-wrap gap-2">
+            <div className="bg-card border-b border-border">
+              <div className="max-w-[1440px] w-full mx-auto px-4 py-2 flex flex-wrap gap-2">
                 <button
                   onClick={() => handleFilterSelect('all')}
                   className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 border ${!selectedFilterSlug || selectedFilterSlug === 'all'
@@ -418,7 +418,7 @@ function GamesPageContent() {
 
         {/* Playbooks Grid */}
         {activeTab === 'playbooks' ? (
-          <main className="flex-1 px-4 py-6">
+          <main className="flex-1 px-4 py-6 max-w-[1440px] w-full mx-auto">
             <div className="flex flex-col gap-8">
               {inProgressPlaybooks.length > 0 && (
                 <section>
@@ -449,7 +449,7 @@ function GamesPageContent() {
             </div>
           </main>
         ) : (
-          <main className="flex-1 px-4 py-6">
+          <main className="flex-1 px-4 py-6 max-w-[1440px] w-full mx-auto">
             {/* Games Grid */}
             {filteredGames.length === 0 ? (
               <div className="text-center">

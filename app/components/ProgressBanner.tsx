@@ -33,7 +33,7 @@ export default function ProgressBanner() {
                 : 'bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:shadow-purple-500/30'
                 }`}
         >
-            <div className="max-w-[100%] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="py-4 flex flex-col items-center justify-center gap-2">
                     <div className="w-full max-w-2xl">
                         <div className="flex flex-col items-center gap-1 mb-3">

@@ -297,7 +297,9 @@ function HomeContent() {
         <ProgressBanner />
 
         <div className="px-4 sm:px-8 py-8 bg-background">
-          <PlaybookWidget />
+          <div className="max-w-[1440px] mx-auto w-full">
+            <PlaybookWidget />
+          </div>
         </div>
         {/* Hero Section
         <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-500 dark:to-purple-500 px-8 py-12 sm:py-16">
@@ -334,332 +336,342 @@ function HomeContent() {
 
         {/* Skillprint View for Active Users */}
         {isLoaded && count >= 3 && (
-          <div className="px-4 sm:px-8 py-12 bg-card border-b border-border">
-            <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-1 space-y-2">
-                <h2 className="text-2xl font-bold text-foreground">
-                  Your Profile is Unlocked!
-                </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Great job! You've played enough sessions and revealed your unique cognitive breakdown.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                  <Link
-                    href="/profile"
-                    className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-primary-foreground bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 hover:shadow-primary/25"
-                  >
-                    View Full Analysis
-                    <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
+          <div className="bg-card border-b border-border">
+            <div className="px-4 sm:px-8 py-12 max-w-[1440px] mx-auto w-full">
+              <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-6">
+                <div className="flex-1 space-y-2">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Your Profile is Unlocked!
+                  </h2>
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    Great job! You've played enough sessions and revealed your unique cognitive breakdown.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                    <Link
+                      href="/profile"
+                      className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-primary-foreground bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 hover:shadow-primary/25"
+                    >
+                      View Full Analysis
+                      <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1 w-full max-w-[500px] bg-background/50 rounded-3xl p-6 border border-border/50 shadow-inner">
-                <SkillprintVisualization
-                  userSkills={userSkillsForVis}
-                  userMoods={userMoodsForVis}
-                  hasScoreBySkill={{}}
-                  hasScoreByMood={hasScoreByMood}
-                  size={400}
-                  initialState="reset"
-                />
+                <div className="flex-1 w-full max-w-[500px] bg-background/50 rounded-3xl p-6 border border-border/50 shadow-inner">
+                  <SkillprintVisualization
+                    userSkills={userSkillsForVis}
+                    userMoods={userMoodsForVis}
+                    hasScoreBySkill={{}}
+                    hasScoreByMood={hasScoreByMood}
+                    size={400}
+                    initialState="reset"
+                  />
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* New Games Section */}
-        <div className="px-4 sm:px-8 py-8 relative bg-white border-b border-border">
-          {/* Tooltip for first item - Positioned relative to the section */}
-          {showTooltip && (
-            <div className="absolute top-24 left-80 sm:left-96 z-[60] w-64 bg-popover p-4 rounded-xl shadow-2xl border border-border animate-bounce-slight">
-              <div className="absolute top-6 -left-2 -translate-x-1/2 rotate-45 w-4 h-4 bg-popover border-l border-b border-border"></div>
-              <h3 className="font-bold text-foreground mb-1">Game Tile</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                This is a game tile. Click it to begin your game!
-              </p>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  dismissTooltip();
-                }}
-                className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wide"
+        <div className="relative bg-white border-b border-border">
+          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
+            {/* Tooltip for first item - Positioned relative to the section */}
+            {showTooltip && (
+              <div className="absolute top-24 left-80 sm:left-96 z-[60] w-64 bg-popover p-4 rounded-xl shadow-2xl border border-border animate-bounce-slight">
+                <div className="absolute top-6 -left-2 -translate-x-1/2 rotate-45 w-4 h-4 bg-popover border-l border-b border-border"></div>
+                <h3 className="font-bold text-foreground mb-1">Game Tile</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  This is a game tile. Click it to begin your game!
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dismissTooltip();
+                  }}
+                  className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wide"
+                >
+                  Got it
+                </button>
+              </div>
+            )}
+
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground mb-1">
+                  New Games
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Check out our latest additions
+                </p>
+              </div>
+              <Link
+                href="/games?filter=new"
+                className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
               >
-                Got it
-              </button>
+                See all
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             </div>
-          )}
 
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-foreground mb-1">
-                New Games
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Check out our latest additions
-              </p>
-            </div>
-            <Link
-              href="/games?filter=new"
-              className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
-            >
-              See all
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-
-          {/* Horizontal scrollable game cards */}
-          <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex gap-4 min-w-min">
-              {isLoadingNewGames ? (
-                <div className="w-full py-12 flex justify-center items-center">
-                  <BuckyballLoading />
-                </div>
-              ) : fetchedNewGames.length > 0 ? (
-                fetchedNewGames.map((game, index) => (
-                  <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
-                    <Link
-                      href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                      className="block group flex-shrink-0 w-80"
-                    >
-                      <div className={`bg-gradient-to-br ${gradients[index % gradients.length]} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
-                        <div className="flex-1 p-5 flex flex-col justify-between items-start">
-                          <div>
-                            <div className="flex gap-2 text-white/90 mb-2">
-                              {/* Use basic icon for 'new' or no icon just the pill */}
-                              <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
-                                NEW
-                              </div>
-                            </div>
-                            <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
-                              {game.name}
-                            </h3>
-                          </div>
-
-                          <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
-                            Play
-                          </button>
-                        </div>
-
-                        {game.screenshot && (
-                          <div className="relative aspect-square h-full shrink-0">
-                            <img
-                              src={game.screenshot}
-                              alt={game.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </Link>
+            {/* Horizontal scrollable game cards */}
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex gap-4 min-w-min">
+                {isLoadingNewGames ? (
+                  <div className="w-full py-12 flex justify-center items-center">
+                    <BuckyballLoading />
                   </div>
-                ))
-              ) : (
-                <div className="text-muted-foreground py-8">No games found for this mood.</div>
-              )}
+                ) : fetchedNewGames.length > 0 ? (
+                  fetchedNewGames.map((game, index) => (
+                    <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
+                      <Link
+                        href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
+                        className="block group flex-shrink-0 w-80"
+                      >
+                        <div className={`bg-gradient-to-br ${gradients[index % gradients.length]} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
+                          <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                            <div>
+                              <div className="flex gap-2 text-white/90 mb-2">
+                                {/* Use basic icon for 'new' or no icon just the pill */}
+                                <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
+                                  NEW
+                                </div>
+                              </div>
+                              <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                                {game.name}
+                              </h3>
+                            </div>
+
+                            <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                              Play
+                            </button>
+                          </div>
+
+                          {game.screenshot && (
+                            <div className="relative aspect-square h-full shrink-0">
+                              <img
+                                src={game.screenshot}
+                                alt={game.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-muted-foreground py-8">No games found for this mood.</div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Browse by Mood & Skill Section */}
-        <div className="px-4 sm:px-8 py-8 bg-[#efefef]">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground mb-1">
-              Explore by Mood & Skill
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Find the perfect game for your current state of mind or goal
-            </p>
-          </div>
-
-          <div className="space-y-8">
-            {/* Moods Row */}
-            <div>
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
-                Moods
-              </h3>
-              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-                {moods.map((mood) => (
-                  <Link
-                    key={mood.id}
-                    href={`/games?tab=moods&filter=${mood.id}`}
-                    className="flex-shrink-0 group"
-                  >
-                    <div className="flex items-center gap-4 px-3 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-                      <div className={`rounded-xl flex items-center justify-center`}>
-                        <img src={mood.image} alt={mood.name} className="w-8 h-8 object-contain rounded-xl" />
-                      </div>
-                      <div>
-                        <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
-                          {mood.name}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+        <div className="bg-[#efefef]">
+          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-1">
+                Explore by Mood & Skill
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Find the perfect game for your current state of mind or goal
+              </p>
             </div>
 
-            {/* Skills Row */}
-            <div>
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
-                Skills
-              </h3>
-              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-                {skills.map((skill) => (
-                  <Link
-                    key={skill.id}
-                    href={`/games?tab=skills&filter=${skill.id}`}
-                    className="flex-shrink-0 group"
-                  >
-                    <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 bg-white">
-                      <div className={`rounded-xl flex items-center justify-center`}>
-                        <img src={skill.image} alt={skill.name} className="w-8 h-8 object-contain rounded-xl" />
+            <div className="space-y-8">
+              {/* Moods Row */}
+              <div>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
+                  Moods
+                </h3>
+                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+                  {moods.map((mood) => (
+                    <Link
+                      key={mood.id}
+                      href={`/games?tab=moods&filter=${mood.id}`}
+                      className="flex-shrink-0 group"
+                    >
+                      <div className="flex items-center gap-4 px-3 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+                        <div className={`rounded-xl flex items-center justify-center`}>
+                          <img src={mood.image} alt={mood.name} className="w-8 h-8 object-contain rounded-xl" />
+                        </div>
+                        <div>
+                          <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
+                            {mood.name}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
-                          {skill.name}
-                        </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skills Row */}
+              <div>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
+                  Skills
+                </h3>
+                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+                  {skills.map((skill) => (
+                    <Link
+                      key={skill.id}
+                      href={`/games?tab=skills&filter=${skill.id}`}
+                      className="flex-shrink-0 group"
+                    >
+                      <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 bg-white">
+                        <div className={`rounded-xl flex items-center justify-center`}>
+                          <img src={skill.image} alt={skill.name} className="w-8 h-8 object-contain rounded-xl" />
+                        </div>
+                        <div>
+                          <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
+                            {skill.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Featured Skill Section */}
-        <div className="px-4 sm:px-8 py-8 border-t border-border bg-white border-b">
-          <div className="mb-6">
+        <div className="border-t border-border bg-white border-b">
+          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
             <div className="mb-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`${featuredSkill.gradient} flex items-center justify-center`}>
-                  <img src={featuredSkill.image} alt={featuredSkill.name} className="w-10 h-10 object-contain rounded-xl" />
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`${featuredSkill.gradient} flex items-center justify-center`}>
+                    <img src={featuredSkill.image} alt={featuredSkill.name} className="w-10 h-10 object-contain rounded-xl" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-foreground mb-1">
+                      Featured Skill: {featuredSkill.name}
+                    </h2>
+                    <p className="text-muted-foreground text-sm">
+                      {featuredSkill.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-foreground mb-1">
-                    Featured Skill: {featuredSkill.name}
-                  </h2>
-                  <p className="text-muted-foreground text-sm">
-                    {featuredSkill.description}
-                  </p>
-                </div>
+                {/* Gradient underline */}
+                <div className={`h-1 bg-gradient-to-r ${featuredSkill.gradient} rounded-full`}></div>
               </div>
-              {/* Gradient underline */}
-              <div className={`h-1 bg-gradient-to-r ${featuredSkill.gradient} rounded-full`}></div>
+
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Games to develop this skill
+                </h3>
+                <Link
+                  href={`/games?tab=skills&filter=${featuredSkill.id}`}
+                  className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
+                >
+                  View all
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">
-                Games to develop this skill
-              </h3>
-              <Link
-                href={`/games?tab=skills&filter=${featuredSkill.id}`}
-                className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
-              >
-                View all
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          </div>
 
 
-
-          {/* Horizontal scrollable skill game cards */}
-          <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex gap-4 min-w-min">
-              {skillGames.length > 0 ? (
-                skillGames.map((game) => (
-                  <Link
-                    key={game.slug}
-                    href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                    className="block group flex-shrink-0 w-80"
-                  >
-                    <div className={`bg-gradient-to-br ${featuredSkill.gradient} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
-                      <div className="flex-1 p-5 flex flex-col justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
-                            {game.name}
-                          </h3>
+            {/* Horizontal scrollable skill game cards */}
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex gap-4 min-w-min">
+                {skillGames.length > 0 ? (
+                  skillGames.map((game) => (
+                    <Link
+                      key={game.slug}
+                      href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
+                      className="block group flex-shrink-0 w-80"
+                    >
+                      <div className={`bg-gradient-to-br ${featuredSkill.gradient} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
+                        <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                          <div>
+                            <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                              {game.name}
+                            </h3>
+                          </div>
+                          <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                            Play
+                          </button>
                         </div>
-                        <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
-                          Play
-                        </button>
+
+                        {game.image ? (
+                          <div className="relative aspect-square h-full shrink-0">
+                            <img
+                              src={game.image}
+                              alt={game.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="relative aspect-square h-full shrink-0 flex items-center justify-center bg-black/10">
+                            <img src={featuredSkill.image} alt={featuredSkill.name} className="w-16 h-16 object-contain invert brightness-0 opacity-50" />
+                          </div>
+                        )}
                       </div>
-
-                      {game.image ? (
-                        <div className="relative aspect-square h-full shrink-0">
-                          <img
-                            src={game.image}
-                            alt={game.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="relative aspect-square h-full shrink-0 flex items-center justify-center bg-black/10">
-                          <img src={featuredSkill.image} alt={featuredSkill.name} className="w-16 h-16 object-contain invert brightness-0 opacity-50" />
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="w-full py-12 flex justify-center items-center">
-                  <BuckyballLoading />
-                </div>
-              )}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="w-full py-12 flex justify-center items-center">
+                    <BuckyballLoading />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Quick Stats or Additional Content */}
-        <div className="px-4 sm:px-8 py-8 bg-[#efefef]">
-          <div className="max-w-4xl">
-            <h2 className="text-2xl font-bold text-foreground mb-6">
-              What would you like to do today?
-            </h2>
+        <div className="bg-[#efefef]">
+          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
+            <div className="max-w-4xl">
+              <h2 className="text-2xl font-bold text-foreground mb-6">
+                What would you like to do today?
+              </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Link
-                href="/games"
-                className="group p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-500 rounded-lg group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link
+                  href="/games"
+                  className="group p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-blue-500 rounded-lg group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-foreground mb-1">Browse All Games</h3>
+                      <p className="text-sm text-muted-foreground">Explore our full collection of games</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-foreground mb-1">Browse All Games</h3>
-                    <p className="text-sm text-muted-foreground">Explore our full collection of games</p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
 
-              <Link
-                href="/profile"
-                className="group p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-transparent hover:border-purple-500 dark:hover:border-purple-400 transition-all duration-300"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-purple-500 rounded-lg group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                <Link
+                  href="/profile"
+                  className="group p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-transparent hover:border-purple-500 dark:hover:border-purple-400 transition-all duration-300"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-purple-500 rounded-lg group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-foreground mb-1">View Your Progress</h3>
+                      <p className="text-sm text-muted-foreground">Track your skills and achievements</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-foreground mb-1">View Your Progress</h3>
-                    <p className="text-sm text-muted-foreground">Track your skills and achievements</p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

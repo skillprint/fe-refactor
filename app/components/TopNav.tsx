@@ -46,7 +46,7 @@ export default function TopNav() {
 
     return (
         <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
-            <div className="max-w-[100%] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between min-h-[4rem] py-2">
                     {/* Left Branding */}
                     <div className="flex items-center gap-2">
