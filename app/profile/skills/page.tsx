@@ -5,7 +5,9 @@ import BuckyballLoading from '../../components/BuckyballLoading';
 import TopNav from '../../components/TopNav';
 import Link from 'next/link';
 
-export default function VisualizeSkillProfileTestPage() {
+import { Suspense } from 'react';
+
+function VisualizeSkillProfileContent() {
     const { data, isLoading, error } = useVisualizeSkillProfile();
 
     if (isLoading) {
@@ -118,5 +120,20 @@ export default function VisualizeSkillProfileTestPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function VisualizeSkillProfileTestPage() {
+    return (
+        <Suspense fallback={
+            <div className="font-sans min-h-screen bg-background">
+                <TopNav />
+                <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+                    <BuckyballLoading />
+                </div>
+            </div>
+        }>
+            <VisualizeSkillProfileContent />
+        </Suspense>
     );
 }

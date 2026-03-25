@@ -5,7 +5,9 @@ import BuckyballLoading from '../../components/BuckyballLoading';
 import TopNav from '../../components/TopNav';
 import Link from 'next/link';
 
-export default function VisualizeMoodProfileTestPage() {
+import { Suspense } from 'react';
+
+function VisualizeMoodProfileContent() {
     const { data, isLoading, error } = useVisualizeMoodProfile();
 
     if (isLoading) {
@@ -130,5 +132,20 @@ export default function VisualizeMoodProfileTestPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function VisualizeMoodProfileTestPage() {
+    return (
+        <Suspense fallback={
+            <div className="font-sans min-h-screen bg-background">
+                <TopNav />
+                <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+                    <BuckyballLoading />
+                </div>
+            </div>
+        }>
+            <VisualizeMoodProfileContent />
+        </Suspense>
     );
 }
