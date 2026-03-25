@@ -218,7 +218,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'bubble-spirit': {
     name: 'Bubble Spirit',
     description: 'Pop bubbles in this puzzle game',
-    image: '/images/activities/covers/bubble-spirit-d1e8e962-1243-4e94-a9f4-351dec27ae8a.png',
+    image: '/games/live/Bubble Spirit/static/html5games/images/logo.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '5-10 minutes',
@@ -228,7 +228,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'change-word': {
     name: 'Change Word',
     description: 'Transform words letter by letter',
-    image: '/images/activities/covers/change-word-0bc38905-8138-43f2-9ff5-a01a5f038782.png',
+    image: '/games/live/Change Word/change-word.png',
     category: 'Word Game',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -287,7 +287,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'i-love-hue': {
     name: 'I Love Hue',
     description: 'Arrange colors in perfect harmony',
-    image: '/images/activities/covers/i-love-hue-115ad80c-adb3-47fb-8be7-4b683133a94e.png',
+    image: '/games/live/I Love Hue/i-love-hue.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-20 minutes',
@@ -336,7 +336,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'space-trip': {
     name: 'Space Trip',
     description: 'Explore space in this adventure',
-    image: '/images/activities/covers/space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20.png',
+    image: '/games/live/Space Trip/icons/icon-256.png',
     category: 'Adventure',
     difficulty: 'Medium',
     estimatedTime: '10-25 minutes',
@@ -396,7 +396,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'fruit-sorting': {
     name: 'Fruit Sorting',
     description: 'Sort the fruits into the right baskets',
-    image: '/images/activities/covers/fruit-sorting-2-778da931-ec64-4123-9aa0-2b21c7994d.png',
+    image: '/games/live/Fruit Sorting/icon_144.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-5 minutes',

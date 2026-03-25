@@ -14,7 +14,10 @@ export function useRecommendedGames(limit: number = 1) {
             try {
                 const response = await getRecommendations(limit);
                 const games = response.results ? response.results : response;
-                setRecommendedGames(Array.isArray(games) ? games : [games]);
+                const gamesArray = Array.isArray(games) ? games : [games];
+                const gamesToFilterBySlug = ["hextris", "lastwar-frontline", "flappy-bird", "flappy-bird-1", "fruit-ninja", "infinite-runner-3d", "last-war-zombie"];
+                const filteredGames = gamesArray.filter((game: any) => !gamesToFilterBySlug.includes(game.slug));
+                setRecommendedGames(filteredGames);
             } catch (error) {
                 console.error('Error fetching recommended games:', error);
                 setError(error as Error);

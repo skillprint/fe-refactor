@@ -30,10 +30,18 @@ export function useGamesBySkill() {
                 const gamesBySkillRaw = await Promise.all(skillsData.map((skill: any) => getCatalogItemsBySkill(skill.slug)));
                 const gamesByMoodRaw = await Promise.all(moodsData.map((mood: any) => getCatalogItemsByMood(mood.slug)));
 
+                const gamesToFilterBySlug = ["hextris", "lastwar-frontline", "flappy-bird", "flappy-bird-1", "fruit-ninja", "infinite-runner-3d", "last-war-zombie"];
+
+                let allGamesSkill = gamesBySkillRaw.map((game: any) => game.results).flat();
+                let allGamesMood = gamesByMoodRaw.map((game: any) => game.results).flat();
+
+                allGamesSkill = allGamesSkill.filter((game: any) => !gamesToFilterBySlug.includes(game.slug));
+                allGamesMood = allGamesMood.filter((game: any) => !gamesToFilterBySlug.includes(game.slug));
+
                 setSkills(skillsData);
                 setMoods(moodsData);
-                setGamesBySkill(gamesBySkillRaw.map((game: any) => game.results).flat());
-                setGamesByMood(gamesByMoodRaw.map((game: any) => game.results).flat());
+                setGamesBySkill(allGamesSkill);
+                setGamesByMood(allGamesMood);
             } catch (error) {
                 console.error('Error fetching games data:', error);
                 setError(error as Error);
