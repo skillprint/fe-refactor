@@ -527,7 +527,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
         try {
             const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
-            const serverSideSlug = mapSlugToGamePath(decodedSlug);
+            const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
 
             console.log('Starting session for slug', serverSideSlug, decodedSlug);
             client.startSession(sessionId, targetMood, serverSideSlug);
