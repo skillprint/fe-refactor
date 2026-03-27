@@ -31,6 +31,8 @@ export const mapLocalGameSlugToServerGameSlug = (slug: string) => {
         '/games/live/Change Word/static/index.html': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782'
     }
 
+    console.log("Mapped: ", slug, map[slug]);
+
     return map[slug] || slug;
 }
 
