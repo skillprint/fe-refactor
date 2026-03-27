@@ -26,6 +26,14 @@ interface GameResults {
     bonus?: number;
 }
 
+export const mapLocalGameSlugToServerGameSlug = (slug: string) => {
+    const map: any = {
+        '/games/live/Change Word/static/index.html': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782'
+    }
+
+    return map[slug] || slug;
+}
+
 export const unifiedSlugFromBESlug = (slug: string) => {
     const lowerSlug = slug.toLowerCase().replace(/\s+/g, '-');
     if (lowerSlug.indexOf('0hh1') >= 0 || lowerSlug.indexOf('0h-h1') >= 0) return '0hh1';
@@ -517,7 +525,10 @@ export default function GameClient({ slug }: GameClientProps) {
 
         try {
             const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
-            client.startSession(sessionId, targetMood, decodedSlug);
+            const serverSideSlug = mapSlugToGamePath(decodedSlug);
+
+            console.log('Starting session for slug', serverSideSlug, decodedSlug);
+            client.startSession(sessionId, targetMood, serverSideSlug);
             shouldPollRef.current = true;
             pollSessionTips();
         } catch (e) {
