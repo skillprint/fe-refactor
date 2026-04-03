@@ -58,6 +58,61 @@ body, html {
   transition: opacity 0.5s ease;
 }
 
+#menu-options {
+  position: absolute;
+  top: 130px;
+  background: rgba(26, 26, 46, 0.85);
+  border: 1px solid rgba(162, 155, 254, 0.4);
+  padding: 15px 30px;
+  border-radius: 12px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+
+.toggle-label {
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input {
+  display: none;
+}
+
+.custom-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #a29bfe;
+  border-radius: 6px;
+  margin-right: 12px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.toggle-label input:checked + .custom-checkbox {
+  background-color: #a29bfe;
+}
+
+.toggle-label input:checked + .custom-checkbox::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .region-node {
   position: absolute;
   width: 30px;

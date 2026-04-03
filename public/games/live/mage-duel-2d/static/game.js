@@ -1,23 +1,45 @@
 // Dictionaries of magical translation words by target language
 const coreWords = [
-    { target: "FIRE", meaning: "Fire" },
-    { target: "WATER", meaning: "Water" },
-    { target: "EARTH", meaning: "Earth" },
-    { target: "WIND", meaning: "Wind" },
-    { target: "LIGHT", meaning: "Light" },
-    { target: "SHADOW", meaning: "Shadow" },
-    { target: "SWORD", meaning: "Sword" },
-    { target: "SHIELD", meaning: "Shield" },
-    { target: "HEAL", meaning: "Heal" },
-    { target: "ICE", meaning: "Ice" },
-    { target: "STORM", meaning: "Storm" }
+    { target: "FIRE", prompt: "Fire" },
+    { target: "WATER", prompt: "Water" },
+    { target: "EARTH", prompt: "Earth" },
+    { target: "WIND", prompt: "Wind" },
+    { target: "LIGHT", prompt: "Light" },
+    { target: "SHADOW", prompt: "Shadow" },
+    { target: "SWORD", prompt: "Sword" },
+    { target: "SHIELD", prompt: "Shield" },
+    { target: "HEAL", prompt: "Heal" },
+    { target: "ICE", prompt: "Ice" },
+    { target: "STORM", prompt: "Storm" }
+];
+
+const coreSentences = [
+    { target: "S_FIRE", prompt: "I cast fire" },
+    { target: "S_WATER", prompt: "The water flows" },
+    { target: "S_WIND", prompt: "A strong wind" },
+    { target: "S_HEAL", prompt: "Heal my wounds" },
+    { target: "S_SHIELD", prompt: "Raise the shield" },
+    { target: "S_ICE", prompt: "Freeze the earth" },
+    { target: "S_SWORD", prompt: "Strike with the sword" }
 ];
 
 const dictionaries = {
-    es: { "FIRE": "Fuego", "WATER": "Agua", "EARTH": "Tierra", "WIND": "Viento", "LIGHT": "Luz", "SHADOW": "Sombra", "SWORD": "Espada", "SHIELD": "Escudo", "HEAL": "Curar", "ICE": "Hielo", "STORM": "Tormenta" },
-    fr: { "FIRE": "Feu", "WATER": "Eau", "EARTH": "Terre", "WIND": "Vent", "LIGHT": "Lumiere", "SHADOW": "Ombre", "SWORD": "Epee", "SHIELD": "Bouclier", "HEAL": "Guerir", "ICE": "Glace", "STORM": "Tempete" },
-    de: { "FIRE": "Feuer", "WATER": "Wasser", "EARTH": "Erde", "WIND": "Wind", "LIGHT": "Licht", "SHADOW": "Schatten", "SWORD": "Schwert", "SHIELD": "Schild", "HEAL": "Heilen", "ICE": "Eis", "STORM": "Sturm" },
-    it: { "FIRE": "Fuoco", "WATER": "Acqua", "EARTH": "Terra", "WIND": "Vento", "LIGHT": "Luce", "SHADOW": "Ombra", "SWORD": "Spada", "SHIELD": "Scudo", "HEAL": "Guarire", "ICE": "Ghiaccio", "STORM": "Tempesta" }
+    es: { 
+        "FIRE": "Fuego", "WATER": "Agua", "EARTH": "Tierra", "WIND": "Viento", "LIGHT": "Luz", "SHADOW": "Sombra", "SWORD": "Espada", "SHIELD": "Escudo", "HEAL": "Curar", "ICE": "Hielo", "STORM": "Tormenta",
+        "S_FIRE": "Lanzo fuego", "S_WATER": "El agua fluye", "S_WIND": "Un viento fuerte", "S_HEAL": "Cura mis heridas", "S_SHIELD": "Levanta el escudo", "S_ICE": "Congela la tierra", "S_SWORD": "Golpea con la espada"
+    },
+    fr: { 
+        "FIRE": "Feu", "WATER": "Eau", "EARTH": "Terre", "WIND": "Vent", "LIGHT": "Lumiere", "SHADOW": "Ombre", "SWORD": "Epee", "SHIELD": "Bouclier", "HEAL": "Guerir", "ICE": "Glace", "STORM": "Tempete",
+        "S_FIRE": "Je lance du feu", "S_WATER": "L eau coule", "S_WIND": "Un vent fort", "S_HEAL": "Gueris mes blessures", "S_SHIELD": "Leve le bouclier", "S_ICE": "Gele la terre", "S_SWORD": "Frappe avec l'epee"
+    },
+    de: { 
+        "FIRE": "Feuer", "WATER": "Wasser", "EARTH": "Erde", "WIND": "Wind", "LIGHT": "Licht", "SHADOW": "Schatten", "SWORD": "Schwert", "SHIELD": "Schild", "HEAL": "Heilen", "ICE": "Eis", "STORM": "Sturm",
+        "S_FIRE": "Ich werfe Feuer", "S_WATER": "Das Wasser fliesst", "S_WIND": "Ein starker Wind", "S_HEAL": "Heile meine Wunden", "S_SHIELD": "Heben Sie den Schild", "S_ICE": "Friere die Erde ein", "S_SWORD": "Schlag mit dem Schwert"
+    },
+    it: { 
+        "FIRE": "Fuoco", "WATER": "Acqua", "EARTH": "Terra", "WIND": "Vento", "LIGHT": "Luce", "SHADOW": "Ombra", "SWORD": "Spada", "SHIELD": "Scudo", "HEAL": "Guarire", "ICE": "Ghiaccio", "STORM": "Tempesta",
+        "S_FIRE": "Lancio il fuoco", "S_WATER": "L acqua scorre", "S_WIND": "Un vento forte", "S_HEAL": "Guarisci le mie ferite", "S_SHIELD": "Alza lo scudo", "S_ICE": "Congela la terra", "S_SWORD": "Colpisci con la spada"
+    }
 };
 
 // Game Configuration Parameters (Exposed via Skillprint)
@@ -33,13 +55,18 @@ let heroHP = 100;
 let enemyHP = 100;
 let maxHP = 100;
 let currentWordObj = null;
+let currentTargetTranslation = "";
 let enemyInterval = null;
 let currentLang = 'es'; // default
+let useSentences = false;
+let showHelper = true;
 
 // DOM Elements
 const mainMenuEl = document.getElementById('main-menu');
 const mapContainerEl = document.getElementById('map-container');
 const regionNodes = document.querySelectorAll('.region-node');
+const toggleSentencesEl = document.getElementById('toggle-sentences');
+const toggleHelperEl = document.getElementById('toggle-helper');
 
 const backgroundEl = document.getElementById('background');
 const heroEl = document.getElementById('hero');
@@ -59,6 +86,8 @@ function initMenu() {
     regionNodes.forEach(node => {
         node.addEventListener('click', () => {
             currentLang = node.getAttribute('data-lang');
+            useSentences = toggleSentencesEl.checked;
+            showHelper = toggleHelperEl.checked;
             startGame();
         });
     });
@@ -134,15 +163,26 @@ function startEnemyAttacks() {
 
 function nextWord() {
     let next;
+    const pool = useSentences ? coreSentences : coreWords;
     do {
-        next = coreWords[Math.floor(Math.random() * coreWords.length)];
+        next = pool[Math.floor(Math.random() * pool.length)];
     } while (currentWordObj === next);
     
     currentWordObj = next;
     
-    const translatedTarget = dictionaries[currentLang][currentWordObj.target].toUpperCase();
-    targetWordEl.textContent = translatedTarget;
-    targetMeaningEl.textContent = `Type Translation: "${currentWordObj.meaning}"`;
+    // Set up translation logic
+    currentTargetTranslation = dictionaries[currentLang][currentWordObj.target].toUpperCase();
+    
+    // UI Updates
+    targetWordEl.textContent = currentWordObj.prompt.toUpperCase();
+    
+    if (showHelper) {
+        targetMeaningEl.textContent = `Type to Translate: "${currentTargetTranslation}"`;
+        targetMeaningEl.style.opacity = 1;
+    } else {
+        targetMeaningEl.textContent = `Type to Translate (Hidden)`;
+        targetMeaningEl.style.opacity = 0; // hide it mostly but maintain layout
+    }
 
     inputWordEl.value = '';
     
@@ -153,11 +193,11 @@ function nextWord() {
 
 function checkInput(e) {
     const input = e.target.value.trim().toLowerCase();
-    const target = currentWordObj.meaning.toLowerCase();
+    const target = currentTargetTranslation.toLowerCase();
     
     if (input === target) {
         // Success
-        heroAttack(currentWordObj.target === "HEAL");
+        heroAttack(currentWordObj.target.includes("HEAL"));
     } else if (target.startsWith(input)) {
         // Still matching, do nothing
         inputWordEl.classList.remove('error-shake');
