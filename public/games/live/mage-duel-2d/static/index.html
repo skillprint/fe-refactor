@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mage Duel 2D</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        
+        <div id="main-menu">
+            <h1 class="menu-title">Select Region to Train</h1>
+            <div id="map-container">
+                <!-- region nodes -->
+                <div class="region-node" data-lang="es" style="top: 30%; left: 25%;">
+                    <div class="node-pulse"></div>
+                    <span class="region-name">Gades (Spanish)</span>
+                </div>
+                <div class="region-node" data-lang="fr" style="top: 20%; left: 65%;">
+                    <div class="node-pulse"></div>
+                    <span class="region-name">Quivira (French)</span>
+                </div>
+                <div class="region-node" data-lang="de" style="top: 65%; left: 45%;">
+                    <div class="node-pulse"></div>
+                    <span class="region-name">Zend (German)</span>
+                </div>
+                <div class="region-node" data-lang="it" style="top: 75%; left: 75%;">
+                    <div class="node-pulse"></div>
+                    <span class="region-name">Abesh (Italian)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="scene" id="scene" style="display: none;">
+            <div id="background"></div>
+            
+            <div id="hero" class="sprite"></div>
+            <div id="enemy" class="sprite"></div>
+            
+            <div id="ui-layer">
+                <div class="health-bars">
+                    <div class="health-container" id="hero-health">
+                        <div class="name">Hero (You)</div>
+                        <div class="health-fill" id="hero-hp-fill"></div>
+                    </div>
+                    <div class="health-container" id="enemy-health">
+                        <div class="name">Dark Warlord</div>
+                        <div class="health-fill" id="enemy-hp-fill"></div>
+                    </div>
+                </div>
+                
+                <div id="typing-area">
+                    <div id="target-word-container">
+                        <div id="target-word">START</div>
+                        <div id="target-meaning">Waiting for opponent...</div>
+                    </div>
+                    <input type="text" id="input-word" placeholder="Type translation..." autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+            
+            <div id="notifications">VS</div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

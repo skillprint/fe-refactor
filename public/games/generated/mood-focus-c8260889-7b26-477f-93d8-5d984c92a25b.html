@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Crosser - Focus Edition</title>
+    <meta name="game-icon" content="🐔">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border: 4px solid #333;
+            image-rendering: pixelated;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-shadow: 2px 2px #000;
+        }
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border: 4px solid #fff;
+            pointer-events: auto;
+        }
+        .screen.active {
+            display: flex;
+        }
+        h1 { font-size: 48px; margin-bottom: 20px; color: #f1c40f; }
+        p { font-size: 18px; margin-bottom: 30px; text-align: center; }
+        button {
+            padding: 15px 30px;
+            font-size: 24px;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            background: #2ecc71;
+            border: none;
+            color: white;
+            border-bottom: 6px solid #27ae60;
+            transition: transform 0.1s;
+        }
+        button:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+        }
+        #score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 32px;
+            color: #fff;
+            display: none;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-layer">
+            <div id="score-display">DISTANCE: 0</div>
+            
+            <div id="start-screen" class="screen active">
+                <h1>PIXEL CROSSER</h1>
+                <p>FOCUS. TIME YOUR JUMPS.<br>STAY ON THE SCREEN.<br>DON'T GET HIT.</p>
+                <button onclick="startGame()">START MISSION</button>
+            </div>
+
+            <div id="game-over-screen" class="screen">
+                <h1 id="game-over-title">GAME OVER</h1>
+                <p id="final-score">DISTANCE: 0</p>
+                <button onclick="startGame()">RETRY</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+/**
+ * PIXEL CROSSER - FOCUS EDITION
+ * A Crossy Road clone built for sustained attention and flow.
+ */
+
+// Global Game Configuration
+window.GAME_CONFIG = {
+    laneHeight: 48,
+    scrollSpeed: 0.8,
+    obstacleBaseSpeed: 2,
+    spawnChance: 0.3,
+    playerJumpSpeed: 200,
+    difficultyMultiplier: 1.0,
+};
+
+// Skillprint Adjustment Logic
+window.adjustGame = function(obj) {
+    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+        const { parameterName, parameterValue } = obj;
+        if (window.GAME_CONFIG.hasOwnProperty(parameterName)) {
+            window.GAME_CONFIG[parameterName] = parameterValue;
+            console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+        }
+    }
+}
+
+window.Skillprint.registerAdjustments({
+    '1': { parameterName: 'scrollSpeed', description: 'Faster World Scroll', value: 1.5 },
+    '2': { parameterName: 'scrollSpeed', description: 'Slower World Scroll', value: 0.5 },
+    '3': { parameterName: 'obstacleBaseSpeed', description: 'Fast Traffic', value: 4 },
+    '4': { parameterName: 'obstacleBaseSpeed', description: 'Slow Traffic', value: 1.5 },
+    '5': { parameterName: 'difficultyMultiplier', description: 'Hard Mode', value: 2.0 },
+    '6': { parameterName: 'difficultyMultiplier', description: 'Easy Mode', value: 0.8 },
+    '7': { parameterName: 'spawnChance', description: 'Crowded Lanes', value: 0.6 },
+    '8': { parameterName: 'spawnChance', description: 'Empty Lanes', value: 0.15 },
+    '9': { parameterName: 'scrollSpeed', description: 'Reset Speed', value: 0.8 }
+});
+
+// Assets (Base64 Pixel Art)
+const ASSETS = {
+    chicken: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIj48cmVjdCB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHg9IjIiIHk9IjQiIGZpbGw9IiNmZmYiIC8+PHJlY3Qgd2lkdGg9IjgiIGhlaWdodD0iMiIgeD0iNCIgeT0iMiIgZmlsbD0iI2ZmZiIgLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIyIiB4PSI2IiB5PSIwIiBmaWxsPSIjZjc0YzRjIiAvPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjEwIiB5PSI2IiBmaWxsPSIjMDAwIiAvPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjIiIHg9IjEyIiB5PSI4IiBmaWxsPSIjZjM5YzEyIiAvPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjQiIHg9IjQiIHk9IjEyIiBmaWxsPSIjZjM5YzEyIiAvPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjQiIHg9IjEwIiB5PSIxMiIgZmlsbD0iI2YzOWMxMiIgLz48L3N2Zz4=',
+    car: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAxNiIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIj48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMTIiIHg9IjQiIHk9IjIiIGZpbGw9IiNlNzRjM2MiIC8+PHJlY3Qgd2lkdGg9IjgiIGhlaWdodD0iNiIgeD0iOCIgeT0iNCIgZmlsbD0iIzM0OThkYiIgLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4PSI2IiB5PSIxMiIgZmlsbD0iIzMzMyIgLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4PSIyMiIgeT0iMTIiIGZpbGw9IiMzMzMiIC8+PC9zdmc+',
+    log: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA4IiBzaGFwZS1yZW5kZXJpbmc9ImNyaXNwRWRnZXMiPjxyZWN0IHdpZHRoPSI0OCIgaGVpZ2h0PSI4IiBmaWxsPSIjOGU0NDFkIiAvPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjgiIHg9IjQiIGZpbGw9IiM2ZDM4MTciIC8+PHJlY3Qgd2lkdGg9IjQiIGhlaWdodD0iOCIgeD0iMzAiIGZpbGw9IiM2ZDM4MTciIC8+PC9zdmc+',
+    tree: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIj48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4PSI2IiB5PSIxMiIgZmlsbD0iIzdjNWU0MiIgLz48cmVjdCB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHg9IjIiIHk9IjAiIGZpbGw9IiMyN2FlNjAiIC8+PHJlY3Qgd2lkdGg9IjgiIGhlaWdodD0iOCIgeD0iNCIgeT0iMiIgZmlsbD0iIzJlY2M3MSIgLz48L3N2Zz4='
+};
+
+class MainScene extends Phaser.Scene {
+    constructor() {
+        super('MainScene');
+        this.lanes = [];
+        this.score = 0;
+        this.isGameOver = false;
+        this.laneCounter = 0;
+        this.lastInputTime = 0;
+    }
+
+    preload() {
+        this.load.image('chicken', ASSETS.chicken);
+        this.load.image('car', ASSETS.car);
+        this.load.image('log', ASSETS.log);
+        this.load.image('tree', ASSETS.tree);
+    }
+
+    create() {
+        this.isGameOver = false;
+        this.score = 0;
+        this.laneCounter = 0;
+        this.lanes = [];
+
+        // Groups
+        this.laneGroup = this.add.group();
+        this.obstacleGroup = this.physics.add.group();
+        this.logGroup = this.physics.add.group();
+        this.treeGroup = this.physics.add.group();
+
+        // Player setup
+        this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'chicken');
+        this.player.setOrigin(0.5, 0.5);
+        this.player.setDisplaySize(32, 32);
+        this.player.setCollideWorldBounds(true);
+        this.player.depth = 100;
+
+        // Initial Lanes
+        for (let i = 0; i < 15; i++) {
+            this.createLane(this.scale.height - (i * window.GAME_CONFIG.laneHeight));
+        }
+
+        // Controls
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.input.on('pointerdown', (pointer) => this.handlePointer(pointer));
+
+        // Collision
+        this.physics.add.overlap(this.player, this.obstacleGroup, this.hitObstacle, null, this);
+        this.physics.add.collider(this.player, this.treeGroup);
+
+        // UI
+        document.getElementById('score-display').style.display = 'block';
+        this.updateScoreUI();
+    }
+
+    createLane(y) {
+        const types = ['grass', 'road', 'water'];
+        let type;
+        
+        // Ensure starting area is grass
+        if (this.laneCounter < 4) {
+            type = 'grass';
+        } else {
+            type = types[Phaser.Math.Between(0, 2)];
+        }
+
+        const lane = this.add.container(0, y);
+        lane.laneType = type;
+        
+        let bgColor;
+        if (type === 'grass') bgColor = 0x2ecc71;
+        else if (type === 'road') bgColor = 0x34495e;
+        else if (type === 'water') bgColor = 0x3498db;
+
+        const bg = this.add.rectangle(0, 0, this.scale.width, window.GAME_CONFIG.laneHeight, bgColor).setOrigin(0, 0);
+        lane.add(bg);
+
+        // Lane decoration/obstacles
+        if (type === 'road') {
+            const laneLine = this.add.rectangle(0, window.GAME_CONFIG.laneHeight / 2 - 2, this.scale.width, 4, 0xf1c40f, 0.5).setOrigin(0, 0);
+            lane.add(laneLine);
+            this.spawnObstacle(y, 'car');
+        } else if (type === 'water') {
+            this.spawnObstacle(y, 'log');
+        } else if (type === 'grass' && this.laneCounter > 2) {
+            if (Math.random() < 0.4) this.spawnTree(y);
+        }
+
+        this.laneGroup.add(lane);
+        this.lanes.push(lane);
+        this.laneCounter++;
+    }
+
+    spawnObstacle(y, type) {
+        if (Math.random() > window.GAME_CONFIG.spawnChance * window.GAME_CONFIG.difficultyMultiplier) return;
+        
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const speed = (window.GAME_CONFIG.obstacleBaseSpeed + Math.random() * 2) * direction * window.GAME_CONFIG.difficultyMultiplier;
+        const startX = direction === 1 ? -50 : this.scale.width + 50;
+        
+        const obj = this.physics.add.sprite(startX, y + window.GAME_CONFIG.laneHeight / 2, type);
+        obj.setDisplaySize(type === 'log' ? 80 : 48, 32);
+        obj.setVelocityX(speed * 60);
+        obj.direction = direction;
+        
+        if (type === 'car') {
+            this.obstacleGroup.add(obj);
+            if (direction === -1) obj.setFlipX(true);
+        } else {
+            this.logGroup.add(obj);
+        }
+    }
+
+    spawnTree(y) {
+        const x = Phaser.Math.Between(40, this.scale.width - 40);
+        const tree = this.physics.add.staticSprite(x, y + window.GAME_CONFIG.laneHeight / 2, 'tree');
+        tree.setDisplaySize(32, 32);
+        this.treeGroup.add(tree);
+    }
+
+    handlePointer(pointer) {
+        if (this.isGameOver) return;
+        const dx = pointer.x - this.player.x;
+        const dy = pointer.y - this.player.y;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) this.movePlayer(32, 0);
+            else this.movePlayer(-32, 0);
+        } else {
+            if (dy > 0) this.movePlayer(0, 32);
+            else this.movePlayer(0, -32);
+        }
+    }
+
+    movePlayer(dx, dy) {
+        if (this.isGameOver) return;
+        const now = this.time.now;
+        if (now - this.lastInputTime < 150) return; // Debounce
+        this.lastInputTime = now;
+
+        const targetX = Phaser.Math.Clamp(this.player.x + dx, 20, this.scale.width - 20);
+        const targetY = this.player.y + dy;
+
+        this.tweens.add({
+            targets: this.player,
+            x: targetX,
+            y: targetY,
+            duration: 100,
+            ease: 'Power1',
+            onComplete: () => {
+                if (dy < 0) {
+                    this.score += 10;
+                    this.updateScoreUI();
+                }
+            }
+        });
+    }
+
+    updateScoreUI() {
+        document.getElementById('score-display').innerText = `DISTANCE: ${this.score}`;
+    }
+
+    hitObstacle() {
+        this.gameOver();
+    }
+
+    gameOver() {
+        if (this.isGameOver) return;
+        this.isGameOver = true;
+        this.physics.pause();
+        this.player.setTint(0xff0000);
+        
+        document.getElementById('game-over-screen').classList.add('active');
+        document.getElementById('final-score').innerText = `DISTANCE: ${this.score}`;
+        document.getElementById('score-display').style.display = 'none';
+    }
+
+    update(time, delta) {
+        if (this.isGameOver) return;
+
+        // Auto-scroll logic
+        const scrollAmount = window.GAME_CONFIG.scrollSpeed;
+        this.player.y += scrollAmount;
+        
+        this.laneGroup.children.iterate((lane) => {
+            lane.y += scrollAmount;
+        });
+
+        this.obstacleGroup.children.iterate((car) => {
+            car.y += scrollAmount;
+            if (car.direction === 1 && car.x > this.scale.width + 100) car.x = -100;
+            if (car.direction === -1 && car.x < -100) car.x = this.scale.width + 100;
+        });
+
+        this.logGroup.children.iterate((log) => {
+            log.y += scrollAmount;
+            if (log.direction === 1 && log.x > this.scale.width + 100) log.x = -100;
+            if (log.direction === -1 && log.x < -100) log.x = this.scale.width + 100;
+        });
+
+        this.treeGroup.children.iterate((tree) => {
+            tree.y += scrollAmount;
+        });
+
+        // Log riding logic
+        let onLog = false;
+        this.physics.overlap(this.player, this.logGroup, (player, log) => {
+            player.x += log.body.velocity.x * (delta / 1000);
+            onLog = true;
+        });
+
+        // Check Water Death
+        const currentLane = this.lanes.find(l => 
+            this.player.y > l.y && this.player.y < l.y + window.GAME_CONFIG.laneHeight
+        );
+        if (currentLane && currentLane.laneType === 'water' && !onLog) {
+            this.gameOver();
+        }
+
+        // Screen Boundary Death
+        if (this.player.y > this.scale.height || this.player.y < 0) {
+            this.gameOver();
+        }
+
+        // Recycle Lanes
+        const topLane = this.lanes[this.lanes.length - 1];
+        if (topLane.y > 0) {
+            this.createLane(topLane.y - window.GAME_CONFIG.laneHeight);
+        }
+
+        // Cleanup old lanes and objects
+        this.lanes = this.lanes.filter(lane => {
+            if (lane.y > this.scale.height + 100) {
+                lane.destroy();
+                return false;
+            }
+            return true;
+        });
+
+        this.cleanupOffscreen(this.obstacleGroup);
+        this.cleanupOffscreen(this.logGroup);
+        this.cleanupOffscreen(this.treeGroup);
+
+        // Input handling
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.movePlayer(0, -window.GAME_CONFIG.laneHeight);
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.movePlayer(0, window.GAME_CONFIG.laneHeight);
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.movePlayer(-window.GAME_CONFIG.laneHeight, 0);
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.movePlayer(window.GAME_CONFIG.laneHeight, 0);
+    }
+
+    cleanupOffscreen(group) {
+        group.children.iterate(child => {
+            if (child && child.y > this.scale.height + 200) {
+                child.destroy();
+            }
+        });
+    }
+}
+
+const config = {
+    type: Phaser.AUTO,
+    width: 400,
+    height: 600,
+    parent: 'game-container',
+    pixelArt: true,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    },
+    scene: MainScene
+};
+
+let game;
+
+function startGame() {
+    document.getElementById('start-screen').classList.remove('active');
+    document.getElementById('game-over-screen').classList.remove('active');
+    
+    if (game) {
+        game.destroy(true);
+    }
+    game = new Phaser.Game(config);
+}
+
+// Ensure the game doesn't start until interaction or window load
+window.addEventListener('load', () => {
+    // Game waits for user to click "START"
+});
+
+</script>
+</body>
+</html>

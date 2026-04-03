@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="game-icon" content="🌙">
+    <title>Neon Moon Runner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            box-shadow: 0 0 50px rgba(255, 0, 255, 0.2);
+            border: 2px solid #ff00ff;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .menu-btn {
+            background: transparent;
+            color: #ff00ff;
+            border: 2px solid #ff00ff;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+            width: 250px;
+        }
+
+        .menu-btn:hover {
+            background: #ff00ff;
+            color: #000;
+            box-shadow: 0 0 30px #ff00ff;
+        }
+
+        .stats {
+            font-size: 1.5rem;
+            color: #00ffff;
+            margin-bottom: 30px;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .difficulty-label {
+            color: #ff00ff;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Main Menu -->
+    <div id="main-menu" class="ui-overlay">
+        <h1>NEON MOON</h1>
+        <p style="color: #00ffff; margin-bottom: 20px;">MAINTAIN FOCUS. AVOID CRASHING.</p>
+        <button class="menu-btn" onclick="startGame('easy')">EASY</button>
+        <button class="menu-btn" onclick="startGame('medium')">NORMAL</button>
+        <button class="menu-btn" onclick="startGame('hard')">HARDCORE</button>
+        <p class="difficulty-label">Desktop: SPACE to Jump | Mobile: Tap Screen</p>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div id="score-display">SCORE: 0</div>
+        <div id="time-display">TIME: 0s</div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over" class="ui-overlay hidden">
+        <h1>CRASHED</h1>
+        <div class="stats">
+            <div id="final-score">SCORE: 0</div>
+            <div id="final-time">TIME: 0s</div>
+        </div>
+        <button class="menu-btn" onclick="resetToMenu()">MAIN MENU</button>
+    </div>
+</div>
+
+<script>
+/** 
+ * GAME CONFIGURATION & PARAMETERS
+ */
+const CONFIG = {
+    gravity: 1600,
+    jumpForce: -550,
+    baseSpeed: 400,
+    spawnRate: 1500,
+    coinValue: 100,
+    difficultyMultiplier: 1.0,
+    currentSpeed: 400
+};
+
+// Skillprint Adjustments
+window.adjustGame = function(obj) {
+    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+        const { parameterName, parameterValue } = obj;
+        if (CONFIG.hasOwnProperty(parameterName)) {
+            CONFIG[parameterName] = parameterValue;
+            // If the game is running, update active scene settings
+            const playScene = game.scene.getScene('PlayScene');
+            if (playScene && playScene.scene.isActive()) {
+                playScene.updateDifficultyParams();
+            }
+        }
+    }
+};
+
+window.Skillprint.registerAdjustments({
+    '1': { parameterName: 'baseSpeed', description: 'Slower Speed', value: 300 },
+    '2': { parameterName: 'baseSpeed', description: 'Faster Speed', value: 600 },
+    '3': { parameterName: 'spawnRate', description: 'Fewer Obstacles', value: 2500 },
+    '4': { parameterName: 'spawnRate', description: 'More Obstacles', value: 1000 },
+    '5': { parameterName: 'jumpForce', description: 'Low Jump', value: -400 },
+    '6': { parameterName: 'jumpForce', description: 'High Jump', value: -700 },
+    '7': { parameterName: 'gravity', description: 'Low Gravity', value: 800 },
+    '8': { parameterName: 'gravity', description: 'High Gravity', value: 2400 },
+    '9': { parameterName: 'coinValue', description: 'High Coin Value', value: 500 }
+});
+
+/**
+ * PHASER SCENES
+ */
+
+class PlayScene extends Phaser.Scene {
+    constructor() {
+        super('PlayScene');
+    }
+
+    init(data) {
+        this.difficulty = data.difficulty || 'medium';
+        this.score = 0;
+        this.startTime = 0;
+        this.elapsedTime = 0;
+        this.isGameOver = false;
+        
+        // Adjust difficulty
+        switch(this.difficulty) {
+            case 'easy': CONFIG.difficultyMultiplier = 0.7; break;
+            case 'medium': CONFIG.difficultyMultiplier = 1.0; break;
+            case 'hard': CONFIG.difficultyMultiplier = 1.4; break;
+        }
+        
+        CONFIG.currentSpeed = CONFIG.baseSpeed * CONFIG.difficultyMultiplier;
+    }
+
+    preload() {
+        // Generate procedural textures
+        this.createTextures();
+    }
+
+    createTextures() {
+        // Player (Astronaut/Rover)
+        let graphics = this.make.graphics({ x: 0, y: 0, add: false });
+        graphics.lineStyle(2, 0x00ffff);
+        graphics.strokeRect(0, 0, 40, 40);
+        graphics.lineStyle(2, 0xff00ff);
+        graphics.strokeCircle(20, 15, 10); // Helmet
+        graphics.generateTexture('player', 40, 40);
+
+        // Coin
+        graphics.clear();
+        graphics.fillStyle(0xffff00);
+        graphics.fillCircle(10, 10, 10);
+        graphics.lineStyle(2, 0xffffff);
+        graphics.strokeCircle(10, 10, 8);
+        graphics.generateTexture('coin', 20, 20);
+
+        // Obstacle (Spike/Rock)
+        graphics.clear();
+        graphics.lineStyle(3, 0xff0000);
+        graphics.beginPath();
+        graphics.moveTo(0, 40);
+        graphics.lineTo(20, 0);
+        graphics.lineTo(40, 40);
+        graphics.closePath();
+        graphics.strokePath();
+        graphics.generateTexture('obstacle', 40, 40);
+
+        // Floor Grid
+        graphics.clear();
+        graphics.lineStyle(1, 0x00ffff, 0.5);
+        graphics.strokeRect(0, 0, 100, 100);
+        graphics.lineStyle(2, 0x00ffff, 1);
+        graphics.moveTo(0, 100);
+        graphics.lineTo(100, 100);
+        graphics.generateTexture('grid', 100, 100);
+    }
+
+    create() {
+        const { width, height } = this.scale;
+
+        // Background
+        this.add.rectangle(width/2, height/2, width, height, 0x050505);
+        
+        // Stars
+        for (let i = 0; i < 100; i++) {
+            let x = Phaser.Math.Between(0, width);
+            let y = Phaser.Math.Between(0, height * 0.7);
+            let star = this.add.circle(x, y, Phaser.Math.FloatBetween(0.5, 1.5), 0xffffff, Phaser.Math.FloatBetween(0.2, 0.8));
+            this.tweens.add({
+                targets: star,
+                alpha: 0.1,
+                duration: Phaser.Math.Between(1000, 3000),
+                yoyo: true,
+                repeat: -1
+            });
+        }
+
+        // Scrolling Floor Grid
+        this.floor = this.add.tileSprite(width/2, height - 50, width, 100, 'grid');
+        this.physics.add.existing(this.floor, true);
+
+        // Player
+        this.player = this.physics.add.sprite(100, height - 120, 'player');
+        this.player.setCollideWorldBounds(true);
+        this.player.setGravityY(CONFIG.gravity);
+        this.player.setBodySize(30, 35);
+        
+        // Neon trail
+        this.particles = this.add.particles(0, 0, 'player', {
+            speed: 10,
+            scale: { start: 0.4, end: 0 },
+            alpha: { start: 0.5, end: 0 },
+            blendMode: 'ADD',
+            follow: this.player,
+            frequency: 50,
+            lifespan: 500
+        });
+
+        // Groups
+        this.obstacles = this.physics.add.group();
+        this.coins = this.physics.add.group();
+
+        // Collisions
+        this.physics.add.collider(this.player, this.floor);
+        this.physics.add.collider(this.player, this.obstacles, this.hitObstacle, null, this);
+        this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
+
+        // Inputs
+        this.input.on('pointerdown', () => this.jump());
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+        // Timers
+        this.startTime = this.time.now;
+        this.spawnTimer = this.time.addEvent({
+            delay: CONFIG.spawnRate / CONFIG.difficultyMultiplier,
+            callback: this.spawnObject,
+            callbackScope: this,
+            loop: true
+        });
+
+        // Reset HUD
+        document.getElementById('hud').style.display = 'flex';
+        this.updateHUD();
+    }
+
+    updateDifficultyParams() {
+        if (this.spawnTimer) {
+            this.spawnTimer.delay = CONFIG.spawnRate / CONFIG.difficultyMultiplier;
+        }
+        if (this.player) {
+            this.player.setGravityY(CONFIG.gravity);
+        }
+    }
+
+    jump() {
+        if (this.player.body.touching.down) {
+            this.player.setVelocityY(CONFIG.jumpForce);
+            
+            // Jump effect
+            this.tweens.add({
+                targets: this.player,
+                angle: 360,
+                duration: 600,
+                onComplete: () => { this.player.angle = 0; }
+            });
+        }
+    }
+
+    spawnObject() {
+        if (this.isGameOver) return;
+
+        const { width, height } = this.scale;
+        const groundY = height - 90;
+
+        // Decide: Obstacle or Coin?
+        if (Math.random() < 0.7) {
+            // Spawn Obstacle
+            let obstacle = this.obstacles.create(width + 50, groundY, 'obstacle');
+            obstacle.setVelocityX(-CONFIG.currentSpeed);
+            obstacle.setImmovable(true);
+            obstacle.body.allowGravity = false;
+        } else {
+            // Spawn Coin
+            let coinY = groundY - Phaser.Math.Between(20, 150);
+            let coin = this.coins.create(width + 50, coinY, 'coin');
+            coin.setVelocityX(-CONFIG.currentSpeed);
+            coin.body.allowGravity = false;
+            
+            // Pulse effect
+            this.tweens.add({
+                targets: coin,
+                scale: 1.2,
+                duration: 400,
+                yoyo: true,
+                repeat: -1
+            });
+        }
+
+        // Increase speed slightly over time to demand more focus
+        CONFIG.currentSpeed += 2;
+    }
+
+    collectCoin(player, coin) {
+        coin.destroy();
+        this.score += CONFIG.coinValue;
+        this.updateHUD();
+        
+        // Visual feedback
+        let txt = this.add.text(coin.x, coin.y, `+${CONFIG.coinValue}`, { fontSize: '20px', color: '#ffff00' });
+        this.tweens.add({
+            targets: txt,
+            y: txt.y - 50,
+            alpha: 0,
+            duration: 800,
+            onComplete: () => txt.destroy()
+        });
+    }
+
+    hitObstacle(player, obstacle) {
+        this.isGameOver = true;
+        this.physics.pause();
+        this.player.setTint(0xff0000);
+        this.cameras.main.shake(250, 0.01);
+        
+        this.time.delayedCall(500, () => {
+            showGameOver(this.score, Math.floor(this.elapsedTime));
+        });
+    }
+
+    update() {
+        if (this.isGameOver) return;
+
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this.jump();
+        }
+
+        // Scroll floor
+        this.floor.tilePositionX += CONFIG.currentSpeed * 0.015;
+
+        // Cleanup objects
+        this.obstacles.getChildren().forEach(child => {
+            if (child.x < -50) child.destroy();
+        });
+        this.coins.getChildren().forEach(child => {
+            if (child.x < -50) child.destroy();
+        });
+
+        // Update Time & Score (Passive distance score)
+        this.elapsedTime = (this.time.now - this.startTime) / 1000;
+        this.score += 0.1; // Distance points
+        
+        this.updateHUD();
+    }
+
+    updateHUD() {
+        document.getElementById('score-display').innerText = `SCORE: ${Math.floor(this.score)}`;
+        document.getElementById('time-display').innerText = `TIME: ${Math.floor(this.elapsedTime)}s`;
+    }
+}
+
+/**
+ * PHASER INITIALIZATION
+ */
+const config = {
+    type: Phaser.AUTO,
+    parent: 'game-container',
+    width: 800,
+    height: 600,
+    backgroundColor: '#050505',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    },
+    scene: [PlayScene]
+};
+
+const game = new Phaser.Game(config);
+
+/**
+ * UI CONTROLS
+ */
+function startGame(difficulty) {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('game-over').classList.add('hidden');
+    game.scene.stop('PlayScene');
+    game.scene.start('PlayScene', { difficulty: difficulty });
+}
+
+function showGameOver(score, time) {
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('game-over').classList.remove('hidden');
+    document.getElementById('final-score').innerText = `SCORE: ${Math.floor(score)}`;
+    document.getElementById('final-time').innerText = `TIME: ${time}s`;
+}
+
+function resetToMenu() {
+    document.getElementById('game-over').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+}
+
+// Handle resizing
+window.addEventListener('resize', () => {
+    game.scale.refresh();
+});
+
+</script>
+</body>
+</html>
