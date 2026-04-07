@@ -61,6 +61,12 @@ let currentLang = 'es'; // default
 let useSentences = false;
 let showHelper = true;
 
+let stats = {
+    spellsCast: 0,
+    typos: 0,
+    startTime: null
+};
+
 // DOM Elements
 const mainMenuEl = document.getElementById('main-menu');
 const mapContainerEl = document.getElementById('map-container');
@@ -79,6 +85,15 @@ const inputWordEl = document.getElementById('input-word');
 const notificationsEl = document.getElementById('notifications');
 const sceneEl = document.getElementById('scene');
 
+const reviewScreenEl = document.getElementById('review-screen');
+const reviewTitleEl = document.getElementById('review-title');
+const statAccuracyEl = document.getElementById('stat-accuracy');
+const statSpellsEl = document.getElementById('stat-spells');
+const statTyposEl = document.getElementById('stat-typos');
+const statTimeEl = document.getElementById('stat-time');
+const btnRepeatEl = document.getElementById('btn-repeat');
+const btnMenuEl = document.getElementById('btn-menu');
+
 // Initialization
 function initMenu() {
     mapContainerEl.style.backgroundImage = "url('assets/world_map.png')";
@@ -91,9 +106,41 @@ function initMenu() {
             startGame();
         });
     });
+
+    btnRepeatEl.addEventListener('click', () => {
+        reviewScreenEl.style.display = 'none';
+        startGame();
+    });
+
+    btnMenuEl.addEventListener('click', () => {
+        reviewScreenEl.style.display = 'none';
+        sceneEl.style.display = 'none';
+        mainMenuEl.style.display = 'flex';
+    });
 }
 
 function startGame() {
+    // Reset Game State
+    heroHP = maxHP;
+    enemyHP = maxHP;
+    updateHPUI();
+    
+    // Reset Entity appearance (in case of repeat)
+    heroEl.style.filter = "contrast(1.1) brightness(0.9)";
+    heroEl.style.transform = "none";
+    heroEl.style.opacity = 1;
+
+    enemyEl.style.filter = "contrast(1.1) brightness(0.9)";
+    enemyEl.style.transform = "scaleX(-1)";
+    enemyEl.style.opacity = 1;
+    
+    // Reset Stats
+    stats = {
+        spellsCast: 0,
+        typos: 0,
+        startTime: Date.now()
+    };
+
     mainMenuEl.style.display = 'none';
     sceneEl.style.display = 'block';
 
@@ -197,14 +244,18 @@ function checkInput(e) {
     
     if (input === target) {
         // Success
+        stats.spellsCast++;
         heroAttack(currentWordObj.target.includes("HEAL"));
     } else if (target.startsWith(input)) {
         // Still matching, do nothing
         inputWordEl.classList.remove('error-shake');
     } else {
         // Typing error, visual feedback
-        inputWordEl.classList.add('error-shake');
-        setTimeout(() => inputWordEl.classList.remove('error-shake'), 400); // remove after animation
+        if (!inputWordEl.classList.contains('error-shake')) {
+            stats.typos++;
+            inputWordEl.classList.add('error-shake');
+            setTimeout(() => inputWordEl.classList.remove('error-shake'), 400); // remove after animation
+        }
     }
 }
 
@@ -273,8 +324,7 @@ function heroAttack(isHeal = false) {
             enemyEl.style.transition = "all 2s";
             enemyEl.style.opacity = 0;
             showNotification("VICTORY!");
-            inputWordEl.disabled = true;
-            clearInterval(enemyInterval);
+            triggerEndGame(true);
         } else {
             inputWordEl.disabled = false;
             nextWord();
@@ -326,10 +376,37 @@ function enemyAttack() {
             heroEl.style.transform = "rotate(-90deg) translate(-50px, 0)";
             heroEl.style.transition = "all 1s";
             showNotification("DEFEAT...");
-            inputWordEl.disabled = true;
-            clearInterval(enemyInterval);
+            triggerEndGame(false);
         }
     }, 400);
+}
+
+function triggerEndGame(isVictory) {
+    inputWordEl.disabled = true;
+    clearInterval(enemyInterval);
+    
+    const timeElapsedSec = Math.floor((Date.now() - stats.startTime) / 1000);
+    const mins = Math.floor(timeElapsedSec / 60);
+    const secs = timeElapsedSec % 60;
+    const timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    
+    let accuracy = 100;
+    if (stats.spellsCast + stats.typos > 0) {
+        accuracy = Math.max(0, Math.round((stats.spellsCast / (stats.spellsCast + stats.typos)) * 100));
+    }
+
+    setTimeout(() => {
+        reviewTitleEl.textContent = isVictory ? "VICTORY!" : "DEFEAT...";
+        reviewTitleEl.style.color = isVictory ? "#a29bfe" : "#ff3b30";
+        reviewTitleEl.style.textShadow = isVictory ? "0 0 20px #a29bfe" : "0 0 20px #ff3b30";
+        
+        statAccuracyEl.textContent = `${accuracy}%`;
+        statSpellsEl.textContent = stats.spellsCast;
+        statTyposEl.textContent = stats.typos;
+        statTimeEl.textContent = timeStr;
+        
+        reviewScreenEl.style.display = 'flex';
+    }, 2500);
 }
 
 function createMagicalEffect(target, isHeal) {
