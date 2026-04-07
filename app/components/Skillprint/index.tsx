@@ -21,6 +21,7 @@ interface SkillprintProps {
     hasScoreByMood: { [key: string]: boolean };
     size?: number;
     initialState?: 'reset' | 'skills' | 'mindsets' | 'traits';
+    hasMenu?: boolean;
 }
 
 const Skillprint: React.FC<SkillprintProps> = ({
@@ -30,6 +31,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
     hasScoreByMood,
     size = 1200,
     initialState = 'reset',
+    hasMenu = false,
 }) => {
     const router = useRouter();
     const [viewState, setViewState] = useState<string>(initialState);
@@ -198,12 +200,12 @@ const Skillprint: React.FC<SkillprintProps> = ({
     }, [userSkills, userMoods, hasScoreBySkill, hasScoreByMood, currentPosition]);
 
     const windowWidth = window.innerWidth;
-    const overrideWidth = Math.min(windowWidth - 40, 800);
+    const overrideWidth = Math.min(windowWidth - 40, 600);
 
     return (
         <div className="flex flex-col items-center justify-center md:p-4">
             {/* Controls */}
-            <div className="flex space-x-4 mb-4 bg-muted p-1 rounded-lg relative z-10 md:p-4">
+            {hasMenu && <div className="flex space-x-4 mb-4 bg-muted p-1 rounded-lg relative z-10 md:p-4">
                 {['reset', 'skills', 'mindsets'].map((state) => (
                     <button
                         key={state}
@@ -216,7 +218,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
                         {state === 'reset' ? 'Summary' : state === 'mindsets' ? 'Moods' : 'Skills'}
                     </button>
                 ))}
-            </div>
+            </div>}
 
             {/* Visualization Container */}
             <div

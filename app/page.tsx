@@ -358,7 +358,7 @@ function HomeContent() {
                     </Link>
                   </div>
                 </div>
-                <div className="flex-1 w-full max-w-[500px] bg-background/50 rounded-3xl p-6 border border-border/50 shadow-inner">
+                <div className="flex-1 w-full max-w-[500px]">
                   <SkillprintVisualization
                     userSkills={userSkillsForVis}
                     userMoods={userMoodsForVis}
@@ -366,6 +366,7 @@ function HomeContent() {
                     hasScoreByMood={hasScoreByMood}
                     size={400}
                     initialState="reset"
+                    hasMenu={false}
                   />
                 </div>
               </div>
