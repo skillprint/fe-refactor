@@ -375,6 +375,20 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'mage-duel-2d':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'heroDamage', parameterValue: 10 }];
+                case 2: return [{ parameterName: 'heroDamage', parameterValue: 50 }];
+                case 3: return [{ parameterName: 'enemyDamage', parameterValue: 5 }];
+                case 4: return [{ parameterName: 'enemyDamage', parameterValue: 40 }];
+                case 5: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 8000 }];
+                case 6: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 3000 }];
+                case 7: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 1000 }];
+                case 8: return [{ parameterName: 'healAmount', parameterValue: 10 }];
+                case 9: return [{ parameterName: 'healAmount', parameterValue: 60 }];
+                default:
+                    return [];
+            }
         case 'airport-rush':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'planeMoveSpeed', parameterValue: 0.2 }]; // Very Slow

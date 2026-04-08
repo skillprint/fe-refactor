@@ -162,11 +162,14 @@ function startGame() {
     setTimeout(() => {
         const adjustmentConfig = {
             '1': { parameterName: 'heroDamage', description: 'Decrease Hero Damage', value: 10 },
-            '2': { parameterName: 'heroDamage', description: 'Increase Hero Damage', value: 40 },
+            '2': { parameterName: 'heroDamage', description: 'Increase Hero Damage', value: 50 },
             '3': { parameterName: 'enemyDamage', description: 'Decrease Enemy Damage', value: 5 },
-            '4': { parameterName: 'enemyDamage', description: 'Increase Enemy Damage', value: 30 },
-            '5': { parameterName: 'enemyAttackRateMs', description: 'Faster Enemy Attacks', value: 2000 },
-            '6': { parameterName: 'enemyAttackRateMs', description: 'Slower Enemy Attacks', value: 8000 }
+            '4': { parameterName: 'enemyDamage', description: 'Increase Enemy Damage', value: 40 },
+            '5': { parameterName: 'enemyAttackRateMs', description: 'Slower Enemy Attacks', value: 8000 },
+            '6': { parameterName: 'enemyAttackRateMs', description: 'Faster Enemy Attacks', value: 3000 },
+            '7': { parameterName: 'enemyAttackRateMs', description: 'Insane Enemy Attacks', value: 1000 },
+            '8': { parameterName: 'healAmount', description: 'Decrease Heal Amount', value: 10 },
+            '9': { parameterName: 'healAmount', description: 'Increase Heal Amount', value: 60 }
         };
 
         if (window.Skillprint && typeof window.Skillprint.registerAdjustments === 'function') {
