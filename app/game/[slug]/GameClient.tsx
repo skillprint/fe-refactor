@@ -369,7 +369,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
         // Record the game session
         const session: GameSession = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: skillprintSessionIdRef.current || Math.random().toString(36).substr(2, 9),
             gameSlug: decodedSlug,
             timestamp: endTime,
             duration: playTime,
@@ -469,7 +469,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
             // Record the game session
             const session: GameSession = {
-                id: Math.random().toString(36).substr(2, 9),
+                id: skillprintSessionIdRef.current || Math.random().toString(36).substr(2, 9),
                 gameSlug: decodedSlug,
                 timestamp: Date.now(),
                 duration: currentTime,
