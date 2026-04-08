@@ -38,6 +38,11 @@ export function useGamesBySkill() {
                 allGamesSkill = allGamesSkill.filter((game: any) => !gamesToFilterBySlug.includes(game.slug));
                 allGamesMood = allGamesMood.filter((game: any) => !gamesToFilterBySlug.includes(game.slug));
 
+                console.log("DUMPING SKILL SLUGS:", allGamesSkill.map(g => g.slug).slice(0,5));
+                console.log("DUMPING MOOD SLUGS:", allGamesMood.map(g => g.slug).slice(0,5));
+                console.log("DUMP SKILLS:", skillsData);
+                console.log("DUMP MOODS:", moodsData);
+                
                 setSkills(skillsData);
                 setMoods(moodsData);
                 setGamesBySkill(allGamesSkill);
