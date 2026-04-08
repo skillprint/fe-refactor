@@ -280,22 +280,25 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                         </div>
                     ) : (
                         <>
-                            {isCalculating && closedSessionResult && (
-                                <div className="bg-primary/10 border border-primary/20 text-primary px-4 py-3 rounded-lg mb-6 flex items-center gap-3">
-                                    <svg className="animate-spin h-5 w-5 text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            {closedSessionResult && (
+                                <div className="bg-muted/30 border border-border/50 px-4 py-3 rounded-lg mb-6">
+                                    {isCalculating && <svg className="animate-spin h-5 w-5 text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span className="text-sm font-medium">Scores are still being finalized...</span>
+                                    </svg>}
+                                    <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                                        Note: Your scores may continue to update after playing.
+                                    </p>
                                 </div>
                             )}
 
+
                             {/* Calculation Error */}
-                            {calculationError && (
+                            {/* {calculationError && (
                                 <div className="bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded-lg mb-6 text-center text-sm font-medium">
                                     {calculationError}
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Session Results */}
                             {closedSessionResult && (
