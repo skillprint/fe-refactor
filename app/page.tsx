@@ -19,40 +19,45 @@ import { getGameDetails } from './config/gameConfig';
 // Skills data
 const skills = [
   {
-    id: 'memory',
-    name: 'Memory',
+    id: 'planning',
+    apiSlug: 'planning',
+    name: 'Planning',
     color: 'bg-indigo-100 text-indigo-800',
     gradient: 'from-indigo-500 to-purple-500',
     image: '/images/skills/Memorization.png',
     description: 'Enhance your recall and retention abilities'
   },
   {
-    id: 'logic',
-    name: 'Logic',
+    id: 'deduction',
+    apiSlug: 'deduction',
+    name: 'Deduction',
     color: 'bg-red-100 text-red-800',
     gradient: 'from-red-500 to-pink-500',
     image: '/images/skills/DeductiveReasoning.png',
     description: 'Sharpen your reasoning and problem-solving'
   },
   {
-    id: 'speed',
-    name: 'Speed',
+    id: 'perceptual-speed',
+    apiSlug: 'perceptual-speed',
+    name: 'Perceptual Speed',
     color: 'bg-orange-100 text-orange-800',
     gradient: 'from-orange-500 to-yellow-500',
     image: '/images/skills/PerceptualSpeed.png',
     description: 'Improve your reaction time and quick thinking'
   },
   {
-    id: 'pattern',
-    name: 'Pattern Recognition',
+    id: 'pattern-matching',
+    apiSlug: 'pattern-matching',
+    name: 'Pattern Matching',
     color: 'bg-teal-100 text-teal-800',
     gradient: 'from-teal-500 to-cyan-500',
     image: '/images/skills/InductiveReasoning.png',
     description: 'Develop your ability to identify patterns'
   },
   {
-    id: 'coordination',
-    name: 'Coordination',
+    id: 'task-switching',
+    apiSlug: 'task-switching',
+    name: 'Task Switching',
     color: 'bg-emerald-100 text-emerald-800',
     gradient: 'from-emerald-500 to-green-500',
     image: '/images/skills/TaskSwitching.png',
@@ -74,14 +79,14 @@ const moods = [
     gradient: 'from-indigo-400 to-blue-500'
   },
   {
-    id: 'collaborate',
-    name: 'Collaborate',
+    id: 'grit',
+    name: 'Grit',
     image: '/images/mindsets/Collaboration.png',
     gradient: 'from-orange-400 to-red-500'
   },
   {
     id: 'creativity',
-    name: 'Creative',
+    name: 'Creativity',
     image: '/images/mindsets/Innovate.png',
     gradient: 'from-pink-400 to-purple-500'
   },
@@ -93,91 +98,91 @@ const allGames = [
     name: '2048',
     slug: '2048',
     description: 'Slide tiles to reach 2048',
-    skills: ['logic', 'pattern']
+    skills: ['planning', 'pattern-matching']
   },
   {
     name: 'Alchemy',
     slug: 'alchemy',
     description: 'Combine elements to create new ones',
-    skills: ['logic', 'pattern']
+    skills: ['planning', 'pattern-matching']
   },
   {
     name: 'Brick Out',
     slug: 'brick-out',
     description: 'Break all the bricks with your paddle',
-    skills: ['coordination', 'speed']
+    skills: ['task-switching', 'perceptual-speed']
   },
   {
     name: 'Bubble Spirit',
     slug: 'bubble-spirit',
     description: 'Pop bubbles in this puzzle game',
-    skills: ['pattern', 'coordination']
+    skills: ['pattern-matching', 'task-switching']
   },
   {
     name: 'Change Word',
     slug: 'change-word',
     description: 'Transform words letter by letter',
-    skills: ['memory', 'logic']
+    skills: ['planning', 'deduction']
   },
   {
     name: 'Flapcat Steampunk',
     slug: 'flapcat-steampunk',
     description: 'Navigate through obstacles',
-    skills: ['coordination', 'speed']
+    skills: ['task-switching', 'perceptual-speed']
   },
   {
     name: 'Fruit Sorting',
     slug: 'fruit-sorting',
     description: 'Sort fruits by color and type',
-    skills: ['pattern', 'coordination']
+    skills: ['pattern-matching', 'task-switching']
   },
   {
     name: 'Garden Match',
     slug: 'garden-match',
     description: 'Match garden items in this puzzle',
-    skills: ['memory', 'pattern']
+    skills: ['planning', 'pattern-matching']
   },
   {
     name: 'Hextris',
     slug: 'hextris',
     description: 'Rotate and match hexagons',
-    skills: ['coordination', 'speed']
+    skills: ['task-switching', 'perceptual-speed']
   },
   {
     name: 'I Love Hue',
     slug: 'i-love-hue',
     description: 'Arrange colors in perfect harmony',
-    skills: ['pattern', 'memory']
+    skills: ['pattern-matching', 'planning']
   },
   {
     name: 'Mahjong Deluxe',
     slug: 'mahjong-deluxe',
     description: 'Classic tile matching game',
-    skills: ['memory', 'pattern']
+    skills: ['planning', 'pattern-matching']
   },
   {
     name: 'Mine Rusher',
     slug: 'mine-rusher',
     description: 'Navigate through the minefield',
-    skills: ['logic', 'coordination']
+    skills: ['deduction', 'task-switching']
   },
   {
     name: 'Snake Attack',
     slug: 'snake-attack',
     description: 'Grow your snake by eating food',
-    skills: ['coordination', 'speed']
+    skills: ['task-switching', 'perceptual-speed']
   },
   {
     name: 'Space Trip',
     slug: 'space-trip',
     description: 'Explore space in this adventure',
-    skills: ['pattern', 'memory']
+    skills: ['pattern-matching', 'planning']
   },
   {
     name: 'Ultimate Sudoku',
     slug: 'ultimate-sudoku',
     description: 'Solve number puzzles',
-    skills: ['logic', 'memory']
+    skills: ['deduction', 'planning']
   },
 ];
 
@@ -521,7 +526,7 @@ function HomeContent() {
                   {skills.map((skill) => (
                     <Link
                       key={skill.id}
-                      href={`/games?tab=skills&filter=${skill.id}`}
+                      href={`/games?tab=skills&filter=${skill.apiSlug}`}
                       className="flex-shrink-0 group"
                     >
                       <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 bg-white">
@@ -569,7 +574,7 @@ function HomeContent() {
                   Games to develop this skill
                 </h3>
                 <Link
-                  href={`/games?tab=skills&filter=${featuredSkill.id}`}
+                  href={`/games?tab=skills&filter=${featuredSkill.apiSlug}`}
                   className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
                 >
                   View all
