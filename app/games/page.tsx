@@ -12,6 +12,7 @@ import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { newGameSlugs } from '../config/newGames';
 import { inactiveGames } from '../config/inactiveGames';
 import BuckyballLoading from '../components/BuckyballLoading';
+import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { getGameDetails } from '../config/gameConfig';
@@ -30,6 +31,7 @@ function GamesPageContent() {
   const [selectedFilterSlug, setSelectedFilterSlug] = useState<string | null>(isNewFilter ? null : initialFilter);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
   const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
   const { sessions } = useGameSessions();
 
@@ -462,10 +464,10 @@ function GamesPageContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {!searchQuery && !selectedFilterSlug && <RecommendedGameTile />}
                 {filteredGames.map((game: any) => (
-                  <Link
+                  <button
                     key={game.slug + Math.random().toString()}
-                    href={`/game/${unifiedSlugFromBESlug(game.slug)}/interstitial`}
-                    className="block group"
+                    onClick={() => setPreviewGameSlug(game.slug)}
+                    className="block group w-full text-left"
                   >
                     {(() => {
                       let tileColor = '#6366F1';
@@ -506,7 +508,7 @@ function GamesPageContent() {
                         </div>
                       );
                     })()}
-                  </Link>
+                  </button>
                 ))}
               </div>
             )}
@@ -516,6 +518,11 @@ function GamesPageContent() {
         {/* Bottom tabs */}
 
       </div>
+      <GamePreviewShareSheet 
+        slug={previewGameSlug} 
+        isOpen={!!previewGameSlug} 
+        onClose={() => setPreviewGameSlug(null)} 
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
 import { PlaybookWidget } from './components/PlaybookWidget';
 import SkillprintVisualization from './components/Skillprint';
+import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
 import { getGameDetails } from './config/gameConfig';
@@ -201,6 +202,7 @@ function HomeContent() {
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<any[]>([]);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
 
   // Fetch games for the "New Games" section using the 'relax' mood
   const { games: fetchedNewGames, isLoading: isLoadingNewGames } = useGamesByMood('relax');
@@ -433,9 +435,9 @@ function HomeContent() {
                 ) : fetchedNewGames.length > 0 ? (
                   fetchedNewGames.map((game, index) => (
                     <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
-                      <Link
-                        href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                        className="block group flex-shrink-0 w-80"
+                      <button
+                        onClick={() => setPreviewGameSlug(game.slug)}
+                        className="block group flex-shrink-0 w-80 text-left"
                       >
                         <div className={`bg-gradient-to-br ${gradients[index % gradients.length]} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
                           <div className="flex-1 p-5 flex flex-col justify-between items-start">
@@ -466,7 +468,7 @@ function HomeContent() {
                             </div>
                           )}
                         </div>
-                      </Link>
+                      </button>
                     </div>
                   ))
                 ) : (
@@ -592,10 +594,10 @@ function HomeContent() {
               <div className="flex gap-4 min-w-min">
                 {skillGames.length > 0 ? (
                   skillGames.map((game) => (
-                    <Link
+                    <button
                       key={game.slug}
-                      href={`/game/${encodeURIComponent(game.slug)}/interstitial`}
-                      className="block group flex-shrink-0 w-80"
+                      onClick={() => setPreviewGameSlug(game.slug)}
+                      className="block group flex-shrink-0 w-80 text-left"
                     >
                       <div className={`bg-gradient-to-br ${featuredSkill.gradient} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
                         <div className="flex-1 p-5 flex flex-col justify-between items-start">
@@ -623,7 +625,7 @@ function HomeContent() {
                           </div>
                         )}
                       </div>
-                    </Link>
+                    </button>
                   ))
                 ) : (
                   <div className="w-full py-12 flex justify-center items-center">
@@ -682,6 +684,11 @@ function HomeContent() {
           </div>
         </div>
       </div>
+      <GamePreviewShareSheet 
+        slug={previewGameSlug} 
+        isOpen={!!previewGameSlug} 
+        onClose={() => setPreviewGameSlug(null)} 
+      />
     </div>
   );
 }

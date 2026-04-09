@@ -7,6 +7,7 @@ import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { useAuth } from '../context/AuthContext';
+import GamePreviewShareSheet from './GamePreviewShareSheet';
 
 interface NextPlaybookGameTileProps {
     playbookId: string;
@@ -15,6 +16,7 @@ interface NextPlaybookGameTileProps {
 export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTileProps) {
     const { sessions } = useGameSessions();
     const { status } = useAuth();
+    const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
 
     // Find playbook
     const playbook = Object.values(PLAYBOOKS).find(p => p.id === playbookId);
@@ -53,9 +55,9 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
     return (
         <div className="mb-6">
             <h2 className="text-xl font-bold mb-3 text-foreground">Next in {playbook.title}</h2>
-            <Link
-                href={`/game/${unifiedSlugFromBESlug(nextGameSlug)}/interstitial?source=playbook&playbookId=${playbook.id}`}
-                className="block group"
+            <button
+                onClick={() => setIsShareSheetOpen(true)}
+                className="block group w-full text-left"
             >
                 <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200">
                     {game.image && (
@@ -97,7 +99,14 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
                         </div>
                     </div>
                 </div>
-            </Link>
+            </button>
+            <GamePreviewShareSheet 
+                slug={nextGameSlug} 
+                isOpen={isShareSheetOpen} 
+                onClose={() => setIsShareSheetOpen(false)} 
+                source="playbook"
+                playbookId={playbook.id}
+            />
         </div>
     );
 }

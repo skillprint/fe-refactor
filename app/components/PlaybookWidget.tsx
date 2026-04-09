@@ -1,14 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePlaybook } from '../hooks/usePlaybook';
 import { getGameDetails } from '../config/gameConfig';
 import { useAuth } from '../context/AuthContext';
+import GamePreviewShareSheet from './GamePreviewShareSheet';
 
 export const PlaybookWidget: React.FC = () => {
     const { currentPlaybook, progress, isLoaded } = usePlaybook();
     const { status } = useAuth();
+    const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
 
     if (!isLoaded || !currentPlaybook || status === 'partner') {
         return null;
@@ -78,9 +80,10 @@ export const PlaybookWidget: React.FC = () => {
                                     <div className="hidden sm:block absolute top-1/2 -right-4 w-8 h-1 bg-border -z-10 transform -translate-y-1/2" />
                                 )}
 
-                                <Link
-                                    href={isLocked ? '#' : `/game/${encodeURIComponent(slug)}/interstitial?source=playbook&playbookId=${currentPlaybook.id}`}
-                                    className={`block bg-background rounded-xl border-2 transition-all duration-300 relative overflow-hidden ${isCurrent
+                                <button
+                                    disabled={isLocked}
+                                    onClick={() => setPreviewGameSlug(slug)}
+                                    className={`block text-left w-full bg-background rounded-xl border-2 transition-all duration-300 relative overflow-hidden ${isCurrent
                                         ? 'border-primary ring-4 ring-primary/10 shadow-lg scale-105 z-10'
                                         : isCompleted
                                             ? 'border-green-500/50'
@@ -136,12 +139,19 @@ export const PlaybookWidget: React.FC = () => {
                                             {details?.difficulty} • {details?.estimatedTime}
                                         </p>
                                     </div>
-                                </Link>
+                                </button>
                             </div>
                         );
                     })}
                 </div>
             </div>
+            <GamePreviewShareSheet 
+                slug={previewGameSlug} 
+                isOpen={!!previewGameSlug} 
+                onClose={() => setPreviewGameSlug(null)} 
+                source="playbook"
+                playbookId={currentPlaybook.id}
+            />
         </div>
     );
 };
