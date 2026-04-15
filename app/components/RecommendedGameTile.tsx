@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRecommendedGames } from '../hooks/useRecommendedGames';
 import GamePreviewShareSheet from './GamePreviewShareSheet';
+import { getGameDetails } from '../config/gameConfig';
 
 export default function RecommendedGameTile() {
     const { recommendedGames, isLoading, error } = useRecommendedGames(1);
@@ -36,6 +37,25 @@ export default function RecommendedGameTile() {
                     // Since 'focus' mapping is '#6366F1' lets use that as default, or implement a basic version.
                     const tileColor = '#6366F1';
 
+                    const details = getGameDetails(game.slug);
+
+                    // Get skills to highlight
+                    let skillsText = '';
+                    
+                    // Try to get skills from the API game object first
+                    if (game.skills && game.skills.length > 0) {
+                        const skillNames = game.skills.slice(0, 2).map((s: any) => s.name);
+                        skillsText = skillNames.join(' and ');
+                    } else if (details?.skills && details.skills.length > 0) {
+                        // Fallback to local game config
+                        const skillNames = details.skills.slice(0, 2);
+                        skillsText = skillNames.join(' and ');
+                    }
+                    
+                    const caption = skillsText 
+                        ? `We recommend this game to help you improve your ${skillsText}.`
+                        : "We've picked a game just for you based on your goals to help improve your Skillprint.";
+
                     return (
                         <div
                             className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-row h-44"
@@ -52,7 +72,7 @@ export default function RecommendedGameTile() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-xs font-normal Normal rounded-lg shadow-xl opacity-0 invisible group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all z-[100] pointer-events-none text-center">
-                                                We've picked a game just for you based on your goals to help improve your Skillprint.
+                                                {caption}
                                                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                                             </div>
                                         </div>

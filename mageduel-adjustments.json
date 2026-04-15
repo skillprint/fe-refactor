@@ -1,0 +1,38 @@
+[
+  {
+    "parameterName": "heroDamage",
+    "parameterValue": 10
+  },
+  {
+    "parameterName": "heroDamage",
+    "parameterValue": 50
+  },
+  {
+    "parameterName": "enemyDamage",
+    "parameterValue": 5
+  },
+  {
+    "parameterName": "enemyDamage",
+    "parameterValue": 40
+  },
+  {
+    "parameterName": "enemyAttackRateMs",
+    "parameterValue": 8000
+  },
+  {
+    "parameterName": "enemyAttackRateMs",
+    "parameterValue": 3000
+  },
+  {
+    "parameterName": "enemyAttackRateMs",
+    "parameterValue": 1000
+  },
+  {
+    "parameterName": "healAmount",
+    "parameterValue": 10
+  },
+  {
+    "parameterName": "healAmount",
+    "parameterValue": 60
+  }
+]
