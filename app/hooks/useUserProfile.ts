@@ -33,7 +33,8 @@ export function useUserProfile() {
             baseUrl: BASE_URL,
             logger: (msg, level) => {
                 console.log(`[Skillprint SDK] [${level}] ${msg}`);
-            }
+            },
+            userToken: userToken || undefined
         });
 
         client.setUserToken(userToken);

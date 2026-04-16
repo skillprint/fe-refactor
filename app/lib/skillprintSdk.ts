@@ -128,26 +128,42 @@ export class SkillprintClient {
 
         if (options.userToken) {
             this.userToken = options.userToken;
-        } else {
-            this.setupUser().then(() => {
-                this.log('User setup complete.', LogLevel.INFO);
-            }).catch((error: any) => {
-                this.log(`User setup failed: ${error.message}`, LogLevel.ERROR);
-            });
         }
     }
 
     async setupUser(): Promise<void> {
         if (this.userToken) return;
 
-        // check if user id in cookie
-        const userId = getCookie('user_id')
+        let userId: string | null = null;
+        let token: string | null = null;
+
+        // 1. check local storage first
+        if (typeof localStorage !== 'undefined') {
+            token = localStorage.getItem('userToken');
+            if (token) {
+                this.userToken = token;
+                return;
+            }
+            userId = localStorage.getItem('userId');
+        }
+
+        // 2. check if user id in cookie
+        if (!userId && typeof document !== 'undefined') {
+            userId = getCookie('user_id') || null;
+        }
+
         if (userId) {
+            if (typeof localStorage !== 'undefined') localStorage.setItem('userId', userId);
             this.userToken = await this.createOrGetUserToken(userId);
         } else {
             const customPlayerId = crypto.randomUUID();
             updateSetting('user_id', customPlayerId, () => { });
+            if (typeof localStorage !== 'undefined') localStorage.setItem('userId', customPlayerId);
             this.userToken = await this.createOrGetUserToken(customPlayerId);
+        }
+
+        if (typeof localStorage !== 'undefined' && this.userToken) {
+            localStorage.setItem('userToken', this.userToken);
         }
     }
 

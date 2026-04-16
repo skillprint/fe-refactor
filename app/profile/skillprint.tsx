@@ -16,7 +16,7 @@ import FirstGameBadge from '../components/FirstGameBadge';
 import { knownGameSlugs } from '../config/gameConfig';
 import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
 import { useAuth } from '../context/AuthContext';
-
+import { useUserSession } from '../hooks/useUserSession';
 interface Skill {
   id: string;
   name: string;
@@ -70,6 +70,7 @@ export default function Skillprint() {
   const [nextGameSlug, setNextGameSlug] = useState<string>('');
   const { goal, setGoal } = useGoal();
   const { logout } = useAuth();
+  const { userToken, userId: sessionUserId } = useUserSession();
 
   const isDebug = queryParamDebug();
 
@@ -554,6 +555,11 @@ export default function Skillprint() {
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   End your current session
+                </p>
+
+                <p className="text-xs text-muted-foreground opacity-60 mt-2 font-mono break-all max-w-[200px]">
+                  ID: {sessionUserId || 'none'}<br />
+                  Token: {userToken ? `${userToken.substring(0, 16)}...` : 'none'}
                 </p>
               </div>
               <button
