@@ -94,5 +94,26 @@
 
     </div>
     <script src="game.js"></script>
+    <script src="../../SkillprintLib/html2canvas.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setInterval(() => {
+                const gameContainer = document.getElementById('game-container');
+                if (gameContainer && getComputedStyle(gameContainer).display !== 'none') {
+                    html2canvas(gameContainer, { 
+                        removeContainer: true, 
+                        scale: 1, 
+                        useCORS: true, 
+                        logging: false 
+                    }).then(canvas => {
+                        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                        window.parent.postMessage({ type: 'screenshot', dataUrl }, "*");
+                    }).catch(err => {
+                        console.error('[Mage Duel] HTML2Canvas error:', err);
+                    });
+                }
+            }, 3000);
+        });
+    </script>
 </body>
 </html>

@@ -13,11 +13,12 @@ export function useUserProfile() {
     const [error, setError] = useState<Error | null>(null);
 
     const getApiKey = () => {
+        return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
         if (typeof document === 'undefined') return '';
         const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
         return cookie ? cookie.split('=')[1] : 'test-api-key';
     };
-    const BASE_URL = 'https://api.skillprint.co/';
+    const BASE_URL = 'https://api.staging.skillprint.co/';
 
     const fetchUserProfile = useCallback(async () => {
         if (!userToken) {

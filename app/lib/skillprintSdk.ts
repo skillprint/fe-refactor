@@ -383,7 +383,7 @@ export class SkillprintClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Api-Key WAwuSkup.eUVwODb46ImgWADaPKB6rE9rNViiPcTo`
+                'Authorization': `Api-Key ${this.apiKey}`
             },
             body: JSON.stringify(requestData)
         });
@@ -409,8 +409,7 @@ export class SkillprintClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Api-Key WAwuSkup.eUVwODb46ImgWADaPKB6rE9rNViiPcTo`
-
+                'Authorization': `Api-Key ${this.apiKey}`
             },
             body: JSON.stringify(requestData)
         });
@@ -445,7 +444,7 @@ export class SkillprintClient {
 
         let headers: any = {
             'Content-Type': 'application/json',
-            'Authorization': `Api-Key WAwuSkup.eUVwODb46ImgWADaPKB6rE9rNViiPcTo`
+            'Authorization': `Api-Key ${this.apiKey}`
         };
 
         if (this.userToken) {

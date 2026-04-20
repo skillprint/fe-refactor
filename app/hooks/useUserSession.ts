@@ -4,6 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
 
+// Configuration flag to enable/disable user token caching. 
+// Set to false for now, can be overridden in the future.
+const USE_TOKEN_CACHING = false;
+
+// Global promise cache to prevent duplicate fetching across components and Strict Mode
+let activeTokenPromise: Promise<string | null> | null = null;
+
 export function useUserSession() {
     const router = useRouter();
     const pathname = usePathname();
@@ -13,11 +20,12 @@ export function useUserSession() {
     const [userToken, setUserToken] = useState<string | null>(null);
 
     const getApiKey = () => {
+        return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
         if (typeof document === 'undefined') return '';
         const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
         return cookie ? cookie.split('=')[1] : 'test-api-key';
     };
-    const BASE_URL = 'https://api.skillprint.co/';
+    const BASE_URL = 'https://api.staging.skillprint.co/';
 
     useEffect(() => {
         const initializeUser = async () => {
@@ -55,7 +63,7 @@ export function useUserSession() {
             setUserId(currentUserId);
 
             // 4. Handle User Token
-            let currentUserToken = localStorage.getItem('userToken');
+            let currentUserToken = USE_TOKEN_CACHING ? localStorage.getItem('userToken') : null;
 
             if (!currentUserToken && currentUserId) {
                 const client = new SkillprintClient({
@@ -69,13 +77,21 @@ export function useUserSession() {
                 try {
                     // Use SDK to create token (will create user if needed)
                     // We cast currentUserId to string because flow analysis might not catch it inside async
-                    const token = await client.createOrGetUserToken(currentUserId as string);
+                    if (!activeTokenPromise) {
+                        activeTokenPromise = client.createOrGetUserToken(currentUserId as string);
+                    }
+                    const token = await activeTokenPromise;
                     if (token) {
-                        localStorage.setItem('userToken', token);
+                        if (USE_TOKEN_CACHING) {
+                            localStorage.setItem('userToken', token);
+                        } else {
+                            localStorage.removeItem('userToken');
+                        }
                         setUserToken(token);
                     }
                 } catch (e) {
                     console.error("Failed to retrieve or create user token", e);
+                    activeTokenPromise = null; // Allow retry on failure
                     // If create user fails because already created (or other error),
                     // we still have the userId stored in localStorage from step 1/2/3.
                 }
@@ -89,7 +105,10 @@ export function useUserSession() {
 
 
     const setToken = useCallback((token: string) => {
-        localStorage.setItem('userToken', token);
+        if (USE_TOKEN_CACHING) {
+            localStorage.setItem('userToken', token);
+        }
+        activeTokenPromise = Promise.resolve(token);
         setUserToken(token);
     }, []);
 
