@@ -77,9 +77,9 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
-        if (typeof document === 'undefined') return '';
-        const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
-        return cookie ? cookie.split('=')[1] : 'test-api-key';
+        // if (typeof document === 'undefined') return '';
+        // const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
+        // return cookie ? cookie.split('=')[1] : 'test-api-key';
     };
 
     // Poll for results when component mounts

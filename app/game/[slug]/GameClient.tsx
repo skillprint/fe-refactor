@@ -162,9 +162,9 @@ export default function GameClient({ slug }: GameClientProps) {
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
-        if (typeof document === 'undefined') return '';
-        const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
-        return cookie ? cookie.split('=')[1] : 'test-api-key';
+        // if (typeof document === 'undefined') return '';
+        // const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
+        // return cookie ? cookie.split('=')[1] : 'test-api-key';
     };
 
     // Decode the URL slug (handle spaces and special characters)

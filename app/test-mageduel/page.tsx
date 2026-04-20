@@ -37,7 +37,7 @@ export default function TestMageDuelPage() {
         const sessionId = crypto.randomUUID();
         skillprintSessionIdRef.current = sessionId;
 
-        let apiKey = "dVVoaBUz.ez1rZLc0bhnxd7DqKhovQqSpx0tLwnrA"
+        let apiKey = process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
         const cacheKey = 'mageduel_token_jeremy';
         let cachedToken = localStorage.getItem(cacheKey);
 
