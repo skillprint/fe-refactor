@@ -17,6 +17,10 @@ import { knownGameSlugs } from '../config/gameConfig';
 import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
 import { useAuth } from '../context/AuthContext';
 import { useUserSession } from '../hooks/useUserSession';
+import { useVisualizeMoodProfile } from '../hooks/useVisualizeMoodProfile';
+import { useVisualizeSkillProfile } from '../hooks/useVisualizeSkillProfile';
+
+
 interface Skill {
   id: string;
   name: string;
@@ -52,6 +56,9 @@ export const updateSetting = (name: string, value: string, setter: (val: string)
 
 export const queryParamDebug = (): boolean => {
   // check query string
+  if (typeof window === 'undefined') {
+    return false;
+  }
   const searchParams = new URLSearchParams(window.location.search);
   const debug = searchParams.get('debug') === 'true';
   return debug;
@@ -71,6 +78,8 @@ export default function Skillprint() {
   const { goal, setGoal } = useGoal();
   const { logout } = useAuth();
   const { userToken, userId: sessionUserId } = useUserSession();
+  const { data: moodProfile, isLoading: isLoadingMoodProfile, error: moodProfileError, fetchVisualizeMoodProfile } = useVisualizeMoodProfile();
+  const { data: skillProfile, isLoading: isLoadingSkillProfile, error: skillProfileError, fetchVisualizeSkillProfile } = useVisualizeSkillProfile();
 
   const isDebug = queryParamDebug();
 
@@ -97,7 +106,8 @@ export default function Skillprint() {
 
   useEffect(() => {
     if (processedProfile?.latestMoods) {
-      setSkills(processedProfile.latestMoods.map((m: any) => ({
+      const moods = processedProfile.latestMoods.filter((m: any) => m.targetMood);
+      setSkills(moods.map((m: any) => ({
         id: m.targetMood,
         name: m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1),
         level: Math.round(m.score * 100),
@@ -121,11 +131,20 @@ export default function Skillprint() {
     const acc: { [key: string]: boolean } = {};
     if (processedProfile?.latestMoods) {
       processedProfile.latestMoods.forEach((m: any) => {
+        if (!m.targetMood) return;
         acc[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
       });
     }
     return acc;
   }, [processedProfile]);
+
+  // call after token has been retrieved
+  useEffect(() => {
+    if (userToken) {
+      fetchVisualizeMoodProfile();
+      fetchVisualizeSkillProfile();
+    }
+  }, [userToken, fetchVisualizeMoodProfile, fetchVisualizeSkillProfile]);
 
   useEffect(() => {
     // Load settings from cookies
