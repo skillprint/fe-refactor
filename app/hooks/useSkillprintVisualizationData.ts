@@ -18,13 +18,28 @@ export function useSkillprintVisualizationData(processedProfile: any) {
           dataMap[capitalizedSkill] = {
             yearly: item,
             weekly: Array.isArray(skillProfile.weeklySessions) ? skillProfile.weeklySessions : [],
-            current: skillProfile.currentSession || null
           };
           dataMap[skillKey.toLowerCase()] = dataMap[capitalizedSkill];
           hasScore[capitalizedSkill] = true;
           hasScore[skillKey.toLowerCase()] = true;
         }
       });
+    }
+
+    if (skillProfile?.currentSession) {
+      const key = skillProfile.currentSession.skill || skillProfile.currentSession.targetMood;
+      if (key && typeof key === 'string') {
+        const capitalizedSkill = key.charAt(0).toUpperCase() + key.slice(1);
+        if (!dataMap[capitalizedSkill]) {
+          dataMap[capitalizedSkill] = { yearly: null, weekly: [], current: skillProfile.currentSession };
+          dataMap[key.toLowerCase()] = dataMap[capitalizedSkill];
+          hasScore[capitalizedSkill] = true;
+          hasScore[key.toLowerCase()] = true;
+        } else {
+          dataMap[capitalizedSkill].current = skillProfile.currentSession;
+          dataMap[key.toLowerCase()].current = skillProfile.currentSession;
+        }
+      }
     }
     return { nodeDataBySkill: dataMap, hasScoreBySkill: hasScore };
   }, [skillProfile]);
@@ -49,13 +64,28 @@ export function useSkillprintVisualizationData(processedProfile: any) {
           dataMap[capitalizedMood] = {
             yearly: item,
             weekly: Array.isArray(moodProfile.weeklySessions) ? moodProfile.weeklySessions : [],
-            current: moodProfile.currentSession || null
           };
           dataMap[moodKey.toLowerCase()] = dataMap[capitalizedMood];
           hasScore[capitalizedMood] = true;
           hasScore[moodKey.toLowerCase()] = true;
         }
       });
+    }
+
+    if (moodProfile?.currentSession) {
+      const key = moodProfile.currentSession.mood || moodProfile.currentSession.targetMood;
+      if (key && typeof key === 'string') {
+        const capitalizedMood = key.charAt(0).toUpperCase() + key.slice(1);
+        if (!dataMap[capitalizedMood]) {
+          dataMap[capitalizedMood] = { yearly: null, weekly: [], current: moodProfile.currentSession };
+          dataMap[key.toLowerCase()] = dataMap[capitalizedMood];
+          hasScore[capitalizedMood] = true;
+          hasScore[key.toLowerCase()] = true;
+        } else {
+          dataMap[capitalizedMood].current = moodProfile.currentSession;
+          dataMap[key.toLowerCase()].current = moodProfile.currentSession;
+        }
+      }
     }
     return { nodeDataByMood: dataMap, hasScoreByMood: hasScore };
   }, [moodProfile, processedProfile]);

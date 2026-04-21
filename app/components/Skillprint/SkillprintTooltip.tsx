@@ -17,6 +17,11 @@ export interface SkillprintTooltipProps {
         mood?: string | null;
         skill?: string | null;
     }>;
+    currentSession?: {
+        targetMood?: string;
+        skill?: string;
+        flowScore?: number;
+    };
     recentGame?: {
         name: string;
         playedAt: string;
@@ -34,6 +39,7 @@ const SkillprintTooltip: React.FC<SkillprintTooltipProps> = ({
     group,
     yearlySummary,
     weeklySessions,
+    currentSession,
     recentGame,
     onPlayAgain,
     onFilterGames,
@@ -74,6 +80,22 @@ const SkillprintTooltip: React.FC<SkillprintTooltipProps> = ({
 
             {/* Content */}
             <div className="space-y-2">
+                {currentSession && (
+                    <div className="bg-primary/20 p-2 rounded-md border border-primary/40 text-xs shadow-sm">
+                        <div className="flex justify-between items-center mb-1 text-primary-100 font-bold">
+                            <span>Current Target</span>
+                            <span className="bg-primary w-2 h-2 rounded-full animate-pulse" />
+                        </div>
+                        <div className="flex justify-between items-center mb-1 text-gray-300">
+                            <span>Target:</span>
+                            <span className="font-mono text-white capitalize">{currentSession.targetMood || currentSession.skill}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-300">
+                            <span>Flow Score:</span>
+                            <span className="font-mono text-white">{currentSession.flowScore ? Math.round(currentSession.flowScore * 100) : '--'}</span>
+                        </div>
+                    </div>
+                )}
                 {yearlySummary || weeklySessions ? (
                     <div className="bg-white/5 p-2 rounded-md border border-white/5">
                         <p className="font-medium text-xs text-gray-400 uppercase tracking-wider mb-2">

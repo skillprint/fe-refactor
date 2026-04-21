@@ -246,6 +246,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
                         translate: currentPosition.translate,
                         rotate: currentPosition.rotate,
                     }}
+                    nodeDataMap={nodeDataMap}
                     viewBox="-100 -100 1012 1012"
                     onNodeClick={(group, slug) => navigateToStats(group, slug)}
                     onNodeHover={handleNodeHover}
@@ -262,6 +263,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
                         group={tooltipState.data?.group || ''}
                         yearlySummary={tooltipState.data?.details?.yearly}
                         weeklySessions={tooltipState.data?.details?.weekly}
+                        currentSession={tooltipState.data?.details?.current}
                         onPlayAgain={() => {
                             if (tooltipState.data) navigateToGames(tooltipState.data.group, tooltipState.data.slug);
                         }}

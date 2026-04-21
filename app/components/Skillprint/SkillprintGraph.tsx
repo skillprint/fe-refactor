@@ -14,6 +14,7 @@ interface SkillprintGraphProps {
         translate: { dx: number; dy: number };
         rotate: string;
     };
+    nodeDataMap?: { [key: string]: any };
     onNodeClick?: (group: string, slug: string) => void;
     onNodeHover?: (node: { group: string; slug: string; rect: DOMRect } | null) => void;
 }
@@ -26,6 +27,7 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
     state,
     viewBox = '0 0 812 812',
     zoom,
+    nodeDataMap,
     onNodeClick,
     onNodeHover,
 }) => {
@@ -81,6 +83,9 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
                     const hoverEvent = isMobile ? 'touchmove' : 'mousemove';
                     const leaveEvent = isMobile ? 'touchend' : 'mouseleave';
 
+                    const nodeData = nodeDataMap && (nodeDataMap[ss.slug] || nodeDataMap[ss.slug.toLowerCase()]);
+                    const hasCurrent = !!nodeData?.current;
+
                     return (
                         <g
                             key={ss.id}
@@ -131,6 +136,22 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
                                     transition: 'all 0.3s ease'
                                 }}
                             />
+                            {hasCurrent && (
+                                <circle
+                                    cx={ss.node.cx}
+                                    cy={ss.node.cy}
+                                    r={ss.node.r + 5}
+                                    fill="none"
+                                    stroke="#000000"
+                                    strokeWidth={3}
+                                    style={{
+                                        opacity: 1,
+                                        transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                                        transformOrigin,
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                />
+                            )}
                             <text
                                 transform={ss.text.transform + (isHovered ? ' scale(1.3)' : 'scale(1)')}
 
