@@ -132,14 +132,8 @@ const Skillprint: React.FC<SkillprintProps> = ({
     };
 
     const navigateToStats = (group: string, slug: string) => {
-        if (group === 'skills') {
-            router.push(`/profile/skill/${encodeURIComponent(slug)}`);
-        } else {
-            // For moods, no breakdown yet, fallback to games or do nothing?
-            // User request: "navigates to the existing skill breakdown page"
-            // If mood doesn't have one, maybe just games filtered is the best we can do.
-            router.push(`/games?tab=moods&filter=${encodeURIComponent(slug)}`);
-        }
+        const type = group === 'skills' ? 'skill' : 'mood';
+        router.push(`/profile/stats/${type}/${encodeURIComponent(slug)}`);
     };
 
     // Define zoom/position configurations for each state
