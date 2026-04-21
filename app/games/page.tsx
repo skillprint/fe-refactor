@@ -61,7 +61,7 @@ function GamesPageContent() {
     // First apply tab filtering
     let matchesTab = true;
     if (activeTab === 'skills' && selectedFilterSlug) {
-      matchesTab = game.skills.map((skill: any) => skill.slug).includes(selectedFilterSlug);
+      matchesTab = game.skills.map((skill: any) => skill.slug.toLowerCase()).includes(selectedFilterSlug.toLowerCase());
     }
 
     // Then apply search filtering
@@ -76,7 +76,7 @@ function GamesPageContent() {
     // First apply tab filtering
     let matchesTab = true;
     if (activeTab === 'moods' && selectedFilterSlug) {
-      matchesTab = game.moods.map((mood: any) => mood.slug).includes(selectedFilterSlug);
+      matchesTab = game.moods.map((mood: any) => mood.slug.toLowerCase()).includes(selectedFilterSlug.toLowerCase());
     }
 
     // Then apply search filtering
@@ -122,7 +122,7 @@ function GamesPageContent() {
   };
 
   const handleFilterSelect = (filterSlug: string) => {
-    const newValue = (filterSlug === 'all' || selectedFilterSlug === filterSlug) ? null : filterSlug;
+    const newValue = (filterSlug === 'all' || selectedFilterSlug?.toLowerCase() === filterSlug.toLowerCase()) ? null : filterSlug;
     setSelectedFilterSlug(newValue);
     if (newValue) {
       localStorage.setItem('targetMood', newValue);
@@ -143,6 +143,7 @@ function GamesPageContent() {
   };
 
   const getColorForSlug = (slug: string) => {
+    const lowerSlug = slug.toLowerCase();
     const colorMap: Record<string, string> = {
       'focus': '#6366F1', // indigo-500
       'relax': '#10B981', // emerald-500
@@ -157,7 +158,7 @@ function GamesPageContent() {
       'creativity': '#D946EF', // fuchsia-500
     };
 
-    if (colorMap[slug]) return colorMap[slug];
+    if (colorMap[lowerSlug]) return colorMap[lowerSlug];
 
     const colors = [
       '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
@@ -165,8 +166,8 @@ function GamesPageContent() {
     ];
 
     let hash = 0;
-    for (let i = 0; i < slug.length; i++) {
-      hash = slug.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < lowerSlug.length; i++) {
+      hash = lowerSlug.charCodeAt(i) + ((hash << 5) - hash);
     }
 
     return colors[Math.abs(hash) % colors.length];
@@ -387,7 +388,7 @@ function GamesPageContent() {
                 </button>
                 {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
                   const color = getColorForSlug(item.slug);
-                  const isSelected = selectedFilterSlug === item.slug;
+                  const isSelected = selectedFilterSlug?.toLowerCase() === item.slug.toLowerCase();
                   return (
                     <button
                       key={item.slug}

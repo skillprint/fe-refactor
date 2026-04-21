@@ -127,8 +127,8 @@ const Skillprint: React.FC<SkillprintProps> = ({
     };
 
     const navigateToGames = (group: string, slug: string) => {
-        const queryParam = group === 'skills' ? 'skill' : 'mood';
-        router.push(`/games?${queryParam}=${encodeURIComponent(slug)}`);
+        const tab = group === 'skills' ? 'skills' : 'moods';
+        router.push(`/games?tab=${tab}&filter=${encodeURIComponent(slug)}`);
     };
 
     const navigateToStats = (group: string, slug: string) => {
@@ -138,7 +138,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
             // For moods, no breakdown yet, fallback to games or do nothing?
             // User request: "navigates to the existing skill breakdown page"
             // If mood doesn't have one, maybe just games filtered is the best we can do.
-            router.push(`/games?mood=${encodeURIComponent(slug)}`);
+            router.push(`/games?tab=moods&filter=${encodeURIComponent(slug)}`);
         }
     };
 
