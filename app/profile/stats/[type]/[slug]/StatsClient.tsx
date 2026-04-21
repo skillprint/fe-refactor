@@ -7,6 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { useSkillprintVisualizationData } from '../../../../hooks/useSkillprintVisualizationData';
 import { useGamesBySkill } from '../../../../hooks/useGamesBySkill';
 import GamePreviewShareSheet from '../../../../components/GamePreviewShareSheet';
+import TopNav from '../../../../components/TopNav';
 
 const getColorForSlug = (slug: string) => {
     const lowerSlug = slug.toLowerCase();
@@ -76,14 +77,18 @@ export default function StatsClient({ type, slug }: { type: string; slug: string
 
     if (isStatsLoading) {
         return (
-            <div className="font-sans min-h-screen bg-background p-8 flex items-center justify-center">
-                <div className="text-muted-foreground animate-pulse">Loading stats...</div>
+            <div className="font-sans min-h-screen bg-background flex flex-col">
+                <TopNav />
+                <div className="p-8 flex-1 flex items-center justify-center">
+                    <div className="text-muted-foreground animate-pulse">Loading stats...</div>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="font-sans min-h-screen bg-background">
+            <TopNav />
             <div className="p-8 pb-32 max-w-[1440px] w-full mx-auto">
                 {/* Header */}
                 <div className="mb-8">
