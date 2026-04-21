@@ -115,7 +115,7 @@ function VisualizeMoodProfileContent() {
                             </section>
                         )}
 
-                        {/* Raw JSON section */}
+                        {/* Raw JSON section
                         <section>
                             <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Raw API Output</h2>
                             <div className="bg-secondary/50 p-6 rounded-lg overflow-x-auto border border-border shadow-inner">
@@ -123,7 +123,7 @@ function VisualizeMoodProfileContent() {
                                     {JSON.stringify(data, null, 2)}
                                 </pre>
                             </div>
-                        </section>
+                        </section> */}
                     </div>
                 ) : (
                     <div className="text-center py-12 text-muted-foreground">
