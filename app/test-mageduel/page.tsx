@@ -135,7 +135,7 @@ export default function TestMageDuelPage() {
 
     return (
         <div className="relative w-full h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="absolute top-4 left-4 z-50 bg-black/80 text-white p-4 rounded-xl shadow-xl pointer-events-none w-72 backdrop-blur-sm border border-white/10">
+            <div className="hidden absolute top-4 left-4 z-50 bg-black/80 text-white p-4 rounded-xl shadow-xl pointer-events-none w-72 backdrop-blur-sm border border-white/10">
                 <h3 className="font-bold mb-1 text-lg">Mage Duel Adjustments</h3>
                 <p className="mb-4 text-white/60 text-sm">Press keys 1-9 to test parameters:</p>
                 <ul className="space-y-2">

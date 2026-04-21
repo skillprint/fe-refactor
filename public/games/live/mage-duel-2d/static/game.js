@@ -44,7 +44,7 @@ const dictionaries = {
 
 // Game Configuration Parameters (Exposed via Skillprint)
 window.GAME_CONFIG = {
-    heroDamage: 20,
+    heroDamage: 4,
     enemyDamage: 15,
     enemyAttackRateMs: 5000,
     healAmount: 20
