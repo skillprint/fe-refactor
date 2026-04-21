@@ -1,13 +1,36 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { useSkillprintVisualizationData } from '../../../../hooks/useSkillprintVisualizationData';
+import { useGamesBySkill } from '../../../../hooks/useGamesBySkill';
+import GamePreviewShareSheet from '../../../../components/GamePreviewShareSheet';
+
+const getColorForSlug = (slug: string) => {
+    const lowerSlug = slug.toLowerCase();
+    const colorMap: Record<string, string> = {
+      'focus': '#6366F1', 'relax': '#10B981', 'memory': '#8B5CF6', 
+      'speed': '#EF4444', 'logic': '#06B6D4', 'attention': '#F59E0B', 
+      'problem-solving': '#3B82F6', 'language': '#EC4899', 'math': '#84CC16', 
+      'visual': '#F97316', 'creativity': '#D946EF',
+    };
+    if (colorMap[lowerSlug]) return colorMap[lowerSlug];
+    const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'];
+    let hash = 0;
+    for (let i = 0; i < lowerSlug.length; i++) {
+        hash = lowerSlug.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+};
 
 export default function StatsClient({ type, slug }: { type: string; slug: string }) {
     const router = useRouter();
-    const { moodProfile, skillProfile, isLoading } = useSkillprintVisualizationData(null);
+    const { moodProfile, skillProfile, isLoading: isStatsLoading } = useSkillprintVisualizationData(null);
+    const { gamesBySkill, gamesByMood, isLoading: isGamesLoading } = useGamesBySkill();
+    const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
+
     const activeData = type === 'mood' ? moodProfile : skillProfile;
 
     const titleName = decodeURIComponent(slug).charAt(0).toUpperCase() + decodeURIComponent(slug).slice(1);
@@ -35,11 +58,23 @@ export default function StatsClient({ type, slug }: { type: string; slug: string
         }).reverse();
     }, [activeData, type, slug]);
 
+    const recommendedGames = useMemo(() => {
+        if (type === 'mood') {
+            return gamesByMood.filter((game: any) => 
+                game.moods?.some((m: any) => m.slug.toLowerCase() === slug.toLowerCase())
+            ).slice(0, 3);
+        } else {
+            return gamesBySkill.filter((game: any) => 
+                game.skills?.some((s: any) => s.slug.toLowerCase() === slug.toLowerCase())
+            ).slice(0, 3);
+        }
+    }, [gamesByMood, gamesBySkill, type, slug]);
+
     const handleBackClick = () => {
         router.back();
     };
 
-    if (isLoading) {
+    if (isStatsLoading) {
         return (
             <div className="font-sans min-h-screen bg-background p-8 flex items-center justify-center">
                 <div className="text-muted-foreground animate-pulse">Loading stats...</div>
@@ -138,7 +173,7 @@ export default function StatsClient({ type, slug }: { type: string; slug: string
 
                 {/* Weekly Time Series Chart */}
                 {chartData.length > 0 && (
-                    <div className="pt-2">
+                    <div className="mb-10 pt-2">
                         <h2 className="text-xl font-semibold text-foreground mb-4">Weekly Sessions Activity</h2>
                         <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
                             <div className="w-full h-72">
@@ -186,7 +221,58 @@ export default function StatsClient({ type, slug }: { type: string; slug: string
                         </div>
                     </div>
                 )}
+
+                {/* Recommended Games */}
+                {(!isGamesLoading && recommendedGames.length > 0) && (
+                    <div className="mb-10 pt-2">
+                        <h2 className="text-xl font-semibold text-foreground mb-4">Recommended games to improve your {titleName}</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {recommendedGames.map((game: any) => {
+                                const tileColor = getColorForSlug(slug);
+                                return (
+                                    <button
+                                        key={game.slug}
+                                        onClick={() => setPreviewGameSlug(game.slug)}
+                                        className="block group w-full text-left"
+                                    >
+                                        <div
+                                            className="rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44"
+                                            style={{ backgroundColor: tileColor }}
+                                        >
+                                            <div className="flex-1 p-5 flex flex-col justify-between items-start">
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
+                                                        {game.name}
+                                                    </h3>
+                                                </div>
+                                                <div className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                                                    Play
+                                                </div>
+                                            </div>
+                                            {game.screenshot && (
+                                                <div className="relative aspect-square h-full shrink-0">
+                                                    <Image
+                                                        src={game.screenshot}
+                                                        alt={game.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
+            
+            <GamePreviewShareSheet 
+                slug={previewGameSlug} 
+                isOpen={!!previewGameSlug} 
+                onClose={() => setPreviewGameSlug(null)} 
+            />
         </div>
     );
 }
