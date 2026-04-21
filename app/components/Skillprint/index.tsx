@@ -19,6 +19,7 @@ interface SkillprintProps {
     userMoods: string[];
     hasScoreBySkill: { [key: string]: boolean };
     hasScoreByMood: { [key: string]: boolean };
+    nodeDataMap?: { [key: string]: any };
     size?: number;
     initialState?: 'reset' | 'skills' | 'mindsets' | 'traits';
     hasMenu?: boolean;
@@ -29,6 +30,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
     userMoods,
     hasScoreBySkill,
     hasScoreByMood,
+    nodeDataMap = {},
     size = 1200,
     initialState = 'reset',
     hasMenu = false,
@@ -39,7 +41,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [tooltipState, setTooltipState] = useState<{
         visible: boolean;
-        data: { group: string; slug: string } | null;
+        data: { group: string; slug: string; details?: any } | null;
         pos: { x: number; y: number; placement: 'top' | 'bottom' | 'left' | 'right' }
     }>({ visible: false, data: null, pos: { x: 0, y: 0, placement: 'top' } });
 
@@ -102,9 +104,11 @@ const Skillprint: React.FC<SkillprintProps> = ({
             finalY = centerY;
         }
 
+        const details = nodeDataMap[node.slug] || nodeDataMap[node.slug.toLowerCase()] || null;
+
         setTooltipState({
             visible: true,
-            data: { group: node.group, slug: node.slug },
+            data: { group: node.group, slug: node.slug, details },
             pos: { x: finalX, y: finalY, placement }
         });
     };
@@ -256,6 +260,8 @@ const Skillprint: React.FC<SkillprintProps> = ({
                         position={tooltipState.pos}
                         title={tooltipState.data?.slug || ''}
                         group={tooltipState.data?.group || ''}
+                        yearlySummary={tooltipState.data?.details?.yearly}
+                        weeklySessions={tooltipState.data?.details?.weekly}
                         onPlayAgain={() => {
                             if (tooltipState.data) navigateToGames(tooltipState.data.group, tooltipState.data.slug);
                         }}

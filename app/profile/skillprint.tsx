@@ -124,27 +124,65 @@ export default function Skillprint() {
   }, [isLoaded, count, markViewed, profileViewed]);
 
   const userSkills = sampleSkills.map(s => s.name);
-  const hasScoreBySkill = {};
+
+  const { nodeDataBySkill, hasScoreBySkill } = React.useMemo(() => {
+    const dataMap: { [key: string]: any } = {};
+    const hasScore: { [key: string]: boolean } = {};
+    
+    if (skillProfile?.yearlySummary && Array.isArray(skillProfile.yearlySummary)) {
+      skillProfile.yearlySummary.forEach((item: any) => {
+        const skillKey = item.skill || item.mood;
+        if (typeof skillKey === 'string') {
+          // Capitalize appropriately to match userSkills cases or slugs
+          const capitalizedSkill = skillKey.charAt(0).toUpperCase() + skillKey.slice(1);
+          dataMap[capitalizedSkill] = {
+            yearly: item,
+            weekly: Array.isArray(skillProfile.weeklySessions) ? skillProfile.weeklySessions : [],
+            current: skillProfile.currentSession || null
+          };
+          // Also set exact lowercase to handle case-insensitive checks
+          dataMap[skillKey.toLowerCase()] = dataMap[capitalizedSkill];
+          hasScore[capitalizedSkill] = true;
+          hasScore[skillKey.toLowerCase()] = true;
+        }
+      });
+    }
+    return { nodeDataBySkill: dataMap, hasScoreBySkill: hasScore };
+  }, [skillProfile]);
 
   const userMoods = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
-  const hasScoreByMood = React.useMemo(() => {
-    const acc: { [key: string]: boolean } = {};
+  const { nodeDataByMood, hasScoreByMood } = React.useMemo(() => {
+    const dataMap: { [key: string]: any } = {};
+    const hasScore: { [key: string]: boolean } = {};
+
+    // Check processedProfile from api as fallback
     if (processedProfile?.latestMoods) {
       processedProfile.latestMoods.forEach((m: any) => {
         if (!m.targetMood) return;
-        acc[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
+        hasScore[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
+        hasScore[m.targetMood.toLowerCase()] = true;
       });
     }
-    return acc;
-  }, [processedProfile]);
-
-  // call after token has been retrieved
-  useEffect(() => {
-    if (userToken) {
-      fetchVisualizeMoodProfile();
-      fetchVisualizeSkillProfile();
+    
+    // Override/supplement with visualization profile endpoint
+    if (moodProfile?.yearlySummary && Array.isArray(moodProfile.yearlySummary)) {
+      moodProfile.yearlySummary.forEach((item: any) => {
+        const moodKey = item.mood;
+        if (typeof moodKey === 'string') {
+          const capitalizedMood = moodKey.charAt(0).toUpperCase() + moodKey.slice(1);
+          dataMap[capitalizedMood] = {
+            yearly: item,
+            weekly: Array.isArray(moodProfile.weeklySessions) ? moodProfile.weeklySessions : [],
+            current: moodProfile.currentSession || null
+          };
+          dataMap[moodKey.toLowerCase()] = dataMap[capitalizedMood];
+          hasScore[capitalizedMood] = true;
+          hasScore[moodKey.toLowerCase()] = true;
+        }
+      });
     }
-  }, [userToken, fetchVisualizeMoodProfile, fetchVisualizeSkillProfile]);
+    return { nodeDataByMood: dataMap, hasScoreByMood: hasScore };
+  }, [moodProfile, processedProfile]);
 
   useEffect(() => {
     // Load settings from cookies
@@ -260,6 +298,7 @@ export default function Skillprint() {
                 userMoods={userMoods}
                 hasScoreBySkill={hasScoreBySkill}
                 hasScoreByMood={hasScoreByMood}
+                nodeDataMap={{ ...nodeDataBySkill, ...nodeDataByMood }}
                 size={600}
               />
             </div>

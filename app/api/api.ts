@@ -71,7 +71,7 @@ export const get = async (path: string, useCache = false, customHeaders: any = {
         // "Authorization": `Api-Key ${getApiKey()}`
     }
 
-    console.log(`[API] Fetching: ${path}`);
+    console.log(`[API] Fetching: ${BASE_URL}${path}`);
 
     // Create the promise
     const requestPromise = axios.get(fullPath, { headers })
@@ -135,7 +135,7 @@ export const getVisualizeSkillProfile = async (token?: string | null) => {
     if (token) {
         headers["X-Auth-Token"] = `Token ${token}`;
     }
-    return await get(url, true, headers);
+    return await get(url, false, headers);
 };
 
 export const getVisualizeMoodProfile = async (token?: string | null) => {
@@ -144,7 +144,7 @@ export const getVisualizeMoodProfile = async (token?: string | null) => {
     if (token) {
         headers["X-Auth-Token"] = `Token ${token}`;
     }
-    return await get(url, true, headers);
+    return await get(url, false, headers);
 };
 
 export const getCatalogItemsBySkill = async (skill_name: string) => {

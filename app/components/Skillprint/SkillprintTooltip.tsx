@@ -6,6 +6,17 @@ export interface SkillprintTooltipProps {
     position: { x: number; y: number; placement: 'top' | 'bottom' | 'left' | 'right' };
     title: string;
     group: string;
+    yearlySummary?: {
+        mood?: string;
+        skill?: string;
+        duration?: string;
+        momentumScore?: number;
+    };
+    weeklySessions?: Array<{
+        date: string;
+        mood?: string | null;
+        skill?: string | null;
+    }>;
     recentGame?: {
         name: string;
         playedAt: string;
@@ -21,6 +32,8 @@ const SkillprintTooltip: React.FC<SkillprintTooltipProps> = ({
     position,
     title,
     group,
+    yearlySummary,
+    weeklySessions,
     recentGame,
     onPlayAgain,
     onFilterGames,
@@ -61,10 +74,45 @@ const SkillprintTooltip: React.FC<SkillprintTooltipProps> = ({
 
             {/* Content */}
             <div className="space-y-2">
-                {recentGame ? (
+                {yearlySummary || weeklySessions ? (
+                    <div className="bg-white/5 p-2 rounded-md border border-white/5">
+                        <p className="font-medium text-xs text-gray-400 uppercase tracking-wider mb-2">
+                            Summary Activity
+                        </p>
+                        {yearlySummary?.duration && (
+                            <div className="flex justify-between items-center mb-1 text-xs text-gray-300">
+                                <span>Duration:</span>
+                                <span className="font-mono text-white">{yearlySummary.duration}</span>
+                            </div>
+                        )}
+                        {yearlySummary?.momentumScore !== undefined && (
+                            <div className="flex justify-between items-center mb-1 text-xs text-gray-300">
+                                <span>Momentum Score:</span>
+                                <span className="font-mono text-white">{yearlySummary.momentumScore}</span>
+                            </div>
+                        )}
+                        {weeklySessions && weeklySessions.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-white/10 flex justify-between items-center text-xs text-gray-300">
+                                <span>Recent Activity:</span>
+                                <div className="flex gap-1">
+                                    {weeklySessions.slice(-7).map((s, i) => {
+                                        const hit = s.mood || s.skill;
+                                        return (
+                                            <div 
+                                                key={i} 
+                                                className={`w-2 h-2 rounded-full ${hit ? 'bg-indigo-400' : 'bg-white/20'}`} 
+                                                title={s.date}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : recentGame ? (
                     <div className="bg-white/5 p-2 rounded-md border border-white/5">
                         <p className="font-medium text-xs text-gray-400 uppercase tracking-wider mb-1">
-                            Recent Activity
+                            Recent Game
                         </p>
                         <div className="flex justify-between items-center mb-2">
                             <span className="font-semibold text-indigo-300 truncate max-w-[120px]">
