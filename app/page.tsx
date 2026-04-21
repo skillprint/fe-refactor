@@ -12,6 +12,7 @@ import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
 import { PlaybookWidget } from './components/PlaybookWidget';
 import SkillprintVisualization from './components/Skillprint';
+import { useSkillprintVisualizationData } from './hooks/useSkillprintVisualizationData';
 import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
@@ -249,7 +250,7 @@ function HomeContent() {
   const { count, isLoaded } = useGameSessions();
   const { fetchUserProfile, profile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
-  const [hasScoreByMood, setHasScoreByMood] = useState<{ [key: string]: boolean }>({});
+  const { nodeDataMap, hasScoreByMood, hasScoreBySkill } = useSkillprintVisualizationData(processedProfile);
 
   const sampleSkillsForVis = [
     { id: '1', name: 'Problem Solving', level: 85, category: 'Cognitive', color: '#3B82F6' },
@@ -279,16 +280,6 @@ function HomeContent() {
       setProcessedProfile({ ...p, latestMoods: Array.from(latestMoodsMap.values()) });
     }
   }, [profile]);
-
-  useEffect(() => {
-    const acc: { [key: string]: boolean } = {};
-    if (processedProfile?.latestMoods) {
-      processedProfile.latestMoods.forEach((m: any) => {
-        acc[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
-      });
-    }
-    setHasScoreByMood(acc);
-  }, [processedProfile]);
 
   return (
     <div className="font-sans min-h-screen bg-background">
@@ -369,8 +360,9 @@ function HomeContent() {
                   <SkillprintVisualization
                     userSkills={userSkillsForVis}
                     userMoods={userMoodsForVis}
-                    hasScoreBySkill={{}}
+                    hasScoreBySkill={hasScoreBySkill}
                     hasScoreByMood={hasScoreByMood}
+                    nodeDataMap={nodeDataMap}
                     size={400}
                     initialState="reset"
                     hasMenu={false}
