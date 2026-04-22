@@ -37,7 +37,7 @@ const getElementForScreenshot = () => {
         '/games/live/Impossible%2010/static/index.html',
         '/games/live/Mahjong%20Deluxe/static/index.html',
         '/games/live/Space%20Trip/static/index.html',
-
+        '/games/live/Brick%20Out/static/index.html',
     ];
     const bodyPathNames = ['/games/live/SkillprintLib/skillprint.html', '/games/live/SkillprintLib/skillprint.html'];
 

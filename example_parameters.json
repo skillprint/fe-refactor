@@ -1,0 +1,30 @@
+{
+    "healAmount": {
+        "max": 60,
+        "min": 10,
+        "type": "integer",
+        "default": 30,
+        "description": "Amount of health restored when healing. Higher values increase survivability."
+    },
+    "heroDamage": {
+        "max": 50,
+        "min": 10,
+        "type": "integer",
+        "default": 30,
+        "description": "Amount of damage dealt by the hero. Higher values make it easier to defeat enemies."
+    },
+    "enemyDamage": {
+        "max": 40,
+        "min": 5,
+        "type": "integer",
+        "default": 20,
+        "description": "Amount of damage dealt by the enemy. Higher values increase difficulty."
+    },
+    "enemyAttackRateMs": {
+        "max": 8000,
+        "min": 1000,
+        "type": "integer",
+        "default": 3000,
+        "description": "Milliseconds between enemy attacks. Lower values mean faster attacks and increased difficulty."
+    }
+}

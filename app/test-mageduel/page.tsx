@@ -24,6 +24,7 @@ export default function TestMageDuelPage() {
 
     const [isIframeLoaded, setIsIframeLoaded] = useState(false);
     const [currentAdjustment, setCurrentAdjustment] = useState<any | null>(null);
+    const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const skillprintSessionIdRef = useRef<string>('');
@@ -62,6 +63,7 @@ export default function TestMageDuelPage() {
 
                 const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
                 await client.startSession(sessionId, targetMood as Mood, 'mage-duel');
+                setIsSessionActive(true);
             } catch (e) {
                 console.error('Failed to start Skillprint session', e);
             }
@@ -71,22 +73,20 @@ export default function TestMageDuelPage() {
 
     }, []);
 
-    const injectJavascriptIntoIframe = () => {
-        if (iframeRef.current) {
-            const iframeDocument = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-            const scriptUrl = '/lib/skillprint-js-sdk/main-manager.js';
-            if (iframeDocument) {
-                const script = iframeDocument.createElement('script');
-                script.src = scriptUrl;
-                iframeDocument.body.appendChild(script);
-            }
-        }
-    };
+    // const injectJavascriptIntoIframe = () => {
+    //     if (iframeRef.current) {
+    //         const iframeDocument = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
+    //         const scriptUrl = '/lib/skillprint-js-sdk/main-manager.js';
+    //         if (iframeDocument) {
+    //             const script = iframeDocument.createElement('script');
+    //             script.src = scriptUrl;
+    //             iframeDocument.body.appendChild(script);
+    //         }
+    //     }
+    // };
 
     const handleIframeLoad = () => {
         setIsIframeLoaded(true);
-        window.addEventListener('message', handleGameMessage);
-        injectJavascriptIntoIframe();
     };
 
     const handleGameMessage = async (event: MessageEvent) => {
@@ -113,19 +113,76 @@ export default function TestMageDuelPage() {
     };
 
     useEffect(() => {
+        window.addEventListener('message', handleGameMessage);
+
         return () => {
             window.removeEventListener('message', handleGameMessage);
         };
     }, []);
 
-    const handleExitGame = () => {
+    // Polling logic for parameter updates
+    useEffect(() => {
+        if (!isSessionActive || !skillprintClientRef.current || !skillprintSessionIdRef.current) return;
+
+        let pollingTimeoutId: NodeJS.Timeout;
+        let isPollingActive = true;
+
+        const pollData = async () => {
+            if (!isPollingActive || !skillprintClientRef.current || !skillprintSessionIdRef.current) return;
+
+            // Default to polling every 5 seconds
+            let nextDelay = 5000;
+            try {
+                const results = await skillprintClientRef.current.pollParameterResults(skillprintSessionIdRef.current);
+                if (results?.parameterUpdates && results.parameterUpdates.length > 0) {
+                    const latestUpdate = results.parameterUpdates[results.parameterUpdates.length - 1];
+                    const adjustmentData = {
+                        parameterName: latestUpdate.parameterName,
+                        parameterValue: latestUpdate.newValue
+                    };
+
+                    setCurrentAdjustment(adjustmentData);
+
+                    if (iframeRef.current && iframeRef.current.contentWindow) {
+                        iframeRef.current.contentWindow.postMessage({
+                            type: 'ADJUST_GAME',
+                            data: adjustmentData
+                        }, '*');
+                    }
+
+                    // Apply a 20 second cooldown before the next poll
+                    nextDelay = 20000;
+                }
+            } catch (error) {
+                console.error("Error polling for parameter updates:", error);
+            }
+
+            if (isPollingActive) {
+                pollingTimeoutId = setTimeout(pollData, nextDelay);
+            }
+        };
+
+        // Begin polling 5 seconds after starting gameplay
+        pollingTimeoutId = setTimeout(pollData, 5000);
+
+        return () => {
+            isPollingActive = false;
+            clearTimeout(pollingTimeoutId);
+        };
+    }, [isSessionActive]);
+
+    const handleExitGame = async () => {
         if (iframeRef.current) {
             window.removeEventListener('message', handleGameMessage);
         }
 
         // Post empty array with is_last_chunk = true
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+            try {
+                await skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+            } catch (e) {
+                console.error("Failed to post final screenshots:", e);
+            }
         }
 
         if (skillprintSessionIdRef.current) {
@@ -168,14 +225,12 @@ export default function TestMageDuelPage() {
                 />
             )}
 
-            {isIframeLoaded && (
-                <FloatingExitButton
-                    position="top-right"
-                    color="red"
-                    size="md"
-                    onClick={handleExitGame}
-                />
-            )}
+            <FloatingExitButton
+                position="top-right"
+                color="red"
+                size="md"
+                onClick={handleExitGame}
+            />
 
             <GameAdjustmentTester
                 iframeRef={iframeRef}

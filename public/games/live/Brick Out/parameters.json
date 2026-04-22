@@ -1,0 +1,30 @@
+{
+    "maxVelocityLimit": {
+        "max": 3.0,
+        "min": 1.0,
+        "type": "float",
+        "default": 1.5,
+        "description": "Maximum ball speed. Higher values make the game faster and more difficult."
+    },
+    "minVelocityLimit": {
+        "max": 1.0,
+        "min": 0.2,
+        "type": "float",
+        "default": 0.5,
+        "description": "Minimum ball speed. Lower values mean the ball can travel more slowly."
+    },
+    "timeBounceBall": {
+        "max": 0.05,
+        "min": 0.005,
+        "type": "float",
+        "default": 0.01,
+        "description": "Time delay for ball bounces. Higher values make physics slightly more relaxed."
+    },
+    "maxBallSpawn": {
+        "max": 10,
+        "min": 1,
+        "type": "integer",
+        "default": 4,
+        "description": "Maximum number of balls spawned when collecting a multi-ball power-up."
+    }
+}

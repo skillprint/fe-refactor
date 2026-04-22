@@ -43,7 +43,7 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('2048') >= 0) return '2048';
     if (lowerSlug.indexOf('alchemy') >= 0) return 'alchemy';
     if (lowerSlug.indexOf('box-tower') >= 0) return 'box-tower';
-    if (lowerSlug.indexOf('brick-out') >= 0) return 'brick-out';
+    if (lowerSlug.indexOf('brick-out-54e74305-8000-4605-b6b7-cf9412dd285b') >= 0) return 'brick-out';
     if (lowerSlug.indexOf('bubble-spirit') >= 0) return 'bubble-spirit';
     if (lowerSlug.indexOf('change-word') >= 0) return 'change-word';
     if (lowerSlug.indexOf('colorize-2') >= 0) return 'colorize-2';
