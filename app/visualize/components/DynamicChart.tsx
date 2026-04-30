@@ -199,6 +199,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
             cy="50%"
             labelLine={false}
             outerRadius={150}
+            dataKey="value"
             label={({ name, percent = 0 }) => `${name} ${(percent * 100).toFixed(0)}%`}
           >
             {pieData.map((entry, index) => (
