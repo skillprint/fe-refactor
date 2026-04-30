@@ -27,7 +27,10 @@ const MODELS = [
   'SkillPrintProfile', 
   'GameChunkAnalysis', 
   'Survey', 
-  'Favorite'
+  'Favorite',
+  'MoodData',
+  'CognitionData',
+  'PersonalityData'
 ];
 
 export default function ControlPanel({
@@ -68,69 +71,168 @@ export default function ControlPanel({
     }
   };
 
+  const applyJumper = (
+    modelName: string, 
+    fields: string[], 
+    daysOffset: number, 
+    chart: any, 
+    compPrev: boolean, 
+    compCohort: boolean
+  ) => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - daysOffset);
+
+    setSelectedModel(modelName);
+    setSelectedFields(fields);
+    setFilters({});
+    setDateRange({ start, end });
+    setComparePrevious(compPrev);
+    setCompareCohort(compCohort);
+    setChartType(chart);
+    
+    onGenerate({
+      modelName,
+      selectedFields: fields,
+      filters: {},
+      startDate: start,
+      endDate: end,
+      comparePrevious: compPrev,
+      compareCohort: compCohort,
+      chartType: chart
+    });
+  };
+
   const jumpers = [
     {
       id: 'default',
       label: 'Select a quick jumper...',
       action: null
     },
+    // Home & Summary
     {
-      id: 'hextris_month',
-      label: 'Total Game Sessions of Hextris (Last Month)',
-      action: () => {
-        const end = new Date();
-        const start = new Date();
-        start.setMonth(start.getMonth() - 1);
-
-        setSelectedModel('Session');
-        setSelectedFields(['duration']);
-        setFilters({ game_id: 'hextris' });
-        setDateRange({ start, end });
-        setComparePrevious(false);
-        setCompareCohort(false);
-        setChartType('Bar');
-        
-        onGenerate({
-          modelName: 'Session',
-          selectedFields: ['duration'],
-          filters: { game_id: 'hextris' },
-          startDate: start,
-          endDate: end,
-          comparePrevious: false,
-          compareCohort: false,
-          chartType: 'Bar'
-        });
-      }
+      id: 'home_footprint_mood',
+      label: 'Home: Mood Footprint (Radar)',
+      action: () => applyJumper('MoodData', ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'], 7, 'Radar', true, true)
     },
     {
-      id: 'hextris_month_prev',
-      label: 'Hextris Sessions vs Prev Period (Last Month)',
-      action: () => {
-        const end = new Date();
-        const start = new Date();
-        start.setMonth(start.getMonth() - 1);
-
-        setSelectedModel('Session');
-        setSelectedFields(['duration']);
-        setFilters({ game_id: 'hextris' });
-        setDateRange({ start, end });
-        setComparePrevious(true);
-        setCompareCohort(false);
-        setChartType('Bar');
-        
-        onGenerate({
-          modelName: 'Session',
-          selectedFields: ['duration'],
-          filters: { game_id: 'hextris' },
-          startDate: start,
-          endDate: end,
-          comparePrevious: true,
-          compareCohort: false,
-          chartType: 'Bar'
-        });
-      }
+      id: 'home_footprint_cognition',
+      label: 'Home: Cognition Footprint (Radar)',
+      action: () => applyJumper('CognitionData', ['memory', 'attention', 'pattern_matching', 'planning', 'visualization', 'math', 'task_switching'], 7, 'Radar', true, true)
+    },
+    {
+      id: 'home_footprint_personality',
+      label: 'Home: Personality Profile (Radar)',
+      action: () => applyJumper('PersonalityData', ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability'], 30, 'Radar', false, true)
+    },
+    {
+      id: 'daily_breakdown',
+      label: 'Home: Daily Breakdown (Weekly Grid)',
+      action: () => applyJumper('MoodData', ['focus'], 7, 'DailyBreakdown', false, false)
+    },
+    // Mood Pillar
+    {
+      id: 'focus_trend_weekly',
+      label: 'Mood: Focus Trend (Weekly Bar vs Prev)',
+      action: () => applyJumper('MoodData', ['focus'], 7, 'Bar', true, false)
+    },
+    {
+      id: 'focus_vs_relax',
+      label: 'Mood: Focus vs Relax (Monthly Line)',
+      action: () => applyJumper('MoodData', ['focus', 'relax'], 30, 'Line', false, false)
+    },
+    {
+      id: 'grit_progression',
+      label: 'Mood: Grit Progression (6-Month Range)',
+      action: () => applyJumper('MoodData', ['grit'], 180, 'RangeBand', false, false)
+    },
+    {
+      id: 'creative_flow',
+      label: 'Mood: Creative Flow (Monthly Line)',
+      action: () => applyJumper('MoodData', ['creativity', 'joy', 'awe'], 30, 'Line', false, false)
+    },
+    {
+      id: 'empathy_collab',
+      label: 'Mood: Empathy & Collaboration (Monthly Bar)',
+      action: () => applyJumper('MoodData', ['empathy', 'collaborate'], 30, 'Bar', true, false)
+    },
+    // Cognition Pillar
+    {
+      id: 'top_cognitive_weekly',
+      label: 'Cognition: Top Skills (Weekly Pie)',
+      action: () => applyJumper('CognitionData', ['memory', 'attention', 'task_switching', 'planning'], 7, 'Pie', false, false)
+    },
+    {
+      id: 'memory_vs_cohort',
+      label: 'Cognition: Memory vs Cohort (Monthly Bar)',
+      action: () => applyJumper('CognitionData', ['memory'], 30, 'Bar', false, true)
+    },
+    {
+      id: 'pattern_matching_consistency',
+      label: 'Cognition: Pattern Matching Consistency (Scatter)',
+      action: () => applyJumper('CognitionData', ['pattern_matching'], 30, 'Scatter', false, false)
+    },
+    {
+      id: 'task_switching_planning',
+      label: 'Cognition: Task Switching vs Planning (6-Month Range)',
+      action: () => applyJumper('CognitionData', ['task_switching', 'planning'], 180, 'RangeBand', false, false)
+    },
+    {
+      id: 'long_range_attention',
+      label: 'Cognition: Long-Range Attention (Yearly Line vs Prev)',
+      action: () => applyJumper('CognitionData', ['attention'], 365, 'Line', true, false)
+    },
+    // Session & Gameplay
+    {
+      id: 'session_duration_monthly',
+      label: 'Session: Duration Trends (Monthly Bar vs Prev)',
+      action: () => applyJumper('Session', ['duration'], 30, 'Bar', true, false)
+    },
+    {
+      id: 'telemetry_activity',
+      label: 'Session: Telemetry Activity (Weekly Line)',
+      action: () => applyJumper('Session', ['telemetry_events'], 7, 'Line', false, false)
+    },
+    {
+      id: 'game_popularity',
+      label: 'Game: Priority vs Players (Monthly Scatter)',
+      action: () => applyJumper('Game', ['priority', 'total_players'], 30, 'Scatter', false, false)
+    },
+    {
+      id: 'active_favorites_growth',
+      label: 'Favorites: Active Growth (Monthly Line)',
+      action: () => applyJumper('Favorite', ['active_favorites', 'total_favorites'], 30, 'Line', false, false)
+    },
+    // Profiles & Analytics
+    {
+      id: 'flow_score_confidence',
+      label: 'Profile: Flow Score vs Confidence (Monthly Range)',
+      action: () => applyJumper('SkillPrintProfile', ['avg_flow_score', 'flow_confidence'], 30, 'RangeBand', false, false)
+    },
+    {
+      id: 'survey_completion',
+      label: 'Survey: Completion Time (Weekly Bar)',
+      action: () => applyJumper('Survey', ['completion_time'], 7, 'Bar', false, false)
+    },
+    {
+      id: 'processing_quality',
+      label: 'Analysis: Processing Quality (Monthly Bar)',
+      action: () => applyJumper('GameChunkAnalysis', ['processing_attempts', 'flow_llm_score', 'skill_llm_score'], 30, 'Bar', false, false)
     }
   ];
+
+  const setDateRangePreset = (preset: 'Day' | 'Week' | 'Month' | '6M' | 'Year') => {
+    const end = new Date();
+    const start = new Date();
+    switch (preset) {
+      case 'Day': start.setDate(start.getDate() - 1); break;
+      case 'Week': start.setDate(start.getDate() - 7); break;
+      case 'Month': start.setMonth(start.getMonth() - 1); break;
+      case '6M': start.setMonth(start.getMonth() - 6); break;
+      case 'Year': start.setFullYear(start.getFullYear() - 1); break;
+    }
+    setDateRange({ start, end });
+  };
 
   return (
     <div className="bg-card text-card-foreground rounded-3xl p-6 shadow-sm border border-border space-y-6">
@@ -225,7 +327,7 @@ export default function ControlPanel({
           Visualization Type
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {['Bar', 'Line', 'RangeBand', 'Scatter', 'Pie'].map(type => (
+          {['Bar', 'Line', 'RangeBand', 'Scatter', 'Pie', 'Radar', 'DailyBreakdown'].map(type => (
             <button
               key={type}
               onClick={() => setChartType(type as any)}
@@ -235,7 +337,7 @@ export default function ControlPanel({
                 : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
               }`}
             >
-              {type === 'RangeBand' ? 'Range Band' : type}
+              {type === 'RangeBand' ? 'Range Band' : type === 'DailyBreakdown' ? 'Daily Breakdown' : type}
             </button>
           ))}
         </div>
@@ -243,9 +345,22 @@ export default function ControlPanel({
 
       {/* Date Range Picker */}
       <div className="space-y-3 pt-2 border-t border-border">
-        <label className="text-sm font-medium leading-none">
-          Date Range
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium leading-none">
+            Date Range
+          </label>
+          <div className="flex gap-1">
+            {['Day', 'Week', 'Month', '6M', 'Year'].map(preset => (
+              <button 
+                key={preset}
+                onClick={() => setDateRangePreset(preset as any)}
+                className="text-[10px] px-2 py-1 rounded-md bg-secondary/20 hover:bg-secondary/40 text-secondary-foreground"
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-col space-y-2">
           <input 
             type="date" 

@@ -10,7 +10,10 @@ export const MODEL_FIELDS: Record<string, string[]> = {
   'SkillPrintProfile': ['total_sessions', 'total_time_played', 'avg_flow_score', 'flow_confidence'],
   'GameChunkAnalysis': ['processing_attempts', 'flow_llm_score', 'skill_llm_score'],
   'Survey': ['score', 'completion_time'],
-  'Favorite': ['total_favorites', 'active_favorites']
+  'Favorite': ['total_favorites', 'active_favorites'],
+  'MoodData': ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'],
+  'CognitionData': ['pattern_matching', 'attention', 'memory', 'planning', 'task_switching', 'math', 'deduction', 'visualization', 'verbal', 'timing', 'perceptual_speed', 'knowledge', 'action', 'spatial'],
+  'PersonalityData': ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability']
 };
 
 export const MODEL_FILTERS: Record<string, string[]> = {
@@ -20,6 +23,9 @@ export const MODEL_FILTERS: Record<string, string[]> = {
   'SkillPrintProfile': ['user_id'],
   'Favorite': ['game_id', 'user_id'],
   'GameScoringConfig': ['game_id'],
+  'MoodData': ['user_id', 'session_id'],
+  'CognitionData': ['user_id', 'session_id'],
+  'PersonalityData': ['user_id'],
 };
 
 export interface SyntheticDataOptions {
@@ -72,7 +78,20 @@ export function generateSyntheticData({
     selectedFields.forEach((field) => {
       const { base, vol } = getFieldBase(field);
       const noise = (Math.random() * 2 - 1) * vol;
-      const val = Math.max(0, Math.round(base + noise + (i * (vol / 10))));
+      let val = Math.round(base + noise + (i * (vol / 10)));
+      
+      // Ensure specific fields stay within 0-100 bounds if they are scores or mind health traits
+      const isScore = MODEL_FIELDS['MoodData'].includes(field) || 
+                      MODEL_FIELDS['CognitionData'].includes(field) || 
+                      MODEL_FIELDS['PersonalityData'].includes(field) ||
+                      field.includes('score') || 
+                      field.includes('confidence');
+      
+      if (isScore) {
+        val = Math.max(0, Math.min(100, val));
+      } else {
+        val = Math.max(0, val);
+      }
       
       dataPoint[field] = val;
 

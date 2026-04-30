@@ -8,7 +8,7 @@ import { generateSyntheticData, DataPoint, MODEL_FIELDS } from './utils/syntheti
 export default function VisualizeClient() {
   const [selectedModel, setSelectedModel] = useState<string>('Session');
   const [selectedFields, setSelectedFields] = useState<string[]>([MODEL_FIELDS['Session'][0]]);
-  const [chartType, setChartType] = useState<'Bar' | 'Line' | 'Pie' | 'Scatter' | 'RangeBand'>('Bar');
+  const [chartType, setChartType] = useState<'Bar' | 'Line' | 'Pie' | 'Scatter' | 'RangeBand' | 'Radar' | 'DailyBreakdown'>('Bar');
   
   const handleModelChange = (model: string) => {
     setSelectedModel(model);
