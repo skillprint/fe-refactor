@@ -3,6 +3,7 @@ export interface DataPoint {
   label: string;
   [key: string]: any; // value, fieldName, fieldName_min, fieldName_max, previousValue, cohortValue
 }
+import { MODEL_FIELDS_20260505, MODEL_FILTERS_20260505 } from './syntheticData_20260505';
 
 export const MODEL_FIELDS: Record<string, string[]> = {
   'Session': ['duration', 'score', 'telemetry_events'],
@@ -13,7 +14,8 @@ export const MODEL_FIELDS: Record<string, string[]> = {
   'Favorite': ['total_favorites', 'active_favorites'],
   'MoodData': ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'],
   'CognitionData': ['pattern_matching', 'attention', 'memory', 'planning', 'task_switching', 'math', 'deduction', 'visualization', 'verbal', 'timing', 'perceptual_speed', 'knowledge', 'action', 'spatial'],
-  'PersonalityData': ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability']
+  'PersonalityData': ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability'],
+  ...MODEL_FIELDS_20260505
 };
 
 export const MODEL_FILTERS: Record<string, string[]> = {
@@ -26,6 +28,7 @@ export const MODEL_FILTERS: Record<string, string[]> = {
   'MoodData': ['user_id', 'session_id'],
   'CognitionData': ['user_id', 'session_id'],
   'PersonalityData': ['user_id'],
+  ...MODEL_FILTERS_20260505
 };
 
 export interface SyntheticDataOptions {
@@ -85,7 +88,9 @@ export function generateSyntheticData({
                       MODEL_FIELDS['CognitionData'].includes(field) || 
                       MODEL_FIELDS['PersonalityData'].includes(field) ||
                       field.includes('score') || 
-                      field.includes('confidence');
+                      field.includes('confidence') ||
+                      (MODEL_FIELDS_20260505['TrendSummary_20260505'] && field === 'avg_score') ||
+                      (MODEL_FIELDS_20260505['TrendLongRange_20260505'] && field === 'score');
       
       if (isScore) {
         val = Math.max(0, Math.min(100, val));

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MODEL_FILTERS } from '../utils/syntheticData';
+import { MODEL_FILTERS, MODEL_FIELDS } from '../utils/syntheticData';
 
 interface ControlPanelProps {
   selectedModel: string;
@@ -21,17 +21,7 @@ interface ControlPanelProps {
   isGenerating: boolean;
 }
 
-const MODELS = [
-  'Session', 
-  'Game', 
-  'SkillPrintProfile', 
-  'GameChunkAnalysis', 
-  'Survey', 
-  'Favorite',
-  'MoodData',
-  'CognitionData',
-  'PersonalityData'
-];
+const MODELS = Object.keys(MODEL_FIELDS);
 
 export default function ControlPanel({
   selectedModel, setSelectedModel,
