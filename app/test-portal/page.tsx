@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, CartesianGrid, Cell } from 'recharts';
 import { useReferenceDimensions } from '../../lib/models/portal/useReferenceDimensions';
 import { useReferenceInsightCategories } from '../../lib/models/portal/useReferenceInsightCategories';
@@ -707,7 +707,7 @@ const LibraryCommunityStatsCard = ({ useSyntheticData }: { useSyntheticData: boo
 };
 
 
-export default function TestHooksPage() {
+function TestHooksContent() {
     const [useSyntheticData, setUseSyntheticData] = useState(true);
 
     return (
@@ -770,5 +770,13 @@ export default function TestHooksPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function TestHooksPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-slate-950 p-10 flex items-center justify-center text-emerald-400">Loading Portal Visualizations...</div>}>
+            <TestHooksContent />
+        </Suspense>
     );
 }
