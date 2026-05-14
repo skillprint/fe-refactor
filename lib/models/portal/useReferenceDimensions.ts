@@ -4,7 +4,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
 import { ReferenceDimensions, generateMockReferenceDimensions } from './ReferenceDimensions';
 
-const BASE_URL = 'https://api.staging.skillprint.co/api/portal';
+import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
+const BASE_URL = `${API_BASE_URL}api`;
 
 export function useReferenceDimensions(useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();
@@ -31,7 +32,7 @@ export function useReferenceDimensions(useSyntheticData: boolean = false) {
         setError(null);
 
         try {
-            const response = await fetch(`${BASE_URL}/reference/dimensions/`, {
+            const response = await fetch(`https://api.staging.skillprint.co/reference/dimensions/`, {
                 headers: {
                     'Authorization': `Token ${userToken}`,
                     'Content-Type': 'application/json'

@@ -4,7 +4,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
 import { HomeRecentSession, generateMockHomeRecentSessions } from './HomeRecentSessions';
 
-const BASE_URL = 'https://api.staging.skillprint.co/api/portal';
+import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
+const BASE_URL = `${API_BASE_URL}api`;
 
 export function useHomeRecentSessions(useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();

@@ -4,7 +4,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
 import { MetricLeaderboard, generateMockMetricLeaderboard } from './MetricLeaderboard';
 
-const BASE_URL = 'https://api.staging.skillprint.co/api/portal';
+import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
+const BASE_URL = `${API_BASE_URL}api`;
 
 export function useMetricLeaderboard(pillar: string, dimension: string, useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();
