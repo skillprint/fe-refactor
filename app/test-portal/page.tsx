@@ -724,9 +724,6 @@ function TestHooksContent() {
                         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
                             Portal API Visualizations
                         </h1>
-                        <p className="text-slate-400 mt-3 max-w-2xl text-sm leading-relaxed">
-                            Testing rich UI states, recharts visualizations, and dynamic tables driven by 26 generated portal hooks.
-                        </p>
                     </div>
                     <div className="mt-6 md:mt-0 flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-800 shadow-inner">
                         <span className={`text-sm font-semibold transition-colors ${!useSyntheticData ? 'text-emerald-400' : 'text-slate-500'}`}>Server API</span>
