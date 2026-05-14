@@ -61,7 +61,7 @@ const GenericTable = ({ data }: { data: any }) => {
         )
     } else if (isObject(data)) {
         return (
-             <div className="overflow-x-auto w-full custom-scrollbar">
+            <div className="overflow-x-auto w-full custom-scrollbar">
                 <table className="w-full text-xs text-left text-slate-300 border-collapse">
                     <tbody>
                         {Object.entries(data).map(([k, v], i) => (
@@ -191,30 +191,30 @@ const LongitudinalMetricCard = ({ useSyntheticData }: { useSyntheticData: boolea
                 <div className="text-red-400 text-sm overflow-auto">{error.message}</div>
             ) : data ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                    {(() => { 
-    return (
-        <div className="flex-1 w-full h-full flex flex-col min-h-[200px]">
-            <div className="flex justify-between items-center mb-2 px-2 text-xs">
-                <span className="text-slate-400">Avg: {data.average}</span>
-                <span className="text-emerald-400">{data.trend.label}</span>
-            </div>
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.buckets} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                    <XAxis dataKey="label" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} />
-                    <Tooltip cursor={{fill: '#334155'}} contentStyle={{backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px'}} />
-                    <ReferenceLine y={data.average} stroke="#38bdf8" strokeDasharray="3 3" />
-                    <Bar dataKey="score" radius={[4, 4, 0, 0]}>
-                        {data.buckets.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.score > data.average ? '#34d399' : '#818cf8'} />
-                        ))}
-                    </Bar>
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
-    );
-   })()}
+                    {(() => {
+                        return (
+                            <div className="flex-1 w-full h-full flex flex-col min-h-[200px]">
+                                <div className="flex justify-between items-center mb-2 px-2 text-xs">
+                                    <span className="text-slate-400">Avg: {data.average}</span>
+                                    <span className="text-emerald-400">{data.trend.label}</span>
+                                </div>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={data.buckets} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                        <XAxis dataKey="label" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} />
+                                        <Tooltip cursor={{ fill: '#334155' }} contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px' }} />
+                                        <ReferenceLine y={data.average} stroke="#38bdf8" strokeDasharray="3 3" />
+                                        <Bar dataKey="score" radius={[4, 4, 0, 0]}>
+                                            {data.buckets.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={(entry.score ?? 0) > (data.average ?? 0) ? '#34d399' : '#818cf8'} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : null}
         </div>
@@ -354,20 +354,20 @@ const HomeFootprintCard = ({ useSyntheticData }: { useSyntheticData: boolean }) 
                 <div className="text-red-400 text-sm overflow-auto">{error.message}</div>
             ) : data ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                    {(() => { 
-    const chartData = data.axes.map(axis => ({ subject: axis.label, A: axis.score, fullMark: 100 }));
-    return (
-        <div className="flex-1 w-full h-full min-h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
-                    <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                    <Radar name="Footprint" dataKey="A" stroke="#34d399" fill="#34d399" fillOpacity={0.5} />
-                </RadarChart>
-            </ResponsiveContainer>
-        </div>
-    );
-   })()}
+                    {(() => {
+                        const chartData = data.axes.map(axis => ({ subject: axis.label, A: axis.score, fullMark: 100 }));
+                        return (
+                            <div className="flex-1 w-full h-full min-h-[200px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+                                        <PolarGrid stroke="#334155" />
+                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                                        <Radar name="Footprint" dataKey="A" stroke="#34d399" fill="#34d399" fillOpacity={0.5} />
+                                    </RadarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : null}
         </div>
@@ -467,34 +467,34 @@ const TrendsDailySummaryCard = ({ useSyntheticData }: { useSyntheticData: boolea
                 <div className="text-red-400 text-sm overflow-auto">{error.message}</div>
             ) : data ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                    {(() => { 
-    return (
-        <div className="flex-1 overflow-x-auto w-full">
-            <table className="w-full text-sm text-left text-slate-300">
-                <thead className="text-xs uppercase bg-white/5 text-slate-400">
-                    <tr>
-                        <th className="px-3 py-2">Pillar</th>
-                        <th className="px-3 py-2">Score</th>
-                        <th className="px-3 py-2">Sessions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.dimensions.map((dim, i) => (
-                        <tr key={i} className="border-b border-white/5">
-                            <td className="px-3 py-2">
-                                <span className={`px-2 py-1 rounded text-xs ${dim.pillar === 'mood' ? 'bg-fuchsia-500/20 text-fuchsia-300' : dim.pillar === 'cognition' ? 'bg-blue-500/20 text-blue-300' : 'bg-orange-500/20 text-orange-300'}`}>
-                                    {dim.slug}
-                                </span>
-                            </td>
-                            <td className="px-3 py-2 font-bold">{dim.avg_score}</td>
-                            <td className="px-3 py-2 text-slate-400">{dim.sessions} sess.</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-   })()}
+                    {(() => {
+                        return (
+                            <div className="flex-1 overflow-x-auto w-full">
+                                <table className="w-full text-sm text-left text-slate-300">
+                                    <thead className="text-xs uppercase bg-white/5 text-slate-400">
+                                        <tr>
+                                            <th className="px-3 py-2">Pillar</th>
+                                            <th className="px-3 py-2">Score</th>
+                                            <th className="px-3 py-2">Sessions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.dimensions.map((dim, i) => (
+                                            <tr key={i} className="border-b border-white/5">
+                                                <td className="px-3 py-2">
+                                                    <span className={`px-2 py-1 rounded text-xs ${dim.pillar === 'mood' ? 'bg-fuchsia-500/20 text-fuchsia-300' : dim.pillar === 'cognition' ? 'bg-blue-500/20 text-blue-300' : 'bg-orange-500/20 text-orange-300'}`}>
+                                                        {dim.slug}
+                                                    </span>
+                                                </td>
+                                                <td className="px-3 py-2 font-bold">{dim.avg_score}</td>
+                                                <td className="px-3 py-2 text-slate-400">{dim.sessions} sess.</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : null}
         </div>
@@ -514,23 +514,23 @@ const InsightCard = ({ useSyntheticData }: { useSyntheticData: boolean }) => {
                 <div className="text-red-400 text-sm overflow-auto">{error.message}</div>
             ) : data ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                    {(() => { 
-    return (
-        <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar">
-            {data.map((insight, i) => (
-                <div key={i} className="bg-white/5 p-3 rounded-lg border border-white/10 flex items-start gap-3">
-                    <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-full shrink-0">
-                        <span className="material-icons text-sm">auto_awesome</span>
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-bold text-white">{insight.title}</h4>
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{insight.body}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-   })()}
+                    {(() => {
+                        return (
+                            <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar">
+                                {data.map((insight, i) => (
+                                    <div key={i} className="bg-white/5 p-3 rounded-lg border border-white/10 flex items-start gap-3">
+                                        <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-full shrink-0">
+                                            <span className="material-icons text-sm">auto_awesome</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-white">{insight.title}</h4>
+                                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{insight.body}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : null}
         </div>
@@ -550,24 +550,24 @@ const NextGameRecommendationCard = ({ useSyntheticData }: { useSyntheticData: bo
                 <div className="text-red-400 text-sm overflow-auto">{error.message}</div>
             ) : data ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                    {(() => { 
-    return (
-        <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2">
-            {data.map((rec, i) => (
-                <div key={i} className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-3 rounded-lg border border-white/10 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-2 opacity-10">
-                        <span className="material-icons text-4xl">play_circle</span>
-                    </div>
-                    <div className="relative z-10">
-                        <span className="text-[10px] uppercase tracking-wider text-blue-400 font-bold">Recommended Next</span>
-                        <h4 className="text-lg font-bold text-white mt-1">{rec.game.name}</h4>
-                        <p className="text-xs text-slate-300 mt-2 bg-black/30 p-2 rounded">{rec.reason_text}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-   })()}
+                    {(() => {
+                        return (
+                            <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2">
+                                {data.map((rec, i) => (
+                                    <div key={i} className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-3 rounded-lg border border-white/10 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-2 opacity-10">
+                                            <span className="material-icons text-4xl">play_circle</span>
+                                        </div>
+                                        <div className="relative z-10">
+                                            <span className="text-[10px] uppercase tracking-wider text-blue-400 font-bold">Recommended Next</span>
+                                            <h4 className="text-lg font-bold text-white mt-1">{rec.game.name}</h4>
+                                            <p className="text-xs text-slate-300 mt-2 bg-black/30 p-2 rounded">{rec.reason_text}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : null}
         </div>
@@ -587,19 +587,19 @@ const MoodMatchedRecommendationCard = ({ useSyntheticData }: { useSyntheticData:
                 <div className="text-red-400 text-sm overflow-auto">{error.message}</div>
             ) : data ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                    {(() => { 
-    return (
-        <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2">
-            {data.map((rec, i) => (
-                <div key={i} className="bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 p-3 rounded-lg border border-white/10">
-                    <span className="text-[10px] uppercase tracking-wider text-fuchsia-400 font-bold">Mood Match</span>
-                    <h4 className="text-base font-bold text-white mt-1">{rec.game.name}</h4>
-                    <p className="text-xs text-slate-300 mt-1">{rec.reason_text}</p>
-                </div>
-            ))}
-        </div>
-    );
-   })()}
+                    {(() => {
+                        return (
+                            <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-2">
+                                {data.map((rec, i) => (
+                                    <div key={i} className="bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 p-3 rounded-lg border border-white/10">
+                                        <span className="text-[10px] uppercase tracking-wider text-fuchsia-400 font-bold">Mood Match</span>
+                                        <h4 className="text-base font-bold text-white mt-1">{rec.game.name}</h4>
+                                        <p className="text-xs text-slate-300 mt-1">{rec.reason_text}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : null}
         </div>
@@ -730,7 +730,7 @@ export default function TestHooksPage() {
                     </div>
                     <div className="mt-6 md:mt-0 flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-800 shadow-inner">
                         <span className={`text-sm font-semibold transition-colors ${!useSyntheticData ? 'text-emerald-400' : 'text-slate-500'}`}>Server API</span>
-                        <button 
+                        <button
                             onClick={() => setUseSyntheticData(!useSyntheticData)}
                             className={`w-14 h-7 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none ${useSyntheticData ? 'bg-cyan-500' : 'bg-emerald-500'}`}
                         >
@@ -740,32 +740,32 @@ export default function TestHooksPage() {
                     </div>
                 </header>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-                <ReferenceDimensionsCard useSyntheticData={useSyntheticData} />
-                <ReferenceInsightCategoriesCard useSyntheticData={useSyntheticData} />
-                <ProfileSettingsCard useSyntheticData={useSyntheticData} />
-                <SessionDetailCard useSyntheticData={useSyntheticData} />
-                <PaginatedSessionCard useSyntheticData={useSyntheticData} />
-                <LongitudinalMetricCard useSyntheticData={useSyntheticData} />
-                <MetricAboutCard useSyntheticData={useSyntheticData} />
-                <MetricLeaderboardCard useSyntheticData={useSyntheticData} />
-                <MetricDistributionCard useSyntheticData={useSyntheticData} />
-                <ProfileAggregateCard useSyntheticData={useSyntheticData} />
-                <ProfilePercentilesCard useSyntheticData={useSyntheticData} />
-                <HomeSummaryCard useSyntheticData={useSyntheticData} />
-                <HomeFootprintCard useSyntheticData={useSyntheticData} />
-                <HomeJustPlayedCard useSyntheticData={useSyntheticData} />
-                <HomeRecentSessionsCard useSyntheticData={useSyntheticData} />
-                <TrendsSummaryCard useSyntheticData={useSyntheticData} />
-                <TrendsLongRangeCard useSyntheticData={useSyntheticData} />
-                <TrendsDailySummaryCard useSyntheticData={useSyntheticData} />
-                <InsightCard useSyntheticData={useSyntheticData} />
-                <NextGameRecommendationCard useSyntheticData={useSyntheticData} />
-                <MoodMatchedRecommendationCard useSyntheticData={useSyntheticData} />
-                <PlaybookRecommendationCard useSyntheticData={useSyntheticData} />
-                <LibraryGameCard useSyntheticData={useSyntheticData} />
-                <LibraryGameDetailCard useSyntheticData={useSyntheticData} />
-                <LibraryPersonalStatsCard useSyntheticData={useSyntheticData} />
-                <LibraryCommunityStatsCard useSyntheticData={useSyntheticData} />
+                    <ReferenceDimensionsCard useSyntheticData={useSyntheticData} />
+                    <ReferenceInsightCategoriesCard useSyntheticData={useSyntheticData} />
+                    <ProfileSettingsCard useSyntheticData={useSyntheticData} />
+                    <SessionDetailCard useSyntheticData={useSyntheticData} />
+                    <PaginatedSessionCard useSyntheticData={useSyntheticData} />
+                    <LongitudinalMetricCard useSyntheticData={useSyntheticData} />
+                    <MetricAboutCard useSyntheticData={useSyntheticData} />
+                    <MetricLeaderboardCard useSyntheticData={useSyntheticData} />
+                    <MetricDistributionCard useSyntheticData={useSyntheticData} />
+                    <ProfileAggregateCard useSyntheticData={useSyntheticData} />
+                    <ProfilePercentilesCard useSyntheticData={useSyntheticData} />
+                    <HomeSummaryCard useSyntheticData={useSyntheticData} />
+                    <HomeFootprintCard useSyntheticData={useSyntheticData} />
+                    <HomeJustPlayedCard useSyntheticData={useSyntheticData} />
+                    <HomeRecentSessionsCard useSyntheticData={useSyntheticData} />
+                    <TrendsSummaryCard useSyntheticData={useSyntheticData} />
+                    <TrendsLongRangeCard useSyntheticData={useSyntheticData} />
+                    <TrendsDailySummaryCard useSyntheticData={useSyntheticData} />
+                    <InsightCard useSyntheticData={useSyntheticData} />
+                    <NextGameRecommendationCard useSyntheticData={useSyntheticData} />
+                    <MoodMatchedRecommendationCard useSyntheticData={useSyntheticData} />
+                    <PlaybookRecommendationCard useSyntheticData={useSyntheticData} />
+                    <LibraryGameCard useSyntheticData={useSyntheticData} />
+                    <LibraryGameDetailCard useSyntheticData={useSyntheticData} />
+                    <LibraryPersonalStatsCard useSyntheticData={useSyntheticData} />
+                    <LibraryCommunityStatsCard useSyntheticData={useSyntheticData} />
 
                 </div>
             </div>
