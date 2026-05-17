@@ -7,6 +7,7 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard } from "./components/AuthGuard";
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Suspense } from "react";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -44,7 +45,9 @@ export default function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               <AuthGuard>
-                <FTUECarousel />
+                <Suspense fallback={null}>
+                  <FTUECarousel />
+                </Suspense>
                 <Toaster position="top-center" />
                 {children}
               </AuthGuard>
