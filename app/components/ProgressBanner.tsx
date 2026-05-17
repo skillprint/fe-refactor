@@ -3,8 +3,9 @@
 import { useGameSessions } from '../hooks/useGameSessions';
 import { useUserSession } from '../hooks/useUserSession';
 import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function ProgressBanner() {
+function ProgressBannerInner() {
     const { count, isLoaded, profileViewed, markViewed } = useGameSessions();
     const { isWhitelisted } = useUserSession();
     const router = useRouter();
@@ -81,6 +82,14 @@ export default function ProgressBanner() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ProgressBanner() {
+    return (
+        <Suspense fallback={null}>
+            <ProgressBannerInner />
+        </Suspense>
     );
 }
 
