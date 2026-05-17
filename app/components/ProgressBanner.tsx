@@ -1,16 +1,19 @@
 'use client';
 
 import { useGameSessions } from '../hooks/useGameSessions';
+import { useUserSession } from '../hooks/useUserSession';
 import { useRouter } from 'next/navigation';
 
 export default function ProgressBanner() {
     const { count, isLoaded, profileViewed, markViewed } = useGameSessions();
+    const { isWhitelisted } = useUserSession();
     const router = useRouter();
     const targetGames = 3;
-    const isProfileReady = count >= targetGames;
+    const isProfileReady = count >= targetGames || isWhitelisted;
 
     if (!isLoaded) return null;
     if (profileViewed) return null;
+    if (isWhitelisted) return null;
 
     // Calculate progress with minimum 5% for CTA feel
     const rawProgress = (count / targetGames) * 100;

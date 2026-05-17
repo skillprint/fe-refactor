@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
+import { isUserWhitelisted } from '../config/whitelist';
 
 // Configuration flag to enable/disable user token caching. 
 // Set to false for now, can be overridden in the future.
@@ -117,6 +118,7 @@ export function useUserSession() {
         getUserToken: () => userToken,
         setToken,
         userId,
-        userToken
+        userToken,
+        isWhitelisted: isUserWhitelisted(userId)
     };
 }

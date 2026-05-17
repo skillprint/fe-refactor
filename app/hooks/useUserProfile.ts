@@ -6,7 +6,7 @@ import { SkillprintClient, LogLevel, UserProfile } from '../lib/skillprintSdk';
 import { useGameSessions } from './useGameSessions';
 
 export function useUserProfile() {
-    const { userToken, userId, setToken } = useUserSession();
+    const { userToken, userId, setToken, isWhitelisted } = useUserSession();
     const { count, isLoaded: isSessionsLoaded } = useGameSessions();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -90,10 +90,10 @@ export function useUserProfile() {
 
     // Automatically fetch profile when token is available and user has played at least 3 games
     useEffect(() => {
-        if (userToken && isSessionsLoaded && count >= 3) {
+        if (userToken && isSessionsLoaded && (count >= 3 || isWhitelisted)) {
             fetchUserProfile();
         }
-    }, [userToken, fetchUserProfile, isSessionsLoaded, count]);
+    }, [userToken, fetchUserProfile, isSessionsLoaded, count, isWhitelisted]);
 
     return {
         profile,

@@ -199,7 +199,7 @@ const gradients = [
 ];
 
 function HomeContent() {
-  useUserSession();
+  const { isWhitelisted } = useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<any[]>([]);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -333,7 +333,7 @@ function HomeContent() {
         </div> */}
 
         {/* Skillprint View for Active Users */}
-        {isLoaded && count >= 3 && (
+        {isLoaded && (count >= 3 || isWhitelisted) && (
           <div className="bg-card border-b border-border">
             <div className="px-4 sm:px-8 py-12 max-w-[1440px] mx-auto w-full">
               <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-6">

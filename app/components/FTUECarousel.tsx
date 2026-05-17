@@ -13,6 +13,7 @@ interface Slide {
 }
 
 import { useAuth } from '../context/AuthContext';
+import { useUserSession } from '../hooks/useUserSession';
 
 const COOKIE_NAME = 'ftue_completed';
 const COOKIE_EXPIRY_DAYS = 365;
@@ -23,10 +24,11 @@ export default function FTUECarousel() {
     const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
     const { goal, setGoal } = useGoal();
     const { status } = useAuth();
+    const { isWhitelisted } = useUserSession();
 
     useEffect(() => {
         // Only trigger FTUE if the user has formally logged in (bypassing Welcome screen)
-        if (status === 'loggedOut' || status === 'partner') return;
+        if (status === 'loggedOut' || status === 'partner' || isWhitelisted) return;
 
         // Check if FTUE has been completed
         const hasCompletedFTUE = document.cookie

@@ -78,7 +78,7 @@ export default function Skillprint() {
   const [nextGameSlug, setNextGameSlug] = useState<string>('');
   const { goal, setGoal } = useGoal();
   const { logout } = useAuth();
-  const { userToken, userId: sessionUserId } = useUserSession();
+  const { userToken, userId: sessionUserId, isWhitelisted } = useUserSession();
   const { nodeDataBySkill, hasScoreBySkill, nodeDataByMood, hasScoreByMood, nodeDataMap } = useSkillprintVisualizationData(processedProfile);
 
   const isDebug = queryParamDebug();
@@ -171,7 +171,7 @@ export default function Skillprint() {
           <div className="flex justify-center py-20">
             <BuckyballLoading />
           </div>
-        ) : (count < 3 && !processedProfile) ? (
+        ) : ((count < 3 && !isWhitelisted) && !processedProfile) ? (
           <div className="bg-card rounded-lg shadow p-8 text-center border border-border mb-8">
             <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🔒</span>
