@@ -79,7 +79,7 @@ export default function Skillprint() {
   const { goal, setGoal } = useGoal();
   const { logout } = useAuth();
   const { userToken, userId: sessionUserId, isWhitelisted } = useUserSession();
-  const { nodeDataBySkill, hasScoreBySkill, nodeDataByMood, hasScoreByMood, nodeDataMap } = useSkillprintVisualizationData(processedProfile);
+  const { nodeDataBySkill, hasScoreBySkill, nodeDataByMood, hasScoreByMood, nodeDataMap, skillProfile } = useSkillprintVisualizationData(processedProfile);
 
   const isDebug = queryParamDebug();
 
@@ -105,17 +105,55 @@ export default function Skillprint() {
   }, [profile]);
 
   useEffect(() => {
-    if (processedProfile?.latestMoods) {
-      const moods = processedProfile.latestMoods.filter((m: any) => m.targetMood);
-      setSkills(moods.map((m: any) => ({
-        id: m.targetMood,
-        name: m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1),
-        level: Math.round(m.score * 100),
-        category: 'Mindset',
-        color: MOOD_COLORS[m.targetMood.toLowerCase()] || '#8F48F1'
-      })));
+    // If skillProfile.yearlySummary exists, it can be an object or an array. Use it to build the skills list.
+    if (skillProfile?.yearlySummary) {
+      let newSkills: Skill[] = [];
+      const summary = skillProfile.yearlySummary;
+      
+      if (Array.isArray(summary)) {
+        newSkills = summary.map((item: any, i: number) => {
+          const name = item.skill || item.mood || `Skill ${i}`;
+          const level = typeof item.progress === 'number' ? item.progress : (Math.round((item.score || 0) * 100) || 0);
+          return {
+            id: name,
+            name: name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' '),
+            level: level,
+            category: 'Cognitive',
+            color: MOOD_COLORS[name.toLowerCase()] || sampleSkills[i % sampleSkills.length].color
+          };
+        });
+      } else {
+        newSkills = Object.entries(summary).map(([name, details]: [string, any], i: number) => {
+          return {
+            id: name,
+            name: name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' '),
+            level: typeof details.progress === 'number' ? details.progress : 0,
+            category: 'Cognitive',
+            color: MOOD_COLORS[name.toLowerCase()] || sampleSkills[i % sampleSkills.length].color
+          };
+        });
+      }
+      
+      if (newSkills.length > 0) {
+        setSkills(newSkills);
+        return;
+      }
     }
-  }, [processedProfile]);
+    
+    // Fallback: If no skillProfile but processedProfile has latestMoods
+    if (processedProfile?.latestMoods) {
+      const moods = processedProfile.latestMoods.filter((m: any) => m && m.targetMood);
+      if (moods.length > 0) {
+        setSkills(moods.map((m: any) => ({
+          id: m.targetMood,
+          name: m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1),
+          level: Math.round((m.score || 0) * 100) || 0,
+          category: 'Mindset',
+          color: MOOD_COLORS[m.targetMood.toLowerCase()] || '#8F48F1'
+        })));
+      }
+    }
+  }, [skillProfile, processedProfile]);
 
   useEffect(() => {
     if (isLoaded && count >= 3 && !profileViewed) {
