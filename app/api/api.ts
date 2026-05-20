@@ -148,12 +148,12 @@ export const getVisualizeMoodProfile = async (token?: string | null) => {
 };
 
 export const getCatalogItemsBySkill = async (skill_name: string) => {
-    const url = `${catalog_path}?skills=${skill_name}`;
+    const url = `${catalog_path}?skills=${skill_name}&is_playable_in_pwa=true`;
     return await get(url, true);
 };
 
 export const getCatalogItemsByMood = async (mood_name: string) => {
-    const url = `${catalog_path}?moods=${mood_name}`;
+    const url = `${catalog_path}?moods=${mood_name}&is_playable_in_pwa=true`;
     return await get(url, true);
 };
 
