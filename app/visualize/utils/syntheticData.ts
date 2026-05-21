@@ -37,7 +37,7 @@ export interface SyntheticDataOptions {
   chartType: string;
   startDate: Date;
   endDate: Date;
-  comparePrevious: boolean;
+  comparePeriods: number;
   compareCohort: boolean;
   filters?: Record<string, string>;
 }
@@ -48,7 +48,7 @@ export function generateSyntheticData({
   chartType,
   startDate,
   endDate,
-  comparePrevious,
+  comparePeriods,
   compareCohort,
   filters = {},
 }: SyntheticDataOptions): DataPoint[] {
@@ -107,10 +107,10 @@ export function generateSyntheticData({
         dataPoint[`${field}_range`] = [min, max];
       }
 
-      if (comparePrevious) {
+      for (let p = 1; p <= comparePeriods; p++) {
         const prevNoise = (Math.random() * 2 - 1) * vol;
-        const trend = Math.random() > 0.5 ? 1.1 : 0.9;
-        dataPoint[`${field}_previous`] = Math.max(0, Math.round((base * trend) + prevNoise));
+        const trend = Math.random() > 0.5 ? (1.1 - (p * 0.02)) : (0.9 + (p * 0.02));
+        dataPoint[`${field}_previous_${p}`] = Math.max(0, Math.round((base * trend) + prevNoise));
       }
 
       if (compareCohort) {

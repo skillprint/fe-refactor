@@ -2,6 +2,7 @@ import React from 'react';
 import {
   BarChart, Bar,
   LineChart, Line,
+  AreaChart, Area,
   PieChart, Pie, Cell,
   ScatterChart, Scatter,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -11,9 +12,9 @@ import { DataPoint } from '../utils/syntheticData';
 
 interface DynamicChartProps {
   data: DataPoint[];
-  type: 'Bar' | 'Line' | 'Pie' | 'Scatter' | 'RangeBand' | 'Radar' | 'DailyBreakdown';
+  type: 'Bar' | 'Line' | 'Area' | 'BarLine' | 'Pie' | 'Scatter' | 'RangeBand' | 'Radar' | 'DailyBreakdown';
   selectedFields: string[];
-  comparePrevious: boolean;
+  comparePeriods: number;
   compareCohort: boolean;
 }
 
@@ -24,7 +25,7 @@ const THEME_COLORS = [
   'var(--destructive)',
 ];
 
-export default function DynamicChart({ data, type, selectedFields, comparePrevious, compareCohort }: DynamicChartProps) {
+export default function DynamicChart({ data, type, selectedFields, comparePeriods, compareCohort }: DynamicChartProps) {
   
   const formatFieldLabel = (field: string) => {
     const formatted = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -94,9 +95,13 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
             return (
               <React.Fragment key={field}>
                 <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} radius={[4, 4, 0, 0]} />
-                {comparePrevious && (
-                  <Bar dataKey={`${field}_previous`} name={`${formatFieldLabel(field)} (Prev)`} fill={prevColor} radius={[4, 4, 0, 0]} />
-                )}
+                {Array.from({ length: comparePeriods }).map((_, p) => {
+                  const pIndex = p + 1;
+                  const opacity = Math.max(0.3, 1 - (pIndex * 0.2));
+                  return (
+                    <Bar key={`prev_${pIndex}`} dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} fill={prevColor} fillOpacity={opacity} radius={[4, 4, 0, 0]} />
+                  );
+                })}
                 {compareCohort && (
                   <Bar dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} fill={cohortColor} radius={[4, 4, 0, 0]} />
                 )}
@@ -121,9 +126,14 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
             return (
               <React.Fragment key={field}>
                 <Line type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                {comparePrevious && (
-                  <Line type="monotone" dataKey={`${field}_previous`} name={`${formatFieldLabel(field)} (Prev)`} stroke={prevColor} strokeWidth={2} strokeDasharray="5 5" />
-                )}
+                {Array.from({ length: comparePeriods }).map((_, p) => {
+                  const pIndex = p + 1;
+                  const strokeOp = Math.max(0.3, 1 - (pIndex * 0.2));
+                  const dash = pIndex === 1 ? "5 5" : pIndex === 2 ? "3 3" : "1 4";
+                  return (
+                    <Line key={`prev_${pIndex}`} type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke={prevColor} strokeOpacity={strokeOp} strokeWidth={2} strokeDasharray={dash} />
+                  );
+                })}
                 {compareCohort && (
                   <Line type="monotone" dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} stroke={cohortColor} strokeWidth={2} strokeDasharray="3 3" />
                 )}
@@ -131,6 +141,74 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
             );
           })}
         </LineChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (type === 'Area') {
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+          {renderAxes()}
+          {selectedFields.map((field, i) => {
+            const color = THEME_COLORS[i % THEME_COLORS.length];
+            const prevColor = `color-mix(in srgb, ${color} 45%, #a1a1aa)`;
+            const cohortColor = `color-mix(in srgb, ${color} 20%, #d4d4d8)`;
+
+            return (
+              <React.Fragment key={field}>
+                <Area type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} fill={color} fillOpacity={0.3} strokeWidth={2} activeDot={{ r: 6 }} />
+                {Array.from({ length: comparePeriods }).map((_, p) => {
+                  const pIndex = p + 1;
+                  const opacity = Math.max(0.1, 0.4 - (pIndex * 0.1));
+                  const dash = pIndex === 1 ? "5 5" : pIndex === 2 ? "3 3" : "1 4";
+                  return (
+                    <Area key={`prev_${pIndex}`} type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke={prevColor} fill={prevColor} fillOpacity={opacity} strokeWidth={2} strokeDasharray={dash} />
+                  );
+                })}
+                {compareCohort && (
+                  <Area type="monotone" dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} stroke={cohortColor} fill={cohortColor} fillOpacity={0.1} strokeWidth={2} strokeDasharray="3 3" />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </AreaChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (type === 'BarLine') {
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+          {renderAxes()}
+          {selectedFields.map((field, i) => {
+            const color = THEME_COLORS[i % THEME_COLORS.length];
+            const prevColor = `color-mix(in srgb, ${color} 45%, #a1a1aa)`;
+            const cohortColor = `color-mix(in srgb, ${color} 20%, #d4d4d8)`;
+
+            return (
+              <React.Fragment key={field}>
+                {i === 0 ? (
+                  <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} radius={[4, 4, 0, 0]} />
+                ) : (
+                  <Line type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                )}
+                {Array.from({ length: comparePeriods }).map((_, p) => {
+                  const pIndex = p + 1;
+                  const strokeOp = Math.max(0.3, 1 - (pIndex * 0.2));
+                  const dash = pIndex === 1 ? "5 5" : pIndex === 2 ? "3 3" : "1 4";
+                  return (
+                    <Line key={`prev_${pIndex}`} type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke={prevColor} strokeOpacity={strokeOp} strokeWidth={2} strokeDasharray={dash} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  );
+                })}
+                {compareCohort && (
+                  <Line type="monotone" dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} stroke={cohortColor} strokeWidth={2} strokeDasharray="3 3" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </ComposedChart>
       </ResponsiveContainer>
     );
   }
@@ -161,9 +239,14 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
                   fill={color} 
                   shape="circle"
                 />
-                {comparePrevious && (
-                  <Scatter dataKey={`${field}_previous`} name={`${formatFieldLabel(field)} (Prev)`} fill={prevColor} shape="cross" />
-                )}
+                {Array.from({ length: comparePeriods }).map((_, p) => {
+                  const pIndex = p + 1;
+                  const shapes = ["cross", "diamond", "square", "triangle"] as const;
+                  const shape = shapes[(pIndex - 1) % shapes.length];
+                  return (
+                    <Scatter key={`prev_${pIndex}`} dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} fill={prevColor} fillOpacity={Math.max(0.3, 1 - (pIndex * 0.2))} shape={shape} />
+                  );
+                })}
                 {compareCohort && (
                   <Scatter dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} fill={cohortColor} shape="diamond" />
                 )}
@@ -178,7 +261,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
   if (type === 'Pie') {
     let pieData: any[] = [];
     
-    if (comparePrevious || compareCohort) {
+    if (comparePeriods > 0 || compareCohort) {
       selectedFields.forEach((field, i) => {
         const color = THEME_COLORS[i % THEME_COLORS.length];
         const prevColor = `color-mix(in srgb, ${color} 45%, #a1a1aa)`;
@@ -187,9 +270,12 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
         const totalCurrent = data.reduce((acc, curr) => acc + (curr[field] || 0), 0);
         pieData.push({ name: `${formatFieldLabel(field)} Total`, value: totalCurrent, fill: color });
         
-        if (comparePrevious) {
-          const totalPrev = data.reduce((acc, curr) => acc + (curr[`${field}_previous`] || 0), 0);
-          pieData.push({ name: `${formatFieldLabel(field)} Prev`, value: totalPrev, fill: prevColor });
+        if (comparePeriods > 0) {
+          Array.from({ length: comparePeriods }).forEach((_, p) => {
+            const pIndex = p + 1;
+            const totalPrev = data.reduce((acc, curr) => acc + (curr[`${field}_previous_${pIndex}`] || 0), 0);
+            pieData.push({ name: `${formatFieldLabel(field)} (-${pIndex}W)`, value: totalPrev, fill: prevColor, opacity: Math.max(0.3, 1 - (pIndex * 0.2)) });
+          });
         }
         
         if (compareCohort) {
@@ -221,7 +307,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
             label={({ name, percent = 0 }) => `${name} ${(percent * 100).toFixed(0)}%`}
           >
             {pieData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fill} />
+              <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={entry.opacity || 1} />
             ))}
           </Pie>
         </PieChart>
@@ -265,9 +351,14 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
             return (
               <React.Fragment key={field}>
                 <Scatter name={formatFieldLabel(field)} data={scatterData} fill={color} dataKey={field} />
-                {comparePrevious && (
-                  <Scatter name={`${formatFieldLabel(field)} (Prev)`} data={scatterData} fill={prevColor} dataKey={`${field}_previous`} shape="cross" />
-                )}
+                {Array.from({ length: comparePeriods }).map((_, p) => {
+                  const pIndex = p + 1;
+                  const shapes = ["cross", "diamond", "square", "triangle"] as const;
+                  const shape = shapes[(pIndex - 1) % shapes.length];
+                  return (
+                    <Scatter key={`prev_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} data={scatterData} fill={prevColor} dataKey={`${field}_previous_${pIndex}`} shape={shape} fillOpacity={Math.max(0.3, 1 - (pIndex * 0.2))} />
+                  );
+                })}
                 {compareCohort && (
                   <Scatter name={`${formatFieldLabel(field)} (Cohort)`} data={scatterData} fill={cohortColor} dataKey={`${field}_cohort`} shape="diamond" />
                 )}
@@ -285,9 +376,12 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
       const avgCurrent = data.reduce((acc, curr) => acc + (curr[field] || 0), 0) / (data.length || 1);
       const dataPoint: any = { subject: field, value: Math.round(avgCurrent) };
       
-      if (comparePrevious) {
-        const avgPrev = data.reduce((acc, curr) => acc + (curr[`${field}_previous`] || 0), 0) / (data.length || 1);
-        dataPoint.prevValue = Math.round(avgPrev);
+      if (comparePeriods > 0) {
+        Array.from({ length: comparePeriods }).forEach((_, p) => {
+          const pIndex = p + 1;
+          const avgPrev = data.reduce((acc, curr) => acc + (curr[`${field}_previous_${pIndex}`] || 0), 0) / (data.length || 1);
+          dataPoint[`prevValue_${pIndex}`] = Math.round(avgPrev);
+        });
       }
       if (compareCohort) {
         const avgCohort = data.reduce((acc, curr) => acc + (curr[`${field}_cohort`] || 0), 0) / (data.length || 1);
@@ -303,9 +397,12 @@ export default function DynamicChart({ data, type, selectedFields, comparePrevio
           <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} tickFormatter={(val) => formatFieldLabel(val).replace(' (Score)', '')} />
           <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'var(--muted-foreground)' }} />
           <Radar name="Current" dataKey="value" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.6} />
-          {comparePrevious && (
-            <Radar name="Previous" dataKey="prevValue" stroke="var(--muted-foreground)" fill="var(--muted-foreground)" fillOpacity={0.3} />
-          )}
+          {Array.from({ length: comparePeriods }).map((_, p) => {
+            const pIndex = p + 1;
+            return (
+              <Radar key={`prev_${pIndex}`} name={`-${pIndex}W`} dataKey={`prevValue_${pIndex}`} stroke="var(--muted-foreground)" fill="var(--muted-foreground)" fillOpacity={Math.max(0.1, 0.4 - (pIndex * 0.1))} />
+            );
+          })}
           {compareCohort && (
             <Radar name="Cohort" dataKey="cohortValue" stroke="var(--secondary)" fill="var(--secondary)" fillOpacity={0.3} />
           )}

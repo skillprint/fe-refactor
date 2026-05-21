@@ -13,8 +13,8 @@ interface ControlPanelProps {
   setChartType: (val: any) => void;
   dateRange: { start: Date; end: Date };
   setDateRange: (val: { start: Date; end: Date }) => void;
-  comparePrevious: boolean;
-  setComparePrevious: (val: boolean) => void;
+  comparePeriods: number;
+  setComparePeriods: (val: number) => void;
   compareCohort: boolean;
   setCompareCohort: (val: boolean) => void;
   onGenerate: (overrides?: any) => void;
@@ -30,7 +30,7 @@ export default function ControlPanel({
   filters, setFilters,
   chartType, setChartType,
   dateRange, setDateRange,
-  comparePrevious, setComparePrevious,
+  comparePeriods, setComparePeriods,
   compareCohort, setCompareCohort,
   onGenerate, isGenerating
 }: ControlPanelProps) {
@@ -66,7 +66,7 @@ export default function ControlPanel({
     fields: string[], 
     daysOffset: number, 
     chart: any, 
-    compPrev: boolean, 
+    compPeriods: number, 
     compCohort: boolean
   ) => {
     const end = new Date();
@@ -77,7 +77,7 @@ export default function ControlPanel({
     setSelectedFields(fields);
     setFilters({});
     setDateRange({ start, end });
-    setComparePrevious(compPrev);
+    setComparePeriods(compPeriods);
     setCompareCohort(compCohort);
     setChartType(chart);
     
@@ -87,7 +87,7 @@ export default function ControlPanel({
       filters: {},
       startDate: start,
       endDate: end,
-      comparePrevious: compPrev,
+      comparePeriods: compPeriods,
       compareCohort: compCohort,
       chartType: chart
     });
@@ -103,111 +103,111 @@ export default function ControlPanel({
     {
       id: 'home_footprint_mood',
       label: 'Home: Mood Footprint (Radar)',
-      action: () => applyJumper('MoodData', ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'], 7, 'Radar', true, true)
+      action: () => applyJumper('MoodData', ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'], 7, 'Radar', 1, true)
     },
     {
       id: 'home_footprint_cognition',
       label: 'Home: Cognition Footprint (Radar)',
-      action: () => applyJumper('CognitionData', ['memory', 'attention', 'pattern_matching', 'planning', 'visualization', 'math', 'task_switching'], 7, 'Radar', true, true)
+      action: () => applyJumper('CognitionData', ['memory', 'attention', 'pattern_matching', 'planning', 'visualization', 'math', 'task_switching'], 7, 'Radar', 1, true)
     },
     {
       id: 'home_footprint_personality',
       label: 'Home: Personality Profile (Radar)',
-      action: () => applyJumper('PersonalityData', ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability'], 30, 'Radar', false, true)
+      action: () => applyJumper('PersonalityData', ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability'], 30, 'Radar', 0, true)
     },
     {
       id: 'daily_breakdown',
       label: 'Home: Daily Breakdown (Weekly Grid)',
-      action: () => applyJumper('MoodData', ['focus'], 7, 'DailyBreakdown', false, false)
+      action: () => applyJumper('MoodData', ['focus'], 7, 'DailyBreakdown', 0, false)
     },
     // Mood Pillar
     {
       id: 'focus_trend_weekly',
       label: 'Mood: Focus Trend (Weekly Bar vs Prev)',
-      action: () => applyJumper('MoodData', ['focus'], 7, 'Bar', true, false)
+      action: () => applyJumper('MoodData', ['focus'], 7, 'BarLine', 1, false)
     },
     {
       id: 'focus_vs_relax',
       label: 'Mood: Focus vs Relax (Monthly Line)',
-      action: () => applyJumper('MoodData', ['focus', 'relax'], 30, 'Line', false, false)
+      action: () => applyJumper('MoodData', ['focus', 'relax'], 30, 'Line', 0, false)
     },
     {
       id: 'grit_progression',
       label: 'Mood: Grit Progression (6-Month Range)',
-      action: () => applyJumper('MoodData', ['grit'], 180, 'RangeBand', false, false)
+      action: () => applyJumper('MoodData', ['grit'], 180, 'RangeBand', 0, false)
     },
     {
       id: 'creative_flow',
       label: 'Mood: Creative Flow (Monthly Line)',
-      action: () => applyJumper('MoodData', ['creativity', 'joy', 'awe'], 30, 'Line', false, false)
+      action: () => applyJumper('MoodData', ['creativity', 'joy', 'awe'], 30, 'Line', 0, false)
     },
     {
       id: 'empathy_collab',
       label: 'Mood: Empathy & Collaboration (Monthly Bar)',
-      action: () => applyJumper('MoodData', ['empathy', 'collaborate'], 30, 'Bar', true, false)
+      action: () => applyJumper('MoodData', ['empathy', 'collaborate'], 30, 'Bar', 1, false)
     },
     // Cognition Pillar
     {
       id: 'top_cognitive_weekly',
       label: 'Cognition: Top Skills (Weekly Pie)',
-      action: () => applyJumper('CognitionData', ['memory', 'attention', 'task_switching', 'planning'], 7, 'Pie', false, false)
+      action: () => applyJumper('CognitionData', ['memory', 'attention', 'task_switching', 'planning'], 7, 'Pie', 0, false)
     },
     {
       id: 'memory_vs_cohort',
       label: 'Cognition: Memory vs Cohort (Monthly Bar)',
-      action: () => applyJumper('CognitionData', ['memory'], 30, 'Bar', false, true)
+      action: () => applyJumper('CognitionData', ['memory'], 30, 'Bar', 0, true)
     },
     {
       id: 'pattern_matching_consistency',
       label: 'Cognition: Pattern Matching Consistency (Scatter)',
-      action: () => applyJumper('CognitionData', ['pattern_matching'], 30, 'Scatter', false, false)
+      action: () => applyJumper('CognitionData', ['pattern_matching'], 30, 'Scatter', 0, false)
     },
     {
       id: 'task_switching_planning',
       label: 'Cognition: Task Switching vs Planning (6-Month Range)',
-      action: () => applyJumper('CognitionData', ['task_switching', 'planning'], 180, 'RangeBand', false, false)
+      action: () => applyJumper('CognitionData', ['task_switching', 'planning'], 180, 'RangeBand', 0, false)
     },
     {
       id: 'long_range_attention',
       label: 'Cognition: Long-Range Attention (Yearly Line vs Prev)',
-      action: () => applyJumper('CognitionData', ['attention'], 365, 'Line', true, false)
+      action: () => applyJumper('CognitionData', ['attention'], 365, 'Line', 1, false)
     },
     // Session & Gameplay
     {
       id: 'session_duration_monthly',
       label: 'Session: Duration Trends (Monthly Bar vs Prev)',
-      action: () => applyJumper('Session', ['duration'], 30, 'Bar', true, false)
+      action: () => applyJumper('Session', ['duration'], 30, 'BarLine', 1, false)
     },
     {
       id: 'telemetry_activity',
       label: 'Session: Telemetry Activity (Weekly Line)',
-      action: () => applyJumper('Session', ['telemetry_events'], 7, 'Line', false, false)
+      action: () => applyJumper('Session', ['telemetry_events'], 7, 'Line', 0, false)
     },
     {
       id: 'game_popularity',
       label: 'Game: Priority vs Players (Monthly Scatter)',
-      action: () => applyJumper('Game', ['priority', 'total_players'], 30, 'Scatter', false, false)
+      action: () => applyJumper('Game', ['priority', 'total_players'], 30, 'Scatter', 0, false)
     },
     {
       id: 'active_favorites_growth',
       label: 'Favorites: Active Growth (Monthly Line)',
-      action: () => applyJumper('Favorite', ['active_favorites', 'total_favorites'], 30, 'Line', false, false)
+      action: () => applyJumper('Favorite', ['active_favorites', 'total_favorites'], 30, 'Line', 0, false)
     },
     // Profiles & Analytics
     {
       id: 'flow_score_confidence',
       label: 'Profile: Flow Score vs Confidence (Monthly Range)',
-      action: () => applyJumper('SkillPrintProfile', ['avg_flow_score', 'flow_confidence'], 30, 'RangeBand', false, false)
+      action: () => applyJumper('SkillPrintProfile', ['avg_flow_score', 'flow_confidence'], 30, 'RangeBand', 0, false)
     },
     {
       id: 'survey_completion',
       label: 'Survey: Completion Time (Weekly Bar)',
-      action: () => applyJumper('Survey', ['completion_time'], 7, 'Bar', false, false)
+      action: () => applyJumper('Survey', ['completion_time'], 7, 'Bar', 0, false)
     },
     {
       id: 'processing_quality',
       label: 'Analysis: Processing Quality (Monthly Bar)',
-      action: () => applyJumper('GameChunkAnalysis', ['processing_attempts', 'flow_llm_score', 'skill_llm_score'], 30, 'Bar', false, false)
+      action: () => applyJumper('GameChunkAnalysis', ['processing_attempts', 'flow_llm_score', 'skill_llm_score'], 30, 'Bar', 0, false)
     }
   ];
 
@@ -317,7 +317,7 @@ export default function ControlPanel({
           Visualization Type
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {['Bar', 'Line', 'RangeBand', 'Scatter', 'Pie', 'Radar', 'DailyBreakdown'].map(type => (
+          {['Bar', 'Line', 'Area', 'BarLine', 'RangeBand', 'Scatter', 'Pie', 'Radar', 'DailyBreakdown'].map(type => (
             <button
               key={type}
               onClick={() => setChartType(type as any)}
@@ -327,7 +327,7 @@ export default function ControlPanel({
                 : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
               }`}
             >
-              {type === 'RangeBand' ? 'Range Band' : type === 'DailyBreakdown' ? 'Daily Breakdown' : type}
+              {type === 'RangeBand' ? 'Range Band' : type === 'DailyBreakdown' ? 'Daily Breakdown' : type === 'BarLine' ? 'Bar + Line' : type}
             </button>
           ))}
         </div>
@@ -374,17 +374,18 @@ export default function ControlPanel({
           Comparisons
         </label>
         
-        <div className="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
-            id="comparePrevious" 
-            checked={comparePrevious}
-            onChange={(e) => setComparePrevious(e.target.checked)}
-            className="h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
-          <label htmlFor="comparePrevious" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Previous Period
-          </label>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Previous Periods to Compare</label>
+          <select 
+            value={comparePeriods}
+            onChange={(e) => setComparePeriods(parseInt(e.target.value, 10))}
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value={0}>None</option>
+            <option value={1}>1 Period (-1W)</option>
+            <option value={2}>2 Periods (-2W)</option>
+            <option value={3}>3 Periods (-3W)</option>
+          </select>
         </div>
 
         <div className="flex items-center space-x-2">

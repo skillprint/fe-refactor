@@ -8,7 +8,7 @@ import { generateSyntheticData, DataPoint, MODEL_FIELDS } from './utils/syntheti
 export default function VisualizeClient() {
   const [selectedModel, setSelectedModel] = useState<string>('Session');
   const [selectedFields, setSelectedFields] = useState<string[]>([MODEL_FIELDS['Session'][0]]);
-  const [chartType, setChartType] = useState<'Bar' | 'Line' | 'Pie' | 'Scatter' | 'RangeBand' | 'Radar' | 'DailyBreakdown'>('Bar');
+  const [chartType, setChartType] = useState<'Bar' | 'Line' | 'Area' | 'BarLine' | 'Pie' | 'Scatter' | 'RangeBand' | 'Radar' | 'DailyBreakdown'>('Bar');
   
   const handleModelChange = (model: string) => {
     setSelectedModel(model);
@@ -21,7 +21,7 @@ export default function VisualizeClient() {
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
     end: new Date()
   });
-  const [comparePrevious, setComparePrevious] = useState<boolean>(false);
+  const [comparePeriods, setComparePeriods] = useState<number>(0);
   const [compareCohort, setCompareCohort] = useState<boolean>(false);
   
   const [chartData, setChartData] = useState<DataPoint[]>([]);
@@ -36,7 +36,7 @@ export default function VisualizeClient() {
         chartType: overrides?.chartType ?? chartType,
         startDate: overrides?.startDate ?? dateRange.start,
         endDate: overrides?.endDate ?? dateRange.end,
-        comparePrevious: overrides?.comparePrevious ?? comparePrevious,
+        comparePeriods: overrides?.comparePeriods ?? comparePeriods,
         compareCohort: overrides?.compareCohort ?? compareCohort,
         filters: overrides?.filters ?? filters
       });
@@ -65,8 +65,8 @@ export default function VisualizeClient() {
           setChartType={setChartType}
           dateRange={dateRange}
           setDateRange={setDateRange}
-          comparePrevious={comparePrevious}
-          setComparePrevious={setComparePrevious}
+          comparePeriods={comparePeriods}
+          setComparePeriods={setComparePeriods}
           compareCohort={compareCohort}
           setCompareCohort={setCompareCohort}
           onGenerate={handleGenerateData}
@@ -91,7 +91,7 @@ export default function VisualizeClient() {
                 data={chartData} 
                 type={chartType}
                 selectedFields={selectedFields.filter(f => f)}
-                comparePrevious={comparePrevious}
+                comparePeriods={comparePeriods}
                 compareCohort={compareCohort}
               />
             ) : (
