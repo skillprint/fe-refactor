@@ -94,16 +94,16 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
             
             return (
               <React.Fragment key={field}>
-                <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} radius={[4, 4, 0, 0]} />
+                <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} radius={[6, 6, 0, 0]} maxBarSize={16} />
                 {Array.from({ length: comparePeriods }).map((_, p) => {
                   const pIndex = p + 1;
                   const opacity = Math.max(0.3, 1 - (pIndex * 0.2));
                   return (
-                    <Bar key={`prev_${pIndex}`} dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} fill={prevColor} fillOpacity={opacity} radius={[4, 4, 0, 0]} />
+                    <Bar key={`prev_${pIndex}`} dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} fill={prevColor} fillOpacity={opacity} radius={[6, 6, 0, 0]} maxBarSize={16} />
                   );
                 })}
                 {compareCohort && (
-                  <Bar dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} fill={cohortColor} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} fill={cohortColor} radius={[6, 6, 0, 0]} maxBarSize={16} />
                 )}
               </React.Fragment>
             );
@@ -154,20 +154,44 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
             const color = THEME_COLORS[i % THEME_COLORS.length];
             const prevColor = `color-mix(in srgb, ${color} 45%, #a1a1aa)`;
             const cohortColor = `color-mix(in srgb, ${color} 20%, #d4d4d8)`;
+            const gradientId = `grad_${field}_${i}`;
 
             return (
               <React.Fragment key={field}>
-                <Area type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} fill={color} fillOpacity={0.3} strokeWidth={2} activeDot={{ r: 6 }} />
+                <defs>
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={color} stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor={color} stopOpacity={0.0}/>
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} fill={`url(#${gradientId})`} strokeWidth={3} activeDot={{ r: 6 }} />
                 {Array.from({ length: comparePeriods }).map((_, p) => {
                   const pIndex = p + 1;
                   const opacity = Math.max(0.1, 0.4 - (pIndex * 0.1));
                   const dash = pIndex === 1 ? "5 5" : pIndex === 2 ? "3 3" : "1 4";
+                  const prevGradientId = `grad_${field}_prev_${pIndex}_${i}`;
                   return (
-                    <Area key={`prev_${pIndex}`} type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke={prevColor} fill={prevColor} fillOpacity={opacity} strokeWidth={2} strokeDasharray={dash} />
+                    <React.Fragment key={`prev_${pIndex}`}>
+                      <defs>
+                        <linearGradient id={prevGradientId} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={prevColor} stopOpacity={opacity}/>
+                          <stop offset="95%" stopColor={prevColor} stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Area type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke={prevColor} fill={`url(#${prevGradientId})`} strokeWidth={2} strokeDasharray={dash} />
+                    </React.Fragment>
                   );
                 })}
                 {compareCohort && (
-                  <Area type="monotone" dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} stroke={cohortColor} fill={cohortColor} fillOpacity={0.1} strokeWidth={2} strokeDasharray="3 3" />
+                  <React.Fragment key="cohort">
+                    <defs>
+                      <linearGradient id={`grad_${field}_cohort_${i}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={cohortColor} stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor={cohortColor} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} stroke={cohortColor} fill={`url(#grad_${field}_cohort_${i})`} strokeWidth={2} strokeDasharray="3 3" />
+                  </React.Fragment>
                 )}
               </React.Fragment>
             );
@@ -190,16 +214,14 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
             return (
               <React.Fragment key={field}>
                 {i === 0 ? (
-                  <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} radius={[6, 6, 0, 0]} barSize={16} />
                 ) : (
                   <Line type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                 )}
                 {Array.from({ length: comparePeriods }).map((_, p) => {
                   const pIndex = p + 1;
-                  const strokeOp = Math.max(0.3, 1 - (pIndex * 0.2));
-                  const dash = pIndex === 1 ? "5 5" : pIndex === 2 ? "3 3" : "1 4";
                   return (
-                    <Line key={`prev_${pIndex}`} type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke={prevColor} strokeOpacity={strokeOp} strokeWidth={2} strokeDasharray={dash} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                    <Line key={`prev_${pIndex}`} type="monotone" dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} stroke="#000000" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                   );
                 })}
                 {compareCohort && (
