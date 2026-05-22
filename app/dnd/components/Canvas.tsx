@@ -33,7 +33,7 @@ export function Canvas() {
             <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
               <div ref={setNodeRef} className={`w-full min-h-screen pb-64 ${isOver ? 'bg-primary/5 rounded-xl transition-colors' : ''}`}>
                 {blocks.map((block) => (
-                  <SortableBlock key={block.id} id={block.id} type={block.type} />
+                  <SortableBlock key={block.id} id={block.id} type={block.type} blockProps={block.props} />
                 ))}
                 
                 {/* Visual indicator for bottom drop zone */}

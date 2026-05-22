@@ -9,9 +9,10 @@ import { MODULE_REGISTRY } from '../modules/ModuleRegistry';
 interface Props {
   id: string;
   type: string;
+  blockProps?: any;
 }
 
-export function SortableBlock({ id, type }: Props) {
+export function SortableBlock({ id, type, blockProps = {} }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const { removeBlock } = useBuilder();
 
@@ -60,7 +61,7 @@ export function SortableBlock({ id, type }: Props) {
       </div>
 
       <div className={`border-2 rounded-xl transition-colors ${isDragging ? 'border-primary shadow-2xl scale-[1.02]' : 'border-transparent hover:border-border/50 hover:shadow-sm'}`}>
-        <ModuleComponent />
+        <ModuleComponent id={id} {...blockProps} />
       </div>
     </div>
   );

@@ -5,6 +5,9 @@ import ProgressBanner from '../../components/ProgressBanner';
 import { PlaybookWidget } from '../../components/PlaybookWidget';
 import SkillprintVisualization from '../../components/Skillprint';
 import DynamicChart from '../../visualize/components/DynamicChart';
+import { JUMPERS } from '../../visualize/utils/jumpers';
+import { generateSyntheticData } from '../../visualize/utils/syntheticData';
+import { useBuilder } from '../components/BuilderContext';
 
 // Mock data for visualizations
 const MOCK_SKILLS = ['Problem Solving', 'Memory', 'Speed', 'Accuracy'];
@@ -164,14 +167,52 @@ export const MODULE_REGISTRY: Record<string, { name: string; component: React.Co
   },
   dynamicChart: {
     name: 'Dynamic Chart',
-    component: () => (
-      <div className="bg-card p-6 border border-border rounded-xl">
-        <h3 className="font-bold mb-4">Performance Trends</h3>
-        <div className="h-64 pointer-events-none">
-          <DynamicChart data={MOCK_CHART_DATA as any} type="Line" selectedFields={['value']} comparePeriods={0} compareCohort={false} />
+    component: ({ id, jumperId = 'home_footprint_mood' }: { id: string, jumperId?: string }) => {
+      const { updateBlockProps } = useBuilder();
+      const jumper = JUMPERS.find(j => j.id === jumperId) || JUMPERS[0];
+      
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - jumper.daysOffset);
+
+      const chartData = generateSyntheticData({
+        modelName: jumper.modelName,
+        selectedFields: jumper.fields,
+        chartType: jumper.chart as any,
+        startDate: start,
+        endDate: end,
+        comparePeriods: jumper.compPeriods,
+        compareCohort: jumper.compCohort,
+        filters: {}
+      });
+
+      return (
+        <div className="bg-card p-6 border border-border rounded-xl group/chart relative">
+          <div className="absolute top-4 right-4 opacity-0 group-hover/chart:opacity-100 transition-opacity z-20">
+            <select 
+              value={jumperId}
+              onChange={(e) => updateBlockProps(id, { jumperId: e.target.value })}
+              className="text-sm border border-input rounded-md px-2 py-1 bg-background shadow-sm"
+              onPointerDown={(e) => e.stopPropagation()} // Prevent dragging when clicking the select
+            >
+              {JUMPERS.map(j => (
+                <option key={j.id} value={j.id}>{j.label}</option>
+              ))}
+            </select>
+          </div>
+          <h3 className="font-bold mb-4">{jumper.label}</h3>
+          <div className="h-64 pointer-events-none">
+            <DynamicChart 
+              data={chartData as any} 
+              type={jumper.chart as any} 
+              selectedFields={jumper.fields} 
+              comparePeriods={jumper.compPeriods} 
+              compareCohort={jumper.compCohort} 
+            />
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
     icon: '📉'
   }
 };

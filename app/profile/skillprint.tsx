@@ -20,6 +20,8 @@ import { useUserSession } from '../hooks/useUserSession';
 import { useVisualizeMoodProfile } from '../hooks/useVisualizeMoodProfile';
 import { useVisualizeSkillProfile } from '../hooks/useVisualizeSkillProfile';
 import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
+import DynamicChart from '../visualize/components/DynamicChart';
+import { generateSyntheticData, DataPoint } from '../visualize/utils/syntheticData';
 
 
 interface Skill {
@@ -81,6 +83,25 @@ export default function Skillprint() {
   const { userToken, userId: sessionUserId, isWhitelisted } = useUserSession();
   const { nodeDataBySkill, hasScoreBySkill, nodeDataByMood, hasScoreByMood, nodeDataMap, skillProfile } = useSkillprintVisualizationData(processedProfile);
 
+  const [comparePeriods, setComparePeriods] = useState<number>(1);
+  const [chartData, setChartData] = useState<DataPoint[]>([]);
+
+  useEffect(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 7);
+    const data = generateSyntheticData({
+      modelName: 'MoodData',
+      selectedFields: ['focus'],
+      chartType: 'BarLine',
+      startDate: start,
+      endDate: end,
+      comparePeriods: comparePeriods,
+      compareCohort: false
+    });
+    setChartData(data);
+  }, [comparePeriods]);
+
   const isDebug = queryParamDebug();
 
   const MOOD_COLORS: Record<string, string> = {
@@ -109,7 +130,7 @@ export default function Skillprint() {
     if (skillProfile?.yearlySummary) {
       let newSkills: Skill[] = [];
       const summary = skillProfile.yearlySummary;
-      
+
       if (Array.isArray(summary)) {
         newSkills = summary.map((item: any, i: number) => {
           const name = item.skill || item.mood || `Skill ${i}`;
@@ -133,13 +154,13 @@ export default function Skillprint() {
           };
         });
       }
-      
+
       if (newSkills.length > 0) {
         setSkills(newSkills);
         return;
       }
     }
-    
+
     // Fallback: If no skillProfile but processedProfile has latestMoods
     if (processedProfile?.latestMoods) {
       const moods = processedProfile.latestMoods.filter((m: any) => m && m.targetMood);
@@ -314,6 +335,34 @@ export default function Skillprint() {
             )}
 
             <div className="py-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-foreground">
+                  Performance Trends
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm text-muted-foreground">Compare:</label>
+                  <select
+                    value={comparePeriods}
+                    onChange={(e) => setComparePeriods(parseInt(e.target.value, 10))}
+                    className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value={0}>None</option>
+                    <option value={1}>Last Week</option>
+                    <option value={2}>Last 2 Weeks</option>
+                    <option value={3}>Last 3 Weeks</option>
+                  </select>
+                </div>
+              </div>
+              <div className="bg-card rounded-xl border border-border p-4 shadow-sm h-[350px] mb-8">
+                <DynamicChart
+                  data={chartData}
+                  type="BarLine"
+                  selectedFields={['focus']}
+                  comparePeriods={comparePeriods}
+                  compareCohort={false}
+                />
+              </div>
+
               <h2 className="text-xl font-semibold text-foreground mb-4">
                 Skill Breakdown
               </h2>

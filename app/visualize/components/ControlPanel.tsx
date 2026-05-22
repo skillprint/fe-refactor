@@ -1,5 +1,6 @@
 import React from 'react';
 import { MODEL_FILTERS, MODEL_FIELDS } from '../utils/syntheticData';
+import { JUMPERS } from '../utils/jumpers';
 
 interface ControlPanelProps {
   selectedModel: string;
@@ -99,116 +100,11 @@ export default function ControlPanel({
       label: 'Select a quick jumper...',
       action: null
     },
-    // Home & Summary
-    {
-      id: 'home_footprint_mood',
-      label: 'Home: Mood Footprint (Radar)',
-      action: () => applyJumper('MoodData', ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'], 7, 'Radar', 1, true)
-    },
-    {
-      id: 'home_footprint_cognition',
-      label: 'Home: Cognition Footprint (Radar)',
-      action: () => applyJumper('CognitionData', ['memory', 'attention', 'pattern_matching', 'planning', 'visualization', 'math', 'task_switching'], 7, 'Radar', 1, true)
-    },
-    {
-      id: 'home_footprint_personality',
-      label: 'Home: Personality Profile (Radar)',
-      action: () => applyJumper('PersonalityData', ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'emotional_stability'], 30, 'Radar', 0, true)
-    },
-    {
-      id: 'daily_breakdown',
-      label: 'Home: Daily Breakdown (Weekly Grid)',
-      action: () => applyJumper('MoodData', ['focus'], 7, 'DailyBreakdown', 0, false)
-    },
-    // Mood Pillar
-    {
-      id: 'focus_trend_weekly',
-      label: 'Mood: Focus Trend (Weekly Bar vs Prev)',
-      action: () => applyJumper('MoodData', ['focus'], 7, 'BarLine', 1, false)
-    },
-    {
-      id: 'focus_vs_relax',
-      label: 'Mood: Focus vs Relax (Monthly Line)',
-      action: () => applyJumper('MoodData', ['focus', 'relax'], 30, 'Line', 0, false)
-    },
-    {
-      id: 'grit_progression',
-      label: 'Mood: Grit Progression (6-Month Range)',
-      action: () => applyJumper('MoodData', ['grit'], 180, 'RangeBand', 0, false)
-    },
-    {
-      id: 'creative_flow',
-      label: 'Mood: Creative Flow (Monthly Line)',
-      action: () => applyJumper('MoodData', ['creativity', 'joy', 'awe'], 30, 'Line', 0, false)
-    },
-    {
-      id: 'empathy_collab',
-      label: 'Mood: Empathy & Collaboration (Monthly Bar)',
-      action: () => applyJumper('MoodData', ['empathy', 'collaborate'], 30, 'Bar', 1, false)
-    },
-    // Cognition Pillar
-    {
-      id: 'top_cognitive_weekly',
-      label: 'Cognition: Top Skills (Weekly Pie)',
-      action: () => applyJumper('CognitionData', ['memory', 'attention', 'task_switching', 'planning'], 7, 'Pie', 0, false)
-    },
-    {
-      id: 'memory_vs_cohort',
-      label: 'Cognition: Memory vs Cohort (Monthly Bar)',
-      action: () => applyJumper('CognitionData', ['memory'], 30, 'Bar', 0, true)
-    },
-    {
-      id: 'pattern_matching_consistency',
-      label: 'Cognition: Pattern Matching Consistency (Scatter)',
-      action: () => applyJumper('CognitionData', ['pattern_matching'], 30, 'Scatter', 0, false)
-    },
-    {
-      id: 'task_switching_planning',
-      label: 'Cognition: Task Switching vs Planning (6-Month Range)',
-      action: () => applyJumper('CognitionData', ['task_switching', 'planning'], 180, 'RangeBand', 0, false)
-    },
-    {
-      id: 'long_range_attention',
-      label: 'Cognition: Long-Range Attention (Yearly Line vs Prev)',
-      action: () => applyJumper('CognitionData', ['attention'], 365, 'Line', 1, false)
-    },
-    // Session & Gameplay
-    {
-      id: 'session_duration_monthly',
-      label: 'Session: Duration Trends (Monthly Bar vs Prev)',
-      action: () => applyJumper('Session', ['duration'], 30, 'BarLine', 1, false)
-    },
-    {
-      id: 'telemetry_activity',
-      label: 'Session: Telemetry Activity (Weekly Line)',
-      action: () => applyJumper('Session', ['telemetry_events'], 7, 'Line', 0, false)
-    },
-    {
-      id: 'game_popularity',
-      label: 'Game: Priority vs Players (Monthly Scatter)',
-      action: () => applyJumper('Game', ['priority', 'total_players'], 30, 'Scatter', 0, false)
-    },
-    {
-      id: 'active_favorites_growth',
-      label: 'Favorites: Active Growth (Monthly Line)',
-      action: () => applyJumper('Favorite', ['active_favorites', 'total_favorites'], 30, 'Line', 0, false)
-    },
-    // Profiles & Analytics
-    {
-      id: 'flow_score_confidence',
-      label: 'Profile: Flow Score vs Confidence (Monthly Range)',
-      action: () => applyJumper('SkillPrintProfile', ['avg_flow_score', 'flow_confidence'], 30, 'RangeBand', 0, false)
-    },
-    {
-      id: 'survey_completion',
-      label: 'Survey: Completion Time (Weekly Bar)',
-      action: () => applyJumper('Survey', ['completion_time'], 7, 'Bar', 0, false)
-    },
-    {
-      id: 'processing_quality',
-      label: 'Analysis: Processing Quality (Monthly Bar)',
-      action: () => applyJumper('GameChunkAnalysis', ['processing_attempts', 'flow_llm_score', 'skill_llm_score'], 30, 'Bar', 0, false)
-    }
+    ...JUMPERS.map(j => ({
+      id: j.id,
+      label: j.label,
+      action: () => applyJumper(j.modelName, j.fields, j.daysOffset, j.chart, j.compPeriods, j.compCohort)
+    }))
   ];
 
   const setDateRangePreset = (preset: 'Day' | 'Week' | 'Month' | '6M' | 'Year') => {
