@@ -465,6 +465,29 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'cut-the-rope':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'gravity', parameterValue: 0.5 }]; // Low gravity
+                case 2: return [{ parameterName: 'gravity', parameterValue: 1.0 }]; // Default
+                case 3: return [{ parameterName: 'gravity', parameterValue: 2.0 }]; // High gravity
+                case 4: return [{ parameterName: 'ropeElasticity', parameterValue: 0.5 }]; // Stiff ropes
+                case 5: return [{ parameterName: 'ropeElasticity', parameterValue: 1.0 }]; // Default
+                case 6: return [{ parameterName: 'ropeElasticity', parameterValue: 1.8 }]; // Elastic ropes
+                case 7: return [
+                    { parameterName: 'scoreMultiplier', parameterValue: 1 },
+                    { parameterName: 'timeLimitSeconds', parameterValue: 90 }
+                ];
+                case 8: return [
+                    { parameterName: 'scoreMultiplier', parameterValue: 2 },
+                    { parameterName: 'timeLimitSeconds', parameterValue: 45 }
+                ];
+                case 9: return [
+                    { parameterName: 'scoreMultiplier', parameterValue: 5 },
+                    { parameterName: 'timeLimitSeconds', parameterValue: 15 }
+                ];
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

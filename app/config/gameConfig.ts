@@ -189,6 +189,15 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'purple',
       size: 'md'
     }
+  },
+
+  'cut-the-rope': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'red',
+      size: 'md'
+    }
   }
 };
 
@@ -601,6 +610,16 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '10-30 minutes',
     skills: ['Logical Thinking', 'Creativity', 'Experimentation'],
     instructions: 'Drag and drop elements onto each other to combine them. Use hints when you get stuck!'
+  },
+  'cut-the-rope': {
+    name: 'Cut The Rope',
+    description: 'Cut the ropes to feed candy to the little monster Om Nom in this physics-based puzzle game!',
+    image: '/games/live/Cut The Rope/static/res/img/icon.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Timing', 'Precision', 'Spatial Reasoning'],
+    instructions: 'Swipe across ropes to cut them. Collect stars and guide the candy into Om Nom\'s mouth!'
   }
 };
 
@@ -699,4 +718,5 @@ export const knownGameSlugs = [
   'ultimate-sudoku',
   'whack-em-all',
   'doodle-god-next',
+  'cut-the-rope',
 ]; 

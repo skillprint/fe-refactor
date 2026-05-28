@@ -1,0 +1,30 @@
+{
+    "gravity": {
+        "max": 3.0,
+        "min": 0.2,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scaling factor for physical gravity. Higher values make game physics faster and heavier."
+    },
+    "ropeElasticity": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Elasticity and bounce coefficient of ropes. Lower values make ropes stiffer."
+    },
+    "scoreMultiplier": {
+        "max": 5,
+        "min": 1,
+        "type": "integer",
+        "default": 1,
+        "description": "Multiplier applied to points scored when collecting stars."
+    },
+    "timeLimitSeconds": {
+        "max": 120,
+        "min": 10,
+        "type": "integer",
+        "default": 45,
+        "description": "Time limit in seconds to complete the active level. Lower values increase difficulty."
+    }
+}
