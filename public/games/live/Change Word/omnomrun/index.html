@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover' />
+    <meta charset='utf-8'>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <style></style>
+    <title>Om Nom Run</title>
+   
+    <!-- ---------------- API Snippet ---------------- -->
+    <script>
+        window.famobi_gameID = "{FAMOBI_GAMEID}"; // the actual GAMEID is added to the final version by Famobi
+        window.famobi_gameJS = [
+            function() {
+                window.MAX_REVIVES_PER_LEVEL = undefined; //controls how many revives could players have per level. undefined = no limit, or an integer >= 0 to set the limit
+                window.ENABLE_PRIVACY_POLICY_AND_TOS = window.famobi.hasFeature("privacy"); //set to true to enable ToS and Privacy Policy buttons in game setting menu
+                window.OPEN_TERMS_OF_SERVICE = () => window.open('https://famobi.com/terms-of-service'); //replace with an actual link
+                window.OPEN_PRIVACY_POLICY = () => window.open('https://famobi.com/privacy'); //replace with an actual link
+                window.SHARE_GAME_CALLBACK = () => window.open('https://famobi.com')
+            },
+            "preloader.js",
+            "playcanvas-stable.min.js",
+            "__settings__.js",
+            "__modules__.js",
+            "__start__.js",
+            "__loading__.js"
+        ];
+        (function (document, url, fgJS, firstJS) {
+            fgJS = document.createElement('script');
+            firstJS = document.getElementsByTagName('script')[0];
+            fgJS.src = url + encodeURIComponent(document.location.href);
+            firstJS.parentNode.insertBefore(fgJS, firstJS);
+        })(document, '//games.cdn.famobi.com/html5games/gameapi/v1.js?e=');         
+    </script>
+
+    <!-- ---------------- API Snippet end ------------- -->
+
+<script src="https://eos-sdk-staging-1090731220557.europe-west3.run.app/getSdk/famobi/game-interface.js"></script>
+</head>
+<body>  
+
+    <div id="application-splash-wrapper">
+        <div id="application-splash">
+            <div id="loaderBar"></div>
+            <span id="loadingText">0%</span>
+        </div>
+        <img id="logo" src="img/logo.png">
+    </div>
+
+
+<script>
+  GameInterface.init(window.famobi_gameJS, {}, true);
+</script>
+</body>
+</html>
