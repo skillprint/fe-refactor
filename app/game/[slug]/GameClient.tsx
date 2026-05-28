@@ -72,6 +72,7 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('sweet-memory') >= 0) return 'sweet-memory';
     if (lowerSlug.indexOf('ultimate-sudoku') >= 0) return 'ultimate-sudoku';
     if (lowerSlug.indexOf('whack-em-all') >= 0 || lowerSlug.indexOf('whack') >= 0) return 'whack-em-all';
+    if (lowerSlug.indexOf('doodle-god-next') >= 0) return 'doodle-god-next';
 
     return slug;
 }
@@ -110,7 +111,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'sumagi': 'Sumagi',
     'sweet-memory': 'Sweet Memory',
     'ultimate-sudoku': 'Ultimate Sudoku',
-    'whack-em-all': "Whack 'em All"
+    'whack-em-all': "Whack 'em All",
+    'doodle-god-next': 'Doodle God Next'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

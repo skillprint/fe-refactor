@@ -30,6 +30,14 @@ html {
     justify-content: center;
 }
 
+body,
+html,
+#main-layout {
+    width: 100%;
+    height: 100%;
+
+}
+
 #edge-fill {
     position: fixed;
     inset: 0;
@@ -54,12 +62,9 @@ html {
     right: 0;
 }
 
-.main-layout {
-    position: absolute;
-    height: var(--app-vh);
+#main-layout {
     width: 100vw;
-    /* width: calc(var(--app-vh) * 0.75); */
-    max-width: 100%;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -144,7 +149,7 @@ html {
 
 .splash__image_0 {
     z-index: 0;
-    
+
 }
 
 .splash__image_1 {
@@ -212,8 +217,10 @@ html {
 .progress-track::before {
     content: "";
     position: absolute;
-    inset: 5px;                     /* отступ от белой рамки */
-    background: #333a42b7;            /* тёмный */
+    inset: 5px;
+    /* отступ от белой рамки */
+    background: #333a42b7;
+    /* тёмный */
     transform: skewX(-6deg);
     transform-origin: left center;
 }
@@ -225,7 +232,8 @@ html {
     left: 5px;
     height: calc(100% - 10px);
     width: 0%;
-    background: #11a720;            /* голубой */
+    background: #11a720;
+    /* голубой */
     transform: skewX(-6deg);
     transform-origin: left center;
     transition: width 0.4s linear;
@@ -248,7 +256,7 @@ html {
     position: absolute;
     text-align: center;
     color: white;
-        height: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -482,7 +490,7 @@ html {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    
+
 }
 
 .loading-arrow {
@@ -491,7 +499,7 @@ html {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    
+
     animation: spin 2.2s linear infinite;
 }
 
@@ -508,12 +516,25 @@ html {
 /* ===== ANIMATIONS ===== */
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(-360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(-360deg);
+    }
 }
 
 @keyframes float {
-    0%   { transform: translateY(0); }
-    50%  { transform: translateY(-6px); }
-    100% { transform: translateY(0); }
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
 }

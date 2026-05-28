@@ -1,0 +1,30 @@
+{
+    "hintCooldownTime": {
+        "max": 120.0,
+        "min": 5.0,
+        "type": "float",
+        "default": 15.0,
+        "description": "Cooldown timer for using hints in seconds. Higher values increase difficulty."
+    },
+    "startingHints": {
+        "max": 15,
+        "min": 1,
+        "type": "integer",
+        "default": 5,
+        "description": "Number of initial hints given at the start of the game session."
+    },
+    "adsFrequencyMinutes": {
+        "max": 15.0,
+        "min": 1.0,
+        "type": "float",
+        "default": 5.0,
+        "description": "Frequency of video advertisement popups in minutes. Lower values increase interruption and stress/arousal."
+    },
+    "debugMode": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 0,
+        "description": "Enable debug/developer overlay displaying rendering and engine statistics."
+    }
+}

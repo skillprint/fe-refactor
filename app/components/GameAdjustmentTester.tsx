@@ -442,6 +442,29 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'doodle-god-next':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'hintCooldownTime', parameterValue: 60.0 }]; // Very slow hints
+                case 2: return [{ parameterName: 'hintCooldownTime', parameterValue: 15.0 }]; // Default
+                case 3: return [{ parameterName: 'hintCooldownTime', parameterValue: 5.0 }];  // Very fast hints
+                case 4: return [{ parameterName: 'startingHints', parameterValue: 1 }];       // Hard starting hints
+                case 5: return [{ parameterName: 'startingHints', parameterValue: 5 }];       // Default hints
+                case 6: return [{ parameterName: 'startingHints', parameterValue: 15 }];      // Easy starting hints
+                case 7: return [
+                    { parameterName: 'adsFrequencyMinutes', parameterValue: 10.0 },
+                    { parameterName: 'debugMode', parameterValue: 0 }
+                ];
+                case 8: return [
+                    { parameterName: 'adsFrequencyMinutes', parameterValue: 5.0 },
+                    { parameterName: 'debugMode', parameterValue: 0 }
+                ];
+                case 9: return [
+                    { parameterName: 'adsFrequencyMinutes', parameterValue: 1.0 },
+                    { parameterName: 'debugMode', parameterValue: 1 }
+                ];
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

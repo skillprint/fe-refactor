@@ -24,6 +24,21 @@
             border: none;
         } */
     </style>
+    <script src="./skillprintShim.js"></script>
+    <script src="../../SkillprintLib/html2canvas.min.js"></script>
+    <script src="./doodleGodScreenshot.js"></script>
+    <script>
+    function logEvent(params) {
+      params.messageType = 'gameEvent';
+      const paramsAsJSON = JSON.stringify(params);
+      if (globalThis.ReactNativeWebView) {
+        globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
+      } else {
+        window.parent.postMessage(paramsAsJSON, "*");
+      }
+    }
+    globalThis.logEvent = logEvent;
+    </script>
 </head>
 
 <body>

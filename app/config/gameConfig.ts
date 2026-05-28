@@ -180,6 +180,15 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'green',
       size: 'sm'
     }
+  },
+
+  'doodle-god-next': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
   }
 };
 
@@ -582,6 +591,16 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '2-5 minutes',
     skills: ['Timing', 'Precision'],
     instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
+  },
+  'doodle-god-next': {
+    name: 'Doodle God Next',
+    description: 'Combine basic elements like fire, water, earth, and air to create new elements and build a whole universe!',
+    image: '/games/live/Doodle God Next/static/data/splash/god.png',
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '10-30 minutes',
+    skills: ['Logical Thinking', 'Creativity', 'Experimentation'],
+    instructions: 'Drag and drop elements onto each other to combine them. Use hints when you get stuck!'
   }
 };
 
@@ -679,4 +698,5 @@ export const knownGameSlugs = [
   'sweet-memory',
   'ultimate-sudoku',
   'whack-em-all',
+  'doodle-god-next',
 ]; 
