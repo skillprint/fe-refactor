@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" /> -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle God</title>
+    <link rel="stylesheet" href="./style.css?v=2.3">
+    <style>
+        /* html,
+        body {
+            
+        } */
+
+        /* Высота iFrame подгоняется под высоту экрана, а ширина рассчитывается для сохранения пропорций iPhone Pro Max (428x926)
+        iframe {
+            height: 100vh;
+            width: calc((100vh * 428) / 926);
+            border: none;
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="edge-fill" aria-hidden="true">
+        <canvas id="edge-fill-left" class="edge-fill__side"></canvas>
+        <canvas id="edge-fill-right" class="edge-fill__side"></canvas>
+    </div>
+
+    <div class="main-layout">
+        <canvas id="canvas"></canvas>
+    </div>
+
+
+    <div id="splash" class="main-layout release">
+        <div id="version">4.153</div>
+        <img id="tl_logo" data-src="/data/splash/jb_logo.png">
+
+        <div class="splash__scene" aria-hidden="true">
+            <div class="splash__edge splash__edge--left"><img class="splash__edge-image" data-src="/data/splash/background_sky.png" alt="" loading="lazy"></div>
+            <div class="splash__edge splash__edge--right"><img class="splash__edge-image" data-src="/data/splash/background_sky.png" alt="" loading="lazy"></div>
+            <img class="splash__image_0" data-src="/data/splash/background_sky.png" alt="splash background" loading="lazy">
+            <img class="splash__image_1" data-src="/data/splash/background_stars.png" alt="splash stars" loading="lazy">
+            <img class="splash__image_2" data-src="/data/splash/god.png" alt="splash god" loading="lazy">
+        </div>
+
+        <div id="progress-bar-container">
+            <div id="progress-text_1">Грузим код и ресурсы</div>
+            <div id="progress-text_2">Грузим ресурсы в коде игры in cpp</div>
+            <div class="progress-track">
+                <div id="progress-bar">
+                    <!-- <span class="progress-star"></span> -->
+                </div>
+                <div id="progress-text-status"></div>
+            </div>
+
+            <a id="site-link" href="https://www.doodlegod.com" target="_blank" rel="noopener noreferrer"
+                aria-label="Открыть www.doodlegod.com в новой вкладке">
+                <img data-src="/data/splash/text.png" alt="www.doodlegod.com">
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        var Module = Module || {};
+    </script>
+    <script src="./src/game_config.js?v=1.22"></script>
+    <script src="./src/host_helper.js?v=1.1"></script>
+    <script>
+        window.host_assets = () => {
+            document.querySelectorAll('[data-src]').forEach((el) => {
+                const p = el.getAttribute('data-src');
+                if (window.DGHost && typeof window.DGHost.loadElement === 'function') {
+                    window.DGHost.loadElement(el, p);
+                } else {
+                    el.setAttribute('src', p);
+                }
+            });
+        };
+        window.host_assets();
+    </script>
+
+    <script src="./src/IndexedDB_helper.js?v=1.221" defer></script>
+    <script src="./src/gamepush_core.js?v=1.17" defer></script>
+    <script src="./src/web_analytics.js?v=1.21" defer></script>
+    <script src="./src/gameanalytics_analytics.js?v=1.16" defer></script>
+    <script src="./src/telegram.js?v=2.234" defer></script>
+    <script src="./src/platform_runtime.js?v=1.23" defer></script>
+    <script src="./src/saves.js?v=1.288" defer></script>
+    <script src="./src/texture_helper.js?v=1.219" defer></script>
+    <script src="./src/fflate.min.js?v=0.222" defer></script>
+    <script src="./src/gamepush_storage.js?v=1.18" defer></script>
+    <script src="./src/pack_progress_ui.js?v=1.222" defer></script>
+    <script src="./src/pack_platform_policy.js?v=1.226" defer></script>
+    <script src="./src/pack_sizes.generated.js?v=1.218" defer></script>
+    <script src="./src/pack_helpers.js?v=1.215" defer></script>
+    <script src="./src/files_helper.js?v=2.100" defer></script>
+    <script src="./src/gamepush_ads.js?v=1.18" defer></script>
+    <script src="./src/gamepush_payments.js?v=1.21" defer></script>
+    <script src="./src/gamepush_social.js?v=1.16" defer></script>
+    <script src="./src/bundle.js?v=4.153" defer></script>
+    <script src="./src/edge_fill.js?v=1.216" defer></script>
+    <script src="./src/media.js?v=1.301" defer></script>
+    <script src="./src/debug.gui.js?v=1.124" defer></script>
+    <script>
+        //______________________________________________________________________________________________
+        HTMLElement.prototype.setLongPressClick = function (callback, duration = 1500) {
+            let timer;
+            const element = this;
+
+            const startPress = (e) => {
+                if (e.type === 'mousedown' && e.button !== 0) return;
+
+                timer = setTimeout(() => {
+                    callback();
+                }, duration);
+            };
+
+            const cancelPress = () => {
+                clearTimeout(timer);
+            };
+
+            element.addEventListener('mousedown', startPress);
+            element.addEventListener('touchstart', startPress, { passive: true });
+
+            element.addEventListener('mouseup', cancelPress);
+            element.addEventListener('mouseleave', cancelPress);
+            element.addEventListener('touchend', cancelPress);
+            element.addEventListener('touchmove', cancelPress); // Отмена при сдвиге пальца
+        };
+    </script>
+
+    <!-- <div id="build-switcher">
+        <button class="build-btn" data-build="gles" style="background-color: rgba(22, 181, 244, 0.5);">GLES</button>
+        <button class="build-btn" data-build="opengl" style="background-color: rgba(85, 231, 18, 0.5);">OpenGL</button>
+    </div> -->
+
+
+
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-glass">
+            <div class="loading-icon">
+                <img class="loading-ring" data-src="/data/round_the_clock.png" alt="">
+                <img class="loading-arrow" data-src="/data/small_arrow.png" alt="">
+            </div>
+            <div class="loading-text">
+                Ожидайте, пока загружаются ресурсы…
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+<script>
+    window.host_assets();
+</script>
+
+</html>
