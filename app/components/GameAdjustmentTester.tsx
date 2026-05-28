@@ -488,6 +488,29 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'omnomrun':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'speedScale', parameterValue: 0.6 }]; // Slow runner
+                case 2: return [{ parameterName: 'speedScale', parameterValue: 1.0 }]; // Default
+                case 3: return [{ parameterName: 'speedScale', parameterValue: 1.5 }]; // Fast runner
+                case 4: return [{ parameterName: 'invincibilityDuration', parameterValue: 5 }]; // Stiff/Short invincibility
+                case 5: return [{ parameterName: 'invincibilityDuration', parameterValue: 10 }]; // Default
+                case 6: return [{ parameterName: 'invincibilityDuration', parameterValue: 25 }]; // Extended invincibility
+                case 7: return [
+                    { parameterName: 'magnetRadius', parameterValue: 1 },
+                    { parameterName: 'coinSpawnRate', parameterValue: 1 }
+                ];
+                case 8: return [
+                    { parameterName: 'magnetRadius', parameterValue: 3 },
+                    { parameterName: 'coinSpawnRate', parameterValue: 2 }
+                ];
+                case 9: return [
+                    { parameterName: 'magnetRadius', parameterValue: 8 },
+                    { parameterName: 'coinSpawnRate', parameterValue: 4 }
+                ];
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

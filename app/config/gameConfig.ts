@@ -198,6 +198,15 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'red',
       size: 'md'
     }
+  },
+
+  'omnomrun': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'green',
+      size: 'md'
+    }
   }
 };
 
@@ -620,6 +629,16 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '5-15 minutes',
     skills: ['Timing', 'Precision', 'Spatial Reasoning'],
     instructions: 'Swipe across ropes to cut them. Collect stars and guide the candy into Om Nom\'s mouth!'
+  },
+  'omnomrun': {
+    name: 'Om Nom Run',
+    description: 'Run, jump, slide, and dodge obstacles through the streets of Nomville with Om Nom!',
+    image: '/games/live/Omnomrun/static/logo.png',
+    category: 'Runner',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Reaction Time', 'Precision', 'Divided Attention'],
+    instructions: 'Swipe or use arrow keys to move left/right, jump, or slide. Avoid obstacles and collect coins!'
   }
 };
 
@@ -719,4 +738,5 @@ export const knownGameSlugs = [
   'whack-em-all',
   'doodle-god-next',
   'cut-the-rope',
+  'omnomrun',
 ]; 

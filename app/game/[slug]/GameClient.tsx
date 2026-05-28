@@ -74,6 +74,7 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('whack-em-all') >= 0 || lowerSlug.indexOf('whack') >= 0) return 'whack-em-all';
     if (lowerSlug.indexOf('doodle-god-next') >= 0) return 'doodle-god-next';
     if (lowerSlug.indexOf('cut-the-rope') >= 0) return 'cut-the-rope';
+    if (lowerSlug.indexOf('omnomrun') >= 0) return 'omnomrun';
 
     return slug;
 }
@@ -114,7 +115,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'ultimate-sudoku': 'Ultimate Sudoku',
     'whack-em-all': "Whack 'em All",
     'doodle-god-next': 'Doodle God Next',
-    'cut-the-rope': 'Cut The Rope'
+    'cut-the-rope': 'Cut The Rope',
+    'omnomrun': 'Omnomrun'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

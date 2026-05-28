@@ -7,6 +7,21 @@
     <link rel="manifest" href="manifest.json">
     <style></style>
     <title>Om Nom Run</title>
+    <script src="./skillprintShim.js"></script>
+    <script src="../../SkillprintLib/html2canvas.min.js"></script>
+    <script src="./omnomrunScreenshot.js"></script>
+    <script>
+    function logEvent(params) {
+      params.messageType = 'gameEvent';
+      const paramsAsJSON = JSON.stringify(params);
+      if (globalThis.ReactNativeWebView) {
+        globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
+      } else {
+        window.parent.postMessage(paramsAsJSON, "*");
+      }
+    }
+    globalThis.logEvent = logEvent;
+    </script>
    
     <!-- ---------------- API Snippet ---------------- -->
     <script>
