@@ -30,14 +30,6 @@ html {
     justify-content: center;
 }
 
-body,
-html,
-#main-layout {
-    width: 100%;
-    height: 100%;
-
-}
-
 #edge-fill {
     position: fixed;
     inset: 0;
@@ -62,9 +54,12 @@ html,
     right: 0;
 }
 
-#main-layout {
+.main-layout {
+    position: absolute;
+    height: var(--app-vh);
     width: 100vw;
-    height: 100vh;
+    /* width: calc(var(--app-vh) * 0.75); */
+    max-width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -202,7 +197,7 @@ html,
     display: flex;
     align-items: center;
 } */
-/* ВНЕШНЯЯ РАМКА */
+/* Ð’ÐÐ•Ð¨ÐÐ¯Ð¯ Ð ÐÐœÐšÐ */
 .progress-track {
     position: relative;
     width: 100%;
@@ -213,19 +208,19 @@ html,
     overflow: hidden;
 }
 
-/* ВНУТРЕННИЙ ТРЕК */
+/* Ð’ÐÐ£Ð¢Ð Ð•ÐÐÐ˜Ð™ Ð¢Ð Ð•Ðš */
 .progress-track::before {
     content: "";
     position: absolute;
     inset: 5px;
-    /* отступ от белой рамки */
+    /* Ð¾Ñ‚ÑÑ‚ÑƒÐ¿ Ð¾Ñ‚ Ð±ÐµÐ»Ð¾Ð¹ Ñ€Ð°Ð¼ÐºÐ¸ */
     background: #333a42b7;
-    /* тёмный */
+    /* Ñ‚Ñ‘Ð¼Ð½Ñ‹Ð¹ */
     transform: skewX(-6deg);
     transform-origin: left center;
 }
 
-/* САМ ПРОГРЕСС */
+/* Ð¡ÐÐœ ÐŸÐ ÐžÐ“Ð Ð•Ð¡Ð¡ */
 #progress-bar {
     position: absolute;
     top: 5px;
@@ -233,7 +228,7 @@ html,
     height: calc(100% - 10px);
     width: 0%;
     background: #11a720;
-    /* голубой */
+    /* Ð³Ð¾Ð»ÑƒÐ±Ð¾Ð¹ */
     transform: skewX(-6deg);
     transform-origin: left center;
     transition: width 0.4s linear;
@@ -385,8 +380,8 @@ html,
     z-index: 9999;
 }
 
-/* #### Стиль для кнопок переключения билдов --- */
-/* --- Стили для кнопок переключения билдов --- */
+/* #### Ð¡Ñ‚Ð¸Ð»ÑŒ Ð´Ð»Ñ ÐºÐ½Ð¾Ð¿Ð¾Ðº Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ Ð±Ð¸Ð»Ð´Ð¾Ð² --- */
+/* --- Ð¡Ñ‚Ð¸Ð»Ð¸ Ð´Ð»Ñ ÐºÐ½Ð¾Ð¿Ð¾Ðº Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ Ð±Ð¸Ð»Ð´Ð¾Ð² --- */
 #build-switcher {
     display: flex;
     flex-direction: column;
@@ -418,11 +413,11 @@ html,
 
 
 
-/* Стиль для активной кнопки */
+/* Ð¡Ñ‚Ð¸Ð»ÑŒ Ð´Ð»Ñ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¾Ð¹ ÐºÐ½Ð¾Ð¿ÐºÐ¸ */
 .build-btn.active {
     transform: translateX(-20px);
     border-color: #e207ff;
-    /* Яркая рамка для выделения */
+    /* Ð¯Ñ€ÐºÐ°Ñ Ñ€Ð°Ð¼ÐºÐ° Ð´Ð»Ñ Ð²Ñ‹Ð´ÐµÐ»ÐµÐ½Ð¸Ñ */
     box-shadow: 0 0 10px #e207ff;
 }
 
