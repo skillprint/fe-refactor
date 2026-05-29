@@ -24,33 +24,17 @@ const takeScreenshot = async () => {
         return;
     }
 
-    const options = {
-        allowTaint: true,
-        useCORS: true,
-        x: canvasElement.offsetLeft,
-        y: canvasElement.offsetTop,
-        width: canvasElement.clientWidth,
-        height: canvasElement.clientHeight,
-        windowWidth: canvasElement.clientWidth,
-        windowHeight: canvasElement.clientHeight,
-        removeContainer: true,
-        scale: 1,
-        logging: false,
-    }
-
     try {
-        html2canvas(canvasElement, options).then(canvas => {
-            const dataUrl = canvas.toDataURL("image/jpeg");
-            console.log("[Cut The Rope Screenshot] Screenshot taken:", dataUrl, options, canvasElement);
-            if (shouldLogDataUrl()) {
-                addToLocalStorage('screenshot', dataUrl);
-            }
-            window.parent.postMessage({ type: 'screenshot', dataUrl }, "*");
-        }).catch(err => {
-            console.error("[Cut The Rope Screenshot] html2canvas rendering failed:", err);
-        });
+        // Since we patched HTMLCanvasElement to preserve the WebGL/2D drawing buffer,
+        // we can now capture it directly and synchronously.
+        const dataUrl = canvasElement.toDataURL("image/jpeg");
+        console.log("[Cut The Rope Screenshot] Screenshot taken:", dataUrl, canvasElement);
+        if (shouldLogDataUrl()) {
+            addToLocalStorage('screenshot', dataUrl);
+        }
+        window.parent.postMessage({ type: 'screenshot', dataUrl }, "*");
     } catch (e) {
-        console.error("[Cut The Rope Screenshot] Exception during html2canvas:", e);
+        console.error("[Cut The Rope Screenshot] Exception during toDataURL:", e);
     }
 }
 

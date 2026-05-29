@@ -1,3 +1,18 @@
+// Intercept Canvas WebGL context creation to force preserveDrawingBuffer: true.
+// This is required to capture screenshots of the WebGL canvas asynchronously.
+(function () {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, attributes) {
+        if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
+            attributes = attributes || {};
+            if (attributes.preserveDrawingBuffer === undefined) {
+                attributes.preserveDrawingBuffer = true;
+            }
+        }
+        return originalGetContext.call(this, type, attributes);
+    };
+})();
+
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
