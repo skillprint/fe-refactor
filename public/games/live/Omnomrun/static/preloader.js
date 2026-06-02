@@ -23,30 +23,3 @@ var simulatingInterval = setInterval(() => {
     loadingProgress += simulatedProgressRange / simulationSteps * Math.random();
     displayProgress(loadingProgress);
 }, simulationTime / simulationSteps * 1000);
-
-
-/** handling free-run mode request even before app has loaded */
-
-window.fetchPlaycanvasAppInstance = window.fetchPlaycanvasAppInstance || (() => new Promise((resolve, reject) => {
-    if (pc && pc.AppBase) {
-        resolve(pc.AppBase.getApplication());
-    } else {
-        const checkingInterval = setInterval(() => {
-            if (pc && pc.AppBase) {
-                clearInterval(checkingInterval);
-                resolve(pc.AppBase.getApplication());
-            }
-        }, 100);
-    }
-}));
-
-
-window.startGameEvent = window.startGameEvent || (async () => {
-    const app = await window.fetchPlaycanvasAppInstance();    
-
-    if(app.__hasCompleteLoading) {
-        window.gotoLevel(-1); //launch free-run mode
-    } else {
-        app._forceFreeRunMode = true; //wait until loaded, then request free-run mode
-    }
-});
