@@ -16,6 +16,7 @@ interface DynamicChartProps {
   selectedFields: string[];
   comparePeriods: number;
   compareCohort: boolean;
+  yAxisLabel?: string;
 }
 
 const THEME_COLORS = [
@@ -25,8 +26,25 @@ const THEME_COLORS = [
   'var(--destructive)',
 ];
 
-export default function DynamicChart({ data, type, selectedFields, comparePeriods, compareCohort }: DynamicChartProps) {
+export default function DynamicChart({ data, type, selectedFields, comparePeriods, compareCohort, yAxisLabel }: DynamicChartProps) {
   
+  const formatXAxisTick = (value: string, index: number) => {
+    if (data && data.length === 7) {
+      const dataPoint = data[index];
+      if (dataPoint && dataPoint.date) {
+        try {
+          const dateObj = new Date(dataPoint.date);
+          if (!isNaN(dateObj.getTime())) {
+            return dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+          }
+        } catch (e) {
+          // fallback to value
+        }
+      }
+    }
+    return value;
+  };
+
   const formatFieldLabel = (field: string) => {
     const formatted = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     
@@ -68,14 +86,16 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
         axisLine={{ stroke: 'var(--border)' }}
         tickLine={false}
         minTickGap={30}
+        tickFormatter={formatXAxisTick}
       />
       <YAxis 
         tick={{ fill: 'var(--muted-foreground)' }} 
         axisLine={false}
         tickLine={false}
         minTickGap={20}
-        width={50}
+        width={yAxisLabel ? 65 : 50}
         tickFormatter={(value) => new Intl.NumberFormat('en', { notation: "compact", compactDisplay: "short" }).format(value)}
+        label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft', fill: 'var(--muted-foreground)', style: { textAnchor: 'middle' } } : undefined}
       />
       {renderTooltip()}
       <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -85,7 +105,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
   if (type === 'Bar') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+        <BarChart data={data} margin={{ top: 20, right: 30, left: yAxisLabel ? 10 : 0, bottom: 0 }}>
           {renderAxes()}
           {selectedFields.map((field, i) => {
             const color = THEME_COLORS[i % THEME_COLORS.length];
@@ -116,7 +136,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
   if (type === 'Line') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+        <LineChart data={data} margin={{ top: 20, right: 30, left: yAxisLabel ? 10 : 0, bottom: 0 }}>
           {renderAxes()}
           {selectedFields.map((field, i) => {
             const color = THEME_COLORS[i % THEME_COLORS.length];
@@ -148,7 +168,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
   if (type === 'Area') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 20, right: 30, left: yAxisLabel ? 10 : 0, bottom: 0 }}>
           {renderAxes()}
           {selectedFields.map((field, i) => {
             const color = THEME_COLORS[i % THEME_COLORS.length];
@@ -204,7 +224,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
   if (type === 'BarLine') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 20, right: 30, left: yAxisLabel ? 10 : 0, bottom: 0 }}>
           {renderAxes()}
           {selectedFields.map((field, i) => {
             const color = THEME_COLORS[i % THEME_COLORS.length];
@@ -238,7 +258,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
   if (type === 'RangeBand') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 20, right: 30, left: yAxisLabel ? 10 : 0, bottom: 0 }}>
           {renderAxes()}
           {selectedFields.map((field, i) => {
             const color = THEME_COLORS[i % THEME_COLORS.length];
@@ -342,7 +362,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
 
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <ScatterChart margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+        <ScatterChart margin={{ top: 20, right: 30, left: yAxisLabel ? 10 : 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis 
             type="category" 
@@ -352,6 +372,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
             axisLine={{ stroke: 'var(--border)' }}
             tickLine={false}
             minTickGap={30}
+            tickFormatter={formatXAxisTick}
           />
           <YAxis 
             type="number" 

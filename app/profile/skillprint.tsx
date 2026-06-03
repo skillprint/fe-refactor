@@ -90,7 +90,7 @@ export default function Skillprint() {
   useEffect(() => {
     const end = new Date();
     const start = new Date();
-    start.setDate(start.getDate() - 7);
+    start.setDate(start.getDate() - 6);
     const data = generateSyntheticData({
       modelName: 'MoodData',
       selectedFields: ['focus'],
@@ -387,6 +387,7 @@ export default function Skillprint() {
                   selectedFields={['focus']}
                   comparePeriods={comparePeriods}
                   compareCohort={false}
+                  yAxisLabel="score"
                 />
               </div>
 
