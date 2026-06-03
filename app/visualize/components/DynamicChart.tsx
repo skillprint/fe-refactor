@@ -114,16 +114,16 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
             
             return (
               <React.Fragment key={field}>
-                <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={2} radius={[6, 6, 0, 0]} maxBarSize={22} />
+                <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={2} radius={[6, 6, 0, 0]} maxBarSize={44} />
                 {Array.from({ length: comparePeriods }).map((_, p) => {
                   const pIndex = p + 1;
                   const opacity = Math.max(0.3, 1 - (pIndex * 0.2));
                   return (
-                    <Bar key={`prev_${pIndex}`} dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} fill={prevColor} fillOpacity={opacity * 0.25} stroke={prevColor} strokeWidth={2} strokeOpacity={opacity} radius={[6, 6, 0, 0]} maxBarSize={22} />
+                    <Bar key={`prev_${pIndex}`} dataKey={`${field}_previous_${pIndex}`} name={`${formatFieldLabel(field)} (-${pIndex}W)`} fill={prevColor} fillOpacity={opacity * 0.25} stroke={prevColor} strokeWidth={2} strokeOpacity={opacity} radius={[6, 6, 0, 0]} maxBarSize={44} />
                   );
                 })}
                 {compareCohort && (
-                  <Bar dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} fill={cohortColor} fillOpacity={0.25} stroke={cohortColor} strokeWidth={2} radius={[6, 6, 0, 0]} maxBarSize={22} />
+                  <Bar dataKey={`${field}_cohort`} name={`${formatFieldLabel(field)} (Cohort)`} fill={cohortColor} fillOpacity={0.25} stroke={cohortColor} strokeWidth={2} radius={[6, 6, 0, 0]} maxBarSize={44} />
                 )}
               </React.Fragment>
             );
@@ -234,7 +234,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
             return (
               <React.Fragment key={field}>
                 {i === 0 ? (
-                  <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={2} radius={[6, 6, 0, 0]} barSize={22} />
+                  <Bar dataKey={field} name={formatFieldLabel(field)} fill={color} fillOpacity={0.25} stroke={color} strokeWidth={2} radius={[6, 6, 0, 0]} barSize={44} />
                 ) : (
                   <Line type="monotone" dataKey={field} name={formatFieldLabel(field)} stroke={color} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                 )}
@@ -272,7 +272,7 @@ export default function DynamicChart({ data, type, selectedFields, comparePeriod
                   name={`${formatFieldLabel(field)} Range`} 
                   fill={color} 
                   fillOpacity={0.5} 
-                  barSize={16}
+                  barSize={32}
                   radius={[4, 4, 4, 4]}
                 />
                 <Scatter 
