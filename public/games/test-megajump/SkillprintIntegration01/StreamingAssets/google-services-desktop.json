@@ -1,0 +1,36 @@
+{
+  "project_info": {
+    "project_number": "384696490999",
+    "project_id": "mega-jump-e77ac",
+    "storage_bucket": "mega-jump-e77ac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384696490999:ios:667bd1727443155b7becf2",
+        "android_client_info": {
+          "package_name": "com.halfbrick.megajump"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAzUijHivxwucPo0E9LZmzofp2q5ND8NY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 0
+        },
+        "appinvite_service": {
+          "status": 1
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384696490999-c4js6qqajo41lan9p3hhc7ahipvqj5jc.apps.googleusercontent.com"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}
