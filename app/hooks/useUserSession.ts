@@ -40,14 +40,19 @@ export function useUserSession() {
                 localStorage.setItem('userId', queryUserId);
                 setUserId(currentUserId);
 
-                // Remove userId from URL
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete('userId');
-                const newPath = newSearchParams.toString() ? `${pathname}?${newSearchParams.toString()}` : pathname;
-                router.replace(newPath, { scroll: false });
+                // For embed routes, do NOT remove parameters from the URL
+                if (pathname && pathname.startsWith('/profile/embed')) {
+                    // Let initialization proceed without redirecting
+                } else {
+                    // Remove userId from URL
+                    const newSearchParams = new URLSearchParams(searchParams);
+                    newSearchParams.delete('userId');
+                    const newPath = newSearchParams.toString() ? `${pathname}?${newSearchParams.toString()}` : pathname;
+                    router.replace(newPath, { scroll: false });
 
-                // Stop here to wait for re-render with clean URL
-                return;
+                    // Stop here to wait for re-render with clean URL
+                    return;
+                }
             }
 
             // 2. Check LocalStorage

@@ -129,20 +129,26 @@ export const getSkillprint = async () => {
     return await get(url, true);
 };
 
-export const getVisualizeSkillProfile = async (token?: string | null) => {
+export const getVisualizeSkillProfile = async (token?: string | null, apiKey?: string | null) => {
     const url = `${visualize_skill_profile_path}`;
     const headers: any = {};
     if (token) {
         headers["X-Auth-Token"] = `Token ${token}`;
     }
+    if (apiKey) {
+        headers["Authorization"] = `Api-Key ${apiKey}`;
+    }
     return await get(url, false, headers);
 };
 
-export const getVisualizeMoodProfile = async (token?: string | null) => {
+export const getVisualizeMoodProfile = async (token?: string | null, apiKey?: string | null) => {
     const url = `${visualize_mood_profile_path}`;
     const headers: any = {};
     if (token) {
         headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    if (apiKey) {
+        headers["Authorization"] = `Api-Key ${apiKey}`;
     }
     return await get(url, false, headers);
 };

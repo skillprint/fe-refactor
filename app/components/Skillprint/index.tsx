@@ -23,6 +23,7 @@ interface SkillprintProps {
     size?: number;
     initialState?: 'reset' | 'skills' | 'mindsets' | 'traits';
     hasMenu?: boolean;
+    useSizeDirectly?: boolean;
 }
 
 const Skillprint: React.FC<SkillprintProps> = ({
@@ -34,6 +35,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
     size = 1200,
     initialState = 'reset',
     hasMenu = false,
+    useSizeDirectly = false,
 }) => {
     const router = useRouter();
     const [viewState, setViewState] = useState<string>(initialState);
@@ -198,10 +200,10 @@ const Skillprint: React.FC<SkillprintProps> = ({
     }, [userSkills, userMoods, hasScoreBySkill, hasScoreByMood, currentPosition]);
 
     const windowWidth = window.innerWidth;
-    const overrideWidth = Math.min(windowWidth - 40, 600);
+    const overrideWidth = useSizeDirectly && size ? size : Math.min(windowWidth - 40, 600);
 
     return (
-        <div className="flex flex-col items-center justify-center md:p-4">
+        <div className={useSizeDirectly ? "flex flex-col items-center justify-center" : "flex flex-col items-center justify-center md:p-4"}>
             {/* Controls */}
             {hasMenu && <div className="flex space-x-4 mb-4 bg-muted p-1 rounded-lg relative z-10 md:p-4">
                 {['reset', 'skills', 'mindsets'].map((state) => (
@@ -221,7 +223,9 @@ const Skillprint: React.FC<SkillprintProps> = ({
             {/* Visualization Container */}
             <div
                 ref={containerRef}
-                className="relative bg-card rounded-xl flex items-center justify-center mb-8 md:p-0 w-full md:w-auto"
+                className={useSizeDirectly 
+                    ? "relative flex items-center justify-center w-full" 
+                    : "relative bg-card rounded-xl flex items-center justify-center mb-8 md:p-0 w-full md:w-auto"}
                 style={{
                     maxWidth: overrideWidth,
                     width: overrideWidth,
