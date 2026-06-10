@@ -361,8 +361,8 @@ export default function Skillprint() {
                     <button
                       onClick={() => setChartType('BarLine')}
                       className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'BarLine'
-                          ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                          : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                        : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
                       Bar & Lines
@@ -370,8 +370,8 @@ export default function Skillprint() {
                     <button
                       onClick={() => setChartType('Area')}
                       className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'Area'
-                          ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                          : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                        : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
                       Area Chart
@@ -502,7 +502,7 @@ export default function Skillprint() {
         {/* Goal Setting Section */}
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">
-            My Focus Goals
+            My Goals
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -600,8 +600,8 @@ export default function Skillprint() {
                               }
                             }}
                             className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer ${isSelected
-                                ? 'bg-primary text-white border-primary shadow-sm scale-105'
-                                : 'bg-transparent border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                              ? 'bg-primary text-white border-primary shadow-sm scale-105'
+                              : 'bg-transparent border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
                               }`}
                           >
                             {skill.name}
