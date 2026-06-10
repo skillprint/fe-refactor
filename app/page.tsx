@@ -364,6 +364,7 @@ function HomeContent() {
                     hasScoreByMood={hasScoreByMood}
                     nodeDataMap={nodeDataMap}
                     size={400}
+                    useSizeDirectly={true}
                     initialState="reset"
                     hasMenu={false}
                   />
@@ -676,10 +677,10 @@ function HomeContent() {
           </div>
         </div>
       </div>
-      <GamePreviewShareSheet 
-        slug={previewGameSlug} 
-        isOpen={!!previewGameSlug} 
-        onClose={() => setPreviewGameSlug(null)} 
+      <GamePreviewShareSheet
+        slug={previewGameSlug}
+        isOpen={!!previewGameSlug}
+        onClose={() => setPreviewGameSlug(null)}
       />
     </div>
   );
