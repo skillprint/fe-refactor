@@ -22,6 +22,7 @@ import { useVisualizeSkillProfile } from '../hooks/useVisualizeSkillProfile';
 import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
 import DynamicChart from '../visualize/components/DynamicChart';
 import { generateSyntheticData, DataPoint } from '../visualize/utils/syntheticData';
+import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
 
 
 interface Skill {
@@ -79,6 +80,20 @@ export default function Skillprint() {
   const [showBadge, setShowBadge] = useState(false);
   const [nextGameSlug, setNextGameSlug] = useState<string>('');
   const { goal, setGoal } = useGoal();
+  const {
+    goalSkills,
+    goalMoods,
+    isLoading: isGoalsLoading,
+    isSavingSkills,
+    isSavingMoods,
+    saveSkills,
+    saveMoods,
+  } = useGoalSetting();
+
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [tempSkills, setTempSkills] = useState<string[]>([]);
+  const [isEditingMoods, setIsEditingMoods] = useState(false);
+  const [tempMoods, setTempMoods] = useState<string[]>([]);
   const { logout } = useAuth();
   const { userToken, userId: sessionUserId, isWhitelisted } = useUserSession();
   const { nodeDataBySkill, hasScoreBySkill, nodeDataByMood, hasScoreByMood, nodeDataMap, skillProfile } = useSkillprintVisualizationData(processedProfile);
@@ -345,21 +360,19 @@ export default function Skillprint() {
                   <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border shadow-inner">
                     <button
                       onClick={() => setChartType('BarLine')}
-                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${
-                        chartType === 'BarLine'
+                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'BarLine'
                           ? 'bg-primary text-primary-foreground shadow-md scale-105'
                           : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                        }`}
                     >
                       Bar & Lines
                     </button>
                     <button
                       onClick={() => setChartType('Area')}
-                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${
-                        chartType === 'Area'
+                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'Area'
                           ? 'bg-primary text-primary-foreground shadow-md scale-105'
                           : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                        }`}
                     >
                       Area Chart
                     </button>
@@ -485,6 +498,311 @@ export default function Skillprint() {
             <GameSessionManager />
           </div>
         )}
+
+        {/* Goal Setting Section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
+            My Focus Goals
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Target Skills Card */}
+            <div className="bg-card rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col justify-between min-h-[220px]">
+
+              {/* Saving Overlay */}
+              {isSavingSkills && (
+                <div className="absolute inset-0 bg-background/85 backdrop-blur-[2px] flex flex-col items-center justify-center z-30 transition-all duration-300">
+                  <div className="relative w-12 h-12">
+                    <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse"></div>
+                    <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+                  </div>
+                  <p className="text-sm font-medium text-foreground mt-3 animate-pulse">Saving skills...</p>
+                </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl">🎯</span>
+                    <h3 className="text-lg font-bold text-foreground">Target Skills</h3>
+                  </div>
+                  {!isEditingSkills && !isGoalsLoading && (
+                    <button
+                      onClick={() => {
+                        setTempSkills([...goalSkills]);
+                        setIsEditingSkills(true);
+                      }}
+                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center space-x-1 border border-primary/20 px-2.5 py-1 rounded-lg hover:bg-primary/5 cursor-pointer"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      <span>Edit</span>
+                    </button>
+                  )}
+                </div>
+
+                {isGoalsLoading ? (
+                  <div className="flex items-center space-x-2 py-4">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm text-muted-foreground">Loading...</span>
+                  </div>
+                ) : !isEditingSkills ? (
+                  /* Display Mode */
+                  goalSkills.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                      <p className="text-sm text-muted-foreground mb-4 max-w-[280px]">
+                        No target skills selected yet. Select the cognitive skills you want to prioritize.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setTempSkills([]);
+                          setIsEditingSkills(true);
+                        }}
+                        className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl shadow hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+                      >
+                        + Add Target Skills
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 py-2">
+                      {goalSkills.map((slug) => {
+                        const skillItem = AVAILABLE_SKILLS.find(s => s.slug === slug);
+                        return (
+                          <span
+                            key={slug}
+                            className="bg-primary/10 border border-primary/20 text-primary text-xs font-semibold px-3 py-1.5 rounded-full"
+                          >
+                            {skillItem?.name || slug}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )
+                ) : (
+                  /* Edit Mode */
+                  <div className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Select the cognitive skills you want to target during your sessions:
+                    </p>
+                    <div className="flex flex-wrap gap-2 max-h-[160px] overflow-y-auto pr-1">
+                      {AVAILABLE_SKILLS.map((skill) => {
+                        const isSelected = tempSkills.includes(skill.slug);
+                        return (
+                          <button
+                            key={skill.slug}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setTempSkills(tempSkills.filter(s => s !== skill.slug));
+                              } else {
+                                setTempSkills([...tempSkills, skill.slug]);
+                              }
+                            }}
+                            className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer ${isSelected
+                                ? 'bg-primary text-white border-primary shadow-sm scale-105'
+                                : 'bg-transparent border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                              }`}
+                          >
+                            {skill.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Edit Mode Buttons */}
+              {isEditingSkills && !isGoalsLoading && (
+                <div className="flex items-center justify-end space-x-2 mt-6 border-t border-border/40 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingSkills(false)}
+                    className="border border-input hover:bg-secondary/50 text-foreground text-xs font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await saveSkills(tempSkills);
+                        setIsEditingSkills(false);
+                        toast.success('Target skills saved!');
+                      } catch (e) {
+                        toast.error('Failed to save target skills.');
+                      }
+                    }}
+                    className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Target Moods Card */}
+            <div className="bg-card rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col justify-between min-h-[220px]">
+
+              {/* Saving Overlay */}
+              {isSavingMoods && (
+                <div className="absolute inset-0 bg-background/85 backdrop-blur-[2px] flex flex-col items-center justify-center z-30 transition-all duration-300">
+                  <div className="relative w-12 h-12">
+                    <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse"></div>
+                    <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+                  </div>
+                  <p className="text-sm font-medium text-foreground mt-3 animate-pulse">Saving moods...</p>
+                </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl">✨</span>
+                    <h3 className="text-lg font-bold text-foreground">Target Moods</h3>
+                  </div>
+                  {!isEditingMoods && !isGoalsLoading && (
+                    <button
+                      onClick={() => {
+                        setTempMoods([...goalMoods]);
+                        setIsEditingMoods(true);
+                      }}
+                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center space-x-1 border border-primary/20 px-2.5 py-1 rounded-lg hover:bg-primary/5 cursor-pointer"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      <span>Edit</span>
+                    </button>
+                  )}
+                </div>
+
+                {isGoalsLoading ? (
+                  <div className="flex items-center space-x-2 py-4">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm text-muted-foreground">Loading...</span>
+                  </div>
+                ) : !isEditingMoods ? (
+                  /* Display Mode */
+                  goalMoods.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                      <p className="text-sm text-muted-foreground mb-4 max-w-[280px]">
+                        No target moods selected yet. Customize your play sessions based on your emotional goals.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setTempMoods([]);
+                          setIsEditingMoods(true);
+                        }}
+                        className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl shadow hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+                      >
+                        + Add Target Moods
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 py-2">
+                      {goalMoods.map((slug) => {
+                        const moodItem = AVAILABLE_MOODS.find(m => m.slug === slug);
+                        const colors: Record<string, string> = {
+                          focus: 'bg-violet-500/15 border-violet-500/30 text-violet-600 dark:text-violet-400',
+                          relax: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400',
+                          innovate: 'bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400',
+                          collaborate: 'bg-blue-500/15 border-blue-500/30 text-blue-600 dark:text-blue-400'
+                        };
+                        const colorClass = colors[slug] || 'bg-primary/10 border-primary/20 text-primary';
+
+                        return (
+                          <span
+                            key={slug}
+                            className={`border text-xs font-semibold px-3 py-1.5 rounded-full ${colorClass}`}
+                          >
+                            {moodItem?.name || slug}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )
+                ) : (
+                  /* Edit Mode */
+                  <div className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Select the mental states you want to cultivate:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {AVAILABLE_MOODS.map((mood) => {
+                        const isSelected = tempMoods.includes(mood.slug);
+
+                        const selectedStyles: Record<string, string> = {
+                          focus: 'bg-violet-600 border-violet-600 text-white shadow-sm scale-105',
+                          relax: 'bg-emerald-600 border-emerald-600 text-white shadow-sm scale-105',
+                          innovate: 'bg-amber-500 border-amber-500 text-white shadow-sm scale-105',
+                          collaborate: 'bg-blue-600 border-blue-600 text-white shadow-sm scale-105'
+                        };
+                        const unselectedStyles: Record<string, string> = {
+                          focus: 'border-violet-500/20 text-muted-foreground hover:bg-violet-500/5 hover:text-violet-600 dark:hover:text-violet-400',
+                          relax: 'border-emerald-500/20 text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400',
+                          innovate: 'border-amber-500/20 text-muted-foreground hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400',
+                          collaborate: 'border-blue-500/20 text-muted-foreground hover:bg-blue-500/5 hover:text-blue-600 dark:hover:text-blue-400'
+                        };
+
+                        const activeStyle = selectedStyles[mood.slug] || 'bg-primary text-white border-primary';
+                        const inactiveStyle = unselectedStyles[mood.slug] || 'bg-transparent border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground';
+
+                        return (
+                          <button
+                            key={mood.slug}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setTempMoods(tempMoods.filter(m => m !== mood.slug));
+                              } else {
+                                setTempMoods([...tempMoods, mood.slug]);
+                              }
+                            }}
+                            className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer ${isSelected ? activeStyle : inactiveStyle
+                              }`}
+                          >
+                            {mood.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Edit Mode Buttons */}
+              {isEditingMoods && !isGoalsLoading && (
+                <div className="flex items-center justify-end space-x-2 mt-6 border-t border-border/40 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingMoods(false)}
+                    className="border border-input hover:bg-secondary/50 text-foreground text-xs font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await saveMoods(tempMoods);
+                        setIsEditingMoods(false);
+                        toast.success('Target moods saved!');
+                      } catch (e) {
+                        toast.error('Failed to save target moods.');
+                      }
+                    }}
+                    className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
 
         {/* Settings Section */}
         <div className="mt-8">
