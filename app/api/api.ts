@@ -17,6 +17,7 @@ const catalog_path = `games/api/catalog/`;
 const skillprint_path = `games/api/skillprint/`;
 const visualize_skill_profile_path = `scoring/api/skill-progression/`;
 const visualize_mood_profile_path = `scoring/api/mood-visualization/`;
+const game_metrics_path = `scoring/api/game-metrics/`;
 const add_user_path = `partners/api/users/add/`;
 const add_user_token = `partners/api/users/auth/token/`;
 
@@ -143,6 +144,19 @@ export const getVisualizeSkillProfile = async (token?: string | null, apiKey?: s
 
 export const getVisualizeMoodProfile = async (token?: string | null, apiKey?: string | null) => {
     const url = `${visualize_mood_profile_path}`;
+    const headers: any = {};
+    if (token) {
+        headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    if (apiKey) {
+        headers["Authorization"] = `Api-Key ${apiKey}`;
+    }
+    return await get(url, false, headers);
+};
+
+export const getGameMetrics = async (games: string[], token?: string | null, apiKey?: string | null) => {
+    const gamesQuery = games.length > 0 ? `?games=${games.join(',')}` : '';
+    const url = `${game_metrics_path}${gamesQuery}`;
     const headers: any = {};
     if (token) {
         headers["X-Auth-Token"] = `Token ${token}`;

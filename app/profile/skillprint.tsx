@@ -23,6 +23,17 @@ import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizat
 import DynamicChart from '../visualize/components/DynamicChart';
 import { generateSyntheticData, DataPoint } from '../visualize/utils/syntheticData';
 import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
+import { useGameMetrics } from '../hooks/useGameMetrics';
+import { useGamesBySkill } from '../hooks/useGamesBySkill';
+import {
+  BarChart as RechartsBarChart,
+  Bar as RechartsBar,
+  XAxis as RechartsXAxis,
+  YAxis as RechartsYAxis,
+  CartesianGrid as RechartsCartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer as RechartsResponsiveContainer
+} from 'recharts';
 
 
 interface Skill {
@@ -97,6 +108,87 @@ export default function Skillprint() {
   const { logout } = useAuth();
   const { userToken, userId: sessionUserId, isWhitelisted } = useUserSession();
   const { nodeDataBySkill, hasScoreBySkill, nodeDataByMood, hasScoreByMood, nodeDataMap, skillProfile } = useSkillprintVisualizationData(processedProfile);
+
+  // Game-specific performance state
+  const { gamesByMood, gamesBySkill } = useGamesBySkill();
+
+  // Get unique games from catalog
+  const uniqueGames = React.useMemo(() => {
+    const seen = new Set();
+    const result = [];
+    for (const g of [...gamesByMood, ...gamesBySkill]) {
+      if (g && g.slug && !seen.has(g.slug)) {
+        seen.add(g.slug);
+        result.push(g);
+      }
+    }
+    return result;
+  }, [gamesByMood, gamesBySkill]);
+
+  const [selectedGames, setSelectedGames] = useState<string[]>([]);
+
+  // Set default selection when games load
+  useEffect(() => {
+    if (uniqueGames.length > 0 && selectedGames.length === 0) {
+      setSelectedGames([uniqueGames[0].slug]);
+    }
+  }, [uniqueGames, selectedGames]);
+
+  // Fetch metrics for selected games
+  const { data: metricsData, isLoading: isMetricsLoading } = useGameMetrics(selectedGames);
+
+  const parsedChartData = React.useMemo(() => {
+    if (!metricsData) return [];
+    const chartPoints: { name: string; score: number }[] = [];
+
+    // Add Flow Score
+    if (metricsData.flow && typeof metricsData.flow.avgScore === 'number') {
+      chartPoints.push({
+        name: 'Flow',
+        score: Math.round(metricsData.flow.avgScore * 100)
+      });
+    }
+
+    // Add Moods
+    if (metricsData.moods) {
+      Object.entries(metricsData.moods).forEach(([name, details]: [string, any]) => {
+        const score = details.avg_score || details.avgScore || 0;
+        chartPoints.push({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          score: Math.round(score * 100)
+        });
+      });
+    }
+
+    // Add Skills
+    if (metricsData.skills) {
+      Object.entries(metricsData.skills).forEach(([name, details]: [string, any]) => {
+        const score = details.avg_score || details.avgScore || 0;
+        chartPoints.push({
+          name: name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' '),
+          score: Math.round(score * 100)
+        });
+      });
+    }
+
+    return chartPoints;
+  }, [metricsData]);
+
+  // Helper to format play time seconds to duration string (e.g. 17m 36s)
+  const formatSecondsToDuration = (seconds: number) => {
+    if (!seconds || seconds <= 0) return '0s';
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hrs > 0) {
+      return `${hrs}h ${mins}m`;
+    }
+    if (mins > 0) {
+      return `${mins}m ${secs}s`;
+    }
+    return `${secs}s`;
+  };
 
   const [comparePeriods, setComparePeriods] = useState<number>(1);
   const [chartType, setChartType] = useState<'BarLine' | 'Area'>('BarLine');
@@ -402,6 +494,150 @@ export default function Skillprint() {
                   compareCohort={false}
                   yAxisLabel="score"
                 />
+              </div>
+
+              <div className="mt-12 mb-12 border-t border-border pt-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground">
+                      Game-Specific Performance Insights
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Filter your cognitive and mood metrics by selecting one or more games
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGames(uniqueGames.map(g => g.slug))}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-secondary/80 hover:bg-secondary text-foreground transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGames([])}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-secondary/80 hover:bg-secondary text-foreground transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {/* Game Selection Chips (Multi-Select) */}
+                {uniqueGames.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Loading games...</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {uniqueGames.map((game) => {
+                      const isSelected = selectedGames.includes(game.slug);
+                      return (
+                        <button
+                          key={game.slug}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedGames(selectedGames.filter(slug => slug !== game.slug));
+                            } else {
+                              setSelectedGames([...selectedGames, game.slug]);
+                            }
+                          }}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? 'bg-primary text-primary-foreground border-primary shadow-sm scale-105'
+                              : 'bg-card border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                          }`}
+                        >
+                          <span className="text-sm">🎮</span>
+                          <span>{game.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Loading / Error / Data Display */}
+                {isMetricsLoading ? (
+                  <div className="bg-card rounded-2xl border border-border p-8 text-center shadow-sm flex items-center justify-center min-h-[300px]">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-sm text-muted-foreground animate-pulse">Loading metrics...</p>
+                    </div>
+                  </div>
+                ) : !metricsData ? (
+                  <div className="bg-card rounded-2xl border border-border p-8 text-center shadow-sm min-h-[300px] flex items-center justify-center">
+                    <p className="text-sm text-muted-foreground">Select one or more games above to view metrics.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Stats Cards Column */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-1 gap-4">
+                      {/* Card: Session Count */}
+                      <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div className="text-3xl font-extrabold text-primary">
+                          {metricsData.sessionCount || 0}
+                        </div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mt-1">
+                          Sessions Played
+                        </div>
+                      </div>
+                      {/* Card: Play Time */}
+                      <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div className="text-3xl font-extrabold text-primary">
+                          {formatSecondsToDuration(metricsData.totalPlayTimeSeconds || 0)}
+                        </div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mt-1">
+                          Total Play Time
+                        </div>
+                      </div>
+                      {/* Card: Avg Flow */}
+                      <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div className="text-3xl font-extrabold text-primary">
+                          {metricsData.flow && typeof metricsData.flow.avgScore === 'number'
+                            ? `${Math.round(metricsData.flow.avgScore * 100)}%`
+                            : '—'
+                          }
+                        </div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mt-1">
+                          Average Flow Score
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Chart Column (occupies 2/3 space on medium screens) */}
+                    <div className="md:col-span-2 bg-card rounded-2xl border border-border p-6 shadow-sm h-[320px] flex flex-col justify-between">
+                      {parsedChartData.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center">
+                          <span className="text-4xl mb-2">📊</span>
+                          <p className="text-sm text-muted-foreground max-w-xs">
+                            No detailed cognitive metrics found for these game sessions. Play more to build your profile!
+                          </p>
+                        </div>
+                      ) : (
+                        <RechartsResponsiveContainer width="100%" height="100%">
+                          <RechartsBarChart
+                            data={parsedChartData}
+                            layout="vertical"
+                            margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
+                          >
+                            <RechartsCartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                            <RechartsXAxis type="number" domain={[0, 100]} tick={{ fill: 'var(--muted-foreground)' }} axisLine={{ stroke: 'var(--border)' }} />
+                            <RechartsYAxis dataKey="name" type="category" tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} axisLine={{ stroke: 'var(--border)' }} width={80} />
+                            <RechartsTooltip
+                              contentStyle={{
+                                backgroundColor: 'var(--card)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--foreground)',
+                                borderRadius: '0.75rem',
+                              }}
+                            />
+                            <RechartsBar dataKey="score" fill="var(--primary)" fillOpacity={0.85} radius={[0, 4, 4, 0]} maxBarSize={20} />
+                          </RechartsBarChart>
+                        </RechartsResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <h2 className="text-xl font-semibold text-foreground mb-4">
