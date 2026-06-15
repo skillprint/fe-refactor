@@ -20,8 +20,7 @@ import { useUserSession } from '../hooks/useUserSession';
 import { useVisualizeMoodProfile } from '../hooks/useVisualizeMoodProfile';
 import { useVisualizeSkillProfile } from '../hooks/useVisualizeSkillProfile';
 import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
-import DynamicChart from '../visualize/components/DynamicChart';
-import { generateSyntheticData, DataPoint } from '../visualize/utils/syntheticData';
+import ProfilePerformanceTrends from '../components/ProfilePerformanceTrends';
 import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
 import { useGameMetrics } from '../hooks/useGameMetrics';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
@@ -190,25 +189,7 @@ export default function Skillprint() {
     return `${secs}s`;
   };
 
-  const [comparePeriods, setComparePeriods] = useState<number>(1);
-  const [chartType, setChartType] = useState<'BarLine' | 'Area'>('BarLine');
-  const [chartData, setChartData] = useState<DataPoint[]>([]);
 
-  useEffect(() => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    const data = generateSyntheticData({
-      modelName: 'MoodData',
-      selectedFields: ['focus'],
-      chartType: chartType,
-      startDate: start,
-      endDate: end,
-      comparePeriods: comparePeriods,
-      compareCohort: false
-    });
-    setChartData(data);
-  }, [comparePeriods, chartType]);
 
   const isDebug = queryParamDebug();
 
@@ -443,58 +424,8 @@ export default function Skillprint() {
             )}
 
             <div className="py-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <h2 className="text-xl font-semibold text-foreground">
-                  Performance Trends
-                </h2>
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Segmented Chart Type Toggle */}
-                  <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border shadow-inner">
-                    <button
-                      onClick={() => setChartType('BarLine')}
-                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'BarLine'
-                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                        : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                    >
-                      Bar & Lines
-                    </button>
-                    <button
-                      onClick={() => setChartType('Area')}
-                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'Area'
-                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                        : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                    >
-                      Area Chart
-                    </button>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm text-muted-foreground">Compare:</label>
-                    <select
-                      value={comparePeriods}
-                      onChange={(e) => setComparePeriods(parseInt(e.target.value, 10))}
-                      className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value={0}>None</option>
-                      <option value={1}>Last Week</option>
-                      <option value={2}>Last 2 Weeks</option>
-                      <option value={3}>Last 3 Weeks</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-xl border border-border p-4 shadow-sm h-[350px] mb-8">
-                <DynamicChart
-                  data={chartData}
-                  type={chartType}
-                  selectedFields={['focus']}
-                  comparePeriods={comparePeriods}
-                  compareCohort={false}
-                  yAxisLabel="score"
-                />
-              </div>
+              <ProfilePerformanceTrends />
+            </div>
 
               <div className="mt-12 mb-12 border-t border-border pt-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -689,7 +620,6 @@ export default function Skillprint() {
                   </div>
                 ))}
               </div>
-            </div>
           </>
         )}
 
