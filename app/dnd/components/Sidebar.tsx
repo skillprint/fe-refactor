@@ -29,12 +29,29 @@ function DraggableSidebarItem({ id, name, icon }: { id: string; name: string; ic
   );
 }
 
-export function Sidebar() {
+export interface SidebarProps {
+  onOpenCreatorModal: () => void;
+  savedLayouts: any[];
+  onLoadLayout: (blocks: any[]) => void;
+  onDeleteLayout: (id: string) => void;
+  isLoadingLayouts: boolean;
+}
+
+export function Sidebar({ onOpenCreatorModal, savedLayouts, onLoadLayout, onDeleteLayout, isLoadingLayouts }: SidebarProps) {
   return (
     <div className="w-80 bg-background border-r border-border h-screen flex flex-col flex-shrink-0 z-20 shadow-xl">
-      <div className="p-6 border-b border-border bg-card/50">
-        <h1 className="text-2xl font-bold text-foreground">Page Builder</h1>
-        <p className="text-sm text-muted-foreground mt-1">Drag modules to compose your page</p>
+      <div className="p-6 border-b border-border bg-card/50 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Page Builder</h1>
+          <p className="text-sm text-muted-foreground mt-1">Drag modules to compose</p>
+        </div>
+        <button
+          onClick={onOpenCreatorModal}
+          className="p-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-lg transition-all flex items-center justify-center cursor-pointer active:scale-95"
+          title="Create layout with AI Chatbot"
+        >
+          <span className="text-lg leading-none">＋</span>
+        </button>
       </div>
       
       <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-3">
@@ -45,6 +62,43 @@ export function Sidebar() {
         {Object.entries(MODULE_REGISTRY).map(([id, module]) => (
           <DraggableSidebarItem key={id} id={id} name={module.name} icon={module.icon} />
         ))}
+
+        {/* Saved Custom Layouts Section */}
+        <div className="mt-6 border-t border-border pt-6 flex flex-col gap-3">
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1 px-1">
+            Saved Layouts
+          </h3>
+          {isLoadingLayouts ? (
+            <div className="text-xs text-muted-foreground italic px-1">Loading saved layouts...</div>
+          ) : savedLayouts.length === 0 ? (
+            <div className="text-xs text-muted-foreground italic px-1">No custom layouts saved yet.</div>
+          ) : (
+            <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
+              {savedLayouts.map((layout) => (
+                <div key={layout.id} className="flex items-center justify-between p-3 bg-card border border-border rounded-xl group hover:border-primary transition-all">
+                  <button
+                    onClick={() => onLoadLayout(layout.blocks)}
+                    className="text-left flex-1 text-xs font-semibold text-foreground hover:text-primary transition-colors truncate mr-2 cursor-pointer"
+                    title={`Load "${layout.name}"`}
+                  >
+                    {layout.name}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to delete "${layout.name}"?`)) {
+                        onDeleteLayout(layout.id);
+                      }
+                    }}
+                    className="text-xs text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                    title="Delete layout"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="p-6 border-t border-border bg-card/50">
@@ -63,3 +117,4 @@ export function Sidebar() {
     </div>
   );
 }
+

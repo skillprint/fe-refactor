@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   DndContext, 
   closestCenter,
@@ -20,11 +20,63 @@ import { BuilderProvider, useBuilder } from './components/BuilderContext';
 import { Sidebar } from './components/Sidebar';
 import { Canvas } from './components/Canvas';
 import { MODULE_REGISTRY } from './modules/ModuleRegistry';
+import { useUserSession } from '../hooks/useUserSession';
+import LayoutCreatorModal from './components/LayoutCreatorModal';
 
 function BuilderRoot() {
   const { blocks, setBlocks, addBlock } = useBuilder();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeSidebarType, setActiveSidebarType] = useState<string | null>(null);
+  
+  const { userId } = useUserSession();
+  const [isCreatorOpen, setIsCreatorOpen] = useState(false);
+  const [savedLayouts, setSavedLayouts] = useState<any[]>([]);
+  const [isLoadingLayouts, setIsLoadingLayouts] = useState(false);
+
+  const fetchLayouts = async () => {
+    if (!userId) return;
+    setIsLoadingLayouts(true);
+    try {
+      const res = await fetch(`/api/custom-layouts?userId=${userId}`);
+      const data = await res.json();
+      if (data.success && data.layouts) {
+        setSavedLayouts(data.layouts);
+      }
+    } catch (err) {
+      console.error('Failed to load saved layouts', err);
+    } finally {
+      setIsLoadingLayouts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLayouts();
+  }, [userId]);
+
+  const handleLoadLayout = (layoutBlocks: any[]) => {
+    setBlocks(layoutBlocks);
+  };
+
+  const handleDeleteLayout = async (id: string) => {
+    try {
+      const res = await fetch(`/api/custom-layouts?id=${id}&userId=${userId}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSavedLayouts(prev => prev.filter(l => l.id !== id));
+      } else {
+        alert(data.error || 'Failed to delete layout');
+      }
+    } catch (err) {
+      console.error('Error deleting layout', err);
+    }
+  };
+
+  const handleSaveSuccess = (newLayout: any) => {
+    setSavedLayouts(prev => [newLayout, ...prev]);
+    setBlocks(newLayout.blocks);
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -102,7 +154,13 @@ function BuilderRoot() {
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-screen w-full bg-background overflow-hidden font-sans">
-        <Sidebar />
+        <Sidebar 
+          onOpenCreatorModal={() => setIsCreatorOpen(true)}
+          savedLayouts={savedLayouts}
+          onLoadLayout={handleLoadLayout}
+          onDeleteLayout={handleDeleteLayout}
+          isLoadingLayouts={isLoadingLayouts}
+        />
         <Canvas />
       </div>
 
@@ -120,6 +178,13 @@ function BuilderRoot() {
           </div>
         ) : null}
       </DragOverlay>
+
+      <LayoutCreatorModal
+        isOpen={isCreatorOpen}
+        onClose={() => setIsCreatorOpen(false)}
+        onSaveSuccess={handleSaveSuccess}
+        userId={userId}
+      />
     </DndContext>
   );
 }
@@ -131,3 +196,4 @@ export default function DnDPage() {
     </BuilderProvider>
   );
 }
+

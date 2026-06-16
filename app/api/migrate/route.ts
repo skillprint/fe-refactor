@@ -20,6 +20,8 @@ import * as addDeletedAtToGames from '@/migrations/15-add-deleted-at-to-games';
 import * as createGameVariants from '@/migrations/16-create-game-variants';
 import * as createQuickJumpers from '@/migrations/17-create-quick-jumpers';
 import * as addRoleToUsers from '@/migrations/18-add-role-to-users';
+import * as createCustomLayouts from '@/migrations/19-create-custom-layouts';
+
 
 export async function GET() {
     try {
@@ -119,6 +121,11 @@ export async function GET() {
                     name: '18-add-role-to-users',
                     up: async () => addRoleToUsers.up({ context: sequelize, name: '18-add-role-to-users' }),
                     down: async () => addRoleToUsers.down({ context: sequelize, name: '18-add-role-to-users' }),
+                },
+                {
+                    name: '19-create-custom-layouts',
+                    up: async () => createCustomLayouts.up({ context: sequelize, name: '19-create-custom-layouts' }),
+                    down: async () => createCustomLayouts.down({ context: sequelize, name: '19-create-custom-layouts' }),
                 }
             ],
             context: sequelize,
