@@ -8,6 +8,18 @@ export interface Block {
   props?: any;
 }
 
+const DEFAULT_THEME = {
+  primaryColor: '#543DEB',
+  secondaryColor: '#05DF91',
+  backgroundColor: '#f5f5f7',
+  foregroundColor: '#1d1d1f',
+  cardColor: '#ffffff',
+  cardForegroundColor: '#1d1d1f',
+  borderColor: '#d2d2d7',
+  borderRadius: '1rem',
+  fontFamily: 'Outfit'
+};
+
 interface BuilderContextType {
   blocks: Block[];
   setBlocks: React.Dispatch<React.SetStateAction<Block[]>>;
@@ -16,6 +28,8 @@ interface BuilderContextType {
   addBlock: (type: string, index?: number) => void;
   removeBlock: (id: string) => void;
   updateBlockProps: (id: string, props: any) => void;
+  theme: any;
+  setTheme: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const BuilderContext = createContext<BuilderContextType | undefined>(undefined);
@@ -23,17 +37,26 @@ const BuilderContext = createContext<BuilderContextType | undefined>(undefined);
 export const BuilderProvider = ({ children }: { children: ReactNode }) => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [theme, setTheme] = useState<any>(DEFAULT_THEME);
   const [isClient, setIsClient] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
     setIsClient(true);
-    const saved = localStorage.getItem('skillprint-dnd-blocks');
-    if (saved) {
+    const savedBlocks = localStorage.getItem('skillprint-dnd-blocks');
+    if (savedBlocks) {
       try {
-        setBlocks(JSON.parse(saved));
+        setBlocks(JSON.parse(savedBlocks));
       } catch (e) {
         console.error('Failed to parse saved blocks', e);
+      }
+    }
+    const savedTheme = localStorage.getItem('skillprint-dnd-theme');
+    if (savedTheme) {
+      try {
+        setTheme(JSON.parse(savedTheme));
+      } catch (e) {
+        console.error('Failed to parse saved theme', e);
       }
     }
   }, []);
@@ -44,6 +67,12 @@ export const BuilderProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('skillprint-dnd-blocks', JSON.stringify(blocks));
     }
   }, [blocks, isClient]);
+
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('skillprint-dnd-theme', JSON.stringify(theme));
+    }
+  }, [theme, isClient]);
 
   const addBlock = (type: string, index?: number) => {
     const newBlock: Block = {
@@ -74,7 +103,7 @@ export const BuilderProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <BuilderContext.Provider value={{
-      blocks, setBlocks, activeId, setActiveId, addBlock, removeBlock, updateBlockProps
+      blocks, setBlocks, activeId, setActiveId, addBlock, removeBlock, updateBlockProps, theme, setTheme
     }}>
       {children}
     </BuilderContext.Provider>

@@ -32,7 +32,7 @@ function DraggableSidebarItem({ id, name, icon }: { id: string; name: string; ic
 export interface SidebarProps {
   onOpenCreatorModal: () => void;
   savedLayouts: any[];
-  onLoadLayout: (blocks: any[]) => void;
+  onLoadLayout: (blocks: any[], theme?: any) => void;
   onDeleteLayout: (id: string) => void;
   isLoadingLayouts: boolean;
 }
@@ -77,7 +77,7 @@ export function Sidebar({ onOpenCreatorModal, savedLayouts, onLoadLayout, onDele
               {savedLayouts.map((layout) => (
                 <div key={layout.id} className="flex items-center justify-between p-3 bg-card border border-border rounded-xl group hover:border-primary transition-all">
                   <button
-                    onClick={() => onLoadLayout(layout.blocks)}
+                    onClick={() => onLoadLayout(layout.blocks, layout.theme)}
                     className="text-left flex-1 text-xs font-semibold text-foreground hover:text-primary transition-colors truncate mr-2 cursor-pointer"
                     title={`Load "${layout.name}"`}
                   >

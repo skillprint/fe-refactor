@@ -7,6 +7,7 @@ export class CustomLayout extends Model {
     declare user_id: string | null;
     declare name: string;
     declare blocks: any;
+    declare theme: any;
     declare created_at: Date;
 }
 
@@ -35,6 +36,10 @@ CustomLayout.init(
             type: DataTypes.JSON,
             allowNull: false,
             defaultValue: [],
+        },
+        theme: {
+            type: DataTypes.JSON,
+            allowNull: true,
         },
         created_at: {
             type: DataTypes.DATE,

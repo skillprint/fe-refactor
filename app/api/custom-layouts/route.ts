@@ -49,6 +49,7 @@ export async function GET(req: Request) {
             id: l.id,
             name: l.name,
             blocks: l.blocks,
+            theme: l.theme,
             createdAt: l.created_at
         }));
 
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { name, blocks } = body;
+        const { name, blocks, theme } = body;
 
         if (!name || !blocks) {
             return NextResponse.json(
@@ -94,13 +95,15 @@ export async function POST(req: Request) {
         const layout = await CustomLayout.create({
             user_id: userId === 'anonymous' ? null : userId,
             name,
-            blocks
+            blocks,
+            theme
         });
 
         const clientLayout = {
             id: layout.id,
             name: layout.name,
             blocks: layout.blocks,
+            theme: layout.theme,
             createdAt: layout.created_at
         };
 

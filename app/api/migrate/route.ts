@@ -21,6 +21,7 @@ import * as createGameVariants from '@/migrations/16-create-game-variants';
 import * as createQuickJumpers from '@/migrations/17-create-quick-jumpers';
 import * as addRoleToUsers from '@/migrations/18-add-role-to-users';
 import * as createCustomLayouts from '@/migrations/19-create-custom-layouts';
+import * as addThemeToCustomLayouts from '@/migrations/20-add-theme-to-custom-layouts';
 
 
 export async function GET() {
@@ -126,6 +127,11 @@ export async function GET() {
                     name: '19-create-custom-layouts',
                     up: async () => createCustomLayouts.up({ context: sequelize, name: '19-create-custom-layouts' }),
                     down: async () => createCustomLayouts.down({ context: sequelize, name: '19-create-custom-layouts' }),
+                },
+                {
+                    name: '20-add-theme-to-custom-layouts',
+                    up: async () => addThemeToCustomLayouts.up({ context: sequelize, name: '20-add-theme-to-custom-layouts' }),
+                    down: async () => addThemeToCustomLayouts.down({ context: sequelize, name: '20-add-theme-to-custom-layouts' }),
                 }
             ],
             context: sequelize,

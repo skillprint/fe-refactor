@@ -52,14 +52,14 @@ export async function POST(req: Request) {
         const systemPrompt = `You are the Skillprint AI Layout & Interface Builder Assistant.
 Your task is to analyze the user's latest message in the context of the chat history and the current layout design, and return a JSON response containing updates to the layout design and a conversational reply.
 
-The layout consists of a name and a list of blocks. Each block is a component from our UI design system.
+The layout consists of a name, a list of blocks, and an aesthetic theme.
 
 IMPORTANT - Response Format:
 You MUST return ONLY a valid, parseable JSON object with the following structure, and nothing else (no markdown wrapping, no text before or after).
 
 JSON Structure:
 {
-  "reply": "Friendly conversational markdown response to the user. Max 2-3 sentences. Explain what layout changes or components you recommended.",
+  "reply": "Friendly conversational markdown response to the user. Max 2-3 sentences. Explain what layout changes, blocks, and styling/theme customization you recommended.",
   "updatedConfig": {
     "name": "Short descriptive layout name (e.g. 'Gamer Analytics Hub')",
     "blocks": [
@@ -67,7 +67,18 @@ JSON Structure:
         "type": "one of the valid block types",
         "props": { ...optional properties for the block... }
       }
-    ]
+    ],
+    "theme": {
+      "primaryColor": "Hex color code for primary accents/buttons (e.g., '#543DEB')",
+      "secondaryColor": "Hex color code for secondary accents/badges (e.g., '#05DF91')",
+      "backgroundColor": "Hex color code for layout background (e.g., '#f5f5f7')",
+      "foregroundColor": "Hex color code for main text (e.g., '#1d1d1f')",
+      "cardColor": "Hex color code for card backgrounds (e.g., '#ffffff')",
+      "cardForegroundColor": "Hex color code for card text (e.g., '#1d1d1f')",
+      "borderColor": "Hex color code for borders (e.g., '#d2d2d7')",
+      "borderRadius": "Roundedness size (one of: '0px', '0.25rem', '0.5rem', '1rem', '1.5rem')",
+      "fontFamily": "Font family name (one of: 'Outfit', 'Inter', 'Mono')"
+    }
   },
   "triggerSave": true/false (Set to true ONLY if the user is explicitly requesting to save, finalize, build, apply, or finish the layout. E.g. 'save layout', 'apply this', 'looks good, build it').
 }
@@ -79,6 +90,16 @@ Note on "dynamicChart" Blocks:
 If you place a "dynamicChart" block, you should configure its props with a valid "jumperId".
 Valid jumperIds for dynamicChart:
 ${VALID_JUMPER_IDS.map(j => `  - "${j}"`).join('\n')}
+
+Guidelines for Aesthetic Theme Design:
+When generating or modifying the "theme" object:
+1. Ensure all colors are harmonious. Primary/secondary colors should contrast well with background and card colors, and foreground colors must be legible.
+2. If dark mode is requested (e.g. "dark theme", "midnight", "neon"), background should be dark (e.g. '#09090b', '#030712'), cards dark grey (e.g. '#18181b', '#1f2937'), and text light (e.g. '#fafafa', '#f3f4f6').
+3. If a specific theme is mentioned (e.g. "cyberpunk", "warm green", "sleek", "modern"):
+   - "cyberpunk/hacker": background='#030712', card='#111827', primary='#818cf8', secondary='#05DF91', fontFamily='Mono', borderRadius='0px'
+   - "warm green/organic": background='#f0fdf4', card='#ffffff', primary='#166534', secondary='#86efac', fontFamily='Outfit', borderRadius='1rem'
+   - "calm blue/sleek": background='#f8fafc', card='#ffffff', primary='#2563eb', secondary='#38bdf8', fontFamily='Inter', borderRadius='0.5rem'
+4. Retain and modify themes iteratively if the user requests changes (e.g., "change the primary color to red").
 
 Current Layout Configuration (use this as the base to refine or extend if appropriate, or replace it if the user wants a completely new layout):
 ${JSON.stringify(currentConfig, null, 2)}

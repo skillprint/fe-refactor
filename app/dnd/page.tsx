@@ -24,7 +24,7 @@ import { useUserSession } from '../hooks/useUserSession';
 import LayoutCreatorModal from './components/LayoutCreatorModal';
 
 function BuilderRoot() {
-  const { blocks, setBlocks, addBlock } = useBuilder();
+  const { blocks, setBlocks, addBlock, theme, setTheme } = useBuilder();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeSidebarType, setActiveSidebarType] = useState<string | null>(null);
   
@@ -53,8 +53,11 @@ function BuilderRoot() {
     fetchLayouts();
   }, [userId]);
 
-  const handleLoadLayout = (layoutBlocks: any[]) => {
+  const handleLoadLayout = (layoutBlocks: any[], layoutTheme?: any) => {
     setBlocks(layoutBlocks);
+    if (layoutTheme) {
+      setTheme(layoutTheme);
+    }
   };
 
   const handleDeleteLayout = async (id: string) => {
@@ -76,6 +79,9 @@ function BuilderRoot() {
   const handleSaveSuccess = (newLayout: any) => {
     setSavedLayouts(prev => [newLayout, ...prev]);
     setBlocks(newLayout.blocks);
+    if (newLayout.theme) {
+      setTheme(newLayout.theme);
+    }
   };
 
   const sensors = useSensors(
@@ -184,6 +190,7 @@ function BuilderRoot() {
         onClose={() => setIsCreatorOpen(false)}
         onSaveSuccess={handleSaveSuccess}
         userId={userId}
+        currentTheme={theme}
       />
     </DndContext>
   );
