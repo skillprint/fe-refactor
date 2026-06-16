@@ -54,7 +54,6 @@
   <g transform="translate(80, 50)">
     <rect x="-4" y="-12" width="1520" height="4" fill="url(#headerGrad)"/>
     <text x="0" y="24" font-size="28" font-weight="900" fill="#FFFFFF" letter-spacing="1">PERFORMANCE REPORT: LIGHTHOUSE &amp; CORE WEB VITALS</text>
-    <text x="1275" y="22" font-size="12" font-weight="bold" fill="#94A3B8" letter-spacing="2">SLIDE 1 OF 2</text>
   </g>
 
   <!-- Swimlanes / Columns Backdrops -->
@@ -211,12 +210,12 @@
     <text x="24" y="52" font-size="11" fill="#64748B">Speed Index (SI) and Time to Interactive (TTI) comparison</text>
     
     <!-- Original vs Refactored Values -->
-    <text x="24" y="85" font-size="12" fill="#94A3B8">SI Original: <tspan fill="#EF4444" font-weight="bold">65.9 s</tspan> → Refactored: <tspan fill="#10B981" font-weight="bold">4.8 s</tspan></text>
-    <text x="24" y="108" font-size="12" fill="#94A3B8">TTI Original: <tspan fill="#EF4444" font-weight="bold">104.1 s</tspan> → Refactored: <tspan fill="#10B981" font-weight="bold">9.8 s</tspan></text>
+    <text x="24" y="85" font-size="12" fill="#94A3B8">SI Original: <tspan fill="#EF4444" font-weight="bold">6.4 s</tspan> → Refactored: <tspan fill="#10B981" font-weight="bold">4.5 s</tspan></text>
+    <text x="24" y="108" font-size="12" fill="#94A3B8">TTI Original: <tspan fill="#EF4444" font-weight="bold">4.5 s</tspan> → Refactored: <tspan fill="#10B981" font-weight="bold">1.7 s</tspan></text>
 
     <!-- Highlight Indicator -->
     <rect x="440" y="45" width="176" height="40" rx="8" fill="#10B981" fill-opacity="0.15"/>
-    <text x="528" y="70" font-size="14" font-weight="900" fill="#10B981" text-anchor="middle">~13.7x FASTER</text>
+    <text x="528" y="70" font-size="14" font-weight="900" fill="#10B981" text-anchor="middle">~3x FASTER</text>
   </g>
 
 </svg>
