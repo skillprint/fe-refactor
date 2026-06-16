@@ -20,6 +20,8 @@ interface ControlPanelProps {
   setCompareCohort: (val: boolean) => void;
   onGenerate: (overrides?: any) => void;
   isGenerating: boolean;
+  customJumpers?: any[];
+  onOpenCreator?: () => void;
 }
 
 const MODELS = Object.keys(MODEL_FIELDS);
@@ -33,7 +35,9 @@ export default function ControlPanel({
   dateRange, setDateRange,
   comparePeriods, setComparePeriods,
   compareCohort, setCompareCohort,
-  onGenerate, isGenerating
+  onGenerate, isGenerating,
+  customJumpers = [],
+  onOpenCreator
 }: ControlPanelProps) {
   
   const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +108,11 @@ export default function ControlPanel({
       id: j.id,
       label: j.label,
       action: () => applyJumper(j.modelName, j.fields, j.daysOffset, j.chart, j.compPeriods, j.compCohort)
+    })),
+    ...customJumpers.map((j: any) => ({
+      id: j.id,
+      label: `✨ ${j.label}`,
+      action: () => applyJumper(j.modelName, j.fields, j.daysOffset, j.chart, j.compPeriods, j.compCohort)
     }))
   ];
 
@@ -125,9 +134,20 @@ export default function ControlPanel({
       
       {/* Quick Jumpers */}
       <div className="space-y-2 pb-4 border-b border-border">
-        <label className="text-sm font-bold text-primary flex items-center gap-2">
-          ⚡ Quick Jumpers
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-bold text-primary flex items-center gap-2">
+            ⚡ Quick Jumpers
+          </label>
+          {onOpenCreator && (
+            <button
+              onClick={onOpenCreator}
+              title="Create Custom Jumper"
+              className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary hover:bg-primary/20 hover:scale-110 transition-all font-bold text-sm cursor-pointer"
+            >
+              +
+            </button>
+          )}
+        </div>
         <select 
           onChange={(e) => {
             const jumper = jumpers.find(j => j.id === e.target.value);

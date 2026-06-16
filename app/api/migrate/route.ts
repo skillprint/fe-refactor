@@ -18,6 +18,8 @@ import * as addSlugToPlaybooks from '@/migrations/13-add-slug-to-playbooks';
 import * as changeGameIdsType from '@/migrations/14-change-game-ids-type';
 import * as addDeletedAtToGames from '@/migrations/15-add-deleted-at-to-games';
 import * as createGameVariants from '@/migrations/16-create-game-variants';
+import * as createQuickJumpers from '@/migrations/17-create-quick-jumpers';
+import * as addRoleToUsers from '@/migrations/18-add-role-to-users';
 
 export async function GET() {
     try {
@@ -107,6 +109,16 @@ export async function GET() {
                     name: '16-create-game-variants',
                     up: async () => createGameVariants.up({ context: sequelize, name: '16-create-game-variants' }),
                     down: async () => createGameVariants.down({ context: sequelize, name: '16-create-game-variants' }),
+                },
+                {
+                    name: '17-create-quick-jumpers',
+                    up: async () => createQuickJumpers.up({ context: sequelize, name: '17-create-quick-jumpers' }),
+                    down: async () => createQuickJumpers.down({ context: sequelize, name: '17-create-quick-jumpers' }),
+                },
+                {
+                    name: '18-add-role-to-users',
+                    up: async () => addRoleToUsers.up({ context: sequelize, name: '18-add-role-to-users' }),
+                    down: async () => addRoleToUsers.down({ context: sequelize, name: '18-add-role-to-users' }),
                 }
             ],
             context: sequelize,
