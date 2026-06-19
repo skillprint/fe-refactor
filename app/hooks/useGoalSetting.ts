@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getCookie, setCookie } from '../utils/cookieUtils';
 
 export interface GoalOptionItem {
   slug: string;
@@ -28,21 +29,6 @@ export const AVAILABLE_MOODS: GoalOptionItem[] = [
 
 const SKILLS_COOKIE_KEY = 'goal_skills';
 const MOODS_COOKIE_KEY = 'goal_moods';
-
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
-
-const setCookie = (name: string, value: string, days = 365) => {
-  if (typeof document === 'undefined') return;
-  const date = new Date();
-  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
-};
 
 export function useGoalSetting() {
   const [goalSkills, setGoalSkills] = useState<string[]>([]);

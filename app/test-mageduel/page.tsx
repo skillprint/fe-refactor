@@ -6,6 +6,7 @@ import FloatingExitButton from '../components/FloatingExitButton';
 import { SkillprintClient, Mood, Adjustment } from '../lib/skillprintSdk';
 import GameAdjustmentTester from '../components/GameAdjustmentTester';
 import GameAdjustmentBanner from '../components/GameAdjustmentBanner';
+import { getApiBaseUrl } from '../utils/cookieUtils';
 
 const ADJUSTMENTS = [
     { key: 1, desc: 'Set heroDamage to 10' },
@@ -44,7 +45,7 @@ export default function TestMageDuelPage() {
 
         const client = new SkillprintClient({
             apiKey,
-            baseUrl: 'https://api.staging.skillprint.co/',
+            baseUrl: getApiBaseUrl(),
             logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
             userToken: cachedToken || undefined
         });

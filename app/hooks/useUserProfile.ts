@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from './useUserSession';
 import { SkillprintClient, LogLevel, UserProfile } from '../lib/skillprintSdk';
 import { useGameSessions } from './useGameSessions';
+import { getApiBaseUrl } from '../utils/cookieUtils';
 
 export function useUserProfile() {
     const { userToken, userId, setToken, isWhitelisted } = useUserSession();
@@ -18,7 +19,7 @@ export function useUserProfile() {
         // const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
         // return cookie ? cookie.split('=')[1] : 'test-api-key';
     };
-    const BASE_URL = 'https://api.staging.skillprint.co/';
+    const BASE_URL = getApiBaseUrl();
 
     const fetchUserProfile = useCallback(async () => {
         if (!userToken) {

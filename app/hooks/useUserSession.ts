@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
 import { isUserWhitelisted } from '../config/whitelist';
+import { getApiBaseUrl } from '../utils/cookieUtils';
 
 // Configuration flag to enable/disable user token caching. 
 // Set to false for now, can be overridden in the future.
@@ -26,7 +27,8 @@ export function useUserSession() {
         // const cookie = document.cookie.split('; ').find(row => row.startsWith('api_key='));
         // return cookie ? cookie.split('=')[1] : 'test-api-key';
     };
-    const BASE_URL = 'https://api.staging.skillprint.co/';
+    const BASE_URL = getApiBaseUrl();
+
 
     useEffect(() => {
         const initializeUser = async () => {

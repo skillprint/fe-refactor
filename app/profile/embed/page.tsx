@@ -6,6 +6,7 @@ import { SkillprintClient } from '../../lib/skillprintSdk';
 import { getVisualizeMoodProfile, getVisualizeSkillProfile } from '../../api/api';
 import SkillprintVisualization from '../../components/Skillprint';
 import BuckyballLoading from '../../components/BuckyballLoading';
+import { getApiBaseUrl } from '../../utils/cookieUtils';
 
 const USER_SKILLS = [
   'Problem Solving',
@@ -76,7 +77,7 @@ function EmbedProfileContent() {
       setError(null);
 
       const apiKey = apiKeyParam || process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
-      const baseUrl = 'https://api.staging.skillprint.co/';
+      const baseUrl = getApiBaseUrl();
 
       if (!userTokenParam && !userIdParam) {
         console.warn('Authentication parameters are missing from URL.');

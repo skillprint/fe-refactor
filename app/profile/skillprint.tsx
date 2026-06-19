@@ -54,18 +54,12 @@ const sampleSkills: Skill[] = [
   { id: '8', name: 'Creativity', level: 71, category: 'Cognitive', color: '#F97316' },
 ];
 
-export const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-};
+import { getCookie, setCookie, deleteCookie } from '../utils/cookieUtils';
+export { getCookie };
 
 export const updateSetting = (name: string, value: string, setter: (val: string) => void) => {
   setter(value);
-  // Set cookie with 1 year expiration
-  const date = new Date();
-  date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+  setCookie(name, value);
 };
 
 export const queryParamDebug = (): boolean => {
@@ -1096,9 +1090,9 @@ export default function Skillprint() {
                 <button
                   onClick={() => {
                     // Delete the FTUE cookie
-                    document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    deleteCookie('ftue_completed');
                     // delete the first badge cookie
-                    document.cookie = 'first_game_badge_seen=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    deleteCookie('first_game_badge_seen');
                     // Show confirmation
                     toast.success('Settings reset! Refresh the page to see the welcome experience again.');
                   }}

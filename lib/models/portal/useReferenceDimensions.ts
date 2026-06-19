@@ -32,7 +32,7 @@ export function useReferenceDimensions(useSyntheticData: boolean = false) {
         setError(null);
 
         try {
-            const response = await fetch(`https://api.staging.skillprint.co/reference/dimensions/`, {
+            const response = await fetch(`${API_BASE_URL}reference/dimensions/`, {
                 headers: {
                     'Authorization': `Token ${userToken}`,
                     'Content-Type': 'application/json'

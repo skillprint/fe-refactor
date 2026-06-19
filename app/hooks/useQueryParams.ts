@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { setCookie } from '../utils/cookieUtils';
 
 /**
  * Hook that checks for user_id and api_key query parameters,
@@ -19,13 +20,13 @@ export function useQueryParams() {
 
         // Write to cookies if parameters exist
         if (userId) {
-            document.cookie = `user_id=${encodeURIComponent(userId)}; path=/; max-age=${60 * 60 * 24 * 365}`; // 1 year
+            setCookie('user_id', encodeURIComponent(userId));
             searchParams.delete('user_id');
             paramsUpdated = true;
         }
 
         if (apiKey) {
-            document.cookie = `api_key=${encodeURIComponent(apiKey)}; path=/; max-age=${60 * 60 * 24 * 365}`; // 1 year
+            setCookie('api_key', encodeURIComponent(apiKey));
             searchParams.delete('api_key');
             paramsUpdated = true;
         }

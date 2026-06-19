@@ -11,6 +11,7 @@ import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsRes
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getGameBySlug } from '../../api/api';
+import { getApiBaseUrl } from '../../utils/cookieUtils';
 
 interface GameClientProps {
     slug: string;
@@ -530,7 +531,7 @@ export default function GameClient({ slug }: GameClientProps) {
             // Use staging by default as per existing code
             const client = new SkillprintClient({
                 apiKey,
-                baseUrl: 'https://api.staging.skillprint.co/',
+                baseUrl: getApiBaseUrl(),
                 logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
                 userToken: tokenToUse || undefined
             });

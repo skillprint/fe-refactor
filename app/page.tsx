@@ -6,7 +6,6 @@ import TopNav from "./components/TopNav";
 import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
-
 import { useUserSession } from './hooks/useUserSession';
 import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
@@ -17,6 +16,7 @@ import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
 import { getGameDetails } from './config/gameConfig';
+import { getCookie, setCookie } from './utils/cookieUtils';
 
 // Skills data
 const skills = [
@@ -216,7 +216,7 @@ function HomeContent() {
 
   useEffect(() => {
     // Check for spotlight cookie
-    const hasSeenSpotlight = document.cookie.split('; ').find(row => row.startsWith('spotlight_dismissed='));
+    const hasSeenSpotlight = getCookie('spotlight_dismissed');
     if (!hasSeenSpotlight) {
       // setShowTooltip(true);
     }
@@ -240,10 +240,7 @@ function HomeContent() {
 
   const dismissTooltip = () => {
     setShowTooltip(false);
-    // Set cookie to expire in 1 year
-    const date = new Date();
-    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-    document.cookie = `spotlight_dismissed=true; expires=${date.toUTCString()}; path=/`;
+    setCookie('spotlight_dismissed', 'true');
   };
 
   // Skillprint Visualization Logic
