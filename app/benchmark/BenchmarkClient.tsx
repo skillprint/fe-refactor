@@ -167,7 +167,7 @@ export default function BenchmarkClient() {
                   <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
                   <path d="M12 8a4 4 0 100 8 4 4 0 000-8z" />
                 </svg>
-                <span>Play with AI</span>
+                <span>Play w/ AI</span>
               </button>
               <button
                 onClick={() => handleLaunchGame(false)}
@@ -176,7 +176,7 @@ export default function BenchmarkClient() {
                 <svg className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 12V8H4v4M2 12h20M6 12v4a2 2 0 002 2h8a2 2 0 002-2v-4M10 15h4" />
                 </svg>
-                <span>Play without AI</span>
+                <span>Play w/o AI</span>
               </button>
             </div>
           </div>
