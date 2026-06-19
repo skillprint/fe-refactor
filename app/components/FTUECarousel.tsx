@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
+import { getCookie, setCookie } from '../utils/cookieUtils';
 
 interface Slide {
     title: string;
@@ -31,24 +32,20 @@ export default function FTUECarousel() {
         if (status === 'loggedOut' || status === 'partner' || isWhitelisted) return;
 
         // Check if FTUE has been completed
-        const hasCompletedFTUE = document.cookie
-            .split('; ')
-            .find(row => row.startsWith(`${COOKIE_NAME}=`));
-
+        const hasCompletedFTUE = getCookie(COOKIE_NAME);
+ 
         if (!hasCompletedFTUE) {
             // Small delay to ensure smooth entrance animation after WelcomeScreen fades
             setTimeout(() => setIsVisible(true), 150);
         }
     }, [status]);
 
-    const setCookie = () => {
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + COOKIE_EXPIRY_DAYS);
-        document.cookie = `${COOKIE_NAME}=true; expires=${expiryDate.toUTCString()}; path=/`;
+    const markFTUECompleted = () => {
+        setCookie(COOKIE_NAME, 'true', COOKIE_EXPIRY_DAYS);
     };
-
+ 
     const handleClose = () => {
-        setCookie();
+        markFTUECompleted();
         setIsVisible(false);
     };
 

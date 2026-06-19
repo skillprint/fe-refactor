@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Pond - Relaxing Experience</title>
+    <meta name="game-icon" content="🪷">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 32, 39, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            pointer-events: all;
+            transition: opacity 0.5s ease;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 5px;
+            font-weight: 300;
+            color: #e0f7fa;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #b2ebf2;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: transparent;
+            color: white;
+            border: 2px solid #80deea;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background: rgba(128, 222, 234, 0.2);
+            box-shadow: 0 0 20px rgba(128, 222, 234, 0.4);
+            transform: scale(1.05);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui-layer">
+        <div class="stats">
+            <div id="score-display">Zen Energy: 0</div>
+            <div id="status-display">Drifting peacefully...</div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="menu-screen">
+        <h1>ZEN POND</h1>
+        <p>Gently guide the petals to the lily pads</p>
+        <button onclick="startGame()">Begin Journey</button>
+    </div>
+
+    <!-- Completion Screen (Gentle Game Over) -->
+    <div id="end-screen" class="menu-screen hidden">
+        <h1>INNER PEACE</h1>
+        <p id="final-score">You gathered 0 petals</p>
+        <button onclick="restartGame()">Continue Drifting</button>
+    </div>
+</div>
+
+<script>
+    // --- Global Configuration ---
+    window.GAME_SETTINGS = {
+        driftSpeed: 0.8,
+        petalSpawnRate: 3000,
+        attractionRadius: 150,
+        attractionStrength: 0.05,
+        rippleFrequency: 2000,
+        pondColor: 0x1e3c72,
+        particleScale: 0.5
+    };
+
+    // --- Skillprint Integration ---
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            if (window.GAME_SETTINGS.hasOwnProperty(parameterName)) {
+                window.GAME_SETTINGS[parameterName] = parameterValue;
+                console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                
+                // Immediate effect for certain parameters if scene is running
+                const scene = game.scene.getScene('MainScene');
+                if (scene && parameterName === 'petalSpawnRate') {
+                    scene.updateSpawnTimer();
+                }
+            }
+        }
+    };
+
+    window.Skillprint.registerAdjustments({
+        '1': { parameterName: 'driftSpeed', description: 'Slower Drift', value: 0.4 },
+        '2': { parameterName: 'driftSpeed', description: 'Faster Drift', value: 1.5 },
+        '3': { parameterName: 'petalSpawnRate', description: 'More Flowers', value: 1500 },
+        '4': { parameterName: 'petalSpawnRate', description: 'Fewer Flowers', value: 5000 },
+        '5': { parameterName: 'attractionRadius', description: 'Stronger Reach', value: 250 },
+        '6': { parameterName: 'attractionRadius', description: 'Softer Reach', value: 80 },
+        '7': { parameterName: 'attractionStrength', description: 'Gentle Pull', value: 0.02 },
+        '8': { parameterName: 'attractionStrength', description: 'Direct Pull', value: 0.1 },
+        '9': { parameterName: 'rippleFrequency', description: 'Calmer Water', value: 4000 }
+    });
+
+    // --- Phaser Game Logic ---
+    const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        parent: 'game-container',
+        transparent: true,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 },
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    const game = new Phaser.Game(config);
+    let petals;
+    let pads;
+    let player;
+    let score = 0;
+    let spawnTimer;
+
+    function preload() {
+        // We use Graphics and Emojis, so no external assets are needed.
+    }
+
+    function create() {
+        const scene = this;
+
+        // Background Water Effect
+        this.bg = this.add.graphics();
+        this.drawBackground();
+
+        // Particle System for Water Trails
+        this.particles = this.add.particles(0, 0, 'flare', {
+            speed: { min: 10, max: 20 },
+            scale: { start: 0.3, end: 0 },
+            alpha: { start: 0.4, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 1000,
+            emitting: false
+        });
+
+        // Groups
+        petals = this.physics.add.group();
+        pads = this.physics.add.staticGroup();
+
+        // Create Lily Pads (Static Goals)
+        for (let i = 0; i < 4; i++) {
+            createLilyPad(scene);
+        }
+
+        // Player (The Ripple Source)
+        player = this.add.container(400, 300);
+        const ring = this.add.graphics();
+        ring.lineStyle(2, 0xffffff, 0.5);
+        ring.strokeCircle(0, 0, 30);
+        player.add(ring);
+        
+        // Add a soft glow to player
+        const glow = this.add.graphics();
+        glow.fillStyle(0x80deea, 0.15);
+        glow.fillCircle(0, 0, 45);
+        player.add(glow);
+
+        // Input
+        this.input.on('pointermove', (pointer) => {
+            scene.tweens.add({
+                targets: player,
+                x: pointer.x,
+                y: pointer.y,
+                duration: 600,
+                ease: 'Power2'
+            });
+        });
+
+        // Spawning Petals
+        this.updateSpawnTimer = () => {
+            if (spawnTimer) spawnTimer.remove();
+            spawnTimer = scene.time.addEvent({
+                delay: window.GAME_SETTINGS.petalSpawnRate,
+                callback: () => spawnPetal(scene),
+                loop: true
+            });
+        };
+        this.updateSpawnTimer();
+
+        // Collisions / Overlaps
+        this.physics.add.overlap(petals, pads, (petal, pad) => {
+            collectPetal(scene, petal, pad);
+        });
+
+        // Periodic Water Ripples
+        this.time.addEvent({
+            delay: window.GAME_SETTINGS.rippleFrequency,
+            callback: () => createAmbientRipple(scene),
+            loop: true
+        });
+    }
+
+    function update() {
+        petals.getChildren().forEach(petal => {
+            // Gentle drifting
+            petal.x += Math.sin(this.time.now / 1000 + petal.y) * window.GAME_SETTINGS.driftSpeed;
+            petal.y += window.GAME_SETTINGS.driftSpeed;
+
+            // Attraction to player
+            const dist = Phaser.Math.Distance.Between(player.x, player.y, petal.x, petal.y);
+            if (dist < window.GAME_SETTINGS.attractionRadius) {
+                const angle = Phaser.Math.Angle.Between(petal.x, petal.y, player.x, player.y);
+                petal.body.velocity.x = Math.cos(angle) * (window.GAME_SETTINGS.attractionRadius - dist) * window.GAME_SETTINGS.attractionStrength * 5;
+                petal.body.velocity.y = Math.sin(angle) * (window.GAME_SETTINGS.attractionRadius - dist) * window.GAME_SETTINGS.attractionStrength * 5;
+            } else {
+                petal.body.velocity.x *= 0.95;
+                petal.body.velocity.y *= 0.95;
+            }
+
+            // Wrap around or destroy
+            if (petal.y > 650) {
+                petal.y = -50;
+                petal.x = Phaser.Math.Between(50, 750);
+            }
+        });
+    }
+
+    // --- Helper Functions ---
+
+    function createLilyPad(scene) {
+        const x = Phaser.Math.Between(100, 700);
+        const y = Phaser.Math.Between(100, 500);
+        
+        // Lily Pad Visual (SVG-like using Graphics)
+        const pad = scene.add.graphics();
+        pad.fillStyle(0x2d5a27, 0.8);
+        pad.fillCircle(0, 0, 40);
+        pad.fillStyle(0x1e3c1e, 0.4);
+        // Cut out a small wedge
+        pad.slice(0, 0, 40, Phaser.Math.DegToRad(0), Phaser.Math.DegToRad(45), true);
+        pad.fillPath();
+        
+        const container = scene.add.container(x, y, [pad]);
+        scene.physics.add.existing(container, true);
+        container.body.setCircle(35, -35, -35);
+        pads.add(container);
+
+        // Gentle floating animation
+        scene.tweens.add({
+            targets: container,
+            y: y + 10,
+            duration: 3000 + Math.random() * 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+    }
+
+    function spawnPetal(scene) {
+        const x = Phaser.Math.Between(50, 750);
+        const y = -50;
+        
+        // Use Emoji for Petal
+        const petal = scene.add.text(x, y, '🌸', { fontSize: '24px' });
+        petal.setOrigin(0.5);
+        scene.physics.add.existing(petal);
+        petals.add(petal);
+
+        // Rotation
+        scene.tweens.add({
+            targets: petal,
+            angle: 360,
+            duration: 8000,
+            repeat: -1
+        });
+    }
+
+    function collectPetal(scene, petal, pad) {
+        if (petal.isCollected) return;
+        petal.isCollected = true;
+        
+        score += 10;
+        document.getElementById('score-display').innerText = `Zen Energy: ${score}`;
+
+        // Visual feedback
+        scene.tweens.add({
+            targets: petal,
+            scale: 2,
+            alpha: 0,
+            x: pad.x,
+            y: pad.y,
+            duration: 800,
+            ease: 'Back.easeIn',
+            onComplete: () => {
+                petal.destroy();
+                createAmbientRipple(scene, pad.x, pad.y, 0x80deea);
+            }
+        });
+
+        // Every 10 petals, show the "completion" screen as a milestone
+        if (score > 0 && score % 100 === 0) {
+            showEndScreen();
+        }
+    }
+
+    function createAmbientRipple(scene, x, y, color = 0xffffff) {
+        const rx = x || Phaser.Math.Between(0, 800);
+        const ry = y || Phaser.Math.Between(0, 600);
+        
+        const ripple = scene.add.graphics();
+        ripple.lineStyle(2, color, 0.6);
+        ripple.strokeCircle(rx, ry, 5);
+        
+        scene.tweens.add({
+            targets: ripple,
+            scale: 15,
+            alpha: 0,
+            duration: 4000,
+            ease: 'Quad.easeOut',
+            onComplete: () => ripple.destroy()
+        });
+    }
+
+    Phaser.Scene.prototype.drawBackground = function() {
+        this.bg.clear();
+        // Deep water gradient
+        this.bg.fillGradientStyle(0x0f2027, 0x0f2027, 0x203a43, 0x2c5364, 1);
+        this.bg.fillRect(0, 0, 800, 600);
+        
+        // Add subtle "caustic" lines
+        for(let i=0; i<10; i++) {
+            this.bg.lineStyle(1, 0xffffff, 0.05);
+            this.bg.beginPath();
+            this.bg.moveTo(0, i * 80);
+            this.bg.bezierCurveTo(200, i * 80 + 40, 600, i * 80 - 40, 800, i * 80);
+            this.bg.strokePath();
+        }
+    };
+
+    // --- UI Controls ---
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        score = 0;
+        document.getElementById('score-display').innerText = `Zen Energy: 0`;
+    }
+
+    function showEndScreen() {
+        document.getElementById('final-score').innerText = `You gathered ${score/10} petals in this session.`;
+        document.getElementById('end-screen').classList.remove('hidden');
+    }
+
+    function restartGame() {
+        document.getElementById('end-screen').classList.add('hidden');
+        // We don't reset the whole state, just keep drifting
+    }
+
+</script>
+</body>
+</html>

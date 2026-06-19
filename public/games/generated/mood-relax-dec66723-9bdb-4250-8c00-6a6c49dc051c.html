@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Zen Garden</title>
+    <meta name="game-icon" content="✨">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+        }
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        .hud-text {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+        #start-screen, #pause-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            pointer-events: all;
+            transition: opacity 0.5s ease;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 200;
+            letter-spacing: 8px;
+            text-align: center;
+        }
+        p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+        .btn {
+            padding: 12px 32px;
+            font-size: 1rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+        .hidden {
+            display: none !important;
+            opacity: 0;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div class="hud-text">Serenity: <span id="score">0</span></div>
+            <div class="hud-text" style="text-align: right;">Breathe Deeply</div>
+        </div>
+
+        <div id="start-screen">
+            <h1>STELLAR ZEN</h1>
+            <p>Gently guide the light to gather stardust.</p>
+            <button class="btn" onclick="startGame()">Begin Journey</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Global Game Parameters ---
+        window.GAME_CONFIG = {
+            petalSpeed: 1.0,
+            spawnRate: 1500,
+            attractionRadius: 150,
+            growthFactor: 1.0,
+            particleDensity: 1.0,
+            serenityScore: 0
+        };
+
+        // --- Skillprint Adjustment Interface ---
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                if (window.GAME_CONFIG.hasOwnProperty(parameterName)) {
+                    window.GAME_CONFIG[parameterName] = parameterValue;
+                    console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                    
+                    // Update internal logic if needed
+                    if (parameterName === 'spawnRate' && window.gameScene) {
+                        window.gameScene.updateSpawnTimer();
+                    }
+                }
+            }
+        };
+
+        window.Skillprint.registerAdjustments({
+            '1': { parameterName: 'petalSpeed', description: 'Slower Drift', value: 0.5 },
+            '2': { parameterName: 'petalSpeed', description: 'Faster Drift', value: 2.5 },
+            '3': { parameterName: 'spawnRate', description: 'Fewer Petals', value: 3000 },
+            '4': { parameterName: 'spawnRate', description: 'More Petals', value: 800 },
+            '5': { parameterName: 'attractionRadius', description: 'Small Attraction', value: 80 },
+            '6': { parameterName: 'attractionRadius', description: 'Large Attraction', value: 300 },
+            '7': { parameterName: 'growthFactor', description: 'Smaller Bloom', value: 0.5 },
+            '8': { parameterName: 'growthFactor', description: 'Larger Bloom', value: 2.0 },
+            '9': { parameterName: 'particleDensity', description: 'Toggle Particles', value: 0.2 }
+        });
+
+        // --- Phaser Game Logic ---
+        class ZenScene extends Phaser.Scene {
+            constructor() {
+                super('ZenScene');
+                window.gameScene = this;
+            }
+
+            preload() {
+                // Generate procedural textures
+                const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                
+                // Player Glow
+                graphics.clear();
+                graphics.fillGradientStyle(0xffffff, 0xffffff, 0xffffff, 0xffffff, 0.8, 0.8, 0, 0);
+                graphics.fillCircle(32, 32, 30);
+                graphics.generateTexture('player_glow', 64, 64);
+
+                // Petal Texture
+                const colors = [0xffb7c5, 0x98fb98, 0x87cefa, 0xe6e6fa, 0xffdab9];
+                colors.forEach((color, i) => {
+                    graphics.clear();
+                    graphics.fillStyle(color, 0.7);
+                    graphics.fillCircle(16, 16, 12);
+                    graphics.generateTexture(`petal_${i}`, 32, 32);
+                });
+
+                // Particle Texture
+                graphics.clear();
+                graphics.fillStyle(0xffffff, 1);
+                graphics.fillCircle(4, 4, 3);
+                graphics.generateTexture('sparkle', 8, 8);
+            }
+
+            create() {
+                this.score = 0;
+                this.width = this.cameras.main.width;
+                this.height = this.cameras.main.height;
+
+                // Background subtle movement
+                this.bgCircles = [];
+                for (let i = 0; i < 5; i++) {
+                    let circle = this.add.circle(
+                        Phaser.Math.Between(0, this.width),
+                        Phaser.Math.Between(0, this.height),
+                        Phaser.Math.Between(100, 300),
+                        0x1e293b, 0.3
+                    );
+                    this.bgCircles.push(circle);
+                }
+
+                // Emitters
+                this.emitter = this.add.particles(0, 0, 'sparkle', {
+                    speed: { min: 20, max: 60 },
+                    scale: { start: 0.6, end: 0 },
+                    alpha: { start: 0.6, end: 0 },
+                    lifespan: 2000,
+                    blendMode: 'ADD',
+                    frequency: -1 // Manual emit
+                });
+
+                // Player
+                this.player = this.add.image(this.width / 2, this.height / 2, 'player_glow');
+                this.player.setBlendMode(Phaser.BlendModes.ADD);
+                this.player.setDepth(10);
+                
+                // Petals Group
+                this.petals = this.add.group();
+
+                // Input
+                this.input.on('pointermove', (pointer) => {
+                    this.targetX = pointer.x;
+                    this.targetY = pointer.y;
+                });
+                this.targetX = this.width / 2;
+                this.targetY = this.height / 2;
+
+                // Spawn Timer
+                this.updateSpawnTimer();
+
+                // Ambient Floating Logic
+                this.time.addEvent({
+                    delay: 50,
+                    callback: this.updatePetals,
+                    callbackScope: this,
+                    loop: true
+                });
+            }
+
+            updateSpawnTimer() {
+                if (this.spawnEvent) this.spawnEvent.remove();
+                this.spawnEvent = this.time.addEvent({
+                    delay: window.GAME_CONFIG.spawnRate,
+                    callback: this.spawnPetal,
+                    callbackScope: this,
+                    loop: true
+                });
+            }
+
+            spawnPetal() {
+                const side = Phaser.Math.Between(0, 3);
+                let x, y;
+                if (side === 0) { x = -50; y = Phaser.Math.Between(0, this.height); }
+                else if (side === 1) { x = this.width + 50; y = Phaser.Math.Between(0, this.height); }
+                else if (side === 2) { x = Phaser.Math.Between(0, this.width); y = -50; }
+                else { x = Phaser.Math.Between(0, this.width); y = this.height + 50; }
+
+                const petalId = Phaser.Math.Between(0, 4);
+                const petal = this.add.image(x, y, `petal_${petalId}`);
+                petal.setAlpha(0);
+                petal.setScale(0.5);
+                
+                // Drift direction
+                petal.vx = (Math.random() - 0.5) * 2;
+                petal.vy = (Math.random() - 0.5) * 2;
+                petal.rotationSpeed = (Math.random() - 0.5) * 0.02;
+
+                this.tweens.add({
+                    targets: petal,
+                    alpha: 0.6,
+                    scale: 1,
+                    duration: 1000
+                });
+
+                this.petals.add(petal);
+            }
+
+            update(time, delta) {
+                // Smooth player movement
+                this.player.x = Phaser.Math.Interpolation.Linear([this.player.x, this.targetX], 0.05);
+                this.player.y = Phaser.Math.Interpolation.Linear([this.player.y, this.targetY], 0.05);
+                
+                // Subtle pulse
+                const pulse = 1 + Math.sin(time / 1000) * 0.1;
+                this.player.setScale(pulse);
+
+                // Background movement
+                this.bgCircles.forEach((c, i) => {
+                    c.x += Math.cos(time / 2000 + i) * 0.2;
+                    c.y += Math.sin(time / 2500 + i) * 0.2;
+                });
+
+                // Petal Logic
+                this.petals.getChildren().forEach(petal => {
+                    // Drift
+                    petal.x += petal.vx * window.GAME_CONFIG.petalSpeed;
+                    petal.y += petal.vy * window.GAME_CONFIG.petalSpeed;
+                    petal.rotation += petal.rotationSpeed;
+
+                    // Attraction
+                    const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, petal.x, petal.y);
+                    if (dist < window.GAME_CONFIG.attractionRadius) {
+                        const angle = Phaser.Math.Angle.Between(petal.x, petal.y, this.player.x, this.player.y);
+                        const force = (window.GAME_CONFIG.attractionRadius - dist) / window.GAME_CONFIG.attractionRadius;
+                        petal.x += Math.cos(angle) * force * 4;
+                        petal.y += Math.sin(angle) * force * 4;
+
+                        // Collection
+                        if (dist < 40) {
+                            this.collectPetal(petal);
+                        }
+                    }
+
+                    // Bounds check (remove if far away)
+                    if (petal.x < -200 || petal.x > this.width + 200 || petal.y < -200 || petal.y > this.height + 200) {
+                        petal.destroy();
+                    }
+                });
+            }
+
+            collectPetal(petal) {
+                this.score++;
+                document.getElementById('score').innerText = this.score;
+                window.GAME_CONFIG.serenityScore = this.score;
+
+                // Ripple effect
+                const ripple = this.add.circle(petal.x, petal.y, 10, 0xffffff, 0.4);
+                this.tweens.add({
+                    targets: ripple,
+                    radius: 100 * window.GAME_CONFIG.growthFactor,
+                    alpha: 0,
+                    duration: 1500,
+                    onComplete: () => ripple.destroy()
+                });
+
+                // Particles
+                const count = Math.floor(15 * window.GAME_CONFIG.particleDensity);
+                if (count > 0) {
+                    this.emitter.emitParticleAt(petal.x, petal.y, count);
+                }
+
+                petal.destroy();
+            }
+        }
+
+        // --- Game Initialization ---
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#0f172a',
+            scene: ZenScene,
+            physics: {
+                default: 'arcade',
+                arcade: { debug: false }
+            }
+        };
+
+        let game;
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            if (!game) {
+                game = new Phaser.Game(config);
+            }
+        }
+
+        // Responsive handling
+        window.addEventListener('resize', () => {
+            if (game) {
+                game.scale.resize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        // Set initial size
+        config.width = window.innerWidth;
+        config.height = window.innerHeight;
+
+    </script>
+</body>
+</html>

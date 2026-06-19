@@ -1,13 +1,12 @@
 import axios from "axios";
 import { setupCache } from 'axios-cache-interceptor';
+import { getCookie, getApiBaseUrl } from "../utils/cookieUtils";
 
 // const instance = Axios.create();
 // const axios = setupCache(instance);
 
-// Use local proxy during development to avoid CORS
-// The /api/ path will be rewritten to https://api.staging.skillprint.co/ by next.config.ts
 // For production static builds, you'll need to configure CORS on your API server or CloudFront
-export const BASE_URL = process.env.NEXT_PUBLIC_SKILLPRINT_API_BASE_URL || "https://api.staging.skillprint.co/";
+export const BASE_URL = getApiBaseUrl();
 
 // console.log(BASE_URL);
 
@@ -22,16 +21,13 @@ const add_user_path = `partners/api/users/add/`;
 const add_user_token = `partners/api/users/auth/token/`;
 
 const getUserId = () => {
-    if (typeof document === 'undefined') return null;
-    const cookie = document.cookie.split(';').find(row => row.startsWith('user_id='));
-    return cookie ? cookie.split('=')[1] : null;
+    return getCookie('user_id');
 }
 
 const getApiKey = () => {
-    if (typeof document === 'undefined') return null;
-    const cookie = document.cookie.split(';').find(row => row.startsWith('api_key='));
-    return cookie ? cookie.split('=')[1] : null;
+    return getCookie('api_key');
 }
+
 
 
 const inFlightRequests = new Map<string, Promise<any>>();

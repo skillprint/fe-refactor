@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import VisualizeClient from './VisualizeClient';
 
 export const metadata = {
@@ -14,7 +15,16 @@ export default function VisualizePage() {
             Explore, analyze, and generate synthetic insights from your models.
           </p>
         </div>
-        <VisualizeClient />
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-[500px]">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-12 w-12 bg-primary/20 rounded-full mb-4"></div>
+              <p className="text-muted-foreground">Loading Studio...</p>
+            </div>
+          </div>
+        }>
+          <VisualizeClient />
+        </Suspense>
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
 import MoodSurveyWidget from '../../../components/MoodSurveyWidget';
 import ChallengeWidget from '../../../components/ChallengeWidget';
+import { getApiBaseUrl, getCookie, setCookie } from '../../../utils/cookieUtils';
 
 interface GameResults {
     score?: number;
@@ -103,7 +104,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
             const client = new SkillprintClient({
                 apiKey,
-                baseUrl: 'https://api.staging.skillprint.co/',
+                baseUrl: getApiBaseUrl(),
                 logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
                 userToken: tokenToUse || undefined
             });
@@ -194,7 +195,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
     useEffect(() => {
         // Check for first game badge
-        const hasSeenBadge = document.cookie.split('; ').find(row => row.startsWith('first_game_badge_seen='));
+        const hasSeenBadge = getCookie('first_game_badge_seen');
         if (!hasSeenBadge && status !== 'partner') {
             // Pick a random next game
             const availableGames = knownGameSlugs.filter(s => s !== decodedSlug);
@@ -208,10 +209,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
 
     const handleBadgeDismiss = () => {
         setShowBadge(false);
-        // Set cookie to expire in 1 year
-        const date = new Date();
-        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-        document.cookie = `first_game_badge_seen=true; expires=${date.toUTCString()}; path=/`;
+        setCookie('first_game_badge_seen', 'true');
     };
 
     const handlePlayAgain = () => {

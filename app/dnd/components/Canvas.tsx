@@ -7,13 +7,28 @@ import { SortableBlock } from './SortableBlock';
 import { useDroppable } from '@dnd-kit/core';
 
 export function Canvas() {
-  const { blocks } = useBuilder();
+  const { blocks, theme } = useBuilder();
   const { setNodeRef, isOver } = useDroppable({
     id: 'canvas-dropzone',
   });
 
+  const themeStyles = theme ? {
+    '--primary': theme.primaryColor,
+    '--secondary': theme.secondaryColor,
+    '--background': theme.backgroundColor,
+    '--foreground': theme.foregroundColor,
+    '--card': theme.cardColor,
+    '--card-foreground': theme.cardForegroundColor,
+    '--border': theme.borderColor || theme.border,
+    '--radius': theme.borderRadius,
+    '--font-sans': theme.fontFamily ? `var(--font-${theme.fontFamily.toLowerCase()})` : undefined
+  } : {};
+
   return (
-    <div className="flex-1 bg-[#efefef] dark:bg-background/50 overflow-y-auto p-8 relative min-h-screen border-l border-border">
+    <div 
+      className="flex-1 bg-background overflow-y-auto p-8 relative min-h-screen border-l border-border transition-colors duration-300"
+      style={themeStyles as React.CSSProperties}
+    >
       <div className="max-w-[1440px] mx-auto w-full flex flex-col items-center">
         {blocks.length === 0 ? (
           <div 

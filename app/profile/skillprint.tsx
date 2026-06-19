@@ -20,8 +20,7 @@ import { useUserSession } from '../hooks/useUserSession';
 import { useVisualizeMoodProfile } from '../hooks/useVisualizeMoodProfile';
 import { useVisualizeSkillProfile } from '../hooks/useVisualizeSkillProfile';
 import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
-import DynamicChart from '../visualize/components/DynamicChart';
-import { generateSyntheticData, DataPoint } from '../visualize/utils/syntheticData';
+import ProfilePerformanceTrends from '../components/ProfilePerformanceTrends';
 import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
 import { useGameMetrics } from '../hooks/useGameMetrics';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
@@ -55,18 +54,12 @@ const sampleSkills: Skill[] = [
   { id: '8', name: 'Creativity', level: 71, category: 'Cognitive', color: '#F97316' },
 ];
 
-export const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-};
+import { getCookie, setCookie, deleteCookie } from '../utils/cookieUtils';
+export { getCookie };
 
 export const updateSetting = (name: string, value: string, setter: (val: string) => void) => {
   setter(value);
-  // Set cookie with 1 year expiration
-  const date = new Date();
-  date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+  setCookie(name, value);
 };
 
 export const queryParamDebug = (): boolean => {
@@ -190,25 +183,7 @@ export default function Skillprint() {
     return `${secs}s`;
   };
 
-  const [comparePeriods, setComparePeriods] = useState<number>(1);
-  const [chartType, setChartType] = useState<'BarLine' | 'Area'>('BarLine');
-  const [chartData, setChartData] = useState<DataPoint[]>([]);
 
-  useEffect(() => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    const data = generateSyntheticData({
-      modelName: 'MoodData',
-      selectedFields: ['focus'],
-      chartType: chartType,
-      startDate: start,
-      endDate: end,
-      comparePeriods: comparePeriods,
-      compareCohort: false
-    });
-    setChartData(data);
-  }, [comparePeriods, chartType]);
 
   const isDebug = queryParamDebug();
 
@@ -443,58 +418,8 @@ export default function Skillprint() {
             )}
 
             <div className="py-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <h2 className="text-xl font-semibold text-foreground">
-                  Performance Trends
-                </h2>
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Segmented Chart Type Toggle */}
-                  <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border shadow-inner">
-                    <button
-                      onClick={() => setChartType('BarLine')}
-                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'BarLine'
-                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                        : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                    >
-                      Bar & Lines
-                    </button>
-                    <button
-                      onClick={() => setChartType('Area')}
-                      className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${chartType === 'Area'
-                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                        : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                    >
-                      Area Chart
-                    </button>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm text-muted-foreground">Compare:</label>
-                    <select
-                      value={comparePeriods}
-                      onChange={(e) => setComparePeriods(parseInt(e.target.value, 10))}
-                      className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value={0}>None</option>
-                      <option value={1}>Last Week</option>
-                      <option value={2}>Last 2 Weeks</option>
-                      <option value={3}>Last 3 Weeks</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-xl border border-border p-4 shadow-sm h-[350px] mb-8">
-                <DynamicChart
-                  data={chartData}
-                  type={chartType}
-                  selectedFields={['focus']}
-                  comparePeriods={comparePeriods}
-                  compareCohort={false}
-                  yAxisLabel="score"
-                />
-              </div>
+              <ProfilePerformanceTrends />
+            </div>
 
               <div className="mt-12 mb-12 border-t border-border pt-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -689,7 +614,6 @@ export default function Skillprint() {
                   </div>
                 ))}
               </div>
-            </div>
           </>
         )}
 
@@ -1166,9 +1090,9 @@ export default function Skillprint() {
                 <button
                   onClick={() => {
                     // Delete the FTUE cookie
-                    document.cookie = 'ftue_completed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    deleteCookie('ftue_completed');
                     // delete the first badge cookie
-                    document.cookie = 'first_game_badge_seen=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    deleteCookie('first_game_badge_seen');
                     // Show confirmation
                     toast.success('Settings reset! Refresh the page to see the welcome experience again.');
                   }}

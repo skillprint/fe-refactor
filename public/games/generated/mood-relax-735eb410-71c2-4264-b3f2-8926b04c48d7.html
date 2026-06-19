@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Cloud Garden</title>
+    <meta name="game-icon" content="☁️">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #a8d8ea;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .score-box {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 24px;
+            font-weight: 300;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #start-screen, #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(168, 216, 234, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            transition: opacity 0.5s ease;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #ffffff;
+            color: #71c9ce;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .hidden {
+            display: none !important;
+            opacity: 0;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div class="score-box">Blooms: <span id="score">0</span></div>
+        </div>
+
+        <div id="start-screen">
+            <h1>Zen Cloud Garden</h1>
+            <p>Gently guide your cloud over drifting seeds to help them bloom into beautiful flowers. Relax and enjoy the drift.</p>
+            <button id="start-button">Begin Journey</button>
+        </div>
+
+        <div id="game-over-screen" class="hidden">
+            <h1>Peace Found</h1>
+            <p>You've nurtured <span id="final-score">0</span> flowers in your garden.</p>
+            <button id="restart-button">Drift Again</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Configuration & Parameters ---
+        window.GAME_SETTINGS = {
+            cloudSpeed: 0.08,
+            rainFrequency: 150,
+            seedSpawnRate: 2000,
+            driftSpeed: 1.2,
+            growthTime: 2000,
+            bgHue: 200,
+            maxSeeds: 15
+        };
+
+        // --- Adjustment Interface ---
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                if (window.GAME_SETTINGS.hasOwnProperty(parameterName)) {
+                    window.GAME_SETTINGS[parameterName] = parameterValue;
+                    console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                    
+                    // Specific logic for background color change
+                    if (parameterName === 'bgHue' && window.gameInstance) {
+                        window.gameInstance.scene.scenes[0].updateBackground();
+                    }
+                }
+            }
+        };
+
+        // --- Skillprint Registration ---
+        window.Skillprint.registerAdjustments({
+            '1': { parameterName: 'cloudSpeed', description: 'Slower Cloud', value: 0.04 },
+            '2': { parameterName: 'cloudSpeed', description: 'Faster Cloud', value: 0.15 },
+            '3': { parameterName: 'rainFrequency', description: 'Sparse Rain', value: 300 },
+            '4': { parameterName: 'rainFrequency', description: 'Dense Rain', value: 50 },
+            '5': { parameterName: 'seedSpawnRate', description: 'Fewer Seeds', value: 4000 },
+            '6': { parameterName: 'seedSpawnRate', description: 'More Seeds', value: 800 },
+            '7': { parameterName: 'bgHue', description: 'Sunset Hue', value: 340 },
+            '8': { parameterName: 'bgHue', description: 'Twilight Hue', value: 260 },
+            '9': { parameterName: 'driftSpeed', description: 'Still Air', value: 0.5 }
+        });
+
+        // --- Phaser Game Logic ---
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super('MainScene');
+                this.score = 0;
+                this.seeds = null;
+                this.flowers = null;
+                this.cloud = null;
+                this.rainEmitter = null;
+                this.lastSeedTime = 0;
+                this.lastRainTime = 0;
+            }
+
+            preload() {
+                // Generate procedural textures
+                this.createCloudTexture();
+                this.createSeedTexture();
+                this.createFlowerTextures();
+                this.createRainTexture();
+            }
+
+            createCloudTexture() {
+                const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                graphics.fillStyle(0xffffff, 0.8);
+                graphics.fillCircle(40, 40, 30);
+                graphics.fillCircle(70, 45, 35);
+                graphics.fillCircle(100, 40, 30);
+                graphics.fillCircle(55, 20, 25);
+                graphics.fillCircle(85, 20, 25);
+                graphics.generateTexture('cloud', 140, 80);
+            }
+
+            createSeedTexture() {
+                const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                graphics.fillStyle(0x8B4513, 1);
+                graphics.fillEllipse(10, 10, 8, 12);
+                graphics.generateTexture('seed', 20, 20);
+            }
+
+            createRainTexture() {
+                const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                graphics.fillStyle(0xade8f4, 0.6);
+                graphics.fillRoundedRect(0, 0, 3, 10, 2);
+                graphics.generateTexture('rain', 3, 10);
+            }
+
+            createFlowerTextures() {
+                const colors = [0xffadad, 0xffd6a5, 0xfdffb6, 0xcaffbf, 0x9bf6ff, 0xa0c4ff, 0xbdb2ff, 0xffc6ff];
+                colors.forEach((color, i) => {
+                    const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                    graphics.fillStyle(color, 1);
+                    for (let angle = 0; angle < 360; angle += 72) {
+                        const rad = Phaser.Math.DegToRad(angle);
+                        graphics.fillEllipse(15 + Math.cos(rad) * 8, 15 + Math.sin(rad) * 8, 12, 12);
+                    }
+                    graphics.fillStyle(0xFFFF00, 1);
+                    graphics.fillCircle(15, 15, 5);
+                    graphics.generateTexture(`flower_${i}`, 30, 30);
+                });
+            }
+
+            create() {
+                this.updateBackground();
+                
+                // Groups
+                this.seeds = this.physics.add.group();
+                this.flowers = this.add.group();
+
+                // Cloud setup
+                this.cloud = this.physics.add.sprite(400, 300, 'cloud').setDepth(10);
+                this.cloud.setAlpha(0.9);
+                this.cloud.setImmovable(true);
+
+                // Rain Emitter
+                this.rainEmitter = this.add.particles(0, 0, 'rain', {
+                    speedY: { min: 200, max: 400 },
+                    speedX: { min: -10, max: 10 },
+                    scale: { start: 1, end: 0.5 },
+                    alpha: { start: 0.6, end: 0 },
+                    lifespan: 1000,
+                    frequency: -1, // We will manual emit
+                });
+
+                // Interaction
+                this.input.on('pointermove', (pointer) => {
+                    this.targetX = pointer.x;
+                    this.targetY = pointer.y;
+                });
+
+                // Initial seeds
+                for(let i=0; i<5; i++) this.spawnSeed();
+            }
+
+            updateBackground() {
+                const color = Phaser.Display.Color.HSLToColor(window.GAME_SETTINGS.bgHue / 360, 0.5, 0.8);
+                this.cameras.main.setBackgroundColor(color.color);
+            }
+
+            spawnSeed() {
+                if (this.seeds.getLength() >= window.GAME_SETTINGS.maxSeeds) return;
+                
+                const x = -50;
+                const y = Phaser.Math.Between(100, 500);
+                const seed = this.seeds.create(x, y, 'seed');
+                seed.setVelocityX(Phaser.Math.FloatBetween(20, 60) * window.GAME_SETTINGS.driftSpeed);
+                seed.setAngularVelocity(Phaser.Math.Between(-50, 50));
+                seed.body.setAllowGravity(false);
+                seed.isBlooming = false;
+            }
+
+            update(time, delta) {
+                // Smooth cloud movement
+                if (this.targetX !== undefined) {
+                    this.cloud.x = Phaser.Math.Interpolation.Linear([this.cloud.x, this.targetX], window.GAME_SETTINGS.cloudSpeed);
+                    this.cloud.y = Phaser.Math.Interpolation.Linear([this.cloud.y, this.targetY], window.GAME_SETTINGS.cloudSpeed);
+                }
+
+                // Rain emission
+                if (time > this.lastRainTime + window.GAME_SETTINGS.rainFrequency) {
+                    this.rainEmitter.emitParticleAt(this.cloud.x + Phaser.Math.Between(-50, 50), this.cloud.y + 20);
+                    this.lastRainTime = time;
+                }
+
+                // Seed spawning
+                if (time > this.lastSeedTime + window.GAME_SETTINGS.seedSpawnRate) {
+                    this.spawnSeed();
+                    this.lastSeedTime = time;
+                }
+
+                // Check seeds vs Rain
+                this.seeds.getChildren().forEach(seed => {
+                    if (seed.x > 900) {
+                        seed.destroy();
+                        return;
+                    }
+
+                    // Simple proximity check for "rain contact"
+                    const dist = Phaser.Math.Distance.Between(this.cloud.x, this.cloud.y, seed.x, seed.y - 100);
+                    if (dist < 80 && !seed.isBlooming) {
+                        this.bloomSeed(seed);
+                    }
+                });
+
+                // Drift flowers
+                this.flowers.getChildren().forEach(flower => {
+                    flower.x += 0.5 * window.GAME_SETTINGS.driftSpeed;
+                    flower.y += Math.sin(time / 1000) * 0.2;
+                    if (flower.x > 900) flower.destroy();
+                });
+            }
+
+            bloomSeed(seed) {
+                seed.isBlooming = true;
+                seed.setAlpha(0.5);
+                
+                // Growth effect
+                this.tweens.add({
+                    targets: seed,
+                    scale: 0.1,
+                    alpha: 0,
+                    duration: 500,
+                    onComplete: () => {
+                        this.createFlower(seed.x, seed.y);
+                        seed.destroy();
+                    }
+                });
+            }
+
+            createFlower(x, y) {
+                const flowerType = Phaser.Math.Between(0, 7);
+                const flower = this.add.sprite(x, y, `flower_${flowerType}`);
+                flower.setScale(0);
+                this.flowers.add(flower);
+
+                this.tweens.add({
+                    targets: flower,
+                    scale: Phaser.Math.FloatBetween(0.8, 1.4),
+                    duration: 1000,
+                    ease: 'Back.easeOut'
+                });
+
+                this.score++;
+                document.getElementById('score').innerText = this.score;
+                
+                // Gentle "ding" visual
+                const ring = this.add.circle(x, y, 5, 0xffffff, 0.5);
+                this.tweens.add({
+                    targets: ring,
+                    radius: 50,
+                    alpha: 0,
+                    duration: 1000,
+                    onComplete: () => ring.destroy()
+                });
+            }
+
+            resetGame() {
+                this.score = 0;
+                document.getElementById('score').innerText = "0";
+                this.seeds.clear(true, true);
+                this.flowers.clear(true, true);
+            }
+        }
+
+        // --- Initialization ---
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            transparent: true,
+            physics: {
+                default: 'arcade',
+                arcade: { gravity: { y: 0 }, debug: false }
+            },
+            scene: MainScene
+        };
+
+        const game = new Phaser.Game(config);
+        window.gameInstance = game;
+
+        // UI Logic
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startBtn = document.getElementById('start-button');
+        const restartBtn = document.getElementById('restart-button');
+
+        startBtn.onclick = () => {
+            startScreen.classList.add('hidden');
+        };
+
+        restartBtn.onclick = () => {
+            gameOverScreen.classList.add('hidden');
+            const scene = game.scene.scenes[0];
+            scene.resetGame();
+        };
+
+        // There is no "death" in this relax game, but we can trigger a "session end" 
+        // if they want to see their summary. For this version, we'll just let it be endless.
+        // If we wanted a "timer" we could add it, but for "Relax" mood, endless is better.
+        
+    </script>
+</body>
+</html>

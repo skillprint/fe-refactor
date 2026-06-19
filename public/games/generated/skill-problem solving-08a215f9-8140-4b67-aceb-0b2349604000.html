@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathfinder: Logic Trails</title>
+    <meta name="game-icon" content="🧩">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --accent: #f472b6;
+            --text: #f1f5f9;
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .hud {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: auto;
+        }
+        .stat-card {
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .btn-home {
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.2s;
+        }
+        .btn-home:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        #menu-overlay, #game-over-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+            background: var(--glass);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button.menu-btn {
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button.menu-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .hidden { display: none !important; }
+
+        .modality-indicator {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-layer">
+            <div class="hud">
+                <button class="btn-home" id="home-btn" title="Exit to Menu">🏠</button>
+                <div class="stat-card">Sequence: <span id="current-target">---</span></div>
+                <div class="stat-card">Time: <span id="timer">00:00</span></div>
+            </div>
+        </div>
+
+        <div id="menu-overlay">
+            <div class="menu-content">
+                <h1>Pathfinder</h1>
+                <p>Connect the nodes in the correct logical sequence as fast as you can. Don't break the trail!</p>
+                <div class="level-grid">
+                    <button class="menu-btn" onclick="startGame('numbers')">🔢 Numbers<br><span class="modality-indicator">1 → 2 → 3</span></button>
+                    <button class="menu-btn" onclick="startGame('letters')">🔠 Letters<br><span class="modality-indicator">A → B → C</span></button>
+                    <button class="menu-btn" onclick="startGame('mixed')">🔀 Mixed<br><span class="modality-indicator">1 → A → 2 → B</span></button>
+                    <button class="menu-btn" onclick="startGame('emojis')">🌙 Emojis<br><span class="modality-indicator">🌑 → 🌓 → 🌕</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-over-overlay" class="hidden">
+            <div class="menu-content">
+                <h1 id="result-title">Sequence Complete!</h1>
+                <p id="result-text">You solved the trail in 0 seconds with 0 errors.</p>
+                <button class="menu-btn" style="width: 100%;" onclick="showMenu()">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Configuration ---
+        window.GAME_SETTINGS = {
+            modality: 'numbers', // numbers, letters, mixed, emojis
+            gridSize: 5,         // 4 to 7
+            hintMode: false,
+            nodeScale: 1.0,
+            errorShake: true,
+            lineThickness: 4
+        };
+
+        // --- Skillprint Adjustment Interface ---
+        window.adjustGame = function(obj) {
+            if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+                const { parameterName, parameterValue } = obj;
+                window.GAME_SETTINGS[parameterName] = parameterValue;
+                console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+                
+                // If in game, restart to apply modality or grid changes
+                if (window.gameInstance && window.gameInstance.scene.isActive('MainScene')) {
+                    window.gameInstance.scene.getScene('MainScene').restartGame();
+                }
+            }
+        };
+
+        window.Skillprint.registerAdjustments({
+            '1': { parameterName: 'modality', description: 'Mode: Numbers', value: 'numbers' },
+            '2': { parameterName: 'modality', description: 'Mode: Letters', value: 'letters' },
+            '3': { parameterName: 'modality', description: 'Mode: Mixed', value: 'mixed' },
+            '4': { parameterName: 'modality', description: 'Mode: Emojis', value: 'emojis' },
+            '5': { parameterName: 'gridSize', description: 'Grid: Small', value: 4 },
+            '6': { parameterName: 'gridSize', description: 'Grid: Large', value: 7 },
+            '7': { parameterName: 'lineThickness', description: 'Thick Lines', value: 8 },
+            '8': { parameterName: 'hintMode', description: 'Hints ON', value: true },
+            '9': { parameterName: 'hintMode', description: 'Hints OFF', value: false }
+        });
+
+        // --- Phaser Game Logic ---
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super('MainScene');
+                this.nodes = [];
+                this.sequence = [];
+                this.currentIndex = 0;
+                this.timer = 0;
+                this.timerEvent = null;
+                this.isDrawing = false;
+                this.lastConnectedNode = null;
+                this.tempLine = null;
+                this.permanentLines = null;
+                this.errors = 0;
+            }
+
+            preload() {
+                // Generate procedural textures
+                const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                
+                // Node Base
+                graphics.clear();
+                graphics.fillStyle(0xffffff, 1);
+                graphics.fillCircle(30, 30, 28);
+                graphics.generateTexture('node-bg', 60, 60);
+
+                // Particle
+                graphics.clear();
+                graphics.fillStyle(0x38bdf8, 1);
+                graphics.fillCircle(4, 4, 4);
+                graphics.generateTexture('spark', 8, 8);
+            }
+
+            create() {
+                this.permanentLines = this.add.graphics();
+                this.tempLine = this.add.graphics();
+                this.nodeGroup = this.add.group();
+                
+                this.setupLevel();
+                
+                this.input.on('pointerdown', this.onPointerDown, this);
+                this.input.on('pointermove', this.onPointerMove, this);
+                this.input.on('pointerup', this.onPointerUp, this);
+
+                this.timer = 0;
+                this.errors = 0;
+                if (this.timerEvent) this.timerEvent.remove();
+                this.timerEvent = this.time.addEvent({
+                    delay: 1000,
+                    callback: () => {
+                        this.timer++;
+                        this.updateTimerUI();
+                    },
+                    loop: true
+                });
+            }
+
+            setupLevel() {
+                const mode = window.GAME_SETTINGS.modality;
+                const size = window.GAME_SETTINGS.gridSize;
+                const count = size * 2 + 2; // Number of nodes based on grid size
+                
+                this.sequence = this.generateSequence(mode, count);
+                this.currentIndex = 0;
+                this.lastConnectedNode = null;
+                this.nodes = [];
+                this.nodeGroup.clear(true, true);
+                this.permanentLines.clear();
+                
+                // Create random but grid-aligned positions
+                const gridStepX = (this.sys.game.config.width - 100) / size;
+                const gridStepY = (this.sys.game.config.height - 150) / size;
+                const slots = [];
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        slots.push({ x: 75 + i * gridStepX, y: 125 + j * gridStepY });
+                    }
+                }
+                Phaser.Utils.Array.Shuffle(slots);
+
+                this.sequence.forEach((val, idx) => {
+                    const pos = slots[idx];
+                    const node = this.createNode(pos.x, pos.y, val, idx);
+                    this.nodes.push(node);
+                });
+
+                this.updateTargetUI();
+            }
+
+            generateSequence(mode, length) {
+                let seq = [];
+                const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+                const emojis = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌱", "🌿", "🌳", "🍎", "🥧", "🥚", "🐣", "🐥", "🐔", "🍗"];
+                
+                if (mode === 'numbers') {
+                    for (let i = 1; i <= length; i++) seq.push(i.toString());
+                } else if (mode === 'letters') {
+                    for (let i = 0; i < length; i++) seq.push(letters[i]);
+                } else if (mode === 'mixed') {
+                    for (let i = 1; i <= Math.ceil(length/2); i++) {
+                        seq.push(i.toString());
+                        if (seq.length < length) seq.push(letters[i-1]);
+                    }
+                } else {
+                    for (let i = 0; i < length; i++) seq.push(emojis[i % emojis.length]);
+                }
+                return seq;
+            }
+
+            createNode(x, y, label, index) {
+                const container = this.add.container(x, y);
+                
+                const bg = this.add.image(0, 0, 'node-bg').setTint(0x1e293b).setScale(window.GAME_SETTINGS.nodeScale);
+                const text = this.add.text(0, 0, label, {
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#ffffff'
+                }).setOrigin(0.5);
+
+                container.add([bg, text]);
+                container.setSize(60, 60);
+                container.setInteractive();
+                
+                container.setData('index', index);
+                container.setData('label', label);
+                
+                this.nodeGroup.add(container);
+                
+                // Animation
+                container.setScale(0);
+                this.tweens.add({
+                    targets: container,
+                    scale: 1,
+                    duration: 400,
+                    delay: index * 50,
+                    ease: 'Back.easeOut'
+                });
+
+                return container;
+            }
+
+            onPointerDown(pointer, currentlyOver) {
+                if (currentlyOver.length > 0) {
+                    const node = currentlyOver[0];
+                    this.tryConnect(node);
+                }
+            }
+
+            onPointerMove(pointer) {
+                if (this.isDrawing && this.lastConnectedNode) {
+                    this.tempLine.clear();
+                    this.tempLine.lineStyle(window.GAME_SETTINGS.lineThickness, 0x38bdf8, 0.5);
+                    this.tempLine.lineBetween(
+                        this.lastConnectedNode.x, 
+                        this.lastConnectedNode.y, 
+                        pointer.x, 
+                        pointer.y
+                    );
+                    
+                    // Check if we hovered over a new node while dragging
+                    const over = this.input.hitTestPointer(pointer);
+                    if (over.length > 0) {
+                        this.tryConnect(over[0]);
+                    }
+                }
+            }
+
+            onPointerUp() {
+                this.isDrawing = false;
+                this.tempLine.clear();
+            }
+
+            tryConnect(node) {
+                const idx = node.getData('index');
+                
+                if (idx === this.currentIndex) {
+                    // Correct connection
+                    this.isDrawing = true;
+                    
+                    if (this.lastConnectedNode) {
+                        this.drawPermanentLine(this.lastConnectedNode, node);
+                    }
+                    
+                    this.lastConnectedNode = node;
+                    this.currentIndex++;
+                    
+                    // Visual feedback
+                    const bg = node.list[0];
+                    bg.setTint(0x38bdf8);
+                    this.spawnParticles(node.x, node.y);
+                    
+                    this.updateTargetUI();
+
+                    if (this.currentIndex === this.sequence.length) {
+                        this.win();
+                    }
+                } else if (idx > this.currentIndex && this.isDrawing) {
+                    // Error: skipped nodes
+                    this.handleError();
+                }
+            }
+
+            handleError() {
+                this.errors++;
+                this.isDrawing = false;
+                this.tempLine.clear();
+                
+                if (window.GAME_SETTINGS.errorShake) {
+                    this.cameras.main.shake(200, 0.01);
+                }
+            }
+
+            drawPermanentLine(nodeA, nodeB) {
+                this.permanentLines.lineStyle(window.GAME_SETTINGS.lineThickness, 0x38bdf8, 1);
+                this.permanentLines.lineBetween(nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+            }
+
+            spawnParticles(x, y) {
+                const emitter = this.add.particles(x, y, 'spark', {
+                    speed: { min: 50, max: 150 },
+                    scale: { start: 1, end: 0 },
+                    alpha: { start: 1, end: 0 },
+                    lifespan: 600,
+                    gravityY: 100,
+                    quantity: 10,
+                    emitting: false
+                });
+                emitter.explode();
+                this.time.delayedCall(1000, () => emitter.destroy());
+            }
+
+            updateTimerUI() {
+                const mins = Math.floor(this.timer / 60);
+                const secs = this.timer % 60;
+                document.getElementById('timer').innerText = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            updateTargetUI() {
+                const el = document.getElementById('current-target');
+                if (this.currentIndex < this.sequence.length) {
+                    el.innerText = this.sequence[this.currentIndex];
+                    
+                    // Hint mode logic
+                    if (window.GAME_SETTINGS.hintMode) {
+                        this.nodes.forEach((n, i) => {
+                            if (i === this.currentIndex) {
+                                n.list[0].setTint(0x818cf8); // Subtle highlight
+                            } else if (i > this.currentIndex) {
+                                n.list[0].setTint(0x1e293b);
+                            }
+                        });
+                    }
+                } else {
+                    el.innerText = "DONE!";
+                }
+            }
+
+            win() {
+                this.timerEvent.remove();
+                this.isDrawing = false;
+                
+                setTimeout(() => {
+                    const overlay = document.getElementById('game-over-overlay');
+                    const text = document.getElementById('result-text');
+                    overlay.classList.remove('hidden');
+                    text.innerText = `You completed the trail in ${this.timer} seconds with ${this.errors} mistakes.`;
+                }, 800);
+            }
+
+            restartGame() {
+                this.create();
+            }
+        }
+
+        // --- App Initialization ---
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#0f172a',
+            physics: { default: 'arcade' },
+            scene: MainScene
+        };
+
+        const game = new Phaser.Game(config);
+        window.gameInstance = game;
+
+        function startGame(mode) {
+            window.GAME_SETTINGS.modality = mode;
+            document.getElementById('menu-overlay').classList.add('hidden');
+            document.getElementById('game-over-overlay').classList.add('hidden');
+            
+            if (game.scene.isActive('MainScene')) {
+                game.scene.getScene('MainScene').restartGame();
+            } else {
+                game.scene.start('MainScene');
+            }
+        }
+
+        function showMenu() {
+            document.getElementById('menu-overlay').classList.remove('hidden');
+            document.getElementById('game-over-overlay').classList.add('hidden');
+        }
+
+        document.getElementById('home-btn').onclick = showMenu;
+
+    </script>
+</body>
+</html>

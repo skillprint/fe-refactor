@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Glide - Techno Future Relax</title>
+    <meta name="game-icon" content="🛸">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+    <script src="/games/lib/skillprint-adjustment.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050510;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+            border: 2px solid #333;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 5, 20, 0.85);
+            transition: opacity 0.5s;
+            pointer-events: auto;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            font-style: italic;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #f0f;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 30px #0ff;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #0ff;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px #0ff;
+            pointer-events: none;
+        }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="/games/lib/skillprint-adjustment.js"></script>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-layer">
+            <div id="start-screen" class="screen">
+                <h1>NEON GLIDE</h1>
+                <p>A Relaxing Techno Journey</p>
+                <button class="btn" onclick="startGame()">Initiate</button>
+                <p style="font-size: 0.8rem; margin-top: 40px; color: #666;">SPACE to Jump | ARROWS to Move</p>
+            </div>
+            <div id="game-over-screen" class="screen hidden">
+                <h1>SESSION END</h1>
+                <p id="final-score">Distance: 0m</p>
+                <button class="btn" onclick="startGame()">Restart</button>
+            </div>
+            <div id="hud" class="hidden">
+                DISTANCE: <span id="distance-val">0</span>m
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Global Game Config & Adjustments
+    window.GAME_SPEED = 200;
+    window.JUMP_FORCE = -450;
+    window.GRAVITY = 800;
+    window.PARTICLE_INTENSITY = 1;
+
+    // Skillprint Registration
+    window.Skillprint.registerAdjustments({
+        '1': { parameterName: 'hero_speed', description: 'Slower Glide', value: 150 },
+        '2': { parameterName: 'hero_speed', description: 'Faster Glide', value: 300 },
+        '3': { parameterName: 'jump_force', description: 'Low Jump', value: -300 },
+        '4': { parameterName: 'jump_force', description: 'High Jump', value: -600 },
+        '5': { parameterName: 'gravity', description: 'Low Gravity', value: 400 },
+        '6': { parameterName: 'gravity', description: 'High Gravity', value: 1200 },
+        '7': { parameterName: 'particles', description: 'Soft Particles', value: 0.5 },
+        '8': { parameterName: 'particles', description: 'Dense Particles', value: 2.0 },
+        '9': { parameterName: 'reset_all', description: 'Reset Defaults', value: 'default' }
+    });
+
+    window.adjustGame = function(obj) {
+        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
+            const { parameterName, parameterValue } = obj;
+            if (parameterName === 'hero_speed') window.GAME_SPEED = parameterValue;
+            if (parameterName === 'jump_force') window.JUMP_FORCE = parameterValue;
+            if (parameterName === 'gravity') {
+                window.GRAVITY = parameterValue;
+                if (gameInstance && gameInstance.scene.scenes[0].physics) {
+                    gameInstance.scene.scenes[0].physics.world.gravity.y = parameterValue;
+                }
+            }
+            if (parameterName === 'particles') window.PARTICLE_INTENSITY = parameterValue;
+            if (parameterName === 'reset_all') {
+                window.GAME_SPEED = 200;
+                window.JUMP_FORCE = -450;
+                window.GRAVITY = 800;
+                window.PARTICLE_INTENSITY = 1;
+            }
+            console.log(`Adjusted ${parameterName} to ${parameterValue}`);
+        }
+    };
+
+    const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 500,
+        parent: 'game-container',
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: window.GRAVITY },
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    let gameInstance = new Phaser.Game(config);
+    let player;
+    let platforms;
+    let cursors;
+    let distance = 0;
+    let isGameOver = false;
+    let bgGrid;
+    let particles;
+    let emitter;
+    let collectibles;
+
+    function preload() {
+        // Create Neon Assets procedurally
+        let graphics = this.make.graphics({ x: 0, y: 0, add: false });
+        
+        // Player: Glowing Orb
+        graphics.fillStyle(0x00ffff, 1);
+        graphics.fillCircle(16, 16, 12);
+        graphics.lineStyle(2, 0xffffff, 1);
+        graphics.strokeCircle(16, 16, 14);
+        graphics.generateTexture('player', 32, 32);
+        graphics.clear();
+
+        // Platform: Neon Bar
+        graphics.fillStyle(0xff00ff, 1);
+        graphics.fillRoundedRect(0, 0, 150, 20, 10);
+        graphics.lineStyle(3, 0xffffff, 1);
+        graphics.strokeRoundedRect(0, 0, 150, 20, 10);
+        graphics.generateTexture('platform', 150, 20);
+        graphics.clear();
+
+        // Collectible: Star
+        graphics.fillStyle(0xffff00, 1);
+        graphics.fillCircle(8, 8, 6);
+        graphics.generateTexture('star', 16, 16);
+        graphics.clear();
+
+        // Background Grid
+        graphics.lineStyle(1, 0x3333ff, 0.5);
+        for(let i=0; i<40; i++){
+            graphics.moveTo(i*40, 0);
+            graphics.lineTo(i*40, 500);
+            graphics.moveTo(0, i*40);
+            graphics.lineTo(800, i*40);
+        }
+        graphics.strokePath();
+        graphics.generateTexture('grid', 800, 500);
+    }
+
+    function create() {
+        // Background
+        bgGrid = this.add.tileSprite(400, 250, 800, 500, 'grid');
+        
+        // Physics Groups
+        platforms = this.physics.add.staticGroup();
+        collectibles = this.physics.add.group();
+
+        // Initial Platform
+        platforms.create(100, 400, 'platform');
+        platforms.create(350, 350, 'platform');
+        platforms.create(600, 300, 'platform');
+
+        // Player
+        player = this.physics.add.sprite(100, 300, 'player');
+        player.setBounce(0.1);
+        player.setCollideWorldBounds(false);
+
+        // Particles
+        particles = this.add.particles(0, 0, 'star', {
+            speed: 100,
+            scale: { start: 1, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 600,
+            frequency: 50
+        });
+        particles.startFollow(player);
+
+        // Collisions
+        this.physics.add.collider(player, platforms);
+        this.physics.add.overlap(player, collectibles, collectStar, null, this);
+
+        cursors = this.input.keyboard.createCursorKeys();
+        
+        // Camera follow (pseudo)
+        this.cameras.main.setBackgroundColor('#050510');
+
+        // Initial stars
+        spawnStars(this);
+    }
+
+    function spawnStars(scene) {
+        for(let i=0; i<5; i++) {
+            let x = Phaser.Math.Between(400, 1200);
+            let y = Phaser.Math.Between(100, 400);
+            let star = collectibles.create(x, y, 'star');
+            star.body.setAllowGravity(false);
+        }
+    }
+
+    function collectStar(player, star) {
+        star.destroy();
+        distance += 50; // Bonus distance for relaxing feel
+        // Visual feedback
+        let boom = this.add.particles(star.x, star.y, 'star', {
+            speed: 200,
+            scale: { start: 1, end: 0 },
+            lifespan: 400,
+            count: 10,
+            emitting: false
+        });
+        boom.explode(10);
+    }
+
+    function update(time, delta) {
+        if (isGameOver) return;
+
+        // Movement
+        if (cursors.left.isDown) {
+            player.setVelocityX(-window.GAME_SPEED);
+        } else if (cursors.right.isDown) {
+            player.setVelocityX(window.GAME_SPEED);
+        } else {
+            player.setVelocityX(window.GAME_SPEED * 0.5); // Constant flow for Rayman feel
+        }
+
+        if ((cursors.up.isDown || cursors.space.isDown) && player.body.touching.down) {
+            player.setVelocityY(window.JUMP_FORCE);
+        }
+
+        // Particle adjustment
+        particles.frequency = 50 / window.PARTICLE_INTENSITY;
+
+        // World Scrolling Logic
+        bgGrid.tilePositionX += 1;
+        
+        // Endless Platform Generation
+        platforms.children.iterate(function (child) {
+            if (child && child.x < player.x - 600) {
+                child.x = player.x + 600 + Phaser.Math.Between(0, 200);
+                child.y = Phaser.Math.Between(200, 450);
+                child.refreshBody();
+                
+                // Spawn a star above new platform
+                if(Math.random() > 0.5) {
+                    let star = collectibles.create(child.x, child.y - 50, 'star');
+                    star.body.setAllowGravity(false);
+                }
+            }
+        });
+
+        // Cleanup stars far behind
+        collectibles.children.iterate(function (star) {
+            if (star && star.x < player.x - 600) {
+                star.destroy();
+            }
+        });
+
+        // Track distance
+        let currentDist = Math.floor(player.x / 10);
+        if (currentDist > distance) distance = currentDist;
+        document.getElementById('distance-val').innerText = distance;
+
+        // Relaxing Death: If you fall, you just teleport back to the last platform height
+        if (player.y > 600) {
+            player.y = 100;
+            player.x -= 100;
+            player.setVelocityY(0);
+            // Flash camera
+            this.cameras.main.flash(500, 0, 255, 255, 0.2);
+        }
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+        
+        isGameOver = false;
+        distance = 0;
+        
+        if (gameInstance.scene.scenes[0]) {
+            let scene = gameInstance.scene.scenes[0];
+            scene.scene.restart();
+        }
+    }
+
+    function gameOver() {
+        isGameOver = true;
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `Distance: ${distance}m`;
+    }
+
+</script>
+</body>
+</html>

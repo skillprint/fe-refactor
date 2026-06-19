@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { setCookie } from '../utils/cookieUtils';
 
 type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner' | 'organization';
 
@@ -57,9 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     safeStorage.removeItem('user_profile');
                 }
 
-                const date = new Date();
-                date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                document.cookie = `user_id=${urlUserId}; expires=${date.toUTCString()}; path=/`;
+                setCookie('user_id', urlUserId);
 
                 setIsLoading(false);
                 return;
@@ -70,9 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (existingUserId) {
                     safeStorage.setItem('auth_status', 'partner');
                     safeStorage.setItem('user_id', existingUserId);
-                    const date = new Date();
-                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = `user_id=${existingUserId}; expires=${date.toUTCString()}; path=/`;
+                    setCookie('user_id', existingUserId);
                 }
             } else {
                 const currentStatus = safeStorage.getItem('auth_status');
@@ -118,9 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         safeStorage.setItem('user_profile', JSON.stringify(profile));
         safeStorage.setItem('user_id', socialId); // Added to sync with localStorage
         // Treat the socialId as the local user_id setting so the profile data fetches properly
-        const date = new Date();
-        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-        document.cookie = `user_id=${socialId}; expires=${date.toUTCString()}; path=/`;
+        setCookie('user_id', socialId);
     };
 
     const loginAsOrg = (token: string, profile: { firstName: string }) => {

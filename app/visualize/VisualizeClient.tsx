@@ -4,11 +4,30 @@ import React, { useState, useEffect } from 'react';
 import ControlPanel from './components/ControlPanel';
 import DynamicChart from './components/DynamicChart';
 import { generateSyntheticData, DataPoint, MODEL_FIELDS } from './utils/syntheticData';
+import { useUserSession } from '../hooks/useUserSession';
+import QuickJumperModal from './components/QuickJumperModal';
 
 export default function VisualizeClient() {
+  const { userId } = useUserSession();
   const [selectedModel, setSelectedModel] = useState<string>('Session');
   const [selectedFields, setSelectedFields] = useState<string[]>([MODEL_FIELDS['Session'][0]]);
   const [chartType, setChartType] = useState<'Bar' | 'Line' | 'Area' | 'BarLine' | 'Pie' | 'Scatter' | 'RangeBand' | 'Radar' | 'DailyBreakdown'>('Bar');
+  
+  const [customJumpers, setCustomJumpers] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    
+    fetch(`/api/quick-jumpers?userId=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.jumpers) {
+          setCustomJumpers(data.jumpers);
+        }
+      })
+      .catch(err => console.error("Failed to load custom quick jumpers", err));
+  }, [userId]);
   
   const handleModelChange = (model: string) => {
     setSelectedModel(model);
@@ -51,7 +70,8 @@ export default function VisualizeClient() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <div className="lg:col-span-1">
         <ControlPanel 
           selectedModel={selectedModel}
@@ -71,6 +91,8 @@ export default function VisualizeClient() {
           setCompareCohort={setCompareCohort}
           onGenerate={handleGenerateData}
           isGenerating={isGenerating}
+          customJumpers={customJumpers}
+          onOpenCreator={() => setIsModalOpen(true)}
         />
       </div>
 
@@ -103,5 +125,39 @@ export default function VisualizeClient() {
         </div>
       </div>
     </div>
+      
+      <QuickJumperModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSaveSuccess={(newJumper) => {
+          setCustomJumpers(prev => [newJumper, ...prev]);
+          
+          // Apply custom jumper configurations to active client state
+          setSelectedModel(newJumper.modelName);
+          setSelectedFields(newJumper.fields);
+          setChartType(newJumper.chart);
+          setComparePeriods(newJumper.compPeriods);
+          setCompareCohort(newJumper.compCohort);
+          setFilters({});
+
+          const end = new Date();
+          const start = new Date();
+          start.setDate(start.getDate() - newJumper.daysOffset);
+          setDateRange({ start, end });
+
+          handleGenerateData({
+            modelName: newJumper.modelName,
+            selectedFields: newJumper.fields,
+            chartType: newJumper.chart,
+            startDate: start,
+            endDate: end,
+            comparePeriods: newJumper.compPeriods,
+            compareCohort: newJumper.compCohort,
+            filters: {}
+          });
+        }}
+        userId={userId}
+      />
+    </>
   );
 }

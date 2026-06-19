@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 740" width="100%" height="100%" style="background:#090D16; font-family: system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Drop Shadow Filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    
+    <!-- Column Backdrop Glowing Gradients -->
+    <linearGradient id="loopGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0"/>
+    </linearGradient>
+    <linearGradient id="sdkGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+    </linearGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#0B0F19"/>
+    </linearGradient>
+
+    <!-- Header Accent Gradient -->
+    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+
+    <!-- Progress Bar Gradients -->
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Grid Pattern -->
+  <rect width="1680" height="740" fill="#070A13"/>
+  <g stroke="#1F2937" stroke-width="0.5" opacity="0.2">
+    <path d="M 0,100 L 1680,100 M 0,200 L 1680,200 M 0,300 L 1680,300 M 0,400 L 1680,400 M 0,500 L 1680,500 M 0,600 L 1680,600 M 0,700 L 1680,700" />
+    <path d="M 200,0 L 200,740 M 400,0 L 400,740 M 600,0 L 600,740 M 800,0 L 800,740 M 1000,0 L 1000,740 M 1200,0 L 1200,740 M 1400,0 L 1400,740 M 1600,0 L 1600,740" />
+  </g>
+
+  <!-- Title & Branding -->
+  <g transform="translate(80, 50)">
+    <rect x="-4" y="-12" width="1520" height="4" fill="url(#headerGrad)"/>
+    <text x="0" y="24" font-size="28" font-weight="900" fill="#FFFFFF" letter-spacing="1">PERFORMANCE REPORT: BUNDLE SIZES &amp; PAGE WEIGHTS</text>
+
+  </g>
+
+  <!-- Swimlanes / Columns Backdrops -->
+  <!-- Column 1: Network & JS Payload Comparison -->
+  <g id="col-payloads">
+    <rect x="80" y="140" width="720" height="520" rx="16" fill="url(#loopGlow)" stroke="#8B5CF6" stroke-width="1.5" stroke-opacity="0.2"/>
+    <rect x="80" y="140" width="720" height="45" rx="16" fill="#8B5CF6" fill-opacity="0.08" stroke="#8B5CF6" stroke-width="1.5" stroke-opacity="0.2"/>
+    <text x="440" y="168" font-size="14" font-weight="bold" fill="#8B5CF6" letter-spacing="2" text-anchor="middle">ASSETS &amp; BUNDLE COMPARISON</text>
+  </g>
+
+  <!-- Column 2: Architectural Drivers -->
+  <g id="col-architecture">
+    <rect x="880" y="140" width="720" height="520" rx="16" fill="url(#sdkGlow)" stroke="#10B981" stroke-width="1.5" stroke-opacity="0.2"/>
+    <rect x="880" y="140" width="720" height="45" rx="16" fill="#10B981" fill-opacity="0.08" stroke="#10B981" stroke-width="1.5" stroke-opacity="0.2"/>
+    <text x="1240" y="168" font-size="14" font-weight="bold" fill="#10B981" letter-spacing="2" text-anchor="middle">KEY ARCHITECTURAL DRIVERS</text>
+  </g>
+
+
+  <!-- ==================== swimlane 1: ASSETS & BUNDLE SIZE ==================== -->
+  
+  <!-- Payload Headers -->
+  <g transform="translate(120, 215)">
+    <text x="0" y="0" font-size="12" font-weight="bold" fill="#64748B" letter-spacing="1">NETWORK / BUNDLE METRIC</text>
+    <text x="320" y="0" font-size="12" font-weight="bold" fill="#64748B" letter-spacing="1" text-anchor="middle">ORIGINAL</text>
+    <text x="490" y="0" font-size="12" font-weight="bold" fill="#64748B" letter-spacing="1" text-anchor="middle">REFACTORED</text>
+    <text x="610" y="0" font-size="12" font-weight="bold" fill="#64748B" letter-spacing="1" text-anchor="middle">IMPROVEMENT</text>
+  </g>
+
+  <g stroke="#1F2937" stroke-width="1" opacity="0.3">
+    <line x1="120" y1="230" x2="760" y2="230"/>
+  </g>
+
+  <!-- Row 1: Total Network Payload -->
+  <g transform="translate(120, 275)">
+    <text x="0" y="0" font-size="14" font-weight="bold" fill="#FFFFFF">Total Page Weight</text>
+    <text x="0" y="18" font-size="11" fill="#64748B">Total compressed bytes loaded over network</text>
+    
+    <text x="320" y="8" font-size="14" font-weight="bold" fill="#EF4444" text-anchor="middle">21,381 KB</text>
+    <text x="490" y="8" font-size="14" font-weight="bold" fill="#10B981" text-anchor="middle">1,826 KB</text>
+    
+    <!-- Improvement Pill -->
+    <rect x="560" y="-12" width="100" height="24" rx="12" fill="#10B981" fill-opacity="0.15"/>
+    <text x="610" y="4" font-size="12" font-weight="bold" fill="#10B981" text-anchor="middle">11.7x Smaller</text>
+  </g>
+
+  <g stroke="#1F2937" stroke-width="1" opacity="0.2" transform="translate(120, 310)">
+    <line x1="0" y1="0" x2="640" y2="0"/>
+  </g>
+
+  <!-- Row 2: JS Transfer Size (Compressed) -->
+  <g transform="translate(120, 350)">
+    <text x="0" y="0" font-size="14" font-weight="bold" fill="#FFFFFF">JS Transfer Size</text>
+    <text x="0" y="18" font-size="11" fill="#64748B">Compressed JS payload sent to user browser</text>
+    
+    <text x="320" y="8" font-size="14" font-weight="bold" fill="#EF4444" text-anchor="middle">19,224 KB</text>
+    <text x="490" y="8" font-size="14" font-weight="bold" fill="#10B981" text-anchor="middle">442 KB</text>
+    
+    <!-- Improvement Pill -->
+    <rect x="560" y="-12" width="100" height="24" rx="12" fill="#10B981" fill-opacity="0.15"/>
+    <text x="610" y="4" font-size="12" font-weight="bold" fill="#10B981" text-anchor="middle">43.5x Smaller</text>
+  </g>
+
+  <g stroke="#1F2937" stroke-width="1" opacity="0.2" transform="translate(120, 385)">
+    <line x1="0" y1="0" x2="640" y2="0"/>
+  </g>
+
+  <!-- Row 3: JS Uncompressed Resource Size -->
+  <g transform="translate(120, 425)">
+    <text x="0" y="0" font-size="14" font-weight="bold" fill="#FFFFFF">JS Uncompressed Size</text>
+    <text x="0" y="18" font-size="11" fill="#64748B">Actual JS parsing size on browser main thread</text>
+    
+    <text x="320" y="8" font-size="14" font-weight="bold" fill="#EF4444" text-anchor="middle">20,113 KB</text>
+    <text x="490" y="8" font-size="14" font-weight="bold" fill="#10B981" text-anchor="middle">1,399 KB</text>
+    
+    <!-- Improvement Pill -->
+    <rect x="560" y="-12" width="100" height="24" rx="12" fill="#10B981" fill-opacity="0.15"/>
+    <text x="610" y="4" font-size="12" font-weight="bold" fill="#10B981" text-anchor="middle">14.4x Smaller</text>
+  </g>
+
+  <g stroke="#1F2937" stroke-width="1" opacity="0.2" transform="translate(120, 460)">
+    <line x1="0" y1="0" x2="640" y2="0"/>
+  </g>
+
+  <!-- Row 4: Total Network Requests -->
+  <g transform="translate(120, 500)">
+    <text x="0" y="0" font-size="14" font-weight="bold" fill="#FFFFFF">Total Network Requests</text>
+    <text x="0" y="18" font-size="11" fill="#64748B">Number of requests to fetch page assets</text>
+    
+    <text x="320" y="8" font-size="14" font-weight="bold" fill="#EF4444" text-anchor="middle">99</text>
+    <text x="490" y="8" font-size="14" font-weight="bold" fill="#10B981" text-anchor="middle">72</text>
+    
+    <!-- Improvement Pill -->
+    <rect x="560" y="-12" width="100" height="24" rx="12" fill="#10B981" fill-opacity="0.15"/>
+    <text x="610" y="4" font-size="12" font-weight="bold" fill="#10B981" text-anchor="middle">27% Fewer</text>
+  </g>
+
+  <g stroke="#1F2937" stroke-width="1" opacity="0.2" transform="translate(120, 535)">
+    <line x1="0" y1="0" x2="640" y2="0"/>
+  </g>
+
+
+  <!-- ==================== swimlane 2: ARCHITECTURAL DRIVERS ==================== -->
+  
+  <!-- Driver 1: Next.js Server-Side Optimization -->
+  <g id="driver-ssr" filter="url(#shadow)" transform="translate(920, 210)">
+    <rect x="0" y="0" width="640" height="120" rx="12" fill="url(#cardGrad)" stroke="#10B981" stroke-opacity="0.2" stroke-width="1.5"/>
+    <rect x="0" y="0" width="6" height="120" rx="2" fill="#10B981"/>
+    
+    <!-- Icon Placeholder / Small Symbol -->
+    <circle cx="45" cy="45" r="18" fill="#10B981" fill-opacity="0.15"/>
+    <path d="M 37,42 H 53 M 37,48 H 53 M 40,36 H 50" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Content -->
+    <text x="80" y="36" font-size="15" font-weight="bold" fill="#FFFFFF">Server-Side Rendering &amp; Static Optimization</text>
+    <text x="80" y="58" font-size="12" fill="#94A3B8">Migrated to Next.js App Router, enabling pre-rendered HTML</text>
+    <text x="80" y="78" font-size="12" fill="#94A3B8">templates. This cuts raw structural execution time on client-side,</text>
+    <text x="80" y="98" font-size="12" fill="#94A3B8">allowing the initial page to display before execution completes.</text>
+  </g>
+
+  <!-- Driver 2: Route-Based Dynamic Imports -->
+  <g id="driver-split" filter="url(#shadow)" transform="translate(920, 350)">
+    <rect x="0" y="0" width="640" height="120" rx="12" fill="url(#cardGrad)" stroke="#10B981" stroke-opacity="0.2" stroke-width="1.5"/>
+    <rect x="0" y="0" width="6" height="120" rx="2" fill="#10B981"/>
+    
+    <!-- Icon Placeholder / Small Symbol -->
+    <circle cx="45" cy="45" r="18" fill="#10B981" fill-opacity="0.15"/>
+    <path d="M 38,40 L 42,40 L 42,48 L 38,48 M 48,40 L 52,40 L 52,48 L 48,48" stroke="#10B981" stroke-width="2" stroke-linejoin="round" fill="none"/>
+    <circle cx="45" cy="45" r="2" fill="#10B981"/>
+
+    <!-- Content -->
+    <text x="80" y="36" font-size="15" font-weight="bold" fill="#FFFFFF">Modern Code Splitting &amp; Bundling</text>
+    <text x="80" y="58" font-size="12" fill="#94A3B8">Split the monolithic JS scripts into 25 independent chunks.</text>
+    <text x="80" y="78" font-size="12" fill="#94A3B8">Instead of downloading 19.2 MB of frontend bundle on day-one,</text>
+    <text x="80" y="98" font-size="12" fill="#94A3B8">the browser downloads only 442 KB of critical code for the route.</text>
+  </g>
+
+  <!-- Driver 3: Lazy Game Initialization -->
+  <g id="driver-lazy" filter="url(#shadow)" transform="translate(920, 490)">
+    <rect x="0" y="0" width="640" height="120" rx="12" fill="url(#cardGrad)" stroke="#10B981" stroke-opacity="0.2" stroke-width="1.5"/>
+    <rect x="0" y="0" width="6" height="120" rx="2" fill="#10B981"/>
+    
+    <!-- Icon Placeholder / Small Symbol -->
+    <circle cx="45" cy="45" r="18" fill="#10B981" fill-opacity="0.15"/>
+    <path d="M 37,45 C 37,39 42,39 45,39 C 48,39 53,39 53,45 C 53,49 50,51 47,51 H 43 C 40,51 37,49 37,45 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+
+    <!-- Content -->
+    <text x="80" y="36" font-size="15" font-weight="bold" fill="#FFFFFF">Deferred Game Canvas &amp; SDK Initialization</text>
+    <text x="80" y="58" font-size="12" fill="#94A3B8">The old version loaded entire Cocos/Unity engines upfront.</text>
+    <text x="80" y="78" font-size="12" fill="#94A3B8">The refactor deferrals lazy-load all heavy engine libraries and iframes</text>
+    <text x="80" y="98" font-size="12" fill="#94A3B8">only when the player launches a specific game in the client.</text>
+  </g>
+
+</svg>
