@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="100%" height="100%" style="background:#070A13; font-family: system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Drop Shadow Filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    
+    <!-- Header Accent Gradient -->
+    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    
+    <!-- Arrowhead Markers -->
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#10B981"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#8B5CF6"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- Background Grid Pattern -->
+  <rect width="1200" height="900" fill="#070A13"/>
+  <g stroke="#1F2937" stroke-width="0.5" opacity="0.2">
+    <path d="M 0,100 L 1200,100 M 0,200 L 1200,200 M 0,300 L 1200,300 M 0,400 L 1200,400 M 0,500 L 1200,500 M 0,600 L 1200,600 M 0,700 L 1200,700 M 0,800 L 1200,800 M 0,900 L 1200,900" />
+    <path d="M 100,0 L 100,900 M 200,0 L 200,900 M 300,0 L 300,900 M 400,0 L 400,900 M 500,0 L 500,900 M 600,0 L 600,900 M 700,0 L 700,900 M 800,0 L 800,900 M 900,0 L 900,900 M 1000,0 L 1000,900 M 1100,0 L 1100,900" />
+  </g>
+
+  <!-- Title & Branding -->
+  <g transform="translate(80, 50)">
+    <rect x="-4" y="-12" width="1040" height="4" fill="url(#headerGrad)"/>
+    <text x="0" y="24" font-size="28" font-weight="900" fill="#FFFFFF" letter-spacing="1">SKILLPRINT GAME CREATOR</text>
+  </g>
+
+  <!-- ==================== FLOW NODES ==================== -->
+
+  <!-- Start Node -->
+  <circle cx="600" cy="90" r="12" fill="#3B82F6" filter="url(#shadow)"/>
+  
+  <!-- Flow: Start -> Node 1 -->
+  <path d="M 600,102 L 600,130" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Node 1: Input prompt/design options -->
+  <g transform="translate(470, 130)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#3B82F6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Configure Design &amp; Input Prompt</text>
+  </g>
+
+  <!-- Flow: Node 1 -> Node 2 -->
+  <path d="M 600,180 L 600,210" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Node 2: Submit POST generate-game request -->
+  <g transform="translate(470, 210)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#3B82F6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Submit POST /api/generate-game</text>
+  </g>
+
+  <!-- Flow: Node 2 -> Node 3 -->
+  <path d="M 600,260 L 600,290" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Node 3: Chatbot BE compiles guidelines & context -->
+  <g transform="translate(470, 290)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#10B981"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Assemble Context &amp; Base Guidelines</text>
+  </g>
+
+  <!-- Flow: Node 3 -> Node 4 -->
+  <path d="M 600,340 L 600,370" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Node 4: LLM compilation of code -->
+  <g transform="translate(470, 370)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#10B981"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Generate Asset-Free Game Code</text>
+  </g>
+
+  <!-- Flow: Node 4 -> Node 5 -->
+  <path d="M 600,420 L 600,450" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Node 5: SDK / Phaser script injection -->
+  <g transform="translate(470, 450)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#10B981" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#10B981"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Inject SDK &amp; Engine Dependencies</text>
+  </g>
+
+  <!-- Flow: Node 5 -> Fork Bar 1 -->
+  <path d="M 600,500 L 600,527" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Fork Bar 1 (Parallel threads start) -->
+  <rect x="300" y="527" width="600" height="6" rx="3" fill="#4B5563" filter="url(#shadow)"/>
+
+  <!-- LEFT THREAD (Save & Database Registry) -->
+  <path d="M 450,533 L 450,560" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-slate)"/>
+  
+  <!-- Left Node 6A: Save Bundle to Public Disk -->
+  <g transform="translate(320, 560)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#8B5CF6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Save Bundle &amp; Register Game</text>
+  </g>
+
+  <path d="M 450,610 L 450,640" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow-purple)"/>
+
+  <!-- Left Node 6B: Extract & Registry Parameters in DB -->
+  <g transform="translate(320, 640)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#8B5CF6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Parse &amp; DB-Register Parameters</text>
+  </g>
+
+  <path d="M 450,690 L 450,717" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow-purple)"/>
+
+  <!-- RIGHT THREAD (Frontend Preview Preparation) -->
+  <path d="M 750,533 L 750,560" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-slate)"/>
+
+  <!-- Right Node 7A: Return Generated game metadata & URL -->
+  <g transform="translate(620, 560)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#3B82F6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Mount Sandboxed Preview Iframe</text>
+  </g>
+
+  <path d="M 750,610 L 750,640" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Right Node 7B: Developer Interactive Playback -->
+  <g transform="translate(620, 640)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#3B82F6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Play &amp; Evaluate Live Mechanics</text>
+  </g>
+
+  <path d="M 750,690 L 750,717" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Join Bar 1 (Parallel threads join) -->
+  <rect x="300" y="717" width="600" height="6" rx="3" fill="#4B5563" filter="url(#shadow)"/>
+
+  <!-- Flow: Join Bar -> Node 8 (Publish Game) -->
+  <path d="M 600,723 L 600,750" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Node 8: Publish Game -->
+  <g transform="translate(470, 750)" filter="url(#shadow)">
+    <rect width="260" height="50" rx="10" fill="url(#cardGrad)" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#3B82F6"/>
+    <text x="130" y="29" font-size="12" font-weight="bold" fill="#E2E8F0" text-anchor="middle">Publish Game to Live Catalog</text>
+  </g>
+
+  <!-- Flow: Node 8 -> End Node -->
+  <path d="M 600,800 L 600,830" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- End Node (Game Published) -->
+  <g transform="translate(600, 845)" filter="url(#shadow)">
+    <circle cx="0" cy="0" r="14" fill="none" stroke="#10B981" stroke-width="2"/>
+    <circle cx="0" cy="0" r="8" fill="#10B981"/>
+  </g>
+
+  <!-- ==================== AUTOMATED SDK TELEMETRY LOOP ==================== -->
+  
+  <!-- Path from 7B (Interactive Session) to SDK background loop -->
+  <path d="M 880,665 L 940,665" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  
+  <!-- Node 9: SDK Screenshot & Telemetry Transmission -->
+  <g transform="translate(940, 640)" filter="url(#shadow)">
+    <rect width="220" height="50" rx="10" fill="url(#cardGrad)" stroke="#8B5CF6" stroke-width="1.5"/>
+    <rect width="4" height="50" rx="2" fill="#8B5CF6"/>
+    <text x="110" y="29" font-size="11" font-weight="bold" fill="#E2E8F0" text-anchor="middle">SDK Screenshot Telemetry</text>
+  </g>
+
+  <!-- Loop back from Node 9 back to playback -->
+  <path d="M 1050,640 C 1050,610 750,610 750,634" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow-purple)"/>
+  <!-- Label on Loop -->
+  <g transform="translate(900, 610)">
+    <rect x="-65" y="-9" width="130" height="18" rx="4" fill="#070A13" stroke="#8B5CF6" stroke-opacity="0.3" stroke-width="1"/>
+    <text y="4" font-size="9" font-weight="bold" fill="#C084FC" text-anchor="middle">Adaptive Parameter Poll</text>
+  </g>
+
+</svg>

@@ -294,7 +294,7 @@ export default function GameClient({ slug }: GameClientProps) {
                     setLastSessionResponse(polledRes);
 
                     // Process telemetry adjustments
-                    if (polledRes.telemetry && polledRes.telemetry.length > 0) {
+                    if (!disableAdjustments && polledRes.telemetry && polledRes.telemetry.length > 0) {
                         try {
                             const now = Date.now();
                             // Check cooldown (30 seconds)
@@ -355,6 +355,8 @@ export default function GameClient({ slug }: GameClientProps) {
     const searchParams = useSearchParams();
     const source = searchParams.get('source');
     const playbookId = searchParams.get('playbookId');
+    const disableAdjustments = searchParams.get('adjustments') === 'false';
+    const disableSdk = searchParams.get('sdk') === 'false';
 
     const handleGameComplete = (data: any) => {
         const endTime = Date.now();
@@ -517,35 +519,37 @@ export default function GameClient({ slug }: GameClientProps) {
         lastAdjustmentTimeRef.current = 0;
 
         // Initialize Skillprint Session
-        const sessionId = crypto.randomUUID();
-        skillprintSessionIdRef.current = sessionId;
-        const apiKey = getApiKey();
+        if (!disableSdk) {
+            const sessionId = crypto.randomUUID();
+            skillprintSessionIdRef.current = sessionId;
+            const apiKey = getApiKey();
 
-        // Try to get token from hook or localStorage directly for immediate availability
-        const tokenToUse = userToken || localStorage.getItem('userToken');
+            // Try to get token from hook or localStorage directly for immediate availability
+            const tokenToUse = userToken || localStorage.getItem('userToken');
 
-        // Use staging by default as per existing code
-        const client = new SkillprintClient({
-            apiKey,
-            baseUrl: 'https://api.staging.skillprint.co/',
-            logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
-            userToken: tokenToUse || undefined
-        });
-        skillprintClientRef.current = client;
+            // Use staging by default as per existing code
+            const client = new SkillprintClient({
+                apiKey,
+                baseUrl: 'https://api.staging.skillprint.co/',
+                logger: (msg, level) => console.log(`[Skillprint SDK] ${level}: ${msg}`),
+                userToken: tokenToUse || undefined
+            });
+            skillprintClientRef.current = client;
 
-        try {
-            const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
-            const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
+            try {
+                const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
+                const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
 
-            console.log('Starting session for slug', serverSideSlug, decodedSlug);
-            client.startSession(sessionId, targetMood, serverSideSlug);
-            shouldPollRef.current = true;
-            pollSessionTips();
-        } catch (e) {
-            console.error('Failed to start Skillprint session', e);
+                console.log('Starting session for slug', serverSideSlug, decodedSlug);
+                client.startSession(sessionId, targetMood, serverSideSlug);
+                shouldPollRef.current = true;
+                pollSessionTips();
+            } catch (e) {
+                console.error('Failed to start Skillprint session', e);
+            }
+
+            injectJavascriptIntoIframe();
         }
-
-        injectJavascriptIntoIframe();
 
         return () => {
             shouldPollRef.current = false;
@@ -625,11 +629,13 @@ export default function GameClient({ slug }: GameClientProps) {
                     )}
 
                     {/* Hidden keyboard adjustment tester */}
-                    <GameAdjustmentTester
-                        iframeRef={iframeRef}
-                        slug={decodedSlug}
-                        onAdjustment={(adj) => setCurrentAdjustment(adj)}
-                    />
+                    {!disableAdjustments && (
+                        <GameAdjustmentTester
+                            iframeRef={iframeRef}
+                            slug={decodedSlug}
+                            onAdjustment={(adj) => setCurrentAdjustment(adj)}
+                        />
+                    )}
                 </main>
             </div>
 
