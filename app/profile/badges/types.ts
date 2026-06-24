@@ -1,5 +1,6 @@
 export interface Badge {
     id: string;
+    slug?: string; // Optional slug for mapping legacy badges to assets
     name: string;
     description: string;
     longDescription: string;

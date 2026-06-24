@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import confetti from 'canvas-confetti';
 import { Badge } from '../types';
+import LocalImageAssets from '../old/assets';
 
 interface GoalModalProps {
     badge: Badge;
@@ -135,8 +137,17 @@ export default function GoalModal({ badge, onClose }: GoalModalProps) {
                         <div className="absolute inset-0 rounded-full border-4 border-yellow-400 flex items-center justify-center animate-spin" style={{ animationDuration: '20s' }} />
 
                         {/* Actual Icon Wrapper */}
-                        <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${badge.color} text-white flex items-center justify-center text-5xl shadow-lg ring-4 ring-card dark:ring-zinc-900 animate-badge-spin z-10`}>
-                            {badge.icon}
+                        <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${badge.color} text-white flex items-center justify-center text-5xl shadow-lg ring-4 ring-card dark:ring-zinc-900 animate-badge-spin z-10 overflow-hidden p-2`}>
+                            {badge.slug ? (
+                                <Image 
+                                    src={LocalImageAssets.badges.regular[badge.slug]} 
+                                    alt={badge.name} 
+                                    className="w-20 h-20 object-contain"
+                                    priority
+                                />
+                            ) : (
+                                <span>{badge.icon}</span>
+                            )}
                         </div>
                     </div>
 
