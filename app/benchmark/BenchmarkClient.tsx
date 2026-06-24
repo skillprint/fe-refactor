@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useBenchmarkData } from './hooks/useBenchmarkData';
 import DynamicScatterPlot from './components/DynamicScatterPlot';
 import LeaderboardTable from './components/LeaderboardTable';
@@ -17,6 +17,30 @@ export default function BenchmarkClient() {
   const [launchMood, setLaunchMood] = useState<string>('focus');
   const [disableSdk, setDisableSdk] = useState<boolean>(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Pre-game survey state
+  const [showPreGameSurvey, setShowPreGameSurvey] = useState(false);
+  const [pendingLaunchConfig, setPendingLaunchConfig] = useState<{ withAdjustments: boolean; url: string } | null>(null);
+  const [preGameRating, setPreGameRating] = useState<number | null>(null);
+
+  // Post-game survey state
+  const isPostGameSurvey = searchParams.get('postGameSurvey') === 'true';
+  const postGameGameSlug = searchParams.get('gameSlug') || '';
+  const postGameMood = searchParams.get('mood') || 'focus';
+
+  const [showPostGameSurvey, setShowPostGameSurvey] = useState(isPostGameSurvey);
+  const [postGameResponse, setPostGameResponse] = useState<string | null>(null);
+  const [surveyCompleted, setSurveyCompleted] = useState(false);
+
+  // Effect to update post-game survey visibility if query parameters change
+  useEffect(() => {
+    if (searchParams.get('postGameSurvey') === 'true') {
+      setShowPostGameSurvey(true);
+      setSurveyCompleted(false);
+      setPostGameResponse(null);
+    }
+  }, [searchParams]);
 
   // Load benchmark dataset
   const { models, scatterData, stats, simulatorSteps } = useBenchmarkData(gameFilter, moodFilter);
@@ -35,11 +59,60 @@ export default function BenchmarkClient() {
 
   const handleLaunchGame = (withAdjustments: boolean) => {
     localStorage.setItem('targetMood', launchMood);
-    let url = `/game/${launchGame}?adjustments=${withAdjustments}`;
+    let url = `/game/${launchGame}?adjustments=${withAdjustments}&source=benchmark`;
     if (disableSdk) {
       url += `&sdk=false`;
     }
-    router.push(url);
+    setPendingLaunchConfig({ withAdjustments, url });
+    setPreGameRating(null); // Reset rating selection
+    setShowPreGameSurvey(true);
+  };
+
+  const handlePreGameSubmit = () => {
+    if (preGameRating !== null && pendingLaunchConfig) {
+      // Save pre-game score
+      const key = `preGameSurvey_${launchGame}_${launchMood}`;
+      localStorage.setItem(key, preGameRating.toString());
+      localStorage.setItem('lastPreGameMood', launchMood);
+      localStorage.setItem('lastPreGameRating', preGameRating.toString());
+      setShowPreGameSurvey(false);
+      router.push(pendingLaunchConfig.url);
+    }
+  };
+
+  const handlePostGameSubmit = () => {
+    if (postGameResponse !== null) {
+      // Save post-game feedback
+      const key = `postGameSurvey_${postGameGameSlug}_${postGameMood}`;
+      localStorage.setItem(key, postGameResponse);
+      
+      // Calculate shifts (just mock logs for analytics dashboard)
+      const prevRating = localStorage.getItem('lastPreGameRating');
+      const prevMood = localStorage.getItem('lastPreGameMood');
+      console.log(`Survey result: Mood ${postGameMood} pre-rating was ${prevRating}, post-response is ${postGameResponse}`);
+      
+      setSurveyCompleted(true);
+    }
+  };
+
+  const handleClosePostGameSurvey = () => {
+    setShowPostGameSurvey(false);
+    // Remove query parameters from URL
+    router.replace('/benchmark');
+  };
+
+  const getMoodLabel = (mood: string) => {
+    if (mood.toLowerCase() === 'focus') return 'Focus';
+    if (mood.toLowerCase() === 'relax' || mood.toLowerCase() === 'colorize-2' || mood.toLowerCase() === 'colorize') return 'Relaxation';
+    if (mood.toLowerCase() === 'creativity') return 'Creativity';
+    return mood;
+  };
+
+  const getGameDisplayName = (slug: string) => {
+    if (slug === 'hextris') return 'Hextris';
+    if (slug === 'colorize-2' || slug === 'colorize') return 'Colorize';
+    if (slug === 'box-tower') return 'Box Tower';
+    return slug;
   };
 
   return (
@@ -100,6 +173,123 @@ export default function BenchmarkClient() {
 
       {/* Main Grid Wrapper */}
       <div className="max-w-[1200px] mx-auto px-6 space-y-8">
+
+        {/* Post-game Survey Card (Modal popup) */}
+        {showPostGameSurvey && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md overflow-hidden bg-slate-900 border border-indigo-500/20 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+              {/* Glow effect */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-indigo-500/10 blur-[60px] pointer-events-none" />
+
+              <button
+                onClick={handleClosePostGameSurvey}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {!surveyCompleted ? (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider font-mono">
+                      Post-Game Evaluation
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-base font-extrabold text-white">
+                      Welcome back! How did it go?
+                    </h3>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Now that you've finished playing <strong className="text-indigo-400">{getGameDisplayName(postGameGameSlug)}</strong>, do you feel your target mood/skill (<strong className="text-indigo-400">{getMoodLabel(postGameMood)}</strong>) has improved?
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 w-full">
+                    {[
+                      { val: 'yes', label: 'Yes', icon: (
+                        <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )},
+                      { val: 'not_sure', label: 'Not Sure', icon: (
+                        <svg className="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )},
+                      { val: 'no', label: 'No', icon: (
+                        <svg className="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        onClick={() => setPostGameResponse(opt.val)}
+                        className={`aspect-square rounded-2xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
+                          postGameResponse === opt.val
+                            ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/5 scale-105'
+                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                        }`}
+                      >
+                        {opt.icon}
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3 pt-2 border-t border-slate-950">
+                    <button
+                      onClick={handleClosePostGameSurvey}
+                      className="flex-1 py-2.5 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all text-center cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handlePostGameSubmit}
+                      disabled={postGameResponse === null}
+                      className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/15 transition-all text-center cursor-pointer"
+                    >
+                      Submit Feedback
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6 py-2">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs text-emerald-400 font-bold uppercase tracking-wider font-mono">
+                      Feedback Received
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-extrabold text-white font-sans">Thank you for playtesting!</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Your responses have been saved. This mindset shift telemetry contributes directly to evaluating the cognitive benefits of AI game-state parameters.
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t border-slate-950">
+                    <button
+                      onClick={handleClosePostGameSurvey}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg transition-all text-center cursor-pointer"
+                    >
+                      Close & Return to Dashboard
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Playtest Arena Section */}
         <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-6 space-y-6">
@@ -329,6 +519,75 @@ export default function BenchmarkClient() {
         </div>
 
       </div>
+
+      {/* Pre-game Survey Modal */}
+      {showPreGameSurvey && pendingLaunchConfig && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md overflow-hidden bg-slate-900 border border-indigo-500/20 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            {/* Glow effect */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-indigo-500/10 blur-[60px] pointer-events-none" />
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                  Mindset Check-In
+                </span>
+                <span className="text-[10px] bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                  Pre-Game
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-base font-extrabold text-white">
+                  How is your focus, relaxation or creativity right now?
+                </h3>
+                <p className="text-xs text-slate-400">
+                  On a scale of 1 to 5, rate your current level of <strong className="text-indigo-400">{getMoodLabel(launchMood)}</strong>:
+                </p>
+              </div>
+
+              {/* Rating options 1-5 */}
+              <div className="flex justify-between items-center gap-2 py-2">
+                {[1, 2, 3, 4, 5].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => setPreGameRating(val)}
+                    className={`w-12 h-12 rounded-xl border text-sm font-bold font-mono transition-all flex items-center justify-center cursor-pointer ${
+                      preGameRating === val
+                        ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/25 scale-105'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-between items-center text-[10px] text-slate-500 px-1 font-semibold font-mono">
+                <span>1 - Low {getMoodLabel(launchMood)}</span>
+                <span>5 - Peak {getMoodLabel(launchMood)}</span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2 border-t border-slate-950">
+                <button
+                  onClick={() => setShowPreGameSurvey(false)}
+                  className="flex-1 py-2.5 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all text-center cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePreGameSubmit}
+                  disabled={preGameRating === null}
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/15 transition-all text-center cursor-pointer"
+                >
+                  Start Playtest
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

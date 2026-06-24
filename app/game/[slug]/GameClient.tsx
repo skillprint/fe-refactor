@@ -401,8 +401,10 @@ export default function GameClient({ slug }: GameClientProps) {
 
 
 
-        // Navigate to review page with sessionId
-        if (skillprintSessionIdRef.current) {
+        // Navigate to review page with sessionId or return to benchmark survey
+        if (source === 'benchmark') {
+            router.push(`/benchmark?postGameSurvey=true&gameSlug=${decodedSlug}&mood=${localStorage.getItem('targetMood') || 'focus'}`);
+        } else if (skillprintSessionIdRef.current) {
             router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
         }
     };
@@ -452,7 +454,11 @@ export default function GameClient({ slug }: GameClientProps) {
         // Reset game state when actually leaving
         setGameState('playing');
         setGameStartTime(Date.now());
-        router.push('/games');
+        if (source === 'benchmark') {
+            router.push(`/benchmark?postGameSurvey=true&gameSlug=${decodedSlug}&mood=${localStorage.getItem('targetMood') || 'focus'}`);
+        } else {
+            router.push('/games');
+        }
     };
 
     const handleExitGame = () => {
@@ -501,8 +507,10 @@ export default function GameClient({ slug }: GameClientProps) {
 
 
 
-            // Navigate to review page with sessionId
-            if (skillprintSessionIdRef.current) {
+            // Navigate to review page with sessionId or return to benchmark survey
+            if (source === 'benchmark') {
+                router.push(`/benchmark?postGameSurvey=true&gameSlug=${decodedSlug}&mood=${localStorage.getItem('targetMood') || 'focus'}`);
+            } else if (skillprintSessionIdRef.current) {
                 router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
             }
         }

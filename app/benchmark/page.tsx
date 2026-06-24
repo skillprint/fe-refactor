@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import BenchmarkClient from './BenchmarkClient';
 
 export const metadata: Metadata = {
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
 export default function BenchmarkPage() {
   return (
     <main id="benchmark-landing-page" className="bg-slate-950 min-h-screen">
-      <BenchmarkClient />
+      <Suspense fallback={<div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-bold">Loading...</div>}>
+        <BenchmarkClient />
+      </Suspense>
     </main>
   );
 }
