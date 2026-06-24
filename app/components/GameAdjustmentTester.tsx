@@ -665,6 +665,65 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'bubble-spirit':
+            switch (keyNumber) {
+                case 1:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 700 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 1 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 1.5 }
+                    ];
+                case 2:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 900 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 1 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 1.2 }
+                    ];
+                case 3:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 1200 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 1 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 1.0 }
+                    ];
+                case 4:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 900 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 1 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 1.0 }
+                    ];
+                case 5:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 1100 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 1 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 0.9 }
+                    ];
+                case 6:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 1300 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 1 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 0.8 }
+                    ];
+                case 7:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 1000 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 0 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 0.8 }
+                    ];
+                case 8:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 1400 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 0 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 0.7 }
+                    ];
+                case 9:
+                    return [
+                        { parameterName: 'shootVelocity', parameterValue: 1800 },
+                        { parameterName: 'aimGuideEnabled', parameterValue: 0 },
+                        { parameterName: 'bubbleLimitMultiplier', parameterValue: 0.5 }
+                    ];
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

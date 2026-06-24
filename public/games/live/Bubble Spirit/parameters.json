@@ -1,0 +1,23 @@
+{
+    "shootVelocity": {
+        "max": 1800,
+        "min": 400,
+        "type": "integer",
+        "default": 900,
+        "description": "Velocity of the launched bubble. Lower velocities increase travel time and allow more deliberate strategy, whereas higher values speed up shooting."
+    },
+    "aimGuideEnabled": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 1,
+        "description": "Enables or disables the aiming guide and bounce indicators. 1: Enabled (provides full trajectory line), 0: Disabled (hides aiming assistance completely)."
+    },
+    "bubbleLimitMultiplier": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scaling factor applied to the level's total shot limit. Higher values allow more mistakes, while lower values restrict total shots."
+    }
+}
