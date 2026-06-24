@@ -59,7 +59,7 @@ export default function BenchmarkClient() {
 
   const handleLaunchGame = (withAdjustments: boolean) => {
     localStorage.setItem('targetMood', launchMood);
-    let url = `/game/${launchGame}?adjustments=${withAdjustments}&source=benchmark`;
+    let url = `/benchmark/play/${launchGame}?adjustments=${withAdjustments}&source=benchmark`;
     if (disableSdk) {
       url += `&sdk=false`;
     }
