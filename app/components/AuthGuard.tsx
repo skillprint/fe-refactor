@@ -12,7 +12,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!isLoading) {
             // Whitelisted paths that don't require login
-            const isPublicRoute = pathname === '/' || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/corporate') || pathname.startsWith('/benchmark');
+            const isPublicRoute = 
+                pathname === '/' || 
+                pathname.startsWith('/test-embed') || 
+                pathname.startsWith('/test-mageduel') || 
+                pathname.startsWith('/profile/embed') || 
+                pathname.startsWith('/profile/badges') || 
+                pathname.startsWith('/corporate') || 
+                pathname.startsWith('/benchmark');
             const isEmbedded = typeof window !== 'undefined' && window.self !== window.top;
 
             if (status === 'loggedOut' && !isPublicRoute && !isEmbedded) {
