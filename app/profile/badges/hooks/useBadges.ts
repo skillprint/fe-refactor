@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Badge, Goal } from '../types';
+import { useState, useEffect, useCallback } from 'react';
+import { Badge } from '../types';
+import { useUserSession } from '../../../hooks/useUserSession';
+import { get } from '../../../api/api';
 
 const INITIAL_MOCK_BADGES: Badge[] = [
     {
@@ -131,28 +133,95 @@ const INITIAL_MOCK_BADGES: Badge[] = [
 const LOCAL_STORAGE_KEY = 'skillprint_mock_badges';
 
 export function useBadges() {
+    const { userToken } = useUserSession();
     const [badges, setBadges] = useState<Badge[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Initial load
-    useEffect(() => {
+    const loadLocalBadges = useCallback(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
                 try {
                     setBadges(JSON.parse(saved));
                 } catch (e) {
-                    console.error('Failed to parse badges from localStorage, resetting to default', e);
+                    console.error('Failed to parse badges from localStorage', e);
                     setBadges(INITIAL_MOCK_BADGES);
                 }
             } else {
                 setBadges(INITIAL_MOCK_BADGES);
             }
-            setIsLoaded(true);
+        } else {
+            setBadges(INITIAL_MOCK_BADGES);
         }
+        setIsLoading(false);
     }, []);
 
-    // Save changes
+    // Merge server response with client mock formatting
+    const mergeBadgesWithServerData = useCallback((serverData: any[], localBadges: Badge[]): Badge[] => {
+        if (!Array.isArray(serverData)) return localBadges;
+        return localBadges.map(local => {
+            const serverItem = serverData.find((s: any) => 
+                s.id === local.id || 
+                s.badgeId === local.id || 
+                s.badge_id === local.id || 
+                (s.name && s.name.toLowerCase() === local.name.toLowerCase())
+            );
+            if (serverItem) {
+                return {
+                    ...local,
+                    earned: serverItem.earned ?? local.earned,
+                    date: serverItem.date || serverItem.earnedAt || serverItem.earned_at || local.date,
+                    progressCurrent: serverItem.progressCurrent ?? serverItem.progress_current ?? local.progressCurrent,
+                    progressTarget: serverItem.progressTarget ?? serverItem.progress_target ?? local.progressTarget
+                };
+            }
+            return local;
+        });
+    }, []);
+
+    // Fetch badges from backend
+    const fetchBadgesFromBackend = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const headers: any = {};
+            if (userToken) {
+                headers["X-Auth-Token"] = `Token ${userToken}`;
+            }
+            const apiKey = process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
+            if (apiKey) {
+                headers["Authorization"] = `Api-Key ${apiKey}`;
+            }
+
+            // GET request to /api/talents/me/
+            console.log('[useBadges] Fetching talents/me from BE...');
+            const response = await get('api/talents/me/', false, headers);
+            console.log('[useBadges] talents/me response:', response);
+
+            // Handle potential array or results envelope
+            const serverData = Array.isArray(response)
+                ? response
+                : (response.results || response.talents || response.data || []);
+
+            const merged = mergeBadgesWithServerData(serverData, INITIAL_MOCK_BADGES);
+            setBadges(merged);
+        } catch (error) {
+            console.error('[useBadges] Failed to fetch badges from backend, using local cache:', error);
+            loadLocalBadges();
+        } finally {
+            setIsLoading(false);
+        }
+    }, [userToken, loadLocalBadges, mergeBadgesWithServerData]);
+
+    // Initial load and listen for userToken
+    useEffect(() => {
+        if (userToken) {
+            fetchBadgesFromBackend();
+        } else {
+            loadLocalBadges();
+        }
+    }, [userToken, fetchBadgesFromBackend, loadLocalBadges]);
+
+    // Save changes locally for testing simulation
     const saveBadges = (newBadges: Badge[]) => {
         setBadges(newBadges);
         if (typeof window !== 'undefined') {
@@ -191,10 +260,11 @@ export function useBadges() {
 
     return {
         badges,
-        isLoaded,
+        isLoaded: !isLoading,
         earnedBadgesCount,
         totalBadgesCount,
         earnBadge,
-        resetBadges
+        resetBadges,
+        refresh: fetchBadgesFromBackend
     };
 }
