@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import TopNav from '../../components/TopNav';
+import BuckyballLoading from '../../components/BuckyballLoading';
 import { useBadges } from './hooks/useBadges';
 import { useLegacyBadges } from './old/hooks/useLegacyBadges';
 import BadgeGrid from './components/BadgeGrid';
@@ -10,7 +11,7 @@ import LegacyBadgeList from './old/components/LegacyBadgeList';
 import GoalModal from './components/GoalModal';
 import { Badge } from './types';
 
-export default function BadgesTestPage() {
+function BadgesContent() {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     
@@ -340,5 +341,13 @@ export default function BadgesTestPage() {
                 />
             )}
         </div>
+    );
+}
+
+export default function BadgesTestPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><BuckyballLoading /></div>}>
+            <BadgesContent />
+        </Suspense>
     );
 }
