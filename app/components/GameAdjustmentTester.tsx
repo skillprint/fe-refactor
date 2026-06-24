@@ -125,32 +125,122 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case '0hh1':
-            // 0h h1 manages difficulty via the 'quality' of the board generated (fewer hints). Default is 60.
+            // 0h h1 manages qualityThreshold, maxGridSize, and hintsAllowed.
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'qualityThreshold', parameterValue: 10 }]; // Very easy
-                case 2: return [{ parameterName: 'qualityThreshold', parameterValue: 30 }];
-                case 3: return [{ parameterName: 'qualityThreshold', parameterValue: 45 }];
-                case 4: return [{ parameterName: 'qualityThreshold', parameterValue: 60 }]; // Default
-                case 5: return [{ parameterName: 'qualityThreshold', parameterValue: 70 }];
-                case 6: return [{ parameterName: 'qualityThreshold', parameterValue: 80 }];
-                case 7: return [{ parameterName: 'qualityThreshold', parameterValue: 90 }];
-                case 8: return [{ parameterName: 'qualityThreshold', parameterValue: 95 }]; // Very hard
-                case 9: return [{ parameterName: 'qualityThreshold', parameterValue: 99 }]; // Extreme
+                case 1:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 20 },
+                        { parameterName: 'maxGridSize', parameterValue: 4 },
+                        { parameterName: 'hintsAllowed', parameterValue: 1 }
+                    ];
+                case 2:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 20 },
+                        { parameterName: 'maxGridSize', parameterValue: 6 },
+                        { parameterName: 'hintsAllowed', parameterValue: 1 }
+                    ];
+                case 3:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 20 },
+                        { parameterName: 'maxGridSize', parameterValue: 6 },
+                        { parameterName: 'hintsAllowed', parameterValue: 0 }
+                    ];
+                case 4:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 60 },
+                        { parameterName: 'maxGridSize', parameterValue: 6 },
+                        { parameterName: 'hintsAllowed', parameterValue: 1 }
+                    ];
+                case 5:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 60 },
+                        { parameterName: 'maxGridSize', parameterValue: 8 },
+                        { parameterName: 'hintsAllowed', parameterValue: 1 }
+                    ];
+                case 6:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 60 },
+                        { parameterName: 'maxGridSize', parameterValue: 8 },
+                        { parameterName: 'hintsAllowed', parameterValue: 0 }
+                    ];
+                case 7:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 90 },
+                        { parameterName: 'maxGridSize', parameterValue: 8 },
+                        { parameterName: 'hintsAllowed', parameterValue: 1 }
+                    ];
+                case 8:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 90 },
+                        { parameterName: 'maxGridSize', parameterValue: 10 },
+                        { parameterName: 'hintsAllowed', parameterValue: 1 }
+                    ];
+                case 9:
+                    return [
+                        { parameterName: 'qualityThreshold', parameterValue: 95 },
+                        { parameterName: 'maxGridSize', parameterValue: 10 },
+                        { parameterName: 'hintsAllowed', parameterValue: 0 }
+                    ];
                 default:
                     return [];
             }
         case '2048':
-            // 2048 handles starting tiles via 'startTiles' setting, default is 2
+            // 2048 manages startTiles, fourProbability, and targetValue.
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'startTiles', parameterValue: 1 }]; // Minimal
-                case 2: return [{ parameterName: 'startTiles', parameterValue: 2 }]; // Default
-                case 3: return [{ parameterName: 'startTiles', parameterValue: 3 }];
-                case 4: return [{ parameterName: 'startTiles', parameterValue: 4 }];
-                case 5: return [{ parameterName: 'startTiles', parameterValue: 5 }];
-                case 6: return [{ parameterName: 'startTiles', parameterValue: 6 }];
-                case 7: return [{ parameterName: 'startTiles', parameterValue: 7 }];
-                case 8: return [{ parameterName: 'startTiles', parameterValue: 8 }];
-                case 9: return [{ parameterName: 'startTiles', parameterValue: 10 }]; // Crowded
+                case 1:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 1 },
+                        { parameterName: 'fourProbability', parameterValue: 0 },
+                        { parameterName: 'targetValue', parameterValue: 256 }
+                    ];
+                case 2:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 2 },
+                        { parameterName: 'fourProbability', parameterValue: 5 },
+                        { parameterName: 'targetValue', parameterValue: 512 }
+                    ];
+                case 3:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 2 },
+                        { parameterName: 'fourProbability', parameterValue: 10 },
+                        { parameterName: 'targetValue', parameterValue: 1024 }
+                    ];
+                case 4:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 2 },
+                        { parameterName: 'fourProbability', parameterValue: 10 },
+                        { parameterName: 'targetValue', parameterValue: 2048 }
+                    ];
+                case 5:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 3 },
+                        { parameterName: 'fourProbability', parameterValue: 15 },
+                        { parameterName: 'targetValue', parameterValue: 2048 }
+                    ];
+                case 6:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 4 },
+                        { parameterName: 'fourProbability', parameterValue: 20 },
+                        { parameterName: 'targetValue', parameterValue: 2048 }
+                    ];
+                case 7:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 4 },
+                        { parameterName: 'fourProbability', parameterValue: 30 },
+                        { parameterName: 'targetValue', parameterValue: 2048 }
+                    ];
+                case 8:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 5 },
+                        { parameterName: 'fourProbability', parameterValue: 40 },
+                        { parameterName: 'targetValue', parameterValue: 4096 }
+                    ];
+                case 9:
+                    return [
+                        { parameterName: 'startTiles', parameterValue: 6 },
+                        { parameterName: 'fourProbability', parameterValue: 50 },
+                        { parameterName: 'targetValue', parameterValue: 4096 }
+                    ];
                 default:
                     return [];
             }

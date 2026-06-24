@@ -113,6 +113,7 @@ var Levels = new (function(){
   this.getSize = getSize;
   this.create = create;
   this.needs = needs;
+  this.qualityThreshold = qualityThreshold;
   this.__defineGetter__('puzzles', function() { return puzzles; });
 
 })();

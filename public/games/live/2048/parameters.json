@@ -1,0 +1,23 @@
+{
+    "startTiles": {
+        "max": 8,
+        "min": 1,
+        "type": "integer",
+        "default": 2,
+        "description": "The number of tiles populated on a new board. Range: 1 to 8."
+    },
+    "fourProbability": {
+        "max": 80,
+        "min": 0,
+        "type": "integer",
+        "default": 10,
+        "description": "The percentage chance of spawning a 4 instead of a 2 on new tile generation. Range: 0 to 80 (representing 0% to 80%)."
+    },
+    "targetValue": {
+        "max": 4096,
+        "min": 256,
+        "type": "integer",
+        "default": 2048,
+        "description": "The score required on a single tile to trigger a win/level complete. Allowed values: 256, 512, 1024, 2048, 4096."
+    }
+}

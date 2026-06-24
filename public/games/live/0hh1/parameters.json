@@ -1,0 +1,23 @@
+{
+    "qualityThreshold": {
+        "max": 99,
+        "min": 10,
+        "type": "integer",
+        "default": 60,
+        "description": "The target quality percentage (percentage of empty cells) for board generation. Lower values provide more starting clues, making the level easier."
+    },
+    "maxGridSize": {
+        "max": 10,
+        "min": 4,
+        "type": "integer",
+        "default": 10,
+        "description": "Restricts the maximum board size options shown in the Level Select screen to control details and cognitive load. Allowed values: 4, 6, 8, 10."
+    },
+    "hintsAllowed": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 1,
+        "description": "Controls whether the player is permitted to receive hints from the help button. 1: Hints enabled, 0: Hints disabled."
+    }
+}

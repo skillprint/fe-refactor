@@ -229,6 +229,9 @@ var Game = new(function () {
       if (grid) grid.clear();
       $('#score').addClass('show');
     }, 0);
+    if (typeof window.refreshSizeSelect === 'function') {
+      window.refreshSizeSelect();
+    }
   }
 
   function showLoad() {
@@ -568,6 +571,15 @@ var Game = new(function () {
         if (gameEnded)
           break;
         clearTimeout(checkTOH);
+        if (window.settings && window.settings.hintsAllowed === 0) {
+          if (grid && grid.hint) {
+            grid.hint.show("Hints are disabled for this level!");
+            setTimeout(function() {
+              if (grid && grid.hint) grid.hint.clear();
+            }, 2000);
+          }
+          break;
+        }
         if (Tutorial.active && !Tutorial.hintAllowed())
           return;
         if (grid.hint.visible)
@@ -778,6 +790,28 @@ var Game = new(function () {
   this.startTutorial = startTutorial;
   this.checkForLevelComplete = checkForLevelComplete;
   this.undo = undo;
+
+  window.refreshSizeSelect = function () {
+    var max = (window.settings && typeof window.settings.maxGridSize === 'number') ? window.settings.maxGridSize : 10;
+    var sizes = [4, 6, 8, 10];
+    $('[data-size]').each(function (i, el) {
+      var $el = $(el),
+        sizeIndex = $el.attr('data-size') * 1 - 1,
+        sizeVal = sizes[sizeIndex];
+      var $tile = $el.closest('.tile');
+      if (sizeVal > max) {
+        $tile.addClass('locked').css({
+          'opacity': '0.25',
+          'pointer-events': 'none'
+        });
+      } else {
+        $tile.removeClass('locked').css({
+          'opacity': '1.0',
+          'pointer-events': 'auto'
+        });
+      }
+    });
+  };
 
   window.__defineGetter__('tile', function () {
     return grid.tile;

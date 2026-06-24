@@ -5,6 +5,8 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.actuator = new Actuator;
 
   this.startTiles = 2;
+  this.fourProbability = 10;
+  this.targetValue = 2048;
 
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
@@ -70,7 +72,8 @@ GameManager.prototype.addStartTiles = function () {
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
-    var value = Math.random() < 0.9 ? 2 : 4;
+    var prob = (this.fourProbability !== undefined) ? this.fourProbability : 10;
+    var value = Math.random() < (1 - prob / 100) ? 2 : 4;
     var tile = new Tile(this.grid.randomAvailableCell(), value);
 
     this.grid.insertTile(tile);
@@ -170,9 +173,9 @@ GameManager.prototype.move = function (direction) {
           // Update the score
           self.score += merged.value;
 
-          // The mighty 2048 tile
-          if (merged.value === 2048) {
-            logEvent({event: "LEVEL_COMPLETE", score: this.score});
+          // The mighty target tile
+          if (merged.value === (self.targetValue || 2048)) {
+            logEvent({event: "LEVEL_COMPLETE", score: self.score});
             self.won = true;
           }
         } else {

@@ -1,9 +1,9 @@
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
+        console.log('[skillprintShim - 2048] Adjusting parameter:', parameterName, 'to:', parameterValue);
 
         if (parameterName === "startTiles") {
-            // Apply it broadly to the game manager start options
             if (window.gameManager) {
                 window.gameManager.startTiles = parameterValue;
             } else {
@@ -15,6 +15,14 @@ window.adjustGame = function (obj) {
                     window.gameManager = gm; // save reference for future adjustments
                     return gm;
                 };
+            }
+        } else if (parameterName === "fourProbability") {
+            if (window.gameManager) {
+                window.gameManager.fourProbability = parameterValue;
+            }
+        } else if (parameterName === "targetValue") {
+            if (window.gameManager) {
+                window.gameManager.targetValue = parameterValue;
             }
         }
     }

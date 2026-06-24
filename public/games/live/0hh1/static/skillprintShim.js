@@ -1,6 +1,12 @@
+window.settings = {
+    maxGridSize: 10,
+    hintsAllowed: 1
+};
+
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
+        console.log('[skillprintShim - 0hh1] Applying parameter:', parameterName, 'with value:', parameterValue);
 
         if (parameterName === "qualityThreshold") {
             // Apply it broadly to all sizes
@@ -10,6 +16,13 @@ window.adjustGame = function (obj) {
                 window.Levels.qualityThreshold[8] = parameterValue;
                 window.Levels.qualityThreshold[10] = parameterValue;
             }
+        } else if (parameterName === "maxGridSize") {
+            window.settings.maxGridSize = parameterValue;
+            if (typeof window.refreshSizeSelect === 'function') {
+                window.refreshSizeSelect();
+            }
+        } else if (parameterName === "hintsAllowed") {
+            window.settings.hintsAllowed = parameterValue;
         }
     }
 }
