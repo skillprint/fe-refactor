@@ -1,7 +1,17 @@
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
-        // Colorize 2 is a creative coloring app. There are no score/time/lives difficulties to adjust.
+        if (parameterName === "maxCategoryComplexity") {
+            window.maxCategoryComplexity = parameterValue;
+            if (window.SceneManager && typeof window.SceneManager.doPopulatePages === 'function') {
+                window.SceneManager.doPopulatePages();
+            }
+        } else if (parameterName === "zoomLevelsCount") {
+            window.zoomLevelsCount = parameterValue;
+            if (window.SceneManager && typeof window.SceneManager.doClampZoom === 'function') {
+                window.SceneManager.doClampZoom();
+            }
+        }
     }
 }
 

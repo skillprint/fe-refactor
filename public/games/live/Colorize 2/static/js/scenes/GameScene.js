@@ -196,12 +196,15 @@ var GameScene = function () {
   var drag_speed_x, drag_speed_y;
   var speed_x=0, speed_y=0;
 
-  var zoom_levels = oCONFIG.zoom_levels;
+  var getZoomLevels = function() {
+    var count = (typeof window.zoomLevelsCount === 'number') ? window.zoomLevelsCount : 5;
+    return oCONFIG.zoom_levels.slice(0, count);
+  };
   var zoom_level = 0;
 
 
   this.doZoomIn =  function(){
-
+    var zoom_levels = getZoomLevels();
     zoom_level = Math.min(zoom_levels.length-1, zoom_level+1);
     zoom = zoom_levels[zoom_level];
 
@@ -213,6 +216,7 @@ var GameScene = function () {
   }
 
   this.doZoomOut=  function(){
+    var zoom_levels = getZoomLevels();
     zoom_level = Math.max(0, zoom_level-1);
     zoom = zoom_levels[zoom_level];
 
@@ -220,8 +224,16 @@ var GameScene = function () {
 
     createjs.Tween.get(frame.coloring_page, { override: true }).to({scale: frame.coloring_page.myscale * zoom }, 500, createjs.Ease.cubicOut);
     stage.activeTweens.push(frame.coloring_page);
+  }
 
-    
+  this.doClampZoom = function() {
+    var zoom_levels = getZoomLevels();
+    if (zoom_level > zoom_levels.length - 1) {
+      zoom_level = zoom_levels.length - 1;
+      zoom = zoom_levels[zoom_level] || 1;
+      createjs.Tween.get(frame.coloring_page, { override: true }).to({scale: frame.coloring_page.myscale * zoom }, 500, createjs.Ease.cubicOut);
+      stage.activeTweens.push(frame.coloring_page);
+    }
   }
 
 

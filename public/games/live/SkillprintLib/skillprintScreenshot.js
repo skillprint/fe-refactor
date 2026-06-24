@@ -38,6 +38,7 @@ const getElementForScreenshot = () => {
         '/games/live/Mahjong%20Deluxe/static/index.html',
         '/games/live/Space%20Trip/static/index.html',
         '/games/live/Brick%20Out/static/index.html',
+        '/games/live/Colorize%202/static/index.html',
     ];
     const bodyPathNames = ['/games/live/SkillprintLib/skillprint.html', '/games/live/SkillprintLib/skillprint.html'];
 

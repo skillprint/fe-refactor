@@ -375,6 +375,20 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'colorize-2':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 1 }, { parameterName: 'zoomLevelsCount', parameterValue: 5 }];
+                case 2: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 1 }, { parameterName: 'zoomLevelsCount', parameterValue: 3 }];
+                case 3: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 1 }, { parameterName: 'zoomLevelsCount', parameterValue: 1 }];
+                case 4: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 2 }, { parameterName: 'zoomLevelsCount', parameterValue: 5 }];
+                case 5: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 2 }, { parameterName: 'zoomLevelsCount', parameterValue: 3 }];
+                case 6: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 2 }, { parameterName: 'zoomLevelsCount', parameterValue: 1 }];
+                case 7: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 3 }, { parameterName: 'zoomLevelsCount', parameterValue: 5 }];
+                case 8: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 3 }, { parameterName: 'zoomLevelsCount', parameterValue: 3 }];
+                case 9: return [{ parameterName: 'maxCategoryComplexity', parameterValue: 3 }, { parameterName: 'zoomLevelsCount', parameterValue: 1 }];
+                default:
+                    return [];
+            }
         case 'mage-duel-2d':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'heroDamage', parameterValue: 10 }];

@@ -1,0 +1,16 @@
+{
+    "maxCategoryComplexity": {
+        "max": 3,
+        "min": 1,
+        "type": "integer",
+        "default": 3,
+        "description": "Restricts categories shown in level select to adjust details and cognitive load. 1: Simple (Arabic, Animals, Geometric), 2: Medium (1 + Florals, Gardens), 3: Full (all categories)."
+    },
+    "zoomLevelsCount": {
+        "max": 5,
+        "min": 1,
+        "type": "integer",
+        "default": 5,
+        "description": "Number of zoom levels available to the user. Lower values restrict zooming in to fine details, increasing coloring difficulty. Range 1 (no zoom) to 5 (full zoom)."
+    }
+}

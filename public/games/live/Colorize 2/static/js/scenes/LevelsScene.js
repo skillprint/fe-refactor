@@ -105,6 +105,7 @@ var LevelsScene = function(){
 	this.doPopulatePages = function(){
 		trace("doPopulatePages()");
 
+		last_data = {w:0,h:0,icons:0}; // Clear cache to force scroll position/layout rebuild
 		scroll_panel.removeAllChildren();
 
 		scroll_header = scroll_panel.addChild(new lib.scene_header());
@@ -114,8 +115,20 @@ var LevelsScene = function(){
 		tiles = [];
 		categories = [];
 
+		var maxComplexity = (typeof window.maxCategoryComplexity === 'number') ? window.maxCategoryComplexity : 3;
+		var allowedCategories = ["animals", "arabic", "geometric"];
+		if (maxComplexity >= 2) {
+			allowedCategories.push("florals", "gardens");
+		}
+		if (maxComplexity >= 3) {
+			allowedCategories.push("mandalas", "oriental");
+		}
+
 		for(let i=0; i<oCONFIG.categories.length; i++){
 			let category = oCONFIG.categories[i];
+			if (!allowedCategories.includes(category.id)) {
+				continue;
+			}
 			//category button
 			let category_button = new lib.chooser_category();
 			scroll_panel.addChild(category_button);

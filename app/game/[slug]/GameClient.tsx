@@ -30,7 +30,8 @@ interface GameResults {
 export const mapLocalGameSlugToServerGameSlug = (slug: string) => {
     const map: any = {
         '/games/live/Change Word/static/index.html': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782',
-        'change-word': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782'
+        'change-word': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782',
+        'colorize-2': 'colorize-2-79f1475d-c180-43e0-a496-0123c3972709'
     }
 
     console.log("Mapped: ", slug, map[slug]);
@@ -47,7 +48,7 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('brick-out-54e74305-8000-4605-b6b7-cf9412dd285b') >= 0) return 'brick-out';
     if (lowerSlug.indexOf('bubble-spirit') >= 0) return 'bubble-spirit';
     if (lowerSlug.indexOf('change-word') >= 0) return 'change-word';
-    if (lowerSlug.indexOf('colorize-2') >= 0) return 'colorize-2';
+    if (lowerSlug.indexOf('colorize') >= 0) return 'colorize-2';
     if (lowerSlug.indexOf('flapcat-steampunk-2') >= 0) return 'flapcat-steampunk-2';
     if (lowerSlug.indexOf('flapcat-steampunk') >= 0) return 'flapcat-steampunk';
     if (lowerSlug.indexOf('fruit-boom') >= 0) return 'fruit-boom';
