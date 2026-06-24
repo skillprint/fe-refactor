@@ -1,8 +1,18 @@
+window.settings = {
+    combineDistance: 40,
+    combineDuration: 400
+};
+
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
-        // Alchemy has no adjustable parameters currently identified (no score/time/lives).
-        // It relies purely on the logic in config.js for 2-item component mixing.
+        console.log('[skillprintShim - Alchemy] Adjusting parameter:', parameterName, 'to:', parameterValue);
+
+        if (parameterName === "combineDistance") {
+            window.settings.combineDistance = parameterValue;
+        } else if (parameterName === "combineDuration") {
+            window.settings.combineDuration = parameterValue;
+        }
     }
 }
 

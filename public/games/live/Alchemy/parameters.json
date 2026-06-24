@@ -1,0 +1,16 @@
+{
+    "combineDistance": {
+        "max": 100,
+        "min": 20,
+        "type": "integer",
+        "default": 40,
+        "description": "The proximity distance in pixels between two dragging items required to trigger a combination. Range: 20 to 100."
+    },
+    "combineDuration": {
+        "max": 2000,
+        "min": 100,
+        "type": "integer",
+        "default": 400,
+        "description": "The duration of the combination animation in milliseconds. Range: 100 to 2000."
+    }
+}

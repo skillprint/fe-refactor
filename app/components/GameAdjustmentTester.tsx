@@ -592,6 +592,56 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'alchemy':
+            switch (keyNumber) {
+                case 1:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 80 },
+                        { parameterName: 'combineDuration', parameterValue: 100 }
+                    ];
+                case 2:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 60 },
+                        { parameterName: 'combineDuration', parameterValue: 200 }
+                    ];
+                case 3:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 40 },
+                        { parameterName: 'combineDuration', parameterValue: 300 }
+                    ];
+                case 4:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 40 },
+                        { parameterName: 'combineDuration', parameterValue: 400 }
+                    ];
+                case 5:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 35 },
+                        { parameterName: 'combineDuration', parameterValue: 600 }
+                    ];
+                case 6:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 30 },
+                        { parameterName: 'combineDuration', parameterValue: 800 }
+                    ];
+                case 7:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 25 },
+                        { parameterName: 'combineDuration', parameterValue: 1000 }
+                    ];
+                case 8:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 20 },
+                        { parameterName: 'combineDuration', parameterValue: 1500 }
+                    ];
+                case 9:
+                    return [
+                        { parameterName: 'combineDistance', parameterValue: 15 },
+                        { parameterName: 'combineDuration', parameterValue: 2000 }
+                    ];
+                default:
+                    return [];
+            }
         case 'omnomrun':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'speedScale', parameterValue: 0.6 }]; // Slow runner

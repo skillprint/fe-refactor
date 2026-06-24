@@ -100,10 +100,11 @@ var AlchemyBuilder = function(){
 		var close_combinable_clips = [];
 		var closest_combinable_dist = Infinity;
 
+		var threshold = (window.settings && typeof window.settings.combineDistance === 'number') ? window.settings.combineDistance : 40;
 		for(let i=0; i<me.clips.length; i++){
 			let clip = me.clips[i];
 			let dist = __utils.doGetDistance(x,y,clip.x,clip.y);
-			if(dist < 40){
+			if(dist < threshold){
 				//register close clips
 				close_clips.push(clip);
 				if(dist < closest_dist){
@@ -195,11 +196,12 @@ var AlchemyBuilder = function(){
 		
 		//find center point
 		let center = new createjs.Point((x + existing_tile.x) * 0.5, (y + existing_tile.y) * 0.5);
-		createjs.Tween.get(new_tile, {override: true}).to({x:center.x, y:center.y}, 400, createjs.Ease.cubicInOut).call(()=>{
+		let duration = (window.settings && typeof window.settings.combineDuration === 'number') ? window.settings.combineDuration : 400;
+		createjs.Tween.get(new_tile, {override: true}).to({x:center.x, y:center.y}, duration, createjs.Ease.cubicInOut).call(()=>{
 	    	me.doDestroyTile(new_tile);
 	    });
 	    stage.activeTweens.push(new_tile);
-	    createjs.Tween.get(existing_tile, {override: true}).to({x:center.x, y:center.y}, 400, createjs.Ease.cubicOut).call(()=>{
+	    createjs.Tween.get(existing_tile, {override: true}).to({x:center.x, y:center.y}, duration, createjs.Ease.cubicOut).call(()=>{
 	    	me.doDestroyTile(existing_tile);
 				me.doAddItem(new_item, center.x, center.y, {"fx":true});
 	    });
