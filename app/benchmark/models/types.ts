@@ -44,3 +44,28 @@ export interface VLMSimulatorStep {
   log: string;
   boardState: any; // game-specific state representation for the mock visual
 }
+
+export interface BenchmarkLeaderboardEntry {
+  providerKey: string;
+  providerDisplayName: string;
+  totalSessions: number;
+  avgMoodRating: number;
+}
+
+export interface BenchmarkProvider {
+  key: string;
+  displayName: string;
+}
+
+export interface BenchmarkSurveyCreate {
+  sessionId: string; // UUID
+  moodRating: number; // 1-5 rating
+}
+
+export interface BenchmarkSurveyResponse {
+  id?: number;
+  sessionId?: string;
+  moodRating: number; // 1-5 rating
+  atCreated?: string;
+}
+

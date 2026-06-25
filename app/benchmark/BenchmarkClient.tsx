@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useBenchmarkData } from './hooks/useBenchmarkData';
+import { useSubmitBenchmarkSurvey } from './hooks/useSubmitBenchmarkSurvey';
 import DynamicScatterPlot from './components/DynamicScatterPlot';
 import LeaderboardTable from './components/LeaderboardTable';
 import GameCards from './components/GameCards';
@@ -45,6 +46,9 @@ export default function BenchmarkClient() {
   // Load benchmark dataset
   const { models, scatterData, stats, simulatorSteps } = useBenchmarkData(gameFilter, moodFilter);
 
+  // Hook for submitting post-game surveys to backend
+  const { submitSurvey, isLoading: isSubmittingSurvey, error: submitError } = useSubmitBenchmarkSurvey();
+
   // Set default model if the current selection is somehow empty
   const activeModel = useMemo(() => {
     return models.find((m) => m.id === selectedModelId) || models[0];
@@ -80,18 +84,35 @@ export default function BenchmarkClient() {
     }
   };
 
-  const handlePostGameSubmit = () => {
+  const handlePostGameSubmit = async () => {
     if (postGameResponse !== null) {
-      // Save post-game feedback
-      const key = `postGameSurvey_${postGameGameSlug}_${postGameMood}`;
-      localStorage.setItem(key, postGameResponse);
-      
-      // Calculate shifts (just mock logs for analytics dashboard)
-      const prevRating = localStorage.getItem('lastPreGameRating');
-      const prevMood = localStorage.getItem('lastPreGameMood');
-      console.log(`Survey result: Mood ${postGameMood} pre-rating was ${prevRating}, post-response is ${postGameResponse}`);
-      
-      setSurveyCompleted(true);
+      // Map response to 1-5 rating: yes -> 5, not_sure -> 3, no -> 1
+      let moodRating = 3;
+      if (postGameResponse === 'yes') moodRating = 5;
+      if (postGameResponse === 'no') moodRating = 1;
+
+      // Extract sessionId from searchParams (fallback to random UUID if not present)
+      const sessionId = searchParams.get('sessionId') || crypto.randomUUID();
+
+      try {
+        await submitSurvey({
+          sessionId,
+          moodRating
+        });
+
+        // Save post-game feedback
+        const key = `postGameSurvey_${postGameGameSlug}_${postGameMood}`;
+        localStorage.setItem(key, postGameResponse);
+        
+        // Calculate shifts (just mock logs for analytics dashboard)
+        const prevRating = localStorage.getItem('lastPreGameRating');
+        const prevMood = localStorage.getItem('lastPreGameMood');
+        console.log(`Survey result: Mood ${postGameMood} pre-rating was ${prevRating}, post-response is ${postGameResponse}`);
+        
+        setSurveyCompleted(true);
+      } catch (err) {
+        console.error('Failed to submit benchmark survey:', err);
+      }
     }
   };
 
@@ -191,7 +212,27 @@ export default function BenchmarkClient() {
                 </svg>
               </button>
 
-              {!surveyCompleted ? (
+              {isSubmittingSurvey ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4 animate-in fade-in duration-200">
+                  <div className="relative flex items-center justify-center">
+                    {/* Pulsing ring outer */}
+                    <div className="absolute w-14 h-14 rounded-full border-2 border-indigo-500/20 animate-ping" />
+                    {/* Spinner inner */}
+                    <svg className="animate-spin h-10 w-10 text-indigo-500 relative z-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-xs text-indigo-400 font-mono font-bold uppercase tracking-wider animate-pulse">
+                      Submitting Survey...
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      Saving shift telemetry to the registry
+                    </p>
+                  </div>
+                </div>
+              ) : !surveyCompleted ? (
                 <div className="space-y-6">
                   <div className="flex items-center gap-2">
                     <span className="flex h-2 w-2 relative">
@@ -244,6 +285,12 @@ export default function BenchmarkClient() {
                       </button>
                     ))}
                   </div>
+
+                  {submitError && (
+                    <div className="text-xs text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-xl text-center">
+                      Failed to submit: {submitError.message || 'Unknown error'}
+                    </div>
+                  )}
 
                   <div className="flex gap-3 pt-2 border-t border-slate-950">
                     <button
