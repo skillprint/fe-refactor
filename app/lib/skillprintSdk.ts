@@ -38,6 +38,7 @@ interface StartSessionRequest {
     sessionId: string;
     game: string;
     targetMood: string;
+    is_benchmark?: boolean;
 }
 
 export interface ParameterUpdateResult {
@@ -176,7 +177,7 @@ export class SkillprintClient {
         this.userToken = token;
     }
 
-    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false): Promise<boolean> {
+    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, isBenchmark?: boolean): Promise<boolean> {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
@@ -187,6 +188,10 @@ export class SkillprintClient {
             game: slugToGameId,
             targetMood
         };
+
+        if (isBenchmark !== undefined) {
+            requestData.is_benchmark = isBenchmark;
+        }
 
         let headers: any = {
             'Content-Type': 'application/json'
@@ -237,7 +242,7 @@ export class SkillprintClient {
                                 }
                             }
 
-                            return await this.startSession(sessionId, targetMood, gameName, true);
+                            return await this.startSession(sessionId, targetMood, gameName, true, isBenchmark);
                         }
                     } catch (e) {
                         this.log(`Failed to parse 401 response or refresh token: ${e}`, LogLevel.ERROR);

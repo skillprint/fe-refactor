@@ -551,7 +551,7 @@ export default function GameClient({ slug }: GameClientProps) {
                 const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
-                client.startSession(sessionId, targetMood, serverSideSlug);
+                client.startSession(sessionId, targetMood, serverSideSlug, false, source === 'benchmark');
                 shouldPollRef.current = true;
                 pollSessionTips();
             } catch (e) {
