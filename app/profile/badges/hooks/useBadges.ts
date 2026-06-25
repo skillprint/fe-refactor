@@ -160,10 +160,10 @@ export function useBadges() {
     const mergeBadgesWithServerData = useCallback((serverData: any[], localBadges: Badge[]): Badge[] => {
         if (!Array.isArray(serverData)) return localBadges;
         return localBadges.map(local => {
-            const serverItem = serverData.find((s: any) => 
-                s.id === local.id || 
-                s.badgeId === local.id || 
-                s.badge_id === local.id || 
+            const serverItem = serverData.find((s: any) =>
+                s.id === local.id ||
+                s.badgeId === local.id ||
+                s.badge_id === local.id ||
                 (s.name && s.name.toLowerCase() === local.name.toLowerCase())
             );
             if (serverItem) {
@@ -194,7 +194,7 @@ export function useBadges() {
 
             // GET request to /api/talents/me/
             console.log('[useBadges] Fetching talents/me from BE...');
-            const response = await get('api/talents/me/', false, headers);
+            const response = await get('games/api/talents/me/', false, headers);
             console.log('[useBadges] talents/me response:', response);
 
             // Handle potential array or results envelope

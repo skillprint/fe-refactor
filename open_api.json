@@ -1,0 +1,4320 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Your Project API",
+        "description": "API documentation for Your Project.",
+        "termsOfService": "https://www.yourproject.com/policies/terms/",
+        "contact": {
+            "email": "contact@yourproject.local"
+        },
+        "license": {
+            "name": "BSD License"
+        },
+        "version": "v1"
+    },
+    "host": "api.staging.skillprint.co",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/",
+    "consumes": [
+        "application/json",
+        "application/json"
+    ],
+    "produces": [
+        "application/json",
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "Basic": {
+            "type": "basic"
+        }
+    },
+    "security": [
+        {
+            "Basic": []
+        }
+    ],
+    "paths": {
+        "/api/portal/home/footprint/": {
+            "get": {
+                "operationId": "api_portal_home_footprint_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/home/just-played/": {
+            "get": {
+                "operationId": "api_portal_home_just-played_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/home/recent-sessions/": {
+            "get": {
+                "operationId": "api_portal_home_recent-sessions_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/home/summary/": {
+            "get": {
+                "operationId": "api_portal_home_summary_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/insights/": {
+            "get": {
+                "operationId": "api_portal_insights_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/insights/{insight_id}/dismiss/": {
+            "post": {
+                "operationId": "api_portal_insights_dismiss_create",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "insight_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/library/community-stats/{slug}/": {
+            "get": {
+                "operationId": "api_portal_library_community-stats_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "slug",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/library/games/": {
+            "get": {
+                "operationId": "api_portal_library_games_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/library/games/{slug}/": {
+            "get": {
+                "operationId": "api_portal_library_games_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "slug",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/library/personal-stats/{slug}/": {
+            "get": {
+                "operationId": "api_portal_library_personal-stats_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "slug",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/metrics/{pillar}/{dimension}/": {
+            "get": {
+                "operationId": "api_portal_metrics_read",
+                "summary": "GET /api/portal/metrics/{pillar}/{dimension}/?range=W&game_slug=…",
+                "description": "Longitudinal metric detail with D/W/M/6M/Y toggles.\nServed from DailyDimensionRollup for fast queries.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "pillar",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "dimension",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/metrics/{pillar}/{dimension}/about/": {
+            "get": {
+                "operationId": "api_portal_metrics_about_list",
+                "summary": "GET /api/portal/metrics/{pillar}/{dimension}/about/",
+                "description": "Static \"About\" copy for a dimension. Cacheable.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "pillar",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "dimension",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/metrics/{pillar}/{dimension}/distribution/": {
+            "get": {
+                "operationId": "api_portal_metrics_distribution_list",
+                "summary": "GET /api/portal/metrics/{pillar}/{dimension}/distribution/",
+                "description": "Returns a histogram of population scores for a dimension.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "pillar",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "dimension",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/metrics/{pillar}/{dimension}/leaderboard/": {
+            "get": {
+                "operationId": "api_portal_metrics_leaderboard_list",
+                "summary": "GET /api/portal/metrics/{pillar}/{dimension}/leaderboard/",
+                "description": "Returns top-N users for a dimension. Auth-gated.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "pillar",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "dimension",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/profile/": {
+            "get": {
+                "operationId": "api_portal_profile_list",
+                "summary": "GET /api/portal/profile/",
+                "description": "Lifetime aggregate profile for the authenticated user.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/profile/percentiles/": {
+            "get": {
+                "operationId": "api_portal_profile_percentiles_list",
+                "summary": "GET /api/portal/profile/percentiles/",
+                "description": "Returns percentile ranks across all three pillars.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/profile/settings/": {
+            "get": {
+                "operationId": "api_portal_profile_settings_list",
+                "summary": "GET / PATCH /api/portal/profile/settings/",
+                "description": "Retrieve or update user portal preferences (display units, confidence\nfloor, notification opt-ins).  GET auto-creates a settings row with\ndefaults if none exists.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "patch": {
+                "operationId": "api_portal_profile_settings_partial_update",
+                "summary": "GET / PATCH /api/portal/profile/settings/",
+                "description": "Retrieve or update user portal preferences (display units, confidence\nfloor, notification opt-ins).  GET auto-creates a settings row with\ndefaults if none exists.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/recommendations/feedback/": {
+            "post": {
+                "operationId": "api_portal_recommendations_feedback_create",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/recommendations/mood-matched/": {
+            "get": {
+                "operationId": "api_portal_recommendations_mood-matched_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/recommendations/next-game/": {
+            "get": {
+                "operationId": "api_portal_recommendations_next-game_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/recommendations/playbook/": {
+            "get": {
+                "operationId": "api_portal_recommendations_playbook_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/reference/dimensions/": {
+            "get": {
+                "operationId": "api_portal_reference_dimensions_list",
+                "summary": "GET /api/portal/reference/dimensions/",
+                "description": "Returns the canonical slug → display-name → about mapping for all three",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/reference/insight-categories/": {
+            "get": {
+                "operationId": "api_portal_reference_insight-categories_list",
+                "summary": "GET /api/portal/reference/insight-categories/",
+                "description": "Returns the closed set of insight categories with icon mappings\nso clients can render cards without parsing free text.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/sessions/": {
+            "get": {
+                "operationId": "api_portal_sessions_list",
+                "summary": "GET /api/portal/sessions/?cursor=…&limit=20&game_slug=…&mood=…",
+                "description": "Paginated session log for the authenticated user.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/sessions/{session_id}/": {
+            "get": {
+                "operationId": "api_portal_sessions_read",
+                "summary": "GET /api/portal/sessions/{session_id}/",
+                "description": "Full latitudinal session breakdown: all 9 mood scores, all 14 cognition\nscores, and (when available) personality snapshot.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "session_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/api/portal/trends/": {
+            "get": {
+                "operationId": "api_portal_trends_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/trends/daily-summary/": {
+            "get": {
+                "operationId": "api_portal_trends_daily-summary_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/api/portal/trends/long-range/": {
+            "get": {
+                "operationId": "api_portal_trends_long-range_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "api"
+                ]
+            },
+            "parameters": []
+        },
+        "/en/map.json/": {
+            "get": {
+                "operationId": "en_map.json_list",
+                "description": "Return a JSON map of game names to their IDs.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "en"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/benchmark/leaderboard/": {
+            "get": {
+                "operationId": "games_api_benchmark_leaderboard_list",
+                "description": "Get the LLM benchmark leaderboard. Ranks providers by average mood rating from post-session surveys.",
+                "parameters": [
+                    {
+                        "name": "game",
+                        "in": "query",
+                        "description": "Filter by game slug",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mood",
+                        "in": "query",
+                        "description": "Filter by target mood slug",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/BenchmarkLeaderboardEntry"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Benchmark"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/benchmark/providers/": {
+            "get": {
+                "operationId": "games_api_benchmark_providers_list",
+                "description": "List all registered LLM providers available for benchmark sessions.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/BenchmarkProvider"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Benchmark"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/benchmark/surveys/": {
+            "post": {
+                "operationId": "games_api_benchmark_surveys_create",
+                "description": "Submit a post-session benchmark survey. The session must be a benchmark session (created with is_benchmark=True).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BenchmarkSurveyCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/BenchmarkSurveyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error"
+                    }
+                },
+                "tags": [
+                    "Benchmark"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/catalog/": {
+            "get": {
+                "operationId": "games_api_catalog_list",
+                "description": "List all publicly listed Games with limit and offset support.\"",
+                "parameters": [
+                    {
+                        "name": "skills",
+                        "in": "query",
+                        "description": "skills",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "moods",
+                        "in": "query",
+                        "description": "moods",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "sdk_enabled",
+                        "in": "query",
+                        "description": "sdk_enabled",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "is_active",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "is_publicly_listed",
+                        "in": "query",
+                        "description": "is_publicly_listed",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "is_playable_in_pwa",
+                        "in": "query",
+                        "description": "is_playable_in_pwa",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for paginated results",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Number of items to include in each page",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response description",
+                        "schema": {
+                            "$ref": "#/definitions/Game"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/catalog/{slug}/": {
+            "get": {
+                "operationId": "games_api_catalog_read",
+                "description": "Retrieve details about a specific Game.",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Game slug",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response description",
+                        "schema": {
+                            "$ref": "#/definitions/Game"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "slug",
+                    "in": "path",
+                    "required": true,
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                }
+            ]
+        },
+        "/games/api/echo/": {
+            "get": {
+                "operationId": "games_api_echo_list",
+                "description": "A simple echo endpoint that returns the request data and headers.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "post": {
+                "operationId": "games_api_echo_create",
+                "description": "Echo back the request data and headers",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Echo response"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/favorites/": {
+            "get": {
+                "operationId": "games_api_favorites_list",
+                "description": "List all publicly listed Games with limit and offset support.\"",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for paginated results",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Number of items to include in each page",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response description",
+                        "schema": {
+                            "$ref": "#/definitions/Favorite"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "post": {
+                "operationId": "games_api_favorites_create",
+                "description": "Create a new Favorite game record.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Favorite"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created response description"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/favorites/{id}/": {
+            "get": {
+                "operationId": "games_api_favorites_read",
+                "description": "Retrieve details about a specific Game.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response description",
+                        "schema": {
+                            "$ref": "#/definitions/Favorite"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "delete": {
+                "operationId": "games_api_favorites_delete",
+                "description": "Delete a specific Favorite game record.",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "Successful response description"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/games/api/goals/": {
+            "get": {
+                "operationId": "games_api_goals_list",
+                "description": "Retrieve the authenticated user's recommendation goals.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserGoal"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "put": {
+                "operationId": "games_api_goals_update",
+                "description": "Replace all recommendation goals for the authenticated user. Send a JSON array of goal objects.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserGoal"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserGoal"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "delete": {
+                "operationId": "games_api_goals_delete",
+                "description": "Delete all recommendation goals for the authenticated user.",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "Goals deleted."
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/moods/": {
+            "get": {
+                "operationId": "games_api_moods_list",
+                "description": "List of unique moods.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Moods"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/partner-sessions/": {
+            "get": {
+                "operationId": "games_api_partner-sessions_list",
+                "description": "ViewSet for partner access to sessions.\nPartners can only view sessions associated with their organization.",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Session"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/partner-sessions/{session_id}/": {
+            "get": {
+                "operationId": "games_api_partner-sessions_read",
+                "description": "ViewSet for partner access to sessions.\nPartners can only view sessions associated with their organization.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "session_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string",
+                    "format": "uuid"
+                }
+            ]
+        },
+        "/games/api/recommendations/": {
+            "get": {
+                "operationId": "Get Recommendations",
+                "description": "View to get personalized game recommendations for a user.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "List of recommended games for the authenticated user",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "skills": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "short_description": {
+                                        "type": "string"
+                                    },
+                                    "long_description": {
+                                        "type": "string"
+                                    },
+                                    "moods": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "display_name": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "gameplay_tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "art_styles": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "themes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "genres": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "goals": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "publisher": {
+                                        "type": "string"
+                                    },
+                                    "screenshot": {
+                                        "type": "string"
+                                    },
+                                    "ios_store_link": {
+                                        "type": "string"
+                                    },
+                                    "android_store_link": {
+                                        "type": "string"
+                                    },
+                                    "external_web_url": {
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "type": "string"
+                                    },
+                                    "thumbnail": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Recommendations"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/record-session/{session_id}/": {
+            "post": {
+                "operationId": "games_api_record-session_create",
+                "description": "Upload video chunks or screenshots from gameplay sessions.\n\n        This endpoint accepts either:\n        - A single video chunk with an is_last_chunk flag\n        - Multiple screenshot images (minimum 1 required)\n\n        Supports two upload methods:\n        1. Multipart form-data (traditional file upload)\n        2. Base64 encoded files in JSON body\n",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "video": {
+                                    "description": "Base64 encoded video file (supported formats: webm, mp4)",
+                                    "type": "string"
+                                },
+                                "screenshots": {
+                                    "description": "Array of base64 encoded screenshots",
+                                    "type": "array",
+                                    "items": {
+                                        "description": "Base64 encoded image (supported formats: png, jpeg, webp)",
+                                        "type": "string"
+                                    }
+                                },
+                                "is_last_chunk": {
+                                    "description": "Flag indicating if this is the last chunk/batch of media",
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "session_id",
+                        "in": "path",
+                        "description": "UUID of the gameplay session",
+                        "required": true,
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Media uploaded successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "description": "Success message",
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "session": {
+                                            "description": "Session information",
+                                            "type": "string"
+                                        },
+                                        "timestamp": {
+                                            "description": "Upload timestamp",
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "images": {
+                                            "description": "Array of uploaded image URLs",
+                                            "type": "array",
+                                            "items": {
+                                                "description": "Image URL",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "video": {
+                                            "description": "Video URL if video was uploaded",
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "description": "Error message",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "description": "Not found message",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Game Media"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "session_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/games/api/search/": {
+            "get": {
+                "operationId": "games_api_search_list",
+                "description": "Manually search via our backend API",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "type": "integer",
+                        "default": 5
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "skills": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "short_description": {
+                                    "type": "string"
+                                },
+                                "long_description": {
+                                    "type": "string"
+                                },
+                                "moods": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "display_name": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "gameplay_tags": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "art_styles": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "themes": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "genres": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "goals": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "publisher": {
+                                    "type": "string"
+                                },
+                                "screenshot": {
+                                    "type": "string"
+                                },
+                                "ios_store_link": {
+                                    "type": "string"
+                                },
+                                "android_store_link": {
+                                    "type": "string"
+                                },
+                                "external_web_url": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string"
+                                },
+                                "thumbnail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/sessions/": {
+            "get": {
+                "operationId": "games_api_sessions_list",
+                "description": "List all sessions for the current user",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Session"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No open sessions found"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "post": {
+                "operationId": "games_api_sessions_create",
+                "description": "Create a new session",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/sessions/claim": {
+            "post": {
+                "operationId": "games_api_sessions_claim_create",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "session_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {},
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/sessions/telemetry": {
+            "post": {
+                "operationId": "games_api_sessions_telemetry_create",
+                "description": "Allows the client to update a gameplay telemetry Session with a client-\n generated UUID (unlike previous session views, no prior create required).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "event": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "session_id",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "game_slug",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "Session does not exist"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/sessions/{session_id}/": {
+            "get": {
+                "operationId": "games_api_sessions_read",
+                "description": "Retrieve a specific session",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "put": {
+                "operationId": "games_api_sessions_update",
+                "description": "Update a specific session",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Session not found"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "patch": {
+                "operationId": "games_api_sessions_partial_update",
+                "description": "Allows the client to list, retrieve and update a session state.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Session"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "session_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/games/api/skills/": {
+            "get": {
+                "operationId": "games_api_skills_list",
+                "description": "List of unique skills.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Skills"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/surveys/mood/": {
+            "post": {
+                "operationId": "games_api_surveys_mood_create",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MoodSurvey"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/MoodSurvey"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/surveys/skill/": {
+            "post": {
+                "operationId": "games_api_surveys_skill_create",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SkillSurvey"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/SkillSurvey"
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/talents/": {
+            "get": {
+                "operationId": "games_api_talents_list",
+                "description": "List of all available talent badges.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Talent"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/api/talents/me/": {
+            "get": {
+                "operationId": "games_api_talents_me_list",
+                "description": "Returns the authenticated user's unlocked talent badges and progress toward locked ones.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "User talents with progress"
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/games/map.json/": {
+            "get": {
+                "operationId": "games_map.json_list",
+                "description": "Return a JSON map of game names to their IDs.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "games"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/": {
+            "get": {
+                "operationId": "partners_api_dashboard_list",
+                "description": "Get overview dashboard data.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/game_stats/": {
+            "get": {
+                "operationId": "partners_api_dashboard_game_stats",
+                "description": "Get game-specific statistics.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/monthly_minutes/": {
+            "get": {
+                "operationId": "partners_api_dashboard_monthly_minutes",
+                "summary": "Get total engagement minutes aggregated by month.",
+                "description": "Used for developer royalty calculations based on\n\"Total Engagement Minutes per Month\".\n\nQuery params:\n    year (int, optional): Filter to a specific year. Defaults to current year.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/monthly_minutes_by_game/": {
+            "get": {
+                "operationId": "partners_api_dashboard_monthly_minutes_by_game",
+                "summary": "Get total engagement minutes aggregated by month and game.",
+                "description": "Useful for per-game developer royalty breakdowns.\n\nQuery params:\n    year (int, optional): Filter to a specific year. Defaults to current year.\n    game_id (int, optional): Filter to a specific game.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/mood_distribution/": {
+            "get": {
+                "operationId": "partners_api_dashboard_mood_distribution",
+                "description": "Get mood distribution data.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/recent_sessions/": {
+            "get": {
+                "operationId": "partners_api_dashboard_recent_sessions",
+                "description": "Get recent session data.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/skill_averages/": {
+            "get": {
+                "operationId": "partners_api_dashboard_skill_averages",
+                "description": "Get skill development averages.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/user_engagement/": {
+            "get": {
+                "operationId": "partners_api_dashboard_user_engagement",
+                "description": "Get user engagement metrics over time.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/dashboard/{id}/game_details/": {
+            "get": {
+                "operationId": "partners_api_dashboard_game_details",
+                "description": "Get detailed metrics for a specific game.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "partners"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/partners/api/users/add/": {
+            "post": {
+                "operationId": "partners_api_users_add_create",
+                "summary": "Partner: Create User",
+                "description": "Create a new user associated with the partner's internal ID. Requires Partner API Key authentication.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PartnerInternalId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (e.g., validation error, generated email conflict)"
+                    },
+                    "401": {
+                        "description": "Unauthorized (API Key invalid or missing)"
+                    },
+                    "403": {
+                        "description": "Forbidden (API Key valid but lacks permission - unlikely with HasPartnerAPIKey)"
+                    },
+                    "409": {
+                        "description": "Conflict (Internal ID already exists for this partner)"
+                    },
+                    "500": {
+                        "description": "Internal Server Error (e.g., unexpected DB issue)"
+                    }
+                },
+                "tags": [
+                    "Partner Integration"
+                ]
+            },
+            "parameters": []
+        },
+        "/partners/api/users/auth/token/": {
+            "post": {
+                "operationId": "partners_api_users_auth_token_create",
+                "summary": "Partner: Get User Token",
+                "description": "Obtain a Knox authentication token for a user using the partner's internal ID. Requires Partner API Key authentication.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PartnerInternalId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "token",
+                                "user"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "token": {
+                                    "description": "The Knox authentication token.",
+                                    "type": "string"
+                                },
+                                "expiry": {
+                                    "description": "ISO 8601 timestamp when the token expires (if applicable).",
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "nullable": true
+                                },
+                                "user": {
+                                    "country": null,
+                                    "last_login": null,
+                                    "first_name": "",
+                                    "last_name": "",
+                                    "is_active": false,
+                                    "date_joined": null,
+                                    "email": "",
+                                    "email_verified": false,
+                                    "phone_number_verified": false,
+                                    "phone_number": "",
+                                    "date_of_birth": null,
+                                    "gender": null,
+                                    "address_line1": "",
+                                    "address_line2": "",
+                                    "city": "",
+                                    "state": "",
+                                    "postal_code": "",
+                                    "username": "",
+                                    "additional_identity_data": null
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (e.g., validation error)"
+                    },
+                    "401": {
+                        "description": "Unauthorized (API Key invalid or missing)"
+                    },
+                    "403": {
+                        "description": "Forbidden (e.g., User account inactive)"
+                    },
+                    "404": {
+                        "description": "Not Found (Internal ID not found for this partner)"
+                    },
+                    "500": {
+                        "description": "Internal Server Error (e.g., Knox issue)"
+                    }
+                },
+                "tags": [
+                    "Partner Integration"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/biggest-movers/": {
+            "get": {
+                "operationId": "scoring_api_biggest-movers_list",
+                "summary": "Apple Health Trends-style \"biggest movers\" endpoint.",
+                "description": "Compares skill and mood levels from the past 7 days against the prior\n7-day period (or earliest available data) and returns all tracked metrics\nranked by absolute change — highlighting the ones that improved or\ndeclined the most.\n\nResponse shape:\n{\n    \"period\": {\"start\": \"...\", \"end\": \"...\"},\n    \"movers\": [\n        {\n            \"type\": \"skill\" | \"mood\",\n            \"slug\": \"memory\",\n            \"name\": \"Memory\",\n            \"current_level\": 0.72,\n            \"previous_level\": 0.55,\n            \"delta\": 0.17,\n            \"delta_pct\": 30.9,\n            \"direction\": \"up\" | \"down\" | \"stable\",\n            \"confidence\": 0.85,\n            \"data_points\": 5\n        },\n        ...\n    ]\n}",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/chunks/": {
+            "get": {
+                "operationId": "scoring_api_chunks_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/GameChunkAnalysis"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/chunks/{id}/": {
+            "get": {
+                "operationId": "scoring_api_chunks_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/GameChunkAnalysis"
+                        }
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/scoring/api/game-metrics/": {
+            "get": {
+                "operationId": "scoring_api_game-metrics_list",
+                "summary": "Aggregate skill, mood, and session metrics filtered by game(s).",
+                "description": "The frontend passes a list of game slugs as a query parameter and\nreceives back all metrics aggregated across sessions for those games.\n\nGET /scoring/api/game-metrics/?games=memory-master,puzzle-quest\n\nResponse shape:\n{\n    \"games\": [\"memory-master\", \"puzzle-quest\"],\n    \"session_count\": 12,\n    \"total_play_time_seconds\": 3600,\n    \"skills\": {\n        \"attention\": {\"avg_score\": 0.72, \"min_score\": 0.5, \"max_score\": 0.9, \"sessions\": 8},\n        \"memory\":    {\"avg_score\": 0.65, ...},\n        ...\n    },\n    \"moods\": {\n        \"focus\":  {\"avg_score\": 0.8, \"avg_confidence\": 0.85, \"sessions\": 6},\n        \"relax\":  {\"avg_score\": 0.6, ...},\n        ...\n    },\n    \"flow\": {\n        \"avg_score\": 0.75,\n        \"avg_confidence\": 0.82\n    }\n}",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/mood-visualization/": {
+            "get": {
+                "operationId": "scoring_api_mood-visualization_list",
+                "description": "Main GET endpoint with comprehensive error handling",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/profiles/": {
+            "get": {
+                "operationId": "scoring_api_profiles_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/SkillPrintProfile"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/profiles/{id}/": {
+            "get": {
+                "operationId": "scoring_api_profiles_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/SkillPrintProfile"
+                        }
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/scoring/api/profiles/{profile_id}/flow-analysis/": {
+            "get": {
+                "operationId": "scoring_api_profiles_flow-analysis_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "profile_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/scoring/api/profiles/{profile_id}/skill-progression/{skill_type}/": {
+            "get": {
+                "operationId": "scoring_api_profiles_skill-progression_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "profile_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "skill_type",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/scoring/api/skill-progression/": {
+            "get": {
+                "operationId": "scoring_api_skill-progression_list",
+                "summary": "Handle GET requests for skill progression data.",
+                "description": "Query Parameters:\n    session_id (optional): Specific session ID to retrieve",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/skills/": {
+            "get": {
+                "operationId": "scoring_api_skills_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/UserSkillAggregate"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": []
+        },
+        "/scoring/api/skills/distribution/{skill_type}/": {
+            "get": {
+                "operationId": "scoring_api_skills_distribution_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "skill_type",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/scoring/api/skills/leaderboard/{skill_type}/": {
+            "get": {
+                "operationId": "scoring_api_skills_leaderboard_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "skill_type",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/scoring/api/skills/{id}/": {
+            "get": {
+                "operationId": "scoring_api_skills_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/UserSkillAggregate"
+                        }
+                    }
+                },
+                "tags": [
+                    "scoring"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/users/api/auth/login/": {
+            "post": {
+                "operationId": "users_api_auth_login_create",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthCustomToken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                },
+                "tags": [
+                    "users"
+                ]
+            },
+            "parameters": []
+        },
+        "/users/api/auth/logout-all/": {
+            "post": {
+                "operationId": "users_api_auth_logout-all_create",
+                "description": "Log the user out of all sessions\nI.E. deletes all auth tokens for the user",
+                "parameters": [],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "users"
+                ]
+            },
+            "parameters": []
+        },
+        "/users/api/auth/logout/": {
+            "post": {
+                "operationId": "users_api_auth_logout_create",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "users"
+                ]
+            },
+            "parameters": []
+        },
+        "/users/api/auth/signup/": {
+            "post": {
+                "operationId": "users_api_auth_signup_create",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Register"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                },
+                "tags": [
+                    "users"
+                ]
+            },
+            "parameters": []
+        },
+        "/users/api/profile/": {
+            "get": {
+                "operationId": "users_api_profile_list",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                },
+                "tags": [
+                    "users"
+                ]
+            },
+            "parameters": []
+        }
+    },
+    "definitions": {
+        "BenchmarkLeaderboardEntry": {
+            "required": [
+                "providerKey",
+                "providerDisplayName",
+                "totalSessions",
+                "avgMoodRating"
+            ],
+            "type": "object",
+            "properties": {
+                "providerKey": {
+                    "title": "Provider key",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "providerDisplayName": {
+                    "title": "Provider display name",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "totalSessions": {
+                    "title": "Total sessions",
+                    "type": "integer"
+                },
+                "avgMoodRating": {
+                    "title": "Avg mood rating",
+                    "type": "number"
+                }
+            }
+        },
+        "BenchmarkProvider": {
+            "required": [
+                "key",
+                "displayName"
+            ],
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "displayName": {
+                    "title": "Display name",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "BenchmarkSurveyCreate": {
+            "required": [
+                "sessionId",
+                "moodRating"
+            ],
+            "type": "object",
+            "properties": {
+                "sessionId": {
+                    "title": "Session id",
+                    "description": "UUID of the session this survey is for.",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "moodRating": {
+                    "title": "Mood rating",
+                    "description": "How much of the target mood the player felt (1 = not at all, 5 = very strongly).",
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                }
+            }
+        },
+        "BenchmarkSurveyResponse": {
+            "required": [
+                "moodRating"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "sessionId": {
+                    "title": "Session id",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "moodRating": {
+                    "title": "Mood rating",
+                    "description": "How much of the target mood the player felt (1–5).",
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                },
+                "atCreated": {
+                    "title": "At created",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                }
+            }
+        },
+        "Skills": {
+            "required": [
+                "name"
+            ],
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                },
+                "slug": {
+                    "title": "Slug",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "readOnly": true,
+                    "minLength": 1
+                }
+            }
+        },
+        "Moods": {
+            "required": [
+                "name"
+            ],
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                },
+                "slug": {
+                    "title": "Slug",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "readOnly": true,
+                    "minLength": 1
+                }
+            }
+        },
+        "Game": {
+            "required": [
+                "name",
+                "shortDescription",
+                "suggestedDuration"
+            ],
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "slug": {
+                    "title": "Slug",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "x-nullable": true
+                },
+                "artStyles": {
+                    "type": "array",
+                    "items": {
+                        "title": "Art styles",
+                        "type": "string",
+                        "enum": [
+                            "Anime",
+                            "Cartoony",
+                            "Landscape",
+                            "Pixel/Voxel",
+                            "Portrait",
+                            "Realistic",
+                            "3D",
+                            "2D"
+                        ]
+                    },
+                    "x-nullable": true
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "title": "Genres",
+                        "type": "string",
+                        "enum": [
+                            "Action",
+                            "Board",
+                            "Arcade",
+                            "Puzzle",
+                            "Hyper-Casual",
+                            "Idle",
+                            "Indie",
+                            "Kids",
+                            "Lifestyle",
+                            "Party",
+                            "Racing",
+                            "RPG",
+                            "Shooter",
+                            "Simulation",
+                            "Sports",
+                            "Strategy",
+                            "Word"
+                        ]
+                    },
+                    "x-nullable": true
+                },
+                "gameplayTags": {
+                    "type": "array",
+                    "items": {
+                        "title": "Gameplay tags",
+                        "type": "string",
+                        "enum": [
+                            "Achievements",
+                            "Augmented Reality",
+                            "Auto Battle",
+                            "Card",
+                            "Chat",
+                            "Competitive",
+                            "Customization",
+                            "Events",
+                            "Friend Invites",
+                            "Guilds/Clans",
+                            "Hidden Object",
+                            "Leaderboards",
+                            "Daily/Login Rewards",
+                            "Lucky Spin/Scratch",
+                            "Match3",
+                            "Merge",
+                            "Missions",
+                            "MMO",
+                            "Multiplayer",
+                            "Multiple levels",
+                            "Social Assists",
+                            "Tournaments",
+                            "Unlimited Time",
+                            "Unlimited Tries"
+                        ]
+                    },
+                    "x-nullable": true
+                },
+                "themes": {
+                    "type": "array",
+                    "items": {
+                        "title": "Themes",
+                        "type": "string",
+                        "enum": [
+                            "Apocalyptic/Post",
+                            "Casino/Gambling",
+                            "Detective",
+                            "Fantasy (Eastern)",
+                            "Fantasy (Western)",
+                            "Farming",
+                            "Female Oriented",
+                            "Home Design",
+                            "Historical/Medieval",
+                            "Horror",
+                            "Modern Military",
+                            "Nature",
+                            "Romance/Love",
+                            "Sniper",
+                            "Space",
+                            "Sci-Fi",
+                            "War",
+                            "Western (American)"
+                        ]
+                    },
+                    "x-nullable": true
+                },
+                "goals": {
+                    "type": "array",
+                    "items": {
+                        "title": "Goals",
+                        "type": "string",
+                        "enum": [
+                            "Avoid",
+                            "Create",
+                            "Configure",
+                            "Find",
+                            "Obtain",
+                            "Optimize",
+                            "Reach",
+                            "Remove",
+                            "Solve",
+                            "Synchronize"
+                        ]
+                    },
+                    "x-nullable": true
+                },
+                "iosStoreLink": {
+                    "title": "Ios store link",
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "androidStoreLink": {
+                    "title": "Android store link",
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "externalWebUrl": {
+                    "title": "External web url",
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "shortDescription": {
+                    "title": "Short description",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "longDescription": {
+                    "title": "Long description",
+                    "type": "string"
+                },
+                "suggestedDuration": {
+                    "title": "Suggested duration",
+                    "type": "string"
+                },
+                "url": {
+                    "title": "Url",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "screenshot": {
+                    "title": "Screenshot",
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 200
+                },
+                "thumbnail": {
+                    "title": "Thumbnail",
+                    "type": "string",
+                    "readOnly": true,
+                    "format": "uri"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Skills"
+                    },
+                    "readOnly": true
+                },
+                "moods": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Moods"
+                    },
+                    "readOnly": true
+                },
+                "orientation": {
+                    "title": "Orientation",
+                    "type": "string",
+                    "enum": [
+                        "landscape",
+                        "portrait"
+                    ]
+                },
+                "exitButtonPosition": {
+                    "title": "Exit button position",
+                    "type": "string",
+                    "enum": [
+                        "TOP_RIGHT",
+                        "BOTTOM_RIGHT",
+                        "TOP_LEFT",
+                        "BOTTOM_LEFT"
+                    ],
+                    "x-nullable": true
+                }
+            }
+        },
+        "Favorite": {
+            "required": [
+                "game"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "atCreated": {
+                    "title": "At created",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "game": {
+                    "title": "Game",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "user": {
+                    "title": "User",
+                    "type": "integer",
+                    "readOnly": true
+                }
+            }
+        },
+        "UserGoal": {
+            "required": [
+                "goalType"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "goalType": {
+                    "title": "Goal type",
+                    "type": "string",
+                    "enum": [
+                        "SKILL",
+                        "MOOD"
+                    ]
+                },
+                "skill": {
+                    "title": "Skill",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "x-nullable": true
+                },
+                "mood": {
+                    "title": "Mood",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "x-nullable": true
+                },
+                "weight": {
+                    "title": "Weight",
+                    "description": "Relative importance of this goal (higher = more important).",
+                    "type": "number",
+                    "maximum": 10.0,
+                    "minimum": 0.1
+                },
+                "atCreated": {
+                    "title": "At created",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "atUpdated": {
+                    "title": "At updated",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                }
+            }
+        },
+        "Session": {
+            "required": [
+                "sessionId",
+                "game",
+                "targetMood"
+            ],
+            "type": "object",
+            "properties": {
+                "sessionId": {
+                    "title": "Session id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "user": {
+                    "title": "User",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "game": {
+                    "title": "Game",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "duration": {
+                    "title": "Duration",
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "telemetry": {
+                    "title": "Telemetry",
+                    "type": "object"
+                },
+                "state": {
+                    "title": "State",
+                    "type": "string",
+                    "enum": [
+                        "OPEN",
+                        "CLOSED"
+                    ]
+                },
+                "generatedContent": {
+                    "title": "Generated content",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "skillScores": {
+                    "title": "Skill scores",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "moodScores": {
+                    "title": "Mood scores",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "gameplayTips": {
+                    "title": "Gameplay tips",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "x-nullable": true
+                },
+                "partnerOrganization": {
+                    "title": "Partner organization",
+                    "type": "integer",
+                    "readOnly": true,
+                    "x-nullable": true
+                },
+                "targetMood": {
+                    "title": "Target mood",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "parameterUpdates": {
+                    "title": "Parameter updates",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "gameParameters": {
+                    "description": "Optional list of game parameter definitions from the SDK.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "x-nullable": true
+                        }
+                    }
+                },
+                "isBenchmark": {
+                    "title": "Is benchmark",
+                    "description": "Mark this session as part of the LLM benchmark.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "useAi": {
+                    "title": "Use ai",
+                    "description": "Whether to use AI for parameter control (benchmark only).",
+                    "type": "boolean",
+                    "default": true
+                },
+                "llmProviderKey": {
+                    "title": "Llm provider key",
+                    "description": "LLM provider key chosen by the user (benchmark only). If provided, overrides random selection with this specific provider. If blank, system picks randomly when use_ai=True.",
+                    "type": "string",
+                    "default": ""
+                }
+            }
+        },
+        "MoodSurvey": {
+            "required": [
+                "mood",
+                "game"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "mood": {
+                    "title": "Mood",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "atCreated": {
+                    "title": "At created",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "atUpdated": {
+                    "title": "At updated",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "game": {
+                    "title": "Game",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "score": {
+                    "title": "Score",
+                    "type": "integer",
+                    "maximum": 1,
+                    "minimum": -1
+                },
+                "user": {
+                    "title": "User",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "session": {
+                    "title": "Session",
+                    "type": "string",
+                    "format": "uuid",
+                    "x-nullable": true
+                }
+            }
+        },
+        "SkillSurvey": {
+            "required": [
+                "skills",
+                "game"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "skill": {
+                    "title": "Skill",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "slug",
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "uniqueItems": true
+                },
+                "atCreated": {
+                    "title": "At created",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "atUpdated": {
+                    "title": "At updated",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "game": {
+                    "title": "Game",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$"
+                },
+                "score": {
+                    "title": "Score",
+                    "type": "integer",
+                    "maximum": 1,
+                    "minimum": -1
+                },
+                "user": {
+                    "title": "User",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "session": {
+                    "title": "Session",
+                    "type": "string",
+                    "format": "uuid",
+                    "x-nullable": true
+                }
+            }
+        },
+        "Talent": {
+            "required": [
+                "number",
+                "name",
+                "slug",
+                "category",
+                "description",
+                "animalName",
+                "animalSpecies"
+            ],
+            "type": "object",
+            "properties": {
+                "number": {
+                    "title": "Number",
+                    "description": "Framework talent number (1-22)",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": 0
+                },
+                "name": {
+                    "title": "Name",
+                    "description": "e.g. 'Focus', 'Grit', 'Memory'",
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 1
+                },
+                "slug": {
+                    "title": "Slug",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "maxLength": 128,
+                    "minLength": 1
+                },
+                "category": {
+                    "title": "Category",
+                    "description": "e.g. 'Attention', 'Mental Agility'",
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                },
+                "description": {
+                    "title": "Description",
+                    "description": "From CSV 'Skillprint Description'",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "animalName": {
+                    "title": "Animal name",
+                    "description": "e.g. 'Determined Dragonfly'",
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 1
+                },
+                "animalSpecies": {
+                    "title": "Animal species",
+                    "description": "e.g. 'Dragonfly'",
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                },
+                "animalFunFact": {
+                    "title": "Animal fun fact",
+                    "description": "Fun fact about the animal",
+                    "type": "string"
+                },
+                "skillSlug": {
+                    "title": "Skill slug",
+                    "type": "string",
+                    "format": "slug",
+                    "pattern": "^[-a-zA-Z0-9_]+$",
+                    "readOnly": true
+                },
+                "unlockThreshold": {
+                    "title": "Unlock threshold",
+                    "description": "Minimum composite mastery score to unlock (0-1)",
+                    "type": "number",
+                    "maximum": 1.0,
+                    "minimum": 0.0
+                }
+            }
+        },
+        "PartnerInternalId": {
+            "required": [
+                "internalId"
+            ],
+            "type": "object",
+            "properties": {
+                "internalId": {
+                    "title": "Internal id",
+                    "description": "The partner's unique identifier for the user.",
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "User": {
+            "required": [
+                "email"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "country": {
+                    "title": "Country",
+                    "type": "string",
+                    "enum": [
+                        "AF",
+                        "AX",
+                        "AL",
+                        "DZ",
+                        "AS",
+                        "AD",
+                        "AO",
+                        "AI",
+                        "AQ",
+                        "AG",
+                        "AR",
+                        "AM",
+                        "AW",
+                        "AU",
+                        "AT",
+                        "AZ",
+                        "BS",
+                        "BH",
+                        "BD",
+                        "BB",
+                        "BY",
+                        "BE",
+                        "BZ",
+                        "BJ",
+                        "BM",
+                        "BT",
+                        "BO",
+                        "BQ",
+                        "BA",
+                        "BW",
+                        "BV",
+                        "BR",
+                        "IO",
+                        "BN",
+                        "BG",
+                        "BF",
+                        "BI",
+                        "CV",
+                        "KH",
+                        "CM",
+                        "CA",
+                        "KY",
+                        "CF",
+                        "TD",
+                        "CL",
+                        "CN",
+                        "CX",
+                        "CC",
+                        "CO",
+                        "KM",
+                        "CG",
+                        "CD",
+                        "CK",
+                        "CR",
+                        "CI",
+                        "HR",
+                        "CU",
+                        "CW",
+                        "CY",
+                        "CZ",
+                        "DK",
+                        "DJ",
+                        "DM",
+                        "DO",
+                        "EC",
+                        "EG",
+                        "SV",
+                        "GQ",
+                        "ER",
+                        "EE",
+                        "SZ",
+                        "ET",
+                        "FK",
+                        "FO",
+                        "FJ",
+                        "FI",
+                        "FR",
+                        "GF",
+                        "PF",
+                        "TF",
+                        "GA",
+                        "GM",
+                        "GE",
+                        "DE",
+                        "GH",
+                        "GI",
+                        "GR",
+                        "GL",
+                        "GD",
+                        "GP",
+                        "GU",
+                        "GT",
+                        "GG",
+                        "GN",
+                        "GW",
+                        "GY",
+                        "HT",
+                        "HM",
+                        "VA",
+                        "HN",
+                        "HK",
+                        "HU",
+                        "IS",
+                        "IN",
+                        "ID",
+                        "IR",
+                        "IQ",
+                        "IE",
+                        "IM",
+                        "IL",
+                        "IT",
+                        "JM",
+                        "JP",
+                        "JE",
+                        "JO",
+                        "KZ",
+                        "KE",
+                        "KI",
+                        "KW",
+                        "KG",
+                        "LA",
+                        "LV",
+                        "LB",
+                        "LS",
+                        "LR",
+                        "LY",
+                        "LI",
+                        "LT",
+                        "LU",
+                        "MO",
+                        "MG",
+                        "MW",
+                        "MY",
+                        "MV",
+                        "ML",
+                        "MT",
+                        "MH",
+                        "MQ",
+                        "MR",
+                        "MU",
+                        "YT",
+                        "MX",
+                        "FM",
+                        "MD",
+                        "MC",
+                        "MN",
+                        "ME",
+                        "MS",
+                        "MA",
+                        "MZ",
+                        "MM",
+                        "NA",
+                        "NR",
+                        "NP",
+                        "NL",
+                        "NC",
+                        "NZ",
+                        "NI",
+                        "NE",
+                        "NG",
+                        "NU",
+                        "NF",
+                        "KP",
+                        "MK",
+                        "MP",
+                        "NO",
+                        "OM",
+                        "PK",
+                        "PW",
+                        "PS",
+                        "PA",
+                        "PG",
+                        "PY",
+                        "PE",
+                        "PH",
+                        "PN",
+                        "PL",
+                        "PT",
+                        "PR",
+                        "QA",
+                        "RE",
+                        "RO",
+                        "RU",
+                        "RW",
+                        "BL",
+                        "SH",
+                        "KN",
+                        "LC",
+                        "MF",
+                        "PM",
+                        "VC",
+                        "WS",
+                        "SM",
+                        "ST",
+                        "SA",
+                        "SN",
+                        "RS",
+                        "SC",
+                        "SL",
+                        "SG",
+                        "SX",
+                        "SK",
+                        "SI",
+                        "SB",
+                        "SO",
+                        "ZA",
+                        "GS",
+                        "KR",
+                        "SS",
+                        "ES",
+                        "LK",
+                        "SD",
+                        "SR",
+                        "SJ",
+                        "SE",
+                        "CH",
+                        "SY",
+                        "TW",
+                        "TJ",
+                        "TZ",
+                        "TH",
+                        "TL",
+                        "TG",
+                        "TK",
+                        "TO",
+                        "TT",
+                        "TN",
+                        "TR",
+                        "TM",
+                        "TC",
+                        "TV",
+                        "UG",
+                        "UA",
+                        "AE",
+                        "GB",
+                        "UM",
+                        "US",
+                        "UY",
+                        "UZ",
+                        "VU",
+                        "VE",
+                        "VN",
+                        "VG",
+                        "VI",
+                        "WF",
+                        "EH",
+                        "YE",
+                        "ZM",
+                        "ZW"
+                    ]
+                },
+                "lastLogin": {
+                    "title": "Last login",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "firstName": {
+                    "title": "First name",
+                    "type": "string",
+                    "maxLength": 150
+                },
+                "lastName": {
+                    "title": "Last name",
+                    "type": "string",
+                    "maxLength": 150
+                },
+                "isActive": {
+                    "title": "Active",
+                    "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                    "type": "boolean"
+                },
+                "dateJoined": {
+                    "title": "Date joined",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "email": {
+                    "title": "Email",
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                    "minLength": 1
+                },
+                "emailVerified": {
+                    "title": "Email verified",
+                    "type": "boolean"
+                },
+                "phoneNumberVerified": {
+                    "title": "Phone number verified",
+                    "type": "boolean"
+                },
+                "phoneNumber": {
+                    "title": "Phone Number",
+                    "type": "string",
+                    "maxLength": 128,
+                    "x-nullable": true
+                },
+                "dateOfBirth": {
+                    "title": "Date of Birth",
+                    "type": "string",
+                    "format": "date",
+                    "x-nullable": true
+                },
+                "gender": {
+                    "title": "Gender",
+                    "type": "string",
+                    "enum": [
+                        "Male",
+                        "Female",
+                        "Diverse/Other"
+                    ],
+                    "x-nullable": true
+                },
+                "addressLine1": {
+                    "title": "Address 1",
+                    "type": "string",
+                    "maxLength": 256,
+                    "x-nullable": true
+                },
+                "addressLine2": {
+                    "title": "Address 2",
+                    "type": "string",
+                    "maxLength": 256,
+                    "x-nullable": true
+                },
+                "city": {
+                    "title": "City",
+                    "type": "string",
+                    "maxLength": 64,
+                    "x-nullable": true
+                },
+                "state": {
+                    "title": "State",
+                    "type": "string",
+                    "maxLength": 64,
+                    "x-nullable": true
+                },
+                "postalCode": {
+                    "title": "ZIP Code",
+                    "type": "string",
+                    "maxLength": 5,
+                    "x-nullable": true
+                },
+                "username": {
+                    "title": "Username",
+                    "type": "string",
+                    "maxLength": 128,
+                    "x-nullable": true
+                },
+                "additionalIdentityData": {
+                    "title": "Additional identity data",
+                    "type": "object",
+                    "x-nullable": true
+                }
+            }
+        },
+        "GameChunkAnalysis": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "session": {
+                    "title": "Session",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "timestamp": {
+                    "title": "Timestamp",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "readOnly": true,
+                        "format": "uri"
+                    }
+                },
+                "video": {
+                    "title": "Video",
+                    "type": "string",
+                    "readOnly": true,
+                    "format": "uri"
+                },
+                "screenshots": {
+                    "title": "Screenshots",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "skillLlmOutput": {
+                    "title": "Skill llm output",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "flowLlmOutput": {
+                    "title": "Flow llm output",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "rawSkillLlmOutput": {
+                    "title": "Raw skill llm output",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "rawFlowLlmOutput": {
+                    "title": "Raw flow llm output",
+                    "type": "object",
+                    "readOnly": true
+                }
+            }
+        },
+        "SkillHistory": {
+            "type": "object",
+            "properties": {
+                "skill": {
+                    "title": "Skill",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                },
+                "currentLevel": {
+                    "title": "Current level",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "percentileRank": {
+                    "title": "Percentile rank",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "confidenceScore": {
+                    "title": "Confidence score",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "levelHistory": {
+                    "title": "Level history",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "improvementRate": {
+                    "title": "Improvement rate",
+                    "type": "number",
+                    "readOnly": true,
+                    "x-nullable": true
+                },
+                "peakPerformance": {
+                    "title": "Peak performance",
+                    "type": "number",
+                    "readOnly": true,
+                    "x-nullable": true
+                },
+                "consistencyScore": {
+                    "title": "Consistency score",
+                    "type": "number",
+                    "readOnly": true,
+                    "x-nullable": true
+                }
+            }
+        },
+        "SkillPrintProfile": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "totalSessions": {
+                    "title": "Total sessions",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "totalTimePlayed": {
+                    "title": "Total time played",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "avgFlowScore": {
+                    "title": "Avg flow score",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "flowScoreHistory": {
+                    "title": "Flow score history",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "flowConfidence": {
+                    "title": "Flow confidence",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "stateDistributions": {
+                    "title": "State distributions",
+                    "type": "object",
+                    "readOnly": true
+                },
+                "skillHistories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SkillHistory"
+                    },
+                    "readOnly": true
+                }
+            }
+        },
+        "UserSkillAggregate": {
+            "type": "object",
+            "properties": {
+                "skill": {
+                    "title": "Skill",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                },
+                "currentLevel": {
+                    "title": "Current level",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "percentileRank": {
+                    "title": "Percentile rank",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "confidenceScore": {
+                    "title": "Confidence score",
+                    "type": "number",
+                    "readOnly": true
+                },
+                "historicalData": {
+                    "title": "Historical data",
+                    "type": "object",
+                    "readOnly": true
+                }
+            }
+        },
+        "AuthCustomToken": {
+            "required": [
+                "email",
+                "password"
+            ],
+            "type": "object",
+            "properties": {
+                "email": {
+                    "title": "Email",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "token": {
+                    "title": "Token",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                },
+                "claimSessionIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            }
+        },
+        "Register": {
+            "required": [
+                "password1",
+                "password2",
+                "email"
+            ],
+            "type": "object",
+            "properties": {
+                "username": {
+                    "title": "Username",
+                    "type": "string",
+                    "maxLength": 128,
+                    "x-nullable": true
+                },
+                "password1": {
+                    "title": "Password 1",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "password2": {
+                    "title": "Password 2",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "email": {
+                    "title": "Email",
+                    "type": "string",
+                    "format": "email",
+                    "minLength": 1
+                },
+                "firstName": {
+                    "title": "First name",
+                    "type": "string",
+                    "maxLength": 150
+                },
+                "lastName": {
+                    "title": "Last name",
+                    "type": "string",
+                    "maxLength": 150
+                },
+                "phoneNumber": {
+                    "title": "Phone Number",
+                    "type": "string",
+                    "maxLength": 128,
+                    "x-nullable": true
+                },
+                "dateOfBirth": {
+                    "title": "Date of Birth",
+                    "type": "string",
+                    "format": "date",
+                    "x-nullable": true
+                },
+                "gender": {
+                    "title": "Gender",
+                    "type": "string",
+                    "enum": [
+                        "Male",
+                        "Female",
+                        "Diverse/Other"
+                    ],
+                    "x-nullable": true
+                },
+                "addressLine1": {
+                    "title": "Address 1",
+                    "type": "string",
+                    "maxLength": 256,
+                    "x-nullable": true
+                },
+                "country": {
+                    "title": "Country",
+                    "type": "string",
+                    "enum": [
+                        "AF",
+                        "AX",
+                        "AL",
+                        "DZ",
+                        "AS",
+                        "AD",
+                        "AO",
+                        "AI",
+                        "AQ",
+                        "AG",
+                        "AR",
+                        "AM",
+                        "AW",
+                        "AU",
+                        "AT",
+                        "AZ",
+                        "BS",
+                        "BH",
+                        "BD",
+                        "BB",
+                        "BY",
+                        "BE",
+                        "BZ",
+                        "BJ",
+                        "BM",
+                        "BT",
+                        "BO",
+                        "BQ",
+                        "BA",
+                        "BW",
+                        "BV",
+                        "BR",
+                        "IO",
+                        "BN",
+                        "BG",
+                        "BF",
+                        "BI",
+                        "CV",
+                        "KH",
+                        "CM",
+                        "CA",
+                        "KY",
+                        "CF",
+                        "TD",
+                        "CL",
+                        "CN",
+                        "CX",
+                        "CC",
+                        "CO",
+                        "KM",
+                        "CG",
+                        "CD",
+                        "CK",
+                        "CR",
+                        "CI",
+                        "HR",
+                        "CU",
+                        "CW",
+                        "CY",
+                        "CZ",
+                        "DK",
+                        "DJ",
+                        "DM",
+                        "DO",
+                        "EC",
+                        "EG",
+                        "SV",
+                        "GQ",
+                        "ER",
+                        "EE",
+                        "SZ",
+                        "ET",
+                        "FK",
+                        "FO",
+                        "FJ",
+                        "FI",
+                        "FR",
+                        "GF",
+                        "PF",
+                        "TF",
+                        "GA",
+                        "GM",
+                        "GE",
+                        "DE",
+                        "GH",
+                        "GI",
+                        "GR",
+                        "GL",
+                        "GD",
+                        "GP",
+                        "GU",
+                        "GT",
+                        "GG",
+                        "GN",
+                        "GW",
+                        "GY",
+                        "HT",
+                        "HM",
+                        "VA",
+                        "HN",
+                        "HK",
+                        "HU",
+                        "IS",
+                        "IN",
+                        "ID",
+                        "IR",
+                        "IQ",
+                        "IE",
+                        "IM",
+                        "IL",
+                        "IT",
+                        "JM",
+                        "JP",
+                        "JE",
+                        "JO",
+                        "KZ",
+                        "KE",
+                        "KI",
+                        "KW",
+                        "KG",
+                        "LA",
+                        "LV",
+                        "LB",
+                        "LS",
+                        "LR",
+                        "LY",
+                        "LI",
+                        "LT",
+                        "LU",
+                        "MO",
+                        "MG",
+                        "MW",
+                        "MY",
+                        "MV",
+                        "ML",
+                        "MT",
+                        "MH",
+                        "MQ",
+                        "MR",
+                        "MU",
+                        "YT",
+                        "MX",
+                        "FM",
+                        "MD",
+                        "MC",
+                        "MN",
+                        "ME",
+                        "MS",
+                        "MA",
+                        "MZ",
+                        "MM",
+                        "NA",
+                        "NR",
+                        "NP",
+                        "NL",
+                        "NC",
+                        "NZ",
+                        "NI",
+                        "NE",
+                        "NG",
+                        "NU",
+                        "NF",
+                        "KP",
+                        "MK",
+                        "MP",
+                        "NO",
+                        "OM",
+                        "PK",
+                        "PW",
+                        "PS",
+                        "PA",
+                        "PG",
+                        "PY",
+                        "PE",
+                        "PH",
+                        "PN",
+                        "PL",
+                        "PT",
+                        "PR",
+                        "QA",
+                        "RE",
+                        "RO",
+                        "RU",
+                        "RW",
+                        "BL",
+                        "SH",
+                        "KN",
+                        "LC",
+                        "MF",
+                        "PM",
+                        "VC",
+                        "WS",
+                        "SM",
+                        "ST",
+                        "SA",
+                        "SN",
+                        "RS",
+                        "SC",
+                        "SL",
+                        "SG",
+                        "SX",
+                        "SK",
+                        "SI",
+                        "SB",
+                        "SO",
+                        "ZA",
+                        "GS",
+                        "KR",
+                        "SS",
+                        "ES",
+                        "LK",
+                        "SD",
+                        "SR",
+                        "SJ",
+                        "SE",
+                        "CH",
+                        "SY",
+                        "TW",
+                        "TJ",
+                        "TZ",
+                        "TH",
+                        "TL",
+                        "TG",
+                        "TK",
+                        "TO",
+                        "TT",
+                        "TN",
+                        "TR",
+                        "TM",
+                        "TC",
+                        "TV",
+                        "UG",
+                        "UA",
+                        "AE",
+                        "GB",
+                        "UM",
+                        "US",
+                        "UY",
+                        "UZ",
+                        "VU",
+                        "VE",
+                        "VN",
+                        "VG",
+                        "VI",
+                        "WF",
+                        "EH",
+                        "YE",
+                        "ZM",
+                        "ZW"
+                    ]
+                },
+                "claimSessionIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            }
+        }
+    }
+}

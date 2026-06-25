@@ -173,8 +173,8 @@ export function useLegacyBadges() {
     const mergeWithServerData = useCallback((serverData: any[], local: UserAchievementType[]): UserAchievementType[] => {
         if (!Array.isArray(serverData)) return local;
         return local.map(item => {
-            const serverItem = serverData.find((s: any) => 
-                s.slug === item.slug || 
+            const serverItem = serverData.find((s: any) =>
+                s.slug === item.slug ||
                 (s.name && s.name.toLowerCase() === item.name.toLowerCase())
             );
             if (serverItem) {
@@ -202,8 +202,8 @@ export function useLegacyBadges() {
             }
 
             console.log('[useLegacyBadges] Fetching talents/me from BE...');
-            const response = await get('api/talents/me/', false, headers);
-            
+            const response = await get('games/api/talents/me/', false, headers);
+
             const serverData = Array.isArray(response)
                 ? response
                 : (response.results || response.talents || response.data || []);
