@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getCookie, setCookie } from '../utils/cookieUtils';
+import { getUserGoals, updateUserGoals } from '../api/api';
+import { useUserSession } from './useUserSession';
 
 export interface GoalOptionItem {
   slug: string;
@@ -31,78 +32,76 @@ const SKILLS_COOKIE_KEY = 'goal_skills';
 const MOODS_COOKIE_KEY = 'goal_moods';
 
 export function useGoalSetting() {
+  const { userToken } = useUserSession();
   const [goalSkills, setGoalSkills] = useState<string[]>([]);
   const [goalMoods, setGoalMoods] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingSkills, setIsSavingSkills] = useState(false);
   const [isSavingMoods, setIsSavingMoods] = useState(false);
 
-  // Load from cookies on mount (client-side only)
+  // Load goals from the backend API when userToken is available
   useEffect(() => {
-    // STUB: Replace this with backend GET request when connected to backend:
-    // try {
-    //   const response = await axios.get('/api/user/goals');
-    //   setGoalSkills(response.data.skills);
-    //   setGoalMoods(response.data.moods);
-    // } catch (e) { ... }
-    
-    const storedSkills = getCookie(SKILLS_COOKIE_KEY);
-    if (storedSkills) {
-      setGoalSkills(storedSkills.split(',').filter(Boolean));
-    } else {
-      setGoalSkills([]);
+    if (!userToken) {
+      setIsLoading(false);
+      return;
     }
 
-    const storedMoods = getCookie(MOODS_COOKIE_KEY);
-    if (storedMoods) {
-      setGoalMoods(storedMoods.split(',').filter(Boolean));
-    } else {
-      setGoalMoods([]);
-    }
+    const fetchGoals = async () => {
+      setIsLoading(true);
+      try {
+        const goals = await getUserGoals(userToken);
+        const skills = goals
+          .filter((g: any) => g.goalType === 'SKILL' && g.skill)
+          .map((g: any) => g.skill);
+        const moods = goals
+          .filter((g: any) => g.goalType === 'MOOD' && g.mood)
+          .map((g: any) => g.mood);
+        setGoalSkills(skills);
+        setGoalMoods(moods);
+      } catch (e) {
+        console.error("Failed to fetch goals:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setIsLoading(false);
-  }, []);
+    fetchGoals();
+  }, [userToken]);
 
   const saveSkills = async (skills: string[]) => {
+    if (!userToken) return;
     setIsSavingSkills(true);
-    
-    // Simulate backend write delay (1.5 seconds)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // STUB: Replace this with backend API write call when connected to backend:
-    // try {
-    //   await axios.post('/api/user/goals/skills', { skills });
-    // } catch (e) {
-    //   console.error("Failed to save skills to backend:", e);
-    //   throw e;
-    // }
-
-    // Save to cookies for now
-    setCookie(SKILLS_COOKIE_KEY, skills.join(','));
-    setGoalSkills(skills);
-    
-    setIsSavingSkills(false);
+    try {
+      const payload = [
+        ...skills.map(s => ({ goalType: 'SKILL', skill: s })),
+        ...goalMoods.map(m => ({ goalType: 'MOOD', mood: m }))
+      ];
+      await updateUserGoals(payload, userToken);
+      setGoalSkills(skills);
+    } catch (e) {
+      console.error("Failed to save skills:", e);
+      throw e;
+    } finally {
+      setIsSavingSkills(false);
+    }
   };
 
   const saveMoods = async (moods: string[]) => {
+    if (!userToken) return;
     setIsSavingMoods(true);
-    
-    // Simulate backend write delay (1.5 seconds)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // STUB: Replace this with backend API write call when connected to backend:
-    // try {
-    //   await axios.post('/api/user/goals/moods', { moods });
-    // } catch (e) {
-    //   console.error("Failed to save moods to backend:", e);
-    //   throw e;
-    // }
-
-    // Save to cookies for now
-    setCookie(MOODS_COOKIE_KEY, moods.join(','));
-    setGoalMoods(moods);
-    
-    setIsSavingMoods(false);
+    try {
+      const payload = [
+        ...goalSkills.map(s => ({ goalType: 'SKILL', skill: s })),
+        ...moods.map(m => ({ goalType: 'MOOD', mood: m }))
+      ];
+      await updateUserGoals(payload, userToken);
+      setGoalMoods(moods);
+    } catch (e) {
+      console.error("Failed to save moods:", e);
+      throw e;
+    } finally {
+      setIsSavingMoods(false);
+    }
   };
 
   return {

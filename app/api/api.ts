@@ -111,6 +111,16 @@ export const post = async (path: string, data: any, headers: any) => {
     return response.data;
 };
 
+export const put = async (path: string, data: any, headers: any) => {
+    const hdrs = {
+        "Content-Type": "application/json",
+        ...headers
+    }
+    const response = await axios.put(`${BASE_URL}${path}`, data, { headers: hdrs });
+    return response.data;
+};
+
+
 export const addUser = async (user: any) => {
     const url = `${add_user_path}`;
     return await post(url, {}, { headers: { "Content-Type": "application/json" } });
@@ -199,4 +209,28 @@ export const submitMoodSurvey = async (data: { score: number, game: string, mood
         headers["X-Auth-Token"] = `Token ${token}`;
     }
     return await post(url, data, headers);
+};
+
+export const getUserGoals = async (token?: string | null, apiKey?: string | null) => {
+    const url = `games/api/goals/`;
+    const headers: any = {};
+    if (token) {
+        headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    if (apiKey) {
+        headers["Authorization"] = `Api-Key ${apiKey}`;
+    }
+    return await get(url, false, headers);
+};
+
+export const updateUserGoals = async (goals: any[], token?: string | null, apiKey?: string | null) => {
+    const url = `games/api/goals/`;
+    const headers: any = {};
+    if (token) {
+        headers["X-Auth-Token"] = `Token ${token}`;
+    }
+    if (apiKey) {
+        headers["Authorization"] = `Api-Key ${apiKey}`;
+    }
+    return await put(url, goals, headers);
 };
