@@ -21,7 +21,7 @@ import { useVisualizeMoodProfile } from '../hooks/useVisualizeMoodProfile';
 import { useVisualizeSkillProfile } from '../hooks/useVisualizeSkillProfile';
 import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
 import ProfilePerformanceTrends from '../components/ProfilePerformanceTrends';
-import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
+import { useGoalSetting } from '../hooks/useGoalSetting';
 import { useGameMetrics } from '../hooks/useGameMetrics';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import {
@@ -92,6 +92,8 @@ export default function Skillprint() {
     isSavingMoods,
     saveSkills,
     saveMoods,
+    availableSkills,
+    availableMoods,
   } = useGoalSetting();
 
   const { logout } = useAuth();
@@ -689,7 +691,7 @@ export default function Skillprint() {
                       Select the cognitive skills you want to prioritize during your sessions:
                     </p>
                     <div className="flex flex-wrap gap-2 pr-1">
-                      {AVAILABLE_SKILLS.map((skill) => {
+                      {availableSkills.map((skill) => {
                         const isSelected = goalSkills.includes(skill.slug);
                         return (
                           <button
@@ -753,8 +755,9 @@ export default function Skillprint() {
                       Select the mental states you want to cultivate:
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {AVAILABLE_MOODS.map((mood) => {
+                      {availableMoods.map((mood) => {
                         const isSelected = goalMoods.includes(mood.slug);
+                        const slugKey = mood.slug.toLowerCase();
 
                         const selectedStyles: Record<string, string> = {
                           focus: 'bg-violet-600 border-violet-600 text-white shadow-sm scale-105',
@@ -769,8 +772,8 @@ export default function Skillprint() {
                           collaborate: 'border-blue-500/20 text-muted-foreground hover:bg-blue-500/5 hover:text-blue-600 dark:hover:text-blue-400'
                         };
 
-                        const activeStyle = selectedStyles[mood.slug] || 'bg-primary text-white border-primary';
-                        const inactiveStyle = unselectedStyles[mood.slug] || 'bg-transparent border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground';
+                        const activeStyle = selectedStyles[slugKey] || 'bg-primary text-white border-primary shadow-sm scale-105';
+                        const inactiveStyle = unselectedStyles[slugKey] || 'bg-transparent border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground';
 
                         return (
                           <button

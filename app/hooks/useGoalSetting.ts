@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUserGoals, updateUserGoals } from '../api/api';
+import { getUserGoals, updateUserGoals, getSkills, getMoods } from '../api/api';
 import { useUserSession } from './useUserSession';
 
 export interface GoalOptionItem {
@@ -35,9 +35,32 @@ export function useGoalSetting() {
   const { userToken } = useUserSession();
   const [goalSkills, setGoalSkills] = useState<string[]>([]);
   const [goalMoods, setGoalMoods] = useState<string[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<GoalOptionItem[]>(AVAILABLE_SKILLS);
+  const [availableMoods, setAvailableMoods] = useState<GoalOptionItem[]>(AVAILABLE_MOODS);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingSkills, setIsSavingSkills] = useState(false);
   const [isSavingMoods, setIsSavingMoods] = useState(false);
+
+  // Load available skills/moods from backend API on mount
+  useEffect(() => {
+    const fetchAvailable = async () => {
+      try {
+        const [skillsData, moodsData] = await Promise.all([
+          getSkills(),
+          getMoods()
+        ]);
+        if (skillsData && Array.isArray(skillsData)) {
+          setAvailableSkills(skillsData);
+        }
+        if (moodsData && Array.isArray(moodsData)) {
+          setAvailableMoods(moodsData);
+        }
+      } catch (e) {
+        console.error("Failed to fetch available skills/moods from backend:", e);
+      }
+    };
+    fetchAvailable();
+  }, []);
 
   // Load goals from the backend API when userToken is available
   useEffect(() => {
@@ -112,5 +135,7 @@ export function useGoalSetting() {
     isSavingMoods,
     saveSkills,
     saveMoods,
+    availableSkills,
+    availableMoods,
   };
 }
