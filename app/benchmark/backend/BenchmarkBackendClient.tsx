@@ -16,6 +16,7 @@ export default function BenchmarkBackendClient() {
   const [gameFilter, setGameFilter] = useState<string>('all');
   const [moodFilter, setMoodFilter] = useState<string>('all');
   const [selectedProviderKey, setSelectedProviderKey] = useState<string | null>('anthropic');
+  const [selectedPlayProviderKey, setSelectedPlayProviderKey] = useState<string | null>(null);
   const [launchGame, setLaunchGame] = useState<string>('hextris');
   const [launchMood, setLaunchMood] = useState<string>('focus');
   const [disableSdk, setDisableSdk] = useState<boolean>(false);
@@ -69,9 +70,15 @@ export default function BenchmarkBackendClient() {
     if (disableSdk) {
       url += `&sdk=false`;
     }
+    if (withAdjustments && selectedPlayProviderKey) {
+      url += `&providerKey=${encodeURIComponent(selectedPlayProviderKey)}`;
+    }
     setPendingLaunchConfig({ withAdjustments, url });
     setPreGameRating(null); // Reset rating selection
-    setShowPreGameSurvey(true);
+    
+    // Bypassing pre-game survey for now: routing directly
+    router.push(url);
+    // setShowPreGameSurvey(true);
   };
 
   const handlePreGameSubmit = () => {
@@ -338,7 +345,7 @@ export default function BenchmarkBackendClient() {
           </div>
 
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
               {/* Game Selection Dropdown */}
               <div className="space-y-2">
                 <label className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Select Game</label>
@@ -364,6 +371,23 @@ export default function BenchmarkBackendClient() {
                   <option value="focus">Focus</option>
                   <option value="relax">Relax</option>
                   <option value="creativity">Creativity</option>
+                </select>
+              </div>
+
+              {/* LLM Selection Dropdown */}
+              <div className="space-y-2">
+                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Select LLM Provider</label>
+                <select
+                  value={selectedPlayProviderKey || ''}
+                  onChange={(e) => setSelectedPlayProviderKey(e.target.value || null)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer h-[38px]"
+                >
+                  <option value="">Random LLM</option>
+                  {providers?.map((provider) => (
+                    <option key={provider.key} value={provider.key}>
+                      {provider.displayName}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

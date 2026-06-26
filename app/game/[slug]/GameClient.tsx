@@ -152,6 +152,13 @@ export const mapSlugToGamePath = (slug: string) => {
 export default function GameClient({ slug }: GameClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
+    const searchParams = useSearchParams();
+    const source = searchParams.get('source');
+    const playbookId = searchParams.get('playbookId');
+    const disableAdjustments = searchParams.get('adjustments') === 'false';
+    const disableSdk = searchParams.get('sdk') === 'false';
+    const providerKey = searchParams.get('providerKey');
+
     const [isIframeLoaded, setIsIframeLoaded] = useState(false);
     const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
@@ -202,12 +209,20 @@ export default function GameClient({ slug }: GameClientProps) {
                 }
 
                 if (isMounted) {
-                    setGamePath(mapSlugToGamePath(targetSlug));
+                    let path = mapSlugToGamePath(targetSlug);
+                    if (providerKey) {
+                        path += (path.includes('?') ? '&' : '?') + `providerKey=${encodeURIComponent(providerKey)}`;
+                    }
+                    setGamePath(path);
                 }
             } catch (error) {
                 console.error("Error fetching game slug mapping", error);
                 if (isMounted) {
-                    setGamePath(mapSlugToGamePath(decodedSlug));
+                    let path = mapSlugToGamePath(decodedSlug);
+                    if (providerKey) {
+                        path += (path.includes('?') ? '&' : '?') + `providerKey=${encodeURIComponent(providerKey)}`;
+                    }
+                    setGamePath(path);
                 }
             } finally {
                 if (isMounted) {
@@ -220,7 +235,7 @@ export default function GameClient({ slug }: GameClientProps) {
         return () => {
             isMounted = false;
         };
-    }, [decodedSlug]);
+    }, [decodedSlug, providerKey]);
 
     const handleIframeLoad = () => {
         setIsIframeLoaded(true);
@@ -354,11 +369,7 @@ export default function GameClient({ slug }: GameClientProps) {
         setTimeout(poll, 2000);
     };
 
-    const searchParams = useSearchParams();
-    const source = searchParams.get('source');
-    const playbookId = searchParams.get('playbookId');
-    const disableAdjustments = searchParams.get('adjustments') === 'false';
-    const disableSdk = searchParams.get('sdk') === 'false';
+
 
     const handleGameComplete = (data: any) => {
         const endTime = Date.now();
@@ -557,7 +568,8 @@ export default function GameClient({ slug }: GameClientProps) {
                 const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
-                client.startSession(sessionId, targetMood, serverSideSlug, false, source === 'benchmark');
+                const isBenchmarkSession = source === 'benchmark' || source === 'benchmark-backend';
+                client.startSession(sessionId, targetMood, serverSideSlug, false, isBenchmarkSession, providerKey || undefined);
                 shouldPollRef.current = true;
                 pollSessionTips();
             } catch (e) {
@@ -570,7 +582,7 @@ export default function GameClient({ slug }: GameClientProps) {
         return () => {
             shouldPollRef.current = false;
         };
-    }, [slug]);
+    }, [slug, providerKey]);
 
     // Update token if it changes (e.g. loads asynchronously)
     useEffect(() => {

@@ -39,6 +39,9 @@ interface StartSessionRequest {
     game: string;
     targetMood: string;
     is_benchmark?: boolean;
+    providerKey?: string;
+    llmProviderKey?: string;
+    llm_provider_key?: string;
 }
 
 export interface ParameterUpdateResult {
@@ -177,8 +180,11 @@ export class SkillprintClient {
         this.userToken = token;
     }
 
-    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, isBenchmark?: boolean): Promise<boolean> {
-        const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
+    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, isBenchmark?: boolean, providerKey?: string): Promise<boolean> {
+        let url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
+        if (providerKey) {
+            url += `?providerKey=${encodeURIComponent(providerKey)}`;
+        }
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
         const slugToGameId = this.GAME_SLUG_TO_NAME_MAP[gameName] || gameName;
@@ -191,6 +197,12 @@ export class SkillprintClient {
 
         if (isBenchmark !== undefined) {
             requestData.is_benchmark = isBenchmark;
+        }
+
+        if (providerKey) {
+            requestData.providerKey = providerKey;
+            requestData.llmProviderKey = providerKey;
+            requestData.llm_provider_key = providerKey;
         }
 
         let headers: any = {
@@ -242,7 +254,7 @@ export class SkillprintClient {
                                 }
                             }
 
-                            return await this.startSession(sessionId, targetMood, gameName, true, isBenchmark);
+                            return await this.startSession(sessionId, targetMood, gameName, true, isBenchmark, providerKey);
                         }
                     } catch (e) {
                         this.log(`Failed to parse 401 response or refresh token: ${e}`, LogLevel.ERROR);

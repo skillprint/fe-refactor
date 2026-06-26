@@ -69,7 +69,10 @@ export default function BenchmarkClient() {
     }
     setPendingLaunchConfig({ withAdjustments, url });
     setPreGameRating(null); // Reset rating selection
-    setShowPreGameSurvey(true);
+    
+    // Bypassing pre-game survey for now: routing directly
+    router.push(url);
+    // setShowPreGameSurvey(true);
   };
 
   const handlePreGameSubmit = () => {
