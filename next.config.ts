@@ -28,6 +28,50 @@ const nextConfig: NextConfig = {
 
     return [];
   },
+
+  async headers() {
+    return [
+      {
+        source: "/games/live/:path*\\.data\\.gz",
+        headers: [
+          {
+            key: "Content-Encoding",
+            value: "gzip",
+          },
+          {
+            key: "Content-Type",
+            value: "application/octet-stream",
+          },
+        ],
+      },
+      {
+        source: "/games/live/:path*\\.wasm\\.gz",
+        headers: [
+          {
+            key: "Content-Encoding",
+            value: "gzip",
+          },
+          {
+            key: "Content-Type",
+            value: "application/wasm",
+          },
+        ],
+      },
+      {
+        source: "/games/live/:path*\\.js\\.gz",
+        headers: [
+          {
+            key: "Content-Encoding",
+            value: "gzip",
+          },
+          {
+            key: "Content-Type",
+            value: "application/javascript",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

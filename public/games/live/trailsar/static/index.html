@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | Trails WebAR</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <!-- 1. Unity Container & Canvas -->
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width="1920" height="1080" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+
+    <!-- 2. Beautiful Lobby Menu Overlay -->
+    <div id="lobby-overlay" class="menu-overlay" style="display: none; opacity: 0;">
+      <div class="bg-radial"></div>
+      <div class="bg-grid"></div>
+
+      <!-- Top Header logos -->
+      <header class="lobby-header">
+        <img class="logo-left" src="TemplateData/trails_logo.png" alt="Trails Logo">
+        <img class="logo-right" src="TemplateData/skillprint_logo.png" alt="Skillprint Logo">
+      </header>
+
+      <!-- Lobby Scroll Carousel -->
+      <div class="lobby-content">
+        <div class="carousel-outer">
+          <div class="carousel-line"></div>
+          <div class="carousel" id="carousel">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Complete/Results overlay -->
+    <div id="results-overlay" class="menu-overlay" style="display: none;">
+      <div class="bg-radial"></div>
+      <div class="bg-grid"></div>
+      <div class="results-box">
+        <h2 class="results-title">COMPLETE!</h2>
+        <div class="results-stats" id="results-stats">Time: --.-s  •  Errors: -</div>
+        <div class="results-buttons">
+          <button class="btn btn-primary" onclick="restartLevel()">Play Again</button>
+          <button class="btn btn-secondary" onclick="showLobby()">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Scripts & Unity Instance Integration -->
+    <script>
+      // Guard against NotReadableError on desktop browsers for motion sensors
+      if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        const sensors = ['AbsoluteOrientationSensor', 'RelativeOrientationSensor', 'Gyroscope', 'Accelerometer', 'Magnetometer'];
+        sensors.forEach(sensor => {
+          try {
+            if (sensor in window) {
+              Object.defineProperty(window, sensor, {
+                value: undefined,
+                configurable: true,
+                writable: true
+              });
+            }
+          } catch (e) {
+            console.warn("Failed to stub " + sensor, e);
+          }
+        });
+      }
+
+      // Level Groupings definition
+      const GROUPS_DATA = [
+        {
+          key: 'PartA_Table',
+          label: 'Group 1',
+          title: 'Getting Started',
+          description: 'Connect numeric nodes on a flat 2D tabletop board.',
+          levels: [1, 2, 3, 4]
+        },
+        {
+          key: 'PartA_Sphere',
+          label: 'Group 2',
+          title: 'Turn Around',
+          description: 'Connect numeric nodes distributed in 3D space around you.',
+          levels: [5, 6, 7, 8]
+        },
+        {
+          key: 'PartB_Table',
+          label: 'Group 3',
+          title: 'Above and Below',
+          description: 'Connect numeric nodes above and below you.',
+          levels: [9, 10, 11, 12]
+        },
+        {
+          key: 'PartB_Sphere',
+          label: 'Group 4',
+          title: 'Master Challenge',
+          description: 'Alternately connect numbers and letters in 3D space around you.',
+          levels: [13, 14, 15, 16]
+        }
+      ];
+
+      // Initialize completed levels tracker
+      let completedLevels = JSON.parse(localStorage.getItem('completed_levels'));
+      if (!completedLevels) {
+        // Match the screenshot: levels 1-11 are completed, level 12 onwards is uncompleted
+        completedLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        localStorage.setItem('completed_levels', JSON.stringify(completedLevels));
+      }
+
+      window.currentActiveLevel = null;
+      window.currentActiveGroupKey = null;
+
+      // Render Carousel Group Cards
+      function renderCarousel() {
+        const container = document.getElementById('carousel');
+        container.innerHTML = '';
+        
+        const completed = JSON.parse(localStorage.getItem('completed_levels')) || [];
+        
+        GROUPS_DATA.forEach((group) => {
+          const card = document.createElement('div');
+          card.className = 'group-card';
+          
+          const levelsHtml = group.levels.map(lvl => {
+            const isCompleted = completed.includes(lvl);
+            return `
+              <button class="level-node ${isCompleted ? 'completed' : ''}" onclick="playLevel('${group.key}', ${lvl})">
+                ${lvl}
+                ${isCompleted ? '<div class="check-badge">✓</div>' : ''}
+              </button>
+            `;
+          }).join('');
+          
+          card.innerHTML = `
+            <div class="group-label">${group.label}</div>
+            <h3 class="group-title">${group.title}</h3>
+            <p class="group-description">${group.description}</p>
+            <div class="levels-container">
+              ${levelsHtml}
+            </div>
+          `;
+          
+          container.appendChild(card);
+        });
+      }
+
+      // Drag to scroll carousel logic for desktop mouse users
+      const carousel = document.getElementById('carousel');
+      let isDown = false;
+      let startY;
+      let scrollTop;
+
+      carousel.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startY = e.pageY - carousel.offsetTop;
+        scrollTop = carousel.scrollTop;
+      });
+      carousel.addEventListener('mouseleave', () => {
+        isDown = false;
+      });
+      carousel.addEventListener('mouseup', () => {
+        isDown = false;
+      });
+      carousel.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const y = e.pageY - carousel.offsetTop;
+        const walk = (y - startY) * 1.5; // multiplier for scrolling speed
+        carousel.scrollTop = scrollTop - walk;
+      });
+
+      // Snapping active card highlight calculations
+      function updateActiveCard() {
+        const cards = document.querySelectorAll('.group-card');
+        if (cards.length === 0) return;
+        const scrollerCenter = carousel.scrollTop + (carousel.clientHeight / 2);
+        
+        let closestCard = null;
+        let minDistance = Infinity;
+        
+        cards.forEach(card => {
+          const cardCenter = card.offsetTop + (card.clientHeight / 2);
+          const distance = Math.abs(scrollerCenter - cardCenter);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestCard = card;
+          }
+        });
+        
+        cards.forEach(card => {
+          if (card === closestCard) {
+            card.classList.add('active');
+          } else {
+            card.classList.remove('active');
+          }
+        });
+      }
+
+      carousel.addEventListener('scroll', updateActiveCard);
+
+      // Play Level Trigger
+      function playLevel(groupKey, levelNum) {
+        window.currentActiveLevel = levelNum;
+        window.currentActiveGroupKey = groupKey;
+        
+        // Fade out Lobby menu
+        const lobby = document.getElementById('lobby-overlay');
+        lobby.style.opacity = '0';
+        setTimeout(() => {
+          lobby.style.display = 'none';
+        }, 400);
+
+        // Show and fade in Unity container
+        const unityContainer = document.getElementById('unity-container');
+        unityContainer.style.display = 'block';
+        setTimeout(() => {
+          unityContainer.style.opacity = '1';
+        }, 50);
+
+        // Notify Unity to start the corresponding configuration
+        if (window.unityInstance) {
+          window.unityInstance.SendMessage("GameManager", "StartGameByName", groupKey);
+        } else {
+          console.error("Unity WebGL Instance is not initialized yet!");
+        }
+      }
+
+      // Restart current level
+      function restartLevel() {
+        document.getElementById('results-overlay').style.display = 'none';
+        playLevel(window.currentActiveGroupKey, window.currentActiveLevel);
+      }
+
+      // Show lobby menu
+      function showLobby() {
+        document.getElementById('results-overlay').style.display = 'none';
+        
+        const lobby = document.getElementById('lobby-overlay');
+        lobby.style.display = 'flex';
+        setTimeout(() => {
+          lobby.style.opacity = '1';
+        }, 50);
+
+        // Hide Unity container
+        const unityContainer = document.getElementById('unity-container');
+        unityContainer.style.opacity = '0';
+        setTimeout(() => {
+          unityContainer.style.display = 'none';
+        }, 400);
+
+        // Notify Unity
+        if (window.unityInstance) {
+          window.unityInstance.SendMessage("GameManager", "OnClickReturnToMenu");
+        }
+        renderCarousel();
+        setTimeout(updateActiveCard, 100);
+      }
+
+      // Bridge: Handle State Changes called from Unity C#
+      window.onGameStateChanged = function(state) {
+        console.log("JS: onGameStateChanged callback - State=" + state);
+        // state: 0 = Menu, 1 = Playing, 2 = Complete
+        if (state === 0) {
+          // If Unity goes to Menu state, ensure lobby is showing
+          if (document.getElementById('lobby-overlay').style.display === 'none') {
+            showLobby();
+          }
+        }
+      };
+
+      // Bridge: Handle Game Completion called from Unity C#
+      window.onGameComplete = function(time, errors) {
+        console.log("JS: onGameComplete callback - Time=" + time + ", Errors=" + errors);
+        
+        // Save progression
+        if (window.currentActiveLevel !== null) {
+          let completed = JSON.parse(localStorage.getItem('completed_levels')) || [];
+          if (!completed.includes(window.currentActiveLevel)) {
+            completed.push(window.currentActiveLevel);
+            localStorage.setItem('completed_levels', JSON.stringify(completed));
+          }
+        }
+
+        // Display results overlay
+        document.getElementById('results-stats').innerText = `Time: ${time.toFixed(1)}s  •  Errors: ${errors}`;
+        document.getElementById('results-overlay').style.display = 'flex';
+        
+        // Hide Unity container
+        const unityContainer = document.getElementById('unity-container');
+        unityContainer.style.opacity = '0';
+        setTimeout(() => {
+          unityContainer.style.display = 'none';
+        }, 400);
+      };
+
+      // Unity Loader Initialization
+      var canvas = document.querySelector("#unity-canvas");
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/WebGL.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data.gz",
+        frameworkUrl: buildUrl + "/WebGL.framework.js.gz",
+        codeUrl: buildUrl + "/WebGL.wasm.gz",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Skillprint",
+        productName: "Trails WebAR",
+        productVersion: "1.0",
+        showBanner: function(msg, type) {
+          var warningBanner = document.querySelector("#unity-warning");
+          function updateBannerVisibility() {
+            warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+          }
+          var div = document.createElement('div');
+          div.innerHTML = msg;
+          warningBanner.appendChild(div);
+          if (type == 'error') div.style = 'background: red; padding: 10px;';
+          else {
+            if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+            setTimeout(function() {
+              warningBanner.removeChild(div);
+              updateBannerVisibility();
+            }, 5000);
+          }
+          updateBannerVisibility();
+        }
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+      } else {
+        canvas.style.width = "1920px";
+        canvas.style.height = "1080px";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+          window.unityInstance = unityInstance;
+          document.querySelector("#unity-loading-bar").style.display = "none";
+          
+          // Display lobby overlay on successful load
+          document.getElementById('lobby-overlay').style.display = 'flex';
+          setTimeout(() => {
+            document.getElementById('lobby-overlay').style.opacity = '1';
+          }, 50);
+          
+          renderCarousel();
+          setTimeout(updateActiveCard, 100);
+        }).catch((message) => {
+          alert(message);
+        });
+      };
+
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
