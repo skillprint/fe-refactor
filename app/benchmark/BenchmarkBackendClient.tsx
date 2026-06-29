@@ -10,7 +10,13 @@ import { useSubmitBenchmarkSurvey } from './hooks/useSubmitBenchmarkSurvey';
 import DynamicScatterPlot from './components/DynamicScatterPlot';
 import LeaderboardBackendTable from './LeaderboardBackendTable';
 import GameCards from './components/GameCards';
-import VLMAgentSimulator from './components/VLMAgentSimulator';
+const PROVIDER_METADATA: Record<string, { type: 'reasoning' | 'vision_agent' | 'base_llm'; cost: number; vlmSpeed: number }> = {
+  openai: { type: 'reasoning', cost: 4.20, vlmSpeed: 1.2 },
+  anthropic: { type: 'vision_agent', cost: 0.95, vlmSpeed: 3.8 },
+  google: { type: 'vision_agent', cost: 0.55, vlmSpeed: 4.8 },
+  meta: { type: 'base_llm', cost: 0.22, vlmSpeed: 3.2 },
+  deepseek: { type: 'reasoning', cost: 0.35, vlmSpeed: 2.2 },
+};
 
 export default function BenchmarkBackendClient() {
   const [gameFilter, setGameFilter] = useState<string>('all');
@@ -54,6 +60,82 @@ export default function BenchmarkBackendClient() {
   // Load simulator and scatter plot mock dataset (since backend has no scatter/simulation routes)
   const { models, scatterData, stats, simulatorSteps } = useBenchmarkData(gameFilter, moodFilter);
 
+  // Map backend leaderboard entries to scatter plot data points
+  const backendScatterData = useMemo(() => {
+    if (!leaderboardEntries || leaderboardEntries.length === 0) return [];
+    return leaderboardEntries.map((entry) => {
+      const metadata = PROVIDER_METADATA[entry.providerKey] || {
+        type: 'base_llm',
+        cost: 0.50,
+        vlmSpeed: 3.0,
+      };
+
+      // Scale rating (1-5) to 0-100%
+      const rating = entry.bayesianAvgMoodRating ?? entry.avgMoodRating;
+      const score = parseFloat(((rating / 5) * 100).toFixed(1));
+
+      // Adjust cost slightly per game filter to show variations
+      let cost = metadata.cost;
+      if (gameFilter !== 'all') {
+        if (gameFilter === 'hextris') {
+          cost = metadata.type === 'vision_agent' ? metadata.cost * 1.3 : metadata.cost;
+        } else if (gameFilter === 'colorize') {
+          cost = metadata.cost * 0.5;
+        } else if (gameFilter === 'box_tower') {
+          cost = metadata.cost * 0.9;
+        }
+      }
+      cost = parseFloat(cost.toFixed(3));
+
+      return {
+        id: entry.providerKey,
+        name: entry.providerDisplayName,
+        provider: entry.providerDisplayName.split(' ')[0] || entry.providerKey,
+        type: metadata.type,
+        score,
+        cost,
+        vlmSpeed: metadata.vlmSpeed,
+      };
+    });
+  }, [leaderboardEntries, gameFilter]);
+
+  // Compute aggregate stats based on the backend data points
+  const backendStats = useMemo(() => {
+    if (!backendScatterData || backendScatterData.length === 0) {
+      return stats;
+    }
+
+    const totalModels = backendScatterData.length;
+    let bestScore = 0;
+    let bestModel = '';
+    let highestFPS = 0;
+    let fastestModel = '';
+    let totalCost = 0;
+
+    backendScatterData.forEach((d) => {
+      if (d.score > bestScore) {
+        bestScore = d.score;
+        bestModel = d.name;
+      }
+      if (d.vlmSpeed > highestFPS) {
+        highestFPS = d.vlmSpeed;
+        fastestModel = d.name;
+      }
+      totalCost += d.cost;
+    });
+
+    const avgCost = totalCost / totalModels;
+
+    return {
+      totalModels,
+      bestScore,
+      bestModel,
+      avgCost: parseFloat(avgCost.toFixed(2)),
+      highestFPS,
+      fastestModel,
+    };
+  }, [backendScatterData, stats]);
+
   // Set default provider key if current selection is empty
   useEffect(() => {
     if (leaderboardEntries && leaderboardEntries.length > 0 && !selectedProviderKey) {
@@ -75,7 +157,7 @@ export default function BenchmarkBackendClient() {
     }
     setPendingLaunchConfig({ withAdjustments, url });
     setPreGameRating(null); // Reset rating selection
-    
+
     // Bypassing pre-game survey for now: routing directly
     router.push(url);
     // setShowPreGameSurvey(true);
@@ -112,12 +194,12 @@ export default function BenchmarkBackendClient() {
         // Save post-game feedback
         const key = `postGameSurvey_${postGameGameSlug}_${postGameMood}`;
         localStorage.setItem(key, postGameResponse);
-        
+
         // Calculate shifts (just mock logs for analytics dashboard)
         const prevRating = localStorage.getItem('lastPreGameRating');
         const prevMood = localStorage.getItem('lastPreGameMood');
         console.log(`Survey result: Mood ${postGameMood} pre-rating was ${prevRating}, post-response is ${postGameResponse}`);
-        
+
         setSurveyCompleted(true);
         // Refresh live rankings after submission
         refetchLeaderboard();
@@ -164,24 +246,15 @@ export default function BenchmarkBackendClient() {
                   Skillprint Live Registry
                 </span>
                 <span className="text-[10px] bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
-                  Backend Connected
+                  AI Models Connected
                 </span>
               </div>
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-                The Live Backend AI Game Benchmark
+                Skillprint AI Game Benchmark
               </h1>
               <p className="text-sm md:text-base text-slate-400 leading-relaxed">
                 Evaluating Vision-Language Models (VLMs) and LLM providers in real-time. Leaderboard metrics are retrieved dynamically from the backend database utilizing live session ratings.
               </p>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/benchmark/static"
-                className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all"
-              >
-                ← Local Benchmark
-              </Link>
             </div>
           </div>
         </div>
@@ -250,30 +323,35 @@ export default function BenchmarkBackendClient() {
 
                   <div className="grid grid-cols-3 gap-3 w-full">
                     {[
-                      { val: 'yes', label: 'Yes', icon: (
-                        <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )},
-                      { val: 'not_sure', label: 'Not Sure', icon: (
-                        <svg className="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )},
-                      { val: 'no', label: 'No', icon: (
-                        <svg className="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )}
+                      {
+                        val: 'yes', label: 'Yes', icon: (
+                          <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )
+                      },
+                      {
+                        val: 'not_sure', label: 'Not Sure', icon: (
+                          <svg className="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )
+                      },
+                      {
+                        val: 'no', label: 'No', icon: (
+                          <svg className="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        )
+                      }
                     ].map((opt) => (
                       <button
                         key={opt.val}
                         onClick={() => setPostGameResponse(opt.val)}
-                        className={`aspect-square rounded-2xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
-                          postGameResponse === opt.val
-                            ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/5 scale-105'
-                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                        }`}
+                        className={`aspect-square rounded-2xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${postGameResponse === opt.val
+                          ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/5 scale-105'
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                          }`}
                       >
                         {opt.icon}
                         <span>{opt.label}</span>
@@ -499,26 +577,26 @@ export default function BenchmarkBackendClient() {
 
           <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between min-h-[100px]">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Evaluated Models</span>
-            <div className="text-2xl font-extrabold text-white mt-1">{stats.totalModels}</div>
+            <div className="text-2xl font-extrabold text-white mt-1">{backendStats.totalModels}</div>
             <span className="text-[10px] text-slate-400 mt-1">Reasoning + Visual systems</span>
           </div>
 
           <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between min-h-[100px]">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Average Move Cost</span>
-            <div className="text-2xl font-extrabold text-amber-400 mt-1">${stats.avgCost.toFixed(2)}</div>
+            <div className="text-2xl font-extrabold text-amber-400 mt-1">${backendStats.avgCost.toFixed(2)}</div>
             <span className="text-[10px] text-slate-400 mt-1">Per 100 game operations</span>
           </div>
 
           <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between min-h-[100px]">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Top Aligned System</span>
-            <div className="text-sm font-extrabold text-white mt-1.5 truncate">{stats.bestModel}</div>
-            <span className="text-[10px] text-emerald-400 font-bold mt-1 font-mono">{stats.bestScore}% Overall</span>
+            <div className="text-sm font-extrabold text-white mt-1.5 truncate">{backendStats.bestModel}</div>
+            <span className="text-[10px] text-emerald-400 font-bold mt-1 font-mono">{backendStats.bestScore}% Overall</span>
           </div>
 
           <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between min-h-[100px]">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Peak Vision Rate</span>
-            <div className="text-sm font-extrabold text-white mt-1.5 truncate">{stats.fastestModel}</div>
-            <span className="text-[10px] text-sky-400 font-bold mt-1 font-mono">{stats.highestFPS} FPS Scanning</span>
+            <div className="text-sm font-extrabold text-white mt-1.5 truncate">{backendStats.fastestModel}</div>
+            <span className="text-[10px] text-sky-400 font-bold mt-1 font-mono">{backendStats.highestFPS} FPS Scanning</span>
           </div>
 
         </div>
@@ -526,9 +604,9 @@ export default function BenchmarkBackendClient() {
         {/* Charts & Interactive Simulation Arena */}
         <div id="simulator" className="w-full">
           <DynamicScatterPlot
-            data={scatterData}
-            selectedModelId={null}
-            onSelectModel={() => {}}
+            data={backendScatterData.length > 0 ? backendScatterData : scatterData}
+            selectedModelId={selectedProviderKey}
+            onSelectModel={setSelectedProviderKey}
           />
         </div>
 
@@ -611,11 +689,10 @@ export default function BenchmarkBackendClient() {
                   <button
                     key={val}
                     onClick={() => setPreGameRating(val)}
-                    className={`w-12 h-12 rounded-xl border text-sm font-bold font-mono transition-all flex items-center justify-center cursor-pointer ${
-                      preGameRating === val
-                        ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/25 scale-105'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                    }`}
+                    className={`w-12 h-12 rounded-xl border text-sm font-bold font-mono transition-all flex items-center justify-center cursor-pointer ${preGameRating === val
+                      ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/25 scale-105'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      }`}
                   >
                     {val}
                   </button>

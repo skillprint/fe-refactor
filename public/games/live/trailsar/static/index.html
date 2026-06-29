@@ -56,11 +56,16 @@
       </div>
     </div>
 
+    <!-- 5. Preview Overlay -->
+    <div id="preview-overlay" style="display: none; position: fixed; bottom: 40px; right: 40px; z-index: 15; gap: 20px; align-items: center;">
+      <button class="btn btn-preview-play" onclick="startGameplay()">Play</button>
+    </div>
+
     <!-- 4. Scripts & Unity Instance Integration -->
     <script>
       // Guard against NotReadableError on desktop browsers for motion sensors
       if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        const sensors = ['AbsoluteOrientationSensor', 'RelativeOrientationSensor', 'Gyroscope', 'Accelerometer', 'Magnetometer'];
+        const sensors = ['AbsoluteOrientationSensor', 'RelativeOrientationSensor', 'Gyroscope', 'Accelerometer', 'Magnetometer', 'LinearAccelerationSensor', 'GravitySensor'];
         sensors.forEach(sensor => {
           try {
             if (sensor in window) {
@@ -105,6 +110,27 @@
           title: 'Master Challenge',
           description: 'Alternately connect numbers and letters in 3D space around you.',
           levels: [13, 14, 15, 16]
+        },
+        {
+          key: 'Pano_Sphere',
+          label: 'Group 5',
+          title: 'Panorama 360',
+          description: 'Connect nodes inside an immersive 360 panoramic space.',
+          levels: [17, 18, 19]
+        },
+        {
+          key: 'Guided_Sphere',
+          label: 'Group 6',
+          title: 'Guided Navigation',
+          description: 'Locate nodes with visual pointer and highlight circle assistance.',
+          levels: [20, 21, 22]
+        },
+        {
+          key: 'Timed_Sphere',
+          label: 'Group 7',
+          title: 'Time Challenge',
+          description: 'Race against the clock! A real-time timer tracks your speed.',
+          levels: [23, 24, 25]
         }
       ];
 
@@ -228,7 +254,7 @@
 
         // Notify Unity to start the corresponding configuration
         if (window.unityInstance) {
-          window.unityInstance.SendMessage("GameManager", "StartGameByName", groupKey);
+          window.unityInstance.SendMessage("GameManager", "StartLevel", levelNum);
         } else {
           console.error("Unity WebGL Instance is not initialized yet!");
         }
@@ -237,12 +263,14 @@
       // Restart current level
       function restartLevel() {
         document.getElementById('results-overlay').style.display = 'none';
+        document.getElementById('preview-overlay').style.display = 'none';
         playLevel(window.currentActiveGroupKey, window.currentActiveLevel);
       }
 
       // Show lobby menu
       function showLobby() {
         document.getElementById('results-overlay').style.display = 'none';
+        document.getElementById('preview-overlay').style.display = 'none';
         
         const lobby = document.getElementById('lobby-overlay');
         lobby.style.display = 'flex';
@@ -265,15 +293,29 @@
         setTimeout(updateActiveCard, 100);
       }
 
+      // Start gameplay timer callback
+      function startGameplay() {
+        document.getElementById('preview-overlay').style.display = 'none';
+        if (window.unityInstance) {
+          window.unityInstance.SendMessage("GameManager", "StartGameplayTimer");
+        }
+      }
+
       // Bridge: Handle State Changes called from Unity C#
       window.onGameStateChanged = function(state) {
         console.log("JS: onGameStateChanged callback - State=" + state);
-        // state: 0 = Menu, 1 = Playing, 2 = Complete
+        // state: 0 = Menu, 1 = Preview, 2 = Playing, 3 = Complete
         if (state === 0) {
           // If Unity goes to Menu state, ensure lobby is showing
           if (document.getElementById('lobby-overlay').style.display === 'none') {
             showLobby();
           }
+          document.getElementById('preview-overlay').style.display = 'none';
+        } else if (state === 1) {
+          // Preview state
+          document.getElementById('preview-overlay').style.display = 'flex';
+        } else {
+          document.getElementById('preview-overlay').style.display = 'none';
         }
       };
 
@@ -308,9 +350,9 @@
       var loaderUrl = buildUrl + "/WebGL.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/WebGL.data.gz",
-        frameworkUrl: buildUrl + "/WebGL.framework.js.gz",
-        codeUrl: buildUrl + "/WebGL.wasm.gz",
+        dataUrl: buildUrl + "/WebGL.data",
+        frameworkUrl: buildUrl + "/WebGL.framework.js",
+        codeUrl: buildUrl + "/WebGL.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Skillprint",
         productName: "Trails WebAR",

@@ -26,30 +26,35 @@ export function useBenchmarkLeaderboard(
             providerDisplayName: 'OpenAI (o1-pro)',
             totalSessions: 42,
             avgMoodRating: 4.8,
+            bayesianAvgMoodRating: 4.65,
           },
           {
             providerKey: 'anthropic',
             providerDisplayName: 'Anthropic (Claude 3.7 Sonnet)',
             totalSessions: 38,
             avgMoodRating: 4.6,
+            bayesianAvgMoodRating: 4.48,
           },
           {
             providerKey: 'google',
             providerDisplayName: 'Google (Gemini 1.5 Pro)',
             totalSessions: 24,
             avgMoodRating: 4.3,
+            bayesianAvgMoodRating: 4.15,
           },
           {
             providerKey: 'meta',
             providerDisplayName: 'Meta (Llama 3.1 70B)',
             totalSessions: 19,
             avgMoodRating: 3.9,
+            bayesianAvgMoodRating: 3.95,
           },
           {
             providerKey: 'deepseek',
             providerDisplayName: 'DeepSeek (R1)',
             totalSessions: 31,
             avgMoodRating: 4.5,
+            bayesianAvgMoodRating: 4.38,
           },
         ];
         setData(mockData);

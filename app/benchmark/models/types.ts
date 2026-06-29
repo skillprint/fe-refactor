@@ -50,6 +50,7 @@ export interface BenchmarkLeaderboardEntry {
   providerDisplayName: string;
   totalSessions: number;
   avgMoodRating: number;
+  bayesianAvgMoodRating?: number;
 }
 
 export interface BenchmarkProvider {

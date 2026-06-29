@@ -11,7 +11,7 @@ interface LeaderboardBackendTableProps {
   activeMood: string;
 }
 
-type SortField = 'provider' | 'key' | 'sessions' | 'rating';
+type SortField = 'provider' | 'key' | 'sessions' | 'rating' | 'bayesianRating';
 
 export default function LeaderboardBackendTable({
   entries,
@@ -20,7 +20,7 @@ export default function LeaderboardBackendTable({
   activeGame,
   activeMood
 }: LeaderboardBackendTableProps) {
-  const [sortField, setSortField] = useState<SortField>('rating');
+  const [sortField, setSortField] = useState<SortField>('bayesianRating');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const handleSort = (field: SortField) => {
@@ -51,6 +51,10 @@ export default function LeaderboardBackendTable({
           valA = a.totalSessions;
           valB = b.totalSessions;
           break;
+        case 'bayesianRating':
+          valA = a.bayesianAvgMoodRating ?? a.avgMoodRating;
+          valB = b.bayesianAvgMoodRating ?? b.avgMoodRating;
+          break;
         case 'rating':
           valA = a.avgMoodRating;
           valB = b.avgMoodRating;
@@ -69,16 +73,12 @@ export default function LeaderboardBackendTable({
     return sortDirection === 'asc' ? <span className="text-indigo-400 ml-1">▲</span> : <span className="text-indigo-400 ml-1">▼</span>;
   };
 
-  const renderRating = (rating: number) => {
-    const percentage = Math.round((rating / 5) * 100);
+  const renderRating = (rating: number, colorClass = 'text-emerald-400') => {
     return (
       <div className="flex flex-col items-center justify-center">
-        <span className="font-mono font-bold text-emerald-400 text-sm">
+        <span className={`font-mono font-bold ${colorClass} text-sm`}>
           {rating.toFixed(2)} / 5.00
         </span>
-        {/* <span className="text-[10px] text-slate-500 font-mono">
-          ({percentage}% alignment)
-        </span> */}
       </div>
     );
   };
@@ -112,6 +112,9 @@ export default function LeaderboardBackendTable({
               <th className="pb-3 cursor-pointer select-none hover:text-white text-center" onClick={() => handleSort('sessions')}>
                 Sessions Played <SortIndicator field="sessions" />
               </th>
+              <th className="pb-3 cursor-pointer select-none hover:text-white text-center" onClick={() => handleSort('bayesianRating')}>
+                Bayesian Rating <SortIndicator field="bayesianRating" />
+              </th>
               <th className="pb-3 cursor-pointer select-none hover:text-white text-center" onClick={() => handleSort('rating')}>
                 Avg Mood Rating <SortIndicator field="rating" />
               </th>
@@ -120,7 +123,7 @@ export default function LeaderboardBackendTable({
           <tbody className="divide-y divide-slate-900/60">
             {sortedEntries.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
+                <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
                   No sessions have been rated yet for these filters. Play a game below to populate the leaderboard!
                 </td>
               </tr>
@@ -153,7 +156,10 @@ export default function LeaderboardBackendTable({
                       {entry.totalSessions}
                     </td>
                     <td className="py-4 text-center">
-                      {renderRating(entry.avgMoodRating)}
+                      {renderRating(entry.bayesianAvgMoodRating ?? entry.avgMoodRating, 'text-emerald-400')}
+                    </td>
+                    <td className="py-4 text-center">
+                      {renderRating(entry.avgMoodRating, 'text-slate-400')}
                     </td>
                   </tr>
                 );
