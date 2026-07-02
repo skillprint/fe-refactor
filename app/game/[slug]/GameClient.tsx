@@ -10,7 +10,7 @@ import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
-import { getGameBySlug } from '../../api/api';
+import { getGameBySlug, get } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 
 interface GameClientProps {
@@ -158,6 +158,7 @@ export default function GameClient({ slug }: GameClientProps) {
     const disableAdjustments = searchParams.get('adjustments') === 'false';
     const disableSdk = searchParams.get('sdk') === 'false';
     const providerKey = searchParams.get('providerKey');
+    const useAi = searchParams.get('use_ai') === 'true';
 
     const [isIframeLoaded, setIsIframeLoaded] = useState(false);
     const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
@@ -212,6 +213,8 @@ export default function GameClient({ slug }: GameClientProps) {
                     let path = mapSlugToGamePath(targetSlug);
                     if (providerKey) {
                         path += (path.includes('?') ? '&' : '?') + `providerKey=${encodeURIComponent(providerKey)}`;
+                    } else if (useAi) {
+                        path += (path.includes('?') ? '&' : '?') + `use_ai=true`;
                     }
                     setGamePath(path);
                 }
@@ -221,6 +224,8 @@ export default function GameClient({ slug }: GameClientProps) {
                     let path = mapSlugToGamePath(decodedSlug);
                     if (providerKey) {
                         path += (path.includes('?') ? '&' : '?') + `providerKey=${encodeURIComponent(providerKey)}`;
+                    } else if (useAi) {
+                        path += (path.includes('?') ? '&' : '?') + `use_ai=true`;
                     }
                     setGamePath(path);
                 }
@@ -235,7 +240,7 @@ export default function GameClient({ slug }: GameClientProps) {
         return () => {
             isMounted = false;
         };
-    }, [decodedSlug, providerKey]);
+    }, [decodedSlug, providerKey, useAi]);
 
     const handleIframeLoad = () => {
         setIsIframeLoaded(true);
@@ -295,6 +300,64 @@ export default function GameClient({ slug }: GameClientProps) {
     };
 
 
+
+    const fetchAndSaveEarnedBadgesBeforePlay = async () => {
+        try {
+            let earnedIds: string[] = [];
+            const tokenToUse = userToken || (typeof window !== 'undefined' ? localStorage.getItem('userToken') : null);
+            
+            if (tokenToUse) {
+                const headers: any = {};
+                headers["X-Auth-Token"] = `Token ${tokenToUse}`;
+                const apiKey = process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
+                if (apiKey) {
+                    headers["Authorization"] = `Api-Key ${apiKey}`;
+                }
+                
+                try {
+                    const response = await get('games/api/talents/me/', false, headers);
+                    const serverData = Array.isArray(response)
+                        ? response
+                        : (response.results || response.talents || response.data || []);
+                    
+                    serverData.forEach((item: any) => {
+                        const isEarned = item.earned ?? item.date ?? item.earnedAt ?? item.earned_at;
+                        const id = item.id || item.badgeId || item.badge_id || (item.name && item.name.toLowerCase().replace(/\s+/g, '-'));
+                        if (isEarned && id) {
+                            earnedIds.push(id);
+                        }
+                    });
+                } catch (apiErr) {
+                    console.warn('[GameClient] Failed to fetch badges from API before play, falling back to local:', apiErr);
+                }
+            }
+            
+            if (earnedIds.length === 0 && typeof window !== 'undefined') {
+                const saved = localStorage.getItem('skillprint_mock_badges');
+                if (saved) {
+                    try {
+                        const localBadges = JSON.parse(saved);
+                        localBadges.forEach((b: any) => {
+                            if (b.earned) {
+                                earnedIds.push(b.id);
+                            }
+                        });
+                    } catch (parseErr) {
+                        console.error('[GameClient] Failed to parse local badges:', parseErr);
+                    }
+                } else {
+                    earnedIds = ['first-steps', 'cognitive-explorer', 'social-pioneer', 'laser-focus'];
+                }
+            }
+            
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('skillprint_earned_badges_before_play', JSON.stringify(earnedIds));
+                console.log('[GameClient] Earned badges before play saved:', earnedIds);
+            }
+        } catch (err) {
+            console.error('[GameClient] Error saving earned badges before play:', err);
+        }
+    };
 
     const pollSessionTips = async () => {
         if (!skillprintClientRef.current || !skillprintSessionIdRef.current) return;
@@ -545,6 +608,8 @@ export default function GameClient({ slug }: GameClientProps) {
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
 
+        fetchAndSaveEarnedBadgesBeforePlay();
+
         // Initialize Skillprint Session
         if (!disableSdk) {
             const sessionId = crypto.randomUUID();
@@ -569,7 +634,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
                 const isBenchmarkSession = source === 'benchmark' || source === 'benchmark-backend';
-                client.startSession(sessionId, targetMood, serverSideSlug, false, isBenchmarkSession, providerKey || undefined);
+                client.startSession(sessionId, targetMood, serverSideSlug, false, isBenchmarkSession, providerKey || undefined, useAi);
                 shouldPollRef.current = true;
                 pollSessionTips();
             } catch (e) {
@@ -582,12 +647,13 @@ export default function GameClient({ slug }: GameClientProps) {
         return () => {
             shouldPollRef.current = false;
         };
-    }, [slug, providerKey]);
+    }, [slug, providerKey, useAi]);
 
     // Update token if it changes (e.g. loads asynchronously)
     useEffect(() => {
         if (skillprintClientRef.current && userToken) {
             skillprintClientRef.current.setUserToken(userToken);
+            fetchAndSaveEarnedBadgesBeforePlay();
         }
     }, [userToken]);
 

@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useUserSession } from '../../../hooks/useUserSession';
 import { useAuth } from '../../../context/AuthContext';
 import { getGameDetails } from '../../../config/gameConfig';
-import { getGameBySlug } from '../../../api/api';
+import { getGameBySlug, get } from '../../../api/api';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
 import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import FirstGameBadge from '../../../components/FirstGameBadge';
 import RecommendedGameTile from '../../../components/RecommendedGameTile';
 import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
+import { useBadges } from '@/app/profile/badges/hooks/useBadges';
+import { Badge } from '@/app/profile/badges/types';
+import BadgeUnlockPopup from '@/app/components/BadgeUnlockPopup';
 import { knownGameSlugs } from '../../../config/gameConfig';
 import MoodSurveyWidget from '../../../components/MoodSurveyWidget';
 import ChallengeWidget from '../../../components/ChallengeWidget';
@@ -44,6 +47,11 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     const [showBadge, setShowBadge] = useState(false);
     const [nextGameSlug, setNextGameSlug] = useState<string>('');
     const [playbookId, setPlaybookId] = useState<string | null>(null);
+
+    const { badges: allBadges, isLoaded: badgesLoaded, refresh: refreshBadges } = useBadges();
+    const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<Badge[]>([]);
+    const [currentBadgeIndex, setCurrentBadgeIndex] = useState<number>(0);
+    const [hasCheckedNewBadges, setHasCheckedNewBadges] = useState<boolean>(false);
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
@@ -193,6 +201,91 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         };
     }, [sessionId, userToken]);
 
+    // Refresh badges once results are ready and we are done calculating
+    useEffect(() => {
+        if (!isCalculating && badgesLoaded && !hasCheckedNewBadges) {
+            const checkBadges = async () => {
+                try {
+                    await refreshBadges();
+                } catch (e) {
+                    console.error('Failed to refresh badges after play:', e);
+                } finally {
+                    setHasCheckedNewBadges(true);
+                }
+            };
+            checkBadges();
+        }
+    }, [isCalculating, badgesLoaded, hasCheckedNewBadges, refreshBadges]);
+
+    // Compare refreshed badges with baseline to find newly unlocked ones
+    useEffect(() => {
+        if (hasCheckedNewBadges && allBadges.length > 0) {
+            const storedBefore = localStorage.getItem('skillprint_earned_badges_before_play');
+            let earnedBefore: string[] = [];
+            if (storedBefore) {
+                try {
+                    earnedBefore = JSON.parse(storedBefore);
+                } catch (e) {
+                    console.error('Failed to parse earned badges before play:', e);
+                }
+            }
+
+            const newlyEarned = allBadges.filter(badge => {
+                const isCurrentlyEarned = badge.earned;
+                const wasEarnedBefore = earnedBefore.includes(badge.id);
+                return isCurrentlyEarned && !wasEarnedBefore;
+            });
+
+            if (newlyEarned.length > 0) {
+                console.log('[ReviewClient] Newly unlocked badges detected:', newlyEarned);
+                setNewlyUnlockedBadges(newlyEarned);
+                setCurrentBadgeIndex(0);
+            } else {
+                console.log('[ReviewClient] No new badges unlocked.');
+            }
+        }
+    }, [hasCheckedNewBadges, allBadges]);
+
+    // Developer tester / keyboard trigger to simulate unlocking 2 badges
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key.toLowerCase() === 'b') {
+                console.log('[Dev/Testing] Simulating two unlocked badges!');
+                const mock1: Badge = {
+                    id: 'speed-demon',
+                    name: 'Speed Demon',
+                    description: 'Complete Hextris clearing 100 rows in under 2 mins',
+                    longDescription: 'Lightning fast decisions! You managed blocks at extreme speed, showcasing highly efficient visual-spatial processing.',
+                    icon: '⚡',
+                    color: 'from-pink-500 via-rose-500 to-orange-500',
+                    gameTitle: 'Hextris',
+                    gameImage: '/games/live/Hextris/screenshot.png',
+                    earned: true,
+                    category: 'cognitive'
+                };
+                const mock2: Badge = {
+                    id: 'zen-master',
+                    name: 'Zen Master',
+                    description: 'Play 5 calming games in a row to reduce stress',
+                    longDescription: 'Finding calm in the storm. You played 5 calming sessions consecutively, displaying great self-regulation and stress management.',
+                    icon: '🧘',
+                    color: 'from-sky-400 via-teal-400 to-emerald-500',
+                    gameTitle: 'Zen Garden',
+                    gameImage: '/games/live/Alchemy/icon_144.png',
+                    earned: true,
+                    category: 'focus'
+                };
+                setNewlyUnlockedBadges([mock1, mock2]);
+                setCurrentBadgeIndex(0);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
     useEffect(() => {
         // Check for first game badge
         const hasSeenBadge = getCookie('first_game_badge_seen');
@@ -232,6 +325,31 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     };
 
     const displayImage = gameDetails?.image || gameApiData?.image;
+
+    const hasNewBadgesToShow = newlyUnlockedBadges.length > 0 && currentBadgeIndex < newlyUnlockedBadges.length;
+
+    if (hasNewBadgesToShow) {
+        const activeBadge = newlyUnlockedBadges[currentBadgeIndex];
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center p-4">
+                <div className="animate-pulse flex flex-col items-center justify-center py-12">
+                    <BuckyballLoading />
+                </div>
+                <BadgeUnlockPopup
+                    badge={activeBadge}
+                    onDismiss={() => {
+                        const nextIndex = currentBadgeIndex + 1;
+                        setCurrentBadgeIndex(nextIndex);
+                        
+                        if (nextIndex >= newlyUnlockedBadges.length) {
+                            const earnedIds = allBadges.filter(b => b.earned).map(b => b.id);
+                            localStorage.setItem('skillprint_earned_badges_before_play', JSON.stringify(earnedIds));
+                        }
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -507,7 +625,7 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                     )}
                 </div>
             </div>
-            {showBadge && (
+            {showBadge && !hasNewBadgesToShow && (
                 <FirstGameBadge onDismiss={handleBadgeDismiss} nextGameSlug={nextGameSlug} />
             )}
         </div >

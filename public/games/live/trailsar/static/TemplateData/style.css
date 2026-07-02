@@ -122,7 +122,7 @@ body {
   height: 300%;
   top: -100%;
   left: -100%;
-  background-image: 
+  background-image:
     linear-gradient(rgba(0, 168, 255, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 168, 255, 0.08) 1px, transparent 1px);
   background-size: 100px 100px;
@@ -161,6 +161,7 @@ body {
   object-fit: contain;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
   pointer-events: auto;
+  border-radius: 50px;
 }
 
 /* Carousel Section */
@@ -204,20 +205,24 @@ body {
   height: 100vh;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding: 40vh 0; /* Let cards scroll and center */
+  padding: 40vh 0;
+  /* Let cards scroll and center */
   cursor: grab;
   pointer-events: auto;
 }
 
 .carousel::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
 
 .carousel:active {
@@ -290,7 +295,8 @@ body {
   height: 72px;
   border-radius: 50%;
   border: none;
-  background: #005ac2; /* Darker blue when locked/uncompleted */
+  background: #005ac2;
+  /* Darker blue when locked/uncompleted */
   color: #ffffff;
   font-family: 'Outfit', sans-serif;
   font-size: 30px;
@@ -304,7 +310,8 @@ body {
 }
 
 .level-node.completed {
-  background: #0084ff; /* Vibrant blue when completed */
+  background: #0084ff;
+  /* Vibrant blue when completed */
 }
 
 .level-node:hover {
@@ -324,7 +331,8 @@ body {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ffd700; /* Yellow checkmark badge */
+  background: #ffd700;
+  /* Yellow checkmark badge */
   border: 2px solid #0e1930;
   color: #000000;
   font-size: 18px;
@@ -355,6 +363,7 @@ body {
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;

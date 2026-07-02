@@ -67,6 +67,9 @@ export default function BenchmarkClient() {
     if (disableSdk) {
       url += `&sdk=false`;
     }
+    if (withAdjustments) {
+      url += `&use_ai=true`;
+    }
     setPendingLaunchConfig({ withAdjustments, url });
     setPreGameRating(null); // Reset rating selection
     

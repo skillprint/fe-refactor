@@ -152,8 +152,12 @@ export default function BenchmarkBackendClient() {
     if (disableSdk) {
       url += `&sdk=false`;
     }
-    if (withAdjustments && selectedPlayProviderKey) {
-      url += `&providerKey=${encodeURIComponent(selectedPlayProviderKey)}`;
+    if (withAdjustments) {
+      if (selectedPlayProviderKey) {
+        url += `&providerKey=${encodeURIComponent(selectedPlayProviderKey)}`;
+      } else {
+        url += `&use_ai=true`;
+      }
     }
     setPendingLaunchConfig({ withAdjustments, url });
     setPreGameRating(null); // Reset rating selection

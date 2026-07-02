@@ -42,6 +42,7 @@ interface StartSessionRequest {
     providerKey?: string;
     llmProviderKey?: string;
     llm_provider_key?: string;
+    use_ai?: boolean;
 }
 
 export interface ParameterUpdateResult {
@@ -180,10 +181,12 @@ export class SkillprintClient {
         this.userToken = token;
     }
 
-    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, isBenchmark?: boolean, providerKey?: string): Promise<boolean> {
+    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, isBenchmark?: boolean, providerKey?: string, useAi?: boolean): Promise<boolean> {
         let url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         if (providerKey) {
             url += `?providerKey=${encodeURIComponent(providerKey)}`;
+        } else if (useAi) {
+            url += `?use_ai=true`;
         }
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
@@ -203,6 +206,8 @@ export class SkillprintClient {
             requestData.providerKey = providerKey;
             requestData.llmProviderKey = providerKey;
             requestData.llm_provider_key = providerKey;
+        } else if (useAi) {
+            requestData.use_ai = true;
         }
 
         let headers: any = {
@@ -254,7 +259,7 @@ export class SkillprintClient {
                                 }
                             }
 
-                            return await this.startSession(sessionId, targetMood, gameName, true, isBenchmark, providerKey);
+                            return await this.startSession(sessionId, targetMood, gameName, true, isBenchmark, providerKey, useAi);
                         }
                     } catch (e) {
                         this.log(`Failed to parse 401 response or refresh token: ${e}`, LogLevel.ERROR);

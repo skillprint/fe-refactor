@@ -28,7 +28,7 @@
       <!-- Top Header logos -->
       <header class="lobby-header">
         <img class="logo-left" src="TemplateData/trails_logo.png" alt="Trails Logo">
-        <img class="logo-right" src="TemplateData/skillprint_logo.png" alt="Skillprint Logo">
+        <img class="logo-right" src="TemplateData/skillprint_logo.jpeg" alt="Skillprint Logo">
       </header>
 
       <!-- Lobby Scroll Carousel -->
@@ -255,6 +255,11 @@
         // Notify Unity to start the corresponding configuration
         if (window.unityInstance) {
           window.unityInstance.SendMessage("GameManager", "StartLevel", levelNum);
+          // Focus canvas to ensure it receives keyboard events immediately
+          setTimeout(() => {
+            const canvasEl = document.getElementById('unity-canvas');
+            if (canvasEl) canvasEl.focus();
+          }, 100);
         } else {
           console.error("Unity WebGL Instance is not initialized yet!");
         }
@@ -298,6 +303,8 @@
         document.getElementById('preview-overlay').style.display = 'none';
         if (window.unityInstance) {
           window.unityInstance.SendMessage("GameManager", "StartGameplayTimer");
+          const canvasEl = document.getElementById('unity-canvas');
+          if (canvasEl) canvasEl.focus();
         }
       }
 
@@ -314,8 +321,14 @@
         } else if (state === 1) {
           // Preview state
           document.getElementById('preview-overlay').style.display = 'flex';
+          const canvasEl = document.getElementById('unity-canvas');
+          if (canvasEl) canvasEl.focus();
         } else {
           document.getElementById('preview-overlay').style.display = 'none';
+          if (state === 2) {
+            const canvasEl = document.getElementById('unity-canvas');
+            if (canvasEl) canvasEl.focus();
+          }
         }
       };
 
