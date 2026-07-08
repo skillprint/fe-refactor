@@ -71,6 +71,22 @@
       <button class="btn btn-preview-play" onclick="startGameplay()">Play</button>
     </div>
 
+    <!-- 6. Gyroscope Permission Interstitial -->
+    <div id="gyro-overlay" class="menu-overlay" style="display: none; opacity: 0; z-index: 20;">
+      <div class="bg-radial"></div>
+      <div class="bg-grid"></div>
+      <div class="results-box">
+        <h2 class="results-title">Gyroscope Required</h2>
+        <div class="results-stats" style="font-size: 18px; margin-bottom: 30px; font-weight: 500; line-height: 1.5; color: rgba(255, 255, 255, 0.85);">
+          AR levels require gyroscope access to play. Please allow motion/orientation permissions when prompted.
+        </div>
+        <div class="results-buttons">
+          <button class="btn btn-primary" onclick="repromptGyro()">Allow Permissions</button>
+          <button class="btn btn-secondary" onclick="showLobbyFromGyro()">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 4. Scripts & Unity Instance Integration -->
     <script>
       // Guard against NotReadableError on desktop browsers for motion sensors
@@ -155,6 +171,20 @@
           title: 'Finger & Mouse Draw',
           description: 'Connect nodes by drawing a trail with your mouse or finger in 2D planar space.',
           levels: [29, 30, 31, 32]
+        },
+        {
+          key: 'Rotating_Sphere',
+          label: 'Group 10',
+          title: 'Rotating Challenge',
+          description: 'Connect nodes that slowly rotate around you in 3D space.',
+          levels: [33, 34, 35, 36]
+        },
+        {
+          key: 'Emoji_Match',
+          label: 'Group 11',
+          title: 'Emoji Quest',
+          description: 'Find and connect nodes displaying emojis instead of numbers and letters.',
+          levels: [37, 38, 39, 40]
         }
       ];
 
@@ -294,6 +324,59 @@
         document.getElementById('results-overlay').style.display = 'none';
         document.getElementById('preview-overlay').style.display = 'none';
         playLevel(window.currentActiveGroupKey, window.currentActiveLevel);
+      }
+
+      // Reprompt gyroscope permission
+      function repromptGyro() {
+        if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+          window.DeviceOrientationEvent.requestPermission()
+            .then(function(permissionState) {
+              if (permissionState === 'granted') {
+                // Hide overlay
+                const gyroOverlay = document.getElementById('gyro-overlay');
+                if (gyroOverlay) {
+                  gyroOverlay.style.opacity = '0';
+                  setTimeout(() => {
+                    gyroOverlay.style.display = 'none';
+                  }, 400);
+                }
+                // Notify Unity
+                if (window.unityInstance) {
+                  window.unityInstance.SendMessage("GameManager", "OnGyroPermissionGranted", 1);
+                }
+              } else {
+                console.log("Re-prompt: Gyroscope permission still denied: " + permissionState);
+              }
+            })
+            .catch(function(error) {
+              console.error("Re-prompt: Gyroscope permission error: ", error);
+            });
+        } else {
+          console.log("Re-prompt: DeviceOrientationEvent.requestPermission is not supported.");
+          // Direct fallback if not supported (e.g. desktop/unsupported browser)
+          const gyroOverlay = document.getElementById('gyro-overlay');
+          if (gyroOverlay) {
+            gyroOverlay.style.opacity = '0';
+            setTimeout(() => {
+              gyroOverlay.style.display = 'none';
+            }, 400);
+          }
+          if (window.unityInstance) {
+            window.unityInstance.SendMessage("GameManager", "OnGyroPermissionGranted", 1);
+          }
+        }
+      }
+
+      // Hide gyro overlay and return to lobby
+      function showLobbyFromGyro() {
+        const gyroOverlay = document.getElementById('gyro-overlay');
+        if (gyroOverlay) {
+          gyroOverlay.style.opacity = '0';
+          setTimeout(() => {
+            gyroOverlay.style.display = 'none';
+          }, 400);
+        }
+        showLobby();
       }
 
       // Show lobby menu

@@ -372,6 +372,11 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
+/* Gyroscope Permission Interstitial Overlay */
+#gyro-overlay {
+  z-index: 20;
+}
+
 /* Stats Display in Results Modal */
 .stats-section {
   text-align: left;
