@@ -151,7 +151,7 @@ export const mapSlugToGamePath = (slug: string) => {
 
 export default function GameClient({ slug }: GameClientProps) {
     const router = useRouter();
-    const { userToken } = useUserSession();
+    const { userToken, isLoading: isUserSessionLoading } = useUserSession();
     const searchParams = useSearchParams();
     const source = searchParams.get('source');
     const playbookId = searchParams.get('playbookId');
@@ -601,6 +601,8 @@ export default function GameClient({ slug }: GameClientProps) {
 
     // Reset state when slug changes
     useEffect(() => {
+        if (isUserSessionLoading) return;
+
         setIsIframeLoaded(false);
         setGameState('playing');
         setGameStartTime(Date.now());
@@ -647,7 +649,7 @@ export default function GameClient({ slug }: GameClientProps) {
         return () => {
             shouldPollRef.current = false;
         };
-    }, [slug, providerKey, useAi]);
+    }, [slug, providerKey, useAi, isUserSessionLoading]);
 
     // Update token if it changes (e.g. loads asynchronously)
     useEffect(() => {

@@ -1733,6 +1733,42 @@ function dbg(text) {
       }
     }
 
+  function _GetScreenOrientationJS() {
+          if (typeof window !== 'undefined') {
+              if (window.screen && window.screen.orientation) {
+                  var type = window.screen.orientation.type;
+                  var angle = window.screen.orientation.angle;
+                  
+                  if (type) {
+                      if (type.indexOf('portrait-primary') !== -1) return 0;
+                      if (type.indexOf('landscape-primary') !== -1) return 1;
+                      if (type.indexOf('landscape-secondary') !== -1) return 2;
+                      if (type.indexOf('portrait-secondary') !== -1) return 3;
+                  }
+                  
+                  if (typeof angle !== 'undefined') {
+                      if (angle === 0) return 0;
+                      if (angle === 90) return 1;
+                      if (angle === 270 || angle === -90) return 2;
+                      if (angle === 180) return 3;
+                  }
+              }
+              
+              if (typeof window.orientation !== 'undefined') {
+                  var winOri = window.orientation;
+                  if (winOri === 0) return 0;
+                  if (winOri === 90) return 1;
+                  if (winOri === -90 || winOri === 270) return 2;
+                  if (winOri === 180) return 3;
+              }
+              
+              if (window.innerWidth > window.innerHeight) {
+                  return 1; // LandscapeLeft
+              }
+          }
+          return 0; // Portrait
+      }
+
   function _IsDeviceOrientationPermissionRequired() {
           return (typeof window !== 'undefined' && typeof window.DeviceOrientationEvent !== 'undefined' && typeof window.DeviceOrientationEvent.requestPermission === 'function');
       }
@@ -7926,9 +7962,9 @@ function dbg(text) {
   		Module.WebPlayer.PlayerIsInitialized();
   	}
 
-  function _OnGameCompleteJS(time, errors) {
+  function _OnGameCompleteJS(actualTime, idealTime, actualDist, idealDist, errors) {
           if (typeof window !== 'undefined' && typeof window.onGameComplete === 'function') {
-              window.onGameComplete(time, errors);
+              window.onGameComplete(actualTime, idealTime, actualDist, idealDist, errors);
           }
       }
 
@@ -16726,6 +16762,7 @@ function checkIncomingModuleAPI() {
 var wasmImports = {
   "GetJSLoadTimeInfo": _GetJSLoadTimeInfo,
   "GetJSMemoryInfo": _GetJSMemoryInfo,
+  "GetScreenOrientationJS": _GetScreenOrientationJS,
   "IsDeviceOrientationPermissionRequired": _IsDeviceOrientationPermissionRequired,
   "IsMobileBrowserJS": _IsMobileBrowserJS,
   "JS_Accelerometer_IsRunning": _JS_Accelerometer_IsRunning,
@@ -17521,7 +17558,9 @@ var dynCall_vjiiiii = Module["dynCall_vjiiiii"] = createExportWrapper("dynCall_v
 /** @type {function(...*):?} */
 var dynCall_viifiiiii = Module["dynCall_viifiiiii"] = createExportWrapper("dynCall_viifiiiii");
 /** @type {function(...*):?} */
-var dynCall_vfii = Module["dynCall_vfii"] = createExportWrapper("dynCall_vfii");
+var dynCall_viffffii = Module["dynCall_viffffii"] = createExportWrapper("dynCall_viffffii");
+/** @type {function(...*):?} */
+var dynCall_vffffii = Module["dynCall_vffffii"] = createExportWrapper("dynCall_vffffii");
 /** @type {function(...*):?} */
 var dynCall_iiiji = Module["dynCall_iiiji"] = createExportWrapper("dynCall_iiiji");
 /** @type {function(...*):?} */
@@ -17593,6 +17632,8 @@ var dynCall_dddi = Module["dynCall_dddi"] = createExportWrapper("dynCall_dddi");
 /** @type {function(...*):?} */
 var dynCall_ddi = Module["dynCall_ddi"] = createExportWrapper("dynCall_ddi");
 /** @type {function(...*):?} */
+var dynCall_vfii = Module["dynCall_vfii"] = createExportWrapper("dynCall_vfii");
+/** @type {function(...*):?} */
 var dynCall_ddddi = Module["dynCall_ddddi"] = createExportWrapper("dynCall_ddddi");
 /** @type {function(...*):?} */
 var dynCall_jjjji = Module["dynCall_jjjji"] = createExportWrapper("dynCall_jjjji");
@@ -17608,8 +17649,6 @@ var dynCall_viiiiiffii = Module["dynCall_viiiiiffii"] = createExportWrapper("dyn
 var dynCall_vfi = Module["dynCall_vfi"] = createExportWrapper("dynCall_vfi");
 /** @type {function(...*):?} */
 var dynCall_ifffi = Module["dynCall_ifffi"] = createExportWrapper("dynCall_ifffi");
-/** @type {function(...*):?} */
-var dynCall_viffffii = Module["dynCall_viffffii"] = createExportWrapper("dynCall_viffffii");
 /** @type {function(...*):?} */
 var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 /** @type {function(...*):?} */

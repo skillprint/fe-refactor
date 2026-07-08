@@ -8,15 +8,25 @@
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
+    <!-- 0. Initializing/Loading Overlay -->
+    <div id="loading-overlay" class="menu-overlay">
+      <div class="bg-radial"></div>
+      <div class="bg-grid"></div>
+      <div class="loading-modal">
+        <img class="loading-logo" src="TemplateData/trails_logo.png" alt="Trails Logo">
+        <div class="spinner-container">
+          <div class="spinner"></div>
+        </div>
+        <div class="loading-status">Initializing Menu...</div>
+        <div class="loading-progress-container">
+          <div id="loading-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- 1. Unity Container & Canvas -->
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width="1920" height="1080" tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
       <div id="unity-warning"> </div>
     </div>
 
@@ -131,6 +141,20 @@
           title: 'Time Challenge',
           description: 'Race against the clock! A real-time timer tracks your speed.',
           levels: [23, 24, 25]
+        },
+        {
+          key: 'Optimal_Sphere',
+          label: 'Group 8',
+          title: 'Path Optimization',
+          description: 'Minimize the distance of your gaze path. See the delta on the completion screen.',
+          levels: [26, 27, 28]
+        },
+        {
+          key: 'Planar_Draw',
+          label: 'Group 9',
+          title: 'Finger & Mouse Draw',
+          description: 'Connect nodes by drawing a trail with your mouse or finger in 2D planar space.',
+          levels: [29, 30, 31, 32]
         }
       ];
 
@@ -333,8 +357,8 @@
       };
 
       // Bridge: Handle Game Completion called from Unity C#
-      window.onGameComplete = function(time, errors) {
-        console.log("JS: onGameComplete callback - Time=" + time + ", Errors=" + errors);
+      window.onGameComplete = function(actualTime, idealTime, actualDistance, idealDistance, errors) {
+        console.log("JS: onGameComplete callback - ActualTime=" + actualTime + ", IdealTime=" + idealTime + ", ActualDistance=" + actualDistance + ", IdealDistance=" + idealDistance + ", Errors=" + errors);
         
         // Save progression
         if (window.currentActiveLevel !== null) {
@@ -346,15 +370,41 @@
         }
 
         // Display results overlay
-        document.getElementById('results-stats').innerText = `Time: ${time.toFixed(1)}s  •  Errors: ${errors}`;
+        let timeDelta = actualTime - idealTime;
+        let distDelta = Math.max(0, actualDistance - idealDistance);
+        
+        let statsHtml = `
+          <div class="stats-section">
+            <h4 class="stats-header">⏱️ TIME PERFORMANCE</h4>
+            <div class="stats-grid">
+              <div class="stats-item"><span>Actual:</span> <strong>${actualTime.toFixed(1)}s</strong></div>
+              <div class="stats-item"><span>Ideal:</span> <strong>${idealTime.toFixed(1)}s</strong></div>
+              <div class="stats-item"><span>Delta:</span> <strong class="${timeDelta <= 0 ? 'text-green' : 'text-red'}">${timeDelta >= 0 ? '+' : ''}${timeDelta.toFixed(1)}s</strong></div>
+            </div>
+          </div>
+          <hr class="stats-divider">
+          <div class="stats-section">
+            <h4 class="stats-header">📏 DISTANCE PERFORMANCE</h4>
+            <div class="stats-grid">
+              <div class="stats-item"><span>Actual:</span> <strong>${actualDistance.toFixed(1)}m</strong></div>
+              <div class="stats-item"><span>Ideal:</span> <strong>${idealDistance.toFixed(1)}m</strong></div>
+              <div class="stats-item"><span>Delta:</span> <strong class="text-blue">+${distDelta.toFixed(1)}m</strong></div>
+            </div>
+          </div>
+          <hr class="stats-divider">
+          <div class="stats-footer">
+            <span>Total Errors:</span> <strong>${errors}</strong>
+          </div>
+        `;
+        document.getElementById('results-stats').innerHTML = statsHtml;
         document.getElementById('results-overlay').style.display = 'flex';
         
-        // Hide Unity container
-        const unityContainer = document.getElementById('unity-container');
-        unityContainer.style.opacity = '0';
-        setTimeout(() => {
-          unityContainer.style.display = 'none';
-        }, 400);
+        // Hide Unity container (Disabled so skybox/camera/nodes remain visible in the background)
+        // const unityContainer = document.getElementById('unity-container');
+        // unityContainer.style.opacity = '0';
+        // setTimeout(() => {
+        //   unityContainer.style.display = 'none';
+        // }, 400);
       };
 
       // Unity Loader Initialization
@@ -402,16 +452,29 @@
         canvas.style.height = "1080px";
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
-
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+          const progressBar = document.getElementById("loading-progress-bar");
+          if (progressBar) {
+            progressBar.style.width = 100 * progress + "%";
+          }
+          const statusText = document.querySelector(".loading-status");
+          if (statusText) {
+            statusText.innerText = `Loading... ${Math.round(progress * 100)}%`;
+          }
         }).then((unityInstance) => {
           window.unityInstance = unityInstance;
-          document.querySelector("#unity-loading-bar").style.display = "none";
+          
+          // Hide loading overlay with transition
+          const loadingOverlay = document.getElementById("loading-overlay");
+          if (loadingOverlay) {
+            loadingOverlay.style.opacity = "0";
+            setTimeout(() => {
+              loadingOverlay.style.display = "none";
+            }, 400);
+          }
           
           // Display lobby overlay on successful load
           document.getElementById('lobby-overlay').style.display = 'flex';

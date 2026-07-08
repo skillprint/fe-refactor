@@ -20,6 +20,7 @@ export function useUserSession() {
 
     const [userId, setUserId] = useState<string | null>(null);
     const [userToken, setUserToken] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
@@ -57,6 +58,8 @@ export function useUserSession() {
                 }
             }
 
+            setIsLoading(true);
+
             // 2. Check LocalStorage
             if (!currentUserId) {
                 currentUserId = localStorage.getItem('userId');
@@ -73,38 +76,42 @@ export function useUserSession() {
             // 4. Handle User Token
             let currentUserToken = USE_TOKEN_CACHING ? localStorage.getItem('userToken') : null;
 
-            if (!currentUserToken && currentUserId) {
-                const client = new SkillprintClient({
-                    apiKey: getApiKey(),
-                    baseUrl: BASE_URL,
-                    logger: (msg, level) => {
-                        if (level === LogLevel.ERROR) console.error(`[Skillprint SDK] ${msg}`);
-                    }
-                });
-
-                try {
-                    // Use SDK to create token (will create user if needed)
-                    // We cast currentUserId to string because flow analysis might not catch it inside async
-                    if (!activeTokenPromise) {
-                        activeTokenPromise = client.createOrGetUserToken(currentUserId as string);
-                    }
-                    const token = await activeTokenPromise;
-                    if (token) {
-                        if (USE_TOKEN_CACHING) {
-                            localStorage.setItem('userToken', token);
-                        } else {
-                            localStorage.removeItem('userToken');
+            try {
+                if (!currentUserToken && currentUserId) {
+                    const client = new SkillprintClient({
+                        apiKey: getApiKey(),
+                        baseUrl: BASE_URL,
+                        logger: (msg, level) => {
+                            if (level === LogLevel.ERROR) console.error(`[Skillprint SDK] ${msg}`);
                         }
-                        setUserToken(token);
+                    });
+
+                    try {
+                        // Use SDK to create token (will create user if needed)
+                        // We cast currentUserId to string because flow analysis might not catch it inside async
+                        if (!activeTokenPromise) {
+                            activeTokenPromise = client.createOrGetUserToken(currentUserId as string);
+                        }
+                        const token = await activeTokenPromise;
+                        if (token) {
+                            if (USE_TOKEN_CACHING) {
+                                localStorage.setItem('userToken', token);
+                            } else {
+                                localStorage.removeItem('userToken');
+                            }
+                            setUserToken(token);
+                        }
+                    } catch (e) {
+                        console.error("Failed to retrieve or create user token", e);
+                        activeTokenPromise = null; // Allow retry on failure
+                        // If create user fails because already created (or other error),
+                        // we still have the userId stored in localStorage from step 1/2/3.
                     }
-                } catch (e) {
-                    console.error("Failed to retrieve or create user token", e);
-                    activeTokenPromise = null; // Allow retry on failure
-                    // If create user fails because already created (or other error),
-                    // we still have the userId stored in localStorage from step 1/2/3.
+                } else if (currentUserToken) {
+                    setUserToken(currentUserToken);
                 }
-            } else if (currentUserToken) {
-                setUserToken(currentUserToken);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -126,6 +133,7 @@ export function useUserSession() {
         setToken,
         userId,
         userToken,
+        isLoading,
         isWhitelisted: isUserWhitelisted(userId)
     };
 }
