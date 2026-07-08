@@ -32,3 +32,11 @@ You can trigger manual adjustments during play using keyboard keys 1-9. Each key
 - `7`: Off-screen arrow help only (`arrowHelpfulness = 1`) — Medium assistance.
 - `8`: No pointer helper assistance (`arrowHelpfulness = 0`) — Hard search mode.
 - `9`: Extreme Mode (`totalNodesCount = 25`, `rotateNodesAroundUser = true`, `rotationSpeed = 15.0`, `arrowHelpfulness = 0`) — Highest cognitive load.
+
+## Deep Space Levels (Group 12, Levels 41-44)
+
+The game includes a set of levels utilizing a 3D space scene as a background with slow-motion drifting:
+- **Level 41: Nebula Drift** - Connect nodes in a teal/green nebula near a gas giant planet and a glowing blue star.
+- **Level 42: Binary System** - Orbiting yellow and red-orange binary suns, a purple nebula, and a volcanic lava planet.
+- **Level 43: Ice Ring** - Connect nodes in an indigo/magenta nebula with an icy planet and white sun.
+- **Level 44: Solar System** - A central star/sun with three orbiting planets of different types revolving at different speeds.

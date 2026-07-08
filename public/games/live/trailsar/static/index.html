@@ -185,6 +185,13 @@
           title: 'Emoji Quest',
           description: 'Find and connect nodes displaying emojis instead of numbers and letters.',
           levels: [37, 38, 39, 40]
+        },
+        {
+          key: 'Space_Scene',
+          label: 'Group 12',
+          title: 'Deep Space',
+          description: 'Navigate in a beautiful 3D space scene with planets, stars, and nebulae.',
+          levels: [41, 42, 43, 44]
         }
       ];
 
@@ -489,6 +496,24 @@
         //   unityContainer.style.display = 'none';
         // }, 400);
       };
+
+      // Listen to parameter adjustments from parent window
+      window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'ADJUST_GAME') {
+          console.log("Iframe received adjustment:", event.data.data);
+          if (window.unityInstance) {
+            window.unityInstance.SendMessage("GameManager", "ApplyParameterAdjustment", JSON.stringify(event.data.data));
+          }
+        }
+      });
+
+      // Forward keydown events to the parent window for the GameAdjustmentTester
+      window.addEventListener('keydown', function (event) {
+        if (/^[1-9]$/.test(event.key)) {
+          console.log('[skillprintShim - Trails] Key intercepted in iframe:', event.key);
+          window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
+        }
+      }, true); // Use capture phase
 
       // Unity Loader Initialization
       var canvas = document.querySelector("#unity-canvas");

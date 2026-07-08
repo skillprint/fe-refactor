@@ -724,6 +724,28 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'trailsar':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'totalNodesCount', parameterValue: 5 }];
+                case 2: return [{ parameterName: 'totalNodesCount', parameterValue: 15 }];
+                case 3: return [
+                    { parameterName: 'rotateNodesAroundUser', parameterValue: 1 },
+                    { parameterName: 'rotationSpeed', parameterValue: 8.0 }
+                ];
+                case 4: return [{ parameterName: 'nodeDimension', parameterValue: 'letters' }];
+                case 5: return [{ parameterName: 'nodeDimension', parameterValue: 'emojis' }];
+                case 6: return [{ parameterName: 'nodeDimension', parameterValue: 'alternating' }];
+                case 7: return [{ parameterName: 'arrowHelpfulness', parameterValue: 1 }];
+                case 8: return [{ parameterName: 'arrowHelpfulness', parameterValue: 0 }];
+                case 9: return [
+                    { parameterName: 'totalNodesCount', parameterValue: 25 },
+                    { parameterName: 'rotateNodesAroundUser', parameterValue: 1 },
+                    { parameterName: 'rotationSpeed', parameterValue: 15.0 },
+                    { parameterName: 'arrowHelpfulness', parameterValue: 0 }
+                ];
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
