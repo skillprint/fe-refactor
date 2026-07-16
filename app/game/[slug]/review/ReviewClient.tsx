@@ -246,45 +246,49 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         }
     }, [hasCheckedNewBadges, allBadges]);
 
-    // Developer tester / keyboard trigger to simulate unlocking 2 badges
+    // Developer tester / keyboard trigger to simulate unlocking a random badge
     useEffect(() => {
+        const triggerRandomBadge = () => {
+            if (!allBadges || allBadges.length === 0) {
+                console.log('[Dev/Testing] No badges loaded to trigger.');
+                return;
+            }
+            const earnedBadges = allBadges.filter(b => b.earned);
+            const sourceList = earnedBadges.length > 0 ? earnedBadges : allBadges;
+            const randomBadge = sourceList[Math.floor(Math.random() * sourceList.length)];
+            console.log('[Dev/Testing] Launching random badge:', randomBadge.name);
+            setNewlyUnlockedBadges([randomBadge]);
+            setCurrentBadgeIndex(0);
+        };
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key.toLowerCase() === 'b') {
-                console.log('[Dev/Testing] Simulating two unlocked badges!');
-                const mock1: Badge = {
-                    id: 'speed-demon',
-                    name: 'Speed Demon',
-                    description: 'Complete Hextris clearing 100 rows in under 2 mins',
-                    longDescription: 'Lightning fast decisions! You managed blocks at extreme speed, showcasing highly efficient visual-spatial processing.',
-                    icon: '⚡',
-                    color: 'from-pink-500 via-rose-500 to-orange-500',
-                    gameTitle: 'Hextris',
-                    gameImage: '/games/live/Hextris/screenshot.png',
-                    earned: true,
-                    category: 'cognitive'
-                };
-                const mock2: Badge = {
-                    id: 'zen-master',
-                    name: 'Zen Master',
-                    description: 'Play 5 calming games in a row to reduce stress',
-                    longDescription: 'Finding calm in the storm. You played 5 calming sessions consecutively, displaying great self-regulation and stress management.',
-                    icon: '🧘',
-                    color: 'from-sky-400 via-teal-400 to-emerald-500',
-                    gameTitle: 'Zen Garden',
-                    gameImage: '/games/live/Alchemy/icon_144.png',
-                    earned: true,
-                    category: 'focus'
-                };
-                setNewlyUnlockedBadges([mock1, mock2]);
-                setCurrentBadgeIndex(0);
+                triggerRandomBadge();
+            }
+        };
+
+        let lastTapTime = 0;
+        const handleTouchStart = (e: TouchEvent) => {
+            // Check for exactly 2 fingers
+            if (e.touches.length === 2) {
+                const now = Date.now();
+                const diff = now - lastTapTime;
+                if (diff < 300) {
+                    triggerRandomBadge();
+                    e.preventDefault();
+                }
+                lastTapTime = now;
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('touchstart', handleTouchStart, { passive: false });
+        
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('touchstart', handleTouchStart);
         };
-    }, []);
+    }, [allBadges]);
 
     useEffect(() => {
         // Check for first game badge

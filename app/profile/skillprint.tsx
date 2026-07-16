@@ -13,7 +13,7 @@ import { useUserProfile } from '../hooks/useUserProfile';
 import BuckyballLoading from '../components/BuckyballLoading';
 import SkillprintVisualization from '../components/Skillprint';
 import FirstGameBadge from '../components/FirstGameBadge';
-import { knownGameSlugs } from '../config/gameConfig';
+import { knownGameSlugs, getGameDetails } from '../config/gameConfig';
 import { useGoal, GOAL_OPTIONS } from '../hooks/useGoal';
 import { useAuth } from '../context/AuthContext';
 import { useUserSession } from '../hooks/useUserSession';
@@ -24,6 +24,10 @@ import ProfilePerformanceTrends from '../components/ProfilePerformanceTrends';
 import { useGoalSetting } from '../hooks/useGoalSetting';
 import { useGameMetrics } from '../hooks/useGameMetrics';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
+import Image from 'next/image';
+import { useLegacyBadges } from './badges/old/hooks/useLegacyBadges';
+import LocalImageAssets from './badges/old/assets';
+import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
 import {
   BarChart as RechartsBarChart,
   Bar as RechartsBar,
@@ -102,6 +106,61 @@ export default function Skillprint() {
 
   // Game-specific performance state
   const { gamesByMood, gamesBySkill } = useGamesBySkill();
+
+  // Legacy badges states & hook
+  const {
+    achievements,
+    isLoaded: isLegacyLoaded,
+    earnedCount: earnedLegacyCount,
+    totalCount: totalLegacyCount,
+  } = useLegacyBadges();
+
+  const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
+  const [activeTooltipSlug, setActiveTooltipSlug] = useState<string | null>(null);
+
+  const getGameForBadge = (badge: any) => {
+    const targetSlug = badge.triggerTargetAttribute?.slug;
+    if (targetSlug) {
+      const matchingGame = gamesBySkill.find((game: any) =>
+        game.skills?.some((s: any) => s.slug === targetSlug || s.name?.toLowerCase() === badge.triggerTargetAttribute.name?.toLowerCase())
+      );
+      if (matchingGame) return matchingGame;
+    }
+
+    const fallbackSlugs: Record<string, string> = {
+      'worldly-whale': 'cut-the-rope',
+      'persistent-penguin': 'omnomrun',
+      'logical-lion': 'ultimate-sudoku',
+      'calculating-chimpanzee': '2048',
+      'storing-spider': 'sweet-memory',
+      'keen-koala': 'photo-hunt',
+      'hurried-hummingbird': 'whack-em-all',
+      'assembled-ant': 'gummy-blocks',
+      'plural-pigeon': 'omnomrun',
+      'first-mood-session': 'cut-the-rope',
+      'first-skill-score': '2048',
+    };
+
+    const fallbackSlug = fallbackSlugs[badge.slug];
+    if (fallbackSlug) {
+      const allGames = [...gamesBySkill, ...gamesByMood];
+      const found = allGames.find((g: any) => g.slug === fallbackSlug);
+      if (found) return found;
+
+      const details = getGameDetails(fallbackSlug);
+      if (details) {
+        return {
+          slug: fallbackSlug,
+          name: details.name,
+          screenshot: details.image,
+          description: details.description
+        };
+      }
+    }
+
+    if (gamesBySkill.length > 0) return gamesBySkill[0];
+    return null;
+  };
 
   // Get unique games from catalog
   const uniqueGames = React.useMemo(() => {
@@ -615,40 +674,188 @@ export default function Skillprint() {
           </>
         )}
 
-        {/* Badges Section */}
-        {/* <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">
-              Achievements
-            </h2>
-            <button
-              onClick={() => router.push('/badges')}
-              className="text-sm text-primary font-medium hover:underline"
-            >
-              View All
-            </button>
-          </div>
-
-          <div
-            onClick={() => router.push('/badges')}
-            className="bg-card rounded-lg shadow p-4 cursor-pointer hover:bg-secondary transition-colors"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="flex -space-x-2 overflow-hidden">
-                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-card bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg">🏆</div>
-                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-card bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-lg">🧠</div>
-                <div className="inline-block h-10 w-10 rounded-full ring-2 ring-card bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center text-lg">⚡</div>
-              </div>
-              <div className="flex-1">
-                <p className="text-foreground font-medium">4 Badges Earned</p>
-                <p className="text-sm text-muted-foreground">Latest: Consistent</p>
-              </div>
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+        {/* Achievements Section */}
+        <div className="mt-12 mb-12 border-t border-border pt-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                Achievements
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Earn premium badges by completing specific cognitive challenges in games.
+              </p>
+            </div>
+            <div className="flex items-center space-x-2 text-sm font-semibold text-muted-foreground bg-secondary/30 px-3 py-1.5 rounded-full self-start md:self-auto">
+              <span>Progress:</span>
+              <span className="text-primary font-bold">{earnedLegacyCount}/{totalLegacyCount}</span>
             </div>
           </div>
-        </div> */}
+
+          {!isLegacyLoaded ? (
+            <div className="flex justify-center items-center py-10">
+              <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="space-y-10">
+              {/* Earned Badges */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-foreground">Earned Badges</h3>
+                {achievements.filter(a => !!a.userAchievementId).length === 0 ? (
+                  <div className="p-6 text-center rounded-2xl border border-dashed border-border/40 bg-card/25">
+                    <p className="text-sm text-muted-foreground">
+                      No badges earned yet. Play games to unlock your first achievement!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {achievements.filter(a => !!a.userAchievementId).map((badge) => {
+                      const iconAsset = LocalImageAssets.badges.icons[badge.slug];
+                      const regAsset = LocalImageAssets.badges.regular[badge.slug];
+                      const isTooltipOpen = activeTooltipSlug === badge.slug;
+                      return (
+                        <div
+                          key={badge.slug}
+                          className="relative flex flex-col items-center p-4 bg-card/60 backdrop-blur-md rounded-2xl border border-border/40 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                        >
+                          <div
+                            className="w-16 h-16 relative flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-800/50 rounded-2xl p-1 border border-border/10 shadow-inner cursor-pointer"
+                            onMouseEnter={() => setActiveTooltipSlug(badge.slug)}
+                            onMouseLeave={() => setActiveTooltipSlug(null)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveTooltipSlug(prev => prev === badge.slug ? null : badge.slug);
+                            }}
+                          >
+                            {iconAsset ? (
+                              <Image
+                                src={iconAsset}
+                                alt={badge.name}
+                                width={56}
+                                height={56}
+                                className="w-14 h-14 object-contain transition-transform duration-300 hover:scale-110"
+                              />
+                            ) : (
+                              <span className="text-2xl">🏆</span>
+                            )}
+                          </div>
+
+                          <span className="text-xs font-bold text-center mt-2 text-foreground line-clamp-1 w-full">
+                            {badge.name}
+                          </span>
+
+                          {/* Tooltip Overlay */}
+                          {isTooltipOpen && (
+                            <div className="absolute bottom-full mb-2 w-64 p-4 rounded-xl shadow-xl border border-border bg-card/95 backdrop-blur-md z-30 text-xs">
+                              <div className="flex flex-col items-center text-center">
+                                <span className="text-[9px] font-black text-primary uppercase tracking-wider mb-2">Badge Details</span>
+                                <div className="w-20 h-20 relative mb-2 flex items-center justify-center bg-zinc-100/30 dark:bg-zinc-800/30 rounded-full border border-border/10">
+                                  {regAsset ? (
+                                    <Image
+                                      src={regAsset}
+                                      alt={badge.name}
+                                      width={72}
+                                      height={72}
+                                      className="w-16 h-16 object-contain"
+                                    />
+                                  ) : (
+                                    <span className="text-3xl">🏆</span>
+                                  )}
+                                </div>
+                                <h4 className="font-bold text-foreground mb-1">{badge.name}</h4>
+                                <p className="text-muted-foreground leading-normal">{badge.longDescription}</p>
+                                {badge.triggerTargetAttribute && (
+                                  <span className="mt-2 text-[9px] text-primary/80 font-semibold uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded-full">
+                                    {badge.triggerTargetAttribute.name}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Locked Badges */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-foreground">Locked Badges</h3>
+                {achievements.filter(a => !a.userAchievementId).length === 0 ? (
+                  <div className="p-6 text-center rounded-2xl border border-dashed border-border/40 bg-card/25">
+                    <p className="text-sm text-muted-foreground">
+                      🎉 Congratulations! You have unlocked all badges!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {achievements.filter(a => !a.userAchievementId).map((badge) => {
+                      const iconAsset = LocalImageAssets.badges.icons[`${badge.slug}-grey`] || LocalImageAssets.badges.icons[badge.slug];
+                      return (
+                        <div
+                          key={badge.slug}
+                          className="flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl border border-border/20 bg-card/20 backdrop-blur-md shadow-xs gap-4"
+                        >
+                          <div className="flex items-center space-x-4 w-full">
+                            <div className="w-16 h-16 relative flex-shrink-0 flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-800/50 rounded-2xl p-1 border border-border/10 shadow-inner">
+                              {iconAsset ? (
+                                <Image
+                                  src={iconAsset}
+                                  alt={badge.name}
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 object-contain opacity-40"
+                                />
+                              ) : (
+                                <span className="text-2xl opacity-40">🏆</span>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="font-bold text-sm text-foreground/75">{badge.name}</h4>
+                              <p className="text-xs text-muted-foreground">{badge.triggerDescription}</p>
+                            </div>
+                          </div>
+
+                          {/* Game Tile CTA */}
+                          {(() => {
+                            const game = getGameForBadge(badge);
+                            if (!game) return null;
+                            return (
+                              <div className="flex flex-row items-stretch border border-border/40 rounded-xl overflow-hidden bg-card/40 hover:bg-card/60 transition-all w-full sm:w-72 h-20 shrink-0">
+                                {game.screenshot && (
+                                  <div className="relative w-20 h-full shrink-0 bg-secondary/15">
+                                    <img
+                                      src={game.screenshot}
+                                      alt={game.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <div className="p-3 flex-1 flex flex-col justify-between items-start">
+                                  <div className="w-full">
+                                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Play to Earn</span>
+                                    <span className="font-bold text-xs text-foreground line-clamp-1 w-full">{game.name}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => setPreviewGameSlug(game.slug)}
+                                    className="px-3 py-1 bg-primary text-primary-foreground font-bold rounded-lg text-xs hover:bg-primary/90 transition-colors self-end"
+                                  >
+                                    Play
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
 
         {/* Game Sessions Section */}
         {isDebug && (
@@ -1014,6 +1221,11 @@ export default function Skillprint() {
       {showBadge && (
         <FirstGameBadge onDismiss={() => setShowBadge(false)} nextGameSlug={nextGameSlug} />
       )}
+      <GamePreviewShareSheet
+        slug={previewGameSlug}
+        isOpen={!!previewGameSlug}
+        onClose={() => setPreviewGameSlug(null)}
+      />
     </div>
   );
 }
