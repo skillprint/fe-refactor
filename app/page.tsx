@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import TopNav from "./components/TopNav";
 import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
@@ -205,6 +206,25 @@ function HomeContent() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
 
+  const searchParams = useSearchParams();
+  const [showBenchmarkPopup, setShowBenchmarkPopup] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('fromBenchmark') === 'true') {
+      setShowBenchmarkPopup(true);
+      
+      // Set the FTUE completed cookie so it bypasses the FTUE Carousel onboarding
+      setCookie('ftue_completed', 'true', 365);
+      
+      // Clean up URL parameters immediately so the popup doesn't reappear on refresh
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete('fromBenchmark');
+      newParams.delete('userId');
+      const newPath = newParams.toString() ? `/?${newParams.toString()}` : '/';
+      window.history.replaceState(null, '', newPath);
+    }
+  }, [searchParams]);
+
   // Fetch games for the "New Games" section using the 'relax' mood
   const { games: fetchedNewGames, isLoading: isLoadingNewGames } = useGamesByMood('relax');
 
@@ -244,7 +264,7 @@ function HomeContent() {
   };
 
   // Skillprint Visualization Logic
-  const { count, isLoaded } = useGameSessions();
+  const { count, targetGames, isLoaded } = useGameSessions();
   const { fetchUserProfile, profile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
   const { nodeDataMap, hasScoreByMood, hasScoreBySkill } = useSkillprintVisualizationData(processedProfile);
@@ -330,7 +350,7 @@ function HomeContent() {
         </div> */}
 
         {/* Skillprint View for Active Users */}
-        {isLoaded && (count >= 3 || isWhitelisted) && (
+        {isLoaded && (count >= targetGames || isWhitelisted) && (
           <div className="bg-card border-b border-border">
             <div className="px-4 sm:px-8 py-12 max-w-[1440px] mx-auto w-full">
               <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-6">
@@ -679,6 +699,89 @@ function HomeContent() {
         isOpen={!!previewGameSlug}
         onClose={() => setPreviewGameSlug(null)}
       />
+
+      {/* Benchmark Onboarding Welcome Popup Modal */}
+      {showBenchmarkPopup && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md overflow-hidden bg-card text-foreground border border-border rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            {/* Ambient Background Glow */}
+            <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-primary/10 blur-[60px] pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 w-36 h-36 rounded-full bg-secondary/10 blur-[60px] pointer-events-none" />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowBenchmarkPopup(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-full hover:bg-muted/50"
+              aria-label="Close modal"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="space-y-6">
+              {/* Header Badge */}
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
+                </span>
+                <span className="text-[10px] text-secondary-foreground bg-secondary/10 border border-secondary/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider font-mono">
+                  Benchmark Completed
+                </span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-3">
+                <h3 className="text-2xl font-extrabold tracking-tight">
+                  Welcome to Your Skillprint Profile!
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Thank you for playtesting! Your gameplay session has started building your cognitive profile.
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  You need to play <strong>{Math.max(0, targetGames - count)} more {Math.max(0, targetGames - count) === 1 ? 'game' : 'games'}</strong> to unlock your full cognitive analysis.
+                </p>
+              </div>
+
+              {/* Game Play CTAs */}
+              <div className="space-y-3 pt-4 border-t border-border">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Play your next game to unlock:
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/game/hextris/interstitial"
+                    onClick={() => setShowBenchmarkPopup(false)}
+                    className="group relative flex flex-col p-4 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 hover:from-indigo-500/15 hover:to-indigo-600/10 border border-indigo-500/25 rounded-2xl transition-all duration-200 hover:scale-[1.02] cursor-pointer text-left"
+                  >
+                    <span className="text-xs font-bold text-indigo-400 group-hover:text-indigo-300">Hextris</span>
+                    <span className="text-[10px] text-muted-foreground">Focus & reaction</span>
+                  </Link>
+                  <Link
+                    href="/game/box-tower/interstitial"
+                    onClick={() => setShowBenchmarkPopup(false)}
+                    className="group relative flex flex-col p-4 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 hover:from-emerald-500/15 hover:to-emerald-600/10 border border-emerald-500/25 rounded-2xl transition-all duration-200 hover:scale-[1.02] cursor-pointer text-left"
+                  >
+                    <span className="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">Box Tower</span>
+                    <span className="text-[10px] text-muted-foreground">Relaxation & timing</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 border-t border-border">
+                <button
+                  onClick={() => setShowBenchmarkPopup(false)}
+                  className="w-full py-2.5 bg-secondary hover:bg-secondary/90 text-secondary-foreground border border-border rounded-xl text-xs font-bold transition-all text-center cursor-pointer"
+                >
+                  Start Exploring Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

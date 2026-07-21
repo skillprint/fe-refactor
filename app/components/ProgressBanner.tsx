@@ -6,10 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 
 function ProgressBannerInner() {
-    const { count, isLoaded, profileViewed, markViewed } = useGameSessions();
+    const { count, targetGames, isLoaded, profileViewed, markViewed } = useGameSessions();
     const { isWhitelisted } = useUserSession();
     const router = useRouter();
-    const targetGames = 3;
     const isProfileReady = count >= targetGames || isWhitelisted;
 
     if (!isLoaded) return null;

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useBenchmarkData } from './hooks/useBenchmarkData';
 import { useSubmitBenchmarkSurvey } from './hooks/useSubmitBenchmarkSurvey';
+import { useUserSession } from '../hooks/useUserSession';
 import DynamicScatterPlot from './components/DynamicScatterPlot';
 import LeaderboardTable from './components/LeaderboardTable';
 import GameCards from './components/GameCards';
@@ -19,6 +20,7 @@ export default function BenchmarkClient() {
   const [disableSdk, setDisableSdk] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { userId } = useUserSession();
 
   // Pre-game survey state
   const [showPreGameSurvey, setShowPreGameSurvey] = useState(false);
@@ -72,7 +74,7 @@ export default function BenchmarkClient() {
     }
     setPendingLaunchConfig({ withAdjustments, url });
     setPreGameRating(null); // Reset rating selection
-    
+
     // Bypassing pre-game survey for now: routing directly
     router.push(url);
     // setShowPreGameSurvey(true);
@@ -109,12 +111,12 @@ export default function BenchmarkClient() {
         // Save post-game feedback
         const key = `postGameSurvey_${postGameGameSlug}_${postGameMood}`;
         localStorage.setItem(key, postGameResponse);
-        
+
         // Calculate shifts (just mock logs for analytics dashboard)
         const prevRating = localStorage.getItem('lastPreGameRating');
         const prevMood = localStorage.getItem('lastPreGameMood');
         console.log(`Survey result: Mood ${postGameMood} pre-rating was ${prevRating}, post-response is ${postGameResponse}`);
-        
+
         setSurveyCompleted(true);
       } catch (err) {
         console.error('Failed to submit benchmark survey:', err);
@@ -168,6 +170,27 @@ export default function BenchmarkClient() {
               <p className="text-sm md:text-base text-slate-400 leading-relaxed">
                 Assessing popular Vision-Language Models (VLMs) and reasoning agents on how they play Skillprint's game catalog. Scoring is derived from Skillprint's real-time VLM cognitive assessment system.
               </p>
+            </div>
+
+            <div className="relative flex-shrink-0 w-full md:w-80 bg-slate-900/60 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-indigo-500/10 blur-[40px] pointer-events-none" />
+              <div className="space-y-1.5">
+                <span className="text-[9px] bg-indigo-600/10 text-indigo-400 border border-indigo-500/25 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                  Build Your Profile
+                </span>
+                <h3 className="text-sm font-extrabold text-white">
+                  Discover Your Cognitive Strengths
+                </h3>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Play more games on the main portal to uncover your personal cognitive assessment.
+                </p>
+              </div>
+              <Link
+                href={`/?fromBenchmark=true&userId=${userId || ''}`}
+                className="block w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-center text-xs font-bold transition-all shadow-md shadow-indigo-600/10 hover:scale-[1.02]"
+              >
+                Find Your Strengths →
+              </Link>
             </div>
 
             {/* <div className="flex flex-wrap items-center gap-3">
@@ -261,30 +284,35 @@ export default function BenchmarkClient() {
 
                   <div className="grid grid-cols-3 gap-3 w-full">
                     {[
-                      { val: 'yes', label: 'Yes', icon: (
-                        <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )},
-                      { val: 'not_sure', label: 'Not Sure', icon: (
-                        <svg className="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )},
-                      { val: 'no', label: 'No', icon: (
-                        <svg className="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )}
+                      {
+                        val: 'yes', label: 'Yes', icon: (
+                          <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )
+                      },
+                      {
+                        val: 'not_sure', label: 'Not Sure', icon: (
+                          <svg className="w-6 h-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )
+                      },
+                      {
+                        val: 'no', label: 'No', icon: (
+                          <svg className="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        )
+                      }
                     ].map((opt) => (
                       <button
                         key={opt.val}
                         onClick={() => setPostGameResponse(opt.val)}
-                        className={`aspect-square rounded-2xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
-                          postGameResponse === opt.val
+                        className={`aspect-square rounded-2xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${postGameResponse === opt.val
                             ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/5 scale-105'
                             : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                        }`}
+                          }`}
                       >
                         {opt.icon}
                         <span>{opt.label}</span>
@@ -330,10 +358,16 @@ export default function BenchmarkClient() {
                       Your responses have been saved. This mindset shift telemetry contributes directly to evaluating the cognitive benefits of AI game-state parameters.
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-slate-950">
+                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-950">
+                    <Link
+                      href={`/?fromBenchmark=true&userId=${userId || ''}`}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg transition-all text-center cursor-pointer"
+                    >
+                      Reveal Your Cognitive Profile
+                    </Link>
                     <button
                       onClick={handleClosePostGameSurvey}
-                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg transition-all text-center cursor-pointer"
+                      className="w-full py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all text-center cursor-pointer"
                     >
                       Close & Return to Dashboard
                     </button>
@@ -605,11 +639,10 @@ export default function BenchmarkClient() {
                   <button
                     key={val}
                     onClick={() => setPreGameRating(val)}
-                    className={`w-12 h-12 rounded-xl border text-sm font-bold font-mono transition-all flex items-center justify-center cursor-pointer ${
-                      preGameRating === val
+                    className={`w-12 h-12 rounded-xl border text-sm font-bold font-mono transition-all flex items-center justify-center cursor-pointer ${preGameRating === val
                         ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/25 scale-105'
                         : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                    }`}
+                      }`}
                   >
                     {val}
                   </button>

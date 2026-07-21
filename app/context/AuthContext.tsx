@@ -36,8 +36,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const urlUserId = urlParams.get('user_id') || urlParams.get('userId');
             const firstName = urlParams.get('first_name');
             const profileImage = urlParams.get('profile_image');
+            const fromBenchmark = urlParams.get('fromBenchmark') === 'true';
 
-            if (urlUserId) {
+            if (fromBenchmark) {
+                const targetUserId = urlUserId || safeStorage.getItem('userId') || safeStorage.getItem('user_id');
+                if (targetUserId) {
+                    safeStorage.setItem('userId', targetUserId);
+                    safeStorage.setItem('user_id', targetUserId);
+                    setCookie('user_id', targetUserId);
+                }
+                const currentStatus = safeStorage.getItem('auth_status') as AuthStatus | null;
+                if (!currentStatus || currentStatus === 'loggedOut') {
+                    setStatus('guest');
+                    safeStorage.setItem('auth_status', 'guest');
+                }
+            } else if (urlUserId) {
                 const newStatus = isEmbedded ? 'partner' : 'social';
                 setStatus(newStatus);
                 setUserProfile({

@@ -82,7 +82,7 @@ export default function Skillprint() {
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   const [userId, setUserId] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const { count, isLoaded, markViewed, profileViewed } = useGameSessions();
+  const { count, targetGames, isLoaded, markViewed, profileViewed } = useGameSessions();
   const { fetchUserProfile, profile, isLoading, error } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
   const [showBadge, setShowBadge] = useState(false);
@@ -317,10 +317,10 @@ export default function Skillprint() {
   }, [skillProfile, processedProfile]);
 
   useEffect(() => {
-    if (isLoaded && count >= 3 && !profileViewed) {
+    if (isLoaded && count >= targetGames && !profileViewed) {
       markViewed();
     }
-  }, [isLoaded, count, markViewed, profileViewed]);
+  }, [isLoaded, count, targetGames, markViewed, profileViewed]);
 
   const userSkills = sampleSkills.map(s => s.name);
   const userMoods = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
@@ -370,21 +370,24 @@ export default function Skillprint() {
           <div className="flex justify-center py-20">
             <BuckyballLoading />
           </div>
-        ) : ((count < 3 && !isWhitelisted) && !processedProfile) ? (
+        ) : ((count < targetGames && !isWhitelisted) && !processedProfile) ? (
           <div className="bg-card rounded-lg shadow p-8 text-center border border-border mb-8">
             <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🔒</span>
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2">Unlock Your Skillprint</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Play at least 3 games to reveal your unique cognitive profile and skill breakdown.
+              Play at least {targetGames} {targetGames === 1 ? 'game' : 'games'} to reveal your unique cognitive profile and skill breakdown.
             </p>
 
             <div className="flex items-center justify-center gap-2 mb-8">
-              <div className={`h-2 w-16 rounded-full ${count >= 1 ? 'bg-primary' : 'bg-secondary'}`} />
-              <div className={`h-2 w-16 rounded-full ${count >= 2 ? 'bg-primary' : 'bg-secondary'}`} />
-              <div className={`h-2 w-16 rounded-full ${count >= 3 ? 'bg-primary' : 'bg-secondary'}`} />
-              <span className="ml-2 text-sm font-medium text-foreground">{count}/3 Played</span>
+              {Array.from({ length: targetGames }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 w-16 rounded-full ${count >= i + 1 ? 'bg-primary' : 'bg-secondary'}`}
+                />
+              ))}
+              <span className="ml-2 text-sm font-medium text-foreground">{count}/{targetGames} Played</span>
             </div>
 
             <div className="flex flex-col items-center gap-6">

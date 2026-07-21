@@ -7,6 +7,7 @@ import { useBenchmarkData } from './hooks/useBenchmarkData';
 import { useBenchmarkLeaderboard } from './hooks/useBenchmarkLeaderboard';
 import { useBenchmarkProviders } from './hooks/useBenchmarkProviders';
 import { useSubmitBenchmarkSurvey } from './hooks/useSubmitBenchmarkSurvey';
+import { useUserSession } from '../hooks/useUserSession';
 import DynamicScatterPlot from './components/DynamicScatterPlot';
 import LeaderboardBackendTable from './LeaderboardBackendTable';
 import GameCards from './components/GameCards';
@@ -28,6 +29,7 @@ export default function BenchmarkBackendClient() {
   const [disableSdk, setDisableSdk] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { userId } = useUserSession();
 
   // Pre-game survey state
   const [showPreGameSurvey, setShowPreGameSurvey] = useState(false);
@@ -260,6 +262,27 @@ export default function BenchmarkBackendClient() {
                 Evaluating Vision-Language Models (VLMs) and LLM providers in real-time. Leaderboard metrics are retrieved dynamically from the backend database utilizing live session ratings.
               </p>
             </div>
+
+            <div className="relative flex-shrink-0 w-full md:w-80 bg-slate-900/60 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-indigo-500/10 blur-[40px] pointer-events-none" />
+              <div className="space-y-1.5">
+                <span className="text-[9px] bg-indigo-600/10 text-indigo-400 border border-indigo-500/25 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                  Build Your Profile
+                </span>
+                <h3 className="text-sm font-extrabold text-white">
+                  Discover Your Cognitive Strengths
+                </h3>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Play more games on the main portal to uncover your personal cognitive assessment.
+                </p>
+              </div>
+              <Link
+                href={`/?fromBenchmark=true&userId=${userId || ''}`}
+                className="block w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-center text-xs font-bold transition-all shadow-md shadow-indigo-600/10 hover:scale-[1.02]"
+              >
+                Find Your Strengths →
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -401,10 +424,16 @@ export default function BenchmarkBackendClient() {
                       Your responses have been successfully logged to the backend. Live provider rankings will recalibrate instantly to incorporate your ratings.
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-slate-950">
+                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-950">
+                    <Link
+                      href={`/?fromBenchmark=true&userId=${userId || ''}`}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg transition-all text-center cursor-pointer"
+                    >
+                      Reveal Your Cognitive Profile
+                    </Link>
                     <button
                       onClick={handleClosePostGameSurvey}
-                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg transition-all text-center cursor-pointer"
+                      className="w-full py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all text-center cursor-pointer"
                     >
                       Close & Return to Dashboard
                     </button>

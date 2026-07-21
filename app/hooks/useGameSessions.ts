@@ -5,8 +5,16 @@ export const useGameSessions = () => {
     const [sessions, setSessions] = useState<GameSession[]>([]);
     const [count, setCount] = useState(0);
     const [profileViewed, setProfileViewed] = useState(false);
-
+    const [fromBenchmark, setFromBenchmark] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setFromBenchmark(localStorage.getItem('from_benchmark') === 'true');
+        }
+    }, []);
+
+    const targetGames = fromBenchmark ? 2 : 3;
 
     const refreshSessions = useCallback(() => {
         const allSessions = getGameSessions();
@@ -57,6 +65,7 @@ export const useGameSessions = () => {
     return {
         sessions,
         count,
+        targetGames,
         profileViewed,
         isLoaded,
         addSession,

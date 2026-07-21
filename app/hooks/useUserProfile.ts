@@ -8,7 +8,7 @@ import { getApiBaseUrl } from '../utils/cookieUtils';
 
 export function useUserProfile() {
     const { userToken, userId, setToken, isWhitelisted } = useUserSession();
-    const { count, isLoaded: isSessionsLoaded } = useGameSessions();
+    const { count, targetGames, isLoaded: isSessionsLoaded } = useGameSessions();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -89,12 +89,12 @@ export function useUserProfile() {
         }
     }, [userToken, userId, setToken]);
 
-    // Automatically fetch profile when token is available and user has played at least 3 games
+    // Automatically fetch profile when token is available and user has played enough games
     useEffect(() => {
-        if (userToken && isSessionsLoaded && (count >= 3 || isWhitelisted)) {
+        if (userToken && isSessionsLoaded && (count >= targetGames || isWhitelisted)) {
             fetchUserProfile();
         }
-    }, [userToken, fetchUserProfile, isSessionsLoaded, count, isWhitelisted]);
+    }, [userToken, fetchUserProfile, isSessionsLoaded, count, targetGames, isWhitelisted]);
 
     return {
         profile,
