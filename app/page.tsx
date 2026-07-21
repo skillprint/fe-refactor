@@ -753,18 +753,32 @@ function HomeContent() {
                   <Link
                     href="/game/hextris/interstitial"
                     onClick={() => setShowBenchmarkPopup(false)}
-                    className="group relative flex flex-col p-4 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 hover:from-indigo-500/15 hover:to-indigo-600/10 border border-indigo-500/25 rounded-2xl transition-all duration-200 hover:scale-[1.02] cursor-pointer text-left"
+                    className="group relative flex flex-col p-2 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 hover:from-indigo-500/15 hover:to-indigo-600/10 border border-indigo-500/25 rounded-2xl transition-all duration-200 hover:scale-[1.02] cursor-pointer text-left overflow-hidden"
                   >
-                    <span className="text-xs font-bold text-indigo-400 group-hover:text-indigo-300">Hextris</span>
-                    <span className="text-[10px] text-muted-foreground">Focus & reaction</span>
+                    <img 
+                      src="/images/activities/covers/hextris-475aff99-6346-4ea4-b432-dc8aa51f2178.png" 
+                      alt="Hextris"
+                      className="w-full h-24 object-cover rounded-lg mb-2 border border-indigo-500/10 group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <div className="px-2 pb-2">
+                      <span className="block text-xs font-bold text-indigo-400 group-hover:text-indigo-300">Hextris</span>
+                      <span className="block text-[10px] text-muted-foreground mt-0.5">Focus & reaction</span>
+                    </div>
                   </Link>
                   <Link
                     href="/game/box-tower/interstitial"
                     onClick={() => setShowBenchmarkPopup(false)}
-                    className="group relative flex flex-col p-4 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 hover:from-emerald-500/15 hover:to-emerald-600/10 border border-emerald-500/25 rounded-2xl transition-all duration-200 hover:scale-[1.02] cursor-pointer text-left"
+                    className="group relative flex flex-col p-2 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 hover:from-emerald-500/15 hover:to-emerald-600/10 border border-emerald-500/25 rounded-2xl transition-all duration-200 hover:scale-[1.02] cursor-pointer text-left overflow-hidden"
                   >
-                    <span className="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">Box Tower</span>
-                    <span className="text-[10px] text-muted-foreground">Relaxation & timing</span>
+                    <img 
+                      src="/images/activities/covers/box-tower-befd1b5c-b07f-4463-8137-fadfdb6fc8de.png" 
+                      alt="Box Tower"
+                      className="w-full h-24 object-cover rounded-lg mb-2 border border-emerald-500/10 group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <div className="px-2 pb-2">
+                      <span className="block text-xs font-bold text-emerald-400 group-hover:text-emerald-300">Box Tower</span>
+                      <span className="block text-[10px] text-muted-foreground mt-0.5">Relaxation & timing</span>
+                    </div>
                   </Link>
                 </div>
               </div>
