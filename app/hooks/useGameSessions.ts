@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GameSession, getGameSessions, saveGameSession, getGamesPlayedCount, clearGameSessions, hasViewedProfile, markProfileAsViewed } from '../lib/gameSessionUtils';
+import { GameSession, clearGameSessions, hasViewedProfile, markProfileAsViewed, getPlayCountFromTalentsResponse } from '../lib/gameSessionUtils';
+import { useUserSession } from './useUserSession';
+import { get } from '../api/api';
+import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 
 export const useGameSessions = () => {
+    const { userToken, isLoading: isUserLoading } = useUserSession();
     const [sessions, setSessions] = useState<GameSession[]>([]);
     const [count, setCount] = useState(0);
     const [profileViewed, setProfileViewed] = useState(false);
@@ -16,51 +20,77 @@ export const useGameSessions = () => {
 
     const targetGames = fromBenchmark ? 2 : 3;
 
-    const refreshSessions = useCallback(() => {
-        const allSessions = getGameSessions();
-        setSessions(allSessions);
-        setCount(getGamesPlayedCount());
-        setProfileViewed(hasViewedProfile());
-        setIsLoaded(true);
-    }, []);
+    const refreshSessions = useCallback(async () => {
+        if (isUserLoading) {
+            return;
+        }
+        if (!userToken) {
+            setSessions([]);
+            setCount(0);
+            setProfileViewed(hasViewedProfile());
+            setIsLoaded(true);
+            return;
+        }
+
+        setIsLoaded(false);
+
+        try {
+            const headers: any = {};
+            headers["X-Auth-Token"] = `Token ${userToken}`;
+            const apiKey = process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
+            if (apiKey) {
+                headers["Authorization"] = `Api-Key ${apiKey}`;
+            }
+
+            const response = await get('games/api/talents/me/', false, headers);
+            if (response) {
+                const gamesPlayedCount = typeof response.totalGamesPlayed === 'number'
+                    ? response.totalGamesPlayed
+                    : (Array.isArray(response.gamesPlayed)
+                        ? response.gamesPlayed.length
+                        : getPlayCountFromTalentsResponse(response));
+                setCount(gamesPlayedCount);
+
+                const mockSessions: GameSession[] = [];
+                if (Array.isArray(response.gamesPlayed)) {
+                    response.gamesPlayed.forEach((game: any) => {
+                        const unifiedSlug = unifiedSlugFromBESlug(game.gameSlug);
+                        mockSessions.push({
+                            id: game.gameSlug,
+                            gameSlug: unifiedSlug,
+                            timestamp: Date.now(),
+                            duration: game.totalPlaySeconds,
+                            completed: (game.totalPlays || 0) > 0,
+                        });
+                    });
+                }
+                setSessions(mockSessions);
+            }
+        } catch (error) {
+            console.error('[useGameSessions] Failed to fetch talents/me from backend:', error);
+        } finally {
+            setProfileViewed(hasViewedProfile());
+            setIsLoaded(true);
+        }
+    }, [userToken, isUserLoading]);
 
     useEffect(() => {
         refreshSessions();
-
-        // Optional: Listen for storage changes from other tabs
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'skillprint_game_sessions' || e.key === 'skillprint_profile_viewed') {
-                refreshSessions();
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        // Custom event for same-tab updates
-        window.addEventListener('skillprint_storage_update', refreshSessions);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('skillprint_storage_update', refreshSessions);
-        };
     }, [refreshSessions]);
 
     const addSession = useCallback((session: GameSession) => {
-        saveGameSession(session);
-        window.dispatchEvent(new Event('skillprint_storage_update'));
         refreshSessions();
     }, [refreshSessions]);
 
     const clearAll = useCallback(() => {
         clearGameSessions();
-        window.dispatchEvent(new Event('skillprint_storage_update'));
         refreshSessions();
     }, [refreshSessions]);
 
     const markViewed = useCallback(() => {
         markProfileAsViewed();
-        window.dispatchEvent(new Event('skillprint_storage_update'));
-        refreshSessions();
-    }, [refreshSessions]);
+        setProfileViewed(true);
+    }, []);
 
     return {
         sessions,

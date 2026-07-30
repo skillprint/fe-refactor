@@ -164,14 +164,18 @@ export function useBadges() {
                 s.id === local.id ||
                 s.badgeId === local.id ||
                 s.badge_id === local.id ||
-                (s.name && s.name.toLowerCase() === local.name.toLowerCase())
+                (s.name && s.name.toLowerCase() === local.name.toLowerCase()) ||
+                (s.animalName && s.animalName.toLowerCase() === local.name.toLowerCase())
             );
             if (serverItem) {
+                const isUnlocked = serverItem.unlocked ?? serverItem.earned ?? local.earned;
                 return {
                     ...local,
-                    earned: serverItem.earned ?? local.earned,
-                    date: serverItem.date || serverItem.earnedAt || serverItem.earned_at || local.date,
-                    progressCurrent: serverItem.progressCurrent ?? serverItem.progress_current ?? local.progressCurrent,
+                    earned: isUnlocked,
+                    date: serverItem.date || serverItem.earnedAt || serverItem.earned_at || (isUnlocked ? new Date().toISOString().split('T')[0] : local.date),
+                    progressCurrent: typeof serverItem.progress === 'number'
+                        ? Math.round(serverItem.progress * (local.progressTarget || 1))
+                        : (serverItem.progressCurrent ?? serverItem.progress_current ?? local.progressCurrent),
                     progressTarget: serverItem.progressTarget ?? serverItem.progress_target ?? local.progressTarget
                 };
             }
@@ -197,10 +201,10 @@ export function useBadges() {
             const response = await get('games/api/talents/me/', false, headers);
             console.log('[useBadges] talents/me response:', response);
 
-            // Handle potential array or results envelope
-            const serverData = Array.isArray(response)
-                ? response
-                : (response.results || response.talents || response.data || []);
+            // Handle unlocked and locked arrays in response
+            const serverData = response
+                ? [...(response.unlocked || []), ...(response.locked || [])]
+                : [];
 
             const merged = mergeBadgesWithServerData(serverData, INITIAL_MOCK_BADGES);
             setBadges(merged);

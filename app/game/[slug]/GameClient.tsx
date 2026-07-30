@@ -316,13 +316,15 @@ export default function GameClient({ slug }: GameClientProps) {
                 
                 try {
                     const response = await get('games/api/talents/me/', false, headers);
-                    const serverData = Array.isArray(response)
-                        ? response
-                        : (response.results || response.talents || response.data || []);
+                    const serverData = response
+                        ? [...(response.unlocked || []), ...(response.locked || [])]
+                        : [];
                     
                     serverData.forEach((item: any) => {
-                        const isEarned = item.earned ?? item.date ?? item.earnedAt ?? item.earned_at;
-                        const id = item.id || item.badgeId || item.badge_id || (item.name && item.name.toLowerCase().replace(/\s+/g, '-'));
+                        const isEarned = item.unlocked ?? item.earned ?? item.date ?? item.earnedAt ?? item.earned_at;
+                        const id = item.slug || item.id || item.badgeId || item.badge_id || 
+                                   (item.animalName && item.animalName.toLowerCase().replace(/\s+/g, '-')) ||
+                                   (item.name && item.name.toLowerCase().replace(/\s+/g, '-'));
                         if (isEarned && id) {
                             earnedIds.push(id);
                         }

@@ -175,12 +175,13 @@ export function useLegacyBadges() {
         return local.map(item => {
             const serverItem = serverData.find((s: any) =>
                 s.slug === item.slug ||
-                (s.name && s.name.toLowerCase() === item.name.toLowerCase())
+                (s.name && s.name.toLowerCase() === item.name.toLowerCase()) ||
+                (s.animalName && s.animalName.toLowerCase() === item.name.toLowerCase())
             );
             if (serverItem) {
                 return {
                     ...item,
-                    userAchievementId: serverItem.userAchievementId || serverItem.id || item.userAchievementId,
+                    userAchievementId: serverItem.userAchievementId || (serverItem.unlocked ? (serverItem.id || serverItem.number || 1) : undefined) || item.userAchievementId,
                     acknowledged: serverItem.acknowledged ?? item.acknowledged
                 };
             }
@@ -204,9 +205,10 @@ export function useLegacyBadges() {
             console.log('[useLegacyBadges] Fetching talents/me from BE...');
             const response = await get('games/api/talents/me/', false, headers);
 
-            const serverData = Array.isArray(response)
-                ? response
-                : (response.results || response.talents || response.data || []);
+            // Handle unlocked and locked arrays in response
+            const serverData = response
+                ? [...(response.unlocked || []), ...(response.locked || [])]
+                : [];
 
             const merged = mergeWithServerData(serverData, LEGACY_BADGES_METADATA);
             setAchievements(merged);

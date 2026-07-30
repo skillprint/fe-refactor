@@ -8,59 +8,46 @@ export interface GameSession {
     metadata?: Record<string, any>;
 }
 
+/**
+ * Computes the total session plays from the backend talents/me response.
+ */
+export const getPlayCountFromTalentsResponse = (response: any): number => {
+    if (!response || !Array.isArray(response.gamesPlayed)) {
+        return 0;
+    }
+    return response.gamesPlayed.reduce((sum: number, game: any) => sum + (game.totalPlays || 0), 0);
+};
+
 const STORAGE_KEY = 'skillprint_game_sessions';
 
 /**
- * Retrieves all game sessions from local storage.
+ * Retrieves all game sessions. FE no longer tracks sessions in local storage.
  */
 export const getGameSessions = (): GameSession[] => {
-    if (typeof window === 'undefined') return [];
-
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    if (!storedData) return [];
-
-    try {
-        return JSON.parse(storedData);
-    } catch (error) {
-        console.error('Failed to parse game sessions from localStorage:', error);
-        return [];
-    }
+    return [];
 };
 
 /**
- * Saves a new game session or updates an existing one.
+ * Saves a new game session. FE no longer tracks game sessions in local storage.
  */
 export const saveGameSession = (session: GameSession): void => {
-    if (typeof window === 'undefined') return;
-
-    const sessions = getGameSessions();
-    const existingIndex = sessions.findIndex(s => s.id === session.id);
-
-    if (existingIndex > -1) {
-        sessions[existingIndex] = session;
-    } else {
-        sessions.push(session);
-    }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-    window.dispatchEvent(new Event('skillprint_storage_update'));
+    // No-op. Backend is the source of truth.
 };
 
 /**
- * Returns the total number of games played.
+ * Returns the total number of games played locally. Deprecated in favor of BE talents/me count.
  */
 export const getGamesPlayedCount = (): number => {
-    return getGameSessions().length;
+    return 0;
 };
 
 /**
- * Clears all game sessions (utility for testing/resetting).
+ * Clears all game sessions.
  */
 export const clearGameSessions = (): void => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(PROFILE_VIEWED_KEY);
-    window.dispatchEvent(new Event('skillprint_storage_update'));
 };
 
 const PROFILE_VIEWED_KEY = 'skillprint_profile_viewed';
