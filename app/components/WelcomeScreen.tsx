@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
@@ -20,6 +20,15 @@ export function WelcomeScreen() {
     const [orgPassword, setOrgPassword] = useState('');
     const [orgError, setOrgError] = useState('');
     const [isLoggingInOrg, setIsLoggingInOrg] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('org') === 'true') {
+                setIsOrgLoginVisible(true);
+            }
+        }
+    }, []);
 
     const { linkedInLogin } = useLinkedIn({
         clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || 'dummy-client-id',
@@ -251,15 +260,8 @@ export function WelcomeScreen() {
                                 </div> */}
                             </div>
 
-                            <div className="mt-4 pt-4 border-t border-border">
-                                {!isOrgLoginVisible ? (
-                                    <button
-                                        onClick={() => setIsOrgLoginVisible(true)}
-                                        className="w-full text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition"
-                                    >
-                                        Organization / Partner Login →
-                                    </button>
-                                ) : (
+                            {isOrgLoginVisible && (
+                                <div className="mt-4 pt-4 border-t border-border">
                                     <form onSubmit={handleOrgLogin} className="flex flex-col gap-3 animate-fade-in">
                                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Organization Portal</h3>
                                         {orgError && (
@@ -300,8 +302,8 @@ export function WelcomeScreen() {
                                             </button>
                                         </div>
                                     </form>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                         </div>
                     )}

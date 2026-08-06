@@ -5,7 +5,7 @@ import { Badge } from '../types';
 import { useUserSession } from '../../../hooks/useUserSession';
 import { get } from '../../../api/api';
 
-const INITIAL_MOCK_BADGES: Badge[] = [
+export const INITIAL_MOCK_BADGES: Badge[] = [
     {
         id: 'first-steps',
         name: 'First Steps',

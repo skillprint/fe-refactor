@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import FTUECarousel from "./components/FTUECarousel";
+import BadgeNavigationListener from "./components/BadgeNavigationListener";
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
@@ -47,6 +48,7 @@ export default function RootLayout({
               <AuthGuard>
                 <Suspense fallback={null}>
                   <FTUECarousel />
+                  <BadgeNavigationListener />
                 </Suspense>
                 <Toaster position="top-center" />
                 {children}
