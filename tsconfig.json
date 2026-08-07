@@ -19,9 +19,14 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*", "./components/skillprint-fe-components/src/*"],
+      "@skillprint/components": ["./components/skillprint-fe-components/src"],
+      "@skillprint/components/*": ["./components/skillprint-fe-components/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "public/lib/skillprint-js-sdk/main-manager.js", "public/lib/skillprint-js-sdk/api-client.js", "public/lib/skillprint-js-sdk/api-models.js", "public/lib/skillprint-js-sdk/config.js", "public/lib/skillprint-js-sdk/constants.js"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "components/skillprint-fe-components"
+  ]
 }

@@ -1,0 +1,3 @@
+[submodule "components/skillprint-fe-components"]
+	path = components/skillprint-fe-components
+	url = https://github.com/skillprint/skillprint-fe-components.git
