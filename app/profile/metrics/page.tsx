@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useMetricsData, Timeframe, MetricsFilter } from '../../hooks/useMetricsData';
 import TopNav from '../../components/TopNav';
 import ProgressBanner from '../../components/ProgressBanner';
@@ -9,7 +9,7 @@ import MetricsChart from '../../components/Metrics/MetricsChart';
 import MultiSelectFilter from '../../components/Metrics/MultiSelectFilter';
 import BuckyballLoading from '../../components/BuckyballLoading';
 
-export default function MetricsPage() {
+function MetricsContent() {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [timeframe, setTimeframe] = useState<Timeframe>('Week');
     const [filters, setFilters] = useState<MetricsFilter[]>([]);
@@ -129,5 +129,17 @@ export default function MetricsPage() {
                 </main>
             </div>
         </div>
+    );
+}
+
+export default function MetricsPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen w-full items-center justify-center bg-background">
+                <BuckyballLoading />
+            </div>
+        }>
+            <MetricsContent />
+        </Suspense>
     );
 }
