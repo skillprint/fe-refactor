@@ -108,9 +108,9 @@ export default function PortalHomeDesignSystemPage() {
   const PageFooter = (
     <>
       <nav aria-label="Portal utility links">
-        <a href="#top" className="text-muted hover:text-white font-sm">Help</a>
+        <a href="#top">Help</a>
       </nav>
-      <span className="portal-foot__legal text-muted font-sm">© 2026 Skillprint</span>
+      <span className="portal-foot__legal">© 2026 Skillprint</span>
     </>
   );
 
