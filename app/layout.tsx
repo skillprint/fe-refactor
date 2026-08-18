@@ -44,6 +44,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-surface="dark" data-brand-family="developer" suppressHydrationWarning>
+      <head>
+        <link rel="stylesheet" href="/assets/design-system/skillprint.css" />
+      </head>
       <body
         className={`${geist.variable} ${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
         suppressHydrationWarning
