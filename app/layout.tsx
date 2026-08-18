@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Geist_Mono, Geist, Inter } from "next/font/google";
 import "./globals.css";
+import "@/components/design-system/skillprint.css";
 import FTUECarousel from "./components/FTUECarousel";
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
