@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Horizontal Stripes — Panel Navy</title>
+  <desc>Skillprint background — Pattern 01 Horizontal Stripes, panel-navy-800 / panel-navy-900</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#2b3159"/>
+  <g clip-path="url(#c)">
+    <rect x="0.00" y="0.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="15.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="30.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="45.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="60.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="75.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="90.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="105.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="120.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="135.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="150.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="165.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="180.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="195.00" width="380.00" height="7.50" fill="#212549"/>
+    <rect x="0.00" y="210.00" width="380.00" height="7.50" fill="#212549"/>
+  </g>
+</svg>

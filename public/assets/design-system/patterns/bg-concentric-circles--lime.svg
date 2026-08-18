@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Concentric Circles — Lime</title>
+  <desc>Skillprint background — Pattern 03 Concentric Circles, core-lime-500 / core-lime-600</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#c1ee16"/>
+  <g clip-path="url(#c)">
+    <circle cx="190.00" cy="105.00" r="459.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="442.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="425.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="408.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="391.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="374.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="357.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="340.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="323.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="306.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="289.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="272.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="255.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="238.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="221.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="204.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="187.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="170.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="153.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="136.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="119.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="102.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="85.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="68.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="51.00" fill="#a7ce18"/>
+    <circle cx="190.00" cy="105.00" r="34.00" fill="#c1ee16"/>
+    <circle cx="190.00" cy="105.00" r="17.00" fill="#a7ce18"/>
+  </g>
+</svg>

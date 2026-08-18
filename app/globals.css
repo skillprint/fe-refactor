@@ -1,207 +1,395 @@
+@import "../public/assets/design-system/skillprint.css";
 @import "tailwindcss";
 
 :root {
-  /* Skillprint Theme (Light) - Default */
-  --background: #f5f5f7;
-  --foreground: #1d1d1f;
-  
-  --card: #ffffff;
-  --card-foreground: #1d1d1f;
-  
-  --popover: #ffffff;
-  --popover-foreground: #1d1d1f;
-  
-  --primary: #543DEB;
+  /* ==========================================================================
+     01 · SKILLPRINT TYPOGRAPHY TOKENS
+     ========================================================================== */
+  --skillprint-font-ui: var(--font-inter), "Geist", system-ui, sans-serif;
+  --skillprint-font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --skillprint-font-display: var(--font-outfit), "Recoleta", Georgia, serif;
+
+  --text-xxs-font-size: 10px;
+  --text-xxs-line-height: 16px;
+  --text-xs-font-size: 12px;
+  --text-xs-line-height: 18px;
+  --text-sm-font-size: 14px;
+  --text-sm-line-height: 20px;
+  --text-md-font-size: 16px;
+  --text-md-line-height: 24px;
+  --text-lg-font-size: 18px;
+  --text-lg-line-height: 28px;
+  --text-xl-font-size: 20px;
+  --text-xl-line-height: 30px;
+  --display-xs-font-size: 24px;
+  --display-xs-line-height: 32px;
+  --display-sm-font-size: 30px;
+  --display-sm-line-height: 38px;
+  --display-md-font-size: 36px;
+  --display-md-line-height: 44px;
+  --display-lg-font-size: 48px;
+  --display-lg-line-height: 60px;
+  --display-xl-font-size: 60px;
+  --display-xl-line-height: 72px;
+  --display-2xl-font-size: 72px;
+  --display-2xl-line-height: 90px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ==========================================================================
+     02 · SKILLPRINT COLOR PALETTE RAMPS
+     ========================================================================== */
+  /* Deep Navy */
+  --deep-navy-25: #f8f9fc;
+  --deep-navy-50: #f0f2f8;
+  --deep-navy-100: #e1e5f0;
+  --deep-navy-200: #c5cbdb;
+  --deep-navy-300: #a1aac1;
+  --deep-navy-400: #7c87a4;
+  --deep-navy-500: #5b6788;
+  --deep-navy-600: #414d70;
+  --deep-navy-700: #2e395b;
+  --deep-navy-800: #1d2646;
+  --deep-navy-900: #090d27;
+  --deep-navy-950: #040616;
+
+  /* Panel Navy */
+  --panel-navy-25: #f7f7fb;
+  --panel-navy-50: #eceef5;
+  --panel-navy-100: #d9dcea;
+  --panel-navy-200: #bcc0d5;
+  --panel-navy-300: #9da3c0;
+  --panel-navy-400: #7c83a7;
+  --panel-navy-500: #5f678d;
+  --panel-navy-600: #4a527a;
+  --panel-navy-700: #39416a;
+  --panel-navy-800: #2b3159;
+  --panel-navy-900: #212549;
+  --panel-navy-950: #171a38;
+
+  /* Geistface Grey */
+  --geistface-grey-25: #fcfcfd;
+  --geistface-grey-50: #f7f8fa;
+  --geistface-grey-100: #eceef2;
+  --geistface-grey-200: #e3e5eb;
+  --geistface-grey-300: #c9cdd6;
+  --geistface-grey-400: #aab0bd;
+  --geistface-grey-500: #8f96a7;
+  --geistface-grey-600: #747c90;
+  --geistface-grey-700: #5c647b;
+  --geistface-grey-800: #444b61;
+  --geistface-grey-900: #30364b;
+  --geistface-grey-950: #1d2236;
+
+  /* Core Lime */
+  --core-lime-25: #f6faf3;
+  --core-lime-50: #f4f9ea;
+  --core-lime-100: #eff8d7;
+  --core-lime-200: #e8f6b7;
+  --core-lime-300: #def48e;
+  --core-lime-400: #d0f156;
+  --core-lime-500: #c1ee16;
+  --core-lime-600: #a7ce18;
+  --core-lime-700: #8daf1b;
+  --core-lime-800: #708b1d;
+  --core-lime-900: #4f6221;
+  --core-lime-950: #313e23;
+
+  /* Core Green */
+  --core-green-25: #eef9f8;
+  --core-green-50: #e5f8f3;
+  --core-green-100: #d2f6eb;
+  --core-green-200: #b0f2db;
+  --core-green-300: #85eec8;
+  --core-green-400: #4ce7ae;
+  --core-green-500: #09e08f;
+  --core-green-600: #09c280;
+  --core-green-700: #09a572;
+  --core-green-800: #098361;
+  --core-green-900: #095d4f;
+  --core-green-950: #093b3e;
+
+  /* Personality Mint */
+  --personality-mint-25: #f2fafb;
+  --personality-mint-50: #ebfafa;
+  --personality-mint-100: #dffaf8;
+  --personality-mint-200: #c9fbf4;
+  --personality-mint-300: #adfbef;
+  --personality-mint-400: #87fce9;
+  --personality-mint-500: #5bfde1;
+  --personality-mint-600: #50dbc7;
+  --personality-mint-700: #44baad;
+  --personality-mint-800: #37938f;
+  --personality-mint-900: #28686e;
+  --personality-mint-950: #1b4250;
+
+  /* Personality Blue */
+  --personality-blue-25: #f0f7fc;
+  --personality-blue-50: #e7f5fc;
+  --personality-blue-100: #d7f0fc;
+  --personality-blue-200: #b9e7fd;
+  --personality-blue-300: #94dbfd;
+  --personality-blue-400: #62ccfe;
+  --personality-blue-500: #27baff;
+  --personality-blue-600: #23a2e1;
+  --personality-blue-700: #1f8ac3;
+  --personality-blue-800: #1a6ea0;
+  --personality-blue-900: #144f79;
+  --personality-blue-950: #103357;
+
+  /* Mindset Violet */
+  --mindset-violet-25: #f2f2fb;
+  --mindset-violet-50: #ebebfb;
+  --mindset-violet-100: #dedcf9;
+  --mindset-violet-200: #c8c2f7;
+  --mindset-violet-300: #aba0f4;
+  --mindset-violet-400: #8473f0;
+  --mindset-violet-500: #573eeb;
+  --mindset-violet-600: #4c37d0;
+  --mindset-violet-700: #4130b4;
+  --mindset-violet-800: #352895;
+  --mindset-violet-900: #272071;
+  --mindset-violet-950: #1a1852;
+
+  /* Mindset Magenta */
+  --mindset-magenta-25: #f5f3fa;
+  --mindset-magenta-50: #f2ecf9;
+  --mindset-magenta-100: #ecdef6;
+  --mindset-magenta-200: #e2c6f0;
+  --mindset-magenta-300: #d4a7e9;
+  --mindset-magenta-400: #c37de0;
+  --mindset-magenta-500: #ae4dd5;
+  --mindset-magenta-600: #9744bd;
+  --mindset-magenta-700: #803ba4;
+  --mindset-magenta-800: #653188;
+  --mindset-magenta-900: #482569;
+  --mindset-magenta-950: #2d1b4d;
+
+  /* Skills Pink */
+  --skills-pink-25: #f8f3f8;
+  --skills-pink-50: #f9ecf3;
+  --skills-pink-100: #f9dfea;
+  --skills-pink-200: #fac7db;
+  --skills-pink-300: #fba9c7;
+  --skills-pink-400: #fd80ac;
+  --skills-pink-500: #ff518d;
+  --skills-pink-600: #dd477f;
+  --skills-pink-700: #ba3e70;
+  --skills-pink-800: #933360;
+  --skills-pink-900: #66274e;
+  --skills-pink-950: #3f1c3d;
+
+  /* Skills Orange */
+  --skills-orange-25: #f8f7f3;
+  --skills-orange-50: #f9f4ea;
+  --skills-orange-100: #f9eed8;
+  --skills-orange-200: #fae4b8;
+  --skills-orange-300: #fbd790;
+  --skills-orange-400: #fdc65a;
+  --skills-orange-500: #ffb21b;
+  --skills-orange-600: #dd9b1d;
+  --skills-orange-700: #ba841e;
+  --skills-orange-800: #936920;
+  --skills-orange-900: #664c22;
+  --skills-orange-950: #3f3124;
+
+  /* ==========================================================================
+     03 · SPACING PRIMITIVES
+     ========================================================================== */
+  --space-0: 0px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-22: 22px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-30: 30px;
+  --space-32: 32px;
+  --space-36: 36px;
+  --space-40: 40px;
+  --space-42: 42px;
+  --space-44: 44px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-72: 72px;
+  --space-80: 80px;
+  --space-88: 88px;
+  --space-96: 96px;
+  --space-128: 128px;
+
+  /* ==========================================================================
+     04 · RADIUS PRIMITIVES
+     ========================================================================== */
+  --radius-none: 0px;
+  --radius-xxs: 2px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-4xl: 24px;
+  --radius-full: 9999px;
+
+  /* ==========================================================================
+     05 · SHADOWS & BLUR
+     ========================================================================== */
+  --shadow-xs: 0 1px 2px color-mix(in srgb, var(--deep-navy-950) 18%, transparent);
+  --shadow-sm: 0 4px 12px color-mix(in srgb, var(--deep-navy-950) 16%, transparent);
+  --shadow-md: 0 12px 32px color-mix(in srgb, var(--deep-navy-950) 20%, transparent);
+  --shadow-xl: 0 24px 70px color-mix(in srgb, var(--deep-navy-950) 24%, transparent);
+
+  /* ==========================================================================
+     06 · SURFACE & THEME ALIASES (DARK SURFACE BY DEFAULT)
+     ========================================================================== */
+  --surface-bg: var(--deep-navy-950);
+  --surface-panel: var(--panel-navy-950);
+  --surface-box: var(--panel-navy-900);
+  --surface-raised: var(--panel-navy-800);
+  --surface-border: color-mix(in srgb, var(--deep-navy-25) 10%, transparent);
+  --surface-border-hover: color-mix(in srgb, var(--deep-navy-25) 20%, transparent);
+  --text-default: var(--geistface-grey-100);
+  --text-muted: var(--geistface-grey-400);
+  --text-inverse: var(--deep-navy-950);
+
+  /* Compatibility theme aliases */
+  --background: var(--surface-bg);
+  --foreground: var(--text-default);
+  --card: var(--surface-panel);
+  --card-foreground: var(--text-default);
+  --popover: var(--surface-panel);
+  --popover-foreground: var(--text-default);
+  --primary: var(--mindset-violet-500);
   --primary-foreground: #ffffff;
-  
-  --secondary: #05DF91;
+  --secondary: var(--core-green-500);
   --secondary-foreground: #000000;
-  
-  --muted: #e5e5ea;
-  --muted-foreground: #86868b;
-  
-  --accent: #26B8FF;
-  --accent-foreground: #000000;
-  
-  --destructive: #FF4F8E;
-  --destructive-foreground: #ffffff;
-  
-  --border: #d2d2d7;
-  --input: #d2d2d7;
-  --ring: #05DF91;
-  
-  --radius: 1rem;
-
-  /* Font Override */
-  --font-sans: var(--font-inter);
-}
-
-[data-theme="dark"] {
-  /* Apple/Calm Dark Theme */
-  --background: #000000;
-  --foreground: #f5f5f7;
-  
-  --card: #1c1c1e;
-  --card-foreground: #f5f5f7;
-  
-  --popover: #1c1c1e;
-  --popover-foreground: #f5f5f7;
-  
-  --primary: #0a84ff;
-  --primary-foreground: #ffffff;
-  
-  --secondary: #2c2c2e;
-  --secondary-foreground: #f5f5f7;
-  
-  --muted: #2c2c2e;
-  --muted-foreground: #86868b;
-  
-  --accent: #0a84ff;
+  --muted: var(--panel-navy-900);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--personality-blue-500);
   --accent-foreground: #ffffff;
-  
-  --destructive: #ff453a;
+  --destructive: var(--skills-pink-500);
   --destructive-foreground: #ffffff;
-  
-  --border: #38383a;
-  --input: #38383a;
-  --ring: #0a84ff;
+  --border: var(--surface-border);
+  --input: var(--surface-border);
+  --ring: var(--core-green-500);
+  --radius: var(--radius-2xl);
+
+  --font-sans: var(--skillprint-font-ui);
 }
 
-[data-theme="midnight"] {
-  /* Midnight Theme */
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  
-  --popover: #1e293b;
-  --popover-foreground: #f1f5f9;
-  
-  --primary: #818cf8;
-  --primary-foreground: #ffffff;
-  
-  --secondary: #334155;
-  --secondary-foreground: #f1f5f9;
-  
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  
-  --accent: #38bdf8;
-  --accent-foreground: #ffffff;
-  
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  
-  --border: #334155;
-  --input: #334155;
-  --ring: #818cf8;
+/* Light Surface Theme Support */
+[data-surface="light"], [data-theme="light"] {
+  --surface-bg: var(--geistface-grey-25);
+  --surface-panel: #ffffff;
+  --surface-box: var(--geistface-grey-50);
+  --surface-raised: var(--geistface-grey-100);
+  --surface-border: var(--geistface-grey-200);
+  --surface-border-hover: var(--geistface-grey-300);
+  --text-default: var(--deep-navy-900);
+  --text-muted: var(--geistface-grey-600);
+  --text-inverse: #ffffff;
+
+  --background: var(--surface-bg);
+  --foreground: var(--text-default);
+  --card: var(--surface-panel);
+  --card-foreground: var(--text-default);
+  --border: var(--surface-border);
 }
 
-[data-theme="light"] {
-  /* Apple/Calm Light Theme */
-  --background: #f5f5f7;
-  --foreground: #1d1d1f;
-  
-  --card: #ffffff;
-  --card-foreground: #1d1d1f;
-  
-  --popover: #ffffff;
-  --popover-foreground: #1d1d1f;
-  
-  --primary: #007aff;
-  --primary-foreground: #ffffff;
-  
-  --secondary: #e5e5ea;
-  --secondary-foreground: #1d1d1f;
-  
-  --muted: #e5e5ea;
-  --muted-foreground: #86868b;
-  
-  --accent: #007aff;
-  --accent-foreground: #ffffff;
-  
-  --destructive: #ff3b30;
-  --destructive-foreground: #ffffff;
-  
-  --border: #d2d2d7;
-  --input: #d2d2d7;
-  --ring: #007aff;
+/* Developer vs Customer Surface Styling */
+[data-brand-family="developer"] {
+  --brand-primary: var(--mindset-violet-500);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-  
-  --font-sans: var(--font-outfit);
-  --font-mono: var(--font-geist-mono);
+[data-brand-family="customer"] {
+  --brand-primary: var(--core-green-500);
+}
 
-  --animate-subtle-fade: subtle-fade 3s ease-out forwards;
-  @keyframes subtle-fade {
-    0% { color: #999; }
-    100% { color: #333; }
-  }
+/* ==========================================================================
+   07 · TAILWIND CSS V4 THEME CONFIGURATION
+   ========================================================================== */
+@theme {
+  --font-ui: var(--skillprint-font-ui);
+  --font-mono: var(--skillprint-font-mono);
+  --font-display: var(--skillprint-font-display);
 
-  --animate-wave-fast: wave 12s linear infinite;
-  --animate-wave: wave 18s linear infinite;
-  --animate-wave-slow: wave 25s linear infinite;
-  --animate-wave-slower: wave 35s linear infinite;
-  
-  --animate-wave-reverse: wave-reverse 22s linear infinite;
-  
-  @keyframes wave {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-50%); }
-  }
-  
-  @keyframes wave-reverse {
-    0% { transform: translateX(-50%); }
-    100% { transform: translateX(0%); }
-  }
+  /* Deep Navy */
+  --color-deep-navy-25: var(--deep-navy-25);
+  --color-deep-navy-50: var(--deep-navy-50);
+  --color-deep-navy-100: var(--deep-navy-100);
+  --color-deep-navy-200: var(--deep-navy-200);
+  --color-deep-navy-300: var(--deep-navy-300);
+  --color-deep-navy-400: var(--deep-navy-400);
+  --color-deep-navy-500: var(--deep-navy-500);
+  --color-deep-navy-600: var(--deep-navy-600);
+  --color-deep-navy-700: var(--deep-navy-700);
+  --color-deep-navy-800: var(--deep-navy-800);
+  --color-deep-navy-900: var(--deep-navy-900);
+  --color-deep-navy-950: var(--deep-navy-950);
+
+  /* Panel Navy */
+  --color-panel-navy-25: var(--panel-navy-25);
+  --color-panel-navy-50: var(--panel-navy-50);
+  --color-panel-navy-100: var(--panel-navy-100);
+  --color-panel-navy-200: var(--panel-navy-200);
+  --color-panel-navy-300: var(--panel-navy-300);
+  --color-panel-navy-400: var(--panel-navy-400);
+  --color-panel-navy-500: var(--panel-navy-500);
+  --color-panel-navy-600: var(--panel-navy-600);
+  --color-panel-navy-700: var(--panel-navy-700);
+  --color-panel-navy-800: var(--panel-navy-800);
+  --color-panel-navy-900: var(--panel-navy-900);
+  --color-panel-navy-950: var(--panel-navy-950);
+
+  /* Core Lime */
+  --color-core-lime-500: var(--core-lime-500);
+  --color-core-lime-400: var(--core-lime-400);
+  --color-core-lime-600: var(--core-lime-600);
+
+  /* Core Green */
+  --color-core-green-500: var(--core-green-500);
+  --color-core-green-400: var(--core-green-400);
+  --color-core-green-600: var(--core-green-600);
+
+  /* Personality Mint & Blue */
+  --color-personality-mint-500: var(--personality-mint-500);
+  --color-personality-blue-500: var(--personality-blue-500);
+
+  /* Mindset Violet & Magenta */
+  --color-mindset-violet-400: var(--mindset-violet-400);
+  --color-mindset-violet-500: var(--mindset-violet-500);
+  --color-mindset-violet-600: var(--mindset-violet-600);
+  --color-mindset-magenta-500: var(--mindset-magenta-500);
+
+  /* Skills Pink & Orange */
+  --color-skills-pink-500: var(--skills-pink-500);
+  --color-skills-orange-500: var(--skills-orange-500);
+
+  /* Surfaces */
+  --color-surface-bg: var(--surface-bg);
+  --color-surface-panel: var(--surface-panel);
+  --color-surface-box: var(--surface-box);
+  --color-surface-border: var(--surface-border);
+
+  /* Radii */
+  --radius-card: var(--radius-2xl);
+  --radius-panel: var(--radius-3xl);
+  --radius-control: var(--radius-md);
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
-}
-
-@utility no-scrollbar {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  background-color: var(--surface-bg);
+  color: var(--text-default);
+  font-family: var(--skillprint-font-ui);
 }

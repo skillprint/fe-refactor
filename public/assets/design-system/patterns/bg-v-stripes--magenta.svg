@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Vertical Stripes — Magenta</title>
+  <desc>Skillprint background — Pattern 02 Vertical Stripes, mindset-magenta-500 / mindset-magenta-600</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#ae4dd5"/>
+  <g clip-path="url(#c)">
+    <rect x="0.00" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="27.14" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="54.29" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="81.43" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="108.57" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="135.71" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="162.86" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="190.00" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="217.14" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="244.29" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="271.43" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="298.57" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="325.71" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="352.86" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+    <rect x="380.00" y="0.00" width="13.57" height="210.00" fill="#9744bd"/>
+  </g>
+</svg>

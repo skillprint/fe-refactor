@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Checkerboard — Panel Navy</title>
+  <desc>Skillprint background — Pattern 08 Checkerboard, panel-navy-800 / panel-navy-900</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#2b3159"/>
+  <g clip-path="url(#c)">
+    <rect x="38.00" y="0.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="114.00" y="0.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="190.00" y="0.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="266.00" y="0.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="342.00" y="0.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="0.00" y="38.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="76.00" y="38.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="152.00" y="38.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="228.00" y="38.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="304.00" y="38.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="38.00" y="76.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="114.00" y="76.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="190.00" y="76.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="266.00" y="76.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="342.00" y="76.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="0.00" y="114.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="76.00" y="114.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="152.00" y="114.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="228.00" y="114.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="304.00" y="114.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="38.00" y="152.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="114.00" y="152.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="190.00" y="152.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="266.00" y="152.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="342.00" y="152.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="0.00" y="190.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="76.00" y="190.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="152.00" y="190.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="228.00" y="190.00" width="38.00" height="38.00" fill="#212549"/>
+    <rect x="304.00" y="190.00" width="38.00" height="38.00" fill="#212549"/>
+  </g>
+</svg>

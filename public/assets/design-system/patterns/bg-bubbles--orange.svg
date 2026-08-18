@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Bubbles — Orange</title>
+  <desc>Skillprint background — Pattern 20 Bubbles, skills-orange-400 / skills-orange-500</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#fdc65a"/>
+  <g clip-path="url(#c)">
+    <circle cx="207.59" cy="75.40" r="4.84" fill="#ffb21b"/>
+    <circle cx="241.46" cy="1.02" r="8.06" fill="#ffb21b"/>
+    <circle cx="321.76" cy="51.96" r="2.87" fill="#ffb21b"/>
+    <circle cx="387.02" cy="98.23" r="4.81" fill="#ffb21b"/>
+    <circle cx="180.14" cy="139.32" r="10.11" fill="#ffb21b"/>
+    <circle cx="243.25" cy="187.74" r="4.08" fill="#ffb21b"/>
+    <circle cx="288.13" cy="145.58" r="7.35" fill="#ffb21b"/>
+    <circle cx="2.57" cy="188.94" r="5.40" fill="#ffb21b"/>
+    <circle cx="278.65" cy="194.07" r="6.91" fill="#ffb21b"/>
+    <circle cx="363.85" cy="79.49" r="9.03" fill="#ffb21b"/>
+    <circle cx="166.98" cy="211.99" r="9.80" fill="#ffb21b"/>
+    <circle cx="21.69" cy="14.68" r="10.48" fill="#ffb21b"/>
+    <circle cx="108.41" cy="106.74" r="8.26" fill="#ffb21b"/>
+    <circle cx="355.20" cy="148.44" r="7.89" fill="#ffb21b"/>
+    <circle cx="339.59" cy="227.61" r="10.92" fill="#ffb21b"/>
+    <circle cx="51.37" cy="192.09" r="8.66" fill="#ffb21b"/>
+    <circle cx="102.19" cy="0.95" r="7.80" fill="#ffb21b"/>
+    <circle cx="394.41" cy="3.23" r="10.26" fill="#ffb21b"/>
+    <circle cx="152.79" cy="19.22" r="9.80" fill="#ffb21b"/>
+    <circle cx="120.19" cy="197.56" r="9.07" fill="#ffb21b"/>
+    <circle cx="20.83" cy="127.94" r="5.48" fill="#ffb21b"/>
+    <circle cx="71.68" cy="84.65" r="3.03" fill="#ffb21b"/>
+    <circle cx="248.51" cy="127.63" r="7.33" fill="#ffb21b"/>
+    <circle cx="209.70" cy="-10.63" r="7.34" fill="#ffb21b"/>
+    <circle cx="116.40" cy="72.49" r="7.97" fill="#ffb21b"/>
+    <circle cx="137.66" cy="126.99" r="5.50" fill="#ffb21b"/>
+    <circle cx="140.91" cy="167.52" r="5.39" fill="#ffb21b"/>
+    <circle cx="217.07" cy="156.94" r="2.99" fill="#ffb21b"/>
+    <circle cx="79.04" cy="174.85" r="5.48" fill="#ffb21b"/>
+    <circle cx="25.82" cy="61.86" r="8.89" fill="#ffb21b"/>
+    <circle cx="323.64" cy="90.80" r="5.69" fill="#ffb21b"/>
+    <circle cx="39.43" cy="111.73" r="4.73" fill="#ffb21b"/>
+    <circle cx="311.52" cy="181.53" r="4.43" fill="#ffb21b"/>
+    <circle cx="102.35" cy="174.39" r="4.37" fill="#ffb21b"/>
+    <circle cx="313.82" cy="0.74" r="5.28" fill="#ffb21b"/>
+    <circle cx="285.77" cy="32.66" r="2.87" fill="#ffb21b"/>
+    <circle cx="304.42" cy="70.14" r="6.95" fill="#ffb21b"/>
+    <circle cx="203.73" cy="176.70" r="4.49" fill="#ffb21b"/>
+    <circle cx="19.96" cy="211.33" r="3.85" fill="#ffb21b"/>
+    <circle cx="122.18" cy="19.93" r="4.43" fill="#ffb21b"/>
+    <circle cx="241.09" cy="88.20" r="9.80" fill="#ffb21b"/>
+    <circle cx="160.53" cy="88.52" r="3.38" fill="#ffb21b"/>
+    <circle cx="325.47" cy="143.85" r="3.82" fill="#ffb21b"/>
+    <circle cx="62.63" cy="48.06" r="4.88" fill="#ffb21b"/>
+    <circle cx="148.47" cy="70.30" r="5.98" fill="#ffb21b"/>
+    <circle cx="265.41" cy="162.66" r="4.16" fill="#ffb21b"/>
+  </g>
+</svg>

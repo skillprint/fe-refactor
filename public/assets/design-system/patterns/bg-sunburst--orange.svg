@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Sunburst — Orange</title>
+  <desc>Skillprint background — Pattern 18 Sunburst, skills-orange-400 / skills-orange-500</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#fdc65a"/>
+  <g clip-path="url(#c)">
+    <polygon points="190.00,220.50 -418.00,220.50 -415.07,160.91" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 -406.32,101.89 -391.82,44.01" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 -371.72,-12.17 -346.21,-66.11" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 -315.53,-117.29 -279.99,-165.21" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 -239.92,-209.42 -195.71,-249.49" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 -147.79,-285.03 -96.61,-315.71" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 -42.67,-341.22 13.51,-361.32" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 71.39,-375.82 130.41,-384.57" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 190.00,-387.50 249.59,-384.57" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 308.61,-375.82 366.49,-361.32" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 422.67,-341.22 476.61,-315.71" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 527.79,-285.03 575.71,-249.49" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 619.92,-209.42 659.99,-165.21" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 695.53,-117.29 726.21,-66.11" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 751.72,-12.17 771.82,44.01" fill="#ffb21b"/>
+    <polygon points="190.00,220.50 786.32,101.89 795.07,160.91" fill="#ffb21b"/>
+  </g>
+</svg>

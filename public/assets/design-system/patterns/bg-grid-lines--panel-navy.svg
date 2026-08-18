@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Grid Lines — Panel Navy</title>
+  <desc>Skillprint background — Pattern 19 Grid Lines, panel-navy-800 / panel-navy-900</desc>
+  <defs><clipPath id="c"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#2b3159"/>
+  <g clip-path="url(#c)">
+    <rect x="-1.20" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="22.55" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="46.30" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="70.05" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="93.80" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="117.55" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="141.30" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="165.05" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="188.80" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="212.55" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="236.30" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="260.05" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="283.80" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="307.55" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="331.30" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="355.05" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="378.80" y="0.00" width="2.40" height="210.00" fill="#212549"/>
+    <rect x="0.00" y="-1.20" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="22.55" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="46.30" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="70.05" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="93.80" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="117.55" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="141.30" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="165.05" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="188.80" width="380.00" height="2.40" fill="#212549"/>
+    <rect x="0.00" y="212.55" width="380.00" height="2.40" fill="#212549"/>
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Geist_Mono, Inter } from "next/font/google";
+import { Outfit, Geist_Mono, Geist, Inter } from "next/font/google";
 import "./globals.css";
 import FTUECarousel from "./components/FTUECarousel";
 import { Toaster } from 'react-hot-toast';
@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard } from "./components/AuthGuard";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Suspense } from "react";
+
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -16,6 +17,12 @@ const outfit = Outfit({
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   display: "swap",
 });
@@ -36,9 +43,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-surface="dark" data-brand-family="developer" suppressHydrationWarning>
       <body
-        className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
+        className={`${geist.variable} ${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
         suppressHydrationWarning
       >
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id'}>
