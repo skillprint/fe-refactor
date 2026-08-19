@@ -361,7 +361,7 @@ export default function PortalGamesPage() {
         <PortalSidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          activePath="/games"
+          activePath="/design-system/games"
           theme={theme}
           onToggleTheme={toggleTheme}
         />
@@ -476,7 +476,7 @@ export default function PortalGamesPage() {
 
           {/* Games Grid */}
           {filteredGames.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="game-grid game-grid--portal grid grid-3" id="gameGrid">
               {filteredGames.map(game => (
                 <FullGameCard key={game.slug} {...game} />
               ))}

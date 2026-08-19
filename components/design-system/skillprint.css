@@ -33488,6 +33488,14 @@ html:is([data-surface="dark"], [data-theme="dark"]) > .page--portal {
   gap: var(--space-28);
 }
 
+.page--portal .portal-layout:not(:has(.portal-rail)),
+.page--portal-games .portal-layout {
+  display: block !important;
+  grid-template-columns: 1fr !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .page--portal .portal-layout__main {
   min-width: 0;
   display: grid;
