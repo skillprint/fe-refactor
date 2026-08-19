@@ -151,14 +151,14 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
         {/* COMBINED NAVIGATION SIDEBAR FOOTER (Profile, Settings, Theme, Screen Switcher) */}
         <div className="portal-sidebar__foot">
           <div className="sp-side-nav__group portal-sidebar__utilities">
-            <Link className="sp-side-nav__link" href="/profile" title="Profile">
+            <Link className="sp-side-nav__link" href="/design-system/profile" title="Profile">
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
                 <use href="/assets/design-system/icons/sprite.svg#ti-user"></use>
               </svg>
               <span className="sp-side-nav__label">Profile</span>
             </Link>
 
-            <Link className="sp-side-nav__link" href="/profile#settings" title="Settings">
+            <Link className="sp-side-nav__link" href="/design-system/profile#settings" title="Settings">
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
                 <use href="/assets/design-system/icons/sprite.svg#ti-settings"></use>
               </svg>
@@ -204,12 +204,12 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
                 <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between" href="/design-system/games">
                   <span>Games</span>
                 </Link>
-                <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between is-active" href="/design-system/skills">
+                <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between" href="/design-system/skills">
                   <span>Skills</span>
-                  <span className="sp-dropdown__selected-mark">✓</span>
                 </Link>
-                <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between" href="/profile">
+                <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between is-active" href="/design-system/profile">
                   <span>Profile</span>
+                  <span className="sp-dropdown__selected-mark">✓</span>
                 </Link>
               </div>
             )}
