@@ -51,7 +51,20 @@ export const FullGameCard: React.FC<FullGameCardProps> = ({
           )}
         </span>
         {mediaBadge && (
-          <span className="media-badge ui-badge position-absolute layout-inline-flex items-center radius-full font-xs leading-sm" data-status="recommended">
+          <span
+            className="media-badge ui-badge position-absolute layout-inline-flex items-center radius-full"
+            data-status={
+              mediaBadge.toLowerCase().includes('recommended')
+                ? 'recommended'
+                : mediaBadge.toLowerCase().includes('played')
+                ? 'played'
+                : mediaBadge.toLowerCase().includes('new')
+                ? 'new'
+                : mediaBadge.toLowerCase().includes('progress')
+                ? 'in-progress'
+                : 'recommended'
+            }
+          >
             {mediaBadge}
           </span>
         )}

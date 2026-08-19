@@ -34745,3 +34745,49 @@ html:is([data-surface="light"], [data-theme="light"]) .page--portal .portal-bran
 .page--portal .playbook-card .nextup-slot {
   border-radius: var(--radius-md, 8px);
 }
+
+/* --- Media Badge / Status Pill on Game Cards ----------------------------- */
+
+.page--portal .media-badge,
+.media-badge {
+  --badge-accent: #94a3b8;
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  left: auto !important;
+  min-height: 20px !important;
+  height: 20px !important;
+  padding: 0 8px !important;
+  border-radius: 9999px !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 35%, #1e293b) !important;
+  background: #0f172a !important; /* Panel Navy dark background */
+  box-shadow: none !important;
+  color: var(--badge-accent) !important;
+  font-size: 10px !important;
+  line-height: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  z-index: 4 !important;
+}
+
+.page--portal .media-badge[data-status="recommended"],
+.media-badge[data-status="recommended"] {
+  --badge-accent: #4ade80 !important; /* Green accent */
+}
+
+.page--portal .media-badge[data-status="new"],
+.media-badge[data-status="new"] {
+  --badge-accent: #f97316 !important; /* Orange accent */
+}
+
+.page--portal .media-badge[data-status="in-progress"],
+.media-badge[data-status="in-progress"] {
+  --badge-accent: #e879f9 !important; /* Magenta accent */
+}
+
+.page--portal .media-badge[data-status="played"],
+.media-badge[data-status="played"] {
+  --badge-accent: #94a3b8 !important; /* Muted slate accent */
+}
