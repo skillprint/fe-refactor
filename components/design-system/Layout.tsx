@@ -8,6 +8,7 @@ interface LayoutProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   theme?: 'dark' | 'light';
+  pageClass?: string;
   className?: string;
 }
 
@@ -19,13 +20,14 @@ export const Layout: React.FC<LayoutProps> = ({
   children,
   footer,
   theme = 'dark',
+  pageClass = 'page--portal-home',
   className = '',
 }) => {
   return (
     <div
-      className={`page page--portal page--portal-home portal-app ${theme} ${className}`}
+      className={`page page--portal ${pageClass} portal-app ${theme} ${className}`}
       data-portal-shell=""
-      data-skillprint-page="portal-home"
+      data-skillprint-page={pageClass.replace('page--', '')}
       data-theme={theme}
       data-surface={theme}
     >

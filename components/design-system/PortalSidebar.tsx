@@ -16,9 +16,9 @@ interface PortalSidebarProps {
 }
 
 const NAV_LINKS: NavLinkItem[] = [
-  { label: 'Home', href: '/design-system/home', icon: 'ti-home', isActive: true },
+  { label: 'Home', href: '/design-system/home', icon: 'ti-home' },
   { label: 'Games', href: '/games', icon: 'ti-gamepad' },
-  { label: 'Skills', href: '/skills', icon: 'ti-chart' },
+  { label: 'Skills', href: '/design-system/skills', icon: 'ti-chart' },
 ];
 
 export const PortalSidebar: React.FC<PortalSidebarProps> = ({
@@ -62,7 +62,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
         <nav className="portal-sidebar__scroll sp-side-nav__scroll" aria-label="Portal sections">
           <div className="sp-side-nav__group">
             {NAV_LINKS.map(link => {
-              const active = activePath === link.href || link.isActive;
+              const active = activePath === link.href;
               return (
                 <a
                   key={link.label}

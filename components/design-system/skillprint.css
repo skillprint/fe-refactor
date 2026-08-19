@@ -13257,7 +13257,8 @@ html[data-surface="light"] > .page--design-system .portal-library-embed {
 }
 
 .page--design-system .portal-library-embed .game-media,
-.page--portal-games .game-media {
+.page--portal-games .game-media,
+.page--portal-skills .game-media {
   aspect-ratio: 1.82/1;
   background: var(--surface-raised);
 }
@@ -13265,7 +13266,9 @@ html[data-surface="light"] > .page--design-system .portal-library-embed {
 .page--design-system .portal-library-embed .category-pill,
 .page--design-system .portal-library-embed .media-badge,
 .page--portal-games .category-pill,
-.page--portal-games .media-badge {
+.page--portal-games .media-badge,
+.page--portal-skills .category-pill,
+.page--portal-skills .media-badge {
   top: var(--space-14);
   z-index: 4;
   min-height: var(--space-28);
@@ -13276,67 +13279,81 @@ html[data-surface="light"] > .page--design-system .portal-library-embed {
 }
 
 .page--design-system .portal-library-embed .category-pill,
-.page--portal-games .category-pill {
+.page--portal-games .category-pill,
+.page--portal-skills .category-pill {
   left: var(--space-14);
 }
 
 .page--design-system .portal-library-embed .media-badge,
-.page--portal-games .media-badge {
+.page--portal-games .media-badge,
+.page--portal-skills .media-badge {
   right: var(--space-14);
 }
 
-.page--design-system .portal-library-embed .game-body, .page--portal-games .game-body {
+.page--design-system .portal-library-embed .game-body,
+.page--portal-games .game-body,
+.page--portal-skills .game-body {
   flex: 1;
   padding: var(--space-20);
 }
 
 .page--design-system .portal-library-embed .game-description,
-.page--portal-games .game-description {
+.page--portal-games .game-description,
+.page--portal-skills .game-description {
   min-height: calc(var(--space-22) * 3);
   margin: var(--space-8) 0 var(--space-16);
 }
 
 .page--design-system .portal-library-embed .trait-group,
-.page--portal-games .trait-group {
+.page--portal-games .trait-group,
+.page--portal-skills .trait-group {
   grid-template-columns: 82px 1fr;
 }
 
 .page--design-system .portal-library-embed .trait-group + .trait-group,
-.page--portal-games .trait-group + .trait-group {
+.page--portal-games .trait-group + .trait-group,
+.page--portal-skills .trait-group + .trait-group {
   margin-top: var(--space-12);
 }
 
 .page--design-system .portal-library-embed .trait-icon,
-.page--portal-games .trait-icon {
+.page--portal-games .trait-icon,
+.page--portal-skills .trait-icon {
   width: var(--space-16);
   height: var(--space-16);
   flex: 0 0 16px;
 }
 
 .page--design-system .portal-library-embed .trait-icon svg,
-.page--portal-games .trait-icon svg {
+.page--portal-games .trait-icon svg,
+.page--portal-skills .trait-icon svg {
   width: var(--space-14);
   height: var(--space-14);
   stroke-width: 2;
   --icon-stroke: var(--icon-stroke-14);
 }
 
-.page--design-system .portal-library-embed .mood-icon, .page--portal-games .mood-icon {
+.page--design-system .portal-library-embed .mood-icon,
+.page--portal-games .mood-icon,
+.page--portal-skills .mood-icon {
   color: var(--customer);
 }
 
 .page--design-system .portal-library-embed .cognition-icon,
-.page--portal-games .cognition-icon {
+.page--portal-games .cognition-icon,
+.page--portal-skills .cognition-icon {
   color: var(--cognition);
 }
 
 .page--design-system .portal-library-embed .card-footer,
-.page--portal-games .card-footer {
+.page--portal-games .card-footer,
+.page--portal-skills .card-footer {
   padding-top: var(--space-20);
 }
 
 .page--design-system .portal-library-embed .play-btn svg,
-.page--portal-games .play-btn svg {
+.page--portal-games .play-btn svg,
+.page--portal-skills .play-btn svg {
   fill: currentColor;
   stroke: none;
 }
@@ -26073,24 +26090,24 @@ html:has(> .page--portal-moods) {
    sheet already uses for .sp-icon--mood / --cognition / --personality, and the
    ink step goes far enough down the same ramp to be read as text (Lime 900 is
    6.8:1, Mint 900 6.5:1, Blue 800 5.4:1 on --surface-box). */
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal-skills {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal-skills {
   --skill-highlight: var(--core-green-800);
   --skill-on-accent: var(--white);
 }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal-skills [data-dimension="mood"] {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal-skills [data-dimension="mood"] {
   --skill-accent    : var(--core-lime-700);
   --skill-ink       : var(--core-lime-900);
   --skill-ink-hover : var(--core-lime-950);
 }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal-skills [data-dimension="cognition"] {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal-skills [data-dimension="cognition"] {
   --skill-accent    : var(--personality-mint-700);
   --skill-ink       : var(--personality-mint-900);
   --skill-ink-hover : var(--personality-mint-950);
 }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal-skills [data-dimension="personality"] {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal-skills [data-dimension="personality"] {
   --skill-accent    : var(--personality-blue-600);
   --skill-ink       : var(--personality-blue-800);
   --skill-ink-hover : var(--personality-blue-900);

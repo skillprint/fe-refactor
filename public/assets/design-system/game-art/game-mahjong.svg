@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Mahjong Deluxe</title>
+  <desc>Skillprint game card — checkerboard in mindset-violet-500/600, mahjong icon</desc>
+  <defs><clipPath id="clip-mahjong"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#573eeb"/>
+  <g clip-path="url(#clip-mahjong)">
+    <rect x="38.00" y="0.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="114.00" y="0.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="190.00" y="0.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="266.00" y="0.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="342.00" y="0.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="0.00" y="38.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="76.00" y="38.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="152.00" y="38.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="228.00" y="38.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="304.00" y="38.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="38.00" y="76.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="114.00" y="76.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="190.00" y="76.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="266.00" y="76.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="342.00" y="76.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="0.00" y="114.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="76.00" y="114.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="152.00" y="114.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="228.00" y="114.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="304.00" y="114.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="38.00" y="152.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="114.00" y="152.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="190.00" y="152.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="266.00" y="152.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="342.00" y="152.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="0.00" y="190.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="76.00" y="190.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="152.00" y="190.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="228.00" y="190.00" width="38.00" height="38.00" fill="#4c37d0"/>
+    <rect x="304.00" y="190.00" width="38.00" height="38.00" fill="#4c37d0"/>
+  </g>
+  <svg x="120" y="35" width="140" height="140" viewBox="0 0 512 512">
+<g><path d="m384 448h64v-64l-76.611-14.411z" fill="#09a572"/><path d="m448 0v384h-64l-256-320v-64z" fill="#d9dcea"/><path d="m448 0v384h-64l-96-120v-264z" fill="#9da3c0"/><path d="m384 448v64h-320v-64l160-11.3z" fill="#c1ee16"/><path d="m384 448v64h-160v-75.3z" fill="#09e08f"/><path d="m64 64h320v384h-320z" fill="#eceef2"/><path d="m224 64h160v384h-160z" fill="#d9dcea"/><path d="m297.31 183.59c-19.6-2.89-38.98-4.62-58.31-5.21v-57.88h-30v57.88c-19.33.59-38.71 2.32-58.31 5.21l-16.02 2.36 25.36 111.71 13.69-1.96c11.85-1.69 23.58-2.78 35.28-3.29v99.09h30v-99.09c11.7.51 23.43 1.6 35.28 3.29l13.69 1.96 25.36-111.71zm-88.31 78.78c-8.57.34-17.16.98-25.78 1.91l-12.07-53.12c12.68-1.44 25.27-2.36 37.85-2.77zm55.78 1.91c-8.62-.93-17.21-1.57-25.78-1.91v-53.98c12.58.41 25.17 1.33 37.85 2.77z" fill="#444b61"/><path d="m297.31 183.59c-19.6-2.89-38.98-4.62-58.31-5.21v-57.88h-15v271h15v-99.09c11.7.51 23.43 1.6 35.28 3.29l13.69 1.96 25.36-111.71zm-32.53 80.69c-8.62-.93-17.21-1.57-25.78-1.91v-53.98c12.58.41 25.17 1.33 37.85 2.77z" fill="#1d2236"/></g>
+  </svg>
+</svg>
