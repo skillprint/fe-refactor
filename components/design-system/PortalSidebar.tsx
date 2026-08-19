@@ -19,7 +19,7 @@ interface PortalSidebarProps {
 
 const NAV_LINKS: NavLinkItem[] = [
   { label: 'Home', href: '/design-system/home', iconId: 'ti-home' },
-  { label: 'Games', href: '/games', iconId: 'ti-gamepad' },
+  { label: 'Games', href: '/design-system/games', iconId: 'ti-gamepad' },
   {
     label: 'Skills',
     href: '/design-system/skills',
@@ -201,7 +201,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
                 <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between" href="/design-system/home">
                   <span>Home</span>
                 </Link>
-                <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between" href="/games">
+                <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between" href="/design-system/games">
                   <span>Games</span>
                 </Link>
                 <Link className="button button--tertiary button--sm sp-dropdown__item flex items-center justify-between is-active" href="/design-system/skills">
