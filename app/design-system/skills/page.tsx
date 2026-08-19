@@ -583,15 +583,8 @@ export default function PortalSkillsPage() {
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           activePath="/design-system/skills"
-        />
-      }
-      topNav={
-        <PortalTopNav
-          onMenuToggle={() => setSidebarOpen(prev => !prev)}
-          currentTheme={theme}
-          onThemeToggle={toggleTheme}
-          searchQuery={searchQuery}
-          onSearchChange={(e) => setSearchQuery(e.target.value)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       }
       header={PageHeader}

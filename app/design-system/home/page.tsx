@@ -117,14 +117,13 @@ export default function PortalHomeDesignSystemPage() {
   return (
     <Layout
       theme={theme}
-      sidebar={<PortalSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
-      topNav={
-        <PortalTopNav
-          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-          searchQuery={searchQuery}
-          onSearchChange={e => setSearchQuery(e.target.value)}
-          onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          currentTheme={theme}
+      sidebar={
+        <PortalSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          activePath="/design-system/home"
+          theme={theme}
+          onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         />
       }
       header={PageHeader}
