@@ -53,14 +53,14 @@ export const PlaybookCard: React.FC<PlaybookCardProps> = ({
 
         <div className="playbook-card__progress">
           <p className="playbook-card__count">{completedCount} of {totalCount} games</p>
-          <ol className="nextup-slots flex items-center gap-1.5 mt-1" aria-label={`${completedCount} of ${totalCount} played`}>
+          <ol className="nextup-slots" aria-label={`${completedCount} of ${totalCount} played`}>
             {Array.from({ length: totalCount }).map((_, idx) => (
               <li
                 key={idx}
-                className={`nextup-slot ${idx < completedCount ? '' : 'nextup-slot--empty'} w-6 h-6 rounded border border-slate-700 overflow-hidden flex items-center justify-center`}
+                className={`nextup-slot ${idx < completedCount ? '' : 'nextup-slot--empty'}`}
               >
                 {idx < completedCount ? (
-                  <img src={staticArt} alt="" className="w-full h-full object-cover" />
+                  <img src={staticArt} alt="" />
                 ) : null}
               </li>
             ))}
