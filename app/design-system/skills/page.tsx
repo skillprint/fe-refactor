@@ -8,7 +8,7 @@ import { PortalTopNav } from '@/components/design-system/PortalTopNav';
 import { SkillCard, SkillCardProps } from '@/components/design-system/SkillCard';
 import { SkillFeatureCard } from '@/components/design-system/SkillFeatureCard';
 import { FullGameCard, FullGameCardProps } from '@/components/design-system/FullGameCard';
-import { SkillBreakdownCard } from '@/components/design-system/SkillBreakdownCard';
+import { ThisWeekRailCard } from '@/components/design-system/ThisWeekRailCard';
 import { SkillGoalCard } from '@/components/design-system/SkillGoalCard';
 import { GameRail } from '@/components/design-system/GridSystem';
 
@@ -570,7 +570,7 @@ export default function PortalSkillsPage() {
 
   const PageRail = (
     <>
-      <SkillBreakdownCard />
+      <ThisWeekRailCard />
       <SkillGoalCard />
     </>
   );

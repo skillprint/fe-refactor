@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Layout } from '@/components/design-system/Layout';
 import { PortalSidebar } from '@/components/design-system/PortalSidebar';
 import { SkillGoalCard } from '@/components/design-system/SkillGoalCard';
-import { SkillBreakdownCard } from '@/components/design-system/SkillBreakdownCard';
+import { ThisWeekRailCard } from '@/components/design-system/ThisWeekRailCard';
 import { ProfileSkillBreakdown } from '@/components/design-system/ProfileSkillBreakdown';
 import { GameSessionsList } from '@/components/design-system/GameSessionsList';
 
@@ -96,7 +96,7 @@ export default function PortalProfilePage() {
       </article>
 
       {/* Rail Weekly Summary */}
-      <SkillBreakdownCard />
+      <ThisWeekRailCard />
 
       {/* Recent Sessions Rail Card */}
       <article className="rail-card sp-card p-5 bg-slate-900 border border-slate-800 rounded-xl space-y-4" id="recent-sessions">
@@ -156,7 +156,7 @@ export default function PortalProfilePage() {
     >
       <div className="space-y-12">
         {/* SECTION 1: ONTOLOGY WHEEL PANEL */}
-        <section className="pp-section ontology-root" id="print">
+        <section className="pp-section ontology-root pt-[0px]" id="print">
           <div className="pp-print sp-panel p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-6">
             <div className="pp-print__bar flex items-center justify-between wrap gap-md">
               <div className="min-width-0">
