@@ -36,7 +36,8 @@ export function GameTile({
   const getSkillIcon = (skill: GameTileSkill) => {
     // For now, mapping directly to the SVG sprites in PortalSprite.
     // Ensure ids map closely to the sprite ids (e.g. ti-cognition-attention, ti-mood-focus)
-    const iconId = `ti-${skill.dimension}-${skill.id.toLowerCase().replace(/\s+/g, '-')}`;
+    const skillIdStr = String(skill?.id || '');
+    const iconId = `ti-${skill.dimension}-${skillIdStr.toLowerCase().replace(/\s+/g, '-')}`;
     return iconId;
   };
 

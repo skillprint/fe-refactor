@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import PortalLayout from "@/components/PortalLayout";
 import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
@@ -21,6 +22,8 @@ import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from 
 import { PortalPageTitle, PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { GameTile } from '@/components/GameTile';
+import { useRecommendedGames } from './hooks/useRecommendedGames';
+import { MockDataTag } from '@/components/MockDataTag';
 
 // Skills data
 const skills = [
@@ -203,6 +206,9 @@ const gradients = [
 ];
 
 function HomeContent() {
+  const searchParams = useSearchParams();
+  const stateOverride = searchParams.get('state');
+
   const { isWhitelisted } = useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<any[]>([]);
@@ -211,6 +217,7 @@ function HomeContent() {
 
   // Fetch games for the "New Games" section using the 'relax' mood
   const { games: fetchedNewGames, isLoading: isLoadingNewGames } = useGamesByMood('relax');
+  const { recommendedGames, isLoading: isLoadingRecommended } = useRecommendedGames(4);
 
   useEffect(() => {
     if (fetchedNewGames.length > 0) {
@@ -248,10 +255,15 @@ function HomeContent() {
   };
 
   // Skillprint Visualization Logic
-  const { count, sessions, isLoaded } = useGameSessions();
+  const { count: realCount, sessions, isLoaded } = useGameSessions();
   const { fetchUserProfile, profile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
   const { nodeDataMap, hasScoreByMood, hasScoreBySkill } = useSkillprintVisualizationData(processedProfile);
+
+  let count = realCount;
+  if (stateOverride === 'first') count = 0;
+  if (stateOverride === 'semi') count = 3;
+  if (stateOverride === 'complete') count = 5;
 
   const sampleSkillsForVis = [
     { id: '1', name: 'Problem Solving', level: 85, category: 'Cognitive', color: '#3B82F6' },
@@ -348,15 +360,15 @@ function HomeContent() {
                 </Link>
               </div>
               <div className="game-rail game-rail--library">
-                {skillGames.slice(0, 4).map((game, i) => (
+                {recommendedGames.slice(0, 4).map((game: any, i: number) => (
                   <GameTile
                     key={game.slug}
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.image || '/images/default-game.jpg'}
+                    image={game.screenshot || game.image || '/images/default-game.jpg'}
                     url={`/game_session?game=${game.slug}`}
-                    skills={game.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const }))}
+                    skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                   />
                 ))}
@@ -364,41 +376,46 @@ function HomeContent() {
             </PortalSection>
 
             {/* Recently Played */}
-            <PortalSection ariaLabelledBy="recentTitle">
-              <div className="portal-section__bar">
-                <PortalSectionTitle id="recentTitle">Recently played</PortalSectionTitle>
-                <Link className="portal-section__link" href="/profile#sessions">
-                  All sessions <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
-                </Link>
-              </div>
-              {count > 0 ? (
-                <div className="game-rail game-rail--library">
-                  {sessions.slice(0, 5).map((session, i) => {
-                    const game = skillGames.find(g => g.slug === session.gameSlug) || skillGames[0];
-                    return (
-                      <GameTile
-                        key={`${session.id}-${i}`}
-                        id={game.slug}
-                        title={game.name}
-                        description={game.description}
-                        image={game.image || '/images/default-game.jpg'}
-                        url={`/game_session?game=${game.slug}`}
-                        skills={game.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const }))}
-                        tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
-                      />
-                    );
-                  })}
+            <div style={{ position: 'relative' }}>
+              <MockDataTag />
+              <PortalSection ariaLabelledBy="recentTitle">
+                <div className="portal-section__bar">
+                  <PortalSectionTitle id="recentTitle">Recently played</PortalSectionTitle>
+                  {count > 0 && (
+                    <Link className="portal-section__link" href="/profile#sessions">
+                      All sessions <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                    </Link>
+                  )}
                 </div>
-              ) : (
-                <div className="portal-blank">
-                  <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
-                    <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-clock"></use></svg>
-                  </span>
-                  <p className="portal-blank__title">No sessions yet</p>
-                  <p className="portal-blank__note">Every game you finish lands here with the date, your flow score and the skills it measured.</p>
-                </div>
-              )}
-            </PortalSection>
+                {count > 0 ? (
+                  <div className="game-rail game-rail--library">
+                    {sessions.slice(0, 5).map((session, i) => {
+                      const game = skillGames.find(g => g.slug === session.gameSlug) || skillGames[0];
+                      return (
+                        <GameTile
+                          key={`${session.id}-${i}`}
+                          id={game?.slug || 'unknown'}
+                          title={game?.name || 'Unknown Game'}
+                          description={game?.description || ''}
+                          image={game?.image || '/images/default-game.jpg'}
+                          url={`/game_session?game=${game?.slug || ''}`}
+                          skills={game?.skills ? game.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const })) : []}
+                          tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="portal-blank">
+                    <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
+                      <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-clock"></use></svg>
+                    </span>
+                    <p className="portal-blank__title">No sessions yet</p>
+                    <p className="portal-blank__note">Every game you finish lands here with the date, your flow score and the skills it measured.</p>
+                  </div>
+                )}
+              </PortalSection>
+            </div>
 
             {/* New Games */}
             <PortalSection ariaLabelledBy="newTitle">
@@ -476,7 +493,9 @@ function HomeContent() {
             <article className="rail-card rail-print sp-card">
               <div className="rail-card__head">
                 <h2 className="rail-card__title" id="printTitle">Your Skillprint</h2>
-                <span className="ui-badge ui-badge--sm">Not started</span>
+                <span className="ui-badge ui-badge--sm">
+                  {count === 0 ? 'Not started' : count < 5 ? 'In progress' : 'Active'}
+                </span>
               </div>
               <div className="rail-print__figure ontology-root">
                 <div className="ontology-visual clip layout-grid place-center" style={{ width: '100%', aspectRatio: '1/1' }}>
@@ -488,24 +507,45 @@ function HomeContent() {
                     nodeDataMap={nodeDataMap}
                     size={220}
                     useSizeDirectly={true}
-                    initialState="reset"
+                    initialState={count === 0 ? "reset" : "play"}
                     hasMenu={false}
                   />
                 </div>
-                <span className="rail-print__veil"><span className="ui-badge ui-badge--sm">0 of 5 sessions</span></span>
+                {count < 5 && (
+                  <span className="rail-print__veil">
+                    <span className="ui-badge ui-badge--sm">{count} of 5 sessions</span>
+                  </span>
+                )}
               </div>
-              <p className="margin-none text-muted font-sm leading-md">Every Skillprint is drawn on this wheel. Yours is blank until you play — each game you finish fills in the parts it measures.</p>
+              <p className="margin-none text-muted font-sm leading-md">
+                {count === 0 
+                  ? 'This is the dial every Skillprint is drawn on. Yours is blank until your first session — each game you finish inks the features it reads.'
+                  : 'Every Skillprint is drawn on this wheel. Yours fills in as you play — each game you finish inks the parts it measures.'
+                }
+              </p>
 
               <dl className="rail-stats">
-                <div className="rail-stat"><dt>Sessions</dt><dd>0</dd></div>
+                <div className="rail-stat"><dt>Sessions</dt><dd>{count}</dd></div>
                 <div className="rail-stat"><dt>Flow</dt><dd>&mdash;</dd></div>
-                <div className="rail-stat"><dt>Streak</dt><dd>0</dd></div>
+                <div className="rail-stat"><dt>Streak</dt><dd>{count > 0 ? 1 : 0}</dd></div>
               </dl>
 
-              <Link className="button button--primary button--md full-width" href="/games">
-                <span>Play your first game</span>
-                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
-              </Link>
+              {count === 0 ? (
+                <Link className="button button--primary button--md full-width" href="/games">
+                  <span>Play your first game</span>
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
+                </Link>
+              ) : count < 5 ? (
+                <Link className="button button--primary button--md full-width" href="/games">
+                  <span>Play your next game</span>
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
+                </Link>
+              ) : (
+                <Link className="button button--primary button--md full-width" href="/profile">
+                  <span>View your profile</span>
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
+                </Link>
+              )}
             </article>
 
             <article className="rail-card sp-card">
