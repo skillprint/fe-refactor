@@ -248,7 +248,7 @@ function HomeContent() {
   };
 
   // Skillprint Visualization Logic
-  const { count, isLoaded } = useGameSessions();
+  const { count, sessions, isLoaded } = useGameSessions();
   const { fetchUserProfile, profile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
   const { nodeDataMap, hasScoreByMood, hasScoreBySkill } = useSkillprintVisualizationData(processedProfile);
@@ -372,7 +372,23 @@ function HomeContent() {
                 </Link>
               </div>
               {count > 0 ? (
-                <p className="text-muted">Placeholder for recently played game rail</p>
+                <div className="game-rail game-rail--library">
+                  {sessions.slice(0, 5).map((session, i) => {
+                    const game = skillGames.find(g => g.slug === session.gameSlug) || skillGames[0];
+                    return (
+                      <GameTile
+                        key={`${session.id}-${i}`}
+                        id={game.slug}
+                        title={game.name}
+                        description={game.description}
+                        image={game.image || '/images/default-game.jpg'}
+                        url={`/game_session?game=${game.slug}`}
+                        skills={game.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const }))}
+                        tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                      />
+                    );
+                  })}
+                </div>
               ) : (
                 <div className="portal-blank">
                   <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
@@ -405,6 +421,52 @@ function HomeContent() {
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[(i + 2) % 6]}
                   />
                 ))}
+              </div>
+            </PortalSection>
+
+            {/* Play by skill */}
+            <PortalSection ariaLabelledBy="bySkillTitle">
+              <div className="portal-section__bar">
+                <div>
+                  <PortalSectionTitle id="bySkillTitle">Play by skill</PortalSectionTitle>
+                  <PortalSectionHint>Every game measures all three at once. Start from the one you most want to improve.</PortalSectionHint>
+                </div>
+                <Link className="portal-section__link" href="/skills">
+                  All skills <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                </Link>
+              </div>
+              <div className="skill-launch">
+                <Link className="skill-launch__card skill-launch__card--all sp-card sp-card--interactive" href="/skills">
+                  <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
+                    <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-layout-grid"></use></svg>
+                  </span>
+                  <span className="skill-launch__name">All skills</span>
+                  <span className="skill-launch__meta">The full index</span>
+                </Link>
+
+                <Link className="skill-launch__card sp-card sp-card--interactive" href="/skills#mood" data-dimension="mood">
+                  <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
+                    <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-category-mood"></use></svg>
+                  </span>
+                  <span className="skill-launch__name">Mood</span>
+                  <span className="skill-launch__meta">9 skills · how a session feels</span>
+                </Link>
+
+                <Link className="skill-launch__card sp-card sp-card--interactive" href="/skills#cognition" data-dimension="cognition">
+                  <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
+                    <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-category-cognition"></use></svg>
+                  </span>
+                  <span className="skill-launch__name">Cognition</span>
+                  <span className="skill-launch__meta">14 skills · how you solve it</span>
+                </Link>
+
+                <Link className="skill-launch__card sp-card sp-card--interactive" href="/skills#personality" data-dimension="personality">
+                  <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
+                    <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-category-personality"></use></svg>
+                  </span>
+                  <span className="skill-launch__name">Personality</span>
+                  <span className="skill-launch__meta">5 traits · how you show up</span>
+                </Link>
               </div>
             </PortalSection>
 
