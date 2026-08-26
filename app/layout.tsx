@@ -38,9 +38,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-brand-family="customer" data-surface="light" data-theme="light">
       <body
-        className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
+        className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased page scrollbar-subtle page--portal margin-none text-default font-ui leading-base`}
         suppressHydrationWarning
       >
         <PortalSprite />
