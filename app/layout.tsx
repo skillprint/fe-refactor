@@ -28,8 +28,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Skillprint",
-  description: "Your gaming personality profile",
+  title: "Skillprint Portal · Home",
+  description: "The Skillprint Games Portal home — continue a game, pick a recommendation, and read the playbook driving them.",
 };
 
 export default function RootLayout({

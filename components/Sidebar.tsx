@@ -1,6 +1,29 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 
 export default function Sidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('skillprintPortalNavCollapsed');
+      if (stored === '1') {
+        setIsCollapsed(true);
+        document.body.classList.add('nav-collapsed');
+      }
+    } catch (e) {}
+  }, []);
+
+  const toggleCollapse = () => {
+    const next = !isCollapsed;
+    setIsCollapsed(next);
+    document.body.classList.toggle('nav-collapsed', next);
+    try {
+      localStorage.setItem('skillprintPortalNavCollapsed', next ? '1' : '0');
+    } catch (e) {}
+  };
   return (
     <aside className="portal-sidebar sp-side-nav" id="portalNav" aria-label="Games Portal" data-portal-nav>
       <div className="portal-sidebar__head">
@@ -10,7 +33,7 @@ export default function Sidebar() {
           <img className="portal-brand__mark" src="/assets/logos/skillprint-favicon-customer.svg" alt="" aria-hidden="true" width="32" height="32" />
           <span className="portal-brand__product">Games Portal</span>
         </Link>
-        <button className="portal-sidebar__toggle icon-button button button--tertiary button--icon-only button--sm" type="button" aria-controls="portalNav" aria-expanded="true" aria-label="Collapse navigation" title="Collapse navigation" data-portal-nav-collapse>
+        <button onClick={toggleCollapse} className="portal-sidebar__toggle icon-button button button--tertiary button--icon-only button--sm" type="button" aria-controls="portalNav" aria-expanded={!isCollapsed} aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'} title={isCollapsed ? 'Expand navigation' : 'Collapse navigation'} data-portal-nav-collapse>
           <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-left"></use></svg>
         </button>
       </div>
