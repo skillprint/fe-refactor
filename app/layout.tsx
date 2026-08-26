@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import "./skillprint.css";
 import FTUECarousel from "./components/FTUECarousel";
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -8,6 +9,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard } from "./components/AuthGuard";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Suspense } from "react";
+import PortalSprite from "@/components/PortalSprite";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -41,6 +43,7 @@ export default function RootLayout({
         className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
         suppressHydrationWarning
       >
+        <PortalSprite />
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id'}>
           <AuthProvider>
             <ThemeProvider>

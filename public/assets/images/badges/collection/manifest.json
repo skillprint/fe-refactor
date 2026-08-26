@@ -1,0 +1,670 @@
+{
+ "generated": "2026-08-21",
+ "source": "3. Media/Editable/Badges/Badge System \u2014 text verified against tools/Game_Icon_Downloads.html",
+ "ranks": [
+  {
+   "rank": 1,
+   "shape": "sparkle"
+  },
+  {
+   "rank": 2,
+   "shape": "shield"
+  },
+  {
+   "rank": 3,
+   "shape": "flower"
+  },
+  {
+   "rank": 4,
+   "shape": "gear"
+  },
+  {
+   "rank": 5,
+   "shape": "star"
+  },
+  {
+   "rank": 6,
+   "shape": "sunburst"
+  }
+ ],
+ "animals": [
+  {
+   "slug": "aardvark",
+   "alpha": 1,
+   "htmlNo": 28,
+   "title": "AFTER HOURS",
+   "animal": "NOCTURNAL AARDVARK",
+   "colour": "Cool Green",
+   "colourSlug": "cool-green",
+   "colourToken": "core-green",
+   "field": "#09e08f",
+   "outline": "#4ce7ae",
+   "ink": "#090d27",
+   "star": "#9744bd",
+   "shapes": {
+    "sparkle": "aardvark/aardvark-badge-cool-green-sparkle.svg",
+    "shield": "aardvark/aardvark-badge-cool-green-shield.svg",
+    "flower": "aardvark/aardvark-badge-cool-green-flower.svg",
+    "gear": "aardvark/aardvark-badge-cool-green-gear.svg",
+    "star": "aardvark/aardvark-badge-cool-green-star.svg",
+    "sunburst": "aardvark/aardvark-badge-cool-green-sunburst.svg"
+   }
+  },
+  {
+   "slug": "anteater",
+   "alpha": 2,
+   "htmlNo": 17,
+   "title": "NUMBER CRUNCHING",
+   "animal": "ADDING ANTEATER",
+   "colour": "Cool Lime",
+   "colourSlug": "cool-lime",
+   "colourToken": "core-lime",
+   "field": "#c1ee16",
+   "outline": "#d0f156",
+   "ink": "#090d27",
+   "star": "#573eeb",
+   "shapes": {
+    "sparkle": "anteater/anteater-badge-cool-lime-sparkle.svg",
+    "shield": "anteater/anteater-badge-cool-lime-shield.svg",
+    "flower": "anteater/anteater-badge-cool-lime-flower.svg",
+    "gear": "anteater/anteater-badge-cool-lime-gear.svg",
+    "star": "anteater/anteater-badge-cool-lime-star.svg",
+    "sunburst": "anteater/anteater-badge-cool-lime-sunburst.svg"
+   }
+  },
+  {
+   "slug": "bat",
+   "alpha": 3,
+   "htmlNo": 14,
+   "title": "ANTICIPATING",
+   "animal": "PLOTTING BAT",
+   "colour": "Mindset Magenta",
+   "colourSlug": "mindset-magenta",
+   "colourToken": "mindset-magenta",
+   "field": "#ae4dd5",
+   "outline": "#c37de0",
+   "ink": "#090d27",
+   "star": "#5bfde1",
+   "shapes": {
+    "sparkle": "bat/bat-badge-mindset-magenta-sparkle.svg",
+    "shield": "bat/bat-badge-mindset-magenta-shield.svg",
+    "flower": "bat/bat-badge-mindset-magenta-flower.svg",
+    "gear": "bat/bat-badge-mindset-magenta-gear.svg",
+    "star": "bat/bat-badge-mindset-magenta-star.svg",
+    "sunburst": "bat/bat-badge-mindset-magenta-sunburst.svg"
+   }
+  },
+  {
+   "slug": "beaver",
+   "alpha": 4,
+   "htmlNo": 12,
+   "title": "ORGANIZING",
+   "animal": "BUILDING BEAVER",
+   "colour": "Mindset Violet",
+   "colourSlug": "mindset-violet",
+   "colourToken": "mindset-violet",
+   "field": "#573eeb",
+   "outline": "#8473f0",
+   "ink": "#e3e5eb",
+   "star": "#c1ee16",
+   "shapes": {
+    "sparkle": "beaver/beaver-badge-mindset-violet-sparkle.svg",
+    "shield": "beaver/beaver-badge-mindset-violet-shield.svg",
+    "flower": "beaver/beaver-badge-mindset-violet-flower.svg",
+    "gear": "beaver/beaver-badge-mindset-violet-gear.svg",
+    "star": "beaver/beaver-badge-mindset-violet-star.svg",
+    "sunburst": "beaver/beaver-badge-mindset-violet-sunburst.svg"
+   }
+  },
+  {
+   "slug": "bushbaby",
+   "alpha": 5,
+   "htmlNo": 22,
+   "title": "REACTION TIME",
+   "animal": "BRISK BUSHBABY",
+   "colour": "Personality Blue",
+   "colourSlug": "personality-blue",
+   "colourToken": "personality-blue",
+   "field": "#27baff",
+   "outline": "#62ccfe",
+   "ink": "#090d27",
+   "star": "#4c37d0",
+   "shapes": {
+    "sparkle": "bushbaby/bushbaby-badge-personality-blue-sparkle.svg",
+    "shield": "bushbaby/bushbaby-badge-personality-blue-shield.svg",
+    "flower": "bushbaby/bushbaby-badge-personality-blue-flower.svg",
+    "gear": "bushbaby/bushbaby-badge-personality-blue-gear.svg",
+    "star": "bushbaby/bushbaby-badge-personality-blue-star.svg",
+    "sunburst": "bushbaby/bushbaby-badge-personality-blue-sunburst.svg"
+   }
+  },
+  {
+   "slug": "chimpanzee",
+   "alpha": 6,
+   "htmlNo": 2,
+   "title": "RESPONSE CONTROL",
+   "animal": "COOL CHIMPANZEE",
+   "colour": "Personality Mint",
+   "colourSlug": "personality-mint",
+   "colourToken": "personality-mint",
+   "field": "#5bfde1",
+   "outline": "#87fce9",
+   "ink": "#090d27",
+   "star": "#dd477f",
+   "shapes": {
+    "sparkle": "chimpanzee/chimpanzee-badge-personality-mint-sparkle.svg",
+    "shield": "chimpanzee/chimpanzee-badge-personality-mint-shield.svg",
+    "flower": "chimpanzee/chimpanzee-badge-personality-mint-flower.svg",
+    "gear": "chimpanzee/chimpanzee-badge-personality-mint-gear.svg",
+    "star": "chimpanzee/chimpanzee-badge-personality-mint-star.svg",
+    "sunburst": "chimpanzee/chimpanzee-badge-personality-mint-sunburst.svg"
+   }
+  },
+  {
+   "slug": "cow",
+   "alpha": 7,
+   "htmlNo": 26,
+   "title": "CONSISTENT",
+   "animal": "CONSTANT COW",
+   "colour": "Skills Orange",
+   "colourSlug": "skills-orange",
+   "colourToken": "skills-orange",
+   "field": "#ffb21b",
+   "outline": "#fdc65a",
+   "ink": "#090d27",
+   "star": "#1a6ea0",
+   "shapes": {
+    "sparkle": "cow/cow-badge-skills-orange-sparkle.svg",
+    "shield": "cow/cow-badge-skills-orange-shield.svg",
+    "flower": "cow/cow-badge-skills-orange-flower.svg",
+    "gear": "cow/cow-badge-skills-orange-gear.svg",
+    "star": "cow/cow-badge-skills-orange-star.svg",
+    "sunburst": "cow/cow-badge-skills-orange-sunburst.svg"
+   }
+  },
+  {
+   "slug": "coyote",
+   "alpha": 8,
+   "htmlNo": 24,
+   "title": "SHARP MIND",
+   "animal": "CANNY COYOTE",
+   "colour": "Skills Pink",
+   "colourSlug": "skills-pink",
+   "colourToken": "skills-pink",
+   "field": "#ff518d",
+   "outline": "#fd80ac",
+   "ink": "#090d27",
+   "star": "#352895",
+   "shapes": {
+    "sparkle": "coyote/coyote-badge-skills-pink-sparkle.svg",
+    "shield": "coyote/coyote-badge-skills-pink-shield.svg",
+    "flower": "coyote/coyote-badge-skills-pink-flower.svg",
+    "gear": "coyote/coyote-badge-skills-pink-gear.svg",
+    "star": "coyote/coyote-badge-skills-pink-star.svg",
+    "sunburst": "coyote/coyote-badge-skills-pink-sunburst.svg"
+   }
+  },
+  {
+   "slug": "cuttlefish",
+   "alpha": 9,
+   "htmlNo": 7,
+   "title": "PATTERN MATCHING",
+   "animal": "COPYCAT CUTTLEFISH",
+   "colour": "Cool Green",
+   "colourSlug": "cool-green",
+   "colourToken": "core-green",
+   "field": "#09e08f",
+   "outline": "#4ce7ae",
+   "ink": "#090d27",
+   "star": "#9744bd",
+   "shapes": {
+    "sparkle": "cuttlefish/cuttlefish-badge-cool-green-sparkle.svg",
+    "shield": "cuttlefish/cuttlefish-badge-cool-green-shield.svg",
+    "flower": "cuttlefish/cuttlefish-badge-cool-green-flower.svg",
+    "gear": "cuttlefish/cuttlefish-badge-cool-green-gear.svg",
+    "star": "cuttlefish/cuttlefish-badge-cool-green-star.svg",
+    "sunburst": "cuttlefish/cuttlefish-badge-cool-green-sunburst.svg"
+   }
+  },
+  {
+   "slug": "donkey",
+   "alpha": 10,
+   "htmlNo": 5,
+   "title": "GRIT",
+   "animal": "DOGGED DONKEY",
+   "colour": "Cool Lime",
+   "colourSlug": "cool-lime",
+   "colourToken": "core-lime",
+   "field": "#c1ee16",
+   "outline": "#d0f156",
+   "ink": "#090d27",
+   "star": "#573eeb",
+   "shapes": {
+    "sparkle": "donkey/donkey-badge-cool-lime-sparkle.svg",
+    "shield": "donkey/donkey-badge-cool-lime-shield.svg",
+    "flower": "donkey/donkey-badge-cool-lime-flower.svg",
+    "gear": "donkey/donkey-badge-cool-lime-gear.svg",
+    "star": "donkey/donkey-badge-cool-lime-star.svg",
+    "sunburst": "donkey/donkey-badge-cool-lime-sunburst.svg"
+   }
+  },
+  {
+   "slug": "elephant",
+   "alpha": 11,
+   "htmlNo": 16,
+   "title": "MEMORY",
+   "animal": "ENCYCLOPEDIC ELEPHANT",
+   "colour": "Mindset Magenta",
+   "colourSlug": "mindset-magenta",
+   "colourToken": "mindset-magenta",
+   "field": "#ae4dd5",
+   "outline": "#c37de0",
+   "ink": "#090d27",
+   "star": "#5bfde1",
+   "shapes": {
+    "sparkle": "elephant/elephant-badge-mindset-magenta-sparkle.svg",
+    "shield": "elephant/elephant-badge-mindset-magenta-shield.svg",
+    "flower": "elephant/elephant-badge-mindset-magenta-flower.svg",
+    "gear": "elephant/elephant-badge-mindset-magenta-gear.svg",
+    "star": "elephant/elephant-badge-mindset-magenta-star.svg",
+    "sunburst": "elephant/elephant-badge-mindset-magenta-sunburst.svg"
+   }
+  },
+  {
+   "slug": "elephant-shrew",
+   "alpha": 12,
+   "htmlNo": 20,
+   "title": "COMPARING",
+   "animal": "SIFTING SHREW",
+   "colour": "Mindset Violet",
+   "colourSlug": "mindset-violet",
+   "colourToken": "mindset-violet",
+   "field": "#573eeb",
+   "outline": "#8473f0",
+   "ink": "#e3e5eb",
+   "star": "#c1ee16",
+   "shapes": {
+    "sparkle": "elephant-shrew/elephant-shrew-badge-mindset-violet-sparkle.svg",
+    "shield": "elephant-shrew/elephant-shrew-badge-mindset-violet-shield.svg",
+    "flower": "elephant-shrew/elephant-shrew-badge-mindset-violet-flower.svg",
+    "gear": "elephant-shrew/elephant-shrew-badge-mindset-violet-gear.svg",
+    "star": "elephant-shrew/elephant-shrew-badge-mindset-violet-star.svg",
+    "sunburst": "elephant-shrew/elephant-shrew-badge-mindset-violet-sunburst.svg"
+   }
+  },
+  {
+   "slug": "fennec-fox",
+   "alpha": 13,
+   "htmlNo": 1,
+   "title": "FOCUS",
+   "animal": "FIXATED FENNEC FOX",
+   "colour": "Personality Blue",
+   "colourSlug": "personality-blue",
+   "colourToken": "personality-blue",
+   "field": "#27baff",
+   "outline": "#62ccfe",
+   "ink": "#090d27",
+   "star": "#4c37d0",
+   "shapes": {
+    "sparkle": "fennec-fox/fennec-fox-badge-personality-blue-sparkle.svg",
+    "shield": "fennec-fox/fennec-fox-badge-personality-blue-shield.svg",
+    "flower": "fennec-fox/fennec-fox-badge-personality-blue-flower.svg",
+    "gear": "fennec-fox/fennec-fox-badge-personality-blue-gear.svg",
+    "star": "fennec-fox/fennec-fox-badge-personality-blue-star.svg",
+    "sunburst": "fennec-fox/fennec-fox-badge-personality-blue-sunburst.svg"
+   }
+  },
+  {
+   "slug": "gazelle",
+   "alpha": 14,
+   "htmlNo": 25,
+   "title": "SPEED DEMON",
+   "animal": "GALLOPING GAZELLE",
+   "colour": "Personality Mint",
+   "colourSlug": "personality-mint",
+   "colourToken": "personality-mint",
+   "field": "#5bfde1",
+   "outline": "#87fce9",
+   "ink": "#090d27",
+   "star": "#dd477f",
+   "shapes": {
+    "sparkle": "gazelle/gazelle-badge-personality-mint-sparkle.svg",
+    "shield": "gazelle/gazelle-badge-personality-mint-shield.svg",
+    "flower": "gazelle/gazelle-badge-personality-mint-flower.svg",
+    "gear": "gazelle/gazelle-badge-personality-mint-gear.svg",
+    "star": "gazelle/gazelle-badge-personality-mint-star.svg",
+    "sunburst": "gazelle/gazelle-badge-personality-mint-sunburst.svg"
+   }
+  },
+  {
+   "slug": "golden-wolf",
+   "alpha": 15,
+   "htmlNo": 6,
+   "title": "KEEN EYE",
+   "animal": "WATCHFUL WOLF",
+   "colour": "Skills Orange",
+   "colourSlug": "skills-orange",
+   "colourToken": "skills-orange",
+   "field": "#ffb21b",
+   "outline": "#fdc65a",
+   "ink": "#090d27",
+   "star": "#1a6ea0",
+   "shapes": {
+    "sparkle": "golden-wolf/golden-wolf-badge-skills-orange-sparkle.svg",
+    "shield": "golden-wolf/golden-wolf-badge-skills-orange-shield.svg",
+    "flower": "golden-wolf/golden-wolf-badge-skills-orange-flower.svg",
+    "gear": "golden-wolf/golden-wolf-badge-skills-orange-gear.svg",
+    "star": "golden-wolf/golden-wolf-badge-skills-orange-star.svg",
+    "sunburst": "golden-wolf/golden-wolf-badge-skills-orange-sunburst.svg"
+   }
+  },
+  {
+   "slug": "gorilla",
+   "alpha": 16,
+   "htmlNo": 13,
+   "title": "PLANNING",
+   "animal": "GAMEPLAN GORILLA",
+   "colour": "Skills Pink",
+   "colourSlug": "skills-pink",
+   "colourToken": "skills-pink",
+   "field": "#ff518d",
+   "outline": "#fd80ac",
+   "ink": "#090d27",
+   "star": "#352895",
+   "shapes": {
+    "sparkle": "gorilla/gorilla-badge-skills-pink-sparkle.svg",
+    "shield": "gorilla/gorilla-badge-skills-pink-shield.svg",
+    "flower": "gorilla/gorilla-badge-skills-pink-flower.svg",
+    "gear": "gorilla/gorilla-badge-skills-pink-gear.svg",
+    "star": "gorilla/gorilla-badge-skills-pink-star.svg",
+    "sunburst": "gorilla/gorilla-badge-skills-pink-sunburst.svg"
+   }
+  },
+  {
+   "slug": "hare",
+   "alpha": 17,
+   "htmlNo": 21,
+   "title": "PROCESSING",
+   "animal": "HURRIED HARE",
+   "colour": "Cool Green",
+   "colourSlug": "cool-green",
+   "colourToken": "core-green",
+   "field": "#09e08f",
+   "outline": "#4ce7ae",
+   "ink": "#090d27",
+   "star": "#9744bd",
+   "shapes": {
+    "sparkle": "hare/hare-badge-cool-green-sparkle.svg",
+    "shield": "hare/hare-badge-cool-green-shield.svg",
+    "flower": "hare/hare-badge-cool-green-flower.svg",
+    "gear": "hare/hare-badge-cool-green-gear.svg",
+    "star": "hare/hare-badge-cool-green-star.svg",
+    "sunburst": "hare/hare-badge-cool-green-sunburst.svg"
+   }
+  },
+  {
+   "slug": "lion",
+   "alpha": 18,
+   "htmlNo": 18,
+   "title": "REASONING",
+   "animal": "LOGICAL LION",
+   "colour": "Cool Lime",
+   "colourSlug": "cool-lime",
+   "colourToken": "core-lime",
+   "field": "#c1ee16",
+   "outline": "#d0f156",
+   "ink": "#090d27",
+   "star": "#573eeb",
+   "shapes": {
+    "sparkle": "lion/lion-badge-cool-lime-sparkle.svg",
+    "shield": "lion/lion-badge-cool-lime-shield.svg",
+    "flower": "lion/lion-badge-cool-lime-flower.svg",
+    "gear": "lion/lion-badge-cool-lime-gear.svg",
+    "star": "lion/lion-badge-cool-lime-star.svg",
+    "sunburst": "lion/lion-badge-cool-lime-sunburst.svg"
+   }
+  },
+  {
+   "slug": "mouse",
+   "alpha": 19,
+   "htmlNo": 4,
+   "title": "DETAIL ORIENTED",
+   "animal": "METICULOUS MOUSE",
+   "colour": "Mindset Magenta",
+   "colourSlug": "mindset-magenta",
+   "colourToken": "mindset-magenta",
+   "field": "#ae4dd5",
+   "outline": "#c37de0",
+   "ink": "#090d27",
+   "star": "#5bfde1",
+   "shapes": {
+    "sparkle": "mouse/mouse-badge-mindset-magenta-sparkle.svg",
+    "shield": "mouse/mouse-badge-mindset-magenta-shield.svg",
+    "flower": "mouse/mouse-badge-mindset-magenta-flower.svg",
+    "gear": "mouse/mouse-badge-mindset-magenta-gear.svg",
+    "star": "mouse/mouse-badge-mindset-magenta-star.svg",
+    "sunburst": "mouse/mouse-badge-mindset-magenta-sunburst.svg"
+   }
+  },
+  {
+   "slug": "platypus",
+   "alpha": 20,
+   "htmlNo": 27,
+   "title": "PUZZLE MASTER",
+   "animal": "PUZZLING PLATYPUS",
+   "colour": "Mindset Violet",
+   "colourSlug": "mindset-violet",
+   "colourToken": "mindset-violet",
+   "field": "#573eeb",
+   "outline": "#8473f0",
+   "ink": "#e3e5eb",
+   "star": "#c1ee16",
+   "shapes": {
+    "sparkle": "platypus/platypus-badge-mindset-violet-sparkle.svg",
+    "shield": "platypus/platypus-badge-mindset-violet-shield.svg",
+    "flower": "platypus/platypus-badge-mindset-violet-flower.svg",
+    "gear": "platypus/platypus-badge-mindset-violet-gear.svg",
+    "star": "platypus/platypus-badge-mindset-violet-star.svg",
+    "sunburst": "platypus/platypus-badge-mindset-violet-sunburst.svg"
+   }
+  },
+  {
+   "slug": "porpoise",
+   "alpha": 21,
+   "htmlNo": 19,
+   "title": "VISUALIZATION",
+   "animal": "PICTURING PORPOISE",
+   "colour": "Personality Blue",
+   "colourSlug": "personality-blue",
+   "colourToken": "personality-blue",
+   "field": "#27baff",
+   "outline": "#62ccfe",
+   "ink": "#090d27",
+   "star": "#4c37d0",
+   "shapes": {
+    "sparkle": "porpoise/porpoise-badge-personality-blue-sparkle.svg",
+    "shield": "porpoise/porpoise-badge-personality-blue-shield.svg",
+    "flower": "porpoise/porpoise-badge-personality-blue-flower.svg",
+    "gear": "porpoise/porpoise-badge-personality-blue-gear.svg",
+    "star": "porpoise/porpoise-badge-personality-blue-star.svg",
+    "sunburst": "porpoise/porpoise-badge-personality-blue-sunburst.svg"
+   }
+  },
+  {
+   "slug": "puma",
+   "alpha": 22,
+   "htmlNo": 3,
+   "title": "TASK SWITCHING",
+   "animal": "PIVOTING PUMA",
+   "colour": "Personality Mint",
+   "colourSlug": "personality-mint",
+   "colourToken": "personality-mint",
+   "field": "#5bfde1",
+   "outline": "#87fce9",
+   "ink": "#090d27",
+   "star": "#dd477f",
+   "shapes": {
+    "sparkle": "puma/puma-badge-personality-mint-sparkle.svg",
+    "shield": "puma/puma-badge-personality-mint-shield.svg",
+    "flower": "puma/puma-badge-personality-mint-flower.svg",
+    "gear": "puma/puma-badge-personality-mint-gear.svg",
+    "star": "puma/puma-badge-personality-mint-star.svg",
+    "sunburst": "puma/puma-badge-personality-mint-sunburst.svg"
+   }
+  },
+  {
+   "slug": "racoon",
+   "alpha": 23,
+   "htmlNo": 10,
+   "title": "ADAPTABILITY",
+   "animal": "RESOURCEFUL RACOON",
+   "colour": "Skills Orange",
+   "colourSlug": "skills-orange",
+   "colourToken": "skills-orange",
+   "field": "#ffb21b",
+   "outline": "#fdc65a",
+   "ink": "#090d27",
+   "star": "#1a6ea0",
+   "shapes": {
+    "sparkle": "racoon/racoon-badge-skills-orange-sparkle.svg",
+    "shield": "racoon/racoon-badge-skills-orange-shield.svg",
+    "flower": "racoon/racoon-badge-skills-orange-flower.svg",
+    "gear": "racoon/racoon-badge-skills-orange-gear.svg",
+    "star": "racoon/racoon-badge-skills-orange-star.svg",
+    "sunburst": "racoon/racoon-badge-skills-orange-sunburst.svg"
+   }
+  },
+  {
+   "slug": "sea-otter",
+   "alpha": 24,
+   "htmlNo": 9,
+   "title": "ACTIVE LEARNER",
+   "animal": "STUDIOUS SEA OTTER",
+   "colour": "Skills Pink",
+   "colourSlug": "skills-pink",
+   "colourToken": "skills-pink",
+   "field": "#ff518d",
+   "outline": "#fd80ac",
+   "ink": "#090d27",
+   "star": "#352895",
+   "shapes": {
+    "sparkle": "sea-otter/sea-otter-badge-skills-pink-sparkle.svg",
+    "shield": "sea-otter/sea-otter-badge-skills-pink-shield.svg",
+    "flower": "sea-otter/sea-otter-badge-skills-pink-flower.svg",
+    "gear": "sea-otter/sea-otter-badge-skills-pink-gear.svg",
+    "star": "sea-otter/sea-otter-badge-skills-pink-star.svg",
+    "sunburst": "sea-otter/sea-otter-badge-skills-pink-sunburst.svg"
+   }
+  },
+  {
+   "slug": "seal",
+   "alpha": 25,
+   "htmlNo": 11,
+   "title": "FLEXIBILITY",
+   "animal": "SUPPLE SEAL",
+   "colour": "Cool Green",
+   "colourSlug": "cool-green",
+   "colourToken": "core-green",
+   "field": "#09e08f",
+   "outline": "#4ce7ae",
+   "ink": "#090d27",
+   "star": "#9744bd",
+   "shapes": {
+    "sparkle": "seal/seal-badge-cool-green-sparkle.svg",
+    "shield": "seal/seal-badge-cool-green-shield.svg",
+    "flower": "seal/seal-badge-cool-green-flower.svg",
+    "gear": "seal/seal-badge-cool-green-gear.svg",
+    "star": "seal/seal-badge-cool-green-star.svg",
+    "sunburst": "seal/seal-badge-cool-green-sunburst.svg"
+   }
+  },
+  {
+   "slug": "shark",
+   "alpha": 26,
+   "htmlNo": 29,
+   "title": "MARATHON RUNNER",
+   "animal": "SLEEPLESS SHARK",
+   "colour": "Cool Lime",
+   "colourSlug": "cool-lime",
+   "colourToken": "core-lime",
+   "field": "#c1ee16",
+   "outline": "#d0f156",
+   "ink": "#090d27",
+   "star": "#573eeb",
+   "shapes": {
+    "sparkle": "shark/shark-badge-cool-lime-sparkle.svg",
+    "shield": "shark/shark-badge-cool-lime-shield.svg",
+    "flower": "shark/shark-badge-cool-lime-flower.svg",
+    "gear": "shark/shark-badge-cool-lime-gear.svg",
+    "star": "shark/shark-badge-cool-lime-star.svg",
+    "sunburst": "shark/shark-badge-cool-lime-sunburst.svg"
+   }
+  },
+  {
+   "slug": "squirrel",
+   "alpha": 27,
+   "htmlNo": 15,
+   "title": "CLEVERNESS",
+   "animal": "SAVVY SQUIRREL",
+   "colour": "Mindset Magenta",
+   "colourSlug": "mindset-magenta",
+   "colourToken": "mindset-magenta",
+   "field": "#ae4dd5",
+   "outline": "#c37de0",
+   "ink": "#090d27",
+   "star": "#5bfde1",
+   "shapes": {
+    "sparkle": "squirrel/squirrel-badge-mindset-magenta-sparkle.svg",
+    "shield": "squirrel/squirrel-badge-mindset-magenta-shield.svg",
+    "flower": "squirrel/squirrel-badge-mindset-magenta-flower.svg",
+    "gear": "squirrel/squirrel-badge-mindset-magenta-gear.svg",
+    "star": "squirrel/squirrel-badge-mindset-magenta-star.svg",
+    "sunburst": "squirrel/squirrel-badge-mindset-magenta-sunburst.svg"
+   }
+  },
+  {
+   "slug": "tapir",
+   "alpha": 28,
+   "htmlNo": 23,
+   "title": "FIRST STEPS",
+   "animal": "TODDLING TAPIR",
+   "colour": "Mindset Violet",
+   "colourSlug": "mindset-violet",
+   "colourToken": "mindset-violet",
+   "field": "#573eeb",
+   "outline": "#8473f0",
+   "ink": "#e3e5eb",
+   "star": "#c1ee16",
+   "shapes": {
+    "sparkle": "tapir/tapir-badge-mindset-violet-sparkle.svg",
+    "shield": "tapir/tapir-badge-mindset-violet-shield.svg",
+    "flower": "tapir/tapir-badge-mindset-violet-flower.svg",
+    "gear": "tapir/tapir-badge-mindset-violet-gear.svg",
+    "star": "tapir/tapir-badge-mindset-violet-star.svg",
+    "sunburst": "tapir/tapir-badge-mindset-violet-sunburst.svg"
+   }
+  },
+  {
+   "slug": "wildbeest",
+   "alpha": 29,
+   "htmlNo": 8,
+   "title": "SPATIAL",
+   "animal": "WAYFINDING WILDEBEEST",
+   "colour": "Personality Blue",
+   "colourSlug": "personality-blue",
+   "colourToken": "personality-blue",
+   "field": "#27baff",
+   "outline": "#62ccfe",
+   "ink": "#090d27",
+   "star": "#4c37d0",
+   "shapes": {
+    "sparkle": "wildbeest/wildbeest-badge-personality-blue-sparkle.svg",
+    "shield": "wildbeest/wildbeest-badge-personality-blue-shield.svg",
+    "flower": "wildbeest/wildbeest-badge-personality-blue-flower.svg",
+    "gear": "wildbeest/wildbeest-badge-personality-blue-gear.svg",
+    "star": "wildbeest/wildbeest-badge-personality-blue-star.svg",
+    "sunburst": "wildbeest/wildbeest-badge-personality-blue-sunburst.svg"
+   }
+  }
+ ]
+}

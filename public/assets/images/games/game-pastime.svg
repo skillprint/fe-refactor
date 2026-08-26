@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Ultimate Sudoku</title>
+  <desc>Skillprint game card — grid-lines in mindset-violet-500/600, pastime icon</desc>
+  <defs><clipPath id="clip-pastime"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#573eeb"/>
+  <g clip-path="url(#clip-pastime)">
+    <rect x="-1.20" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="22.55" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="46.30" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="70.05" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="93.80" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="117.55" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="141.30" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="165.05" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="188.80" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="212.55" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="236.30" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="260.05" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="283.80" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="307.55" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="331.30" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="355.05" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="378.80" y="0.00" width="2.40" height="210.00" fill="#4c37d0"/>
+    <rect x="0.00" y="-1.20" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="22.55" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="46.30" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="70.05" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="93.80" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="117.55" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="141.30" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="165.05" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="188.80" width="380.00" height="2.40" fill="#4c37d0"/>
+    <rect x="0.00" y="212.55" width="380.00" height="2.40" fill="#4c37d0"/>
+  </g>
+  <svg x="120" y="35" width="140" height="140" viewBox="0 0 682.66669 682.66669">
+<defs
+     id="defs2272"><clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2290"><path
+         d="M 0,512 H 512 V 0 H 0 Z"
+         id="path2288" /></clipPath></defs><g
+     id="g2274"
+     transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)"><g
+       id="g2276"
+       transform="translate(396.9999,90.9999)"><path
+         d="M 0,0 -15,-30 V -45 -60 L 0,-91 h 30 l 15,31 v 15 15 L 30,0 Z"
+         style="fill:#eceef5;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         id="path2278" /></g><g
+       id="g2280"
+       transform="translate(381.9996,45.9999)"><path
+         d="m 0,0 v -15 l 15,-31 h 30 l 15,31 V 0 Z"
+         style="fill:#d9dcea;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         id="path2282" /></g><g
+       id="g2284"><g
+         id="g2286"
+         clip-path="url(#clipPath2290)"><g
+           id="g2292"
+           transform="translate(187,91)"><path
+             d="m 0,0 h -35.918 c -38.35,0 -75.483,-11.25 -107.402,-32.52 L -162.041,-45 -143.32,-57.48 C -111.401,-78.75 -74.268,-91 -35.918,-91 H 0 l 15,31 v 15 15 z"
+             style="fill:#fae4b8;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path2294" /></g><g
+           id="g2296"
+           transform="translate(151.082)"><path
+             d="m 0,0 h 35.918 l 15,31 v 15 h -177.041 l 18.721,-12.48 C -75.483,12.25 -38.35,0 0,0"
+             style="fill:#dd9b1d;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path2298" /></g><path
+           d="M 67,121 H 457 V 512 H 67 Z"
+           style="fill:#8f96a7;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2300" /><path
+           d="M 457,121 H 262 v 391 h 195 z"
+           style="fill:#747c90;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2302" /><path
+           d="M 187,482 H 97 v -91 h 90 z"
+           style="fill:#fae4b8;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2304" /><path
+           d="m 307,391 h -90 v 91 h 90 z"
+           style="fill:#d0f156;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2306" /><path
+           d="m 337,391 h 90 v 91 h -90 z"
+           style="fill:#c1ee16;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2308" /><path
+           d="m 307,391 h -45 v 91 h 45 z"
+           style="fill:#c1ee16;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2310" /><path
+           d="m 97,151 h 90 v 90 H 97 Z"
+           style="fill:#fae4b8;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2312" /><path
+           d="M 187,361 H 97 v -90 h 90 z"
+           style="fill:#d0f156;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2314" /><path
+           d="m 337,271 h 90 v 90 h -90 z"
+           style="fill:#ffb21b;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2316" /><path
+           d="m 337,151 h 90 v 90 h -90 z"
+           style="fill:#ffb21b;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2318" /><path
+           d="m 157,181 h -30 v 30 h 30 z"
+           style="fill:#8f96a7;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2320" /><path
+           d="m 397,181 h -30 v 30 h 30 z"
+           style="fill:#747c90;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2322" /><path
+           d="m 157,421 h -30 v 30 h 30 z"
+           style="fill:#8f96a7;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2324" /><path
+           d="m 397,301 h -30 v 30 h 30 z"
+           style="fill:#747c90;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2326" /><path
+           d="m 307,271 h -90 v 90 h 90 z"
+           style="fill:#fae4b8;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2328" /><path
+           d="m 262,361 h 45 v -90 h -45 z"
+           style="fill:#ffb21b;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2330" /><path
+           d="m 277,301 h -30 v 30 h 30 z"
+           style="fill:#8f96a7;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2332" /><path
+           d="m 277,301 h -15 v 30 h 15 z"
+           style="fill:#747c90;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2334" /><path
+           d="m 307,151 h -90 v 90 h 90 z"
+           style="fill:#d0f156;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2336" /><path
+           d="m 262,241 h 45 v -90 h -45 z"
+           style="fill:#c1ee16;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2338" /><g
+           id="g2340"
+           transform="translate(187,91)"><path
+             d="M 0,0 V -45 -91 H 210 V -45 0 Z"
+             style="fill:#94dbfd;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path2342" /></g><path
+           d="M 397,46 H 187 V 0 h 210 z"
+           style="fill:#62ccfe;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2344" /><g
+           id="g2346"
+           transform="translate(427,91)"><path
+             d="M 0,0 V -45 -91 H 60 V -45 0 Z"
+             style="fill:#fd80ac;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path2348" /></g><path
+           d="M 487,46 H 427 V 0 h 60 z"
+           style="fill:#dd477f;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="path2350" /></g></g></g>
+  </svg>
+</svg>

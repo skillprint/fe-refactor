@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <defs>
+    <style>
+      .h{fill:#09e08f;} .i{fill:#ae4dd5;} .j{fill:#5bfde1;} .k{fill:#ffb21b;} .l{fill:#573eeb;} .m{fill:#c1ee16;} .n{fill:#212549;} .o{fill:#ff518d;} .p{fill:#27baff;} .q{fill:#2b3159;}
+      #hex-layer-a,#hex-layer-b{transform-origin:190px 105px; animation:hex-zoom 4.8s linear infinite; will-change:transform,opacity;}
+      #hex-layer-b{animation-delay:-2.4s;}
+      @keyframes hex-zoom{0%{transform:scale(.88);opacity:0;}16%{opacity:.9;}100%{transform:scale(1.2);opacity:0;}}
+      
+    </style>
+  </defs>
+  <g id="a"><rect class="q" width="380" height="210"/></g>
+  <g id="background-zoom"><g id="hex-layer-a"><polygon class="n" points="295 -76.87 85 -76.87 -20 105 85 286.87 295 286.87 400 105 295 -76.87"/><polygon class="q" points="280 -50.88 100 -50.88 10 105 100 260.88 280 260.88 370 105 280 -50.88"/><polygon class="n" points="265 -24.9 115 -24.9 40 105 115 234.9 265 234.9 340 105 265 -24.9"/><polygon class="q" points="250 1.08 130 1.08 70 105 130 208.92 250 208.92 310 105 250 1.08"/></g><g id="hex-layer-b"><polygon class="n" points="295 -76.87 85 -76.87 -20 105 85 286.87 295 286.87 400 105 295 -76.87"/><polygon class="q" points="280 -50.88 100 -50.88 10 105 100 260.88 280 260.88 370 105 280 -50.88"/><polygon class="n" points="265 -24.9 115 -24.9 40 105 115 234.9 265 234.9 340 105 265 -24.9"/><polygon class="q" points="250 1.08 130 1.08 70 105 130 208.92 250 208.92 310 105 250 1.08"/></g></g>
+  <g id="d"><path class="i" d="M235.28,184.1h-90.49l3.59-24.36,20.88-17.82h41.55l21.94,19.62,2.53,22.57Z"/><path class="l" d="M232.75,161.53l2.53,22.57h-45.25v-42.19h20.78l21.94,19.62Z"/><path class="j" d="M231.89,105l28.34,10.55,19.76-10.55-44.72-79.1-23.97,23.12-.52,19.07,21.09,36.91Z"/><path class="k" d="M169.27,68.09l.23-17.77-24.72-24.42-44.79,79.1,35.66,10.55,12.52-10.55,21.09-36.91Z"/><path class="m" d="M235.28,25.9l-24.47,42.19h-41.55l-24.47-42.19h90.49Z"/><path class="p" d="M210.8,141.91l24.48,42.19,44.72-79.1h-48.11l-21.09,36.91Z"/><path class="o" d="M169.27,141.91l-21.09-36.91h-48.18l44.79,79.1,24.48-42.19Z"/><path class="h" d="M210.81,68.09h-20.78V25.9h45.25l-24.47,42.19Z"/></g>
+</svg>

@@ -2,6 +2,23 @@
 
 You are acting as an expert Skillprint game designer and developer. When prompted to create or enhance a game, your primary objective is to adapt the game to seamlessly support the Skillprint game loop.
 
+## Redesign & New Components
+
+A new reference design for the Skillprint portal is available at `public/skillprint-portal-redesign/`. This design was created using the current application in this repository as a baseline. 
+
+When working on front-end tasks or UI updates, you must maintain context on this redesign and adhere to the following rules:
+
+- **Reference Material**: Refer to the static HTML/CSS/JS files in `public/skillprint-portal-redesign/` (and its `README.md`) for the target layout, styling (CSS design tokens), and behavior.
+- **New Components Location**: Any new components that need to be created for the application must be placed in the `components/` folder.
+- **Data Integration**: Existing Backend (BE) APIs should be utilized to populate data in components wherever possible.
+- **Placeholder Views & Tags**: Some new views or cards may not have corresponding BE data yet. If you are unsure, ask the user to confirm. If a component is built without real BE data, you must include a small visual tag on the component indicating that it is using placeholder/mock data.
+- **Component Parity**: The ultimate goal is to build a complete component list that covers everything present in `public/Skillprint Design System · 26 August 2026.html`.
+- **Autonomous Workflow & TODO Tracking**: 
+  - Maintain a running TODO list artifact to track progress towards component parity and redesign implementation. 
+  - As an agent, use this TODO list to pick up new work autonomously, using this `GEMINI.md` file as your guiding reference. 
+  - The objective is to work continuously over long periods with minimal human intervention, checking in only at key points (e.g. for approvals or major decisions).
+- **Clarifications**: Always pause and ask questions when requirements or next steps become unclear.
+
 ## Core Responsibilities
 
 1. **Skillprint SDK Integration**

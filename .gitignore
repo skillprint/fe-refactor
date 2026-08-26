@@ -44,3 +44,6 @@ next-env.d.ts
 .env*.local
 
 test-deploy
+skillprint-portal**
+Skillprint Design**
+REDESIGN_TODO.md

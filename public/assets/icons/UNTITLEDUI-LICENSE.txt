@@ -1,0 +1,22 @@
+Untitled UI Icons
+https://www.untitledui.com/icons
+(c) Untitled UI
+
+You are allowed to:
+
+  - Use the icons in personal and commercial projects
+
+You are not allowed to:
+
+  - Sell, sublicense, or distribute the icons (in original or modified form)
+  - Create derivative icon libraries based on the icons
+  - Use the icons in any form of UI kit, library, or template intended for resale
+
+Full terms: https://www.untitledui.com/license
+
+Note for this project
+---------------------
+Unlike the MIT-licensed Tabler set this replaced, these terms do not grant
+redistribution. The sprite at assets/icons/untitledui-icons.svg and the
+generated contact sheet are vendored for Skillprint's own surfaces; they are
+not an icon library to be published or shipped onward as one.

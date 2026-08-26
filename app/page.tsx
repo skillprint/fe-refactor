@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import TopNav from "./components/TopNav";
+import PortalLayout from "@/components/PortalLayout";
 import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
@@ -287,8 +287,7 @@ function HomeContent() {
           onClick={dismissTooltip}
         />
       )}
-      <div className="flex flex-col min-h-screen">
-        <TopNav />
+      <PortalLayout>
         <ProgressBanner />
 
         <div className="px-4 sm:px-8 py-8 bg-background">
@@ -596,9 +595,9 @@ function HomeContent() {
                               {game.name}
                             </h3>
                           </div>
-                          <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
+                          <div className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg inline-block text-center">
                             Play
-                          </button>
+                          </div>
                         </div>
 
                         {game.image ? (
@@ -673,7 +672,7 @@ function HomeContent() {
             </div>
           </div>
         </div>
-      </div>
+      </PortalLayout>
       <GamePreviewShareSheet
         slug={previewGameSlug}
         isOpen={!!previewGameSlug}
