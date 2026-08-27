@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getGameDetails } from '../config/gameConfig';
-import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
+import { unifiedSlugFromBESlug } from '../utils/slugUtils';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { useAuth } from '../context/AuthContext';

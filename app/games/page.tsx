@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
-import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
+import { unifiedSlugFromBESlug } from '../utils/slugUtils';
 import { newGameSlugs } from '../config/newGames';
 import BuckyballLoading from '../components/BuckyballLoading';
 import GamePreviewShareSheet from '../components/GamePreviewShareSheet';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
+import { unifiedSlugFromBESlug } from '../utils/slugUtils';
 
 interface GameAdjustmentTesterProps {
     iframeRef: React.RefObject<HTMLIFrameElement | null>;
