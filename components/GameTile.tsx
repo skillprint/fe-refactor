@@ -67,9 +67,9 @@ export function GameTile({
             <Link className="no-underline text-default" href={url}>{title}</Link>
           </h3>
           {/* Note: We can route to a real game_detail.html or modal later */}
-          <button className="game-info" aria-label={`View game details for ${title}`}>
+          <Link className="game-info" aria-label={`View game details for ${title}`} href={`/game_detail?game=${id}`}>
             <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-info"></use></svg>
-          </button>
+          </Link>
         </div>
         
         <p className="game-description text-muted font-md leading-lg">{description}</p>

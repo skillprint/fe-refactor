@@ -1,189 +1,110 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import TopNav from '../components/TopNav';
-import ProgressBanner from '../components/ProgressBanner';
-import RecommendedGameTile from '../components/RecommendedGameTile';
 import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
 import { unifiedSlugFromBESlug } from '../game/[slug]/GameClient';
 import { newGameSlugs } from '../config/newGames';
-import { inactiveGames } from '../config/inactiveGames';
 import BuckyballLoading from '../components/BuckyballLoading';
 import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
 import { PLAYBOOKS } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { getGameDetails } from '../config/gameConfig';
 import { useAuth } from '../context/AuthContext';
-
-type FilterType = 'moods' | 'skills' | 'playbooks' | 'inactive';
+import PortalLayout from '@/components/PortalLayout';
+import { PortalPageMain, PortalSection } from '@/components/LayoutGrid';
+import { PortalSectionHint, PortalSectionTitle } from '@/components/Typography';
+import { GameTile } from '@/components/GameTile';
+import { PlaybookTile } from '@/components/PlaybookTile';
+import { GameRail } from '@/components/GameRail';
+import { GamesFilter, SkillOption } from '@/components/GamesFilter';
+import { useRecommendedGames } from '../hooks/useRecommendedGames';
 
 function GamesPageContent() {
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as FilterType) || 'moods';
   const initialFilter = searchParams.get('filter');
   const isNewFilter = initialFilter === 'new';
   const { status } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<FilterType>(initialTab === 'playbooks' && status === 'partner' ? 'moods' : initialTab);
-  const [selectedFilterSlug, setSelectedFilterSlug] = useState<string | null>(isNewFilter ? null : initialFilter);
-  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedCognition, setSelectedCognition] = useState<string | null>(null);
+  const [selectedPersonality, setSelectedPersonality] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
-  const { moods, skills, gamesBySkill, gamesByMood, isLoading, error } = useGamesBySkill();
+  
+  const { moods, skills, gamesBySkill, gamesByMood, isLoading } = useGamesBySkill();
   const { sessions } = useGameSessions();
-
-
-  /* ... inside GamesPageContent ... */
+  const { recommendedGames, isLoading: isLoadingRecommended } = useRecommendedGames(10);
 
   // Games to exclude (blacklist)
   const BLACKLISTED_GAMES = ['infinite-runner-3d', 'hextris', 'fruit-ninja', 'plastoblasto', 'flappy-bird-1', 'lastwar-frontline', 'line-color'];
 
-  // Calculate available skills and moods based on existing games (excluding blacklisted ones)
   const availableSkillSlugs = new Set(
     gamesBySkill
       .filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug))
-      .flatMap((game: any) => game.skills.map((s: any) => s.slug))
+      .flatMap((game: any) => game.skills?.map((s: any) => s.slug) || [])
   );
 
   const availableMoodSlugs = new Set(
     gamesByMood
       .filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug))
-      .flatMap((game: any) => game.moods.map((m: any) => m.slug))
+      .flatMap((game: any) => game.moods?.map((m: any) => m.slug) || [])
   );
 
-  const visibleSkills = skills.filter((skill: any) => availableSkillSlugs.has(skill.slug));
-  const visibleMoods = moods.filter((mood: any) => availableMoodSlugs.has(mood.slug));
+  // Re-map skills to pillars for the filter
+  const moodOptions: SkillOption[] = moods
+    .filter((m: any) => availableMoodSlugs.has(m.slug))
+    .map((m: any) => ({ slug: m.slug, name: m.name, pillar: 'mood' }));
+    
+  const cognitionOptions: SkillOption[] = skills
+    .filter((s: any) => availableSkillSlugs.has(s.slug))
+    // We assume skills from useGamesBySkill are mostly cognition.
+    // In a real app we'd map this accurately from the taxonomy.
+    .map((s: any) => ({ slug: s.slug, name: s.name, pillar: 'cognition' }));
 
-  const filteredSkillsGames = gamesBySkill.filter((game: any) => {
-    // First apply tab filtering
-    let matchesTab = true;
-    if (activeTab === 'skills' && selectedFilterSlug) {
-      matchesTab = game.skills.map((skill: any) => skill.slug.toLowerCase()).includes(selectedFilterSlug.toLowerCase());
+  const personalityOptions: SkillOption[] = []; // Add if available
+
+  // Get all unique games
+  const allAvailableGames = useMemo(() => {
+    const combined = [...gamesBySkill, ...gamesByMood];
+    const unique = Array.from(new Map(combined.map(item => [item.slug, item])).values());
+    return unique.filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug));
+  }, [gamesBySkill, gamesByMood]);
+
+  // Apply filters
+  let filteredGames = allAvailableGames.filter((game: any) => {
+    let matchesMood = true;
+    let matchesCognition = true;
+    let matchesPersonality = true;
+
+    if (selectedMood) {
+      matchesMood = game.moods?.some((m: any) => m.slug === selectedMood) || false;
     }
-
-    // Then apply search filtering
-    const matchesSearch = searchQuery === '' ||
-      game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      game.description && game.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesTab && matchesSearch;
-  });
-
-  const filteredMoodGames = gamesByMood.filter((game: any) => {
-    // First apply tab filtering
-    let matchesTab = true;
-    if (activeTab === 'moods' && selectedFilterSlug) {
-      matchesTab = game.moods.map((mood: any) => mood.slug.toLowerCase()).includes(selectedFilterSlug.toLowerCase());
+    if (selectedCognition) {
+      matchesCognition = game.skills?.some((s: any) => s.slug === selectedCognition) || false;
     }
+    // No personality games implemented yet, so skip matching it
 
-    // Then apply search filtering
-    const matchesSearch = searchQuery === '' ||
-      game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      game.description && game.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesTab && matchesSearch;
-  });
-
-  const filteredInactiveGames = inactiveGames.filter((game: any) => {
     const matchesSearch = searchQuery === '' ||
       game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (game.description && game.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesSearch;
+    return matchesMood && matchesCognition && matchesPersonality && matchesSearch;
   });
 
-  const nonDedupedFilteredGames = activeTab === 'inactive' ? filteredInactiveGames : activeTab === 'skills' ? filteredSkillsGames : filteredMoodGames;
-
-  // Apply deduplication
-  let filteredGames = nonDedupedFilteredGames.filter((game: any, index: number) => {
-    // TODO: import these games
-    if (BLACKLISTED_GAMES.includes(game.slug)) {
-      return false;
-    };
-    return nonDedupedFilteredGames.findIndex((g: any) => g.slug === game.slug) === index;
-  });
-
-  // Apply 'new' filter if specified
   if (isNewFilter) {
     filteredGames = filteredGames.filter((game: any) =>
       newGameSlugs.includes(unifiedSlugFromBESlug(game.slug))
     );
   }
 
-  const handleTabChange = (tab: FilterType) => {
-    setActiveTab(tab);
-    setSelectedFilterSlug(null);
-    localStorage.removeItem('targetMood');
-    setIsSearchActive(false);
-    setSearchQuery('');
+  const handleClearAll = () => {
+    setSelectedMood(null);
+    setSelectedCognition(null);
+    setSelectedPersonality(null);
   };
-
-  const handleFilterSelect = (filterSlug: string) => {
-    const newValue = (filterSlug === 'all' || selectedFilterSlug?.toLowerCase() === filterSlug.toLowerCase()) ? null : filterSlug;
-    setSelectedFilterSlug(newValue);
-    if (newValue) {
-      localStorage.setItem('targetMood', newValue);
-    } else {
-      localStorage.removeItem('targetMood');
-    }
-  };
-
-  const handleSearchToggle = () => {
-    setIsSearchActive(!isSearchActive);
-    if (isSearchActive) {
-      setSearchQuery('');
-    }
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const getColorForSlug = (slug: string) => {
-    const lowerSlug = slug.toLowerCase();
-    const colorMap: Record<string, string> = {
-      'focus': '#6366F1', // indigo-500
-      'relax': '#10B981', // emerald-500
-      'memory': '#8B5CF6', // violet-500
-      'speed': '#EF4444', // red-500
-      'logic': '#06B6D4', // cyan-500
-      'attention': '#F59E0B', // amber-500
-      'problem-solving': '#3B82F6', // blue-500
-      'language': '#EC4899', // pink-500
-      'math': '#84CC16', // lime-500
-      'visual': '#F97316', // orange-500
-      'creativity': '#D946EF', // fuchsia-500
-    };
-
-    if (colorMap[lowerSlug]) return colorMap[lowerSlug];
-
-    const colors = [
-      '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
-      '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
-    ];
-
-    let hash = 0;
-    for (let i = 0; i < lowerSlug.length; i++) {
-      hash = lowerSlug.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    return colors[Math.abs(hash) % colors.length];
-  };
-
-  const getTintedBackground = (color: string, opacity: number) => {
-    if (color.startsWith('#')) {
-      const r = parseInt(color.slice(1, 3), 16);
-      const g = parseInt(color.slice(3, 5), 16);
-      const b = parseInt(color.slice(5, 7), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    }
-    return color;
-  };
-
-  const activeColor = selectedFilterSlug ? getColorForSlug(selectedFilterSlug) : null;
 
   const playbookData = Object.values(PLAYBOOKS).map((playbook) => {
     let nextGameSlug = playbook.games[0];
@@ -199,341 +120,181 @@ function GamesPageContent() {
       }
     }
     const isFinished = completedCount === playbook.games.length;
-    const percentComplete = Math.round((completedCount / playbook.games.length) * 100);
     const firstGameDetails = getGameDetails(playbook.games[0]);
 
-    return { playbook, completedCount, isFinished, percentComplete, nextGameSlug, firstGameDetails };
+    return { playbook, completedCount, isFinished, nextGameSlug, firstGameDetails };
   });
 
-  const inProgressPlaybooks = playbookData.filter(p => !p.isFinished && p.completedCount > 0);
-  const availablePlaybooks = playbookData.filter(p => !p.isFinished && p.completedCount === 0);
-  const completedPlaybooks = playbookData.filter(p => p.isFinished);
-
-  const renderPlaybookCard = ({ playbook, completedCount, isFinished, percentComplete, nextGameSlug, firstGameDetails }: any) => (
-    <Link
-      key={playbook.id}
-      href={isFinished ? '#' : `/game/${encodeURIComponent(nextGameSlug)}/interstitial?source=playbook&playbookId=${playbook.id}`}
-      className={`block group ${isFinished ? 'cursor-not-allowed opacity-80' : ''}`}
-    >
-      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-lg transition-all duration-300 relative h-full flex flex-col">
-        {isFinished && (
-          <div className="absolute top-3 right-3 z-20 bg-green-500 text-white p-1.5 rounded-full shadow-md">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        )}
-
-        <div className="h-32 w-full relative bg-secondary/20">
-          {firstGameDetails?.image ? (
-            <img
-              src={firstGameDetails.image}
-              alt={playbook.title}
-              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${isFinished ? 'grayscale' : ''}`}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 opacity-80" />
-          )}
-
-          {/* Goal Badge overlay */}
-          <div className="absolute top-3 left-3 z-20">
-            <span className="bg-background/90 backdrop-blur-sm text-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm border border-border/50">
-              {playbook.goal}
-            </span>
-          </div>
-        </div>
-
-        <div className="p-5 flex-1 flex flex-col">
-          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-            {playbook.title}
-          </h3>
-          <p className="text-muted-foreground text-sm mt-2 mb-4 flex-1">
-            {playbook.description}
-          </p>
-
-          {/* Progress Meter inside card */}
-          <div className="mt-auto">
-            <div className="flex justify-between text-xs font-semibold mb-1.5">
-              <span className="text-muted-foreground">{completedCount} of {playbook.games.length} games</span>
-              <span className={isFinished ? 'text-green-500' : 'text-primary'}>{percentComplete}%</span>
-            </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-500 ease-out ${isFinished ? 'bg-green-500' : 'bg-primary'}`}
-                style={{ width: `${percentComplete}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-
   return (
-    <div
-      className="font-sans min-h-screen bg-background transition-colors duration-500 ease-in-out"
-      style={{
-        backgroundColor: activeColor ? getTintedBackground(activeColor, 0.03) : undefined
-      }}
-    >
-      <div className="flex flex-col min-h-screen pb-32">
-        <TopNav />
-        <ProgressBanner />
-        <div className="flex flex-col sticky top-16 z-40">
-
-          {/* Tab Menu */}
-          <div className="bg-card shadow-sm border-b border-border">
-            <div className="max-w-[1440px] w-full mx-auto px-4">
-              <div className="flex space-x-1 py-1">
-                <button
-                  onClick={() => handleTabChange('moods')}
-                  className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'moods'
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                >
-                  Moods
-                </button>
-                <button
-                  onClick={() => handleTabChange('skills')}
-                  className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'skills'
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                >
-                  Skills
-                </button>
-                {status !== 'partner' && (
-                  <button
-                    onClick={() => handleTabChange('playbooks')}
-                    className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'playbooks'
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                  >
-                    Playbooks
-                  </button>
-                )}
-                {/* <button
-                  onClick={() => handleTabChange('inactive')}
-                  className={`px-4 py-1 text-[13px] rounded-lg font-medium transition-colors ${activeTab === 'inactive'
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                >
-                  Inactive
-                </button> */}
-                {/* search button */}
-                <button
-                  onClick={handleSearchToggle}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${isSearchActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
-              </div>
+    <>
+      <PortalLayout>
+        <PortalPageMain>
+          {/* Header */}
+          <div className="portal-head">
+            <div className="portal-eyebrow">Games</div>
+            <div className="portal-head__row">
+              <h1>Ready to play</h1>
+              <Link className="button button--secondary button--md" href="/skills">
+                How games build skills 
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
+              </Link>
             </div>
+            <p>50 short games, and every one of them is a measurement. Play a round and it reads how you think, decide and hold your nerve, then feeds that reading back as skills you can watch build session by session.</p>
           </div>
 
-          {/* Search Box - Overlaps filter menu when active */}
-          {isSearchActive && (
-            <div className="bg-card border-b border-border shadow-sm">
-              <div className="max-w-[1440px] w-full mx-auto px-4 py-3 relative">
-                <input
-                  type="text"
-                  placeholder="Search games..."
+          {/* Recommended for you */}
+          <PortalSection ariaLabelledBy="gamesPicked">
+            <div className="portal-section__bar">
+                <div>
+                  <PortalSectionTitle id="gamesPicked">Recommended for you</PortalSectionTitle>
+                  <PortalSectionHint>Attention has the most headroom this week, so these read it hardest.</PortalSectionHint>
+                </div>
+                <Link className="portal-section__link" href="/skills">
+                  Develop a specific skill <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                </Link>
+              </div>
+              <GameRail isLibrary>
+                {recommendedGames.slice(0, 5).map((game: any, i: number) => (
+                  <GameTile
+                    key={game.slug}
+                    id={game.slug}
+                    title={game.name}
+                    description={game.description}
+                    image={game.screenshot || game.image || '/images/default-game.jpg'}
+                    url={`/game_session?game=${game.slug}`}
+                    skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
+                    tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                    statusBadge="Recommended"
+                  />
+                ))}
+              </GameRail>
+          </PortalSection>
+
+          {/* Playbooks */}
+          {status !== 'partner' && (
+            <PortalSection ariaLabelledBy="gamesPlaybooks">
+              <div className="portal-section__bar">
+                <div>
+                  <PortalSectionTitle id="gamesPlaybooks">Playbooks</PortalSectionTitle>
+                  <PortalSectionHint>A short sequence with one job. Finish the set and the skills it targets move together.</PortalSectionHint>
+                </div>
+              </div>
+              <GameRail>
+                {playbookData.map((data, i) => (
+                  <PlaybookTile
+                    key={data.playbook.id}
+                    id={data.playbook.id}
+                    title={data.playbook.title}
+                    description={data.playbook.description}
+                    iconSrc={`/assets/icons/playbook-${['focus', 'learning', 'wellness'][i % 3]}.svg`}
+                    nextGameSlug={data.nextGameSlug}
+                    nextGameImage={data.firstGameDetails?.image || '/images/default-game.jpg'}
+                    totalGames={data.playbook.games.length}
+                    completedGames={data.completedCount}
+                    isFinished={data.isFinished}
+                    tone={(["pink", "magenta", "orange", "blue", "green", "yellow", "purple"] as const)[i % 7]}
+                  />
+                ))}
+              </GameRail>
+            </PortalSection>
+          )}
+
+          {/* All Games */}
+          <PortalSection ariaLabelledBy="gamesAll">
+            <div className="portal-section__bar">
+              <div>
+                <PortalSectionTitle id="gamesAll">All games</PortalSectionTitle>
+                <PortalSectionHint>Every game adapts to you as you play. Start from the skill you want to move.</PortalSectionHint>
+              </div>
+              
+              {/* Search Field */}
+              <label className="search-field field__control--both position-relative">
+                <span className="sr-only position-absolute padding-none clip no-wrap border-none">Search games</span>
+                <svg className="sp-icon position-absolute text-muted" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-search"></use></svg>
+                <input 
+                  className="full-width" 
+                  aria-label="Search games" 
+                  autoComplete="off" 
+                  id="gameSearch" 
+                  placeholder="Search games or skills" 
+                  type="search" 
                   value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="w-full px-4 py-2 pl-10 pr-4 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground placeholder-muted-foreground"
-                  autoFocus
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <svg
-                  className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <button 
+                  aria-label="Clear search" 
+                  className="clear-search button button--tertiary button--icon-only button--md surface-transparent text-muted position-absolute border-none radius-control layout-grid place-center" 
+                  hidden={!searchQuery}
+                  id="clearSearch" 
+                  type="button"
+                  onClick={() => setSearchQuery('')}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  >
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Filter Options */}
-          {activeTab !== 'playbooks' && activeTab !== 'inactive' && (
-            <div className="bg-card border-b border-border">
-              <div className="max-w-[1440px] w-full mx-auto px-4 py-2 flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleFilterSelect('all')}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 border ${!selectedFilterSlug || selectedFilterSlug === 'all'
-                    ? 'bg-foreground text-background shadow-md transform scale-105 border-foreground'
-                    : 'bg-transparent hover:bg-secondary text-foreground border-transparent'
-                    }`}
-                >
-                  All
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-close"></use></svg>
                 </button>
-                {(activeTab === 'moods' ? visibleMoods : visibleSkills).map((item: any) => {
-                  const color = getColorForSlug(item.slug);
-                  const isSelected = selectedFilterSlug?.toLowerCase() === item.slug.toLowerCase();
-                  return (
-                    <button
-                      key={item.slug}
-                      onClick={() => handleFilterSelect(item.slug)}
-                      className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 border ${isSelected
-                        ? 'text-white shadow-md transform scale-105'
-                        : 'bg-transparent hover:bg-secondary text-foreground border-transparent'
-                        }`}
-                      style={{
-                        backgroundColor: isSelected ? color : undefined,
-                        borderColor: isSelected ? color : 'transparent',
-                        color: isSelected ? '#ffffff' : undefined
-                      }}
-                    >
-                      {item.name}
-                    </button>
-                  );
-                })}
+              </label>
+            </div>
+
+            <GamesFilter
+              moods={moodOptions}
+              cognitions={cognitionOptions}
+              personalities={personalityOptions}
+              selectedMood={selectedMood}
+              selectedCognition={selectedCognition}
+              selectedPersonality={selectedPersonality}
+              onSelectMood={setSelectedMood}
+              onSelectCognition={setSelectedCognition}
+              onSelectPersonality={setSelectedPersonality}
+              onClearAll={handleClearAll}
+            />
+
+            <div className="portal-toolbar">
+              <span className="portal-toolbar__count" id="resultCount" role="status" aria-atomic="true">
+                {isLoading ? 'Loading...' : `${filteredGames.length} games`}
+              </span>
+            </div>
+
+            {isLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <BuckyballLoading />
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Loading */}
-        {isLoading && (
-          <div className="flex justify-center items-center h-full mt-10">
-            <BuckyballLoading />
-          </div>
-        )}
-
-        {/* Playbooks Grid */}
-        {activeTab === 'playbooks' ? (
-          <main className="flex-1 px-4 py-6 max-w-[1440px] w-full mx-auto">
-            <div className="flex flex-col gap-8">
-              {inProgressPlaybooks.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">In Progress</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {inProgressPlaybooks.map(renderPlaybookCard)}
-                  </div>
-                </section>
-              )}
-
-              {availablePlaybooks.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Available</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {availablePlaybooks.map(renderPlaybookCard)}
-                  </div>
-                </section>
-              )}
-
-              {completedPlaybooks.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Completed</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {completedPlaybooks.map(renderPlaybookCard)}
-                  </div>
-                </section>
-              )}
-            </div>
-          </main>
-        ) : (
-          <main className="flex-1 px-4 py-6 max-w-[1440px] w-full mx-auto">
-            {/* Games Grid */}
-            {filteredGames.length === 0 ? (
-              <div className="text-center">
-                <p className="text-muted-foreground text-lg font-semibold">
-                  {/* {isLoading ? 'Loading games...' : ''} */}
-                  {!isLoading && !searchQuery ? 'No games found with the selected filter.' : !isLoading && searchQuery ? 'No games found matching your search.' : ''}
-                </p>
+            ) : filteredGames.length === 0 ? (
+              <div className="portal-blank">
+                <p className="portal-blank__title">No games found</p>
+                <p className="portal-blank__note">Try adjusting your filters or search query.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {!searchQuery && !selectedFilterSlug && <RecommendedGameTile />}
-                {filteredGames.map((game: any) => (
-                  <button
-                    key={game.slug + Math.random().toString()}
-                    onClick={() => setPreviewGameSlug(game.slug)}
-                    className="block group w-full text-left"
-                  >
-                    {(() => {
-                      let tileColor = '#6366F1';
-                      if (selectedFilterSlug && selectedFilterSlug !== 'all') {
-                        tileColor = getColorForSlug(selectedFilterSlug);
-                      } else if (activeTab === 'skills' && game.skills?.length > 0) {
-                        tileColor = getColorForSlug(skills.find((s: any) => s.id === game.skills[0])?.slug || 'focus');
-                      } else if (game.moods?.length > 0) {
-                        const firstMood = moods.find((m: any) => m.id === game.moods[0]);
-                        tileColor = getColorForSlug(firstMood?.slug || 'focus');
-                      }
-
-                      return (
-                        <div
-                          className="rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44"
-                          style={{ backgroundColor: tileColor }}
-                        >
-                          <div className="flex-1 p-5 flex flex-col justify-between items-start">
-                            <div>
-                              <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
-                                {game.name}
-                              </h3>
-                            </div>
-                            <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
-                              Play
-                            </button>
-                          </div>
-                          {game.screenshot && (
-                            <div className="relative aspect-square h-full shrink-0">
-                              <Image
-                                src={game.screenshot}
-                                alt={game.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </button>
+              <div className="game-grid game-grid--portal grid grid-3" id="gameGrid">
+                {filteredGames.map((game: any, i: number) => (
+                  <GameTile
+                    key={game.slug}
+                    id={game.slug}
+                    title={game.name}
+                    description={game.description || ''}
+                    image={game.screenshot || game.image || '/images/default-game.jpg'}
+                    url={`/game_session?game=${game.slug}`}
+                    skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
+                    tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                  />
                 ))}
               </div>
             )}
-          </main>
-        )}
+          </PortalSection>
+        </PortalPageMain>
+      </PortalLayout>
 
-        {/* Bottom tabs */}
-
-      </div>
       <GamePreviewShareSheet 
         slug={previewGameSlug} 
         isOpen={!!previewGameSlug} 
         onClose={() => setPreviewGameSlug(null)} 
       />
-    </div>
+    </>
   );
 }
 
-function GamesPage() {
+export default function GamesPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><BuckyballLoading /></div>}>
       <GamesPageContent />
     </Suspense>
   );
 }
-
-export default GamesPage;

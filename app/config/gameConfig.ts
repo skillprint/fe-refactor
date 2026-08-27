@@ -593,7 +593,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'line-color': {
     name: 'Line Color',
     description: 'Line Color',
-    image: '/games/live/Line Color/icon_144.png',
+    image: '/images/activities/covers/2048.png', // Temporary fallback
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',

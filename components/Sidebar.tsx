@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     try {
@@ -42,9 +44,9 @@ export default function Sidebar() {
       </button>
       <nav className="portal-sidebar__scroll sp-side-nav__scroll" aria-label="Portal sections">
         <div className="sp-side-nav__group" data-home-spot="routes">
-          <Link title="Home" className="sp-side-nav__link is-active" href="/" aria-current="page"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-home"></use></svg><span className="sp-side-nav__label">Home</span></Link>
-          <Link title="Games" className="sp-side-nav__link" href="/games"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg><span className="sp-side-nav__label">Games</span></Link>
-          <Link title="Skills" className="sp-side-nav__link" href="/skills"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chart"></use></svg><span className="sp-side-nav__label">Skills</span></Link>
+          <Link title="Home" className={`sp-side-nav__link ${pathname === '/' ? 'is-active' : ''}`} href="/" aria-current={pathname === '/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-home"></use></svg><span className="sp-side-nav__label">Home</span></Link>
+          <Link title="Games" className={`sp-side-nav__link ${pathname === '/games' || pathname === '/games/' ? 'is-active' : ''}`} href="/games" aria-current={pathname === '/games' || pathname === '/games/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg><span className="sp-side-nav__label">Games</span></Link>
+          <Link title="Skills" className={`sp-side-nav__link ${pathname === '/skills' || pathname === '/skills/' ? 'is-active' : ''}`} href="/skills" aria-current={pathname === '/skills' || pathname === '/skills/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chart"></use></svg><span className="sp-side-nav__label">Skills</span></Link>
         </div>
       </nav>
       <div className="portal-sidebar__foot">
