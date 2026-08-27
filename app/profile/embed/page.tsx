@@ -7,6 +7,7 @@ import { getVisualizeMoodProfile, getVisualizeSkillProfile } from '../../api/api
 import SkillprintVisualization from '../../components/Skillprint';
 import BuckyballLoading from '../../components/BuckyballLoading';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
+import EmbedCard from '@/components/Profile/EmbedCard';
 
 const USER_SKILLS = [
   'Problem Solving',
@@ -30,6 +31,24 @@ function EmbedProfileContent() {
     hasScoreByMood: { [key: string]: boolean };
     nodeDataMap: { [key: string]: any };
   } | null>(null);
+
+  const [embedProps, setEmbedProps] = useState<any>({
+    userName: 'Player',
+    flowMedian: 72,
+    flowBest: 82,
+    stats: [
+      { label: 'Flow', value: 72 },
+      { label: 'Sessions', value: 8 },
+      { label: 'Played', value: '1h 12m' }
+    ],
+    traits: [
+      { traitName: 'Pattern Matching', score: 82, iconId: 'ti-cognition-pattern-matching' },
+      { traitName: 'Task Switching', score: 76, iconId: 'ti-cognition-task-switching' },
+      { traitName: 'Planning', score: 71, iconId: 'ti-cognition-planning' },
+    ],
+    targetMood: 'Focus',
+    streakDays: 4,
+  });
 
   const [size, setSize] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -252,6 +271,50 @@ function EmbedProfileContent() {
           hasScoreByMood,
           nodeDataMap: { ...nodeDataBySkill, ...nodeDataByMood }
         });
+
+        // Compute stats and traits for EmbedCard
+        const userName = profileResponse?.results?.[0]?.name || profileResponse?.results?.[0]?.username || profileResponse?.results?.[0]?.id || "Player";
+        const sessions = profileResponse?.results?.[0]?.flowScoreHistory?.length || 8;
+        let extractedTraits: any[] = [];
+        if (skillProfile?.yearlySummary && Array.isArray(skillProfile.yearlySummary)) {
+           const sorted = [...skillProfile.yearlySummary].sort((a, b) => (b.score || b.progress || 0) - (a.score || a.progress || 0));
+           extractedTraits = sorted.slice(0, 3).map(t => {
+               const name = (t.skill || t.mood || '').replace(/-/g, ' ');
+               const capName = name.charAt(0).toUpperCase() + name.slice(1);
+               const score = Math.round((t.score || t.progress || 0) * 100) || 0;
+               return {
+                  traitName: capName,
+                  score,
+                  iconId: `ti-cognition-${name.toLowerCase().replace(/ /g, '-')}` 
+               };
+           });
+        }
+        
+        if (extractedTraits.length === 0) {
+            extractedTraits = [
+              { traitName: 'Pattern Matching', score: 82, iconId: 'ti-cognition-pattern-matching' },
+              { traitName: 'Task Switching', score: 76, iconId: 'ti-cognition-task-switching' },
+              { traitName: 'Planning', score: 71, iconId: 'ti-cognition-planning' },
+            ];
+        }
+
+        const topMood = processedProfile?.latestMoods?.[0]?.targetMood || "Focus";
+        const capTargetMood = topMood.charAt(0).toUpperCase() + topMood.slice(1);
+
+        setEmbedProps({
+           userName: userName,
+           flowMedian: 72,
+           flowBest: 82,
+           stats: [
+              { label: 'Flow', value: 72 },
+              { label: 'Sessions', value: sessions },
+              { label: 'Played', value: '1h 12m' }
+           ],
+           traits: extractedTraits,
+           targetMood: capTargetMood,
+           streakDays: 4
+        });
+
       } catch (err: any) {
         console.error('Failed to load embed profile data:', err);
         if (isMounted) {
@@ -275,42 +338,39 @@ function EmbedProfileContent() {
 
   return (
     <div
-      ref={containerRef}
       className="w-screen h-screen flex items-center justify-center overflow-hidden bg-transparent m-0 p-0"
     >
       {isLoading ? (
         <BuckyballLoading />
       ) : error ? (
-        <div className="flex flex-col items-center justify-center p-6 text-center max-w-sm bg-card rounded-2xl border border-border/85 shadow-lg animate-in fade-in zoom-in duration-300 mx-4">
-          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center text-3xl mb-4 animate-pulse">
-            ⚠️
-          </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">Unable to load profile</h2>
-          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-            {error.message || 'We ran into an unexpected issue while fetching the Skillprint visualization.'}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-sm rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-          >
-            Try Again
-          </button>
-        </div>
-      ) : visualizationData && size > 0 ? (
-        <div
-          style={{ width: size, height: size }}
-          className="flex items-center justify-center relative animate-in fade-in duration-500"
-        >
-          <SkillprintVisualization
-            userSkills={USER_SKILLS}
-            userMoods={USER_MOODS}
-            hasScoreBySkill={visualizationData.hasScoreBySkill}
-            hasScoreByMood={visualizationData.hasScoreByMood}
-            nodeDataMap={visualizationData.nodeDataMap}
-            size={size}
-            useSizeDirectly={true}
-          />
-        </div>
+        <EmbedCard 
+            error={error} 
+            onRetry={() => window.location.reload()} 
+        />
+      ) : visualizationData ? (
+        <EmbedCard 
+            userName={embedProps.userName}
+            flowMedian={embedProps.flowMedian}
+            flowBest={embedProps.flowBest}
+            stats={embedProps.stats}
+            traits={embedProps.traits}
+            targetMood={embedProps.targetMood}
+            streakDays={embedProps.streakDays}
+            visualizationNode={
+                <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
+                    <SkillprintVisualization
+                        userSkills={USER_SKILLS}
+                        userMoods={USER_MOODS}
+                        hasScoreBySkill={visualizationData.hasScoreBySkill}
+                        hasScoreByMood={visualizationData.hasScoreByMood}
+                        nodeDataMap={visualizationData.nodeDataMap}
+                        size={size > 0 ? size : 200}
+                        useSizeDirectly={true}
+                        interactive={false}
+                    />
+                </div>
+            }
+        />
       ) : (
         <BuckyballLoading />
       )}

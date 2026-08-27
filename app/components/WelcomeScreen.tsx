@@ -1,25 +1,33 @@
 'use client';
 
-import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { useLinkedIn } from 'react-linkedin-login-oauth2';
+import { knownGameSlugs, getGameDetails } from '../config/gameConfig';
+
+const ROWS = [
+  { duration: 115, delay: -41, reverse: false },
+  { duration: 132, delay: -15, reverse: true },
+  { duration: 96, delay: -11, reverse: false },
+  { duration: 129, delay: -47, reverse: true },
+  { duration: 108, delay: -29, reverse: false },
+  { duration: 143, delay: -73, reverse: true },
+  { duration: 117, delay: -5, reverse: false },
+  { duration: 104, delay: -33, reverse: true },
+  { duration: 135, delay: -62, reverse: false },
+  { duration: 122, delay: -21, reverse: true },
+  { duration: 98, delay: -55, reverse: false },
+  { duration: 140, delay: -38, reverse: true },
+  { duration: 125, delay: -25, reverse: false },
+  { duration: 110, delay: -50, reverse: true },
+];
 
 export function WelcomeScreen() {
-    const { loginAsGuest, loginWithSocialId, loginAsOrg } = useAuth();
-    const [isHovered, setIsHovered] = useState<string | null>(null);
+    const { loginAsGuest, loginWithSocialId } = useAuth();
     const [isCompletingLogin, setIsCompletingLogin] = useState(false);
-    const [isExiting, setIsExiting] = useState(false);
-
-    // Org Login State
-    const [isOrgLoginVisible, setIsOrgLoginVisible] = useState(false);
-    const [orgUsername, setOrgUsername] = useState('');
-    const [orgPassword, setOrgPassword] = useState('');
-    const [orgError, setOrgError] = useState('');
-    const [isLoggingInOrg, setIsLoggingInOrg] = useState(false);
 
     const { linkedInLogin } = useLinkedIn({
         clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || 'dummy-client-id',
@@ -36,13 +44,10 @@ export function WelcomeScreen() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setIsExiting(true);
-                    setTimeout(() => {
-                        loginWithSocialId(`linkedin-${data.id || code.substring(0, 8)}`, {
-                            firstName: data.firstName || 'LinkedIn User',
-                            picture: data.picture
-                        });
-                    }, 500);
+                    loginWithSocialId(`linkedin-${data.id || code.substring(0, 8)}`, {
+                        firstName: data.firstName || 'LinkedIn User',
+                        picture: data.picture
+                    });
                 } else {
                     console.error('LinkedIn backend error:', await response.text());
                     setIsCompletingLogin(false);
@@ -59,259 +64,167 @@ export function WelcomeScreen() {
 
     const handleLoginAction = (action: () => void) => {
         setIsCompletingLogin(true);
-        setTimeout(() => {
-            setIsExiting(true);
-            setTimeout(() => {
-                action();
-            }, 500); // Wait for transition fade out to complete
-        }, 300); // Show spinner briefly 
+        action();
     };
 
-    const handleOrgLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setOrgError('');
-        setIsLoggingInOrg(true);
-
-        try {
-            const res = await fetch('/api/auth/org/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: orgUsername, password: orgPassword })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || 'Login failed');
-            }
-
-            handleLoginAction(() => {
-                loginAsOrg(data.token, { firstName: data.organization.name });
-            });
-        } catch (err: any) {
-            setOrgError(err.message);
-            setIsLoggingInOrg(false);
-        }
-    };
-
-    // Decorative ambient circles
-    const circles = [
-        { bg: "bg-blue-500", size: "w-64 h-64", top: "-top-32", left: "-left-32", delay: "animation-delay-0" },
-        { bg: "bg-purple-500", size: "w-72 h-72", top: "top-1/4", left: "-right-24", delay: "animation-delay-2000" },
-        { bg: "bg-pink-500", size: "w-80 h-80", top: "-bottom-40", left: "left-1/3", delay: "animation-delay-4000" },
+    // Build pool of known good game images for the animated tiles
+    const tileImages = [
+        '/images/activities/covers/2048.png',
+        '/images/activities/covers/Hextris.png',
+        '/images/activities/covers/alchemy-0d0a33e5-d249-42d2-91cc-a734b00e6113.png',
+        '/images/activities/covers/box-tower.png',
+        '/images/activities/covers/brick-out.png',
+        '/images/activities/covers/bubble-spirit-d1e8e962-1243-4e94-a9f4-351dec27ae8a.png',
+        '/images/activities/covers/change-word-0bc38905-8138-43f2-9ff5-a01a5f038782.png',
+        '/images/activities/covers/colorize-2-79f1475d-c180-43e0-a496-0123c3972709.png',
+        '/images/activities/covers/flapcat-steampunk-fe310887-b4c3-4cbb-96d4-575e5786.png',
+        '/images/activities/covers/fruit-boom-cfc9640c-477d-437b-9d2f-54f972163c09.png',
+        '/images/activities/covers/0hh1-e28b593f-4355-4b9e-8444-6f9e04ca1846.png',
+        '/images/activities/covers/garden-match-f883d184-cb16-434c-a866-6eaff7bd05b2.png',
+        '/images/activities/covers/i-love-hue-115ad80c-adb3-47fb-8be7-4b683133a94e.png',
+        '/images/activities/covers/mine-rusher-08ac08e4-61d5-4ac8-8cef-d29273cf8448.png',
+        '/images/activities/covers/snake-attack-3b730898-fe67-4e51-a655-57c81bd3efbc.png',
+        '/images/activities/covers/space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20.png',
+        '/images/activities/covers/ultimate-sudoku-c5f5177d-6a3e-43f6-b2d2-6a7a78c88e.png',
+        '/images/activities/covers/sweet-memory-2-6b558e2a-cf49-4ea7-be60-2a8dda06b60.png',
+        '/images/activities/covers/star-puzzles-c2b7b115-b851-419e-8052-cad293bac997.png',
+        '/images/activities/covers/mahjong-deluxe-77a68085-f806-48c8-a3a8-a11450f3d80.png'
     ];
 
     return (
-        <div className={`relative min-h-screen flex items-center justify-center overflow-hidden bg-background transition-all duration-500 ease-in-out ${isExiting ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
-            {/* Dynamic Background Elements */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-gradient-to-b from-transparent to-slate-900/40 dark:to-background/60">
-                {/* Soft ambient wave layers at the bottom */}
-                <div className="absolute inset-x-0 bottom-0 overflow-hidden h-[50vh] mix-blend-multiply dark:mix-blend-lighten opacity-80 dark:opacity-40">
-                    <svg className="absolute bottom-0 w-[200%] h-full animate-wave-slower origin-bottom text-blue-700" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                        <path fill="currentColor" opacity="0.6" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                        <path fill="currentColor" opacity="0.6" transform="translate(1440, 0)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                    </svg>
-                    <svg className="absolute bottom-0 w-[200%] h-[85%] animate-wave-reverse origin-bottom text-indigo-700" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                        <path fill="currentColor" opacity="0.7" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                        <path fill="currentColor" opacity="0.7" transform="translate(1440, 0)" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                    </svg>
-                    <svg className="absolute bottom-0 w-[200%] h-[70%] animate-wave-slow origin-bottom text-purple-700" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                        <path fill="currentColor" opacity="0.8" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                        <path fill="currentColor" opacity="0.8" transform="translate(1440, 0)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                    </svg>
-                    <svg className="absolute bottom-0 w-[200%] h-[55%] animate-wave origin-bottom text-blue-900" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                        <path fill="currentColor" opacity="0.9" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                        <path fill="currentColor" opacity="0.9" transform="translate(1440, 0)" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                    </svg>
-                </div>
+        <div className="page--portal-welcome" data-skillprint-page="portal-welcome">
+            <div className="welcome-shell">
+                {/* Animated Tiles Background */}
+                <div className="welcome-field" data-welcome-field aria-hidden="true">
+                    <div className="welcome-field__stage">
+                        {ROWS.map((row, i) => {
+                            // Deterministic shuffle for this row
+                            const order = [...tileImages].sort((a, b) => (a.length * (i + 1)) % 5 - (b.length * (i + 1)) % 5);
+                            // Ensure enough tiles to fill a large screen row (approx 24 cards per half)
+                            const extendedOrder = [];
+                            while (extendedOrder.length < 24) {
+                                extendedOrder.push(...order);
+                            }
+                            const half = extendedOrder.slice(0, 24);
+                            const trackItems = [...half, ...half]; // Duplicate for seamless loop
 
-                <div className="absolute inset-0 opacity-20 dark:opacity-30">
-                    {circles.map((circle, i) => (
-                        <div
-                            key={i}
-                            className={`absolute ${circle.bg} ${circle.size} ${circle.top} ${circle.left} rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob ${circle.delay}`}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            <div className={`relative z-10 w-full max-w-md p-8 sm:p-10 mx-4 bg-card/60 backdrop-blur-xl border border-border rounded-3xl shadow-2xl transition-all duration-500 ${isExiting ? 'scale-95 translate-y-4' : 'scale-100 translate-y-0'}`}>
-
-                {/* Header & Branding */}
-                <div className="flex flex-col items-center mb-10 text-center">
-                    <div className="relative w-20 h-20 mb-6 drop-shadow-xl overflow-hidden rounded-2xl ring-1 ring-border shadow-inner">
-                        <Image
-                            src="/logo192.png"
-                            alt="Skillprint Logo"
-                            layout="fill"
-                            objectFit="cover"
-                            className="hover:scale-105 transition-transform duration-500 ease-out"
-                        />
+                            return (
+                                <div key={i} className={`welcome-field__row ${row.reverse ? 'welcome-field__row--reverse' : ''}`}>
+                                    <div className="welcome-field__track" style={{
+                                        '--row-duration': `${row.duration}s`,
+                                        '--row-delay': `${row.delay}s`,
+                                        '--row-rest': `-${(((Math.abs(row.delay) / row.duration) % 1) * 50).toFixed(2)}%`,
+                                    } as React.CSSProperties}>
+                                        {trackItems.map((src, j) => (
+                                            <span key={j} className="welcome-field__card">
+                                                <img src={src} alt="" width="160" height="160" decoding="async" />
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-                    <h1 className="text-4xl font-extrabold tracking-tight mb-2 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        Welcome to Skillprint
-                    </h1>
-                    <p className="text-muted-foreground text-sm sm:text-base px-4">
-                        Unlock your potential with games that adapt to improve your cognitive abilities.
-                    </p>
                 </div>
 
-                {/* Login Actions */}
-                <div className="flex flex-col gap-4 relative min-h-[160px]">
-                    {isCompletingLogin ? (
-                        <div className="absolute inset-0 flex items-center justify-center animate-fade-in">
-                            <div className="w-12 h-12 rounded-full border-4 border-muted border-t-foreground animate-spin"></div>
+                <main className="welcome-main" id="top">
+                    <article className="auth-card sp-card">
+                        
+                        <div className="auth-card__head">
+                            <h1 className="auth-card__title margin-none">Welcome to Skillprint</h1>
+                            <p className="auth-card__lede margin-none text-muted">Short games that read how you think, and turn what you already play into a profile you can use.</p>
                         </div>
-                    ) : (
-                        <div className="flex flex-col gap-4 w-full animate-fade-in">
-                            <button
-                                onClick={() => handleLoginAction(loginAsGuest)}
-                                onMouseEnter={() => setIsHovered('guest')}
-                                onMouseLeave={() => setIsHovered(null)}
-                                className="group relative w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/25 overflow-hidden"
-                            >
-                                <div className={`absolute inset-0 bg-white/20 transform -translate-x-full transition-transform duration-500 ease-out ${isHovered === 'guest' ? 'translate-x-0' : ''}`} />
-                                <span className="relative flex flex-row gap-2">Play as Guest
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg></span>
-                            </button>
-
-                            <div className="relative flex items-center py-4">
-                                <div className="flex-grow border-t border-border"></div>
-                                <span className="flex-shrink-0 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Or continue with</span>
-                                <div className="flex-grow border-t border-border"></div>
-                            </div>
-
-                            {/* Social Provider Stubs */}
-                            <div className="flex flex-col gap-3">
-                                <div className="flex items-center justify-center w-full">
-                                    <GoogleLogin
-                                        onSuccess={credentialResponse => {
-                                            if (credentialResponse.credential) {
-                                                const decoded = jwtDecode(credentialResponse.credential) as any;
-                                                if (decoded && decoded.sub) {
-                                                    const firstName = decoded.given_name || decoded.name || 'User';
-                                                    const picture = decoded.picture;
-                                                    handleLoginAction(() => loginWithSocialId(decoded.sub, { firstName, picture }));
-                                                }
-                                            }
-                                        }}
-                                        onError={() => {
-                                            console.error('Google Login Failed');
-                                        }}
-                                        useOneTap
-                                        theme="outline"
-                                        size="large"
-                                        text="continue_with"
-                                        shape="rectangular"
-                                        width="384"
-                                    />
+                        
+                        <div className="auth-card__body">
+                            {isCompletingLogin ? (
+                                <div className="layout-flex items-center justify-center p-8">
+                                    <svg className="sp-icon animate-spin text-muted" aria-hidden="true" viewBox="0 0 24 24">
+                                        <use href="#ti-loading"></use>
+                                    </svg>
                                 </div>
-                                <div className="flex items-center justify-center w-full">
-                                    <FacebookLogin
-                                        appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'dummy-app-id'}
-                                        autoLoad={false}
-                                        fields="name,email,picture"
-                                        callback={(response: any) => {
-                                            const socialId = response.id || response.userID;
-                                            if (socialId) {
-                                                const firstName = response.name ? response.name.split(' ')[0] : 'User';
-                                                const picture = response.picture?.data?.url;
-                                                handleLoginAction(() => loginWithSocialId(socialId, { firstName, picture }));
-                                            } else {
-                                                console.error('Facebook Login Failed', response);
-                                            }
-                                        }}
-                                        render={(renderProps: any) => (
-                                            <button
-                                                onClick={renderProps.onClick}
-                                                className="flex items-center justify-center gap-2 w-full max-w-[384px] h-[40px] px-4 py-2 bg-white border border-[#747775] rounded text-[#1F1F1F] font-medium transition-colors hover:bg-gray-50"
-                                                style={{ fontFamily: '"Roboto", arial, sans-serif', fontSize: '14px' }}
-                                            >
-                                                <svg className="w-[18px] h-[18px] text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                                </svg>
-                                                Continue with Facebook
-                                            </button>
-                                        )}
-                                    />
-                                </div>
-                                {/* <div className="flex items-center justify-center w-full">
-                                    <button
-                                        onClick={linkedInLogin}
-                                        className="flex items-center justify-center gap-2 w-full max-w-[384px] h-[40px] px-4 py-2 bg-white border border-[#747775] rounded text-[#1F1F1F] font-medium transition-colors hover:bg-gray-50"
-                                        style={{ fontFamily: '"Roboto", arial, sans-serif', fontSize: '14px' }}
+                            ) : (
+                                <>
+                                    <button 
+                                        className="auth-guest button button--primary button--lg full-width" 
+                                        type="button"
+                                        onClick={() => handleLoginAction(loginAsGuest)}
                                     >
-                                        <svg className="w-[18px] h-[18px] text-[#0A66C2]" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                                        Play as guest 
+                                        <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
+                                            <use href="#ti-arrow-right"></use>
                                         </svg>
-                                        Continue with LinkedIn
                                     </button>
-                                </div> */}
-                            </div>
-
-                            <div className="mt-4 pt-4 border-t border-border">
-                                {!isOrgLoginVisible ? (
-                                    <button
-                                        onClick={() => setIsOrgLoginVisible(true)}
-                                        className="w-full text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition"
-                                    >
-                                        Organization / Partner Login →
-                                    </button>
-                                ) : (
-                                    <form onSubmit={handleOrgLogin} className="flex flex-col gap-3 animate-fade-in">
-                                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Organization Portal</h3>
-                                        {orgError && (
-                                            <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 p-2 rounded border border-red-200 dark:border-red-800/30">
-                                                {orgError}
+                                    
+                                    <p className="auth-divider layout-flex items-center gap-lg margin-none">
+                                        <span className="auth-divider__rule no-grow border-none" aria-hidden="true"></span>
+                                        <span className="ui-label auth-divider__label no-grow">Or continue with</span>
+                                        <span className="auth-divider__rule no-grow border-none" aria-hidden="true"></span>
+                                    </p>
+                                    
+                                    <div className="auth-providers layout-grid gap-md">
+                                        <div className="auth-provider button button--secondary button--md full-width" style={{ padding: 0, position: 'relative', overflow: 'hidden' }}>
+                                            <div style={{ position: 'absolute', opacity: 0, zIndex: 1, width: '100%', height: '100%' }}>
+                                                <GoogleLogin
+                                                    onSuccess={credentialResponse => {
+                                                        if (credentialResponse.credential) {
+                                                            const decoded = jwtDecode(credentialResponse.credential) as any;
+                                                            if (decoded && decoded.sub) {
+                                                                const firstName = decoded.given_name || decoded.name || 'User';
+                                                                const picture = decoded.picture;
+                                                                handleLoginAction(() => loginWithSocialId(decoded.sub, { firstName, picture }));
+                                                            }
+                                                        }
+                                                    }}
+                                                    onError={() => {
+                                                        console.error('Google Login Failed');
+                                                    }}
+                                                    useOneTap
+                                                    theme="outline"
+                                                    size="large"
+                                                    text="continue_with"
+                                                    shape="rectangular"
+                                                    width="384"
+                                                />
                                             </div>
-                                        )}
-                                        <input
-                                            type="text"
-                                            placeholder="Username"
-                                            value={orgUsername}
-                                            onChange={(e) => setOrgUsername(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
-                                            required
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="Password"
-                                            value={orgPassword}
-                                            onChange={(e) => setOrgPassword(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
-                                            required
-                                        />
-                                        <div className="flex gap-2 mt-1">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsOrgLoginVisible(false)}
-                                                className="flex-1 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                disabled={isLoggingInOrg}
-                                                className="flex-1 px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow-sm transition disabled:opacity-50"
-                                            >
-                                                {isLoggingInOrg ? 'Logging in...' : 'Sign In'}
-                                            </button>
+                                            <div className="layout-flex items-center justify-center gap-sm full-width" style={{ height: '100%', pointerEvents: 'none' }}>
+                                                <img className="auth-provider__mark" src="/assets/logos/google-mark.svg" alt="" width="20" height="20" />
+                                                <span>Continue with Google</span>
+                                            </div>
                                         </div>
-                                    </form>
-                                )}
-                            </div>
-
+                                        
+                                        <FacebookLogin
+                                            appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'dummy-app-id'}
+                                            autoLoad={false}
+                                            fields="name,email,picture"
+                                            callback={(response: any) => {
+                                                const socialId = response.id || response.userID;
+                                                if (socialId) {
+                                                    const firstName = response.name ? response.name.split(' ')[0] : 'User';
+                                                    const picture = response.picture?.data?.url;
+                                                    handleLoginAction(() => loginWithSocialId(socialId, { firstName, picture }));
+                                                } else {
+                                                    console.error('Facebook Login Failed', response);
+                                                }
+                                            }}
+                                            render={(renderProps: any) => (
+                                                <button className="auth-provider button button--secondary button--md full-width" type="button" onClick={renderProps.onClick}>
+                                                    <img className="auth-provider__mark" src="/assets/logos/facebook-mark.svg" alt="" width="20" height="20" />
+                                                    <span>Continue with Facebook</span>
+                                                </button>
+                                            )}
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    )}
-                </div>
-
-                {/* Footer info */}
-                <div className="mt-8 text-center text-xs text-muted-foreground">
-                    By continuing, you agree to our <a href="#" className="underline hover:text-foreground">Terms of Service</a> and <a href="#" className="underline hover:text-foreground">Privacy Policy</a>.
-                </div>
+                        
+                        <p className="auth-legal margin-none text-center text-muted font-xs leading-md">
+                            By continuing you agree to our <a className="text-link text-strong" href="https://skillprint.co/terms" target="_blank" rel="noopener noreferrer" aria-label="Terms of Service, opens in a new tab">Terms of Service</a> and <a className="text-link text-strong" href="https://skillprint.co/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy Policy, opens in a new tab">Privacy Policy</a>.
+                        </p>
+                    </article>
+                </main>
             </div>
         </div>
     );
 }
+

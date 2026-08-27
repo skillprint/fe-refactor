@@ -2,6 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { GameTileSkill } from './GameTile';
 
+import { TraitSkillPill } from './TraitSkillPill';
+
 export interface GameDetailRecordProps {
   gameTitle: string;
   gameSlug: string;
@@ -32,9 +34,7 @@ export function GameDetailRecord({
 
   const skillPills = skills.map((skill) => (
     <li key={skill.id}>
-      <button className="trait-skill" type="button" data-skill-peek={skill.name} data-dimension={skill.dimension}>
-        <span className="trait-skill__name">{skill.name}</span>
-      </button>
+      <TraitSkillPill skill={skill} />
     </li>
   ));
 

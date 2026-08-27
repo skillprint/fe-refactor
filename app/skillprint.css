@@ -515,8 +515,8 @@ body {
 }
 
 
-:is(.page.light, html[data-surface="light"] > .page, html[data-theme="light"] > .page),
-:is(.page.light, html[data-surface="light"] > .page, html[data-theme="light"] > .page) .scrollbar-violet,
+:is(.page.light, html[data-surface="light"] .page, html[data-theme="light"] .page),
+:is(.page.light, html[data-surface="light"] .page, html[data-theme="light"] .page) .scrollbar-violet,
 .page :is(.panel-surface-demo--light, .surface-demo--light, .chart-card.light),
 .page :is(.panel-surface-demo--light, .surface-demo--light, .chart-card.light) .scrollbar-violet {
   --scrollbar-housing: color-mix(in srgb, var(--mindset-violet-500) 13%, transparent);
@@ -525,8 +525,8 @@ body {
   --scrollbar-thumb-active: var(--mindset-violet-500);
 }
 
-:is(.page.light, html[data-surface="light"] > .page, html[data-theme="light"] > .page).scrollbar-subtle,
-:is(.page.light, html[data-surface="light"] > .page, html[data-theme="light"] > .page) .scrollbar-subtle,
+:is(.page.light, html[data-surface="light"] .page, html[data-theme="light"] .page).scrollbar-subtle,
+:is(.page.light, html[data-surface="light"] .page, html[data-theme="light"] .page) .scrollbar-subtle,
 .page :is(.panel-surface-demo--light, .surface-demo--light, .chart-card.light).scrollbar-subtle,
 .page :is(.panel-surface-demo--light, .surface-demo--light, .chart-card.light) .scrollbar-subtle {
   --scrollbar-housing: color-mix(in srgb, var(--panel-navy-900) 7%, transparent);
@@ -2617,8 +2617,8 @@ html:is([data-surface="light"], [data-theme="light"]) .brand-logo--light {
 
 
 .page.light,
-html[data-surface="light"] > .page,
-html[data-theme="light"] > .page,
+html[data-surface="light"] .page,
+html[data-theme="light"] .page,
 .page :where(.panel-surface-demo--light, .surface-demo--light, .chart-card.light) {
   --lime: var(--core-lime-600);
   --mint: var(--personality-mint-600);
@@ -2630,7 +2630,7 @@ html[data-theme="light"] > .page,
 .page :where(.layout-flex) { display: flex; }
 .page :where(.layout-inline-flex) { display: inline-flex; }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page {
+html:is([data-theme="light"], [data-surface="light"]) .page {
   --deep: var(--deep-navy-25);
   --panel-900: var(--geistface-grey-25);
   --text: var(--geistface-grey-800);
@@ -2849,8 +2849,8 @@ img, svg { max-width: 100%; }
   --positive-text: var(--green);
 }
 
-html[data-surface="light"] > .page,
-html[data-theme="light"] > .page {
+html[data-surface="light"] .page,
+html[data-theme="light"] .page {
   --positive-text: var(--core-green-900);
 }
 
@@ -3539,7 +3539,7 @@ html:is([data-theme="light"], [data-surface="light"]) .sp-tour__dot[data-current
   --customer: var(--core-green-500);
 }
 
-html:has(> .page--portal-games)[data-surface="light"] {
+html:has( .page--portal-games)[data-surface="light"] {
   --canvas: var(--deep-navy-25);
   --surface-panel: var(--panel-navy-50);
   --surface-box: var(--geistface-grey-25);
@@ -3548,7 +3548,7 @@ html:has(> .page--portal-games)[data-surface="light"] {
   --border-interactive: color-mix(in srgb, var(--deep-navy-900) 20%, transparent);
 }
 
-html:has(> .page--portal-games) {
+html:has( .page--portal-games) {
   scroll-behavior: smooth;
   scroll-padding-top: var(--space-72);
 }
@@ -4031,7 +4031,7 @@ html:has(> .page--portal-games) {
    ========================================================================== */
 
 
-html[data-surface="light"] > .page--portal-games, html[data-theme="light"] > .page--portal-games {
+html[data-surface="light"] .page--portal-games, html[data-theme="light"] .page--portal-games {
   --canvas: var(--deep-navy-25);
   --surface-panel: var(--panel-navy-50);
   --surface-box: var(--geistface-grey-25);
@@ -4042,13 +4042,13 @@ html[data-surface="light"] > .page--portal-games, html[data-theme="light"] > .pa
 }
 
 
-html[data-surface="light"] > .page--portal .popup-backdrop,
-html[data-theme="light"] > .page--portal .popup-backdrop {
+html[data-surface="light"] .page--portal .popup-backdrop,
+html[data-theme="light"] .page--portal .popup-backdrop {
   background: var(--popup-backdrop-light);
 }
 
-html[data-surface="light"] > .page--portal .popup,
-html[data-theme="light"] > .page--portal .popup {
+html[data-surface="light"] .page--portal .popup,
+html[data-theme="light"] .page--portal .popup {
   background: var(--popup-light);
   border: 1px solid color-mix(in srgb, var(--geistface-grey-25) 52%, transparent);
 }
@@ -5542,25 +5542,25 @@ html:not([data-reveal]) .reveal {
 }
 
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal,
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal-skills {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal,
+html:is([data-theme="light"], [data-surface="light"]) .page--portal-skills {
   --skill-accent   : var(--core-lime-700);
   --skill-ink      : var(--core-lime-900);
   --skill-highlight: var(--core-green-800);
   --skill-on-accent: var(--white);
 }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal [data-dimension="mood"] {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal [data-dimension="mood"] {
   --skill-accent    : var(--core-lime-700);
   --skill-ink       : var(--core-lime-900);
 }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal [data-dimension="cognition"] {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal [data-dimension="cognition"] {
   --skill-accent    : var(--personality-mint-700);
   --skill-ink       : var(--personality-mint-900);
 }
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal [data-dimension="personality"] {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal [data-dimension="personality"] {
   --skill-accent    : var(--personality-blue-600);
   --skill-ink       : var(--personality-blue-800);
 }
@@ -7712,7 +7712,7 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile .pp-
 html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile .metric--portal small { color: var(--core-green-700); }
 
 
-html:is([data-theme="light"], [data-surface="light"]) > .page--portal-profile {
+html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile {
   --skills-ramp-from: var(--personality-blue-700);
   --skills-ramp-to: var(--personality-mint-900);
 }
@@ -7779,7 +7779,7 @@ html:is([data-theme="light"], [data-surface="light"]) > .page--portal-profile {
   font-size: var(--app-text-md-font-size);
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-progression {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal-skill-progression {
   --canvas: var(--deep-navy-25);
   --surface-panel: var(--panel-navy-50);
   --surface-box: var(--geistface-grey-25);
@@ -7791,7 +7791,7 @@ html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-prog
   --skills-ramp-to: var(--personality-mint-900);
 }
 
-html:has(> .page--portal-skill-progression) {
+html:has( .page--portal-skill-progression) {
   scroll-behavior: smooth;
   scroll-padding-top: var(--space-72);
 }
@@ -7818,7 +7818,7 @@ html:has(> .page--portal-skill-progression) {
   --stat-accent: var(--personality-500);
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-progression {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal-skill-progression {
   --stat-accent-strong: var(--core-green-800);
   --stat-accent-low: var(--geistface-grey-500);
 }
@@ -8241,19 +8241,19 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-skill-progre
   font-variant-numeric: tabular-nums;
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-progression {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal-skill-progression {
   --stat-ink: var(--personality-mint-900);
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-progression[data-pillar="mood"] {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal-skill-progression[data-pillar="mood"] {
   --stat-ink: var(--core-lime-900);
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-progression[data-pillar="cognition"] {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal-skill-progression[data-pillar="cognition"] {
   --stat-ink: var(--personality-mint-900);
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal-skill-progression[data-pillar="personality"] {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal-skill-progression[data-pillar="personality"] {
   --stat-ink: var(--personality-blue-800);
 }
 
@@ -8632,7 +8632,7 @@ html:is([data-surface="light"], [data-theme="light"]) .metric--portal small {
       color-mix(in srgb, var(--deep-navy-950) 16%, transparent);
 }
 
-html:is([data-surface="light"], [data-theme="light"]) > .page {
+html:is([data-surface="light"], [data-theme="light"]) .page {
   --text-primary: var(--geistface-grey-900);
   --text-muted: color-mix(in srgb, var(--geistface-grey-800) 82%, transparent);
   --border-subtle: color-mix(in srgb, var(--deep-navy-900) 10%, transparent);
@@ -8660,7 +8660,7 @@ html:is([data-surface="light"], [data-theme="light"]) .page--portal .stat-hero__
    09 - Unique composition · Games Portal · the light ground
    ========================================================================== */
 
-html:is([data-surface="light"], [data-theme="light"]) > .page--portal {
+html:is([data-surface="light"], [data-theme="light"]) .page--portal {
   color-scheme: light;
 
 
@@ -8800,7 +8800,7 @@ html:is([data-surface="light"], [data-theme="light"]) .page--portal :is(input, s
 }
 
 
-html:is([data-surface="dark"], [data-theme="dark"]) > .page--portal {
+html:is([data-surface="dark"], [data-theme="dark"]) .page--portal {
   --side-nav-active: var(--nav-current-surface);
   --side-nav-active-border: var(--nav-current-border);
   --side-nav-accent: var(--violet);
@@ -13455,7 +13455,7 @@ body.peek-drawer-open {
    ========================================================================== */
 
 @media print {
-  html:is([data-theme], [data-surface]) > .page--portal,
+  html:is([data-theme], [data-surface]) .page--portal,
   .page--portal {
     color-scheme: light;
 

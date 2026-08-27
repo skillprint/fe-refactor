@@ -24,6 +24,7 @@ interface SkillprintProps {
     initialState?: 'reset' | 'skills' | 'mindsets' | 'traits';
     hasMenu?: boolean;
     useSizeDirectly?: boolean;
+    interactive?: boolean;
 }
 
 const Skillprint: React.FC<SkillprintProps> = ({
@@ -36,6 +37,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
     initialState = 'reset',
     hasMenu = false,
     useSizeDirectly = false,
+    interactive = true,
 }) => {
     const router = useRouter();
     const [viewState, setViewState] = useState<string>(initialState);
@@ -60,6 +62,8 @@ const Skillprint: React.FC<SkillprintProps> = ({
     }, []);
 
     const handleNodeHover = (node: { group: string; slug: string; rect: DOMRect } | null) => {
+        if (!interactive) return;
+
         // Clear any pending hide timeout if hovering a new node or re-entering
         if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
@@ -116,6 +120,7 @@ const Skillprint: React.FC<SkillprintProps> = ({
     };
 
     const handleTooltipEnter = () => {
+        if (!interactive) return;
         if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
             hideTimeoutRef.current = null;
@@ -246,33 +251,35 @@ const Skillprint: React.FC<SkillprintProps> = ({
                     }}
                     nodeDataMap={nodeDataMap}
                     viewBox="-100 -100 1012 1012"
-                    onNodeClick={(group, slug) => navigateToStats(group, slug)}
-                    onNodeHover={handleNodeHover}
+                    onNodeClick={interactive ? (group, slug) => navigateToStats(group, slug) : undefined}
+                    onNodeHover={interactive ? handleNodeHover : undefined}
                 />
 
-                <div
-                    onMouseEnter={handleTooltipEnter}
-                    onMouseLeave={handleTooltipLeave}
-                >
-                    <SkillprintTooltip
-                        isVisible={tooltipState.visible}
-                        position={tooltipState.pos}
-                        title={tooltipState.data?.slug || ''}
-                        group={tooltipState.data?.group || ''}
-                        yearlySummary={tooltipState.data?.details?.yearly}
-                        weeklySessions={tooltipState.data?.details?.weekly}
-                        currentSession={tooltipState.data?.details?.current}
-                        onPlayAgain={() => {
-                            if (tooltipState.data) navigateToGames(tooltipState.data.group, tooltipState.data.slug);
-                        }}
-                        onFilterGames={() => {
-                            if (tooltipState.data) navigateToGames(tooltipState.data.group, tooltipState.data.slug);
-                        }}
-                        onViewDetails={() => {
-                            if (tooltipState.data) navigateToStats(tooltipState.data.group, tooltipState.data.slug);
-                        }}
-                    />
-                </div>
+                {interactive && (
+                    <div
+                        onMouseEnter={handleTooltipEnter}
+                        onMouseLeave={handleTooltipLeave}
+                    >
+                        <SkillprintTooltip
+                            isVisible={tooltipState.visible}
+                            position={tooltipState.pos}
+                            title={tooltipState.data?.slug || ''}
+                            group={tooltipState.data?.group || ''}
+                            yearlySummary={tooltipState.data?.details?.yearly}
+                            weeklySessions={tooltipState.data?.details?.weekly}
+                            currentSession={tooltipState.data?.details?.current}
+                            onPlayAgain={() => {
+                                if (tooltipState.data) navigateToGames(tooltipState.data.group, tooltipState.data.slug);
+                            }}
+                            onFilterGames={() => {
+                                if (tooltipState.data) navigateToGames(tooltipState.data.group, tooltipState.data.slug);
+                            }}
+                            onViewDetails={() => {
+                                if (tooltipState.data) navigateToStats(tooltipState.data.group, tooltipState.data.slug);
+                            }}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

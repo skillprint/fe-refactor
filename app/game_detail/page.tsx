@@ -7,6 +7,7 @@ import { gameDetails } from '../config/gameConfig';
 import { unifiedSlugFromBESlug } from '../utils/slugUtils';
 import { GameTile } from '@/components/GameTile';
 import { SkillCard } from '@/components/SkillCard';
+import { TraitSkillPill, getSkillIconId } from '@/components/TraitSkillPill';
 import { GameDetailRecord } from '@/components/GameDetailRecord';
 import { GameDetailBadge } from '@/components/GameDetailBadge';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
@@ -54,11 +55,11 @@ export default async function GameDetailPage({ searchParams }: GameDetailPagePro
   const moreLikeThis = allGames.filter(g => 
     g.slug !== gameSlug && 
     g.skills && game.skills && 
-    g.skills.some((s: string) => game.skills.includes(s))
+    g.skills.some((s: string) => game.skills!.includes(s))
   ).slice(0, 5);
 
   return (
-    <PortalLayout>
+    <PortalLayout pageClass="page--portal-game-detail">
       <div className="portal-head">
         <Link className="stat-hero__back layout-inline-flex items-center gap-md font-sm weight-semibold no-grow" href="/games">
           <svg className="sp-icon sp-icon--sm" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-left"></use></svg>
@@ -105,7 +106,7 @@ export default async function GameDetailPage({ searchParams }: GameDetailPagePro
                 </p>
                 
                 <div className="gd-actions cluster wrap">
-                  <Link className="gd-play button button--primary button--lg no-grow" data-gd-play="" href={`/game_session?game=${game.slug}`}>
+                  <Link className="gd-play button button--primary button--lg no-grow" data-gd-play="" href={`/game_session?game=${gameSlug}`}>
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
                     <span data-gd-play-label="">Play {game.name}</span>
                   </Link>
@@ -127,17 +128,20 @@ export default async function GameDetailPage({ searchParams }: GameDetailPagePro
                 </Link>
               </div>
               <div className="skill-grid grid" data-gd-skill-groups="">
-                {skills.map((skill, idx) => (
-                  <SkillCard 
-                    key={skill.id}
-                    id={skill.id}
-                    name={skill.name}
-                    description={skill.description}
-                    dimension={(["mood", "cognition", "personality"] as const)[idx % 3]} // Distribute across dimensions for UI mockup
-                    iconId={`ti-${(["mood", "cognition", "personality"] as const)[idx % 3]}-${skill.id}`}
-                    progressPercentage={0}
-                  />
-                ))}
+                {skills.map((skill, idx) => {
+                  const dimension = (["mood", "cognition", "personality"] as const)[idx % 3]; // Distribute across dimensions for UI mockup
+                  return (
+                    <SkillCard 
+                      key={skill.id}
+                      id={skill.id}
+                      name={skill.name}
+                      description={skill.description}
+                      dimension={dimension} 
+                      iconId={getSkillIconId(skill.name, dimension)}
+                      progressPercentage={0}
+                    />
+                  );
+                })}
               </div>
             </PortalSection>
           )}

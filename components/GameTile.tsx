@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { TraitSkillPill } from './TraitSkillPill';
 
 export interface GameTileSkill {
   id: string;
@@ -32,14 +33,6 @@ export function GameTile({
   statusBadge,
   tone = 'pink'
 }: GameTileProps) {
-  // SVG icon mapping fallback based on dimension/id
-  const getSkillIcon = (skill: GameTileSkill) => {
-    // For now, mapping directly to the SVG sprites in PortalSprite.
-    // Ensure ids map closely to the sprite ids (e.g. ti-cognition-attention, ti-mood-focus)
-    const skillIdStr = String(skill?.id || '');
-    const iconId = `ti-${skill.dimension}-${skillIdStr.toLowerCase().replace(/\s+/g, '-')}`;
-    return iconId;
-  };
 
   return (
     <article className={`game-card game-card--portal sp-card sp-card--interactive card--flush tone tone--${tone} min-width-0 layout-flex flow-column clip`}>
@@ -85,12 +78,7 @@ export function GameTile({
             <ul className="trait-skills layout-flex wrap items-center margin-none padding-none">
               {skills.map((skill) => (
                 <li key={skill.id}>
-                  <button className="trait-skill" type="button" data-skill-peek={skill.name} data-dimension={skill.dimension}>
-                    <svg className="sp-icon sp-icon--2xs trait-skill__icon" aria-hidden="true" viewBox="0 0 24 24">
-                      <use href={`#${getSkillIcon(skill)}`}></use>
-                    </svg>
-                    <span className="trait-skill__name">{skill.name}</span>
-                  </button>
+                  <TraitSkillPill skill={skill} />
                 </li>
               ))}
             </ul>

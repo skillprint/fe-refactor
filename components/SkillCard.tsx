@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { GamePill, GamePillProps } from './GamePill';
 
 export interface SkillCardProps {
   id: string;
@@ -8,6 +9,7 @@ export interface SkillCardProps {
   dimension: 'mood' | 'cognition' | 'personality';
   iconId: string;
   progressPercentage?: number;
+  games?: GamePillProps[];
 }
 
 export function SkillCard({
@@ -16,7 +18,8 @@ export function SkillCard({
   description,
   dimension,
   iconId,
-  progressPercentage = 0
+  progressPercentage = 0,
+  games = []
 }: SkillCardProps) {
   // Use a fallback link since skill_progression isn't fully implemented yet
   const href = `/skills#${dimension}`;
@@ -41,6 +44,18 @@ export function SkillCard({
         </h3>
         <p className="skill-card__desc margin-none text-muted">{description}</p>
       </div>
+      {games.length > 0 && (
+        <div className="skill-card__games">
+          <span className="ui-label skill-card__games-label layout-block">Games to develop this skill</span>
+          <ul className="skill-card__game-list layout-flex wrap gap-sm margin-none">
+            {games.map(game => (
+              <li key={game.slug}>
+                <GamePill {...game} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <Link className="skill-card__action button button--primary sp-progress-button sp-progress-button--compact" href={href} data-meter={progressPercentage}>
         <svg className="sp-icon sp-progress-button__icon" aria-hidden="true" viewBox="0 0 24 24">
           <use href="#ti-chart"></use>

@@ -75,111 +75,156 @@ export default function ProfilePerformanceTrends() {
   };
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">
-            Performance Trends
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Select a scoring pillar and track your cognitive, mood, and personality metrics over time
+    <section className="pp-section" id="trends">
+      <div className="section-head pp-head layout-flex wrap items-end justify-between gap-2xl">
+        <div className="section-head-copy">
+          <h2>Performance trends</h2>
+          <p className="margin-none text-muted">
+            Track your cognitive, mood, and personality metrics over time.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Segmented Pillar Selector */}
-          <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border shadow-inner">
+        <div className="pp-toolbar cluster wrap items-center gap-lg" data-state-when="semi complete">
+          <div className="status-tabs layout-inline-flex" role="group" aria-label="Dimension">
             {(['Mood', 'Cognition', 'Personality'] as const).map((pillar) => (
               <button
                 key={pillar}
                 type="button"
+                aria-pressed={selectedPillar === pillar}
+                className="status-tab"
                 onClick={() => setSelectedPillar(pillar)}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 cursor-pointer ${
-                  selectedPillar === pillar
-                    ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
               >
                 {pillar}
               </button>
             ))}
           </div>
-
-          {/* Segmented Chart Type Toggle */}
-          <div className="flex items-center bg-secondary/50 p-1 rounded-full border border-border shadow-inner">
-            <button
-              type="button"
-              onClick={() => setChartType('BarLine')}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 cursor-pointer ${
-                chartType === 'BarLine'
-                  ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Bar & Lines
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartType('Area')}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 cursor-pointer ${
-                chartType === 'Area'
-                  ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Area Chart
-            </button>
+          <div className="chart-view-switch layout-inline-flex" role="group" aria-label="Chart type">
+            <button aria-pressed={chartType === 'BarLine'} className={chartType === 'BarLine' ? 'is-active' : ''} onClick={() => setChartType('BarLine')} type="button">Bar &amp; Lines</button>
+            <button aria-pressed={chartType === 'Area'} className={chartType === 'Area' ? 'is-active' : ''} onClick={() => setChartType('Area')} type="button">Area Chart</button>
           </div>
-
-          {/* Compare Selector */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm text-muted-foreground">Compare:</label>
-            <select
-              value={comparePeriods}
-              onChange={(e) => setComparePeriods(parseInt(e.target.value, 10))}
-              className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
+          <div className="field pp-compare" data-size="sm">
+            <label htmlFor="ppCompare">Compare:</label>
+            <select id="ppCompare" name="compare" value={comparePeriods} onChange={(e) => setComparePeriods(parseInt(e.target.value, 10))}>
               <option value={0}>None</option>
-              <option value={1}>Last Week</option>
-              <option value={2}>Last 2 Weeks</option>
-              <option value={3}>Last 3 Weeks</option>
+              <option value={1}>Last week</option>
+              <option value={2}>Last 2 weeks</option>
+              <option value={3}>Last 3 weeks</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Dimension Selector Chips */}
-      <div className="flex flex-wrap gap-2 mb-6 p-3 bg-card rounded-xl border border-border">
-        {PILLAR_DIMENSIONS[selectedPillar].map((dim) => {
-          const isSelected = selectedDimensions.includes(dim);
-          const label = dim.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-          return (
-            <button
-              key={dim}
-              type="button"
-              onClick={() => toggleDimension(dim)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 cursor-pointer ${
-                isSelected
-                  ? 'bg-primary text-primary-foreground border-primary shadow-sm scale-105'
-                  : 'bg-card border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
-              }`}
-            >
-              <span>{label}</span>
-            </button>
-          );
-        })}
+      <div className="pp-trend-filters sp-panel padding-md margin-bottom-lg">
+        <div className="filter-group">
+          <span className="ui-label filter-label">{selectedPillar} metrics</span>
+          <div className="filters cluster wrap gap-md">
+            {PILLAR_DIMENSIONS[selectedPillar].map((dim) => {
+              const isSelected = selectedDimensions.includes(dim);
+              return (
+                <button
+                  key={dim}
+                  type="button"
+                  className={`chart-chip ${isSelected ? 'is-active' : ''}`}
+                  onClick={() => toggleDimension(dim)}
+                >
+                  <svg className="sp-icon sp-icon--xs" aria-hidden="true" viewBox="0 0 24 24">
+                    <use href={`#ti-${selectedPillar.toLowerCase()}-${dim.replace('_', '-')}`}></use>
+                  </svg>
+                  {dim.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <p className="field__help pp-metric-note margin-none text-muted font-xs mt-4">
+          Pick up to four metrics. The compare series traces the same first metric in an earlier week.
+        </p>
       </div>
 
-      {/* Chart Container */}
-      <div className="bg-card rounded-xl border border-border p-4 shadow-sm h-[350px] mb-8">
-        <DynamicChart
-          data={chartData}
-          type={chartType}
-          selectedFields={selectedDimensions}
-          comparePeriods={comparePeriods}
-          compareCohort={false}
-          yAxisLabel="score"
-        />
-      </div>
-    </div>
+      <article className="chart-card sp-card min-width-0">
+        <div className="chart-card-head">
+          <div className="chart-card-title">
+            <span className="theme-label">{selectedPillar}</span>
+            <strong>{selectedDimensions.length > 0 ? selectedDimensions.map(d => d.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')).join(' and ') : 'No metrics selected'}, last 7 days</strong>
+          </div>
+          <div className="chart-actions layout-inline-flex">
+            <button
+              type="button"
+              aria-pressed={chartType === 'BarLine'}
+              className="chart-action"
+              onClick={() => setChartType('BarLine')}
+            >
+              Bar & Lines
+            </button>
+            <button
+              type="button"
+              aria-pressed={chartType === 'Area'}
+              className="chart-action"
+              onClick={() => setChartType('Area')}
+            >
+              Area
+            </button>
+          </div>
+        </div>
+        <div className="chart-frame p-4 h-[400px]">
+          {chartData.length > 0 ? (
+            <DynamicChart
+              data={chartData}
+              type={chartType}
+              selectedFields={selectedDimensions}
+              comparePeriods={comparePeriods}
+              compareCohort={false}
+              yAxisLabel="score"
+            />
+          ) : (
+            <div className="portal-blank" data-state-when="first">
+              <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true">
+                <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg>
+              </span>
+              <p className="portal-blank__title">Nothing to plot yet</p>
+              <p className="portal-blank__note">This is the empty chart your scores will draw across. Play a game and the first week appears.</p>
+              <a className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></a>
+            </div>
+          )}
+        </div>
+        
+        <div className="chart-key" data-pp-trend-key="" data-state-when="semi complete"></div>
+      </article>
+
+      <article className="chart-card sp-card min-width-0">
+        <div className="chart-card-head">
+          <div className="chart-card-title">
+            <span className="theme-label">Weekly wheel</span>
+            <strong>Your skills this week</strong>
+            <span>One dimension at a time, against your four-week average. Select a point for the skill behind it.</span>
+          </div>
+          <div className="chart-actions status-tabs layout-inline-flex" role="group" aria-label="Dimension">
+            <button aria-pressed="true" className="status-tab" data-pp-view="mood" type="button">Mood</button>
+            <button aria-pressed="false" className="status-tab" data-pp-view="cognition" type="button">Cognition</button>
+            <button aria-pressed="false" className="status-tab" data-pp-view="personality" type="button">Personality</button>
+            <button aria-pressed="false" className="status-tab" data-pp-view="sessions" type="button">Sessions</button>
+          </div>
+        </div>
+        
+        <div className="chart-frame" data-pp-orbit="" id="ppOrbit"></div>
+        
+        <div className="portal-blank" data-state-when="first">
+          <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
+          <p className="portal-blank__title">No skill has a score yet</p>
+          <p className="portal-blank__note">Each spoke is one skill. A finished game puts a point on the skills it measured.</p>
+          <a className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></a>
+        </div>
+
+        <div className="chart-key" data-state-when="semi complete">
+          <span className="key-item" data-series="mood"><i></i>Mood</span>
+          <span className="key-item" data-series="cognition"><i></i>Cognition</span>
+          <span className="key-item" data-series="personality"><i></i>Personality</span>
+          <span className="key-item" data-series="baseline"><i></i>Baseline</span>
+        </div>
+        <div className="pp-orbit-detail" data-orbit-detail aria-live="polite">
+          <p className="pp-orbit-detail__empty margin-none text-muted font-sm" data-orbit-empty data-state-text="orbitDetailEmpty">Select a point on the wheel for that skill&apos;s score.</p>
+        </div>
+        <p className="chart-insight" data-state-when="semi complete" data-state-text="orbitInsight"><span className="insight-dot" aria-hidden="true"></span>Focus and Pattern Matching carry this week. Relax is the only mood below its four-week baseline.</p>
+      </article>
+    </section>
   );
 }

@@ -10,7 +10,6 @@ import BuckyballLoading from './components/BuckyballLoading';
 import { useUserSession } from './hooks/useUserSession';
 import { useGameSessions } from './hooks/useGameSessions';
 import { useUserProfile } from './hooks/useUserProfile';
-import { PlaybooksList } from '@/components/PlaybooksList';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
 import { PlayBySkill } from '@/components/PlayBySkill';
 import { PlaybookWidget } from './components/PlaybookWidget';
@@ -476,7 +475,7 @@ function HomeContent() {
                     nodeDataMap={nodeDataMap}
                     size={220}
                     useSizeDirectly={true}
-                    initialState={count === 0 ? "reset" : "play"}
+                    initialState={count === 0 ? "reset" : "skills"}
                     hasMenu={false}
                   />
                 </div>

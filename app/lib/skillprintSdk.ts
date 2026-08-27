@@ -1,7 +1,7 @@
 
 // removed uuid import since sessionId is passed as argument
 
-import { getCookie, updateSetting } from "../profile/skillprint";
+import { getCookie, setCookie } from "../utils/cookieUtils";
 
 export enum Mood {
     RELAX = 'relax',
@@ -156,7 +156,7 @@ export class SkillprintClient {
             this.userToken = await this.createOrGetUserToken(userId);
         } else {
             const customPlayerId = crypto.randomUUID();
-            updateSetting('user_id', customPlayerId, () => { });
+            setCookie('user_id', customPlayerId);
             if (typeof localStorage !== 'undefined') localStorage.setItem('userId', customPlayerId);
             this.userToken = await this.createOrGetUserToken(customPlayerId);
         }

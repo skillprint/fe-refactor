@@ -30,22 +30,22 @@ export function GameDetailBadge({
       </div>
       <div data-gd-badge>
         <figure className={`sp-badge sp-badge--sm sp-badge--row ${!isEarned ? 'sp-badge--locked' : ''}`}>
-          <div className="sp-badge__art-box">
-            <img 
-              className="sp-badge__art" 
-              src={`/assets/images/badges/collection/cuttlefish/cuttlefish-badge-cool-green-gear.svg`} 
-              alt="" 
-              // Fallback if image doesn't exist yet
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          </div>
-          <figcaption className="sp-badge__caption">
-            <div className="sp-badge__head">
-              <strong className="sp-badge__talent">{badgeSkill}</strong>
-              <span className="sp-badge__animal">{badgeName}</span>
-            </div>
+          <img 
+            className="sp-badge__art layout-block" 
+            src={`/assets/images/badges/collection/cuttlefish/cuttlefish-badge-cool-green-gear.svg`} 
+            alt="" 
+            width="610"
+            height="610"
+            loading="lazy" 
+            decoding="async"
+            // Fallback if image doesn't exist yet
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+          <figcaption className="sp-badge__copy layout-grid min-width-0">
+            <strong className="sp-badge__name margin-none">{badgeSkill}</strong>
+            <span className="sp-badge__animal">{badgeName}</span>
             
             <span className="sp-badge__points ui-badge ui-badge--pill">
               <b>{badgePoints}</b>&nbsp;{badgePoints === 1 ? 'point' : 'points'}
