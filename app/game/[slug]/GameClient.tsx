@@ -608,9 +608,9 @@ export default function GameClient({ slug }: GameClientProps) {
 
             {sequence === 'review' && gameResults && (
                 <GameResultDialog
-                    gameTitle={gameConfig?.title || unifiedSlug}
+                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
                     score={gameResults.score || 0}
-                    highScore={gameConfig?.highScore || 0}
+                    highScore={0}
                     duration={gameResults.time || 0}
                     adjustmentsCount={adjustmentsApplied}
                     targetMood={sessionMood}
@@ -624,7 +624,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
             {sequence === 'playing' && (
                 <PlayBar
-                    gameTitle={gameConfig?.title || unifiedSlug}
+                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
                     gameSlug={unifiedSlug}
                     onExit={handleExitGame}
                     targetMood={sessionMood}
