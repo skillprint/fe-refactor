@@ -9,7 +9,7 @@ import { unifiedSlugFromBESlug } from '../utils/slugUtils';
 import { newGameSlugs } from '../config/newGames';
 import BuckyballLoading from '../components/BuckyballLoading';
 import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
-import { PLAYBOOKS } from '../hooks/usePlaybook';
+import { usePlaybooks } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { getGameDetails } from '../config/gameConfig';
 import { useAuth } from '../context/AuthContext';
@@ -37,6 +37,7 @@ function GamesPageContent() {
   const { moods, skills, gamesBySkill, gamesByMood, isLoading } = useGamesBySkill();
   const { sessions } = useGameSessions();
   const { recommendedGames, isLoading: isLoadingRecommended } = useRecommendedGames(10);
+  const { playbooks } = usePlaybooks();
 
   // Games to exclude (blacklist)
   const BLACKLISTED_GAMES = ['infinite-runner-3d', 'hextris', 'fruit-ninja', 'plastoblasto', 'flappy-bird-1', 'lastwar-frontline', 'line-color'];
@@ -106,21 +107,21 @@ function GamesPageContent() {
     setSelectedPersonality(null);
   };
 
-  const playbookData = Object.values(PLAYBOOKS).map((playbook) => {
-    let nextGameSlug = playbook.games[0];
+  const playbookData = playbooks.map((playbook) => {
+    let nextGameSlug = playbook.game_ids?.[0];
     let completedCount = 0;
 
-    for (let i = 0; i < playbook.games.length; i++) {
-      const slug = playbook.games[i];
+    for (let i = 0; i < (playbook.game_ids?.length || 0); i++) {
+      const slug = playbook.game_ids[i];
       const isCompleted = sessions.some(s => s.gameSlug === slug && s.metadata?.playbookId === playbook.id && s.completed);
       if (isCompleted) {
         completedCount++;
-      } else if (nextGameSlug === playbook.games[0] && completedCount === i) {
+      } else if (nextGameSlug === playbook.game_ids?.[0] && completedCount === i) {
         nextGameSlug = slug;
       }
     }
-    const isFinished = completedCount === playbook.games.length;
-    const firstGameDetails = getGameDetails(playbook.games[0]);
+    const isFinished = completedCount === (playbook.game_ids?.length || 0);
+    const firstGameDetails = nextGameSlug ? getGameDetails(nextGameSlug) : null;
 
     return { playbook, completedCount, isFinished, nextGameSlug, firstGameDetails };
   });
@@ -161,7 +162,7 @@ function GamesPageContent() {
                     title={game.name}
                     description={game.description}
                     image={game.screenshot || game.image || '/images/default-game.jpg'}
-                    url={`/game_session?game=${game.slug}`}
+                    url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                     statusBadge="Recommended"
@@ -183,16 +184,16 @@ function GamesPageContent() {
                 {playbookData.map((data, i) => (
                   <PlaybookTile
                     key={data.playbook.id}
-                    id={data.playbook.id}
+                    id={data.playbook.slug}
                     title={data.playbook.title}
                     description={data.playbook.description}
-                    iconSrc={`/assets/icons/playbook-${['focus', 'learning', 'wellness'][i % 3]}.svg`}
+                    iconSrc={`/skillprint-portal-redesign/assets/icons/${data.playbook.icon || 'playbook-focus'}.svg`}
                     nextGameSlug={data.nextGameSlug}
                     nextGameImage={data.firstGameDetails?.image || '/images/default-game.jpg'}
-                    totalGames={data.playbook.games.length}
+                    totalGames={data.playbook.game_ids?.length || 0}
                     completedGames={data.completedCount}
                     isFinished={data.isFinished}
-                    tone={(["pink", "magenta", "orange", "blue", "green", "yellow", "purple"] as const)[i % 7]}
+                    tone={data.playbook.tone?.replace('tone--', '') as any || "pink"}
                   />
                 ))}
               </GameRail>
@@ -271,7 +272,7 @@ function GamesPageContent() {
                     title={game.name}
                     description={game.description || ''}
                     image={game.screenshot || game.image || '/images/default-game.jpg'}
-                    url={`/game_session?game=${game.slug}`}
+                    url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                   />

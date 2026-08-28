@@ -11,7 +11,7 @@ export interface PortalLayoutProps {
 
 export default function PortalLayout({ children, pageClass, header, rail }: PortalLayoutProps) {
   return (
-    <div className={`page--portal portal-app ${pageClass || ''}`.trim()} data-portal-shell>
+    <div className={`portal-app ${pageClass || ''}`.trim()} data-portal-shell>
       <Sidebar />
       <button className="portal-scrim" type="button" aria-label="Close navigation" data-portal-nav-close></button>
       <div className="portal-main">

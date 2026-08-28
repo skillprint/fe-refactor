@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import "./skillprint.css";
-import FTUECarousel from "./components/FTUECarousel";
+import HomeTour from './components/HomeTour';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
@@ -28,7 +28,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Skillprint Portal · Home",
+  title: {
+    template: "Skillprint Portal · %s",
+    default: "Skillprint Portal · Home",
+  },
   description: "The Skillprint Games Portal home — continue a game, pick a recommendation, and read the playbook driving them.",
 };
 
@@ -49,7 +52,7 @@ export default function RootLayout({
             <ThemeProvider>
               <AuthGuard>
                 <Suspense fallback={null}>
-                  <FTUECarousel />
+                  <HomeTour />
                 </Suspense>
                 <Toaster position="top-center" />
                 {children}

@@ -21,8 +21,7 @@ export function SkillCard({
   progressPercentage = 0,
   games = []
 }: SkillCardProps) {
-  // Use a fallback link since skill_progression isn't fully implemented yet
-  const href = `/skills#${dimension}`;
+  const href = `/skills/${id}`;
 
   return (
     <article className="skill-card sp-card sp-card--interactive min-width-0" data-skill={id} data-dimension={dimension}>

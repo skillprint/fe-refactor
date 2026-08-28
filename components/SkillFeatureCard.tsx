@@ -39,7 +39,7 @@ export function SkillFeatureCard({
       </div>
       <div className="skill-feature__bar layout-flex items-center justify-between gap-lg wrap">
         <h4 className="margin-none">Games to develop this skill</h4>
-        <Link className="skill-feature__all layout-inline-flex items-center gap-xs font-sm weight-semibold" data-route={`/games?tab=skills&filter=${skillSlug}`} href={`/skills#${skillSlug}`}>
+        <Link className="skill-feature__all layout-inline-flex items-center gap-xs font-sm weight-semibold" data-route={`/games?tab=skills&filter=${skillSlug}`} href={`/skills/${skillSlug}`}>
           View all <svg className="sp-icon sp-icon--sm" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
         </Link>
       </div>

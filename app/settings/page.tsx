@@ -5,7 +5,7 @@ import PortalLayout from '../../components/PortalLayout';
 import PortalHead from '../../components/PortalHead';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
-import { getCookie } from '../utils/cookieUtils';
+import { getCookie, deleteCookie } from '../utils/cookieUtils';
 
 export default function SettingsPage() {
     const { status, userProfile, logout } = useAuth();
@@ -35,7 +35,7 @@ export default function SettingsPage() {
     };
 
     const handleResetTour = () => {
-        // Placeholder for actual reset logic
+        deleteCookie('ftue_completed');
         setShowTourResetAlert(true);
         setTimeout(() => setShowTourResetAlert(false), 5000); // Auto-hide after 5 seconds
     };
@@ -51,87 +51,6 @@ export default function SettingsPage() {
             <section className="pp-section" id="settings">
                 <div className="pp-settings sp-card" id="ppSettings">
                     
-                    {/* API Configuration */}
-                    <div className="pp-setting pp-setting--stack separator-bottom">
-                        <h2>
-                            <svg className="sp-icon sp-icon--sm sp-icon--muted" aria-hidden="true" viewBox="0 0 24 24">
-                                <use href="#ti-key"></use>
-                            </svg>
-                            API configuration
-                        </h2>
-                        <p className="pp-credential__note">Issued when this account was created. Read-only here &mdash; rotate them from the developer dashboard.</p>
-                        
-                        <div className="pp-setting__fields grid">
-                            {/* User ID Field */}
-                            <div className="pp-credential">
-                                <div className="pp-credential__row">
-                                    <div className="field">
-                                        <label htmlFor="user_id">User ID</label>
-                                        <input 
-                                            id="user_id" 
-                                            name="user_id" 
-                                            type="text" 
-                                            value={userId || 'sp_demo_7f3a91'} 
-                                            readOnly 
-                                            aria-describedby="user_id_help" 
-                                        />
-                                    </div>
-                                    <button 
-                                        className="button button--secondary button--md" 
-                                        type="button" 
-                                        onClick={() => handleCopy(userId || 'sp_demo_7f3a91')}
-                                    >
-                                        <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
-                                            <use href="#ti-copy"></use>
-                                        </svg>
-                                        <span data-credential-label>Copy</span>
-                                        <span className="sr-only"> User ID</span>
-                                    </button>
-                                </div>
-                                <p className="pp-credential__note" id="user_id_help">Identifies this account to the API.</p>
-                            </div>
-
-                            {/* API Key Field */}
-                            <div className="pp-credential">
-                                <div className="pp-credential__row">
-                                    <div className="field">
-                                        <label htmlFor="api_key">API Key</label>
-                                        <input 
-                                            id="api_key" 
-                                            name="api_key" 
-                                            type={showApiKey ? 'text' : 'password'} 
-                                            value={apiKey || 'skp_live_9042'} 
-                                            readOnly 
-                                            aria-describedby="api_key_help" 
-                                        />
-                                    </div>
-                                    <button 
-                                        className="button button--secondary button--icon-only button--md" 
-                                        type="button" 
-                                        aria-pressed={showApiKey} 
-                                        aria-label="Show API Key"
-                                        onClick={() => setShowApiKey(!showApiKey)}
-                                    >
-                                        <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
-                                            <use href={showApiKey ? "#ti-eye-off" : "#ti-eye"}></use>
-                                        </svg>
-                                    </button>
-                                    <button 
-                                        className="button button--secondary button--md" 
-                                        type="button"
-                                        onClick={() => handleCopy(apiKey || 'skp_live_9042')}
-                                    >
-                                        <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
-                                            <use href="#ti-copy"></use>
-                                        </svg>
-                                        <span data-credential-label>Copy</span>
-                                        <span className="sr-only"> API Key</span>
-                                    </button>
-                                </div>
-                                <p className="pp-credential__note" id="api_key_help">Keep this secret. Anyone holding it can act as this account.</p>
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Appearance */}
                     <div className="pp-setting separator-bottom">

@@ -1,8 +1,11 @@
 import { Suspense } from 'react';
 import { gameDetails, knownGameSlugs } from '../../config/gameConfig';
 import GameClient from './GameClient';
+import type { Metadata } from 'next';
 
-
+export const metadata: Metadata = {
+  title: 'Game Session',
+};
 
 interface GamePageProps {
   params: Promise<{

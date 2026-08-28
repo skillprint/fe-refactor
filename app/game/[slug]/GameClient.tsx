@@ -3,8 +3,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useUserSession } from '../../hooks/useUserSession';
-import FloatingExitButton from '../../components/FloatingExitButton';
-import { getGameConfig, knownGameSlugs } from '../../config/gameConfig';
+import PlayStage from '../../../components/GameSession/PlayStage';
+import SessionVeil from '../../../components/GameSession/SessionVeil';
+import PlayBar from '../../../components/GameSession/PlayBar';
+import GameResultDialog from '../../../components/GameSession/GameResultDialog';
+import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
+import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
@@ -98,8 +102,13 @@ export const mapSlugToGamePath = (slug: string) => {
 export default function GameClient({ slug }: GameClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
-    const [isIframeLoaded, setIsIframeLoaded] = useState(false);
-    const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
+    type SequenceState = 'loading' | 'ready' | 'playing' | 'calculating' | 'review' | 'badge';
+    const [sequence, setSequence] = useState<SequenceState>('loading');
+    const [isGamePaused, setIsGamePaused] = useState(false);
+    const [gameResults, setGameResults] = useState<GameResults | null>(null);
+    const [sessionMood, setSessionMood] = useState<string>('Focus');
+    const [adjustmentsApplied, setAdjustmentsApplied] = useState<number>(0);
+    const adjustmentsCountRef = useRef(0);
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
     const skillprintSessionIdRef = useRef<string>('');
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
@@ -111,6 +120,7 @@ export default function GameClient({ slug }: GameClientProps) {
     const shouldPollRef = useRef(false);
     const [lastSessionResponse, setLastSessionResponse] = useState<PollResultsResponse | null>(null);
     const [currentAdjustment, setCurrentAdjustment] = useState<Adjustment | null>(null);
+    const [latestAdjustment, setLatestAdjustment] = useState<Adjustment | null>(null);
     const processedAdjustmentsRef = useRef<Set<string>>(new Set());
     const lastAdjustmentTimeRef = useRef<number>(0);
 
@@ -123,12 +133,14 @@ export default function GameClient({ slug }: GameClientProps) {
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
+    const unifiedSlug = unifiedSlugFromBESlug(decodedSlug);
 
     const [gamePath, setGamePath] = useState<string>('');
     const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
+    const [hasImageError, setHasImageError] = useState(false);
 
     // Get game configuration
-    const gameConfig = getGameConfig(decodedSlug);
+    const gameConfig = getGameConfig(unifiedSlug);
 
     useEffect(() => {
         let isMounted = true;
@@ -169,7 +181,7 @@ export default function GameClient({ slug }: GameClientProps) {
     }, [decodedSlug]);
 
     const handleIframeLoad = () => {
-        setIsIframeLoaded(true);
+        setSequence('ready');
         setGameStartTime(Date.now());
         // Do not set shouldPollRef.current = true here. It is already set in useEffect,
         // and setting it here can re-enable polling during exit/navigation race conditions.
@@ -194,10 +206,10 @@ export default function GameClient({ slug }: GameClientProps) {
                 handleGameComplete(data);
                 break;
             case 'GAME_PAUSE':
-                setGameState('paused');
+                setIsGamePaused(true);
                 break;
             case 'GAME_RESUME':
-                setGameState('playing');
+                setIsGamePaused(false);
                 break;
             case 'GAME_SCORE_UPDATE':
                 // Handle real-time score updates if needed
@@ -267,6 +279,8 @@ export default function GameClient({ slug }: GameClientProps) {
                                     console.log("Applying game adjustment:", adj);
                                     processedAdjustmentsRef.current.add(adjId);
                                     lastAdjustmentTimeRef.current = now;
+                                    adjustmentsCountRef.current += 1;
+                                    setAdjustmentsApplied(adjustmentsCountRef.current);
 
                                     // Send to iframe
                                     if (iframeRef.current?.contentWindow) {
@@ -278,6 +292,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
                                     // Show banner
                                     setCurrentAdjustment(adj);
+                                    setLatestAdjustment(adj);
                                 }
                             }
                         } catch (err) {
@@ -305,6 +320,7 @@ export default function GameClient({ slug }: GameClientProps) {
     const playbookId = searchParams.get('playbookId');
     const disableAdjustments = searchParams.get('adjustments') === 'false';
     const disableSdk = searchParams.get('sdk') === 'false';
+    const devToolsEnabled = searchParams.get('dev') === 'true';
 
     const handleGameComplete = (data: any) => {
         const endTime = Date.now();
@@ -349,9 +365,11 @@ export default function GameClient({ slug }: GameClientProps) {
 
 
         // Navigate to review page with sessionId
-        if (skillprintSessionIdRef.current) {
-            router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
-        }
+        setGameResults(results);
+        setSequence('calculating');
+        setTimeout(() => {
+            setSequence('review');
+        }, 2000);
     };
 
     const stopIframe = () => {
@@ -385,9 +403,11 @@ export default function GameClient({ slug }: GameClientProps) {
     };
 
     const handlePlayAgain = () => {
-        // Reset game state
-        setGameState('playing');
+        setSequence('loading');
         setGameStartTime(Date.now());
+        setGameResults(null);
+        setAdjustmentsApplied(0);
+        adjustmentsCountRef.current = 0;
 
         // Reload the iframe to restart the game
         if (iframeRef.current) {
@@ -397,14 +417,13 @@ export default function GameClient({ slug }: GameClientProps) {
 
     const handleBackToGames = () => {
         // Reset game state when actually leaving
-        setGameState('playing');
+        setSequence('playing');
         setGameStartTime(Date.now());
         router.push('/games');
     };
 
     const handleExitGame = () => {
-        if (gameState === 'completed') {
-            // If game is already completed, just go back to games
+        if (sequence === 'review' || sequence === 'calculating') {
             handleBackToGames();
         } else {
             // If game is in progress, navigate to review page
@@ -448,10 +467,11 @@ export default function GameClient({ slug }: GameClientProps) {
 
 
 
-            // Navigate to review page with sessionId
-            if (skillprintSessionIdRef.current) {
-                router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
-            }
+            setGameResults(exitResults);
+            setSequence('calculating');
+            setTimeout(() => {
+                setSequence('review');
+            }, 2000);
         }
     };
 
@@ -459,10 +479,11 @@ export default function GameClient({ slug }: GameClientProps) {
 
     // Reset state when slug changes
     useEffect(() => {
-        setIsIframeLoaded(false);
-        setGameState('playing');
+        setSequence('loading');
+        setIsGamePaused(false);
         setGameStartTime(Date.now());
         setCurrentAdjustment(null);
+        setLatestAdjustment(null);
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
 
@@ -530,66 +551,121 @@ export default function GameClient({ slug }: GameClientProps) {
         }
     };
 
+    const handleTogglePlay = () => {
+        if (sequence === 'playing') {
+            setIsGamePaused(true);
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_PAUSE' }, '*');
+            }
+        } else if (sequence === 'ready') {
+            setSequence('playing');
+            setGameStartTime(Date.now());
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
+            }
+        } else {
+            setIsGamePaused(false);
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
+            }
+        }
+    };
+
     return (
-        <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="flex flex-col min-h-screen">
-                {/* Game iframe */}
-                <main className="flex-1 relative">
-                    {isLoadingGamePath ? (
-                        <div className="w-full h-full min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 border-0">
-                            <div className="flex flex-col items-center gap-4">
-                                <svg className="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span className="text-gray-500 dark:text-gray-400 font-medium">Loading Game...</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <iframe
-                            ref={iframeRef}
-                            src={gamePath}
-                            className="w-full h-full min-h-screen border-0"
-                            title={`${decodedSlug} Game`}
-                            allowFullScreen
-                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-                            onLoad={handleIframeLoad}
-                        />
-                    )}
-
-                    {/* Adjustment Banner */}
-                    {currentAdjustment && (
-                        <GameAdjustmentBanner
-                            parameterName={currentAdjustment.parameterName}
-                            parameterValue={currentAdjustment.parameterValue}
-                            onDismiss={() => setCurrentAdjustment(null)}
-                        />
-                    )}
-
-                    {/* Floating exit button - only show when iframe is loaded */}
-                    {isIframeLoaded && (
-                        <FloatingExitButton
-                            position={gameConfig.exitButtonPosition}
-                            color={gameConfig.customExitButton?.color || 'red'}
-                            size={gameConfig.customExitButton?.size || 'md'}
-                            onClick={handleExitGame}
-                        />
-                    )}
-
-                    {/* Hidden keyboard adjustment tester */}
-                    {!disableAdjustments && (
-                        <GameAdjustmentTester
-                            iframeRef={iframeRef}
-                            slug={decodedSlug}
-                            onAdjustment={(adj) => setCurrentAdjustment(adj)}
-                        />
-                    )}
-                </main>
+        <div className="page scrollbar-subtle page--game-session margin-none text-default font-ui leading-base" data-sequence={sequence} data-skillprint-page="game-session">
+            <div aria-hidden="true" className="play-field" data-stage-field>
+                <img alt="" className="play-field__art" data-stage-art src={`/assets/images/games/game-${unifiedSlug}.svg`} onError={(e) => { e.currentTarget.style.display = 'none'; setHasImageError(true); }} />
+                {hasImageError && <AnimatedGameTiles />}
+                
+                {!isLoadingGamePath && (
+                    <iframe
+                        ref={iframeRef}
+                        src={gamePath}
+                        className="w-full h-full border-0 absolute inset-0 z-10"
+                        title={`${decodedSlug} Game`}
+                        allowFullScreen
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                        onLoad={handleIframeLoad}
+                        style={{
+                            opacity: (sequence === 'playing' || sequence === 'calculating' || sequence === 'review' || sequence === 'ready') ? 1 : 0,
+                            pointerEvents: sequence === 'playing' ? 'auto' : 'none'
+                        }}
+                    />
+                )}
             </div>
 
+            {sequence === 'ready' && (
+                <PlayStage gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug} onPlay={() => handleTogglePlay()} />
+            )}
 
+            {sequence === 'loading' && (
+                <SessionVeil step="loading" title="Loading game" description={`${getGameDetails(unifiedSlug)?.name || unifiedSlug} is starting up.`} isCanvas />
+            )}
 
+            {sequence === 'calculating' && (
+                <SessionVeil step="calculating" title="Calculating results" description="Just a moment while we analyse your gameplay." />
+            )}
 
+            {sequence === 'review' && gameResults && (
+                <GameResultDialog
+                    gameTitle={gameConfig?.title || unifiedSlug}
+                    score={gameResults.score || 0}
+                    highScore={gameConfig?.highScore || 0}
+                    duration={gameResults.time || 0}
+                    adjustmentsCount={adjustmentsApplied}
+                    targetMood={sessionMood}
+                    onReplay={handlePlayAgain}
+                    skillScores={lastSessionResponse?.skillScores}
+                    moodScores={lastSessionResponse?.moodScores}
+                    gameSlug={decodedSlug}
+                    userToken={userToken}
+                />
+            )}
+
+            {sequence === 'playing' && (
+                <PlayBar
+                    gameTitle={gameConfig?.title || unifiedSlug}
+                    gameSlug={unifiedSlug}
+                    onExit={handleExitGame}
+                    targetMood={sessionMood}
+                    adjustmentName={latestAdjustment?.parameterName}
+                    adjustmentValue={latestAdjustment?.parameterValue}
+                    adjustmentCreateDate={latestAdjustment?.createDate}
+                />
+            )}
+
+            {/* Sequence steps for testing */}
+            {devToolsEnabled && (
+                <nav aria-label="Sequence steps" className="session-rail layout-flex items-center" style={{ position: 'fixed', bottom: 10, left: 10, zIndex: 9999 }}>
+                    <button aria-pressed={sequence === 'loading'} className="session-rail__step button button--tertiary" onClick={() => setSequence('loading')} type="button">Load</button>
+                    <button aria-pressed={sequence === 'ready'} className="session-rail__step button button--tertiary" onClick={() => setSequence('ready')} type="button">Start</button>
+                    <button aria-pressed={sequence === 'playing'} className="session-rail__step button button--tertiary" onClick={() => setSequence('playing')} type="button">Play</button>
+                    <button aria-pressed={sequence === 'calculating'} className="session-rail__step button button--tertiary" onClick={() => setSequence('calculating')} type="button">Calculate</button>
+                    <button aria-pressed={sequence === 'review'} className="session-rail__step button button--tertiary" onClick={() => setSequence('review')} type="button">Review</button>
+                </nav>
+            )}
+
+            {/* Hidden keyboard adjustment tester */}
+            {!disableAdjustments && (
+                <GameAdjustmentTester
+                    iframeRef={iframeRef}
+                    slug={decodedSlug}
+                    onAdjustment={(adj) => {
+                        setCurrentAdjustment(adj);
+                        setLatestAdjustment(adj);
+                    }}
+                />
+            )}
+
+            {/* Adjustment Banner (disabled, using bottom bar notification instead)
+            {currentAdjustment && (
+                <GameAdjustmentBanner
+                    parameterName={currentAdjustment.parameterName}
+                    parameterValue={currentAdjustment.parameterValue}
+                    onDismiss={() => setCurrentAdjustment(null)}
+                />
+            )}
+            */}
         </div>
     );
 }

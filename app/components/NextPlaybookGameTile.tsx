@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { getGameDetails } from '../config/gameConfig';
 import { unifiedSlugFromBESlug } from '../utils/slugUtils';
-import { PLAYBOOKS } from '../hooks/usePlaybook';
+import { usePlaybook } from '../hooks/usePlaybook';
 import { useGameSessions } from '../hooks/useGameSessions';
 import { useAuth } from '../context/AuthContext';
 import GamePreviewShareSheet from './GamePreviewShareSheet';
@@ -18,26 +18,25 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
     const { status } = useAuth();
     const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
 
-    // Find playbook
-    const playbook = Object.values(PLAYBOOKS).find(p => p.id === playbookId);
-
-    if (!playbook || status === 'partner') return null;
+    const { currentPlaybook: playbook, progress } = usePlaybook(playbookId);
+    
+    if (!playbook || status === 'partner' || !playbook.game_ids) return null;
 
     // Find next game
-    let nextGameSlug = playbook.games[0];
+    let nextGameSlug = playbook.game_ids[0];
     let completedCount = 0;
 
-    for (let i = 0; i < playbook.games.length; i++) {
-        const slug = playbook.games[i];
+    for (let i = 0; i < playbook.game_ids.length; i++) {
+        const slug = playbook.game_ids[i];
         const isCompleted = sessions.some(s => s.gameSlug === slug && s.metadata?.playbookId === playbook.id && s.completed);
         if (isCompleted) {
             completedCount++;
-        } else if (nextGameSlug === playbook.games[0] && completedCount === i) {
+        } else if (nextGameSlug === playbook.game_ids[0] && completedCount === i) {
             nextGameSlug = slug;
         }
     }
 
-    const isFinished = completedCount === playbook.games.length;
+    const isFinished = completedCount === playbook.game_ids.length;
 
     if (isFinished) {
         return (
@@ -87,13 +86,13 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
                         {/* Progress Meter inside card */}
                         <div className="mt-4">
                             <div className="flex justify-between text-xs font-semibold mb-1.5">
-                                <span className="text-muted-foreground">{completedCount} of {playbook.games.length} games</span>
-                                <span className="text-primary">{Math.round((completedCount / playbook.games.length) * 100)}%</span>
+                                <span className="text-muted-foreground">{completedCount} of {playbook.game_ids.length} games</span>
+                                <span className="text-primary">{Math.round((completedCount / playbook.game_ids.length) * 100)}%</span>
                             </div>
                             <div className="h-2 bg-secondary rounded-full overflow-hidden">
                                 <div
                                     className="h-full transition-all duration-500 ease-out bg-primary"
-                                    style={{ width: `${Math.round((completedCount / playbook.games.length) * 100)}%` }}
+                                    style={{ width: `${Math.round((completedCount / playbook.game_ids.length) * 100)}%` }}
                                 />
                             </div>
                         </div>

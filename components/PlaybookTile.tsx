@@ -32,7 +32,7 @@ export function PlaybookTile({
     ? '#' 
     : `/game/${encodeURIComponent(nextGameSlug)}/interstitial?source=playbook&playbookId=${id}`;
   
-  const detailUrl = `/playbook_detail?playbook=${id}`;
+  const detailUrl = `/playbooks/${id}`;
 
   return (
     <article className={`game-card game-card--portal playbook-card sp-card sp-card--interactive card--flush tone tone--${tone} min-width-0 layout-flex flow-column clip`}>

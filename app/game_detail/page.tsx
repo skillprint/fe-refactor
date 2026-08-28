@@ -12,6 +12,11 @@ import { GameDetailRecord } from '@/components/GameDetailRecord';
 import { GameDetailBadge } from '@/components/GameDetailBadge';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
 import { GameRail } from '@/components/GameRail';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Game Detail',
+};
 
 interface GameDetailPageProps {
   searchParams: Promise<{
@@ -106,7 +111,7 @@ export default async function GameDetailPage({ searchParams }: GameDetailPagePro
                 </p>
                 
                 <div className="gd-actions cluster wrap">
-                  <Link className="gd-play button button--primary button--lg no-grow" data-gd-play="" href={`/game_session?game=${gameSlug}`}>
+                  <Link className="gd-play button button--primary button--lg no-grow" data-gd-play="" href={`/game/${gameSlug}`}>
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
                     <span data-gd-play-label="">Play {game.name}</span>
                   </Link>
@@ -215,7 +220,7 @@ export default async function GameDetailPage({ searchParams }: GameDetailPagePro
                     title={g.name}
                     description={g.description || ''}
                     image={g.image || '/images/activities/covers/2048.png'}
-                    url={`/game_session?game=${g.slug}`}
+                    url={`/game/${g.slug}`}
                     skills={g.skills ? g.skills.map((s: any) => typeof s === 'string' ? { id: s, name: s, dimension: 'cognition' as const } : { ...s, id: typeof s.id === 'string' ? s.id : (s.name || 'skill') }) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                   />

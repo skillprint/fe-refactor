@@ -7,80 +7,79 @@ export interface Playbook {
     id: string;
     title: string;
     description: string;
-    goal: Goal;
-    games: string[]; // game slugs
+    slug: string;
+    associated_skills: string[];
+    associated_moods: string[];
+    game_ids: string[];
+    tone: string | null;
+    icon: string | null;
+    target: string | null;
+    est_time: string | null;
+    how_it_works: string | null;
+    created_at: string;
 }
 
-export const PLAYBOOKS: Record<Goal, Playbook> = {
-    focus: {
-        id: 'focus-playbook',
-        title: 'Deep Focus Routine',
-        description: 'A sequence of games designed to sharpen your attention and eliminate distractions.',
-        goal: 'focus',
-        games: ['2048', 'hextris', 'box-tower']
-    },
-    learning: {
-        id: 'learning-playbook',
-        title: 'Brain Activation for Learning',
-        description: 'Prime your brain for new information with these cognitive warm-ups.',
-        goal: 'learning',
-        games: ['change-word', 'alchemy', 'memory-match'] // memory-match might need a real slug check, using 'sweet-memory' or similar if needed. 'memory-match' is likely not valid based on gameConfig.ts. Let's check. 
-        // Checking gameConfig.ts... 'sweet-memory' or 'mahjong-deluxe'. Let's use 'sweet-memory' for now, or 'simon-says' if available?
-        // Actually, let's use valid slugs from gameConfig.ts: 'change-word', 'alchemy', 'sweet-memory'
-    },
-    wellness: {
-        id: 'wellness-playbook',
-        title: 'Mindful Relaxation',
-        description: 'Decompress and reduce stress with calming, low-pressure activities.',
-        goal: 'wellness',
-        games: ['i-love-hue', 'bubble-spirit', 'garden-match']
-    }
-};
+export function usePlaybooks() {
+    const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
+    const [isLoaded, setIsLoaded] = useState(false);
 
-// Correction for Learning games locally to ensure valid slugs
-PLAYBOOKS.learning.games = ['change-word', 'alchemy', 'sweet-memory'];
+    useEffect(() => {
+        let mounted = true;
+        fetch('/api/playbooks')
+            .then(res => res.json())
+            .then(data => {
+                if (mounted) {
+                    setPlaybooks(data);
+                    setIsLoaded(true);
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load playbooks:', err);
+                if (mounted) setIsLoaded(true);
+            });
+        
+        return () => { mounted = false; };
+    }, []);
 
+    return { playbooks, isLoaded };
+}
 
-export function usePlaybook() {
-    const { goal, isLoaded: isGoalLoaded } = useGoal();
+export function usePlaybook(slugOrId?: string) {
+    const { playbooks, isLoaded: isPlaybooksLoaded } = usePlaybooks();
     const { sessions, isLoaded: isSessionsLoaded } = useGameSessions();
 
     const currentPlaybook = useMemo(() => {
-        return PLAYBOOKS[goal] || PLAYBOOKS.focus;
-    }, [goal]);
+        if (!slugOrId) return playbooks[0];
+        return playbooks.find(p => p.slug === slugOrId || p.id === slugOrId) || playbooks[0];
+    }, [playbooks, slugOrId]);
 
     const progress = useMemo(() => {
-        if (!currentPlaybook || !sessions.length) return { completedGames: [], percentComplete: 0 };
+        if (!currentPlaybook || !sessions.length || !currentPlaybook.game_ids) {
+            return { completedGames: [], percentComplete: 0, isFinished: false, completedCount: 0 };
+        }
 
-        const completedGames = currentPlaybook.games.map(slug => {
-            // Find if this game has been played *specifically for this playbook*
-            // However, the user request says "The application should store if the game was played if it was entered from a playbook widget in order to update completion progress of a playbook."
-            // But it also implies we should probably count if they just played it? 
-            // "Game Tiles that if not played and clicked, go to the game preview interstial. Completed state for a single game..."
-            // "The application should store if the game was played if it was entered from a playbook widget..."
-            // This suggests strict tracking. I will look for metadata first.
-            const hasPlayedContextual = sessions.some(s =>
-                s.gameSlug === slug &&
+        const completedGames = currentPlaybook.game_ids.map(gameSlug => {
+            return sessions.some(s =>
+                s.gameSlug === gameSlug &&
                 s.metadata?.playbookId === currentPlaybook.id &&
                 s.completed
             );
-            return hasPlayedContextual;
         });
 
         const completedCount = completedGames.filter(Boolean).length;
-        const percentComplete = Math.round((completedCount / currentPlaybook.games.length) * 100);
+        const percentComplete = Math.round((completedCount / currentPlaybook.game_ids.length) * 100);
 
         return {
-            completedGames, // boolean array matching games index
+            completedGames,
             completedCount,
             percentComplete,
-            isFinished: completedCount === currentPlaybook.games.length
+            isFinished: completedCount === currentPlaybook.game_ids.length
         };
     }, [currentPlaybook, sessions]);
 
     return {
         currentPlaybook,
         progress,
-        isLoaded: isGoalLoaded && isSessionsLoaded
+        isLoaded: isPlaybooksLoaded && isSessionsLoaded
     };
 }

@@ -8840,6 +8840,7 @@ html:is([data-surface="dark"], [data-theme="dark"]) .page--portal {
   pointer-events: auto;
   transform: none;
   box-shadow: none;
+  transition: width 0.25s ease-out, transform 0.25s ease-out;
 }
 
 .page--portal .portal-brand {
@@ -8972,6 +8973,7 @@ html:is([data-surface="dark"], [data-theme="dark"]) .page--portal {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  transition: margin-inline-start 0.25s ease-out;
 }
 
 

@@ -53,7 +53,6 @@ export default function Sidebar() {
         <div className="sp-side-nav__group portal-sidebar__utilities">
           <Link title="Profile" href="/profile" className="sp-side-nav__link"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-user"></use></svg><span className="sp-side-nav__label">Profile</span></Link>
           <Link title="Settings" className="sp-side-nav__link" href="/settings"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-settings"></use></svg><span className="sp-side-nav__label">Settings</span></Link>
-          <button title="Theme" className="sp-side-nav__link" type="button" data-theme-toggle><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-moon"></use></svg><span className="sp-side-nav__label" data-theme-toggle-label>Theme</span></button>
         </div>
       </div>
     </aside>

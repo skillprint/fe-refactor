@@ -205,3 +205,25 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Fix for Game Session modal getting overridden by global page--portal light theme */
+html[data-surface="light"] > .page--portal .page--game-session .popup-backdrop,
+html[data-theme="light"] > .page--portal .page--game-session .popup-backdrop {
+  background: color-mix(in srgb, var(--deep-navy-950) 26%, transparent);
+  padding: var(--space-24);
+}
+
+html[data-surface="light"] > .page--portal .page--game-session .popup,
+html[data-theme="light"] > .page--portal .page--game-session .popup {
+  background: var(--popup-dark);
+  border: 1px solid color-mix(in srgb, var(--deep-navy-300) 24%, transparent);
+  color: var(--geistface-grey-200);
+  --ui-text: var(--geistface-grey-200);
+  --ui-muted: var(--geistface-grey-400);
+  --ui-surface: var(--panel-navy-900);
+  --ui-border: color-mix(in srgb, var(--deep-navy-25) 10%, transparent);
+  width: min(var(--space-720), 100%);
+  max-height: 100%;
+  grid-template-columns: none;
+  grid-template-rows: minmax(0, 1fr) auto;
+}

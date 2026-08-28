@@ -28,11 +28,11 @@ export const PlaybookWidget: React.FC = () => {
                             <span className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider">
                                 Current Playbook
                             </span>
-                            <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${currentPlaybook.goal === 'focus' ? 'bg-indigo-100 text-indigo-800' :
-                                currentPlaybook.goal === 'learning' ? 'bg-emerald-100 text-emerald-800' :
+                            <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${currentPlaybook.slug.includes('focus') ? 'bg-indigo-100 text-indigo-800' :
+                                currentPlaybook.slug.includes('learning') ? 'bg-emerald-100 text-emerald-800' :
                                     'bg-orange-100 text-orange-800'
                                 }`}>
-                                {currentPlaybook.goal}
+                                {currentPlaybook.target || 'Playbook'}
                             </span>
                         </div>
                         <h2 className="text-2xl font-bold text-foreground">{currentPlaybook.title}</h2>
@@ -67,7 +67,7 @@ export const PlaybookWidget: React.FC = () => {
             {/* Game Sequence */}
             <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {currentPlaybook.games.map((slug, index) => {
+                    {currentPlaybook.game_ids.map((slug: string, index: number) => {
                         const details = getGameDetails(slug);
                         const isCompleted = completedGames[index];
                         const isLocked = index > 0 && !completedGames[index - 1] && !isCompleted;
@@ -76,7 +76,7 @@ export const PlaybookWidget: React.FC = () => {
                         return (
                             <div key={slug} className={`relative group ${isLocked ? 'opacity-50 grayscale' : ''}`}>
                                 {/* Connector Line (Desktop) */}
-                                {index < currentPlaybook.games.length - 1 && (
+                                {index < currentPlaybook.game_ids.length - 1 && (
                                     <div className="hidden sm:block absolute top-1/2 -right-4 w-8 h-1 bg-border -z-10 transform -translate-y-1/2" />
                                 )}
 

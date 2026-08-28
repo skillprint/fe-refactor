@@ -310,7 +310,7 @@ function HomeContent() {
           <Breadcrumbs items={[{ label: 'Home' }]} />
           <div className="portal-head__row">
             <PortalPageTitle>Play games. Build your Skillprint.</PortalPageTitle>
-            <button className="button button--secondary button--md" type="button">
+            <button className="button button--secondary button--md" type="button" onClick={() => window.dispatchEvent(new CustomEvent('skillprint:show-ftue'))}>
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-help"></use></svg>
               How this works
             </button>
@@ -323,12 +323,12 @@ function HomeContent() {
 
             {/* Get Started */}
             <PortalSection ariaLabelledBy="nextUpTitle">
-              <div className="portal-nextup sp-card">
+              <div className="portal-nextup sp-card" data-home-spot="nextup">
                 <div className="portal-nextup__copy">
                   <span className="portal-eyebrow">Get started</span>
                   <PortalSectionTitle id="nextUpTitle">Play one game to start your Skillprint.</PortalSectionTitle>
                   <p className="portal-nextup__lede">Nothing here is scored until you play. A session takes five to ten minutes, and five of them make your first Skillprint.</p>
-                  <div className="portal-nextup__actions">
+                  <div className="portal-nextup__actions" data-home-spot="play">
                     <Link className="button button--primary button--lg" href="/games">
                       <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
                       <span>Play your first game</span>
@@ -339,7 +339,7 @@ function HomeContent() {
                     </Link>
                   </div>
                 </div>
-                <div className="portal-nextup__progress">
+                <div className="portal-nextup__progress" data-home-spot="run">
                   <p className="nextup-progress__count">Your first 5 sessions</p>
                   <ol className="nextup-slots" aria-label="No sessions played yet. 5 still to play.">
                     {/* Render 5 empty slots */}
@@ -369,7 +369,7 @@ function HomeContent() {
                     title={game.name}
                     description={game.description}
                     image={game.screenshot || game.image || '/images/default-game.jpg'}
-                    url={`/game_session?game=${game.slug}`}
+                    url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                   />
@@ -400,7 +400,7 @@ function HomeContent() {
                           title={game?.name || 'Unknown Game'}
                           description={game?.description || ''}
                           image={game?.image || '/images/default-game.jpg'}
-                          url={`/game_session?game=${game?.slug || ''}`}
+                          url={`/game/${game?.slug || ''}`}
                           skills={game?.skills ? game.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const })) : []}
                           tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                         />
@@ -433,7 +433,7 @@ function HomeContent() {
                     title={game.name}
                     description={game.description || 'Check out this new game!'}
                     image={game.screenshot || '/images/default-game.jpg'}
-                    url={`/game_session?game=${game.slug}`}
+                    url={`/game/${game.slug}`}
                     statusBadge="New"
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[(i + 2) % 6]}
                   />
@@ -458,7 +458,7 @@ function HomeContent() {
           </PortalPageMain>
 
           <PortalPageRail ariaLabelledBy="printTitle">
-            <article className="rail-card rail-print sp-card">
+            <article className="rail-card rail-print sp-card" data-home-spot="print">
               <div className="rail-card__head">
                 <h2 className="rail-card__title" id="printTitle">Your Skillprint</h2>
                 <span className="ui-badge ui-badge--sm">
@@ -516,35 +516,38 @@ function HomeContent() {
               )}
             </article>
 
-            <article className="rail-card sp-card">
-              <div className="rail-card__head">
-                <span className="rail-card__label">What you will see here</span>
-              </div>
-              <div className="layout-grid gap-lg">
-                <div className="layout-grid gap-sm">
-                  <div className="layout-flex items-center justify-between gap-md font-sm">
-                    <span className="weight-semibold">Mood</span><span className="text-muted">Needs play</span>
-                  </div>
-                  <div className="rail-meter"><i></i></div>
+            <div style={{ position: 'relative' }}>
+              <MockDataTag />
+              <article className="rail-card sp-card" aria-labelledby="railReadTitle" data-home-spot="read">
+                <div className="rail-card__head">
+                  <span className="rail-card__label">What you will see here</span>
                 </div>
-                <div className="layout-grid gap-sm">
-                  <div className="layout-flex items-center justify-between gap-md font-sm">
-                    <span className="weight-semibold">Cognition</span><span className="text-muted">Needs play</span>
+                <div className="layout-grid gap-lg">
+                  <div className="layout-grid gap-sm">
+                    <div className="layout-flex items-center justify-between gap-md font-sm">
+                      <span className="weight-semibold">Mood</span><span className="text-muted">Needs play</span>
+                    </div>
+                    <div className="rail-meter"><i></i></div>
                   </div>
-                  <div className="rail-meter"><i></i></div>
-                </div>
-                <div className="layout-grid gap-sm">
-                  <div className="layout-flex items-center justify-between gap-md font-sm">
-                    <span className="weight-semibold">Personality</span><span className="text-muted">Needs play</span>
+                  <div className="layout-grid gap-sm">
+                    <div className="layout-flex items-center justify-between gap-md font-sm">
+                      <span className="weight-semibold">Cognition</span><span className="text-muted">Needs play</span>
+                    </div>
+                    <div className="rail-meter"><i></i></div>
                   </div>
-                  <div className="rail-meter"><i></i></div>
+                  <div className="layout-grid gap-sm">
+                    <div className="layout-flex items-center justify-between gap-md font-sm">
+                      <span className="weight-semibold">Personality</span><span className="text-muted">Needs play</span>
+                    </div>
+                    <div className="rail-meter"><i></i></div>
+                  </div>
                 </div>
-              </div>
-              <p className="margin-none text-muted font-sm leading-md">Mood scores first, cognition next, personality last. This card always says what still needs play.</p>
-              <div className="cluster gap-md">
-                <Link className="button button--secondary button--sm" href="/skills">View skills</Link>
-              </div>
-            </article>
+                <p className="margin-none text-muted font-sm leading-md">Mood scores first, cognition next, personality last. This card always says what still needs play.</p>
+                <div className="cluster gap-md">
+                  <Link className="button button--secondary button--sm" href="/skills">View skills</Link>
+                </div>
+              </article>
+            </div>
           </PortalPageRail>
         </PortalPageLayout>
       </PortalLayout>
