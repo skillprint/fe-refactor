@@ -27,7 +27,7 @@ function formatSecondsToDuration(sec: number): string {
   return `${s}s`;
 }
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const { sessions } = useGameSessions();
   const { fetchUserProfile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
@@ -177,5 +177,13 @@ export default function ProfilePage() {
 
       <ProfileSessions sessions={mappedSessions} />
     </PortalLayout>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <React.Suspense fallback={<div>Loading profile...</div>}>
+      <ProfilePageContent />
+    </React.Suspense>
   );
 }
