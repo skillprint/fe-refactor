@@ -27,7 +27,7 @@ function formatSecondsToDuration(sec: number): string {
   return `${s}s`;
 }
 
-export default function NewProfilePage() {
+export default function ProfilePage() {
   const { sessions } = useGameSessions();
   const { fetchUserProfile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
