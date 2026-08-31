@@ -48,15 +48,27 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
           <div className="rail-meter" data-meter={completePct} style={{ '--meter-fill': `${completePct}%` } as React.CSSProperties}><i></i></div>
         </div>
         <div className="layout-flex items-center justify-between gap-md separator-top font-sm">
-          <span className="text-muted" data-state-text="streakLabel">{daysPlayed > 0 ? `${daysPlayed} Day Streak` : 'No streak yet'}</span>
+          <span className="text-muted" data-state-text="streakLabel">{daysPlayed > 0 ? `${daysPlayed} Sessions` : 'No sessions yet'}</span>
           <div className="pp-streak-days layout-flex gap-sm" data-pp-streak>
-            <span className="day layout-grid place-center border-subtle radius-round">M</span>
-            <span className="day layout-grid place-center border-subtle radius-round">T</span>
-            <span className="day layout-grid place-center border-subtle radius-round">W</span>
-            <span className="day layout-grid place-center border-subtle radius-round">T</span>
-            <span className="day layout-grid place-center border-subtle radius-round">F</span>
-            <span className="day layout-grid place-center border-subtle radius-round">S</span>
-            <span className="day layout-grid place-center border-subtle radius-round">S</span>
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, index) => {
+              const now = new Date();
+              const dayOfWeek = (now.getDay() + 6) % 7;
+              const startOfWeek = new Date(now);
+              startOfWeek.setDate(now.getDate() - dayOfWeek);
+              startOfWeek.setHours(0, 0, 0, 0);
+
+              const isActive = sessions.some(session => {
+                const sessionDate = new Date(session.date || session.timestamp);
+                const diffTime = sessionDate.getTime() - startOfWeek.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays === index;
+              });
+
+              const className = `day layout-grid place-center border-subtle radius-round ${isActive ? 'done text-deep' : ''}`;
+              return (
+                <span key={index} className={className.trim()}>{label}</span>
+              );
+            })}
           </div>
         </div>
       </article>
@@ -64,16 +76,20 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
       <article className="rail-card sp-card" id="recent-sessions" aria-labelledby="railRecent">
         <div className="rail-card__head">
           <span className="rail-card__label" id="railRecent">Recent sessions</span>
-          <span className="ui-badge ui-badge--sm" data-state-text="recentBadge">Last 5</span>
+          {recentSessions.length > 0 && (
+            <span className="ui-badge ui-badge--sm" data-state-text="recentBadge">
+              {recentSessions.length < 5 ? `Last ${recentSessions.length}` : 'Last 5'}
+            </span>
+          )}
         </div>
         <ul className="rail-list" data-pp-session-list="">
           {recentSessions.map((session, i) => (
             <li key={session.id || i}>
-              <div>
-                <strong className="font-md leading-md weight-semibold layout-block">{session.gameName}</strong>
-                <span className="text-muted font-sm leading-sm">{session.skillMeasured}</span>
-              </div>
-              <strong className="font-mono text-primary margin-left-auto">{session.score}</strong>
+              <Link className="rail-list__link" href={`/game/${session.gameSlug || session.id}`}>
+                <img className="rail-thumb" alt="" src={session.gameImage || '/images/default-game.jpg'} />
+                <span className="rail-list__name">{session.gameName}</span>
+                <span className="rail-list__value">{session.score}</span>
+              </Link>
             </li>
           ))}
         </ul>
@@ -84,12 +100,12 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
           <p className="margin-none text-muted font-sm">No sessions recorded yet.</p>
           <p className="margin-none font-xs text-subtle">Start playing to see your history.</p>
         </div>
-        <a className="portal-section__link font-sm" href="#sessions">
+        <Link className="portal-section__link font-sm" href="#sessions">
           All sessions 
           <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
             <use href="#ti-chevron-right"></use>
           </svg>
-        </a>
+        </Link>
       </article>
     </>
   );

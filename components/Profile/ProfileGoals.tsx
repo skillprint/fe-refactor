@@ -48,7 +48,7 @@ export default function ProfileGoals({
       
       <div className="pp-goal-grid grid gap-6 md:grid-cols-2">
         {/* TARGET SKILLS */}
-        <article className="pp-goal sp-card">
+        <article className="pp-goal sp-card relative">
           <div className="pp-goal__head layout-flex items-center justify-between gap-lg">
             <div className="cluster items-center gap-md">
               <svg className="sp-icon sp-icon--md sp-icon--cognition" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-trophy"></use></svg>
@@ -69,14 +69,6 @@ export default function ProfileGoals({
               </button>
             )}
           </div>
-          
-          {isSavingSkills && (
-            <div className="absolute inset-0 bg-background/85 backdrop-blur-[2px] flex flex-col items-center justify-center z-30 transition-all duration-300">
-               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-               <p className="text-sm font-medium text-foreground mt-3 animate-pulse">Saving skills...</p>
-            </div>
-          )}
-
           {!isEditingSkills ? (
             goalSkills.length === 0 ? (
               <div className="pp-goal__empty text-center" data-pp-goal-empty>
@@ -138,12 +130,14 @@ export default function ProfileGoals({
                   className="button button--secondary button--xs" 
                   onClick={() => setIsEditingSkills(false)}
                   type="button"
+                  disabled={isSavingSkills}
                 >
                   Cancel
                 </button>
                 <button 
-                  className="button button--primary button--xs" 
+                  className="button button--primary button--xs flex items-center gap-2" 
                   onClick={async () => {
+                    if (isSavingSkills) return;
                     try {
                       await saveSkills(tempSkills);
                       setIsEditingSkills(false);
@@ -153,8 +147,14 @@ export default function ProfileGoals({
                     }
                   }}
                   type="button"
+                  disabled={isSavingSkills}
                 >
-                  Save
+                  {isSavingSkills ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
+                      Saving...
+                    </>
+                  ) : 'Save'}
                 </button>
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function ProfileGoals({
         </article>
 
         {/* TARGET MOODS */}
-        <article className="pp-goal sp-card">
+        <article className="pp-goal sp-card relative">
           <div className="pp-goal__head layout-flex items-center justify-between gap-lg">
             <div className="cluster items-center gap-md">
               <svg className="sp-icon sp-icon--md sp-icon--mood" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-bolt"></use></svg>
@@ -183,14 +183,6 @@ export default function ProfileGoals({
               </button>
             )}
           </div>
-          
-          {isSavingMoods && (
-            <div className="absolute inset-0 bg-background/85 backdrop-blur-[2px] flex flex-col items-center justify-center z-30 transition-all duration-300">
-               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-               <p className="text-sm font-medium text-foreground mt-3 animate-pulse">Saving moods...</p>
-            </div>
-          )}
-
           {!isEditingMoods ? (
             goalMoods.length === 0 ? (
               <div className="pp-goal__empty text-center" data-pp-goal-empty>
@@ -252,12 +244,14 @@ export default function ProfileGoals({
                   className="button button--secondary button--xs" 
                   onClick={() => setIsEditingMoods(false)}
                   type="button"
+                  disabled={isSavingMoods}
                 >
                   Cancel
                 </button>
                 <button 
-                  className="button button--primary button--xs" 
+                  className="button button--primary button--xs flex items-center gap-2" 
                   onClick={async () => {
+                    if (isSavingMoods) return;
                     try {
                       await saveMoods(tempMoods);
                       setIsEditingMoods(false);
@@ -267,8 +261,14 @@ export default function ProfileGoals({
                     }
                   }}
                   type="button"
+                  disabled={isSavingMoods}
                 >
-                  Save
+                  {isSavingMoods ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin"></div>
+                      Saving...
+                    </>
+                  ) : 'Save'}
                 </button>
               </div>
             </div>

@@ -128,7 +128,7 @@ function GamesPageContent() {
 
   return (
     <>
-      <PortalLayout>
+      <PortalLayout pageClass="page--portal-games">
         <PortalPageMain>
           {/* Header */}
           <div className="portal-head">
@@ -161,7 +161,7 @@ function GamesPageContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.screenshot || game.image || '/images/default-game.jpg'}
+                    image={game.screenshot || game.image || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
@@ -189,7 +189,7 @@ function GamesPageContent() {
                     description={data.playbook.description}
                     iconSrc={`/skillprint-portal-redesign/assets/icons/${data.playbook.icon || 'playbook-focus'}.svg`}
                     nextGameSlug={data.nextGameSlug}
-                    nextGameImage={data.firstGameDetails?.image || '/images/default-game.jpg'}
+                    nextGameImage={data.firstGameDetails?.image || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
                     totalGames={data.playbook.game_ids?.length || 0}
                     completedGames={data.completedCount}
                     isFinished={data.isFinished}
@@ -271,7 +271,7 @@ function GamesPageContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description || ''}
-                    image={game.screenshot || game.image || '/images/default-game.jpg'}
+                    image={game.screenshot || game.image || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}

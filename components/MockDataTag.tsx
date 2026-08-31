@@ -14,10 +14,11 @@ export function MockDataTag() {
       <span
         className="ui-badge ui-badge--sm"
         style={{
-          backgroundColor: 'var(--surface-sunken)',
-          color: 'var(--text-muted)',
-          border: '1px solid var(--ui-border-strong)',
-          opacity: 0.8
+          backgroundColor: '#fffae6',
+          color: '#000000',
+          border: '1px solid #ffe58f',
+          opacity: 0.9,
+          fontWeight: 600
         }}
         title="This section is currently populated with local/mock data and lacks a backend endpoint."
       >

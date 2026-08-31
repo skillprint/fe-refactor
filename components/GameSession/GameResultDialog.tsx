@@ -49,7 +49,7 @@ export default function GameResultDialog({
     try {
       await submitMoodSurvey({
         score,
-        game: gameSlug,
+        game: gameSlug.toLowerCase(),
         mood: targetMood
       }, userToken);
       setSurveySubmitted(true);

@@ -77,7 +77,7 @@ const replacement = `
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.image || '/images/default-game.jpg'}
+                    image={game.image || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
                     url={`/ game_session ? game = ${ game.slug }`}
                     skills={game.skills.map(s => ({ id: s, name: s, dimension: 'cognition' }))}
                     tone={['pink', 'mint', 'green', 'blue', 'yellow', 'purple'][i % 6]}
@@ -122,7 +122,7 @@ const replacement = `
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.screenshot || '/images/default-game.jpg'}
+                    image={game.screenshot || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
                     url={`/ game_session ? game = ${ game.slug } `}
                     statusBadge="New"
                     tone="blue"

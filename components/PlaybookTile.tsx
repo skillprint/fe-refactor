@@ -46,7 +46,7 @@ export function PlaybookTile({
 
       <div className="playbook-card__progress layout-flex items-center">
         <span className="playbook-card__preview layout-block clip">
-          <img alt="" aria-hidden="true" className="layout-block" src={nextGameImage || '/images/default-game.jpg'} width="64" height="64" />
+          <img alt="" aria-hidden="true" className="layout-block" src={nextGameImage || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'} width="64" height="64" />
         </span>
         <div className="playbook-card__tally min-width-0">
           <p className="playbook-card__count">{completedGames} of {totalGames} games played</p>

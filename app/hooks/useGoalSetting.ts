@@ -9,22 +9,32 @@ export interface GoalOptionItem {
 }
 
 export const AVAILABLE_SKILLS: GoalOptionItem[] = [
-  { slug: 'problem-solving', name: 'Problem Solving' },
-  { slug: 'memory', name: 'Memory' },
-  { slug: 'speed', name: 'Speed' },
-  { slug: 'logic', name: 'Logic' },
+  { slug: 'pattern-matching', name: 'Pattern Matching' },
   { slug: 'attention', name: 'Attention' },
-  { slug: 'visual', name: 'Visual' },
-  { slug: 'creativity', name: 'Creativity' },
-  { slug: 'language', name: 'Language' },
+  { slug: 'memory', name: 'Memory' },
+  { slug: 'planning', name: 'Planning' },
+  { slug: 'task-switching', name: 'Task Switching' },
   { slug: 'math', name: 'Math' },
+  { slug: 'deduction', name: 'Deduction' },
+  { slug: 'visualization', name: 'Visualization' },
+  { slug: 'verbal', name: 'Verbal' },
+  { slug: 'timing', name: 'Timing' },
+  { slug: 'perceptual-speed', name: 'Perceptual Speed' },
+  { slug: 'knowledge', name: 'Knowledge' },
+  { slug: 'action', name: 'Action' },
+  { slug: 'spatial', name: 'Spatial' },
 ];
 
 export const AVAILABLE_MOODS: GoalOptionItem[] = [
   { slug: 'focus', name: 'Focus' },
+  { slug: 'grit', name: 'Grit' },
   { slug: 'relax', name: 'Relax' },
-  { slug: 'innovate', name: 'Innovate' },
   { slug: 'collaborate', name: 'Collaborate' },
+  { slug: 'empathy', name: 'Empathy' },
+  { slug: 'creativity', name: 'Creativity' },
+  { slug: 'joy', name: 'Joy' },
+  { slug: 'curiosity', name: 'Curiosity' },
+  { slug: 'awe', name: 'Awe' },
 ];
 
 const SKILLS_COOKIE_KEY = 'goal_skills';
@@ -48,14 +58,22 @@ export function useGoalSetting() {
     
     const storedSkills = getCookie(SKILLS_COOKIE_KEY);
     if (storedSkills) {
-      setGoalSkills(storedSkills.split(',').filter(Boolean));
+      const validSkills = storedSkills
+        .split(',')
+        .filter(Boolean)
+        .filter(slug => AVAILABLE_SKILLS.some(s => s.slug === slug));
+      setGoalSkills(validSkills);
     } else {
       setGoalSkills([]);
     }
 
     const storedMoods = getCookie(MOODS_COOKIE_KEY);
     if (storedMoods) {
-      setGoalMoods(storedMoods.split(',').filter(Boolean));
+      const validMoods = storedMoods
+        .split(',')
+        .filter(Boolean)
+        .filter(slug => AVAILABLE_MOODS.some(m => m.slug === slug));
+      setGoalMoods(validMoods);
     } else {
       setGoalMoods([]);
     }

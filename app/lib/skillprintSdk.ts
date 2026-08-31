@@ -273,20 +273,37 @@ export class SkillprintClient {
 
         if (isLastChunk) {
             try {
-                const base64Data = this.testEmptyDataBase64String.split(',')[1];
-                const byteCharacters = atob(base64Data);
-                const byteArrays = [];
-                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-                    const slice = byteCharacters.slice(offset, offset + 512);
-                    const byteNumbers = new Array(slice.length);
-                    for (let i = 0; i < slice.length; i++) {
-                        byteNumbers[i] = slice.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    byteArrays.push(byteArray);
+                let blob: Blob;
+                let filename = 'screenshot_0.jpg';
+                let useFallback = true;
+                
+                if (screenshots.length > 0) {
+                    blob = screenshots[screenshots.length - 1];
+                    useFallback = false;
+                } else if (this.lastScreenshotDataURI) {
+                    const fetchedResponse = await fetch(this.lastScreenshotDataURI);
+                    blob = await fetchedResponse.blob();
+                    useFallback = false;
                 }
-                const blob = new Blob(byteArrays, { type: 'image/png' });
-                formData.append('screenshot_0', blob, 'screenshot_0.png');
+                
+                if (useFallback) {
+                    const base64Data = this.testEmptyDataBase64String.split(',')[1];
+                    const byteCharacters = atob(base64Data);
+                    const byteArrays = [];
+                    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                        const slice = byteCharacters.slice(offset, offset + 512);
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                            byteNumbers[i] = slice.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        byteArrays.push(byteArray);
+                    }
+                    blob = new Blob(byteArrays, { type: 'image/png' });
+                    filename = 'screenshot_0.png';
+                }
+                
+                formData.append('screenshot_0', blob!, filename);
             } catch (e: any) {
                 this.log(`Failed to create fallback blob: ${e.message}`, LogLevel.ERROR);
             }

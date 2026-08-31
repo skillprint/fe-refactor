@@ -315,6 +315,41 @@ export default function GameClient({ slug }: GameClientProps) {
         setTimeout(poll, 2000);
     };
 
+    const pollForFinalResults = async () => {
+        if (!skillprintClientRef.current || !skillprintSessionIdRef.current || disableSdk) {
+            setTimeout(() => setSequence('review'), 2000);
+            return;
+        }
+
+        let attempts = 0;
+        const maxAttempts = 15; // 30 seconds max
+        const poll = async () => {
+            if (attempts >= maxAttempts) {
+                setSequence('review');
+                return;
+            }
+
+            try {
+                const polledRes = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
+                if (polledRes) {
+                    setLastSessionResponse(polledRes);
+                    // If state is closed, or we have populated skillScores, move to review
+                    if (polledRes.state === "CLOSED" || (polledRes.skillScores && polledRes.skillScores.analyzedAt)) {
+                        setSequence('review');
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('Error polling for final results', e);
+            }
+
+            attempts++;
+            setTimeout(poll, 2000);
+        };
+
+        poll();
+    };
+
     const searchParams = useSearchParams();
     const source = searchParams.get('source');
     const playbookId = searchParams.get('playbookId');
@@ -367,9 +402,7 @@ export default function GameClient({ slug }: GameClientProps) {
         // Navigate to review page with sessionId
         setGameResults(results);
         setSequence('calculating');
-        setTimeout(() => {
-            setSequence('review');
-        }, 2000);
+        pollForFinalResults();
     };
 
     const stopIframe = () => {
@@ -469,9 +502,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
             setGameResults(exitResults);
             setSequence('calculating');
-            setTimeout(() => {
-                setSequence('review');
-            }, 2000);
+            pollForFinalResults();
         }
     };
 

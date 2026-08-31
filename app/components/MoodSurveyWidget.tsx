@@ -25,8 +25,8 @@ export default function MoodSurveyWidget({ gameSlug, targetMood }: MoodSurveyWid
         try {
             const tokenToUse = userToken || (typeof window !== 'undefined' ? localStorage.getItem('userToken') : null);
             await submitMoodSurvey({
-                game: gameSlug,
-                mood: targetMood,
+                game: gameSlug.toLowerCase(),
+                mood: targetMood.toLowerCase(),
                 score: score
             }, tokenToUse);
             setIsSubmitted(true);

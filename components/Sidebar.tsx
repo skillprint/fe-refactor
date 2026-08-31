@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeSkillSection, setActiveSkillSection] = useState('mood');
   const pathname = usePathname();
+  const isSkillsPage = pathname === '/skills' || pathname === '/skills/';
 
   useEffect(() => {
     try {
@@ -17,6 +19,39 @@ export default function Sidebar() {
       }
     } catch (e) {}
   }, []);
+
+  useEffect(() => {
+    if (!isSkillsPage) return;
+    
+    const handleScroll = () => {
+      const sections = ['mood', 'cognition', 'personality'];
+      let current = sections[0];
+      const offset = 150; // offset for the header and top spacing
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= offset) {
+            current = section;
+          }
+        }
+      }
+      
+      // Check if we are at the bottom of the page
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
+         current = sections[sections.length - 1];
+      }
+      
+      setActiveSkillSection(current);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Trigger once on mount to set initial state
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isSkillsPage]);
 
   const toggleCollapse = () => {
     const next = !isCollapsed;
@@ -46,7 +81,24 @@ export default function Sidebar() {
         <div className="sp-side-nav__group" data-home-spot="routes">
           <Link title="Home" className={`sp-side-nav__link ${pathname === '/' ? 'is-active' : ''}`} href="/" aria-current={pathname === '/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-home"></use></svg><span className="sp-side-nav__label">Home</span></Link>
           <Link title="Games" className={`sp-side-nav__link ${pathname === '/games' || pathname === '/games/' ? 'is-active' : ''}`} href="/games" aria-current={pathname === '/games' || pathname === '/games/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg><span className="sp-side-nav__label">Games</span></Link>
-          <Link title="Skills" className={`sp-side-nav__link ${pathname === '/skills' || pathname === '/skills/' ? 'is-active' : ''}`} href="/skills" aria-current={pathname === '/skills' || pathname === '/skills/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chart"></use></svg><span className="sp-side-nav__label">Skills</span></Link>
+          <Link title="Skills" className={`sp-side-nav__link ${isSkillsPage ? 'is-active' : ''}`} href="/skills" aria-current={isSkillsPage ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chart"></use></svg><span className="sp-side-nav__label">Skills</span></Link>
+          
+          {isSkillsPage && (
+            <div className="portal-subnav" data-skills-subnav>
+              <a title="Mood" className={`portal-subnav__link ${activeSkillSection === 'mood' ? 'is-active' : ''}`} href="#mood" data-dimension="mood">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-category-mood"></use></svg>
+                <span className="portal-subnav__label">Mood</span>
+              </a>
+              <a title="Cognition" className={`portal-subnav__link ${activeSkillSection === 'cognition' ? 'is-active' : ''}`} href="#cognition" data-dimension="cognition">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-category-cognition"></use></svg>
+                <span className="portal-subnav__label">Cognition</span>
+              </a>
+              <a title="Personality" className={`portal-subnav__link ${activeSkillSection === 'personality' ? 'is-active' : ''}`} href="#personality" data-dimension="personality">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-category-personality"></use></svg>
+                <span className="portal-subnav__label">Personality</span>
+              </a>
+            </div>
+          )}
         </div>
       </nav>
       <div className="portal-sidebar__foot">

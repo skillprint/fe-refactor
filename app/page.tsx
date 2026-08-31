@@ -214,7 +214,6 @@ function HomeContent() {
   const { isWhitelisted } = useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<any[]>([]);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
 
   // Fetch games for the "New Games" section using the 'relax' mood
@@ -228,13 +227,13 @@ function HomeContent() {
   }, [fetchedNewGames]);
 
   useEffect(() => {
-    // Check for spotlight cookie
-    const hasSeenSpotlight = getCookie('spotlight_dismissed');
-    if (!hasSeenSpotlight) {
-      // setShowTooltip(true);
-    }
+    document.body.classList.add('page--portal-home');
+    return () => {
+      document.body.classList.remove('page--portal-home');
+    };
+  }, []);
 
-    // Randomly select a skill on component mount
+  useEffect(() => {
     const randomSkill = skills[Math.floor(Math.random() * skills.length)];
     setFeaturedSkill(randomSkill);
 
@@ -250,11 +249,6 @@ function HomeContent() {
     });
     setSkillGames(gamesForSkill);
   }, []);
-
-  const dismissTooltip = () => {
-    setShowTooltip(false);
-    setCookie('spotlight_dismissed', 'true');
-  };
 
   // Skillprint Visualization Logic
   const { count: realCount, sessions, isLoaded } = useGameSessions();
@@ -298,13 +292,6 @@ function HomeContent() {
 
   return (
     <>
-      {/* Spotlight Overlay */}
-      {showTooltip && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"
-          onClick={dismissTooltip}
-        />
-      )}
       <PortalLayout>
         <div className="portal-head">
           <Breadcrumbs items={[{ label: 'Home' }]} />
@@ -329,7 +316,7 @@ function HomeContent() {
                   <PortalSectionTitle id="nextUpTitle">Play one game to start your Skillprint.</PortalSectionTitle>
                   <p className="portal-nextup__lede">Nothing here is scored until you play. A session takes five to ten minutes, and five of them make your first Skillprint.</p>
                   <div className="portal-nextup__actions" data-home-spot="play">
-                    <Link className="button button--primary button--lg" href="/games">
+                    <Link className="button button--primary button--lg" href="/game/hextris">
                       <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
                       <span>Play your first game</span>
                     </Link>
@@ -340,10 +327,20 @@ function HomeContent() {
                   </div>
                 </div>
                 <div className="portal-nextup__progress" data-home-spot="run">
-                  <p className="nextup-progress__count">Your first 5 sessions</p>
-                  <ol className="nextup-slots" aria-label="No sessions played yet. 5 still to play.">
-                    {/* Render 5 empty slots */}
-                    {[1, 2, 3, 4, 5].map(i => <li key={i} className="nextup-slot nextup-slot--empty"></li>)}
+                  <p className="nextup-progress__count">{count}/5 games played</p>
+                  <ol className="nextup-slots" aria-label={`${count} sessions played. ${5 - count} still to play.`}>
+                    {Array.from({ length: 5 }).map((_, i) => {
+                      if (i < count && sessions[i]) {
+                        const game = allGames.find(g => g.slug === sessions[i].gameSlug) || allGames[0];
+                        const details = getGameDetails(game.slug);
+                        return (
+                          <li key={i} className="nextup-slot">
+                            <img src={details?.image || '/images/default-game.jpg'} alt={game?.name || 'Game'} />
+                          </li>
+                        );
+                      }
+                      return <li key={i} className="nextup-slot nextup-slot--empty"></li>;
+                    })}
                   </ol>
                   <p className="nextup-progress__note">Each game measures a different set of skills, so five different games build your Skillprint faster than one played five times.</p>
                 </div>
@@ -481,7 +478,7 @@ function HomeContent() {
                 </div>
                 {count < 5 && (
                   <span className="rail-print__veil">
-                    <span className="ui-badge ui-badge--sm">{count} of 5 sessions</span>
+                    <span className="ui-badge ui-badge--sm">{count}/5</span>
                   </span>
                 )}
               </div>
@@ -499,12 +496,12 @@ function HomeContent() {
               </dl>
 
               {count === 0 ? (
-                <Link className="button button--primary button--md full-width" href="/games">
+                <Link className="button button--primary button--md full-width" href="/game/hextris">
                   <span>Play your first game</span>
                   <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                 </Link>
               ) : count < 5 ? (
-                <Link className="button button--primary button--md full-width" href="/games">
+                <Link className="button button--primary button--md full-width" href="/game/hextris">
                   <span>Play your next game</span>
                   <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                 </Link>

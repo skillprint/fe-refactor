@@ -45,4 +45,8 @@ When working on front-end tasks or UI updates, you must maintain context on this
    - Pressing these keys should invoke an indicator (such as `app/components/GameAdjustmentBanner.tsx`) to be displayed and actively change the game logic.
    - You must also create a `README.md` file colocated with the game. This file must contain the keymapping and a detailed description of the available adjustments and their effects on the game.
 
+6. **Linear Bug Filing**
+   - When filing bugs in Linear, always do so in the portal redesign project: https://linear.app/skillprint/project/portal-redesign-6c1ecfd21889/issues
+   - Always use the template issue for bugs: https://linear.app/skillprint/issue/SKI-123/clone-me-template-issuebug
+
 Always keep these requirements active in your context while generating, refactoring, or integrating game code in this repository.
