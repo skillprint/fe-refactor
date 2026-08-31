@@ -9,6 +9,7 @@ interface Session {
   date: string | number;
   score: number;
   skillMeasured: string;
+  duration?: string;
 }
 
 interface ProfileSessionsProps {
@@ -78,7 +79,7 @@ export default function ProfileSessions({ sessions }: ProfileSessionsProps) {
                   <div className="min-width-0">
                     <p className="margin-none weight-semibold">{session.gameName}</p>
                     <p className="margin-none text-muted font-sm leading-sm">
-                      {formatDate(session.date)} &middot; {session.skillMeasured} &middot; 5 min
+                      {formatDate(session.date)} &middot; {session.skillMeasured} &middot; {session.duration || '5 min'}
                     </p>
                   </div>
                   <div className="pp-session__score"><strong className="font-mono">{session.score.toLocaleString()}</strong></div>

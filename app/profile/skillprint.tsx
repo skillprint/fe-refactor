@@ -169,6 +169,7 @@ export default function Skillprint() {
 
             <ProfileSessions sessions={sessions.map((s: any) => ({
               id: s.id,
+              gameSlug: s.gameSlug || s.gameId,
               gameName: s.gameSlug || s.gameId,
               date: s.startedAt,
               score: s.score || 0,
@@ -198,10 +199,12 @@ export default function Skillprint() {
           daysPlayed={daysPlayed}
           sessions={sessions.map((s: any) => ({
             id: s.id,
+            gameSlug: s.gameSlug || s.gameId,
             gameName: s.gameSlug || s.gameId,
             date: s.startedAt,
             score: s.score || 0,
-            skillMeasured: s.parameters?.skill || s.parameters?.mood || 'Unknown'
+            skillMeasured: s.parameters?.skill || s.parameters?.mood || 'Unknown',
+            duration: s.duration_seconds ? formatSecondsToDuration(s.duration_seconds) : '0:00'
           }))}
         />
       </div>
