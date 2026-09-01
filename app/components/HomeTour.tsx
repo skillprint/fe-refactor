@@ -62,13 +62,11 @@ export default function HomeTour() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const [spotStyle, setSpotStyle] = useState<React.CSSProperties>({});
-    const [tourStyle, setTourStyle] = useState<React.CSSProperties>({});
-    const [placement, setPlacement] = useState<string>('bottom');
     const [useFallbackText, setUseFallbackText] = useState(false);
 
     const bubbleRef = useRef<HTMLDivElement>(null);
     const targetRef = useRef<HTMLElement | null>(null);
+    const spotRef = useRef<HTMLDivElement>(null);
 
     const GAP = 12;
     const EDGE = 16;
@@ -91,26 +89,15 @@ export default function HomeTour() {
         if (!silent) markFTUECompleted();
     }, [isOpen, markFTUECompleted]);
 
-    const usable = (el: HTMLElement | null) => {
+    const usable = useCallback((el: HTMLElement | null) => {
         if (!el) return false;
         const box = el.getBoundingClientRect();
         if (!box.width || !box.height) return false;
         if (window.getComputedStyle(el).visibility === 'hidden') return false;
         return box.right > 0 && box.left < document.documentElement.clientWidth;
-    };
+    }, []);
 
-    const targetFor = (step: TourStep) => {
-        setUseFallbackText(false);
-        const first = document.querySelector(`[data-home-spot="${step.spot}"]`) as HTMLElement;
-        if (usable(first)) return first;
-        if (!step.fallback) return first;
-        const spare = document.querySelector(`[data-home-spot="${step.fallback}"]`) as HTMLElement;
-        if (!usable(spare)) return first;
-        setUseFallbackText(true);
-        return spare;
-    };
-
-    const nudge = (el: HTMLElement | null, delta: number) => {
+    const nudge = useCallback((el: HTMLElement | null, delta: number) => {
         if (!el || !Math.round(delta)) return false;
         const from = window.scrollY;
         const before = el.getBoundingClientRect().top;
@@ -119,9 +106,9 @@ export default function HomeTour() {
         if (Math.abs(el.getBoundingClientRect().top - before) >= 1) return true;
         window.scrollTo({ top: from, behavior: 'instant' });
         return false;
-    };
+    }, []);
 
-    const ensureVisible = (el: HTMLElement | null) => {
+    const ensureVisible = useCallback((el: HTMLElement | null) => {
         if (!el) return;
         const box = el.getBoundingClientRect();
         const view = window.innerHeight;
@@ -129,9 +116,9 @@ export default function HomeTour() {
         if (box.top >= EDGE && box.bottom <= view - EDGE) return;
         const lead = Math.max(EDGE, Math.min(room - box.height, room / 3));
         nudge(el, box.top - lead);
-    };
+    }, [nudge]);
 
-    const padded = () => {
+    const padded = useCallback(() => {
         if (!targetRef.current) return null;
         const box = targetRef.current.getBoundingClientRect();
         return {
@@ -139,25 +126,28 @@ export default function HomeTour() {
             right: box.right + PAD, bottom: box.bottom + PAD,
             width: box.width + PAD * 2, height: box.height + PAD * 2
         };
-    };
+    }, []);
 
-    const writeHole = (box: any) => {
-        if (!targetRef.current) return;
+    const writeHole = useCallback((box: any) => {
+        if (!targetRef.current || !spotRef.current) return;
         const computed = window.getComputedStyle(targetRef.current);
         const radius = parseFloat(computed.borderTopLeftRadius) || 0;
-        setSpotStyle({
-            '--spot-x': `${Math.round(box.left)}px`,
-            '--spot-y': `${Math.round(box.top)}px`,
-            '--spot-w': `${Math.round(box.width)}px`,
-            '--spot-h': `${Math.round(box.height)}px`,
-            '--spot-radius': `${Math.round(Math.max(radius + PAD, 10))}px`
-        } as React.CSSProperties);
-    };
+        const spot = spotRef.current;
+        spot.style.setProperty('--spot-x', `${Math.round(box.left)}px`);
+        spot.style.setProperty('--spot-y', `${Math.round(box.top)}px`);
+        spot.style.setProperty('--spot-w', `${Math.round(box.width)}px`);
+        spot.style.setProperty('--spot-h', `${Math.round(box.height)}px`);
+        spot.style.setProperty('--spot-radius', `${Math.round(Math.max(radius + PAD, 10))}px`);
+    }, []);
 
-    const place = (box: any) => {
+    const place = useCallback((box: any) => {
         if (!bubbleRef.current) return;
+        const bubble = bubbleRef.current;
         const view = { w: document.documentElement.clientWidth, h: window.innerHeight };
-        const size = { w: bubbleRef.current.offsetWidth, h: bubbleRef.current.offsetHeight };
+        
+        // Reset to bottom to get intrinsic size without previous constraints
+        bubble.dataset.placement = 'bottom';
+        const size = { w: bubble.offsetWidth, h: bubble.offsetHeight };
         
         let side = 'dock';
         if (view.w > DOCK_UNDER) {
@@ -167,34 +157,31 @@ export default function HomeTour() {
             else if (box.left - GAP >= size.w + EDGE) side = 'left';
         }
 
-        setPlacement(side);
-        if (side === 'dock') {
-            setTourStyle({});
-            return;
-        }
+        bubble.dataset.placement = side;
+        if (side === 'dock') return;
 
         const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, Math.max(min, max)));
         let left: number;
         let top: number;
-        let newTourStyle: any = {};
 
         if (side === 'bottom' || side === 'top') {
             left = clamp(box.left + box.width / 2 - size.w / 2, EDGE, view.w - size.w - EDGE);
             top = clamp(side === 'bottom' ? box.bottom + GAP : box.top - GAP - size.h, EDGE, view.h - size.h - EDGE);
-            newTourStyle['--tour-arrow-x'] = `${Math.round(clamp(box.left + box.width / 2 - left, EDGE, size.w - EDGE))}px`;
+            bubble.style.setProperty('--tour-arrow-x', `${Math.round(clamp(box.left + box.width / 2 - left, EDGE, size.w - EDGE))}px`);
+            bubble.style.removeProperty('--tour-arrow-y');
         } else {
             top = clamp(box.top + box.height / 2 - size.h / 2, EDGE, view.h - size.h - EDGE);
             left = side === 'right' ? box.right + GAP : box.left - GAP - size.w;
-            newTourStyle['--tour-arrow-y'] = `${Math.round(clamp(box.top + box.height / 2 - top, EDGE, size.h - EDGE))}px`;
+            bubble.style.setProperty('--tour-arrow-y', `${Math.round(clamp(box.top + box.height / 2 - top, EDGE, size.h - EDGE))}px`);
+            bubble.style.removeProperty('--tour-arrow-x');
         }
 
-        newTourStyle['--tour-left'] = `${Math.round(left)}px`;
-        newTourStyle['--tour-top'] = `${Math.round(top)}px`;
-        setTourStyle(newTourStyle);
-    };
+        bubble.style.setProperty('--tour-left', `${Math.round(left)}px`);
+        bubble.style.setProperty('--tour-top', `${Math.round(top)}px`);
+    }, []);
 
     const measure = useCallback((settle = false) => {
-        if (!targetRef.current || !bubbleRef.current) return;
+        if (!targetRef.current || !bubbleRef.current || !spotRef.current) return;
         const box = padded();
         if (!box) return;
 
@@ -202,6 +189,7 @@ export default function HomeTour() {
         place(box);
 
         const content = document.querySelector('.portal-content') as HTMLElement;
+        const placement = bubbleRef.current.dataset.placement;
         if (placement !== 'dock') {
             if (content) content.style.removeProperty('--home-tour-dock');
         } else if (content) {
@@ -216,26 +204,46 @@ export default function HomeTour() {
             const newBox = padded();
             if (newBox) writeHole(newBox);
         }
-    }, [isOpen, placement]);
+    }, [padded, writeHole, place, nudge]);
+
+    // Handle measuring and positioning whenever the step content updates
+    useEffect(() => {
+        if (!isOpen) return;
+        
+        const step = TOUR[currentStep];
+        const first = document.querySelector(`[data-home-spot="${step.spot}"]`) as HTMLElement;
+        let target = first;
+        let fallback = false;
+        
+        if (!usable(first) && step.fallback) {
+            const spare = document.querySelector(`[data-home-spot="${step.fallback}"]`) as HTMLElement;
+            if (usable(spare)) {
+                target = spare;
+                fallback = true;
+            }
+        }
+        
+        if (fallback !== useFallbackText) {
+            setUseFallbackText(fallback);
+        } else {
+            targetRef.current = target;
+            if (target) {
+                ensureVisible(target);
+                measure(true);
+                requestAnimationFrame(() => measure(true));
+            }
+        }
+    }, [currentStep, isOpen, useFallbackText, measure, ensureVisible, usable]);
 
     const showStep = useCallback((index: number) => {
         if (index < 0 || index >= TOUR.length) return;
         setCurrentStep(index);
-        const target = targetFor(TOUR[index]);
-        targetRef.current = target;
-
-        if (target) {
-            ensureVisible(target);
-            measure(true);
-            requestAnimationFrame(() => measure(true));
-        }
-    }, [measure]);
+    }, []);
 
     const startTour = useCallback((force = false) => {
         if (isOpen) return;
         if (pathname !== '/') {
             if (force) {
-                // If forced but not on home page, navigate to home and append query to start tour
                 router.push('/?tour=start');
             }
             return;
@@ -254,9 +262,7 @@ export default function HomeTour() {
         
         document.body.style.setProperty('--home-tour-gutter', `${Math.max(0, window.innerWidth - document.documentElement.clientWidth)}px`);
         document.body.classList.add('home-tour-open');
-        
-        setTimeout(() => showStep(0), 50);
-    }, [isOpen, pathname, router, showStep]);
+    }, [isOpen, pathname, router]);
 
     // Initial check and routing listener
     useEffect(() => {
@@ -304,7 +310,16 @@ export default function HomeTour() {
 
         const handleResize = () => {
             if (!isOpen) return;
-            targetRef.current = targetFor(TOUR[currentStep]);
+            // Target recalculation on resize
+            const step = TOUR[currentStep];
+            const first = document.querySelector(`[data-home-spot="${step.spot}"]`) as HTMLElement;
+            let target = first;
+            if (!usable(first) && step.fallback) {
+                const spare = document.querySelector(`[data-home-spot="${step.fallback}"]`) as HTMLElement;
+                if (usable(spare)) target = spare;
+            }
+            targetRef.current = target;
+            
             measure(false);
             scheduleMeasure();
         };
@@ -318,9 +333,8 @@ export default function HomeTour() {
             window.removeEventListener('scroll', scheduleMeasure);
             window.removeEventListener('resize', handleResize);
         };
-    }, [isOpen, startTour, closeTour, measure, currentStep]);
+    }, [isOpen, startTour, closeTour, measure, currentStep, usable]);
 
-    if (!isOpen) return null;
 
     const stepData = TOUR[currentStep];
     const isLast = currentStep === TOUR.length - 1;
@@ -329,17 +343,21 @@ export default function HomeTour() {
 
     return (
         <>
-            <div className="portal-spotlight" data-home-spotlight data-open={isOpen} aria-hidden="true" style={spotStyle}></div>
+            <div 
+                className="portal-spotlight" 
+                data-home-spotlight 
+                data-open={isOpen ? 'true' : 'false'} 
+                aria-hidden="true" 
+                ref={spotRef}
+            ></div>
             <div 
                 className="portal-tour sp-tour" 
                 data-portal-tour 
-                data-open={isOpen} 
-                data-placement={placement} 
+                data-open={isOpen ? 'true' : 'false'} 
                 role="dialog" 
                 aria-modal="true" 
                 aria-labelledby="homeTourTitle" 
                 aria-describedby="homeTourText"
-                style={tourStyle}
                 ref={bubbleRef}
             >
                 <div className="portal-tour__body" data-portal-tour-live aria-live="polite">
@@ -374,7 +392,7 @@ export default function HomeTour() {
                         </button>
                     </div>
                 </div>
-                <svg className="sp-tour__arrow" aria-hidden="true" width="16" height="8" viewBox="0 0 16 8"><path d="M6.586 1.414 1.414 6.586A2 2 0 0 0 2.828 10h10.344a2 2 0 0 0 1.414-3.414L9.414 1.414a2 2 0 0 0-2.828 0Z"/></svg>
+                <span className="sp-tour__arrow" aria-hidden="true"></span>
             </div>
         </>
     );
