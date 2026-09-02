@@ -226,12 +226,6 @@ function HomeContent() {
     }
   }, [fetchedNewGames]);
 
-  useEffect(() => {
-    document.body.classList.add('page--portal-home');
-    return () => {
-      document.body.classList.remove('page--portal-home');
-    };
-  }, []);
 
   useEffect(() => {
     const randomSkill = skills[Math.floor(Math.random() * skills.length)];
