@@ -262,7 +262,9 @@ export default function HomeTour() {
         
         document.body.style.setProperty('--home-tour-gutter', `${Math.max(0, window.innerWidth - document.documentElement.clientWidth)}px`);
         document.body.classList.add('home-tour-open');
-    }, [isOpen, pathname, router]);
+        
+        if (!force) markFTUECompleted();
+    }, [isOpen, pathname, router, markFTUECompleted]);
 
     // Initial check and routing listener
     useEffect(() => {
@@ -278,13 +280,18 @@ export default function HomeTour() {
             return;
         }
 
+        let timeoutId: NodeJS.Timeout;
         if (pathname === '/') {
             const completed = getCookie(COOKIE_NAME);
             if (!completed) {
                 // Short delay for mount
-                setTimeout(() => startTour(false), 300);
+                timeoutId = setTimeout(() => startTour(false), 300);
             }
         }
+        
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
     }, [status, pathname, startTour, isWhitelisted]);
 
     // Event listeners
