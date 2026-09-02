@@ -103,8 +103,8 @@ export default function Sidebar() {
       </nav>
       <div className="portal-sidebar__foot">
         <div className="sp-side-nav__group portal-sidebar__utilities">
-          <Link title="Profile" href="/profile" className="sp-side-nav__link"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-user"></use></svg><span className="sp-side-nav__label">Profile</span></Link>
-          <Link title="Settings" className="sp-side-nav__link" href="/settings"><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-settings"></use></svg><span className="sp-side-nav__label">Settings</span></Link>
+          <Link title="Profile" href="/profile" className={`sp-side-nav__link ${pathname.startsWith('/profile') ? 'is-active' : ''}`} aria-current={pathname.startsWith('/profile') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-user"></use></svg><span className="sp-side-nav__label">Profile</span></Link>
+          <Link title="Settings" className={`sp-side-nav__link ${pathname.startsWith('/settings') ? 'is-active' : ''}`} href="/settings" aria-current={pathname.startsWith('/settings') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-settings"></use></svg><span className="sp-side-nav__label">Settings</span></Link>
         </div>
       </div>
     </aside>
