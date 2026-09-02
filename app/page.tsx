@@ -216,6 +216,13 @@ function HomeContent() {
   const [skillGames, setSkillGames] = useState<any[]>([]);
   const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
 
+  useEffect(() => {
+    document.body.classList.add('page--portal-home');
+    return () => {
+      document.body.classList.remove('page--portal-home');
+    };
+  }, []);
+
   // Fetch games for the "New Games" section using the 'relax' mood
   const { games: fetchedNewGames, isLoading: isLoadingNewGames } = useGamesByMood('relax');
   const { recommendedGames, isLoading: isLoadingRecommended } = useRecommendedGames(4);
