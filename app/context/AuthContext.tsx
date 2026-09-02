@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { setCookie } from '../utils/cookieUtils';
+import { setCookie, deleteCookie } from '../utils/cookieUtils';
 
 type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner' | 'organization';
 
@@ -106,6 +106,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         safeStorage.setItem('auth_status', 'loggedOut');
         safeStorage.removeItem('user_profile');
         safeStorage.removeItem('org_token');
+        safeStorage.removeItem('user_id');
+        safeStorage.removeItem('userId');
+        deleteCookie('user_id');
+        deleteCookie('ftue_completed');
     };
 
     const loginWithSocialId = (socialId: string, profile: { firstName: string; picture?: string }) => {
