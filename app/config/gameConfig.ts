@@ -245,7 +245,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'bubble-spirit': {
     name: 'Bubble Spirit',
     description: 'Pop bubbles in this puzzle game',
-    image: '/images/activities/covers/bubble-spirit-d1e8e962-1243-4e94-a9f4-351dec27ae8a.png',
+    image: '/games/live/Bubble%20Spirit/static/html5games/images/logo.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '5-10 minutes',
@@ -255,7 +255,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'change-word': {
     name: 'Change Word',
     description: 'Transform words letter by letter',
-    image: '/images/activities/covers/change-word-0bc38905-8138-43f2-9ff5-a01a5f038782.png',
+    image: '/games/live/Change%20Word/change-word.png',
     category: 'Word Game',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -314,7 +314,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'i-love-hue': {
     name: 'I Love Hue',
     description: 'Arrange colors in perfect harmony',
-    image: '/images/activities/covers/i-love-hue-115ad80c-adb3-47fb-8be7-4b683133a94e.png',
+    image: '/games/live/I%20Love%20Hue/i-love-hue.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-20 minutes',
@@ -363,7 +363,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'space-trip': {
     name: 'Space Trip',
     description: 'Explore space in this adventure',
-    image: '/images/activities/covers/space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20.png',
+    image: '/games/live/Space%20Trip/icons/icon-256.png',
     category: 'Adventure',
     difficulty: 'Medium',
     estimatedTime: '10-25 minutes',
@@ -413,7 +413,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'flapcat-steampunk-2': {
     name: 'Flapcat Steampunk 2',
     description: 'More steampunk flying adventures',
-    image: '/games/live/Flapcat Steampunk 2/screenshot.png',
+    image: '/games/live/Flapcat%20Steampunk%202/screenshot.png',
     category: 'Arcade',
     difficulty: 'Hard',
     estimatedTime: '2-5 minutes',
@@ -423,7 +423,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'fruit-sorting': {
     name: 'Fruit Sorting',
     description: 'Sort the fruits into the right baskets',
-    image: '/images/activities/covers/fruit-sorting-2-778da931-ec64-4123-9aa0-2b21c7994d.png',
+    image: '/games/live/Fruit%20Sorting/icon_144.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-5 minutes',
@@ -503,7 +503,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'stacks-tower': {
     name: 'Stacks Tower',
     description: 'Stack blocks to build a tower',
-    image: '/games/live/Stacks Tower/screenshot.png',
+    image: '/games/live/Stacks%20Tower/screenshot.png',
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -553,7 +553,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'infinite-runner-3d': {
   //   name: 'Infinite Runner 3D',
   //   description: 'Run and jump in this 3D infinite runner',
-  //   image: '/games/live/Infinite Runner 3D/icon_144.png',
+  //   image: '/games/live/Infinite%20Runner%203D/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -563,7 +563,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'flappy-bird-1': {
   //   name: 'Flappy Bird',
   //   description: 'Flappy Bird',
-  //   image: '/games/live/Flappy Bird/icon_144.png',
+  //   image: '/games/live/Flappy%20Bird/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -573,7 +573,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // '  ': {
   //   name: 'Last War Frontline',
   //   description: 'Last War Frontline',
-  //   image: '/games/live/Last War Frontline/icon_144.png',
+  //   image: '/games/live/Last%20War%20Frontline/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -583,7 +583,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'fruit-ninja': {
   //   name: 'Fruit Ninja',
   //   description: 'Fruit Ninja',
-  //   image: '/games/live/Fruit Ninja/icon_144.png',
+  //   image: '/games/live/Fruit%20Ninja/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -613,7 +613,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'doodle-god-next': {
     name: 'Doodle God Next',
     description: 'Combine basic elements like fire, water, earth, and air to create new elements and build a whole universe!',
-    image: '/games/live/Doodle God Next/static/data/splash/god.png',
+    image: '/games/live/Doodle%20God%20Next/static/data/splash/god.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-30 minutes',
@@ -623,7 +623,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'cut-the-rope': {
     name: 'Cut The Rope',
     description: 'Cut the ropes to feed candy to the little monster Om Nom in this physics-based puzzle game!',
-    image: '/games/live/Cut The Rope/static/res/img/icon.png',
+    image: '/games/live/Cut%20The%20Rope/static/res/img/icon.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
