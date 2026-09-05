@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { MockDataTag } from '../MockDataTag';
+import { useComputedGameMetrics } from '../../app/hooks/useComputedGameMetrics';
 import { SkillScores, MoodScores } from '../../app/lib/skillprintSdk';
 import { submitMoodSurvey } from '../../app/api/api';
 
@@ -16,6 +17,7 @@ interface GameResultDialogProps {
   moodScores?: MoodScores;
   gameSlug?: string;
   userToken?: string | null;
+  sessionId?: string;
 }
 
 export default function GameResultDialog({
@@ -29,8 +31,10 @@ export default function GameResultDialog({
   skillScores,
   moodScores,
   gameSlug,
-  userToken
+  userToken,
+  sessionId
 }: GameResultDialogProps) {
+  const { data: computedMetrics } = useComputedGameMetrics(sessionId);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
 
@@ -80,9 +84,18 @@ export default function GameResultDialog({
 
   // Mock data fallbacks for skills and mood
   let isMockSkills = false;
-  let skillsData: { name: string; score: number; band: string }[] = [];
+  let skillsData: { name: string; score: number; band: string; isEstimated?: boolean; baselineScore?: number; slug?: string }[] = [];
 
-  if (skillScores?.metrics && Object.keys(skillScores.metrics).length > 0) {
+  if (computedMetrics?.cognition && computedMetrics.cognition.length > 0) {
+    skillsData = computedMetrics.cognition.map((metric) => ({
+      name: metric.slug.charAt(0).toUpperCase() + metric.slug.slice(1).replace(/-/g, ' '),
+      score: Math.round(metric.score),
+      band: getBand(metric.score),
+      isEstimated: metric.is_estimated,
+      baselineScore: metric.baseline_score,
+      slug: metric.slug
+    }));
+  } else if (skillScores?.metrics && Object.keys(skillScores.metrics).length > 0) {
     skillsData = Object.entries(skillScores.metrics).map(([name, metric]) => ({
       name,
       score: Math.round(metric.score),
@@ -99,9 +112,18 @@ export default function GameResultDialog({
   }
 
   let isMockMoods = false;
-  let moodsData: { name: string; score: number; band: string }[] = [];
+  let moodsData: { name: string; score: number; band: string; isEstimated?: boolean; baselineScore?: number; slug?: string }[] = [];
 
-  if (moodScores) {
+  if (computedMetrics?.mood?.all_moods && computedMetrics.mood.all_moods.length > 0) {
+    moodsData = computedMetrics.mood.all_moods.map((metric) => ({
+      name: metric.slug.charAt(0).toUpperCase() + metric.slug.slice(1).replace(/-/g, ' '),
+      score: Math.round(metric.score),
+      band: getBand(metric.score),
+      isEstimated: metric.is_estimated,
+      baselineScore: metric.baseline_score,
+      slug: metric.slug
+    }));
+  } else if (moodScores) {
     moodsData = [
       { name: 'Flow score', score: Math.round(moodScores.flowScore), band: getBand(moodScores.flowScore) },
       { name: 'Confidence', score: Math.round(moodScores.confidence), band: getBand(moodScores.confidence) }
@@ -220,12 +242,23 @@ export default function GameResultDialog({
                   <strong className="game-result__metric-value layout-block">
                     <span data-score-value="">{skill.score}</span>
                     <span className="game-result__metric-total font-xs weight-semibold">/ 100</span>
+                    {skill.isEstimated && (
+                      <span className="ui-badge ui-badge--sm ui-badge--amber ml-2" title="This score is estimated based on similar play sessions.">Estimated</span>
+                    )}
                   </strong>
                   <div aria-hidden="true" className="sp-progress">
                     <span className="sp-progress__track">
                       <span className="sp-progress__fill" style={{ width: `${skill.score}%` }}></span>
                     </span>
+                    {skill.baselineScore !== undefined && (
+                      <span className="sp-progress__baseline" style={{ left: `${skill.baselineScore}%`, position: 'absolute', height: '100%', width: '2px', backgroundColor: 'var(--core-green-500)' }} title={`Baseline: ${skill.baselineScore}`}></span>
+                    )}
                   </div>
+                  {skill.slug && (
+                    <Link href={`/playbooks/cognition-${skill.slug}`} className="font-xs text-muted mt-1 hover:text-white">
+                      View playbook
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>
@@ -246,12 +279,23 @@ export default function GameResultDialog({
                   <strong className="game-result__metric-value layout-block">
                     <span data-score-value="">{mood.score}</span>
                     <span className="game-result__metric-total font-xs weight-semibold">/ 100</span>
+                    {mood.isEstimated && (
+                      <span className="ui-badge ui-badge--sm ui-badge--amber ml-2" title="This score is estimated based on similar play sessions.">Estimated</span>
+                    )}
                   </strong>
                   <div aria-hidden="true" className="sp-progress">
                     <span className="sp-progress__track">
                       <span className="sp-progress__fill" style={{ width: `${mood.score}%` }}></span>
                     </span>
+                    {mood.baselineScore !== undefined && (
+                      <span className="sp-progress__baseline" style={{ left: `${mood.baselineScore}%`, position: 'absolute', height: '100%', width: '2px', backgroundColor: 'var(--core-green-500)' }} title={`Baseline: ${mood.baselineScore}`}></span>
+                    )}
                   </div>
+                  {mood.slug && (
+                    <Link href={`/playbooks/mood-${mood.slug}`} className="font-xs text-muted mt-1 hover:text-white">
+                      View playbook
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>

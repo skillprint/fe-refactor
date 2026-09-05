@@ -4,6 +4,8 @@ export interface SessionDimensionScore {
   confidence: number;
   is_target?: boolean;
   is_exercised_by_game?: boolean;
+  is_estimated?: boolean;
+  baseline_score?: number;
 }
 
 export interface SessionPersonalityScore {

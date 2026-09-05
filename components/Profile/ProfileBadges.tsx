@@ -2,49 +2,29 @@ import React from 'react';
 import Link from 'next/link';
 import { MockDataTag } from '../MockDataTag';
 import { FallbackImage } from '../FallbackImage';
-// Mock data matching the redesign's PORTAL_BADGES
-const MOCK_BADGES = [
-  {
-    slug: 'cuttlefish',
-    name: 'Copycat Cuttlefish',
-    skill: 'Pattern Matching',
-    art: '/assets/images/badges/collection/cuttlefish/cuttlefish-badge-cool-green-gear.svg',
-    gameTitle: 'Hextris',
-    gameArt: '/assets/images/games/game-hextris.svg',
-    reason: 'You kept clearing sets while the outer ring was closing in, and your accuracy never dropped with the pace.',
-    earned: 'Today',
-    points: 20
-  },
-  {
-    slug: 'gorilla',
-    name: 'Gameplan Gorilla',
-    skill: 'Planning',
-    art: '/assets/images/badges/collection/gorilla/gorilla-badge-skills-pink-star.svg',
-    gameTitle: 'Box Tower',
-    gameArt: '/assets/images/games/game-box-tower.svg',
-    reason: 'Every block placed where the next one could still land. The tower held because the plan did.',
-    earned: 'Sunday',
-    points: 30
-  },
-  {
-    slug: 'beaver',
-    name: 'Building Beaver',
-    skill: 'Organizing',
-    art: '/assets/images/badges/collection/beaver/beaver-badge-mindset-violet-flower.svg',
-    gameTitle: 'Gummy Blocks',
-    gameArt: '/assets/images/games/game-gummy-blocks.svg',
-    reason: 'You cleared the board by grouping before placing, and never boxed yourself into a corner.',
-    earned: 'Friday',
-    points: 15
+import { useProfileBadges } from '../../lib/models/portal/useProfileBadges';
+
+function formatRelativeDate(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays === 0) return 'today';
+  if (diffInDays === 1) return 'yesterday';
+  if (diffInDays < 7) {
+    return date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   }
-];
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toLowerCase();
+}
 
 export default function ProfileBadges() {
-  const hasBadges = MOCK_BADGES.length > 0;
+  const { data: badges, isLoading } = useProfileBadges();
+  const displayBadges = badges || [];
+  const hasBadges = displayBadges.length > 0;
 
   return (
     <section className="pp-section" id="badges" style={{ position: 'relative' }}>
-      <MockDataTag />
       <div className="section-head pp-head layout-flex wrap items-end justify-between gap-2xl">
         <div className="section-head-copy">
           <h2>Badges</h2>
@@ -61,7 +41,7 @@ export default function ProfileBadges() {
       </div>
 
       <div className="pp-badge-grid" data-pp-badges hidden={!hasBadges}>
-        {MOCK_BADGES.map((badge) => (
+        {displayBadges.map((badge) => (
           <article className="pp-badge-card sp-card" key={badge.slug}>
             <figure className="sp-badge sp-badge--lg" data-badge={badge.slug} data-earned="true">
               <FallbackImage 
@@ -91,7 +71,7 @@ export default function ProfileBadges() {
                   />
                   <span className="sp-badge__game-name">{badge.gameTitle}</span>
                   <span className="sp-badge__dot" aria-hidden="true">·</span>
-                  <span className="sp-badge__when">Earned {badge.earned.toLowerCase()}</span>
+                  <span className="sp-badge__when">Earned {formatRelativeDate(badge.unlocked_at)}</span>
                 </span>
                 {badge.reason && (
                   <p className="sp-badge__reason margin-none">{badge.reason}</p>

@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { MockDataTag } from '../MockDataTag';
+import { useProfileTrends } from '../../lib/models/portal/useProfileTrends';
+import {
+  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
+} from 'recharts';
 
 export default function ProfilePerformanceTrends() {
   const [pillar, setPillar] = useState('Mood');
   const [chartType, setChartType] = useState('BarLine');
   const [orbitView, setOrbitView] = useState('mood');
+
+  const { data: trendsData, isLoading } = useProfileTrends();
+  const points = trendsData?.points || [];
 
   return (
     <section className="pp-section" id="trends" style={{ position: 'relative' }}>
@@ -94,12 +101,47 @@ export default function ProfilePerformanceTrends() {
           </div>
         </div>
         
-        <div className="chart-frame" data-pp-trends="" id="ppTrends"></div>
-        <div className="portal-blank" data-state-when="first">
-          <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
-          <p className="portal-blank__title">Nothing to plot yet</p>
-          <p className="portal-blank__note">This is the empty chart your scores will draw across. Play a game and the first week appears.</p>
-          <a className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></a>
+        <div className="chart-frame h-[320px]" data-pp-trends="" id="ppTrends">
+          {isLoading ? (
+            <div className="p-8 text-center h-full flex flex-col justify-center items-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div></div>
+          ) : points.length === 0 ? (
+            <div className="portal-blank" data-state-when="first">
+              <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
+              <p className="portal-blank__title">Nothing to plot yet</p>
+              <p className="portal-blank__note">This is the empty chart your scores will draw across. Play a game and the first week appears.</p>
+              <a className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></a>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              {chartType === 'BarLine' ? (
+                <LineChart data={points} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dy={10} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dx={-10} />
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '0.75rem', color: 'var(--foreground)' }}
+                  />
+                  <Line type="monotone" dataKey={pillar.toLowerCase()} stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 2, stroke: 'var(--background)' }} activeDot={{ r: 6 }} />
+                </LineChart>
+              ) : (
+                <AreaChart data={points} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dy={10} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dx={-10} />
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '0.75rem', color: 'var(--foreground)' }}
+                  />
+                  <Area type="monotone" dataKey={pillar.toLowerCase()} stroke="var(--primary)" fillOpacity={1} fill="url(#colorScore)" strokeWidth={3} />
+                </AreaChart>
+              )}
+            </ResponsiveContainer>
+          )}
         </div>
         
         <div className="chart-key" data-pp-trend-key="" data-state-when="semi complete"></div>

@@ -20,6 +20,7 @@ import { unifiedSlugFromBESlug, mapLocalGameSlugToServerGameSlug } from '../../u
 
 interface GameClientProps {
     slug: string;
+    autoPlay?: boolean;
 }
 
 interface GameResults {
@@ -99,7 +100,7 @@ export const mapSlugToGamePath = (slug: string) => {
     return `/games/live/${slug}/static/index.html`;
 };
 
-export default function GameClient({ slug }: GameClientProps) {
+export default function GameClient({ slug, autoPlay = false }: GameClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
     type SequenceState = 'loading' | 'ready' | 'playing' | 'calculating' | 'review' | 'badge';
@@ -181,13 +182,19 @@ export default function GameClient({ slug }: GameClientProps) {
     }, [decodedSlug]);
 
     const handleIframeLoad = () => {
-        setSequence('ready');
+        setSequence(autoPlay ? 'playing' : 'ready');
         setGameStartTime(Date.now());
         // Do not set shouldPollRef.current = true here. It is already set in useEffect,
         // and setting it here can re-enable polling during exit/navigation race conditions.
 
         // Set up message listener for communication with the game
         window.addEventListener('message', handleGameMessage);
+
+        if (autoPlay) {
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
+            }
+        }
     };
 
     const handleGameMessage = (event: MessageEvent) => {
@@ -650,6 +657,7 @@ export default function GameClient({ slug }: GameClientProps) {
                     moodScores={lastSessionResponse?.moodScores}
                     gameSlug={decodedSlug}
                     userToken={userToken}
+                    sessionId={skillprintSessionIdRef.current}
                 />
             )}
 
