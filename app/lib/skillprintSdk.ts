@@ -253,6 +253,38 @@ export class SkillprintClient {
         }
     }
 
+    async stopSession(sessionId: string): Promise<boolean> {
+        const url = `${this.baseUrl}${this.STOP_SESSION_ENDPOINT.replace('{sessionId}', sessionId)}`;
+        this.log(`Stopping session: POST ${url}`, LogLevel.INFO);
+
+        let headers: any = {
+            'Content-Type': 'application/json'
+        };
+
+        if (this.userToken) {
+            headers['X-Auth-Token'] = `Token ${this.userToken}`;
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers
+            });
+
+            if (response.ok) {
+                this.log(`StopSession successful.`, LogLevel.INFO);
+                return true;
+            } else {
+                const text = await response.text();
+                this.log(`StopSession Error: ${response.status}. Response: ${text}`, LogLevel.ERROR);
+                throw new Error(`${response.status} | ${text}`);
+            }
+        } catch (error: any) {
+            this.log(`StopSession Error: ${error.message}`, LogLevel.ERROR);
+            throw error;
+        }
+    }
+
     async setLastScreenshotDataURI(dataURI: string): Promise<void> {
         this.lastScreenshotDataURI = dataURI;
     }

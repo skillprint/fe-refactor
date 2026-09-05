@@ -1,7 +1,8 @@
 export const mapLocalGameSlugToServerGameSlug = (slug: string) => {
     const map: any = {
         '/games/live/Change Word/static/index.html': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782',
-        'change-word': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782'
+        'change-word': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782',
+        'box-tower': 'box-tower-befd1b5c-b07f-4463-8137-fadfdb6fc8de'
     }
 
     console.log("Mapped: ", slug, map[slug]);

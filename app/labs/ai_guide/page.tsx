@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import AiGuideClient from './AiGuideClient';
 
 export const metadata: Metadata = {
-  title: 'AI Guide Lab | Skillprint',
+  title: 'AI Guide | Skillprint',
 };
 
 export default function AiGuidePage() {
