@@ -491,7 +491,7 @@ export default function AiGuideClient() {
                                 activeDot={{ r: 3, fill: '#a78bfa' }}
                                 isAnimationActive={true}
                                 animateNewValues={true}
-                                animationDuration={300}
+                                animationDuration={100}
                               />
                             </LineChart>
                           </ResponsiveContainer>

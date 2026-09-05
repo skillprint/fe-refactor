@@ -93,6 +93,7 @@ export default function AnalysisResultsModule({ skillScores, skillScoresHistory 
                       activeDot={{ r: 3, fill: '#60a5fa' }} 
                       isAnimationActive={true} 
                       animateNewValues={true}
+                      animationDuration={100}
                     />
                     <Line 
                       type="linear" 
@@ -112,6 +113,7 @@ export default function AnalysisResultsModule({ skillScores, skillScoresHistory 
                       activeDot={{ r: 3, fill: '#10b981' }} 
                       isAnimationActive={true} 
                       animateNewValues={true}
+                      animationDuration={100}
                     />
                     <Line 
                       type="linear" 
@@ -131,6 +133,7 @@ export default function AnalysisResultsModule({ skillScores, skillScoresHistory 
                       activeDot={{ r: 3, fill: '#a855f7' }} 
                       isAnimationActive={true} 
                       animateNewValues={true}
+                      animationDuration={100}
                     />
                   </LineChart>
                 </ResponsiveContainer>

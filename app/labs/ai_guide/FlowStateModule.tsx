@@ -62,6 +62,7 @@ export default function FlowStateModule({ moodScores, moodScoresHistory = [], is
                       activeDot={{ r: 3, fill: selectedMetric === 'flowScore' ? '#4ade80' : '#60a5fa' }} 
                       isAnimationActive={true} 
                       animateNewValues={true}
+                      animationDuration={100}
                     />
                   </LineChart>
                 </ResponsiveContainer>
