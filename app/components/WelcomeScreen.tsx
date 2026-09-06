@@ -2,8 +2,7 @@
 
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
-import { GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from "jwt-decode";
+import { useGoogleLogin } from '@react-oauth/google';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { useLinkedIn } from 'react-linkedin-login-oauth2';
 import { knownGameSlugs, getGameDetails } from '../config/gameConfig';
@@ -66,6 +65,31 @@ export function WelcomeScreen() {
         setIsCompletingLogin(true);
         action();
     };
+
+    const loginWithGoogle = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsCompletingLogin(true);
+            try {
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const decoded = await userInfoRes.json();
+                if (decoded && decoded.sub) {
+                    const firstName = decoded.given_name || decoded.name || 'User';
+                    const picture = decoded.picture;
+                    loginWithSocialId(decoded.sub, { firstName, picture });
+                } else {
+                    setIsCompletingLogin(false);
+                }
+            } catch (err) {
+                console.error('Failed to fetch Google user info', err);
+                setIsCompletingLogin(false);
+            }
+        },
+        onError: errorResponse => {
+            console.error('Google Login Failed', errorResponse);
+        },
+    });
 
     // Build pool of known good game images for the animated tiles
     const tileImages = [
@@ -162,35 +186,14 @@ export function WelcomeScreen() {
                                     </p>
                                     
                                     <div className="auth-providers layout-grid gap-md">
-                                        <div className="auth-provider button button--secondary button--md full-width" style={{ padding: 0, position: 'relative', overflow: 'hidden' }}>
-                                            <div style={{ position: 'absolute', opacity: 0, zIndex: 1, width: '100%', height: '100%' }}>
-                                                <GoogleLogin
-                                                    onSuccess={credentialResponse => {
-                                                        if (credentialResponse.credential) {
-                                                            const decoded = jwtDecode(credentialResponse.credential) as any;
-                                                            if (decoded && decoded.sub) {
-                                                                const firstName = decoded.given_name || decoded.name || 'User';
-                                                                const picture = decoded.picture;
-                                                                handleLoginAction(() => loginWithSocialId(decoded.sub, { firstName, picture }));
-                                                            }
-                                                        }
-                                                    }}
-                                                    onError={() => {
-                                                        console.error('Google Login Failed');
-                                                    }}
-                                                    useOneTap
-                                                    theme="outline"
-                                                    size="large"
-                                                    text="continue_with"
-                                                    shape="rectangular"
-                                                    width="384"
-                                                />
-                                            </div>
-                                            <div className="layout-flex items-center justify-center gap-sm full-width" style={{ height: '100%', pointerEvents: 'none' }}>
-                                                <img className="auth-provider__mark" src="/assets/logos/google-mark.svg" alt="" width="20" height="20" />
-                                                <span>Continue with Google</span>
-                                            </div>
-                                        </div>
+                                        <button 
+                                            className="auth-provider button button--secondary button--md full-width" 
+                                            type="button" 
+                                            onClick={() => loginWithGoogle()}
+                                        >
+                                            <img className="auth-provider__mark" src="/assets/logos/google-mark.svg" alt="" width="20" height="20" />
+                                            <span>Continue with Google</span>
+                                        </button>
                                         
                                         <FacebookLogin
                                             appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'dummy-app-id'}
