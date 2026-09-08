@@ -3,7 +3,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import Script from 'next/script';
 import { useLinkedIn } from 'react-linkedin-login-oauth2';
 import { knownGameSlugs, getGameDetails } from '../config/gameConfig';
 
@@ -61,6 +61,28 @@ export function WelcomeScreen() {
         },
     });
 
+    const handleFacebookLogin = () => {
+        if (typeof window !== 'undefined' && (window as any).FB) {
+            (window as any).FB.login((response: any) => {
+                if (response.authResponse) {
+                    (window as any).FB.api('/me', { fields: 'name,email,picture' }, (userInfo: any) => {
+                        const socialId = userInfo.id || userInfo.userID;
+                        if (socialId) {
+                            const firstName = userInfo.name ? userInfo.name.split(' ')[0] : 'User';
+                            const picture = userInfo.picture?.data?.url;
+                            handleLoginAction(() => loginWithSocialId(socialId, { firstName, picture }));
+                        }
+                    });
+                } else {
+                    console.error('Facebook Login Failed or Cancelled', response);
+                }
+            }, { scope: 'public_profile,email' });
+        } else {
+            console.error('Facebook SDK not loaded');
+            alert('Facebook login is currently unavailable. Please check if your adblocker is blocking it, or try refreshing the page. If you just added the Facebook App ID, please restart the dev server.');
+        }
+    };
+
     const handleLoginAction = (action: () => void) => {
         setIsCompletingLogin(true);
         action();
@@ -117,6 +139,20 @@ export function WelcomeScreen() {
 
     return (
         <div className="page--portal-welcome" data-skillprint-page="portal-welcome">
+            <Script
+                src="https://connect.facebook.net/en_US/sdk.js"
+                strategy="lazyOnload"
+                onLoad={() => {
+                    if ((window as any).FB) {
+                        (window as any).FB.init({
+                            appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'dummy-app-id',
+                            cookie: true,
+                            xfbml: true,
+                            version: 'v16.0'
+                        });
+                    }
+                }}
+            />
             <div className="welcome-shell">
                 {/* Animated Tiles Background */}
                 <div className="welcome-field" data-welcome-field aria-hidden="true">
@@ -194,28 +230,10 @@ export function WelcomeScreen() {
                                             <img className="auth-provider__mark" src="/assets/logos/google-mark.svg" alt="" width="20" height="20" />
                                             <span>Continue with Google</span>
                                         </button>
-                                        
-                                        <FacebookLogin
-                                            appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'dummy-app-id'}
-                                            autoLoad={false}
-                                            fields="name,email,picture"
-                                            callback={(response: any) => {
-                                                const socialId = response.id || response.userID;
-                                                if (socialId) {
-                                                    const firstName = response.name ? response.name.split(' ')[0] : 'User';
-                                                    const picture = response.picture?.data?.url;
-                                                    handleLoginAction(() => loginWithSocialId(socialId, { firstName, picture }));
-                                                } else {
-                                                    console.error('Facebook Login Failed', response);
-                                                }
-                                            }}
-                                            render={(renderProps: any) => (
-                                                <button className="auth-provider button button--secondary button--md full-width" type="button" onClick={renderProps.onClick}>
-                                                    <img className="auth-provider__mark" src="/assets/logos/facebook-mark.svg" alt="" width="20" height="20" />
-                                                    <span>Continue with Facebook</span>
-                                                </button>
-                                            )}
-                                        />
+                                        <button className="auth-provider button button--secondary button--md full-width" type="button" onClick={handleFacebookLogin}>
+                                            <img className="auth-provider__mark" src="/assets/logos/facebook-mark.svg" alt="" width="20" height="20" />
+                                            <span>Continue with Facebook</span>
+                                        </button>
                                     </div>
                                 </>
                             )}

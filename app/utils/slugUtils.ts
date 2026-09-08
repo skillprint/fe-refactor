@@ -39,7 +39,7 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('photo-hunt') >= 0) return 'photo-hunt';
     if (lowerSlug.indexOf('snake-attack') >= 0) return 'snake-attack';
     if (lowerSlug.indexOf('space-adventure-pinball') >= 0) return 'space-adventure-pinball';
-    if (lowerSlug.indexOf('space-trip') >= 0) return 'space-trip';
+    if (lowerSlug.indexOf('space-trip') >= 0) return 'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20';
     if (lowerSlug.indexOf('stacks-tower') >= 0) return 'stacks-tower';
     if (lowerSlug.indexOf('star-puzzles') >= 0) return 'star-puzzles';
     if (lowerSlug.indexOf('sumagi') >= 0) return 'sumagi';

@@ -185,7 +185,7 @@ const allGames = [
   },
   {
     name: 'Space Trip',
-    slug: 'space-trip',
+    slug: 'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20',
     description: 'Explore space in this adventure',
     skills: ['pattern-matching', 'planning']
   },

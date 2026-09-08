@@ -1,5 +1,5 @@
 export const MOOD_GAMES = [
-  { id: 'space-trip', slug: 'space-trip', name: 'Space Trip', title: 'Space Trip', description: 'Explore the universe', image: '/skillprint-portal-redesign/assets/images/games/game-space-trip.svg', url: '/game/space-trip', skills: [{ id: 'focus', name: 'Focus', dimension: 'mood' as const }] },
+  { id: 'space-trip', slug: 'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20', name: 'Space Trip', title: 'Space Trip', description: 'Explore the universe', image: '/skillprint-portal-redesign/assets/images/games/game-space-trip.svg', url: '/game/space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20', skills: [{ id: 'focus', name: 'Focus', dimension: 'mood' as const }] },
   { id: 'i-love-hue', slug: 'i-love-hue', name: 'I Love Hue', title: 'I Love Hue', description: 'A relaxing color puzzle game', image: '/skillprint-portal-redesign/assets/images/games/game-color.svg', url: '/game/i-love-hue', skills: [{ id: 'focus', name: 'Focus', dimension: 'mood' as const }] },
   { id: 'space-adventure-pinball', slug: 'space-adventure-pinball', name: 'Space Adventure Pinball', title: 'Space Adventure Pinball', description: 'Pinball in space!', image: '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg', url: '/game/space-adventure-pinball', skills: [{ id: 'focus', name: 'Focus', dimension: 'mood' as const }] }
 ];

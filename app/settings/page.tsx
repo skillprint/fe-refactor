@@ -81,17 +81,6 @@ export default function SettingsPage() {
                                 </svg>
                                 Dark
                             </button>
-                            <button 
-                                className="button-group__item" 
-                                type="button" 
-                                aria-pressed={theme === 'midnight'}
-                                onClick={() => setTheme('midnight')}
-                            >
-                                <svg className="sp-icon button-group__icon" aria-hidden="true" viewBox="0 0 24 24">
-                                    <use href="#ti-star"></use>
-                                </svg>
-                                Midnight
-                            </button>
                         </div>
                     </div>
 

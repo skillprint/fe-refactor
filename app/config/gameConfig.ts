@@ -729,7 +729,7 @@ export const knownGameSlugs = [
   'photo-hunt',
   'snake-attack',
   'space-adventure-pinball',
-  'space-trip',
+  'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20',
   'stacks-tower',
   'star-puzzles',
   'sumagi',
