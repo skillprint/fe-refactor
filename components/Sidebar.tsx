@@ -11,6 +11,10 @@ export default function Sidebar() {
   const isSkillsPage = pathname === '/skills' || pathname === '/skills/';
 
   useEffect(() => {
+    document.body.classList.remove('nav-open');
+  }, [pathname]);
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem('skillprintPortalNavCollapsed');
       if (stored === '1') {
@@ -74,7 +78,7 @@ export default function Sidebar() {
           <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-left"></use></svg>
         </button>
       </div>
-      <button className="portal-sidebar__close button button--tertiary button--icon-only button--sm" type="button" aria-label="Close navigation" data-portal-nav-close>
+      <button onClick={() => document.body.classList.remove('nav-open')} className="portal-sidebar__close button button--tertiary button--icon-only button--sm" type="button" aria-label="Close navigation" data-portal-nav-close>
         <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-close"></use></svg>
       </button>
       <nav className="portal-sidebar__scroll sp-side-nav__scroll" aria-label="Portal sections">

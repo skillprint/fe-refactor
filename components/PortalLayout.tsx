@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
@@ -13,7 +15,7 @@ export default function PortalLayout({ children, pageClass, header, rail }: Port
   return (
     <div className={`portal-app ${pageClass || ''}`.trim()} data-portal-shell>
       <Sidebar />
-      <button className="portal-scrim" type="button" aria-label="Close navigation" data-portal-nav-close></button>
+      <button onClick={() => document.body.classList.remove('nav-open')} className="portal-scrim" type="button" aria-label="Close navigation" data-portal-nav-close></button>
       <div className="portal-main">
         <TopBar />
         <main className="portal-content" id="top">
