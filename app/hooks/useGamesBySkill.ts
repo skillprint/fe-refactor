@@ -43,6 +43,19 @@ export function useGamesBySkill() {
                 console.log("DUMP SKILLS:", skillsData);
                 console.log("DUMP MOODS:", moodsData);
                 
+                const localSpaceTrip = {
+                    slug: 'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20',
+                    name: 'Space Trip',
+                    description: 'Explore space in this adventure',
+                    image: '/games/live/Space Trip/icons/icon-256.png',
+                    skills: [{ slug: 'pattern-matching', name: 'Pattern Matching', dimension: 'cognition' }],
+                    moods: [{ slug: 'focus', name: 'Focus', dimension: 'mood' }]
+                };
+                
+                if (!allGamesMood.some((g: any) => g.slug === localSpaceTrip.slug)) {
+                    allGamesMood.push(localSpaceTrip);
+                }
+                
                 setSkills(skillsData);
                 setMoods(moodsData);
                 setGamesBySkill(allGamesSkill);

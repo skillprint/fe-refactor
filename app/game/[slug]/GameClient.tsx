@@ -60,7 +60,7 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'photo-hunt': 'Photo Hunt',
     'snake-attack': 'Snake Attack',
     'space-adventure-pinball': 'Space Adventure Pinball',
-    'space-trip': 'Space Trip',
+    'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20': 'Space Trip',
     'stacks-tower': 'Stacks Tower',
     'star-puzzles': 'Star Puzzles',
     'sumagi': 'Sumagi',
