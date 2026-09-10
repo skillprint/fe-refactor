@@ -4863,6 +4863,11 @@ html:is([data-theme="light"], [data-surface="light"]) :is(.page--ontology-wheel,
   backdrop-filter: none;
 }
 
+/* When the animated-tiles carousel is behind the loading veil, use light text */
+.page--game-session .play-field[data-tiles-active] ~ .session-veil--canvas {
+  color: var(--geistface-grey-25);
+}
+
 .page--game-session .session-veil__copy {
   display: grid;
   gap: var(--space-6);
@@ -10747,10 +10752,119 @@ html .page--portal.nav-collapsed .portal-brand .brand-logo,
   z-index: 0;
   overflow: hidden;
 
-  background: var(--stage-accent);
+  background: var(--deep-navy-950);
 }
 
+
+/* --- Welcome-field carousel (re-scoped for .page--game-session) --- */
+.page--game-session .welcome-field {
+  --field-card: var(--space-192);
+  --field-row: calc(var(--field-card) * 21 / 38);
+  --field-gap: var(--space-16);
+  --field-tilt: -3deg;
+  --field-scale: 1.18;
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.page--game-session .welcome-field__stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  grid-auto-rows: var(--field-row);
+  gap: var(--field-gap);
+  transform: rotate(var(--field-tilt)) scale(var(--field-scale));
+  transform-origin: center;
+}
+
+.page--game-session .welcome-field__row {
+  overflow: hidden;
+  height: var(--field-row);
+}
+
+.page--game-session .welcome-field__track {
+  display: flex;
+  width: max-content;
+  gap: var(--field-gap);
+  animation: welcome-drift var(--row-duration, 110s) linear infinite;
+  animation-delay: var(--row-delay, 0s);
+  will-change: transform;
+}
+
+.page--game-session .welcome-field__row--reverse .welcome-field__track {
+  animation-direction: reverse;
+}
+
+.page--game-session .welcome-field__card {
+  width: var(--field-card);
+  height: var(--field-row);
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  background: var(--surface-raised);
+}
+
+.page--game-session .welcome-field__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dark scrim overlay – mirrors the welcome page radial gradient */
+.page--game-session .welcome-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--deep-navy-950) 78%, transparent) 0,
+      transparent var(--space-144),
+      transparent calc(100% - var(--space-112)),
+      color-mix(in srgb, var(--deep-navy-950) 78%, transparent) 100%
+    ),
+    radial-gradient(
+      ellipse 55% 52% at 50% 50%,
+      color-mix(in srgb, var(--deep-navy-950) 82%, transparent) 0%,
+      color-mix(in srgb, var(--deep-navy-950) 66%, transparent) 58%,
+      color-mix(in srgb, var(--deep-navy-950) 46%, transparent) 100%
+    ),
+    color-mix(in srgb, var(--deep-navy-950) 30%, transparent);
+}
+
+@media (max-width: 64rem) {
+  .page--game-session .welcome-field { --field-card: var(--space-176); }
+}
+
+@media (max-width: 40rem) {
+  .page--game-session .welcome-field {
+    --field-card: var(--space-160);
+    --field-gap: var(--space-12);
+    --field-tilt: -4deg;
+    --field-scale: 1.24;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page--game-session .welcome-field__track {
+    animation: none;
+    transform: translate3d(var(--row-rest, 0%), 0, 0);
+    will-change: auto;
+  }
+}
+
+
 .page--game-session .play-field__art {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;

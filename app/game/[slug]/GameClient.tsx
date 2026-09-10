@@ -612,8 +612,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     return (
         <div className="page scrollbar-subtle page--game-session margin-none text-default font-ui leading-base" data-sequence={sequence} data-skillprint-page="game-session">
             <div aria-hidden="true" className="play-field" data-stage-field>
-                <img alt="" className="play-field__art" data-stage-art src={`/assets/images/games/game-${unifiedSlug}.svg`} onError={(e) => { e.currentTarget.style.display = 'none'; setHasImageError(true); }} />
-                {hasImageError && <AnimatedGameTiles />}
+                <AnimatedGameTiles />
+                <img alt="" className="play-field__art" data-stage-art src={`/assets/images/games/game-${unifiedSlug}.svg`} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.closest('.play-field')?.setAttribute('data-tiles-active', ''); }} />
                 
                 {!isLoadingGamePath && (
                     <iframe

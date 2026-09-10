@@ -42,7 +42,7 @@ const tileImages = [
 
 export function AnimatedGameTiles() {
     return (
-        <div className="welcome-field" data-welcome-field aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.5, pointerEvents: 'none' }}>
+        <div className="welcome-field" data-welcome-field aria-hidden="true">
             <div className="welcome-field__stage">
                 {ROWS.map((row, i) => {
                     // Deterministic shuffle for this row
