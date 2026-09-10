@@ -1,21 +1,32 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import PortalLayout from '@/components/PortalLayout';
-import { MockDataTag } from '@/components/MockDataTag';
 import { SkillProgressionHeader } from '@/components/SkillProgressionHeader';
 import { SkillFilter } from '@/components/SkillFilter';
 import { SkillTrendSection } from '@/components/SkillTrendSection';
 import { SkillStatisticsSection } from '@/components/SkillStatisticsSection';
 import { SkillSessionsTable } from '@/components/SkillSessionsTable';
 import { SkillEmptyState } from '@/components/SkillEmptyState';
-import { getSkillById } from '@/lib/skillsData';
-import Link from 'next/link';
+import { GameTile } from '@/components/GameTile';
+import BuckyballLoading from '@/app/components/BuckyballLoading';
+import { useTaxonomySkills } from '@/lib/models/portal/useTaxonomySkills';
+import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
+import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
+import { useLongitudinalMetric } from '@/lib/models/portal/useLongitudinalMetric';
+import type { MetricRange } from '@/lib/models/portal/LongitudinalMetric';
+import { useGamesBySkill } from '@/app/hooks/useGamesBySkill';
+import { buildSkillCatalog, findSkillEntry } from '@/lib/skillCatalog';
 
+/**
+ * Skill progression (SKI-133): the skill itself comes from the taxonomy
+ * endpoint; its history from `/metrics/{pillar}/{dimension}/`.
+ */
 export default function SkillProgressionPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = React.use(params);
   const [currentSkillId, setCurrentSkillId] = useState(resolvedParams.slug);
-  const [hasData, setHasData] = useState(true); // Toggle this to test Empty State
+  const [range, setRange] = useState<MetricRange>('W');
 
   // Update URL shallowly if skill changes internally
   useEffect(() => {
@@ -24,39 +35,67 @@ export default function SkillProgressionPage({ params }: { params: Promise<{ slu
     }
   }, [currentSkillId, resolvedParams.slug]);
 
-  const skill = getSkillById(currentSkillId);
+  const { data: taxonomy, isLoading: isTaxonomyLoading } = useTaxonomySkills();
+  const { data: profile } = useProfileAggregate();
+  const { gamesBySkill, gamesByMood } = useGamesBySkill();
+
+  const scores = useMemo(() => profileDimensionMap(profile), [profile]);
+  const catalog = useMemo(
+    () => buildSkillCatalog(taxonomy, gamesBySkill, gamesByMood, scores),
+    [taxonomy, gamesBySkill, gamesByMood, scores]
+  );
+  const skill = findSkillEntry(catalog, currentSkillId);
+
+  const { data: metric, isLoading: isMetricLoading, notFound } = useLongitudinalMetric(
+    skill?.pillar || '',
+    skill?.id || '',
+    false,
+    range
+  );
+
+  if (isTaxonomyLoading && !taxonomy) {
+    return (
+      <PortalLayout pageClass="page--portal-skill-progression">
+        <div className="flex justify-center items-center py-20"><BuckyballLoading /></div>
+      </PortalLayout>
+    );
+  }
 
   if (!skill) {
     return (
       <PortalLayout pageClass="page--portal-skill-progression">
         <div className="portal-head">
           <h1>Skill not found</h1>
-          <p>We couldn't find data for this skill.</p>
+          <p>We couldn&apos;t find a skill called &ldquo;{currentSkillId}&rdquo; in the taxonomy.</p>
           <Link className="button button--secondary button--md mt-4" href="/skills">Back to Skills</Link>
         </div>
       </PortalLayout>
     );
   }
 
+  const hasData = !notFound && !!metric && (metric.stats.sessions > 0 || skill.score !== null);
+  const games = skill.gameTiles;
+
   return (
     <PortalLayout pageClass="page--portal-skill-progression">
-      <MockDataTag />
-      
-      <SkillProgressionHeader skillId={currentSkillId} />
+      <SkillProgressionHeader skill={skill} />
       
       <SkillFilter 
+        catalog={catalog}
         currentSkillId={currentSkillId} 
         onSkillChange={setCurrentSkillId} 
       />
 
-      {hasData ? (
+      {isMetricLoading && !metric ? (
+        <div className="flex justify-center items-center py-12"><BuckyballLoading /></div>
+      ) : hasData ? (
         <>
-          <SkillTrendSection skillId={currentSkillId} />
-          <SkillStatisticsSection skillId={currentSkillId} />
-          <SkillSessionsTable skillId={currentSkillId} />
+          <SkillTrendSection skill={skill} metric={metric} isLoading={isMetricLoading} range={range} onRangeChange={setRange} />
+          <SkillStatisticsSection skill={skill} metric={metric} />
+          <SkillSessionsTable skill={skill} metric={metric} />
         </>
       ) : (
-        <SkillEmptyState skillId={currentSkillId} />
+        <SkillEmptyState skill={skill} />
       )}
 
       <section aria-labelledby="gamesTitle" className="stat-section separator-top" id="games">
@@ -65,24 +104,19 @@ export default function SkillProgressionPage({ params }: { params: Promise<{ slu
             <span className="eyebrow eyebrow--compact">Keep playing</span>
             <h2 className="portal-section__title" id="gamesTitle">Games to develop this skill</h2>
           </div>
-          <span className="stat-count text-muted font-sm weight-semibold">{skill.games.length} games</span>
+          <span className="stat-count text-muted font-sm weight-semibold">{games.length} {games.length === 1 ? 'game' : 'games'}</span>
         </div>
         <p className="stat-section__lede margin-none text-muted">
-          Playing these games will generate signals for {skill.name}.
+          {games.length > 0 ? `Playing these games will generate signals for ${skill.name}.` : `No games in the library measure ${skill.name} yet.`}
         </p>
         
-        <div className="stat-games card-grid grid mt-6" role="list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
-          {skill.games.map(game => (
-            <div key={game.id} className="sp-card card--game p-4 border border-border-subtle rounded-xl flex flex-col h-full">
-              <img src={game.image} alt={game.name} className="w-full h-32 object-contain rounded-md bg-surface-box" />
-              <h3 className="font-semibold text-lg mt-4">{game.name}</h3>
-              <p className="text-muted text-sm flex-grow">{game.description}</p>
-              <Link href={game.url} className="button button--secondary button--sm mt-4 w-full">
-                Play
-              </Link>
-            </div>
-          ))}
-        </div>
+        {games.length > 0 && (
+          <div className="stat-games card-grid grid mt-6" role="list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            {games.map((game) => (
+              <GameTile key={game.id} {...game} />
+            ))}
+          </div>
+        )}
         
         <div className="stat-cta layout-flex items-center justify-between gap-2xl wrap separator-top mt-8 pt-8">
           <p className="margin-none text-muted font-sm leading-md">
@@ -90,7 +124,7 @@ export default function SkillProgressionPage({ params }: { params: Promise<{ slu
           </p>
           <div className="cluster wrap no-grow">
             <Link className="button button--secondary button--md" href="/skills">All skills</Link>
-            <Link className="button button--primary button--md" href={skill.games.length > 0 ? skill.games[0].url : '/games'}>
+            <Link className="button button--primary button--md" href={games.length > 0 ? games[0].url : '/games'}>
               <span>Play now</span> 
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
             </Link>

@@ -1,70 +1,46 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
-import { PaginatedSession, generateMockPaginatedSession } from './PaginatedSession';
+import { PaginatedSession, SessionListQuery, generateMockPaginatedSession } from './PaginatedSession';
+import { portalFetch } from './portalFetch';
 
-import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api`;
+export function usePaginatedSession(useSyntheticData: boolean = false, query: SessionListQuery = {}) {
+  const { userToken } = useUserSession();
+  const [data, setData] = useState<PaginatedSession | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { limit, cursor, gameSlug, mood } = query;
 
-export function usePaginatedSession(useSyntheticData: boolean = false) {
-    const { userToken } = useUserSession();
-    const [data, setData] = useState<PaginatedSession | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+  const fetchData = useCallback(async () => {
+    if (useSyntheticData) {
+      setData(generateMockPaginatedSession());
+      setIsLoading(false);
+      return;
+    }
+    if (!userToken) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (limit) params.set('limit', String(limit));
+      if (cursor) params.set('cursor', cursor);
+      if (gameSlug) params.set('game_slug', gameSlug);
+      if (mood) params.set('mood', mood);
+      const qs = params.toString();
+      const json = await portalFetch<PaginatedSession>(`/sessions/${qs ? `?${qs}` : ''}`, userToken);
+      setData(json);
+    } catch (err: any) {
+      console.error('Failed to fetch sessions:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userToken, useSyntheticData, limit, cursor, gameSlug, mood]);
 
-    const fetchData = useCallback(async () => {
-        if (useSyntheticData) {
-            setIsLoading(true);
-            setTimeout(() => {
-                setData(generateMockPaginatedSession());
-                setIsLoading(false);
-            }, 500); // Simulate network delay
-            return;
-        }
+  useEffect(() => {
+    if (useSyntheticData || userToken) fetchData();
+  }, [useSyntheticData, userToken, fetchData]);
 
-        if (!userToken) {
-            console.warn('No user token available to fetch usePaginatedSession.');
-            return null;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await fetch(`${BASE_URL}/sessions/`, {
-                headers: {
-                    'Authorization': `Token ${userToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch usePaginatedSession: ${response.status}`);
-            }
-
-            const json = await response.json();
-            setData(json);
-            return json;
-        } catch (err: any) {
-            console.error('Failed to fetch usePaginatedSession:', err);
-            setError(err);
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [userToken, useSyntheticData]);
-
-    useEffect(() => {
-        if (useSyntheticData || userToken) {
-            fetchData();
-        }
-    }, [useSyntheticData, userToken, fetchData]);
-
-    return {
-        data,
-        isLoading,
-        error,
-        refetch: fetchData
-    };
+  return { data, isLoading, error, refetch: fetchData };
 }

@@ -18,6 +18,9 @@ import { useGameMetrics } from '../hooks/useGameMetrics';
 import ProfileSkillsSection from '@/components/Profile/ProfileSkillsSection';
 import ProfileSkillprintWheel from '@/components/Profile/ProfileSkillprintWheel';
 import ProfilePerformanceTrends from '@/components/Profile/ProfilePerformanceTrends';
+import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
+import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
+import type { SkillBaselineMap } from '@/components/Profile/ProfileSkillBreakdown';
 
 function formatSecondsToDuration(sec: number): string {
   if (!sec || isNaN(sec)) return '0m 0s';
@@ -31,6 +34,9 @@ function ProfilePageContent() {
   const { sessions } = useGameSessions();
   const { fetchUserProfile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
+  // Portal aggregate (SKI-131): per-dimension score, lifetime baseline and delta.
+  const { data: profileAggregate } = useProfileAggregate();
+  const aggregateDimensions = React.useMemo(() => profileDimensionMap(profileAggregate), [profileAggregate]);
 
   const {
     goalSkills,
@@ -101,10 +107,8 @@ function ProfilePageContent() {
   }, [metricsData]);
 
   const { nodeDataBySkill } = useSkillprintVisualizationData(processedProfile);
-  const skillsCount = Object.keys(nodeDataBySkill).length;
-  const daysPlayed = processedProfile ? processedProfile.totalSessions || 0 : 0;
 
-  const userScores = React.useMemo(() => {
+  const legacyScores = React.useMemo(() => {
     const s: Record<string, number> = {};
     if (!processedProfile) return s;
     const processCategory = (category: any) => {
@@ -120,6 +124,27 @@ function ProfilePageContent() {
     processCategory(processedProfile.personality);
     return s;
   }, [processedProfile]);
+
+  // Portal scores win; the legacy scoring profile fills any dimension the
+  // rollups have not reached yet.
+  const userScores = React.useMemo(() => {
+    const merged: Record<string, number> = { ...legacyScores };
+    Object.values(aggregateDimensions).forEach((stat) => {
+      if (typeof stat.score === 'number') merged[stat.slug] = stat.score;
+    });
+    return merged;
+  }, [legacyScores, aggregateDimensions]);
+
+  const skillBaselines = React.useMemo<SkillBaselineMap>(() => {
+    const out: SkillBaselineMap = {};
+    Object.values(aggregateDimensions).forEach((stat) => {
+      out[stat.slug] = { baselineScore: stat.baselineScore, delta: stat.delta };
+    });
+    return out;
+  }, [aggregateDimensions]);
+
+  const skillsCount = Math.max(Object.keys(nodeDataBySkill).length, Object.keys(userScores).length);
+  const daysPlayed = profileAggregate?.totals?.sessions ?? (processedProfile ? processedProfile.totalSessions || 0 : 0);
 
   const mappedSessions = sessions.map((s: any) => ({
     id: s.id,
@@ -145,7 +170,7 @@ function ProfilePageContent() {
       }
     >
       <PortalSection ariaLabelledBy="profile-skills-breakdown">
-        <ProfileSkillsSection scores={userScores} />
+        <ProfileSkillsSection scores={userScores} baselines={skillBaselines} />
       </PortalSection>
       
       <ProfileSkillprintWheel />

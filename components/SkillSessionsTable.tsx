@@ -1,22 +1,55 @@
-import React from 'react';
-import { getSkillById } from '@/lib/skillsData';
+'use client';
+
+import React, { useMemo } from 'react';
+import type { SkillCatalogEntry } from '@/lib/skillCatalog';
+import type { LongitudinalMetric } from '@/lib/models/portal/LongitudinalMetric';
+import { usePaginatedSession } from '@/lib/models/portal/usePaginatedSession';
+import { unifiedSlugFromBESlug } from '@/app/utils/slugUtils';
+import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
+import { titleFromSlug } from '@/lib/skillIcons';
 
 interface SkillSessionsTableProps {
-  skillId: string;
+  skill: SkillCatalogEntry;
+  metric: LongitudinalMetric | null;
 }
 
-export function SkillSessionsTable({ skillId }: SkillSessionsTableProps) {
-  const skill = getSkillById(skillId);
+const MAX_ROWS = 8;
 
-  if (!skill) return null;
+function formatPlayed(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  if (sameDay) return `Today, ${time}`;
+  if (d.toDateString() === yesterday.toDateString()) return `Yesterday, ${time}`;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
-  // Mock sessions data
-  const sessions = [
-    { id: 1, date: 'Today, 2:45 PM', game: 'Hextris', result: 'Completed', duration: '2m 14s', score: 1450, change: '+2', changeIsPositive: true },
-    { id: 2, date: 'Yesterday, 10:30 AM', game: 'Space Trip', result: 'Completed', duration: '5m 02s', score: 3200, change: '+5', changeIsPositive: true },
-    { id: 3, date: 'Aug 24, 2026', game: 'Hextris', result: 'Quit', duration: '0m 45s', score: 240, change: '-1', changeIsPositive: false },
-    { id: 4, date: 'Aug 22, 2026', game: 'Bubble Spirit', result: 'Completed', duration: '3m 20s', score: 2100, change: '+4', changeIsPositive: true },
-  ];
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}m ${s.toString().padStart(2, '0')}s`;
+}
+
+export function SkillSessionsTable({ skill, metric }: SkillSessionsTableProps) {
+  const { data, isLoading } = usePaginatedSession(false, { limit: 50 });
+
+  // The session log is not indexed by skill, so we keep the sessions played on
+  // games the backend says train this skill (or, for moods, sessions that
+  // targeted the mood).
+  const rows = useMemo(() => {
+    const results = data?.results || [];
+    const trainingSlugs = new Set((metric?.gamesThatTrainThis || []).map((g) => unifiedSlugFromBESlug(g.slug)));
+    const tileSlugs = new Set(skill.gameTiles.map((g) => unifiedSlugFromBESlug(g.id)));
+    return results
+      .filter((s) => {
+        if (skill.pillar === 'mood' && s.primaryMood === skill.id) return true;
+        const slug = unifiedSlugFromBESlug(s.gameSlug || '');
+        return trainingSlugs.has(slug) || tileSlugs.has(slug);
+      })
+      .slice(0, MAX_ROWS);
+  }, [data, metric, skill]);
 
   return (
     <section aria-labelledby="sessionsTitle" className="stat-section separator-top" id="sessions">
@@ -27,7 +60,7 @@ export function SkillSessionsTable({ skillId }: SkillSessionsTableProps) {
         </div>
       </div>
       <p className="stat-section__lede margin-none text-muted">
-        Your most recent game sessions that impacted your {skill.name} score.
+        Your most recent sessions on games that measure {skill.name}.
       </p>
 
       <div className="stat-table sp-panel padding-none clip mt-6">
@@ -40,30 +73,31 @@ export function SkillSessionsTable({ skillId }: SkillSessionsTableProps) {
               <tr>
                 <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Played</th>
                 <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Game</th>
-                <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Result</th>
+                <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Target mood</th>
                 <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Duration</th>
-                <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Score</th>
-                <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Change</th>
+                <th className="ui-label separator-bottom text-left surface-box text-subtle py-3 px-4" scope="col">Mood score</th>
               </tr>
             </thead>
             <tbody>
-              {sessions.map((session) => (
-                <tr key={session.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-box transition-colors">
-                  <td className="py-4 px-4 text-sm">{session.date}</td>
-                  <td className="py-4 px-4 text-sm font-semibold">{session.game}</td>
-                  <td className="py-4 px-4 text-sm text-muted">{session.result}</td>
-                  <td className="py-4 px-4 text-sm text-muted">{session.duration}</td>
-                  <td className="py-4 px-4 text-sm">{session.score}</td>
-                  <td className={`py-4 px-4 text-sm font-semibold ${session.changeIsPositive ? 'text-brand-primary' : 'text-danger'}`}>
-                    {session.change}
-                  </td>
+              {rows.map((session) => (
+                <tr key={session.sessionId} className="border-b border-border-subtle last:border-0 hover:bg-surface-box transition-colors">
+                  <td className="py-4 px-4 text-sm">{formatPlayed(session.playedAt)}</td>
+                  <td className="py-4 px-4 text-sm font-semibold">{session.gameName}</td>
+                  <td className="py-4 px-4 text-sm text-muted">{session.primaryMood ? (PORTAL_SKILLS[session.primaryMood]?.name || titleFromSlug(session.primaryMood)) : '—'}</td>
+                  <td className="py-4 px-4 text-sm text-muted">{formatDuration(session.durationSeconds || 0)}</td>
+                  <td className="py-4 px-4 text-sm">{session.primaryScore ?? '—'}</td>
                 </tr>
               ))}
+              {!isLoading && rows.length === 0 && (
+                <tr>
+                  <td className="py-6 px-4 text-sm text-muted" colSpan={5}>No recent sessions on games that measure {skill.name}.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
         <p className="stat-table__foot margin-none separator-top font-xs leading-md text-muted p-4">
-          Showing the last 4 sessions.
+          {isLoading ? 'Loading sessions…' : `Showing the last ${rows.length} ${rows.length === 1 ? 'session' : 'sessions'}.`}
         </p>
       </div>
     </section>

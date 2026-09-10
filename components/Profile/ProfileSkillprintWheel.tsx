@@ -25,7 +25,7 @@ const ProfileSkillprintWheel = React.memo(function ProfileSkillprintWheel() {
     <div style={{ position: 'relative' }}>
       <MockDataTag />
       <Script 
-        src="/skillprint-portal-redesign/js/skillprint.js" 
+        src="/skillprint-portal-redesign/js/skillprint-wheel.js" 
         strategy="lazyOnload"
       />
       <div ref={containerRef} dangerouslySetInnerHTML={{ __html: `

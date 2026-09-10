@@ -6,8 +6,9 @@ export interface PlaybookTileProps {
   title: string;
   description: string;
   iconSrc: string;
-  nextGameSlug: string;
-  nextGameImage: string;
+  /** Next unplayed game; omit to send the player to the playbook page to start. */
+  nextGameSlug?: string;
+  nextGameImage?: string;
   totalGames: number;
   completedGames: number;
   isFinished: boolean;
@@ -26,13 +27,12 @@ export function PlaybookTile({
   isFinished,
   tone = 'pink'
 }: PlaybookTileProps) {
-  // If finished, the playbook link shouldn't lead anywhere or maybe to the detail page.
-  // For now, matching original logic: if finished, link to '#' else to interstitial.
-  const playUrl = isFinished 
-    ? '#' 
-    : `/game/${encodeURIComponent(nextGameSlug)}/interstitial?source=playbook&playbookId=${id}`;
-  
-  const detailUrl = `/playbooks/${id}`;
+  const detailUrl = `/playbooks/${encodeURIComponent(id)}`;
+  // A finished set, or one whose next game we do not know client-side, starts
+  // from the playbook page, which picks the next game in sequence.
+  const playUrl = isFinished || !nextGameSlug
+    ? detailUrl
+    : `/game/${encodeURIComponent(nextGameSlug)}/interstitial?source=playbook&playbookId=${encodeURIComponent(id)}`;
 
   return (
     <article className={`game-card game-card--portal playbook-card sp-card sp-card--interactive card--flush tone tone--${tone} min-width-0 layout-flex flow-column clip`}>
@@ -64,11 +64,11 @@ export function PlaybookTile({
         </Link>
         <Link 
           aria-label={`Play ${title}`} 
-          className={`play-btn button button--primary button--sm ${isFinished ? 'opacity-50 pointer-events-none' : ''}`} 
+          className="play-btn button button--primary button--sm" 
           href={playUrl}
         >
           <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
-          {isFinished ? 'Completed' : 'Play'}
+          {isFinished ? 'Play again' : completedGames > 0 ? 'Continue' : 'Play'}
         </Link>
       </div>
     </article>

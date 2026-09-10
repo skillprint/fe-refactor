@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { PORTAL_SKILLS, PortalSkill } from '../../app/config/skillsTaxonomy';
-import { MockDataTag } from '../MockDataTag';
+import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
+
+export type SkillBaselineMap = Record<string, { baselineScore: number | null; delta: number | null }>;
 
 interface ProfileSkillBreakdownProps {
   scores: Record<string, number>;
+  /** SKI-131: lifetime baseline per skill so each row can show how far it has come. */
+  baselines?: SkillBaselineMap;
 }
 
 const DIMENSIONS = [
@@ -13,7 +16,7 @@ const DIMENSIONS = [
   { key: 'personality', label: 'Personality' },
 ];
 
-export default function ProfileSkillBreakdown({ scores }: ProfileSkillBreakdownProps) {
+export default function ProfileSkillBreakdown({ scores, baselines = {} }: ProfileSkillBreakdownProps) {
   const totalSkills = Object.keys(PORTAL_SKILLS).length;
   const scoredSkills = Object.keys(scores).filter((slug) => typeof scores[slug] === 'number');
   const scoredCount = scoredSkills.length;
@@ -51,13 +54,12 @@ export default function ProfileSkillBreakdown({ scores }: ProfileSkillBreakdownP
   }, [scores]);
 
   return (
-    <aside className="pp-wheel-layout__aside" aria-labelledby="skill-breakdown" style={{ position: 'relative' }}>
-      <MockDataTag />
+    <aside className="pp-wheel-layout__aside" aria-labelledby="skill-breakdown">
       <div className="section-head pp-head pp-subhead">
         <div className="section-head-copy">
           <h3 id="skill-breakdown">Skill breakdown</h3>
           <p className="margin-none text-muted">
-            Where each of the 28 skills stands now, ranked within its dimension. Open a row to see it session by session.
+            Where each of the {totalSkills} skills stands now, ranked within its dimension, with the change since your first reading. Open a row to see it session by session.
           </p>
         </div>
       </div>
@@ -92,7 +94,9 @@ export default function ProfileSkillBreakdown({ scores }: ProfileSkillBreakdownP
               </p>
               {group.items.map((item) => {
                 const hasScore = typeof item.score === 'number';
-                const href = `/profile/skills/${item.slug}`; // Assuming a route exists or will exist
+                const href = `/skills/${item.slug}`;
+                const baseline = baselines[item.slug];
+                const delta = baseline?.delta ?? null;
 
                 return (
                   <Link
@@ -112,6 +116,15 @@ export default function ProfileSkillBreakdown({ scores }: ProfileSkillBreakdownP
                           <i className="radius-full" style={{ '--track-fill': `${Math.max(0, Math.min(100, item.score as number))}%` } as React.CSSProperties}></i>
                         </span>
                         <span className="pp-skill__value font-sm">{Math.round(item.score as number)}</span>
+                        {delta !== null && (
+                          <span
+                            className="font-xs text-muted"
+                            title={`Baseline ${Math.round(baseline!.baselineScore as number)}`}
+                            aria-label={`${delta > 0 ? 'Up' : delta < 0 ? 'Down' : 'Unchanged'} ${Math.abs(Math.round(delta))} since your first reading`}
+                          >
+                            {delta > 0 ? '+' : ''}{Math.round(delta)}
+                          </span>
+                        )}
                       </>
                     ) : (
                       <span className="pp-skill__state font-sm text-muted">Needs play</span>

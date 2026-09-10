@@ -8,7 +8,8 @@ export interface SkillDimensionSectionProps {
   dimensionTitle: string;
   dimensionDescription: string;
   dimensionIconId: string;
-  featuredSkill: SkillFeatureCardProps;
+  /** The backend flags one featured skill per pillar, rotating weekly. */
+  featuredSkill?: SkillFeatureCardProps | null;
   skills: SkillCardProps[];
 }
 
@@ -40,11 +41,15 @@ export function SkillDimensionSection({
       {featuredSkill && <SkillFeatureCard {...featuredSkill} />}
 
       <h3 className="skills-section__index-title">All {dimensionTitle} skills</h3>
-      <div className="skill-grid grid">
-        {skills.map(skill => (
-          <SkillCard key={skill.id} {...skill} />
-        ))}
-      </div>
+      {skills.length === 0 ? (
+        <p className="text-muted font-sm">No {dimensionTitle.toLowerCase()} skills are published yet.</p>
+      ) : (
+        <div className="skill-grid grid">
+          {skills.map(skill => (
+            <SkillCard key={skill.id} {...skill} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

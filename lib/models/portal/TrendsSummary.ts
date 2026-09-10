@@ -1,6 +1,7 @@
+/** `GET /api/portal/trends/?range=D|W|M|6M|Y` — camelCase on the wire. */
 export interface TrendPillarMetric {
   slug: string;
-  avg_score: number;
+  avgScore: number;
   sessions: number;
 }
 
@@ -14,10 +15,10 @@ export interface TrendsSummary {
 }
 
 export const generateMockTrendsSummary = (): TrendsSummary => ({
-  range: "W",
+  range: 'W',
   pillars: {
-    mood: [{ slug: "focus", avg_score: 72, sessions: 5 }],
-    cognition: [{ slug: "attention", avg_score: 78, sessions: 5 }],
-    personality: [{ slug: "openness", avg_score: 68, sessions: 5 }]
-  }
+    mood: [{ slug: 'focus', avgScore: 72, sessions: 5 }],
+    cognition: [{ slug: 'attention', avgScore: 78, sessions: 5 }],
+    personality: [{ slug: 'openness', avgScore: 68, sessions: 5 }],
+  },
 });

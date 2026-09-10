@@ -9,12 +9,9 @@ import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
 import { useUserSession } from './hooks/useUserSession';
 import { useGameSessions } from './hooks/useGameSessions';
-import { useUserProfile } from './hooks/useUserProfile';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
 import { PlayBySkill } from '@/components/PlayBySkill';
 import { PlaybookWidget } from './components/PlaybookWidget';
-import SkillprintVisualization from './components/Skillprint';
-import { useSkillprintVisualizationData } from './hooks/useSkillprintVisualizationData';
 import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
@@ -26,6 +23,11 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { GameTile } from '@/components/GameTile';
 import { useRecommendedGames } from './hooks/useRecommendedGames';
 import { MockDataTag } from '@/components/MockDataTag';
+import HomeSkillprintWheel from '@/components/HomeSkillprintWheel';
+import { useHomeSummary } from '@/lib/models/portal/useHomeSummary';
+import { useHomeRecentSessions } from '@/lib/models/portal/useHomeRecentSessions';
+import { useNextGameRecommendation } from '@/lib/models/portal/useNextGameRecommendation';
+import type { HomeRecentSession } from '@/lib/models/portal/HomeRecentSessions';
 
 // Skills data
 const skills = [
@@ -207,6 +209,105 @@ const gradients = [
   'from-indigo-500 to-purple-500',
 ];
 
+// The Get started card is one run of five sessions. Every line of copy below is
+// derived from how far through that run the player is, so the card cannot say
+// "play your first game" to someone with three sessions behind them.
+const RUN_TARGET = 5;
+const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five'];
+
+type NextUpGame = { slug: string; name: string };
+
+function getNextUpCopy(count: number, nextGames: NextUpGame[]) {
+  const played = Math.min(Math.max(count, 0), RUN_TARGET);
+  const remaining = RUN_TARGET - played;
+  const next = nextGames[0];
+  const playHref = `/game/${next?.slug || 'hextris'}`;
+
+  if (played === 0) {
+    return {
+      eyebrow: 'Get started',
+      title: 'Play one game to start your Skillprint.',
+      lede: 'Nothing here is scored until you play. A session takes five to ten minutes, and five of them make your first Skillprint.',
+      primary: { label: 'Play your first game', href: playHref, icon: 'ti-play' },
+      secondary: { label: 'Browse all games', href: '/games' },
+      runCount: `Your first ${RUN_TARGET} sessions`,
+      runNote: 'Each game measures a different set of skills, so five different games build your Skillprint faster than one played five times.',
+      slotsLabel: `No sessions played yet. ${RUN_TARGET} still to play.`,
+    };
+  }
+
+  if (remaining > 0) {
+    const names = nextGames.slice(0, Math.min(remaining, 2)).map(g => g.name);
+    const measured = names.length === 2
+      ? `${names[0]} and ${names[1]} measure`
+      : names.length === 1
+        ? `${names[0]} measures`
+        : 'Each new game measures';
+    const sessionsWord = played === 1 ? 'session' : 'sessions';
+    const moreWord = remaining === 1 ? 'session' : 'sessions';
+    return {
+      eyebrow: 'Next up',
+      title: `Play ${remaining} more ${remaining === 1 ? 'game' : 'games'} to finish your first Skillprint.`,
+      lede: `${measured} the skills your first ${NUMBER_WORDS[played]} ${sessionsWord} missed. ${NUMBER_WORDS[remaining][0].toUpperCase()}${NUMBER_WORDS[remaining].slice(1)} more ${moreWord} and all three dimensions have a score.`,
+      primary: { label: next ? `Play ${next.name}` : 'Play your next game', href: playHref, icon: 'ti-play' },
+      secondary: { label: 'Choose another game', href: '/games' },
+      runCount: `${played} of ${RUN_TARGET} sessions`,
+      runNote: 'Each game measures a different set of skills, so a varied run builds your Skillprint faster than a repeated one.',
+      slotsLabel: `${played} of ${RUN_TARGET} sessions played. ${remaining} still to play.`,
+    };
+  }
+
+  return {
+    eyebrow: 'Your Skillprint is ready',
+    title: 'All five sessions are in. Your first Skillprint is ready to read.',
+    lede: 'Mood, cognition and personality now all have a score. Nothing resets from here \u2014 every further session sharpens the same Skillprint.',
+    primary: { label: 'Read your Skillprint', href: '/profile', icon: 'ti-arrow-right' },
+    secondary: { label: 'Keep playing', href: '/games' },
+    runCount: `${RUN_TARGET} of ${RUN_TARGET} sessions`,
+    runNote: 'The run is complete. New games reach skills these five did not, so your Skillprint keeps sharpening as you play.',
+    slotsLabel: `All ${RUN_TARGET} sessions played.`,
+  };
+}
+
+type PillarKey = 'mood' | 'cognition' | 'personality';
+const PILLARS: { key: PillarKey; label: string }[] = [
+  { key: 'mood', label: 'Mood' },
+  { key: 'cognition', label: 'Cognition' },
+  { key: 'personality', label: 'Personality' },
+];
+
+/* The rail's "what is readable" card. A pillar with a score is described by
+   how settled that score is; a pillar without one says what it still needs. */
+function pillarLabel(score: number | null | undefined, played: number, remaining: number) {
+  if (typeof score === 'number') {
+    if (score >= 70) return 'Clear';
+    if (score >= 40) return 'Settling';
+    return 'Emerging';
+  }
+  if (played === 0) return 'Needs play';
+  if (remaining > 0) return `${remaining} more ${remaining === 1 ? 'game' : 'games'}`;
+  return 'Needs a longer run';
+}
+
+function getReadCopy(played: number, remaining: number) {
+  if (played === 0) {
+    return {
+      title: 'What you will see here',
+      note: 'Mood scores first, cognition next, personality last. This card always says what still needs play.',
+    };
+  }
+  if (remaining > 0) {
+    return {
+      title: 'What is readable so far',
+      note: `Mood scores first, cognition next, personality last. ${NUMBER_WORDS[remaining][0].toUpperCase()}${NUMBER_WORDS[remaining].slice(1)} more ${remaining === 1 ? 'session reaches' : 'sessions reach'} the rest.`,
+    };
+  }
+  return {
+    title: 'What is readable now',
+    note: 'All three now have a score. Personality is the slowest to settle, so it keeps moving the longest.',
+  };
+}
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const stateOverride = searchParams.get('state');
@@ -251,45 +352,47 @@ function HomeContent() {
     setSkillGames(gamesForSkill);
   }, []);
 
-  // Skillprint Visualization Logic
-  const { count: realCount, sessions, isLoaded } = useGameSessions();
-  const { fetchUserProfile, profile } = useUserProfile();
-  const [processedProfile, setProcessedProfile] = useState<any>(null);
-  const { nodeDataMap, hasScoreByMood, hasScoreBySkill } = useSkillprintVisualizationData(processedProfile);
+  // Local session log is only a fallback until the portal summary arrives.
+  const { count: localCount } = useGameSessions();
+  const { data: homeSummary } = useHomeSummary();
+  const { data: recentSessions } = useHomeRecentSessions();
+  const { data: nextGameRecs } = useNextGameRecommendation();
 
-  let count = realCount;
+  let count = homeSummary ? homeSummary.totalSessions : localCount;
   if (stateOverride === 'first') count = 0;
   if (stateOverride === 'semi') count = 3;
   if (stateOverride === 'complete') count = 5;
 
-  const sampleSkillsForVis = [
-    { id: '1', name: 'Problem Solving', level: 85, category: 'Cognitive', color: '#3B82F6' },
-    { id: '2', name: 'Memory', level: 78, category: 'Cognitive', color: '#10B981' },
-    { id: '3', name: 'Speed', level: 92, category: 'Cognitive', color: '#F59E0B' },
-    { id: '4', name: 'Accuracy', level: 88, category: 'Cognitive', color: '#EF4444' },
-    { id: '5', name: 'Pattern Recognition', level: 76, category: 'Cognitive', color: '#8B5CF6' },
-    { id: '6', name: 'Spatial Awareness', level: 82, category: 'Cognitive', color: '#06B6D4' },
-    { id: '7', name: 'Logic', level: 89, category: 'Cognitive', color: '#84CC16' },
-    { id: '8', name: 'Creativity', level: 71, category: 'Cognitive', color: '#F97316' },
-  ];
-  const userSkillsForVis = sampleSkillsForVis.map(s => s.name);
-  const userMoodsForVis = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
+  const playedInRun = Math.min(count, RUN_TARGET);
+  const remainingInRun = RUN_TARGET - playedInRun;
 
-  useEffect(() => {
-    if (profile && profile.results && profile.results.length > 0) {
-      const p = profile.results[0];
-      const history = p.flowScoreHistory || [];
-      const latestMoodsMap = new Map();
-      history.forEach((entry: any) => {
-        const mood = entry.targetMood;
-        const current = latestMoodsMap.get(mood);
-        if (!current || new Date(entry.timestamp) > new Date(current.timestamp)) {
-          latestMoodsMap.set(mood, entry);
-        }
-      });
-      setProcessedProfile({ ...p, latestMoods: Array.from(latestMoodsMap.values()) });
-    }
-  }, [profile]);
+  // Newest first on the wire; the slot row reads in the order they were played.
+  const playedSessions: HomeRecentSession[] = recentSessions ?? [];
+  const runSlots = [...playedSessions].slice(0, RUN_TARGET).reverse();
+
+  // The portal recommender leads; the legacy games recommender fills in until it answers.
+  const nextGames: NextUpGame[] = (nextGameRecs && nextGameRecs.length > 0)
+    ? nextGameRecs.map(r => ({ slug: r.game.slug, name: r.game.name }))
+    : recommendedGames.map((g: any) => ({ slug: g.slug, name: g.name }));
+  const nextUp = getNextUpCopy(count, nextGames.filter((g: NextUpGame) => g.slug && g.name));
+
+  const flowScores = playedSessions.map(s => s.primaryScore).filter((n): n is number => typeof n === 'number');
+  const flowScore = flowScores.length ? Math.round(flowScores.reduce((a, b) => a + b, 0) / flowScores.length) : null;
+  const streakDays = homeSummary?.streakDays ?? 0;
+
+  // Pillar meters. The dev state overrides carry the reference design's figures.
+  const pillarScores: Record<PillarKey, number | null> = stateOverride === 'semi'
+    ? { mood: 72, cognition: 38, personality: 14 }
+    : stateOverride === 'complete'
+      ? { mood: 84, cognition: 76, personality: 58 }
+      : stateOverride === 'first'
+        ? { mood: null, cognition: null, personality: null }
+        : {
+          mood: homeSummary?.pillarAverages?.mood ?? null,
+          cognition: homeSummary?.pillarAverages?.cognition ?? null,
+          personality: homeSummary?.pillarAverages?.personality ?? null,
+        };
+  const readCopy = getReadCopy(playedInRun, remainingInRun);
 
   return (
     <>
@@ -313,37 +416,37 @@ function HomeContent() {
             <PortalSection ariaLabelledBy="nextUpTitle">
               <div className="portal-nextup sp-card" data-home-spot="nextup">
                 <div className="portal-nextup__copy">
-                  <span className="portal-eyebrow">Get started</span>
-                  <PortalSectionTitle id="nextUpTitle">Play one game to start your Skillprint.</PortalSectionTitle>
-                  <p className="portal-nextup__lede">Nothing here is scored until you play. A session takes five to ten minutes, and five of them make your first Skillprint.</p>
+                  <span className="portal-eyebrow">{nextUp.eyebrow}</span>
+                  <PortalSectionTitle id="nextUpTitle">{nextUp.title}</PortalSectionTitle>
+                  <p className="portal-nextup__lede">{nextUp.lede}</p>
                   <div className="portal-nextup__actions" data-home-spot="play">
-                    <Link className="button button--primary button--lg" href="/game/hextris">
-                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
-                      <span>Play your first game</span>
+                    <Link className="button button--primary button--lg" href={nextUp.primary.href}>
+                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href={`#${nextUp.primary.icon}`}></use></svg>
+                      <span>{nextUp.primary.label}</span>
                     </Link>
-                    <Link className="button button--secondary button--lg" href="/games">
-                      <span>Browse all games</span>
+                    <Link className="button button--secondary button--lg" href={nextUp.secondary.href}>
+                      <span>{nextUp.secondary.label}</span>
                       <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                     </Link>
                   </div>
                 </div>
                 <div className="portal-nextup__progress" data-home-spot="run">
-                  <p className="nextup-progress__count">{count}/5 games played</p>
-                  <ol className="nextup-slots" aria-label={`${count} sessions played. ${5 - count} still to play.`}>
-                    {Array.from({ length: 5 }).map((_, i) => {
-                      if (i < count && sessions[i]) {
-                        const game = allGames.find(g => g.slug === sessions[i].gameSlug) || allGames[0];
-                        const details = getGameDetails(game.slug);
+                  <p className="nextup-progress__count">{nextUp.runCount}</p>
+                  <ol className="nextup-slots" aria-label={nextUp.slotsLabel}>
+                    {Array.from({ length: RUN_TARGET }).map((_, i) => {
+                      const session = i < playedInRun ? runSlots[i] : undefined;
+                      if (session) {
+                        const details = getGameDetails(session.gameSlug);
                         return (
-                          <li key={i} className="nextup-slot">
-                            <img src={details?.image || '/images/default-game.jpg'} alt={game?.name || 'Game'} />
+                          <li key={session.sessionId} className="nextup-slot">
+                            <img src={details?.image || '/images/default-game.jpg'} alt={session.gameName || 'Game'} />
                           </li>
                         );
                       }
                       return <li key={i} className="nextup-slot nextup-slot--empty"></li>;
                     })}
                   </ol>
-                  <p className="nextup-progress__note">Each game measures a different set of skills, so five different games build your Skillprint faster than one played five times.</p>
+                  <p className="nextup-progress__note">{nextUp.runNote}</p>
                 </div>
               </div>
             </PortalSection>
@@ -368,7 +471,7 @@ function HomeContent() {
                     description={game.description}
                     image={game.screenshot || game.image || '/images/default-game.jpg'}
                     url={`/game/${game.slug}`}
-                    skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.id || s, name: s.name || s, dimension: 'cognition' as const })) : []}
+                    skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                   />
                 ))}
@@ -376,44 +479,42 @@ function HomeContent() {
             </PortalSection>
 
             {/* Recently Played */}
-            <div style={{ position: 'relative' }}>
-              <MockDataTag />
-              <PortalSection ariaLabelledBy="recentTitle">
-                <div className="portal-section__bar">
-                  <PortalSectionTitle id="recentTitle">Recently played</PortalSectionTitle>
-                  {count > 0 && (
-                    <Link className="portal-section__link" href="/profile#sessions">
-                      All sessions <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
-                    </Link>
-                  )}
-                </div>
-                {count > 0 ? (
-                  <div className="game-rail game-rail--library">
-                    {sessions.slice(0, 5).map((session, i) => {
-                      const game = skillGames.find(g => g.slug === session.gameSlug) || skillGames[0];
-                      return (
-                        <GameTile
-                          key={`${session.id}-${i}`}
-                          id={game?.slug || 'unknown'}
-                          title={game?.name || 'Unknown Game'}
-                          description={game?.description || ''}
-                          image={game?.image || '/images/default-game.jpg'}
-                          url={`/game/${game?.slug || ''}`}
-                          skills={game?.skills ? game.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const })) : []}
-                          tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
-                        />
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <IconInfoCardWithDescription 
-                    title="No sessions yet" 
-                    note="Every game you finish lands here with the date, your flow score and the skills it measured." 
-                    iconId="ti-clock" 
-                  />
+            <PortalSection ariaLabelledBy="recentTitle">
+              <div className="portal-section__bar">
+                <PortalSectionTitle id="recentTitle">Recently played</PortalSectionTitle>
+                {playedSessions.length > 0 && (
+                  <Link className="portal-section__link" href="/profile#sessions">
+                    All sessions <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                  </Link>
                 )}
-              </PortalSection>
-            </div>
+              </div>
+              {playedSessions.length > 0 ? (
+                <div className="game-rail game-rail--library">
+                  {playedSessions.slice(0, 5).map((session, i) => {
+                    const known = allGames.find(g => g.slug === session.gameSlug);
+                    const details = getGameDetails(session.gameSlug);
+                    return (
+                      <GameTile
+                        key={session.sessionId}
+                        id={session.gameSlug}
+                        title={session.gameName}
+                        description={known?.description || ''}
+                        image={details?.image || '/images/default-game.jpg'}
+                        url={`/game/${session.gameSlug}`}
+                        skills={known?.skills ? known.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const })) : []}
+                        tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <IconInfoCardWithDescription 
+                  title="No sessions yet" 
+                  note="Every game you finish lands here with the date, your flow score and the skills it measured." 
+                  iconId="ti-clock" 
+                />
+              )}
+            </PortalSection>
 
             {/* New Games */}
             <PortalSection ariaLabelledBy="newTitle">
@@ -460,92 +561,92 @@ function HomeContent() {
               <div className="rail-card__head">
                 <h2 className="rail-card__title" id="printTitle">Your Skillprint</h2>
                 <span className="ui-badge ui-badge--sm">
-                  {count === 0 ? 'Not started' : count < 5 ? 'In progress' : 'Active'}
+                  {playedInRun === 0 ? 'Not started' : playedInRun < RUN_TARGET ? 'Forming' : 'Ready'}
                 </span>
               </div>
-              <div className="rail-print__figure ontology-root">
-                <div className="ontology-visual clip layout-grid place-center" style={{ width: '100%', aspectRatio: '1/1' }}>
-                  <SkillprintVisualization
-                    userSkills={userSkillsForVis}
-                    userMoods={userMoodsForVis}
-                    hasScoreBySkill={hasScoreBySkill}
-                    hasScoreByMood={hasScoreByMood}
-                    nodeDataMap={nodeDataMap}
-                    size={220}
-                    useSizeDirectly={true}
-                    initialState={count === 0 ? "reset" : "skills"}
-                    hasMenu={false}
+
+              {playedInRun < RUN_TARGET ? (
+                <HomeSkillprintWheel
+                  person="base"
+                  ariaLabel="The blank Skillprint wheel"
+                  description="The blank Skillprint wheel — the circular map of 87 game features that every Skillprint is drawn on, shown here with no scores inked onto it yet."
+                >
+                  <span className="rail-print__veil">
+                    <span className="ui-badge ui-badge--sm">{playedInRun} of {RUN_TARGET} sessions</span>
+                  </span>
+                </HomeSkillprintWheel>
+              ) : (
+                <div style={{ position: 'relative' }}>
+                  <MockDataTag />
+                  <HomeSkillprintWheel
+                    person="ada"
+                    ariaLabel="Your Skillprint"
+                    description="Your Skillprint, inked from five completed sessions — the heavier a line, the more evidence sits behind it."
                   />
                 </div>
-                {count < 5 && (
-                  <span className="rail-print__veil">
-                    <span className="ui-badge ui-badge--sm">{count}/5</span>
-                  </span>
-                )}
-              </div>
+              )}
+
               <p className="margin-none text-muted font-sm leading-md">
-                {count === 0 
-                  ? 'This is the dial every Skillprint is drawn on. Yours is blank until your first session — each game you finish inks the features it reads.'
-                  : 'Every Skillprint is drawn on this wheel. Yours fills in as you play — each game you finish inks the parts it measures.'
+                {playedInRun === 0
+                  ? 'Every Skillprint is drawn on this wheel. Yours is blank until you play — each game you finish fills in the parts it measures.'
+                  : playedInRun < RUN_TARGET
+                    ? `${NUMBER_WORDS[playedInRun][0].toUpperCase()}${NUMBER_WORDS[playedInRun].slice(1)} ${playedInRun === 1 ? 'session' : 'sessions'} in. Enough to score mood; cognition and personality need more play before the wheel can fill them in.`
+                    : 'Drawn from five sessions. The heavier a line, the more play sits behind it; faint lines are skills no game has reached yet.'
                 }
               </p>
 
               <dl className="rail-stats">
                 <div className="rail-stat"><dt>Sessions</dt><dd>{count}</dd></div>
-                <div className="rail-stat"><dt>Flow</dt><dd>&mdash;</dd></div>
-                <div className="rail-stat"><dt>Streak</dt><dd>{count > 0 ? 1 : 0}</dd></div>
+                <div className="rail-stat"><dt>Flow</dt><dd>{flowScore ?? <>&mdash;</>}</dd></div>
+                <div className="rail-stat"><dt>Streak</dt><dd>{streakDays}</dd></div>
               </dl>
 
-              {count === 0 ? (
-                <Link className="button button--primary button--md full-width" href="/game/hextris">
+              {playedInRun === 0 ? (
+                <Link className="button button--primary button--md full-width" href={nextUp.primary.href}>
                   <span>Play your first game</span>
-                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
-                </Link>
-              ) : count < 5 ? (
-                <Link className="button button--primary button--md full-width" href="/game/hextris">
-                  <span>Play your next game</span>
                   <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                 </Link>
               ) : (
                 <Link className="button button--primary button--md full-width" href="/profile">
-                  <span>View your profile</span>
+                  <span>View profile</span>
                   <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                 </Link>
               )}
             </article>
 
-            <div style={{ position: 'relative' }}>
-              <MockDataTag />
-              <article className="rail-card sp-card" aria-labelledby="railReadTitle" data-home-spot="read">
-                <div className="rail-card__head">
-                  <span className="rail-card__label">What you will see here</span>
-                </div>
-                <div className="layout-grid gap-lg">
-                  <div className="layout-grid gap-sm">
-                    <div className="layout-flex items-center justify-between gap-md font-sm">
-                      <span className="weight-semibold">Mood</span><span className="text-muted">Needs play</span>
+            <article className="rail-card sp-card" aria-labelledby="railReadTitle" data-home-spot="read">
+              <div className="rail-card__head">
+                <span className="rail-card__label" id="railReadTitle">{readCopy.title}</span>
+              </div>
+              <div className="layout-grid gap-lg">
+                {PILLARS.map(pillar => {
+                  const score = pillarScores[pillar.key];
+                  return (
+                    <div key={pillar.key} className="layout-grid gap-sm" data-dimension={pillar.key}>
+                      <div className="layout-flex items-center justify-between gap-md font-sm">
+                        <span className="weight-semibold">{pillar.label}</span>
+                        <span className="text-muted">{pillarLabel(score, playedInRun, remainingInRun)}</span>
+                      </div>
+                      <div
+                        className="rail-meter"
+                        role="meter"
+                        aria-label={`${pillar.label} score`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={score ?? 0}
+                        style={{ '--meter': `${Math.max(0, Math.min(100, score ?? 0))}%` } as React.CSSProperties}
+                      >
+                        <i></i>
+                      </div>
                     </div>
-                    <div className="rail-meter"><i></i></div>
-                  </div>
-                  <div className="layout-grid gap-sm">
-                    <div className="layout-flex items-center justify-between gap-md font-sm">
-                      <span className="weight-semibold">Cognition</span><span className="text-muted">Needs play</span>
-                    </div>
-                    <div className="rail-meter"><i></i></div>
-                  </div>
-                  <div className="layout-grid gap-sm">
-                    <div className="layout-flex items-center justify-between gap-md font-sm">
-                      <span className="weight-semibold">Personality</span><span className="text-muted">Needs play</span>
-                    </div>
-                    <div className="rail-meter"><i></i></div>
-                  </div>
-                </div>
-                <p className="margin-none text-muted font-sm leading-md">Mood scores first, cognition next, personality last. This card always says what still needs play.</p>
-                <div className="cluster gap-md">
-                  <Link className="button button--secondary button--sm" href="/skills">View skills</Link>
-                </div>
-              </article>
-            </div>
+                  );
+                })}
+              </div>
+              <p className="margin-none text-muted font-sm leading-md">{readCopy.note}</p>
+              <div className="cluster gap-md">
+                <Link className="button button--secondary button--sm" href="/skills">View skills</Link>
+              </div>
+            </article>
           </PortalPageRail>
         </PortalPageLayout>
       </PortalLayout>

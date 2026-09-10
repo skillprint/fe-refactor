@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { MockDataTag } from '../MockDataTag';
 import { useComputedGameMetrics } from '../../app/hooks/useComputedGameMetrics';
 import { SkillScores, MoodScores } from '../../app/lib/skillprintSdk';
 import { submitMoodSurvey } from '../../app/api/api';
+import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
+import { titleFromSlug } from '../../lib/skillIcons';
+
+interface ResultMetric {
+  name: string;
+  score: number;
+  band: string;
+  isEstimated?: boolean;
+  confidence?: number;
+  slug?: string;
+  playbookSlug?: string;
+}
+
+const displayName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug(slug);
 
 interface GameResultDialogProps {
   gameTitle: string;
@@ -18,6 +31,8 @@ interface GameResultDialogProps {
   gameSlug?: string;
   userToken?: string | null;
   sessionId?: string;
+  /** Dev only: render the mock session (includes an estimated score) instead of fetching. */
+  useSyntheticData?: boolean;
 }
 
 export default function GameResultDialog({
@@ -32,9 +47,10 @@ export default function GameResultDialog({
   moodScores,
   gameSlug,
   userToken,
-  sessionId
+  sessionId,
+  useSyntheticData = false
 }: GameResultDialogProps) {
-  const { data: computedMetrics } = useComputedGameMetrics(sessionId);
+  const { data: session, isProcessing } = useComputedGameMetrics(sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
 
@@ -82,59 +98,84 @@ export default function GameResultDialog({
   const scoreDiff = score - highScore;
   const isNewBest = score > highScore && highScore > 0;
 
-  // Mock data fallbacks for skills and mood
-  let isMockSkills = false;
-  let skillsData: { name: string; score: number; band: string; isEstimated?: boolean; baselineScore?: number; slug?: string }[] = [];
-
-  if (computedMetrics?.cognition && computedMetrics.cognition.length > 0) {
-    skillsData = computedMetrics.cognition.map((metric) => ({
-      name: metric.slug.charAt(0).toUpperCase() + metric.slug.slice(1).replace(/-/g, ' '),
-      score: Math.round(metric.score),
-      band: getBand(metric.score),
-      isEstimated: metric.is_estimated,
-      baselineScore: metric.baseline_score,
-      slug: metric.slug
-    }));
+  // Skill scores (SKI-132). The session endpoint is the source of truth: when a
+  // game emitted no cognition scores the backend substitutes estimates flagged
+  // `isEstimated`, which we must label as such. The SDK's own scores are the
+  // fallback; there is no invented data.
+  let skillsData: ResultMetric[] = [];
+  if (session?.cognition && session.cognition.length > 0) {
+    skillsData = [...session.cognition]
+      .sort((a, b) => Number(b.isExercisedByGame ?? false) - Number(a.isExercisedByGame ?? false) || b.score - a.score)
+      .map((metric) => ({
+        name: displayName(metric.slug),
+        score: Math.round(metric.score),
+        band: getBand(metric.score),
+        isEstimated: metric.isEstimated,
+        confidence: metric.confidence,
+        slug: metric.slug,
+        playbookSlug: `cognition-${metric.slug}`,
+      }));
   } else if (skillScores?.metrics && Object.keys(skillScores.metrics).length > 0) {
     skillsData = Object.entries(skillScores.metrics).map(([name, metric]) => ({
       name,
       score: Math.round(metric.score),
-      band: getBand(metric.score)
-    }));
-  } else {
-    isMockSkills = true;
-    skillsData = [
-      { name: 'Pattern Matching', score: 84, band: 'green' },
-      { name: 'Spatial', score: 71, band: 'blue' },
-      { name: 'Attention', score: 52, band: 'amber' },
-      { name: 'Timing', score: 34, band: 'red' }
-    ];
-  }
-
-  let isMockMoods = false;
-  let moodsData: { name: string; score: number; band: string; isEstimated?: boolean; baselineScore?: number; slug?: string }[] = [];
-
-  if (computedMetrics?.mood?.all_moods && computedMetrics.mood.all_moods.length > 0) {
-    moodsData = computedMetrics.mood.all_moods.map((metric) => ({
-      name: metric.slug.charAt(0).toUpperCase() + metric.slug.slice(1).replace(/-/g, ' '),
-      score: Math.round(metric.score),
       band: getBand(metric.score),
-      isEstimated: metric.is_estimated,
-      baselineScore: metric.baseline_score,
-      slug: metric.slug
     }));
+  }
+  const hasEstimatedSkills = skillsData.some((s) => s.isEstimated);
+
+  let moodsData: ResultMetric[] = [];
+  const allMoods = session?.mood?.allMoods || [];
+  if (allMoods.length > 0) {
+    moodsData = [...allMoods]
+      .sort((a, b) => Number(b.isTarget ?? false) - Number(a.isTarget ?? false) || b.score - a.score)
+      .map((metric) => ({
+        name: displayName(metric.slug),
+        score: Math.round(metric.score),
+        band: getBand(metric.score),
+        isEstimated: metric.isEstimated,
+        confidence: metric.confidence,
+        slug: metric.slug,
+        playbookSlug: `mood-${metric.slug}`,
+      }));
   } else if (moodScores) {
     moodsData = [
       { name: 'Flow score', score: Math.round(moodScores.flowScore), band: getBand(moodScores.flowScore) },
-      { name: 'Confidence', score: Math.round(moodScores.confidence), band: getBand(moodScores.confidence) }
-    ];
-  } else {
-    isMockMoods = true;
-    moodsData = [
-      { name: 'Flow score', score: 72, band: 'blue' },
-      { name: 'Confidence', score: 58, band: 'amber' }
+      { name: 'Confidence', score: Math.round(moodScores.confidence), band: getBand(moodScores.confidence) },
     ];
   }
+
+  const resolvedTargetMood = session?.mood?.targetMood ? displayName(session.mood.targetMood) : targetMood;
+
+  const renderMetric = (metric: ResultMetric, index: number, kind: 'Skill' | 'Mood') => (
+    <div key={`${kind}-${metric.slug || metric.name}-${index}`} aria-label={`${kind} score: ${metric.name}`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={metric.score} className="game-result__metric layout-grid" data-score={metric.score} data-band={metric.band} data-estimated={metric.isEstimated ? 'true' : undefined} role="progressbar">
+      <span className="ui-label game-result__metric-name layout-block">{metric.name}</span>
+      <strong className="game-result__metric-value layout-block">
+        <span data-score-value="">{metric.score}</span>
+        <span className="game-result__metric-total font-xs weight-semibold">/ 100</span>
+        {metric.isEstimated && (
+          <span className="ui-badge ui-badge--sm ui-badge--amber ml-2" title="This game does not yet report this score directly. The value is an estimate from your play time, not a measurement, and it does not count toward your profile.">Estimated</span>
+        )}
+      </strong>
+      <div aria-hidden="true" className="sp-progress">
+        <span className="sp-progress__track">
+          <span className="sp-progress__fill" style={{ width: `${metric.score}%`, opacity: metric.isEstimated ? 0.6 : 1 }}></span>
+        </span>
+      </div>
+      {metric.playbookSlug && (
+        <Link href={`/playbooks/${metric.playbookSlug}`} className="font-xs text-muted mt-1 hover:text-white">
+          View playbook
+        </Link>
+      )}
+    </div>
+  );
+
+  const renderEmpty = (message: string) => (
+    <p className="margin-none text-muted font-sm layout-flex items-center gap-md">
+      {isProcessing && <span aria-hidden="true" className="session-spinner" style={{ width: '18px', height: '18px' }}></span>}
+      <span>{message}</span>
+    </p>
+  );
 
   return (
     <div className="popup-backdrop inset-none place-center is-open" id="resultPopup">
@@ -233,72 +274,32 @@ export default function GameResultDialog({
           </div>
 
           <section aria-label="Skill scores" className="game-result__section separator-top layout-grid relative">
-            {isMockSkills && <MockDataTag />}
             <h3 className="portal-eyebrow game-result__section-title">Skill scores</h3>
-            <div className="layout-grid grid-4 gap-lg">
-              {skillsData.map((skill, index) => (
-                <div key={index} aria-label={`Skill score: ${skill.name}`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={skill.score} className="game-result__metric layout-grid" data-score={skill.score} data-band={skill.band} role="progressbar">
-                  <span className="ui-label game-result__metric-name layout-block">{skill.name}</span>
-                  <strong className="game-result__metric-value layout-block">
-                    <span data-score-value="">{skill.score}</span>
-                    <span className="game-result__metric-total font-xs weight-semibold">/ 100</span>
-                    {skill.isEstimated && (
-                      <span className="ui-badge ui-badge--sm ui-badge--amber ml-2" title="This score is estimated based on similar play sessions.">Estimated</span>
-                    )}
-                  </strong>
-                  <div aria-hidden="true" className="sp-progress">
-                    <span className="sp-progress__track">
-                      <span className="sp-progress__fill" style={{ width: `${skill.score}%` }}></span>
-                    </span>
-                    {skill.baselineScore !== undefined && (
-                      <span className="sp-progress__baseline" style={{ left: `${skill.baselineScore}%`, position: 'absolute', height: '100%', width: '2px', backgroundColor: 'var(--core-green-500)' }} title={`Baseline: ${skill.baselineScore}`}></span>
-                    )}
-                  </div>
-                  {skill.slug && (
-                    <Link href={`/playbooks/cognition-${skill.slug}`} className="font-xs text-muted mt-1 hover:text-white">
-                      View playbook
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </div>
+            {skillsData.length === 0 ? (
+              renderEmpty(isProcessing ? 'Scoring your session. Skill scores appear here as soon as they are ready.' : 'This session did not produce skill scores.')
+            ) : (
+              <div className="layout-grid grid-4 gap-lg">
+                {skillsData.map((skill, index) => renderMetric(skill, index, 'Skill'))}
+              </div>
+            )}
+            {hasEstimatedSkills && (
+              <p className="game-result__note margin-none font-xs leading-xs">
+                Scores marked <strong>Estimated</strong> come from your play time rather than a measurement, because this game does not report them directly yet. They are shown for context only and do not change your profile.
+              </p>
+            )}
           </section>
 
           <section aria-label="Mood analysis" className="game-result__section separator-top layout-grid relative">
-            {isMockMoods && <MockDataTag />}
             <h3 className="portal-eyebrow game-result__section-title">Mood analysis</h3>
             <div className="layout-grid grid-3 gap-lg">
               <div className="game-result__metric layout-grid">
                 <span className="ui-label game-result__metric-name layout-block">Target mood</span>
-                <strong className="game-result__metric-value layout-block" data-stage-mood="">{targetMood}</strong>
+                <strong className="game-result__metric-value layout-block" data-stage-mood="">{resolvedTargetMood}</strong>
               </div>
               
-              {moodsData.map((mood, index) => (
-                <div key={index} aria-label={`Mood score: ${mood.name}`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={mood.score} className="game-result__metric layout-grid" data-score={mood.score} data-band={mood.band} role="progressbar">
-                  <span className="ui-label game-result__metric-name layout-block">{mood.name}</span>
-                  <strong className="game-result__metric-value layout-block">
-                    <span data-score-value="">{mood.score}</span>
-                    <span className="game-result__metric-total font-xs weight-semibold">/ 100</span>
-                    {mood.isEstimated && (
-                      <span className="ui-badge ui-badge--sm ui-badge--amber ml-2" title="This score is estimated based on similar play sessions.">Estimated</span>
-                    )}
-                  </strong>
-                  <div aria-hidden="true" className="sp-progress">
-                    <span className="sp-progress__track">
-                      <span className="sp-progress__fill" style={{ width: `${mood.score}%` }}></span>
-                    </span>
-                    {mood.baselineScore !== undefined && (
-                      <span className="sp-progress__baseline" style={{ left: `${mood.baselineScore}%`, position: 'absolute', height: '100%', width: '2px', backgroundColor: 'var(--core-green-500)' }} title={`Baseline: ${mood.baselineScore}`}></span>
-                    )}
-                  </div>
-                  {mood.slug && (
-                    <Link href={`/playbooks/mood-${mood.slug}`} className="font-xs text-muted mt-1 hover:text-white">
-                      View playbook
-                    </Link>
-                  )}
-                </div>
-              ))}
+              {moodsData.map((mood, index) => renderMetric(mood, index, 'Mood'))}
             </div>
+            {moodsData.length === 0 && renderEmpty(isProcessing ? 'Reading the mood this session moved.' : 'No mood scores were recorded for this session.')}
           </section>
 
         </div>

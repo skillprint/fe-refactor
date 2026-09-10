@@ -1,12 +1,13 @@
 import React from 'react';
-import { MOOD_SKILLS, COGNITION_SKILLS, PERSONALITY_SKILLS } from '@/lib/skillsData';
+import type { SkillCatalogDimension } from '@/lib/skillCatalog';
 
 interface SkillFilterProps {
+  catalog: SkillCatalogDimension[];
   currentSkillId: string;
   onSkillChange: (skillId: string) => void;
 }
 
-export function SkillFilter({ currentSkillId, onSkillChange }: SkillFilterProps) {
+export function SkillFilter({ catalog, currentSkillId, onSkillChange }: SkillFilterProps) {
   return (
     <section className="skill-filter" aria-labelledby="pickerTitle">
       <span className="ui-label skill-filter__label" id="pickerTitle">Choose a skill</span>
@@ -17,28 +18,17 @@ export function SkillFilter({ currentSkillId, onSkillChange }: SkillFilterProps)
           style={{ width: 'auto', minWidth: '200px', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}
           value={currentSkillId} 
           onChange={(e) => onSkillChange(e.target.value)}
+          aria-labelledby="pickerTitle"
         >
-          <optgroup label="Mood">
-            {MOOD_SKILLS.map(skill => (
-              <option key={skill.id} value={skill.id}>
-                {skill.name} {skill.progressPercentage > 0 ? '•' : ''}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Cognition">
-            {COGNITION_SKILLS.map(skill => (
-              <option key={skill.id} value={skill.id}>
-                {skill.name} {skill.progressPercentage > 0 ? '•' : ''}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Personality">
-            {PERSONALITY_SKILLS.map(skill => (
-              <option key={skill.id} value={skill.id}>
-                {skill.name} {skill.progressPercentage > 0 ? '•' : ''}
-              </option>
-            ))}
-          </optgroup>
+          {catalog.map((dim) => (
+            <optgroup label={dim.title} key={dim.pillar}>
+              {dim.skills.map((skill) => (
+                <option key={skill.id} value={skill.id}>
+                  {skill.name} {skill.score !== null ? '•' : ''}
+                </option>
+              ))}
+            </optgroup>
+          ))}
         </select>
       </div>
 

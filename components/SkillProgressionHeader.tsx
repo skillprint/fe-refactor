@@ -1,16 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
-import { getSkillById } from '@/lib/skillsData';
+import type { SkillCatalogEntry } from '@/lib/skillCatalog';
+import { pillarLabel } from '@/lib/skillIcons';
 
 interface SkillProgressionHeaderProps {
-  skillId: string;
+  skill: SkillCatalogEntry;
 }
 
-export function SkillProgressionHeader({ skillId }: SkillProgressionHeaderProps) {
-  const skill = getSkillById(skillId);
-
-  if (!skill) return null;
-
+export function SkillProgressionHeader({ skill }: SkillProgressionHeaderProps) {
   return (
     <div className="portal-head">
       <Link className="stat-hero__back layout-inline-flex items-center gap-md font-sm weight-semibold no-grow" href="/skills">
@@ -23,9 +20,8 @@ export function SkillProgressionHeader({ skillId }: SkillProgressionHeaderProps)
             <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href={`#${skill.iconId}`}></use></svg>
           </span>
           <h1>{skill.name}</h1>
-          <span className="ui-badge ui-badge--pill progression-pillar">
-            {skill.dimension.charAt(0).toUpperCase() + skill.dimension.slice(1)}
-          </span>
+          <span className="ui-badge ui-badge--pill progression-pillar">{pillarLabel(skill.pillar)}</span>
+          {skill.category && <span className="ui-badge ui-badge--pill">{skill.category}</span>}
         </div>
         <a className="button button--primary button--md no-grow" href="#games">
           <span>Build this skill</span>

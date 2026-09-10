@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
-import { MockDataTag } from '../MockDataTag';
 
 interface ProfileSkillsWheelProps {
   who?: string;
@@ -250,15 +249,14 @@ export default function ProfileSkillsWheel({
   const measuredCount = Object.values(scores).filter((val) => typeof val === 'number').length;
 
   return (
-    <div className="pp-skills-wheel sp-panel" data-skills-who="You" style={{ position: 'relative' }}>
-      <MockDataTag />
+    <div className="pp-skills-wheel sp-panel" data-skills-who="You">
       <div className="pp-skills-wheel__body">
         <div className="min-width-0">
           <h2 className="pp-print__who" id="ppSkillsWheelTitle-first">Your skills</h2>
           <span className="pp-print__caption">
             {measuredCount === 0
               ? 'Nothing is scored yet. Each skill is a spoke that darkens and thickens as games measure it.'
-              : `${measuredCount} of 28 measured so far \u00B7 thicker and darker is a higher score`}
+              : `${measuredCount} of ${total} measured so far \u00B7 thicker and darker is a higher score`}
           </span>
         </div>
       </div>
@@ -270,7 +268,7 @@ export default function ProfileSkillsWheel({
             viewBox={viewBoxStr}
             style={{ aspectRatio: aspectRatioStr }}
             role="img"
-            aria-label={`${who}'s 28 skills, grouped by dimension`}
+            aria-label={`${who}'s ${total} skills, grouped by dimension`}
           >
             <g className="sw-rings" aria-hidden="true">
               {[0.34, 0.67, 1].map((f) => (

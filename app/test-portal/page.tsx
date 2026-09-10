@@ -204,7 +204,7 @@ const LongitudinalMetricCard = ({ useSyntheticData }: { useSyntheticData: boolea
                                         <XAxis dataKey="label" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
                                         <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} />
                                         <Tooltip cursor={{ fill: '#334155' }} contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px' }} />
-                                        <ReferenceLine y={data.average} stroke="#38bdf8" strokeDasharray="3 3" />
+                                        <ReferenceLine y={data.average ?? undefined} stroke="#38bdf8" strokeDasharray="3 3" />
                                         <Bar dataKey="score" radius={[4, 4, 0, 0]}>
                                             {data.buckets.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={(entry.score ?? 0) > (data.average ?? 0) ? '#34d399' : '#818cf8'} />
@@ -561,7 +561,7 @@ const NextGameRecommendationCard = ({ useSyntheticData }: { useSyntheticData: bo
                                         <div className="relative z-10">
                                             <span className="text-[10px] uppercase tracking-wider text-blue-400 font-bold">Recommended Next</span>
                                             <h4 className="text-lg font-bold text-white mt-1">{rec.game.name}</h4>
-                                            <p className="text-xs text-slate-300 mt-2 bg-black/30 p-2 rounded">{rec.reason_text}</p>
+                                            <p className="text-xs text-slate-300 mt-2 bg-black/30 p-2 rounded">{rec.reasonText}</p>
                                         </div>
                                     </div>
                                 ))}

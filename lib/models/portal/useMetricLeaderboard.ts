@@ -5,7 +5,7 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { MetricLeaderboard, generateMockMetricLeaderboard } from './MetricLeaderboard';
 
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api`;
+const BASE_URL = `${API_BASE_URL}api/portal`;
 
 export function useMetricLeaderboard(pillar: string, dimension: string, useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();

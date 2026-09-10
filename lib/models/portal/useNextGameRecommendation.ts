@@ -5,7 +5,7 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { NextGameRecommendation, generateMockNextGameRecommendation } from './NextGameRecommendation';
 
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api`;
+const BASE_URL = `${API_BASE_URL}api/portal`;
 
 export function useNextGameRecommendation(useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();

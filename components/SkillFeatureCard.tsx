@@ -43,11 +43,15 @@ export function SkillFeatureCard({
           View all <svg className="sp-icon sp-icon--sm" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
         </Link>
       </div>
-      <GameRail isLibrary={false}>
-        {games.map(game => (
-          <GameTile key={game.id} {...game} />
-        ))}
-      </GameRail>
+      {games.length > 0 ? (
+        <GameRail isLibrary={false}>
+          {games.map(game => (
+            <GameTile key={game.id} {...game} />
+          ))}
+        </GameRail>
+      ) : (
+        <p className="margin-none text-muted font-sm">No games in the library measure {skillName} yet.</p>
+      )}
     </article>
   );
 }

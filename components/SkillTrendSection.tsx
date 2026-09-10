@@ -1,46 +1,39 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import DynamicChart from '@/app/visualize/components/DynamicChart';
-import { generateSyntheticData, DataPoint } from '@/app/visualize/utils/syntheticData';
-import { getSkillById } from '@/lib/skillsData';
+import React from 'react';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine
+} from 'recharts';
+import type { SkillCatalogEntry } from '@/lib/skillCatalog';
+import type { LongitudinalMetric, MetricRange } from '@/lib/models/portal/LongitudinalMetric';
 
 interface SkillTrendSectionProps {
-  skillId: string;
+  skill: SkillCatalogEntry;
+  metric: LongitudinalMetric | null;
+  isLoading: boolean;
+  range: MetricRange;
+  onRangeChange: (range: MetricRange) => void;
 }
 
-const PILLAR_MODELS: Record<string, string> = {
-  mood: 'MoodData',
-  cognition: 'CognitionData',
-  personality: 'PersonalityData'
-};
+const RANGES: { value: MetricRange; label: string }[] = [
+  { value: 'W', label: 'Last week' },
+  { value: 'M', label: 'Last month' },
+  { value: '6M', label: 'Last 6 months' },
+];
 
-export function SkillTrendSection({ skillId }: SkillTrendSectionProps) {
-  const [range, setRange] = useState<number>(3); // Default: Last 3 weeks
-  const [chartData, setChartData] = useState<DataPoint[]>([]);
-  const skill = getSkillById(skillId);
+function formatPlaySeconds(seconds: number): string {
+  const m = Math.round(seconds / 60);
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  return `${h}h ${m % 60}m`;
+}
 
-  useEffect(() => {
-    if (!skill) return;
-
-    const end = new Date();
-    const start = new Date();
-    // Assuming range is weeks: 1 = 7 days, 2 = 14 days, 3 = 21 days
-    start.setDate(start.getDate() - (range * 7 - 1)); 
-
-    const data = generateSyntheticData({
-      modelName: PILLAR_MODELS[skill.dimension] || 'CognitionData',
-      selectedFields: [skill.id.replace('-', '_')],
-      chartType: 'Line',
-      startDate: start,
-      endDate: end,
-      comparePeriods: 0,
-      compareCohort: false
-    });
-    setChartData(data);
-  }, [skillId, range, skill]);
-
-  if (!skill) return null;
+export function SkillTrendSection({ skill, metric, isLoading, range, onRangeChange }: SkillTrendSectionProps) {
+  const delta = metric?.comparison?.delta ?? null;
+  const deltaPct = metric?.comparison?.deltaPct ?? null;
+  const direction = metric?.trend?.direction || 'flat';
+  const chartData = (metric?.buckets || []).map((b) => ({ label: b.label, score: b.score, sessions: b.sessionCount }));
+  const hasPoints = chartData.some((b) => typeof b.score === 'number');
 
   return (
     <section aria-labelledby="trendTitle" className="stat-section separator-top" id="progression">
@@ -49,36 +42,23 @@ export function SkillTrendSection({ skillId }: SkillTrendSectionProps) {
           <span className="eyebrow eyebrow--compact">Progression</span>
           <h2 className="portal-section__title" id="trendTitle">How it has changed</h2>
         </div>
-        <div className="layout-inline-flex button-group no-grow padding-none" role="group">
-          <button 
-            aria-pressed={range === 1} 
-            className={`button-group__item ${range === 1 ? 'is-active' : ''}`} 
-            onClick={() => setRange(1)} 
-            type="button"
-          >
-            Last week
-          </button>
-          <button 
-            aria-pressed={range === 2} 
-            className={`button-group__item ${range === 2 ? 'is-active' : ''}`} 
-            onClick={() => setRange(2)} 
-            type="button"
-          >
-            Last 2 weeks
-          </button>
-          <button 
-            aria-pressed={range === 3} 
-            className={`button-group__item ${range === 3 ? 'is-active' : ''}`} 
-            onClick={() => setRange(3)} 
-            type="button"
-          >
-            Last 3 weeks
-          </button>
+        <div className="layout-inline-flex button-group no-grow padding-none" role="group" aria-label="Range">
+          {RANGES.map((r) => (
+            <button
+              key={r.value}
+              aria-pressed={range === r.value}
+              className={`button-group__item ${range === r.value ? 'is-active' : ''}`}
+              onClick={() => onRangeChange(r.value)}
+              type="button"
+            >
+              {r.label}
+            </button>
+          ))}
         </div>
       </div>
       
       <p className="stat-section__lede margin-none text-muted">
-        Your progression for {skill.name} over the selected timeframe.
+        Your {skill.name} score across the selected range, against your lifetime baseline.
       </p>
 
       <div className="stat-trends layout-grid gap-2xl items-start mt-6">
@@ -86,57 +66,71 @@ export function SkillTrendSection({ skillId }: SkillTrendSectionProps) {
           <div className="stat-trend__head layout-flex items-start justify-between gap-lg wrap">
             <div className="min-width-0">
               <span className="ui-label layout-block">Change over period</span>
-              <strong className="stat-trend__value layout-block">+24 pts</strong>
-              <span className="layout-block font-sm text-muted">Upward trend</span>
+              <strong className="stat-trend__value layout-block">
+                {delta === null ? '—' : `${delta > 0 ? '+' : ''}${Math.round(delta)} pts`}
+              </strong>
+              <span className="layout-block font-sm text-muted">
+                {metric?.trend?.label || (direction === 'improving' ? 'Upward trend' : direction === 'declining' ? 'Downward trend' : 'Holding steady')}
+              </span>
             </div>
-            <span className="ui-badge ui-badge--pill ui-badge--md ui-badge--leading stat-trend__badge">
-              <svg className="ui-badge__icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-trending"></use></svg>
-              <span>+12%</span>
-            </span>
+            {deltaPct !== null && (
+              <span className="ui-badge ui-badge--pill ui-badge--md ui-badge--leading stat-trend__badge">
+                <svg className="ui-badge__icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-trending"></use></svg>
+                <span>{deltaPct > 0 ? '+' : ''}{Math.round(deltaPct)}%</span>
+              </span>
+            )}
           </div>
           
           <div className="stat-trend__chart chart-frame padding-none h-[250px] mt-4">
-             {chartData.length > 0 ? (
-                <DynamicChart
-                  data={chartData}
-                  type="Line"
-                  selectedFields={[skill.id.replace('-', '_')]}
-                  comparePeriods={0}
-                  compareCohort={false}
-                  yAxisLabel="score"
-                />
-             ) : (
-               <div className="flex items-center justify-center h-full text-muted">No data available</div>
-             )}
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full text-muted">Loading…</div>
+            ) : hasPoints ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 16, right: 24, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} dy={8} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} dx={-8} />
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '0.75rem', color: 'var(--foreground)' }}
+                    formatter={(value: any, name: any) => [value, name === 'score' ? skill.name : name]}
+                  />
+                  {typeof skill.baselineScore === 'number' && (
+                    <ReferenceLine y={skill.baselineScore} stroke="var(--muted-foreground)" strokeDasharray="4 4" label={{ value: 'Baseline', fill: 'var(--muted-foreground)', fontSize: 11, position: 'insideTopRight' }} />
+                  )}
+                  <Line type="monotone" dataKey="score" stroke="var(--primary)" strokeWidth={3} connectNulls={false} dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 2, stroke: 'var(--background)' }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted">No sessions in this range</div>
+            )}
           </div>
         </div>
 
         <div className="stat-weeks sp-panel">
-          <p className="ui-label stat-weeks__title margin-none">Sessions per week</p>
+          <p className="ui-label stat-weeks__title margin-none">In this range</p>
           <ul className="stat-weeks__list margin-none padding-none layout-grid gap-lg mt-4">
             <li className="flex justify-between items-center text-sm">
-              <span className="text-muted">This week</span>
-              <span className="weight-semibold">4 sessions</span>
+              <span className="text-muted">Sessions</span>
+              <span className="weight-semibold">{metric ? metric.stats.sessions : '—'}</span>
             </li>
             <li className="flex justify-between items-center text-sm">
-              <span className="text-muted">Last week</span>
-              <span className="weight-semibold">2 sessions</span>
+              <span className="text-muted">Time played</span>
+              <span className="weight-semibold">{metric ? formatPlaySeconds(metric.stats.totalPlaySeconds) : '—'}</span>
             </li>
             <li className="flex justify-between items-center text-sm">
-              <span className="text-muted">2 weeks ago</span>
-              <span className="weight-semibold">5 sessions</span>
+              <span className="text-muted">Peak score</span>
+              <span className="weight-semibold">{metric?.stats.peakScore ?? '—'}</span>
+            </li>
+            <li className="flex justify-between items-center text-sm">
+              <span className="text-muted">Consistency</span>
+              <span className="weight-semibold">{metric?.stats.consistency === null || metric?.stats.consistency === undefined ? '—' : `${Math.round(metric.stats.consistency)}%`}</span>
             </li>
           </ul>
           <div className="stat-weeks__foot streak-row cluster justify-between separator-top text-muted font-sm mt-4 pt-4">
             <span className="layout-inline-flex items-center gap-md">
               <svg className="sp-icon sp-icon--xs" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-calendar"></use></svg>
-              <span>3-week streak</span>
+              <span>{metric ? `${metric.period.start} → ${metric.period.end}` : 'Period'}</span>
             </span>
-            <div className="streak-days layout-flex gap-sm">
-              <div className="w-2 h-2 rounded-full bg-brand-primary"></div>
-              <div className="w-2 h-2 rounded-full bg-brand-primary"></div>
-              <div className="w-2 h-2 rounded-full bg-brand-primary"></div>
-            </div>
           </div>
         </div>
       </div>

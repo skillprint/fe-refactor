@@ -1,11 +1,17 @@
+/** `GET /api/portal/sessions/{session_id}/` — full breakdown of one session. camelCase on the wire. */
+
 export interface SessionDimensionScore {
   slug: string;
   score: number;
   confidence: number;
-  is_target?: boolean;
-  is_exercised_by_game?: boolean;
-  is_estimated?: boolean;
-  baseline_score?: number;
+  isTarget?: boolean;
+  isExercisedByGame?: boolean;
+  /**
+   * SKI-132: true when the game emitted no cognition scores and the backend
+   * substituted an estimate from play time. Estimates are capped low, carry
+   * low confidence, are never persisted, and must be labelled in the UI.
+   */
+  isEstimated?: boolean;
 }
 
 export interface SessionPersonalityScore {
@@ -14,41 +20,44 @@ export interface SessionPersonalityScore {
   confidence: number;
 }
 
+export interface SessionMoodSection {
+  targetMood: string | null;
+  targetScore: number | null;
+  targetConfidence: number | null;
+  allMoods: SessionDimensionScore[];
+}
+
 export interface SessionDetail {
-  session_id: string;
-  game: { id: number; name: string; slug: string; };
-  started_at: string;
-  ended_at: string;
-  duration_seconds: number;
-  mood: {
-    target_mood: string;
-    target_score: number;
-    target_confidence: number;
-    all_moods: SessionDimensionScore[];
-  };
+  sessionId: string;
+  game: { id: number; name: string; slug: string };
+  startedAt: string;
+  /** null while scoring is still in flight. */
+  endedAt: string | null;
+  durationSeconds: number;
+  mood: SessionMoodSection | null;
+  /** [] while scoring is still in flight; poll until it populates. */
   cognition: SessionDimensionScore[];
-  personality: SessionPersonalityScore[];
+  personality: SessionPersonalityScore[] | null;
 }
 
 export const generateMockSessionDetail = (): SessionDetail => ({
-  session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  game: { id: 42, name: "Hextris", slug: "hextris" },
-  started_at: new Date(Date.now() - 330000).toISOString(),
-  ended_at: new Date().toISOString(),
-  duration_seconds: 330,
+  sessionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  game: { id: 42, name: 'Hextris', slug: 'hextris' },
+  startedAt: new Date(Date.now() - 330000).toISOString(),
+  endedAt: new Date().toISOString(),
+  durationSeconds: 330,
   mood: {
-    target_mood: "focus",
-    target_score: 72,
-    target_confidence: 0.85,
-    all_moods: [
-      { slug: "focus", score: 72, confidence: 0.85, is_target: true },
-      { slug: "relax", score: 58, confidence: 0.71, is_target: false }
-    ]
+    targetMood: 'focus',
+    targetScore: 72,
+    targetConfidence: 0.85,
+    allMoods: [
+      { slug: 'focus', score: 72, confidence: 0.85, isTarget: true },
+      { slug: 'relax', score: 58, confidence: 0.71, isTarget: false },
+    ],
   },
   cognition: [
-    { slug: "attention", score: 81, confidence: 0.90, is_exercised_by_game: true }
+    { slug: 'attention', score: 81, confidence: 0.9, isExercisedByGame: true, isEstimated: false },
+    { slug: 'pattern-matching', score: 38, confidence: 0.2, isExercisedByGame: true, isEstimated: true },
   ],
-  personality: [
-    { trait: "openness", score: 68, confidence: 0.72 }
-  ]
+  personality: [{ trait: 'openness', score: 68, confidence: 0.72 }],
 });
