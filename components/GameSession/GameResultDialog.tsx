@@ -14,6 +14,8 @@ interface ResultMetric {
   confidence?: number;
   slug?: string;
   playbookSlug?: string;
+  /** SKI-140: false when the session scored a skill this game does not exercise. */
+  isExercisedByGame?: boolean;
 }
 
 const displayName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug(slug);
@@ -53,6 +55,8 @@ export default function GameResultDialog({
   const { data: session, isProcessing } = useComputedGameMetrics(sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
+  // SKI-140: skills the game did not exercise stay behind a toggle by default.
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   const handleSurveySubmit = async (score: number) => {
     if (!gameSlug || !userToken) {
@@ -114,6 +118,7 @@ export default function GameResultDialog({
         confidence: metric.confidence,
         slug: metric.slug,
         playbookSlug: `cognition-${metric.slug}`,
+        isExercisedByGame: metric.isExercisedByGame,
       }));
   } else if (skillScores?.metrics && Object.keys(skillScores.metrics).length > 0) {
     skillsData = Object.entries(skillScores.metrics).map(([name, metric]) => ({
@@ -123,6 +128,15 @@ export default function GameResultDialog({
     }));
   }
   const hasEstimatedSkills = skillsData.some((s) => s.isEstimated);
+
+  // SKI-140: a session can score every skill in the taxonomy, most of them
+  // untouched by the game and sitting at zero. Lead with the skills the game
+  // actually measures and keep the rest behind a toggle. When the backend does
+  // not flag any skill as exercised there is nothing to split, so show all.
+  const measuredSkills = skillsData.filter((s) => s.isExercisedByGame);
+  const hasUnmeasuredSkills = measuredSkills.length > 0 && measuredSkills.length < skillsData.length;
+  const unmeasuredCount = skillsData.length - measuredSkills.length;
+  const visibleSkills = hasUnmeasuredSkills && !showAllSkills ? measuredSkills : skillsData;
 
   let moodsData: ResultMetric[] = [];
   const allMoods = session?.mood?.allMoods || [];
@@ -251,7 +265,7 @@ export default function GameResultDialog({
           <div className="game-result__overview layout-grid gap-lg">
             <div className="game-result__score layout-grid radius-card padding-xl">
               <div className="layout-flex items-center justify-between gap-lg">
-                <span className="ui-label">Final score</span>
+                <span className="ui-label">Game score</span>
                 {isNewBest && (
                   <span className="game-result__best ui-badge ui-badge--pill ui-badge--leading">
                     <i className="ui-badge__dot"></i>New personal best
@@ -259,28 +273,56 @@ export default function GameResultDialog({
                 )}
               </div>
               <strong className="game-result__score-value layout-block">{score.toLocaleString()}</strong>
-              {highScore > 0 && (
-                <span className="game-result__score-note layout-block font-sm">
-                  {scoreDiff > 0 ? '+' : ''}{scoreDiff.toLocaleString()} on your previous best of {highScore.toLocaleString()}
-                </span>
-              )}
+              {/* SKI-140: the number is the game's own points, not a mark out of
+                  100 like the skill scores below, so say which scale it is on. */}
+              <span className="game-result__score-note layout-block font-sm">
+                {highScore > 0
+                  ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${highScore.toLocaleString()}`
+                  : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
+              </span>
             </div>
             
             <div className="game-result__summary layout-grid gap-md radius-card padding-xl">
               <div><span className="ui-label layout-block">Game</span><strong className="layout-block" data-stage-title>{gameTitle}</strong></div>
               <div><span className="ui-label layout-block">Duration</span><strong className="layout-block">{formatDuration(duration)}</strong></div>
-              <div><span className="ui-label layout-block">Adjustments</span><strong className="layout-block">{adjustmentsCount} applied</strong></div>
+              <div title={`Times ${gameTitle} changed its difficulty to match your play during this session.`}>
+                <span className="ui-label layout-block">Live adjustments</span>
+                <strong className="layout-block">{adjustmentsCount} applied</strong>
+              </div>
+              <p className="game-result__note margin-none">
+                {adjustmentsCount > 0
+                  ? `Live adjustments are the times ${gameTitle} changed its difficulty to match your play during this session.`
+                  : `${gameTitle} did not need to change its difficulty during this session.`}
+              </p>
             </div>
           </div>
 
           <section aria-label="Skill scores" className="game-result__section separator-top layout-grid relative">
             <h3 className="portal-eyebrow game-result__section-title">Skill scores</h3>
+            {skillsData.length > 0 && (
+              <p className="game-result__note margin-none">
+                Each skill is scored from 0 to 100.
+                {hasUnmeasuredSkills && !showAllSkills && ` Only the skills ${gameTitle} measures are shown.`}
+              </p>
+            )}
             {skillsData.length === 0 ? (
               renderEmpty(isProcessing ? 'Scoring your session. Skill scores appear here as soon as they are ready.' : 'This session did not produce skill scores.')
             ) : (
               <div className="layout-grid grid-4 gap-lg">
-                {skillsData.map((skill, index) => renderMetric(skill, index, 'Skill'))}
+                {visibleSkills.map((skill, index) => renderMetric(skill, index, 'Skill'))}
               </div>
+            )}
+            {hasUnmeasuredSkills && (
+              <button
+                type="button"
+                className="button button--tertiary button--sm justify-self-start"
+                aria-expanded={showAllSkills}
+                onClick={() => setShowAllSkills((open) => !open)}
+              >
+                {showAllSkills
+                  ? `Hide the ${unmeasuredCount} ${unmeasuredCount === 1 ? 'skill' : 'skills'} ${gameTitle} does not measure`
+                  : `Show ${unmeasuredCount} more ${unmeasuredCount === 1 ? 'skill' : 'skills'} ${gameTitle} does not measure`}
+              </button>
             )}
             {hasEstimatedSkills && (
               <p className="game-result__note margin-none font-xs leading-xs">

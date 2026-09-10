@@ -58,6 +58,9 @@ export const generateMockSessionDetail = (): SessionDetail => ({
   cognition: [
     { slug: 'attention', score: 81, confidence: 0.9, isExercisedByGame: true, isEstimated: false },
     { slug: 'pattern-matching', score: 38, confidence: 0.2, isExercisedByGame: true, isEstimated: true },
+    // Skills the game does not exercise come back scored but untouched (SKI-140).
+    { slug: 'planning', score: 0, confidence: 0, isExercisedByGame: false, isEstimated: false },
+    { slug: 'deduction', score: 0, confidence: 0, isExercisedByGame: false, isEstimated: false },
   ],
   personality: [{ trait: 'openness', score: 68, confidence: 0.72 }],
 });
