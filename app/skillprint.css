@@ -9106,6 +9106,22 @@ html:is([data-surface="light"], [data-theme="light"]) .page--portal .portal-topb
   gap: var(--space-20);
 }
 
+/* SKI-139: a header whose title and lede are grouped keeps the action at the
+   top of the row, level with the title, rather than sinking to the lede. */
+.page--portal .portal-head__copy {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+  /* Zero basis so the action never wraps under the copy; the cap keeps the
+     block (and the tour's ring around it) no wider than its own text. */
+  flex: 1 1 0;
+  max-width: max-content;
+}
+
+.page--portal .portal-head__row:has(.portal-head__copy) {
+  align-items: flex-start;
+}
+
 .page--portal .portal-head h1 {
   margin: 0;
   font-size: var(--app-display-xs-font-size);
