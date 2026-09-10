@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import Script from 'next/script';
 
-const WHEEL_SCRIPT = '/skillprint-portal-redesign/js/skillprint-wheel.js';
+const WHEEL_SCRIPT = '/js/skillprint-wheel.js';
 
 interface HomeSkillprintWheelProps {
   /** Which print to ink. `base` is the blank dial; any other key is a person from the wheel script's catalogue. */

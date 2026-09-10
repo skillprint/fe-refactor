@@ -2,12 +2,12 @@
  * Maps a backend badge (Talent) onto the badge art shipped with the redesign.
  *
  * The backend only knows the animal's name and species; the art lives at
- * /skillprint-portal-redesign/assets/images/badges/collection/<animal>/<animal>-badge-<colour>-<shape>.svg
+ * /assets/images/badges/collection/<animal>/<animal>-badge-<colour>-<shape>.svg
  * (see manifest.json alongside it). Colour is fixed per animal; the shape is a
  * rank marker we derive from the badge's points.
  */
 
-export const BADGE_ART_BASE = '/skillprint-portal-redesign/assets/images/badges/collection';
+export const BADGE_ART_BASE = '/assets/images/badges/collection';
 
 export const BADGE_SHAPES = ['sparkle', 'shield', 'flower', 'gear', 'star', 'sunburst'] as const;
 export type BadgeShape = (typeof BADGE_SHAPES)[number];

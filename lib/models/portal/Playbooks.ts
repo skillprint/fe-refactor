@@ -118,8 +118,8 @@ export const generateMockPlaybookDetail = (slug: string = 'deep-focus-routine'):
   slug, title: 'Deep Focus Routine', description: 'Sharpen attention and cut distractions.',
   source: 'authored', pillar: 'cognition', dimension: 'attention',
   games: [
-    { id: 42, slug: 'whack-em-all', title: "Whack 'em All", image: '/skillprint-portal-redesign/assets/images/games/game-mole.svg', description: 'Hit the moles.', estimatedDurationSeconds: 300, difficulty: 'moderate', targetedSkills: ['attention'] },
-    { id: 43, slug: 'hidden-objects', title: 'Hidden Objects', image: '/skillprint-portal-redesign/assets/images/games/game-hide.svg', description: 'Find hidden objects in the image.', estimatedDurationSeconds: 420, difficulty: 'moderate', targetedSkills: ['attention'] },
+    { id: 42, slug: 'whack-em-all', title: "Whack 'em All", image: '/assets/images/games/game-mole.svg', description: 'Hit the moles.', estimatedDurationSeconds: 300, difficulty: 'moderate', targetedSkills: ['attention'] },
+    { id: 43, slug: 'hidden-objects', title: 'Hidden Objects', image: '/assets/images/games/game-hide.svg', description: 'Find hidden objects in the image.', estimatedDurationSeconds: 420, difficulty: 'moderate', targetedSkills: ['attention'] },
   ],
   targetSkills: [
     { slug: 'attention', name: 'Attention', description: 'Holding one target.', pillar: 'cognition', icon: '', category: 'Attention' },

@@ -20,7 +20,7 @@ interface TourStep {
 
 const TOUR: TourStep[] = [
     {
-        spot: 'nextup',
+        spot: 'intro',
         title: 'What Skillprint is',
         text: 'Every game here measures how you think while you play. Five of them make your Skillprint.'
     },
@@ -196,7 +196,12 @@ export default function HomeTour() {
             content.style.setProperty('--home-tour-dock', `${Math.ceil(bubbleRef.current.getBoundingClientRect().height + EDGE * 2)}px`);
         }
 
-        if (!settle) return;
+        // Only a docked bubble can cover its target, so only a docked bubble
+        // may scroll the page to keep the target above it. Side and top
+        // placements are already clear of the target by construction, and
+        // nudging them scrolls the page for nothing, which then fires a
+        // scroll re-measure that jumps the bubble to a different side.
+        if (!settle || placement !== 'dock') return;
         const ceiling = bubbleRef.current.getBoundingClientRect().top - GAP;
         if (box.top >= EDGE && box.bottom <= ceiling) return;
         const shift = box.height > ceiling - EDGE ? box.top - EDGE : box.bottom - ceiling;

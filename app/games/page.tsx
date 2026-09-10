@@ -147,7 +147,7 @@ function GamesPageContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.screenshot || game.image || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
+                    image={game.screenshot || game.image || '/assets/images/games/game-arcade-machine.svg'}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
@@ -262,7 +262,7 @@ function GamesPageContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description || ''}
-                    image={game.screenshot || game.image || '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg'}
+                    image={game.screenshot || game.image || '/assets/images/games/game-arcade-machine.svg'}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}

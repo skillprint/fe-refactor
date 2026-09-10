@@ -5,8 +5,8 @@ import type { PlaybookDetail, PlaybookGame, PlaybookSummary } from './models/por
 import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { titleFromSlug } from './skillIcons';
 
-export const DEFAULT_GAME_IMAGE = '/skillprint-portal-redesign/assets/images/games/game-arcade-machine.svg';
-export const PLAYBOOK_ICON_BASE = '/skillprint-portal-redesign/assets/icons';
+export const DEFAULT_GAME_IMAGE = '/assets/images/games/game-arcade-machine.svg';
+export const PLAYBOOK_ICON_BASE = '/assets/icons';
 
 /** Generated playbooks carry no presentation; pick one off the pillar. */
 const PILLAR_ICON: Record<string, string> = {

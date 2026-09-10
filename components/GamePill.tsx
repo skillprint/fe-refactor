@@ -64,7 +64,7 @@ export function GamePill({ slug, name, description, image }: GamePillProps) {
         >
           <div className="game-peek__head">
             <span className="game-peek__art">
-              <img alt="" src={image || '/skillprint-portal-redesign/assets/images/games/game-space-trip.svg'} />
+              <img alt="" src={image || '/assets/images/games/game-space-trip.svg'} />
             </span>
             <span className="min-width-0"><strong className="game-peek__title">{name}</strong></span>
           </div>

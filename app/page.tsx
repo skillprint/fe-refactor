@@ -397,7 +397,7 @@ function HomeContent() {
   return (
     <>
       <PortalLayout>
-        <div className="portal-head">
+        <div className="portal-head" data-home-spot="intro">
           <Breadcrumbs items={[{ label: 'Home' }]} />
           <div className="portal-head__row">
             <PortalPageTitle>Play games. Build your Skillprint.</PortalPageTitle>

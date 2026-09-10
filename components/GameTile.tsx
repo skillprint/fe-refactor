@@ -1,6 +1,9 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { TraitSkillPill } from './TraitSkillPill';
+import { DEFAULT_GAME_IMAGE } from '@/lib/playbookUtils';
 
 export interface GameTileSkill {
   id: string;
@@ -40,7 +43,18 @@ export function GameTile({
       <Link href={url} className="media-open layout-block full-width padding-none border-none surface-transparent text-left" aria-label={`Play ${title}`} tabIndex={-1}>
         <div className="game-media position-relative clip">
           <div className="art-stack stack position-absolute inset-none clip">
-            <img alt={`${title} game artwork`} className="art-layer art-static position-absolute layout-block opaque" src={image} />
+            <img
+              alt={`${title} game artwork`}
+              className="art-layer art-static position-absolute layout-block opaque"
+              src={image}
+              onError={(e) => {
+                // SKI-145: a missing cover (untracked asset, dead backend URL) must not
+                // leave a broken-image icon in the rail. Fall back to the generic art once.
+                if (e.currentTarget.getAttribute('src') !== DEFAULT_GAME_IMAGE) {
+                  e.currentTarget.src = DEFAULT_GAME_IMAGE;
+                }
+              }}
+            />
             {animatedImage && (
               <img alt="" aria-hidden="true" className="art-layer art-animated position-absolute layout-block" src={animatedImage} />
             )}
