@@ -1,38 +1,79 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { LineChart, Line, ResponsiveContainer, YAxis, Tooltip } from 'recharts';
-import { mapSlugToGamePath } from '../../game/[slug]/GameClient';
+import React, { useState, useEffect, useRef, useMemo, useCallback, CSSProperties } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { mapSlugToGamePath } from '../../game/[slug]/GameClient';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores } from '../../lib/skillprintSdk';
-import AnalysisResultsModule from './AnalysisResultsModule';
-import FlowStateModule from './FlowStateModule';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
-import { unifiedSlugFromBESlug, mapLocalGameSlugToServerGameSlug } from '../../utils/slugUtils';
+import { mapLocalGameSlugToServerGameSlug } from '../../utils/slugUtils';
 import { getGameCatalogDetail } from '../../api/api';
+import { useTheme } from '../../components/ThemeProvider';
+import { ConsoleIcon } from '@/components/LiveConsole/ConsoleIcon';
+import { CardHead, CardLede, CardNote } from '@/components/LiveConsole/ConsoleCard';
+import { FlowHero } from '@/components/LiveConsole/FlowHero';
+import { SkillList } from '@/components/LiveConsole/SkillList';
+import { TrendChart, TrendLegend, TrendSeries } from '@/components/LiveConsole/TrendChart';
+import { AnalysisLog, LogEntry } from '@/components/LiveConsole/AnalysisLog';
+import {
+  toPercent,
+  toPercentDelta,
+  trendKey,
+  TREND_GLYPH,
+  formatSkillName,
+  formatClock,
+  formatDuration,
+} from '@/components/LiveConsole/scores';
 
-const getApiKey = () => {
-  return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
-};
+const getApiKey = () => process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
 
-interface LogEntry {
-  time: string;
-  timestamp: number;
-  level: string;
-  message: string;
+interface GameOption {
+  slug: string;
+  name: string;
+  art: string;
+  hint: string;
 }
+
+const GAMES: GameOption[] = [
+  { slug: 'hextris', name: 'Hextris', art: '/assets/images/games/game-hextris.svg', hint: 'Arrow keys rotate the hexagon. P pauses.' },
+  { slug: 'box-tower', name: 'Box Tower', art: '/assets/images/games/game-box-tower.svg', hint: 'Tap or click to drop each box.' },
+  { slug: '2048', name: '2048', art: '/images/activities/covers/2048.png', hint: 'Arrow keys slide the tiles.' },
+];
+
+const FLOW_SERIES: TrendSeries[] = [
+  { key: 'flow', label: 'Flow score', colour: 'var(--violet)' },
+  { key: 'confidence', label: 'Confidence', colour: 'var(--mint)' },
+];
+
+const SKILL_SERIES: TrendSeries[] = [
+  { key: 'score', label: 'Score', colour: 'var(--violet)' },
+  { key: 'trend', label: 'Trend', colour: 'var(--mint)' },
+  { key: 'confidence', label: 'Confidence', colour: 'var(--orange)' },
+];
+
+const PARAM_SERIES: TrendSeries[] = [{ key: 'value', label: 'Value', colour: 'var(--violet)' }];
+
+const apiHost = () => {
+  try {
+    return new URL(getApiBaseUrl()).host;
+  } catch {
+    return getApiBaseUrl();
+  }
+};
 
 export default function AiGuideClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  
+  const { theme, setTheme } = useTheme();
+
   const gameQuery = searchParams.get('game');
   const moodQuery = searchParams.get('mood');
 
   const [selectedGame, setSelectedGame] = useState(gameQuery || 'hextris');
   const [selectedMood, setSelectedMood] = useState<string>(moodQuery || Mood.FOCUS);
   const [sessionId, setSessionId] = useState<string>('');
+  const [runKey, setRunKey] = useState(0);
+  const [consoleOpen, setConsoleOpen] = useState(false);
   const [isSessionClosedOnBackend, setIsSessionClosedOnBackend] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'Disconnected' | 'Active'>('Disconnected');
   const [adjustments, setAdjustments] = useState<Adjustment[]>([]);
@@ -44,30 +85,19 @@ export default function AiGuideClient() {
   const [isSessionEnded, setIsSessionEnded] = useState(false);
   const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [selectedParameter, setSelectedParameter] = useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string>('');
+  const [trendTab, setTrendTab] = useState<'flow' | 'skills'>('flow');
   const [gameMetadata, setGameMetadata] = useState<any>(null);
-
-  // Sync state to URL
-  useEffect(() => {
-    const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
-    let changed = false;
-    
-    if (selectedGame && currentParams.get('game') !== selectedGame) {
-      currentParams.set('game', selectedGame);
-      changed = true;
-    }
-    
-    if (selectedMood && currentParams.get('mood') !== selectedMood) {
-      currentParams.set('mood', selectedMood);
-      changed = true;
-    }
-    
-    if (changed) {
-      router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
-    }
-  }, [selectedGame, selectedMood, pathname, router, searchParams]);
+  const [framesCaptured, setFramesCaptured] = useState(0);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [closedAt, setClosedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [copied, setCopied] = useState(false);
+  const [keyShown, setKeyShown] = useState(false);
+  const [gameLoaded, setGameLoaded] = useState(false);
+  const [flash, setFlash] = useState(false);
 
   const sessionEndedRef = useRef(false);
-
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const clientRef = useRef<SkillprintClient | null>(null);
   const shouldPollRef = useRef(false);
@@ -75,7 +105,33 @@ export default function AiGuideClient() {
   const sessionStartedRef = useRef(false);
   const sessionFailedRef = useRef(false);
 
-  // Initialize SDK and Session
+  const game = GAMES.find(g => g.slug === selectedGame) || GAMES[0];
+  const serverSlug = mapLocalGameSlugToServerGameSlug(selectedGame);
+  const gamePath = mapSlugToGamePath(selectedGame);
+
+  const addLog = useCallback((message: string, level: string = 'info') => {
+    const date = new Date();
+    setLogs(prev => [{ time: date.toLocaleTimeString(), timestamp: date.getTime(), level, message }, ...prev].slice(0, 200));
+  }, []);
+
+  // Sync state to URL
+  useEffect(() => {
+    const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
+    let changed = false;
+    if (selectedGame && currentParams.get('game') !== selectedGame) {
+      currentParams.set('game', selectedGame);
+      changed = true;
+    }
+    if (selectedMood && currentParams.get('mood') !== selectedMood) {
+      currentParams.set('mood', selectedMood);
+      changed = true;
+    }
+    if (changed) {
+      router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
+    }
+  }, [selectedGame, selectedMood, pathname, router, searchParams]);
+
+  // Initialise the SDK and a fresh session id for every run
   useEffect(() => {
     setSessionId('');
     setConnectionStatus('Disconnected');
@@ -88,6 +144,11 @@ export default function AiGuideClient() {
     setIsSessionEnded(false);
     setIsSessionStarted(false);
     setIsSessionClosedOnBackend(false);
+    setSelectedParameter(null);
+    setFramesCaptured(0);
+    setStartedAt(null);
+    setClosedAt(null);
+    setGameLoaded(false);
     sessionEndedRef.current = false;
     processedAdjustmentsRef.current.clear();
     shouldPollRef.current = false;
@@ -100,45 +161,32 @@ export default function AiGuideClient() {
     const client = new SkillprintClient({
       apiKey: getApiKey(),
       baseUrl: getApiBaseUrl(),
-      logger: (msg, level) => {
-        const date = new Date();
-        const time = date.toLocaleTimeString();
-        const timestamp = date.getTime();
-        setLogs(prev => [{ time, timestamp, level, message: msg }, ...prev].slice(0, 100));
-      }
+      logger: (msg, level) => addLog(msg, level),
     });
     clientRef.current = client;
 
     return () => {
       shouldPollRef.current = false;
     };
-  }, [selectedGame]);
+  }, [selectedGame, runKey, addLog]);
 
-  // Fetch Game Metadata
+  // Game metadata: the moods and skills the target picker offers
   useEffect(() => {
     let isMounted = true;
     const fetchMetadata = async () => {
       try {
-        const serverSlug = mapLocalGameSlugToServerGameSlug(selectedGame);
-        const game = await getGameCatalogDetail(serverSlug);
+        const detail = await getGameCatalogDetail(mapLocalGameSlugToServerGameSlug(selectedGame));
         if (isMounted) {
-          setGameMetadata(game);
-          
+          setGameMetadata(detail);
           const validTargets: string[] = [];
-          if (game?.moods) validTargets.push(...game.moods.map((m: any) => m.slug));
-          if (game?.skills) validTargets.push(...game.skills.map((s: any) => s.slug));
-
+          if (detail?.moods) validTargets.push(...detail.moods.map((m: any) => m.slug));
+          if (detail?.skills) validTargets.push(...detail.skills.map((s: any) => s.slug));
           if (validTargets.length > 0) {
-            setSelectedMood((currentMood) => {
-              if (!validTargets.includes(currentMood)) {
-                return validTargets[0];
-              }
-              return currentMood;
-            });
+            setSelectedMood(current => (validTargets.includes(current) ? current : validTargets[0]));
           }
         }
       } catch (e) {
-        console.error("Failed to fetch game metadata", e);
+        console.error('Failed to fetch game metadata', e);
       }
     };
     fetchMetadata();
@@ -147,19 +195,32 @@ export default function AiGuideClient() {
     };
   }, [selectedGame]);
 
-  const pollSessionResults = async (client: SkillprintClient, sid: string) => {
+  // The clock for the session's duration
+  useEffect(() => {
+    if (!startedAt || closedAt) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [startedAt, closedAt]);
+
+  useEffect(() => {
+    if (isSessionClosedOnBackend && !closedAt) setClosedAt(Date.now());
+  }, [isSessionClosedOnBackend, closedAt]);
+
+  const pollSessionResults = (client: SkillprintClient, sid: string) => {
     const poll = async () => {
       if (!shouldPollRef.current) return;
       try {
         const res = await client.pollParameterResults(sid);
         if (!shouldPollRef.current) return;
 
-        if (res && (res.state === "OPEN" || res.state === "CLOSED")) {
+        if (res && (res.state === 'OPEN' || res.state === 'CLOSED')) {
           setConnectionStatus('Active');
 
           if (res.skillScores) {
             setSkillScores(res.skillScores);
             setSkillScoresHistory(prev => [...prev, { timestamp: Date.now(), scores: res.skillScores! }]);
+            setFlash(true);
+            setTimeout(() => setFlash(false), 900);
           }
           if (res.moodScores) {
             setMoodScores(res.moodScores);
@@ -174,7 +235,6 @@ export default function AiGuideClient() {
                 const id = `${adj.gameSlug}-${adj.createDate}-${adj.parameterName}`;
                 if (!processedAdjustmentsRef.current.has(id)) {
                   processedAdjustmentsRef.current.add(id);
-                  // Forward to iframe
                   if (iframeRef.current?.contentWindow) {
                     iframeRef.current.contentWindow.postMessage({ type: 'ADJUST_GAME', data: adj }, '*');
                   }
@@ -184,18 +244,20 @@ export default function AiGuideClient() {
               });
 
             if (newAdjustments.length > 0) {
-              setAdjustments(prev => [...newAdjustments, ...prev].slice(0, 20));
+              setAdjustments(prev => [...newAdjustments, ...prev].slice(0, 200));
+              newAdjustments.forEach(adj => addLog(`Game adjusted: ${adj.parameterName} → ${adj.parameterValue}`, 'success'));
             }
           }
 
-          if (res.state === "CLOSED") {
+          if (res.state === 'CLOSED') {
             setIsSessionClosedOnBackend(true);
             shouldPollRef.current = false;
             setConnectionStatus('Disconnected');
+            addLog('The API closed the session. Final results are in.', 'success');
           }
         }
       } catch (e) {
-        console.error("Polling error", e);
+        console.error('Polling error', e);
       }
       if (shouldPollRef.current) {
         setTimeout(poll, 2000);
@@ -204,7 +266,7 @@ export default function AiGuideClient() {
     setTimeout(poll, 2000);
   };
 
-  // Iframe Message Listener
+  // Messages from the game frame
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
@@ -213,75 +275,65 @@ export default function AiGuideClient() {
       if (typeof eventData === 'string') {
         try {
           eventData = JSON.parse(eventData);
-        } catch (e) { }
+        } catch (e) { /* not JSON */ }
       }
 
       const type = eventData?.type || eventData?.messageType;
 
       let isGameStart = false;
       if (selectedGame === 'hextris') {
-        if (type === 'gameState' && eventData?.data?.gameState === 1) {
-          isGameStart = true;
-        }
+        if (type === 'gameState' && eventData?.data?.gameState === 1) isGameStart = true;
       } else if (selectedGame === '2048') {
-        // 2048 defaults to starting upon load, so we can trigger on the first screenshot 
-        if (
-          type === 'screenshot' ||
-          type === 'skillprint_keydown' ||
-          type === 'skillprint_mousedown'
-        ) {
-          isGameStart = true;
-        }
-      } else {
-        if (
-          type === 'skillprint_keydown' ||
-          type === 'skillprint_mousedown' ||
-          (type === 'gameEvent' && (eventData?.event === 'LEVEL_START' || eventData?.event === 'LEVEL_RESTART'))
-        ) {
-          isGameStart = true;
-        }
+        if (type === 'screenshot' || type === 'skillprint_keydown' || type === 'skillprint_mousedown') isGameStart = true;
+      } else if (
+        type === 'skillprint_keydown' ||
+        type === 'skillprint_mousedown' ||
+        (type === 'gameEvent' && (eventData?.event === 'LEVEL_START' || eventData?.event === 'LEVEL_RESTART'))
+      ) {
+        isGameStart = true;
       }
 
       if (isGameStart && !sessionStartedRef.current && !sessionFailedRef.current && clientRef.current && sessionId) {
         sessionStartedRef.current = true;
         setIsSessionStarted(true);
+        setStartedAt(Date.now());
         try {
-          const serverSlug = mapLocalGameSlugToServerGameSlug(selectedGame);
-          await clientRef.current.startSession(sessionId, selectedMood, serverSlug);
+          await clientRef.current.startSession(sessionId, selectedMood, mapLocalGameSlugToServerGameSlug(selectedGame));
           shouldPollRef.current = true;
           pollSessionResults(clientRef.current, sessionId);
         } catch (e) {
           console.error('Failed to start session', e);
           sessionStartedRef.current = false;
           setIsSessionStarted(false);
+          setStartedAt(null);
           sessionFailedRef.current = true;
+          addLog('The session could not be opened with the API.', 'error');
         }
       }
 
       if (type === 'screenshot' && clientRef.current && sessionId && sessionStartedRef.current) {
         if (sessionEndedRef.current) return;
         try {
-          // Some games send dataUrl directly, some nest it in data.dataUrl, some send it as data
           const base64String = eventData.dataUrl || eventData.data?.dataUrl || eventData.data;
-
           if (!base64String || typeof base64String !== 'string') {
             console.warn('Invalid screenshot data format received:', eventData);
             return;
           }
-
+          setFramesCaptured(n => n + 1);
           clientRef.current.setLastScreenshotDataURI(base64String);
           const res = await fetch(base64String);
           const blob = await res.blob();
           clientRef.current.postScreenshots(sessionId, [blob]);
         } catch (e) {
-          console.error("Failed to process screenshot", e);
+          console.error('Failed to process screenshot', e);
         }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [sessionId, selectedGame]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, selectedGame, selectedMood]);
 
   const handleIframeLoad = () => {
     if (iframeRef.current) {
@@ -293,349 +345,595 @@ export default function AiGuideClient() {
       }
       iframeRef.current.contentWindow?.postMessage({ type: 'GAME_RESUME' }, '*');
     }
+    setGameLoaded(true);
+    addLog(`${game.name} loaded in the frame. The session opens with the API when play starts.`);
+  };
+
+  const handleStart = (event: React.FormEvent) => {
+    event.preventDefault();
+    setConsoleOpen(true);
+    addLog(`Console opened for ${game.name}, target ${targetLabel}.`);
   };
 
   const handleEndGame = async () => {
     setIsSessionEnded(true);
     sessionEndedRef.current = true;
-
+    addLog('Ending the session: sending the final batch.', 'success');
     if (clientRef.current && sessionId) {
       try {
         await clientRef.current.postScreenshots(sessionId, [], true);
       } catch (e) {
         console.error('Failed to post final screenshot chunk', e);
+        addLog('The final batch could not be sent.', 'error');
       }
     }
   };
 
-  const getAdjustmentTrend = (adj: Adjustment, index: number) => {
+  const handleExit = () => {
+    shouldPollRef.current = false;
+    setConsoleOpen(false);
+    setRunKey(k => k + 1);
+  };
+
+  const copySessionId = async () => {
+    try {
+      await navigator.clipboard.writeText(sessionId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (e) {
+      console.error('Could not copy the session id', e);
+    }
+  };
+
+  const isLight = theme === 'light';
+  const toggleTheme = () => setTheme(isLight ? 'dark' : 'light');
+
+  // ---- Derived readouts --------------------------------------------------
+
+  const targetLabel = useMemo(() => {
+    const mood = gameMetadata?.moods?.find((m: any) => m.slug === selectedMood);
+    if (mood) return mood.name as string;
+    const skill = gameMetadata?.skills?.find((s: any) => s.slug === selectedMood);
+    if (skill) return skill.name as string;
+    return selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1);
+  }, [gameMetadata, selectedMood]);
+
+  const skillNames = useMemo(() => {
+    const names: Record<string, string> = {};
+    (gameMetadata?.skills || []).forEach((s: any) => {
+      names[s.slug] = s.name;
+      names[s.slug.replace(/-/g, '_')] = s.name;
+    });
+    return names;
+  }, [gameMetadata]);
+
+  const metrics = skillScores?.metrics;
+  const skillKeys = useMemo(() => Object.keys(metrics || {}), [metrics]);
+  const activeSkill = selectedSkill && skillKeys.includes(selectedSkill) ? selectedSkill : skillKeys[0] || '';
+
+  let sessionStatus: 'Not started' | 'Open' | 'Closing' | 'Closed' = 'Not started';
+  if (isSessionClosedOnBackend) sessionStatus = 'Closed';
+  else if (isSessionEnded) sessionStatus = 'Closing';
+  else if (isSessionStarted) sessionStatus = 'Open';
+
+  const live = !consoleOpen
+    ? { label: 'Idle', tone: 'neutral' }
+    : sessionStatus === 'Open'
+      ? { label: 'Live', tone: 'success' }
+      : sessionStatus === 'Closing'
+        ? { label: 'Closing', tone: 'warning' }
+        : sessionStatus === 'Closed'
+          ? { label: 'Closed', tone: 'neutral' }
+          : { label: 'Waiting for play', tone: 'neutral' };
+
+  const stageStatus =
+    sessionStatus === 'Open'
+      ? { tone: 'success', text: 'Session open. Frames are going to the scoring API.' }
+      : sessionStatus === 'Closing'
+        ? { tone: 'info', text: 'Final batch sent. Waiting for the API to close the session.' }
+        : sessionStatus === 'Closed'
+          ? { tone: 'success', text: 'Session closed. Final results are displayed.' }
+          : sessionFailedRef.current
+            ? { tone: 'danger', text: 'The session could not be opened with the API.' }
+            : { tone: 'info', text: gameLoaded ? 'Start playing to open the session.' : 'Loading the game.' };
+
+  const latestAdjustment = adjustments[0];
+  const uniqueParameters = useMemo(
+    () => adjustments.filter((adj, index, self) => index === self.findIndex(a => a.parameterName === adj.parameterName)),
+    [adjustments],
+  );
+  const activeParameter = selectedParameter && uniqueParameters.some(p => p.parameterName === selectedParameter)
+    ? selectedParameter
+    : uniqueParameters[0]?.parameterName || null;
+
+  const parameterTrend = (adj: Adjustment) => {
+    const index = adjustments.indexOf(adj);
     const prev = adjustments.slice(index + 1).find(a => a.parameterName === adj.parameterName);
-    let arrow = '→';
-    let color = 'var(--mint-400)';
-
-    if (prev) {
-      const currentVal = typeof adj.parameterValue === 'string' ? parseFloat(adj.parameterValue) : Number(adj.parameterValue);
-      const prevVal = typeof prev.parameterValue === 'string' ? parseFloat(prev.parameterValue) : Number(prev.parameterValue);
-      if (!isNaN(currentVal) && !isNaN(prevVal)) {
-        if (currentVal > prevVal) {
-          arrow = '↑';
-          color = 'var(--mint-400)';
-        } else if (currentVal < prevVal) {
-          arrow = '↓';
-          color = 'var(--error-400)';
-        } else {
-          arrow = '→';
-          color = 'var(--ui-muted)';
-        }
-      }
-    }
-    return { arrow, color };
+    if (!prev) return 'flat' as const;
+    const cur = Number(adj.parameterValue);
+    const before = Number(prev.parameterValue);
+    if (!Number.isFinite(cur) || !Number.isFinite(before)) return 'flat' as const;
+    return cur > before ? ('up' as const) : cur < before ? ('down' as const) : ('flat' as const);
   };
 
-  let sessionStatus = 'Not Started';
-  if (isSessionClosedOnBackend) {
-    sessionStatus = 'Closed';
-  } else if (isSessionEnded) {
-    sessionStatus = 'Closing';
-  } else if (isSessionStarted) {
-    sessionStatus = 'Open';
-  }
+  const parameterData = useMemo(() => {
+    if (!activeParameter) return [];
+    return adjustments
+      .filter(a => a.parameterName === activeParameter)
+      .sort((a, b) => new Date(a.createDate).getTime() - new Date(b.createDate).getTime())
+      .map(a => ({ time: formatClock(a.createDate), value: Number(a.parameterValue) || 0 }));
+  }, [adjustments, activeParameter]);
 
-  let statusColor = '#9ca3af'; // gray-400
-  if (sessionStatus === 'Open') statusColor = '#4ade80'; // green-400 (mint)
-  else if (sessionStatus === 'Closing') statusColor = '#eab308'; // yellow-500
+  const flowData = useMemo(
+    () => moodScoresHistory.map(h => ({
+      time: formatClock(h.timestamp),
+      flow: Math.round(toPercent(h.scores.flowScore)),
+      confidence: Math.round(toPercent(h.scores.confidence)),
+    })),
+    [moodScoresHistory],
+  );
+
+  const skillData = useMemo(() => {
+    if (!activeSkill) return [];
+    return skillScoresHistory.map(h => {
+      const m = h.scores.metrics?.[activeSkill];
+      return {
+        time: formatClock(h.timestamp),
+        score: Math.round(toPercent(m?.score)),
+        trend: Math.round(toPercentDelta(m?.trend, m?.score) * 10) / 10,
+        confidence: Math.round(toPercent(m?.confidence)),
+      };
+    });
+  }, [skillScoresHistory, activeSkill]);
+
+  const lastScoredAt = skillScores?.analyzedAt ? formatClock(skillScores.analyzedAt) : null;
+  const duration = startedAt ? formatDuration((closedAt ?? now) - startedAt) : '—';
+  const environment = apiHost();
+
+  const gameArt = (
+    <img className="aa-stage__art" src={game.art} width={380} height={210} alt="" />
+  );
 
   return (
-    <div className="page scrollbar-subtle page--portal margin-none text-default font-ui leading-base min-h-screen bg-gray-900" data-theme="dark">
-      <div className="portal-app w-full max-w-none px-4 md:px-8 py-8">
-        <header className="mb-8 border-b border-gray-700 pb-4 flex justify-between items-center">
-          <div>
-            <h1 className="font-bold text-blue-400" style={{ fontSize: '2rem' }}>AI Guide</h1>
-            <p className="text-gray-400 mt-2">Diagnostic environment for game adjustments and AI interaction.</p>
+    <div className="page--adaptive-assist" data-skillprint-page="adaptive-assist" data-session-state={consoleOpen ? 'live' : 'idle'}>
+      <a className="skip-link" href="#dashboard">Skip to the dashboard</a>
+
+      <header className="sp-nav sp-nav--sticky aa-topbar">
+        <div className="sp-nav__inner">
+          <a className="sp-nav__brand sp-nav__brand--labelled" href="/labs/ai_guide" aria-label="Skillprint AI Guide">
+            <img className="brand-logo brand-logo--dark" src="/assets/logos/skillprint-logo-developer-dark.svg" width={168} height={34} alt="Skillprint" />
+            <img className="brand-logo brand-logo--light" src="/assets/logos/skillprint-logo-developer-light.svg" width={168} height={34} alt="Skillprint" />
+            <span className="sp-nav__divider" aria-hidden="true" />
+            <span className="sp-page-label sp-page-label--nav">AI Guide</span>
+          </a>
+          <div className="sp-nav__actions">
+            <span className="ui-badge ui-badge--pill ui-badge--md ui-badge--leading aa-live" data-badge-tone={live.tone} role="status">
+              <span className="ui-badge__dot" aria-hidden="true" />
+              <span>{live.label}</span>
+            </span>
+            <button className="icon-button" type="button" onClick={toggleTheme} aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'} title="Toggle colour mode">
+              <ConsoleIcon name={isLight ? 'moon' : 'sun'} />
+            </button>
           </div>
+        </div>
+      </header>
 
-          <div className="flex flex-col items-center">
-            <h2 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Select Game</h2>
-            <div className="flex items-center gap-4 bg-gray-800 border border-gray-700 rounded-lg p-1 pr-3 shadow-sm">
-              <img
-                src={`/images/activities/covers/${selectedGame === 'hextris' ? 'Hextris' : selectedGame}.png`}
-                alt={selectedGame}
-                className="w-8 h-8 rounded"
-                style={{ objectFit: 'cover' }}
-              />
-              <select
-                className="bg-transparent text-white text-lg font-bold h-8 outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                value={selectedGame}
-                onChange={(e) => setSelectedGame(e.target.value)}
-                disabled={isSessionStarted}
-              >
-                <option value="hextris">Hextris</option>
-                <option value="box-tower">Box Tower</option>
-                <option value="2048">2048</option>
-              </select>
-            </div>
-          </div>
+      <main className="aa-main" id="top">
+        <div className="aa-container" id="dashboard">
+          <h1 className="sr-only">AI Guide</h1>
 
-          <div className="flex items-center gap-6 text-sm bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
-            <div className="flex flex-col">
-              <span className="text-gray-500 text-xs mb-1 uppercase tracking-wider font-semibold">Target</span>
-              <select
-                className="bg-transparent font-medium uppercase outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ color: 'var(--violet-400)' }}
-                value={selectedMood}
-                onChange={(e) => setSelectedMood(e.target.value)}
-                disabled={isSessionStarted || (!gameMetadata?.moods && !gameMetadata?.skills)}
-              >
-                {!gameMetadata ? (
-                  <option value={selectedMood} className="bg-gray-800 text-white">Loading...</option>
-                ) : (
-                  <>
-                    {gameMetadata.moods && gameMetadata.moods.length > 0 && (
-                      <optgroup label="Moods" className="bg-gray-900 text-gray-400 font-bold">
-                        {gameMetadata.moods.map((mood: any) => (
-                          <option key={mood.slug} value={mood.slug} className="bg-gray-800 text-white font-normal">
-                            {mood.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                    {gameMetadata.skills && gameMetadata.skills.length > 0 && (
-                      <optgroup label="Skills" className="bg-gray-900 text-gray-400 font-bold">
-                        {gameMetadata.skills.map((skill: any) => (
-                          <option key={skill.slug} value={skill.slug} className="bg-gray-800 text-white font-normal">
-                            {skill.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </>
-                )}
-              </select>
-            </div>
-            <div className="w-px h-8 bg-gray-700"></div>
-            <div className="flex flex-col">
-              <span className="text-gray-500 text-xs mb-1 uppercase tracking-wider font-semibold">Session ID</span>
-              <span className="font-mono text-gray-300" style={{ fontSize: '0.75rem' }}>{sessionId || 'Initializing...'}</span>
-            </div>
-            <div className="w-px h-8 bg-gray-700"></div>
-            <div className="flex flex-col">
-              <span className="text-gray-500 text-xs mb-1 uppercase tracking-wider font-semibold">Status</span>
-              <span className="flex items-center gap-2" style={{ color: statusColor }}>
-                <span className="relative flex h-2 w-2">
-                  {sessionStatus === 'Open' && (
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: statusColor }}></span>
-                  )}
-                  <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: statusColor }}></span>
-                </span>
-                {sessionStatus}
-              </span>
-            </div>
-          </div>
-        </header>
+          {/* Idle: the start panel */}
+          {!consoleOpen && (
+            <section className="aa-start" aria-labelledby="startTitle">
+              <form className="sp-card" onSubmit={handleStart} noValidate>
+                <CardHead as="h2" id="startTitle" icon="play" title="Start a session">
+                  <span className="ui-badge ui-badge--pill" data-badge-tone="brand">{game.name}</span>
+                </CardHead>
+                <div className="aa-card__body">
+                  <p className="aa-start__lede">
+                    Play while Skillprint watches. Every second a frame of the game goes to the scoring API, which sends back skill and flow scores and adjusts the game as you play.
+                  </p>
 
-        <div className="flex justify-between gap-8 w-full items-start">
-
-          {/* Left Column: Parameter Adjustments */}
-          <aside className="w-[350px] flex-shrink-0 flex flex-col gap-8">
-            {/* Parameter Adjustments Panel */}
-            <div className="sp-card card--interactive relative overflow-visible p-4 flex flex-col mt-3" style={{ maxHeight: '812px' }}>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 text-gray-200 text-[10px] font-bold px-3 py-1 uppercase tracking-wider rounded-full z-30 border border-gray-700 shadow-md whitespace-nowrap">
-                Parameter Adjustments
-              </div>
-              <div className="layout-grid gap-md overflow-y-auto pr-2 scrollbar-subtle flex-grow mt-4 relative">
-                {selectedParameter ? (
-                  <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-violet-400 capitalize">{selectedParameter} Trend</h3>
-                      <button
-                        onClick={() => setSelectedParameter(null)}
-                        className="text-xs font-semibold text-gray-400 hover:text-white transition-colors uppercase tracking-wider bg-gray-800 px-2 py-1 rounded border border-gray-700 hover:bg-gray-700"
+                  <div className="aa-start__fields">
+                    <div className="field">
+                      <label htmlFor="aaGame">Game</label>
+                      <select id="aaGame" value={selectedGame} onChange={e => setSelectedGame(e.target.value)}>
+                        {GAMES.map(g => <option key={g.slug} value={g.slug}>{g.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label htmlFor="aaTarget">Target</label>
+                      <select
+                        id="aaTarget"
+                        value={selectedMood}
+                        onChange={e => setSelectedMood(e.target.value)}
+                        disabled={!gameMetadata?.moods && !gameMetadata?.skills}
                       >
-                        ← Back
+                        {!gameMetadata ? (
+                          <option value={selectedMood}>Loading…</option>
+                        ) : (
+                          <>
+                            {gameMetadata.moods?.length > 0 && (
+                              <optgroup label="Moods">
+                                {gameMetadata.moods.map((mood: any) => <option key={mood.slug} value={mood.slug}>{mood.name}</option>)}
+                              </optgroup>
+                            )}
+                            {gameMetadata.skills?.length > 0 && (
+                              <optgroup label="Skills">
+                                {gameMetadata.skills.map((skill: any) => <option key={skill.slug} value={skill.slug}>{skill.name}</option>)}
+                              </optgroup>
+                            )}
+                          </>
+                        )}
+                      </select>
+                    </div>
+                  </div>
+
+                  <details className="aa-key-box">
+                    <summary className="aa-key-box__summary">
+                      <span className="aa-key-box__title"><ConsoleIcon name="key" />API key</span>
+                      <span className="aa-key-box__state">Using the key from this build&apos;s environment</span>
+                      <span className="aa-tech__action"><span>Show</span><ConsoleIcon name="chevron-down" className="aa-tech__chevron" /></span>
+                    </summary>
+                    <div className="field aa-key">
+                      <label htmlFor="apiKey" className="sr-only">API key</label>
+                      <div className="aa-key__control">
+                        <input id="apiKey" type={keyShown ? 'text' : 'password'} value={getApiKey()} readOnly autoComplete="off" spellCheck={false} />
+                        <button
+                          className="button button--secondary button--icon-only button--md aa-key__reveal"
+                          type="button"
+                          onClick={() => setKeyShown(v => !v)}
+                          aria-pressed={keyShown}
+                          aria-label={keyShown ? 'Hide API key' : 'Show API key'}
+                          title="Show or hide the key"
+                        >
+                          <ConsoleIcon name={keyShown ? 'eye-off' : 'eye'} className="sp-icon--sm" />
+                        </button>
+                      </div>
+                      <p className="aa-field__hint">
+                        Sent as <code className="inline-code">Authorization: Api-Key …</code> on every request to <span className="aa-mono">{environment}</span>. Set with <code className="inline-code">NEXT_PUBLIC_API_KEY</code>.
+                      </p>
+                    </div>
+                  </details>
+
+                  <div className="sp-alert sp-alert--compact" data-alert-tone="info" role="status" aria-live="polite">
+                    <ConsoleIcon name="info" className="sp-icon--sm sp-alert__icon" />
+                    <div className="sp-alert__body">
+                      <p className="sp-alert__text">Ready to start {game.name} with the target {targetLabel}. The session opens with the API the moment play begins.</p>
+                    </div>
+                  </div>
+
+                  <button className="button button--primary button--lg full-width" type="submit">
+                    <ConsoleIcon name="play" />Start {game.name}
+                  </button>
+                </div>
+              </form>
+
+              <aside className="sp-card" aria-labelledby="loopTitle">
+                <CardHead as="h2" id="loopTitle" icon="bolt" title="What happens when you press Start" />
+                <ol className="aa-loop">
+                  <li><span><strong>Play</strong>{game.name} opens beside the live scores. {game.hint}</span></li>
+                  <li><span><strong>Capture</strong>One frame a second goes to the scoring API as the game reports it.</span></li>
+                  <li><span><strong>Score</strong>Flow and skill scores fill in as each batch is analysed, usually within a minute.</span></li>
+                  <li><span><strong>Adapt</strong>When the API changes a game parameter, the new value is sent straight into the game.</span></li>
+                </ol>
+                <dl className="aa-kv aa-start__facts">
+                  <div><dt>Game</dt><dd>{serverSlug}</dd></div>
+                  <div><dt>Game frame</dt><dd>{gamePath}</dd></div>
+                  <div><dt>Target</dt><dd>{selectedMood}</dd></div>
+                  <div><dt>Session id</dt><dd>{sessionId || '—'}</dd></div>
+                  <div><dt>API</dt><dd>{environment}</dd></div>
+                </dl>
+              </aside>
+            </section>
+          )}
+
+          {/* Live: the session */}
+          {consoleOpen && (
+            <section className="aa-session" aria-labelledby="sessionTitle">
+              <h2 className="sr-only" id="sessionTitle">Live session</h2>
+
+              <div className="aa-layout">
+                <article className="sp-card aa-stage" aria-labelledby="stageTitle">
+                  <div className="aa-card__head aa-stage__head">
+                    <h3 className="aa-card__title aa-stage__title" id="stageTitle">{gameArt}<span>{game.name}</span></h3>
+                    <div className="aa-card__tools aa-stage__tools">
+                      <span className="ui-badge ui-badge--pill" data-badge-tone="brand">Target · {targetLabel}</span>
+                      <button
+                        className="button button--danger button--sm"
+                        type="button"
+                        onClick={handleEndGame}
+                        disabled={!isSessionStarted || isSessionEnded || connectionStatus !== 'Active'}
+                      >
+                        <ConsoleIcon name="pause" />{isSessionEnded ? 'Session ended' : 'End session'}
+                      </button>
+                      <button className="button button--secondary button--sm aa-stage__exit" type="button" onClick={handleExit}>
+                        <ConsoleIcon name="logout" />Exit game
                       </button>
                     </div>
+                  </div>
 
-                    <div className="flex-grow w-full min-h-[200px]">
-                      {(() => {
-                        const paramHistory = adjustments
-                          .filter(a => a.parameterName === selectedParameter)
-                          .sort((a, b) => new Date(a.createDate).getTime() - new Date(b.createDate).getTime());
-
-                        return paramHistory.length > 0 ? (
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={paramHistory.map(h => ({
-                              time: new Date(h.createDate).toLocaleTimeString(),
-                              value: typeof h.parameterValue === 'string' ? parseFloat(h.parameterValue) || 0 : Number(h.parameterValue) || 0
-                            }))}>
-                              <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: '#6b7280' }} width={30} />
-                              <Tooltip
-                                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '4px', fontSize: '12px', color: '#fff' }}
-                                itemStyle={{ color: '#a78bfa', fontWeight: 'bold' }}
-                                labelStyle={{ color: '#9ca3af', marginBottom: '4px' }}
-                              />
-                              <Line
-                                type="linear"
-                                dataKey="value"
-                                stroke="#a78bfa"
-                                strokeWidth={2}
-                                dot={(props: any) => {
-                                  const isLast = props.index === paramHistory.length - 1;
-                                  if (isLast && isSessionClosedOnBackend) {
-                                    return <circle key={props.index} cx={props.cx} cy={props.cy} r={4} fill="#fbbf24" stroke="#f59e0b" strokeWidth={1} />;
-                                  }
-                                  if (props.index % 5 === 0 || isLast) {
-                                    return <circle key={props.index} cx={props.cx} cy={props.cy} r={1.5} fill={props.stroke} stroke="none" />;
-                                  }
-                                  return null;
-                                }}
-                                activeDot={{ r: 3, fill: '#a78bfa' }}
-                                isAnimationActive={true}
-                                animateNewValues={true}
-                                animationDuration={100}
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-gray-500 text-xs italic">
-                            Waiting for trend data...
-                          </div>
-                        );
-                      })()}
+                  <div className="aa-stage__bar" role="region" aria-label="Session counters">
+                    <dl className="aa-stats">
+                      <div className="aa-stat" title="Frames captured from the game, one a second">
+                        <dt><ConsoleIcon name="camera" />Frames captured</dt><dd>{framesCaptured}</dd>
+                      </div>
+                      <div className="aa-stat" title="Score readings the API has returned for this session">
+                        <dt>Score updates</dt><dd>{skillScoresHistory.length}<small>{skillKeys.length} skills</small></dd>
+                      </div>
+                      <div className="aa-stat" title="Game parameters the API has changed during this session">
+                        <dt>Game adjustments</dt><dd>{adjustments.length}</dd>
+                      </div>
+                    </dl>
+                    <div className="aa-status" data-alert-tone={stageStatus.tone} role="status" aria-live="polite">
+                      <ConsoleIcon name={stageStatus.tone === 'danger' ? 'error' : stageStatus.tone === 'success' ? 'success' : 'info'} />
+                      <span>{stageStatus.text}</span>
+                    </div>
+                    <div className="aa-stage__links">
+                      <span className="ui-badge ui-badge--pill ui-badge--leading" data-badge-tone={gameLoaded ? 'success' : 'neutral'}>
+                        <span className="ui-badge__dot" aria-hidden="true" />
+                        <span>{gameLoaded ? 'Game ready' : 'Game loading'}</span>
+                      </span>
+                      <a className="button button--tertiary button--xs" href={gamePath} target="_blank" rel="noopener">
+                        Open game<ConsoleIcon name="external" />
+                      </a>
                     </div>
                   </div>
-                ) : (
-                  <>
-                    {adjustments.length === 0 ? (
-                      <p className="text-muted font-sm italic margin-none">No adjustments received yet.</p>
-                    ) : (
-                      <div className="layout-grid gap-2">
-                        {adjustments
-                          .filter((adj, index, self) => index === self.findIndex(a => a.parameterName === adj.parameterName))
-                          .map((adj) => {
-                            const originalIndex = adjustments.indexOf(adj);
-                            const { arrow, color } = getAdjustmentTrend(adj, originalIndex);
-                            return (
-                              <div
-                                key={adj.parameterName}
-                                onClick={() => setSelectedParameter(adj.parameterName)}
-                                className="sp-panel tone tone--violet px-3 py-2 radius-compact opacity-90 flex justify-between items-center cursor-pointer hover:opacity-100 hover:bg-violet-900/20 transition-all border border-transparent hover:border-violet-500/30"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="font-mono text-sm font-semibold">{adj.parameterName}</span>
-                                </div>
-                                <span className="font-semibold text-sm font-mono" style={{ color }}>{arrow} {adj.parameterValue}</span>
-                              </div>
-                            );
-                          })
-                        }
+
+                  <div className="aa-stage__frame aa-stage__frame--phone">
+                    <iframe ref={iframeRef} onLoad={handleIframeLoad} src={gamePath} title={`${game.name} game`} allowFullScreen />
+                    {isSessionEnded && (
+                      <div className="aa-stage__veil" data-state={isSessionClosedOnBackend ? 'closed' : 'closing'}>
+                        <div className="aa-stage__ready">
+                          {!isSessionClosedOnBackend ? (
+                            <>
+                              <span className="button button--secondary button--sm" aria-busy="true">Processing the final batch</span>
+                              <span className="aa-stage__ready-hint">Waiting for the API to return the final results.</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="button button--secondary button--sm">Session ended</span>
+                              <span className="aa-stage__ready-hint">Final results are displayed.</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     )}
-                  </>
-                )}
-              </div>
-            </div>
+                  </div>
 
-            {/* SDK Logs Panel */}
-            <div className="sp-card card--interactive relative overflow-visible p-4 flex flex-col max-h-[400px] mt-3">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 text-gray-200 text-[10px] font-bold px-3 py-1 uppercase tracking-wider rounded-full z-30 border border-gray-700 shadow-md whitespace-nowrap">
-                SDK Logs
-              </div>
-              <div className="overflow-y-auto flex-grow scrollbar-subtle pr-2 bg-gray-900 rounded p-2 border border-gray-800 mt-4">
-                {logs.length === 0 && (
-                  <p className="text-muted font-sm italic margin-none p-2">Waiting for SDK events...</p>
-                )}
-                <table className="w-full text-xs font-mono text-left" style={{ borderSpacing: '0 4px', borderCollapse: 'separate' }}>
-                  <tbody>
-                    {logs.slice().sort((a, b) => b.timestamp - a.timestamp).map((log, i) => (
-                      <tr key={i} className="align-top">
-                        <td className="pr-3 whitespace-nowrap text-gray-500">{log.time}</td>
-                        <td className="pr-3 whitespace-nowrap align-middle">
-                          <div
-                            className={`w-2 h-2 rounded-full inline-block ${log.level === 'error' ? 'bg-red-500' : log.level === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'}`}
-                            title={log.level.toUpperCase()}
-                          />
-                        </td>
-                        <td className="text-gray-300 break-words">{log.message}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </aside>
+                  <div className="aa-stage__foot">
+                    <span className="aa-stage__hint">{game.hint} The game changes as the API sends new settings.</span>
+                    <span className={latestAdjustment ? 'aa-adjust is-fresh' : 'aa-adjust'} title="The latest game setting the API changed">
+                      <span className="ui-label">Latest change</span>
+                      <span className="aa-adjust__text">{latestAdjustment ? `${latestAdjustment.parameterName} → ${latestAdjustment.parameterValue}` : 'None yet'}</span>
+                      {latestAdjustment && <span className="aa-adjust__time">{formatClock(latestAdjustment.createDate)}</span>}
+                    </span>
+                  </div>
+                </article>
 
-          {/* Middle Column: Game Frame */}
-          <div className="flex-shrink-0 flex flex-col items-center mt-3">
-            <div className="relative">
-              <div className="relative w-[375px] h-[812px] bg-black rounded-xl overflow-hidden shadow-2xl flex-shrink-0" style={{ outline: '1px solid var(--border-subtle)', transform: 'scale(1)' }}>
-                {isSessionEnded && (
-                  <div className="absolute inset-0 bg-black/60 z-20 flex items-center justify-center backdrop-blur-[2px]">
-                    <div className="text-center p-4 bg-gray-900/80 rounded-lg border border-gray-700">
-                      {!isSessionClosedOnBackend ? (
-                        <>
-                          <h3 className="text-white text-xl font-bold mb-2 flex items-center justify-center gap-2">
-                            <span className="relative flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                            </span>
-                            Processing...
-                          </h3>
-                          <p className="text-gray-300 text-sm">Waiting for final results.</p>
-                        </>
+                <aside className="sp-card aa-panel" aria-labelledby="scoresTitle">
+                  <CardHead id="scoresTitle" icon="trending" title="Live scores">
+                    <span className="ui-badge ui-badge--pill">{skillKeys.length} {skillKeys.length === 1 ? 'skill' : 'skills'}</span>
+                  </CardHead>
+                  <CardLede>What the scoring API reads from the play, updated as each batch of frames is scored. Scores run from 0 to 100.</CardLede>
+                  <FlowHero flowScore={moodScores?.flowScore} confidence={moodScores?.confidence} targetLabel={targetLabel} hasReading={!!moodScores} />
+                  <div className="aa-skill-list__head" aria-hidden="true"><span>Skill</span><span>Score</span><span>Trend</span></div>
+                  <SkillList metrics={metrics} names={skillNames} flash={flash} />
+                  <CardNote>{lastScoredAt ? `Last scored at ${lastScoredAt} after ${skillScores?.numChunksAnalyzed ?? 0} batches.` : 'Nothing scored yet.'}</CardNote>
+                </aside>
+              </div>
+
+              <div className="aa-details">
+                <article className="sp-card aa-speed" aria-labelledby="paramsTitle">
+                  <CardHead id="paramsTitle" icon="adjust" title="Parameter adjustments">
+                    <span className="ui-badge ui-badge--pill">{adjustments.length} {adjustments.length === 1 ? 'change' : 'changes'}</span>
+                  </CardHead>
+                  <CardLede>Game settings the API has changed during this session. Pick a parameter to see how it moved.</CardLede>
+                  <div className="aa-speed__body">
+                    <dl className="aa-speed__stats">
+                      <div><dt>Latest</dt><dd>{latestAdjustment ? `${latestAdjustment.parameterValue}` : '—'}</dd></div>
+                      <div><dt>Parameters changed</dt><dd>{uniqueParameters.length}</dd></div>
+                    </dl>
+                    {uniqueParameters.length === 0 ? (
+                      <div className="aa-chart">
+                        <p className="aa-chart__empty">The API has not changed any game parameter yet.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="aa-param-list" role="group" aria-label="Parameters changed">
+                          {uniqueParameters.map(adj => {
+                            const key = parameterTrend(adj);
+                            return (
+                              <button
+                                key={adj.parameterName}
+                                type="button"
+                                className="aa-param-row"
+                                aria-pressed={activeParameter === adj.parameterName}
+                                onClick={() => setSelectedParameter(adj.parameterName)}
+                              >
+                                <span className="aa-param-row__name">{adj.parameterName}</span>
+                                <span className="aa-param-row__value aa-trend" data-trend={key}>
+                                  <ConsoleIcon name={TREND_GLYPH[key]} />{String(adj.parameterValue)}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <TrendChart data={parameterData} series={PARAM_SERIES} isClosed={isSessionClosedOnBackend} emptyText="Waiting for changes to this parameter." />
+                      </>
+                    )}
+                  </div>
+                </article>
+
+                <article className="sp-card aa-analysis" aria-labelledby="trendsTitle">
+                  <CardHead id="trendsTitle" icon="chart" title="Score trends">
+                    <div className="button-group aa-tabs" role="tablist" aria-label="Score trends">
+                      <button
+                        className={trendTab === 'flow' ? 'button-group__item is-current' : 'button-group__item'}
+                        type="button"
+                        role="tab"
+                        id="flowTabButton"
+                        aria-controls="flowTab"
+                        aria-selected={trendTab === 'flow'}
+                        onClick={() => setTrendTab('flow')}
+                      >
+                        Flow state
+                      </button>
+                      <button
+                        className={trendTab === 'skills' ? 'button-group__item is-current' : 'button-group__item'}
+                        type="button"
+                        role="tab"
+                        id="skillsTabButton"
+                        aria-controls="skillsTab"
+                        aria-selected={trendTab === 'skills'}
+                        onClick={() => setTrendTab('skills')}
+                      >
+                        Skills
+                      </button>
+                    </div>
+                  </CardHead>
+                  <CardLede>How the readings moved over the session, one point per scored batch.</CardLede>
+                  {trendTab === 'flow' ? (
+                    <div className="aa-analysis__panel" id="flowTab" role="tabpanel" aria-labelledby="flowTabButton" style={{ padding: 0 }}>
+                      <TrendLegend series={FLOW_SERIES} />
+                      <TrendChart data={flowData} series={FLOW_SERIES} domain={[0, 100]} isClosed={isSessionClosedOnBackend} emptyText="Flow readings appear here after the first scored batch." />
+                    </div>
+                  ) : (
+                    <div className="aa-analysis__panel" id="skillsTab" role="tabpanel" aria-labelledby="skillsTabButton" style={{ padding: 0 }}>
+                      <div className="aa-select-row">
+                        <div className="field">
+                          <label htmlFor="aaSkill" className="sr-only">Skill</label>
+                          <select id="aaSkill" value={activeSkill} onChange={e => setSelectedSkill(e.target.value)} disabled={!skillKeys.length}>
+                            {skillKeys.length === 0 ? <option value="">No skills scored yet</option> : skillKeys.map(k => <option key={k} value={k}>{formatSkillName(k, skillNames)}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <TrendLegend series={SKILL_SERIES} />
+                      <TrendChart data={skillData} series={SKILL_SERIES} isClosed={isSessionClosedOnBackend} emptyText="Skill readings appear here after the first scored batch." />
+                    </div>
+                  )}
+                  <CardNote>{skillScoresHistory.length ? `${skillScoresHistory.length} readings so far.` : 'Waiting for the first scored batch.'}</CardNote>
+                </article>
+
+                <article className="sp-card aa-record" aria-labelledby="recordTitle">
+                  <CardHead id="recordTitle" icon="database" title="This session">
+                    <span className="ui-badge ui-badge--pill" data-badge-tone={sessionStatus === 'Open' ? 'success' : sessionStatus === 'Closing' ? 'warning' : 'neutral'}>{sessionStatus}</span>
+                  </CardHead>
+                  <CardLede>The session as the console tracks it, refreshed with every poll of the API.</CardLede>
+                  <div className="aa-record__id">
+                    <span className="ui-label">Session id</span>
+                    <span className="aa-record__value">
+                      <code className="aa-mono">{sessionId || '—'}</code>
+                      <button className="button button--tertiary button--xs aa-copy" type="button" onClick={copySessionId} aria-label="Copy the session id">
+                        <ConsoleIcon name="copy" /><span>{copied ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </span>
+                  </div>
+                  <dl className="aa-kv aa-record__facts">
+                    <div><dt>Game</dt><dd>{serverSlug}</dd></div>
+                    <div><dt>Target</dt><dd>{selectedMood}</dd></div>
+                    <div><dt>API</dt><dd>{environment}</dd></div>
+                    <div><dt>Connection</dt><dd>{connectionStatus}</dd></div>
+                    <div><dt>Frames captured</dt><dd>{framesCaptured}</dd></div>
+                    <div><dt>Settings changed</dt><dd>{adjustments.length}</dd></div>
+                    <div><dt>Batches scored</dt><dd>{skillScores?.numChunksAnalyzed ?? 0}</dd></div>
+                    <div><dt>Last scored at</dt><dd>{lastScoredAt || '—'}</dd></div>
+                    <div><dt>Started</dt><dd>{startedAt ? formatClock(startedAt) : '—'}</dd></div>
+                    <div><dt>Duration</dt><dd>{duration}</dd></div>
+                  </dl>
+                  <CardNote>Polled from the scoring API every two seconds while the session is open.</CardNote>
+                </article>
+              </div>
+
+              <details className="aa-tech">
+                <summary className="aa-tech__summary">
+                  <span className="aa-tech__title"><ConsoleIcon name="terminal" />Technical details</span>
+                  <span className="aa-tech__meta">For engineers: the full skill table, the latest batch as returned and the SDK log ({logs.length} {logs.length === 1 ? 'entry' : 'entries'})</span>
+                  <span className="aa-tech__action"><span>Expand</span><ConsoleIcon name="chevron-down" className="aa-tech__chevron" /></span>
+                </summary>
+                <div className="aa-tech__body">
+                  <article className="sp-card aa-skills" aria-labelledby="skillsTitle">
+                    <CardHead id="skillsTitle" icon="bolt" title="Skill scores in full">
+                      <span className="aa-card__meta">{lastScoredAt ? `Last scored at ${lastScoredAt}.` : 'Nothing scored yet.'}</span>
+                    </CardHead>
+                    <div className="table-scroll">
+                      <table className="sp-table aa-table">
+                        <thead>
+                          <tr><th scope="col">Skill</th><th scope="col">Score</th><th scope="col">Trend</th><th scope="col">Confidence</th><th scope="col">Consistency</th><th scope="col">Momentum</th><th scope="col">Volatility</th></tr>
+                        </thead>
+                        <tbody>
+                          {skillKeys.length === 0 ? (
+                            <tr className="aa-table__placeholder"><td colSpan={7}>Skill data will appear here after processing…</td></tr>
+                          ) : (
+                            skillKeys
+                              .slice()
+                              .sort((a, b) => toPercent(metrics![b].score) - toPercent(metrics![a].score))
+                              .map(key => {
+                                const m = metrics![key];
+                                const score = toPercent(m.score);
+                                const delta = toPercentDelta(m.trend, m.score);
+                                const t = trendKey(delta);
+                                return (
+                                  <tr key={key} className={flash ? 'is-updated' : undefined}>
+                                    <td className="aa-table__skill">{formatSkillName(key, skillNames)}</td>
+                                    <td data-label="Score">
+                                      <span className="aa-table__score">
+                                        <span>{score.toFixed(1)}</span>
+                                        <span className="sp-progress" aria-hidden="true" style={{ '--progress': `${Math.round(score)}%` } as CSSProperties}>
+                                          <span className="sp-progress__track"><span className="sp-progress__fill" /></span>
+                                        </span>
+                                      </span>
+                                    </td>
+                                    <td data-label="Trend"><span className="aa-trend" data-trend={t}><ConsoleIcon name={TREND_GLYPH[t]} /><span>{delta > 0 ? '+' : ''}{delta.toFixed(1)}</span></span></td>
+                                    <td data-label="Confidence">{toPercent(m.confidence).toFixed(1)}</td>
+                                    <td data-label="Consistency">{toPercent(m.consistency).toFixed(1)}</td>
+                                    <td data-label="Momentum">{Number(m.momentum ?? 0).toFixed(2)}</td>
+                                    <td data-label="Volatility">{Number(m.volatility ?? 0).toFixed(2)}</td>
+                                  </tr>
+                                );
+                              })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </article>
+
+                  <article className="sp-card aa-analysis" aria-labelledby="batchTitle">
+                    <CardHead id="batchTitle" icon="chart" title="Latest batch, as scored" />
+                    <CardLede>The raw flow result the model returned for the most recent batch of frames.</CardLede>
+                    <div className="aa-analysis__panel">
+                      {!moodScores ? (
+                        <p className="aa-placeholder">Flow metrics will appear here after processing…</p>
                       ) : (
-                        <>
-                          <h3 className="text-white text-xl font-bold mb-2">Session Ended</h3>
-                          <p className="text-gray-300 text-sm">Final results are displayed.</p>
-                        </>
+                        <dl className="aa-kv">
+                          <div><dt>Flow score</dt><dd>{Number(moodScores.flowScore ?? 0).toFixed(3)}</dd></div>
+                          <div><dt>Confidence</dt><dd>{Number(moodScores.confidence ?? 0).toFixed(3)}</dd></div>
+                          <div><dt>Target mood</dt><dd>{moodScores.targetMood || selectedMood}</dd></div>
+                          <div><dt>Analysed at</dt><dd>{skillScores?.analyzedAt ? formatClock(skillScores.analyzedAt) : '—'}</dd></div>
+                          <div><dt>Batches analysed</dt><dd>{skillScores?.numChunksAnalyzed ?? 0}</dd></div>
+                        </dl>
                       )}
                     </div>
-                  </div>
-                )}
-                <iframe
-                  ref={iframeRef}
-                  onLoad={handleIframeLoad}
-                  src={mapSlugToGamePath(selectedGame)}
-                  className="w-full h-full border-0 absolute inset-0 z-10"
-                  title={`${selectedGame} Game`}
-                />
-              </div>
-            </div>
+                    <CardNote>The live scores above blend these over the whole session.</CardNote>
+                  </article>
 
-            <div className="w-full max-w-[375px] mt-6 flex justify-center">
-              <button
-                onClick={handleEndGame}
-                disabled={!isSessionStarted || isSessionEnded || connectionStatus !== 'Active'}
-                className={`w-full font-bold py-3 px-4 rounded-lg shadow-lg border transition-all duration-500 uppercase tracking-wider text-sm
-                  ${!isSessionStarted
-                    ? 'bg-gray-800 text-gray-500 border-gray-700 scale-95 opacity-50'
-                    : isSessionEnded
-                      ? 'bg-red-900/50 text-red-200/50 border-red-900 scale-100 cursor-not-allowed'
-                      : 'bg-red-600 hover:bg-red-700 text-white border-red-500 scale-100 shadow-red-900/20 shadow-xl cursor-pointer hover:-translate-y-0.5 active:translate-y-0'
-                  }`}
-              >
-                {isSessionEnded ? 'Session Ended' : 'End Session'}
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: Diagnostics */}
-          <aside className="w-[450px] flex flex-col gap-lg flex-shrink-0" style={{ height: '812px' }}>
-
-            {/* Flow State Module */}
-            <FlowStateModule moodScores={moodScores} moodScoresHistory={moodScoresHistory} isSessionClosed={isSessionClosedOnBackend} />
-
-            {/* Individual Skills Module */}
-            <AnalysisResultsModule 
-              skillScores={skillScores} 
-              skillScoresHistory={skillScoresHistory} 
-              isSessionClosed={isSessionClosedOnBackend} 
-              gameSkills={gameMetadata?.skills}
-            />
-
-          </aside>
-
+                  <AnalysisLog entries={logs} onClear={() => setLogs([])} />
+                </div>
+              </details>
+            </section>
+          )}
         </div>
-      </div>
+      </main>
+
+      <footer className="aa-foot">
+        <div className="aa-foot__inner">
+          <span>© 2026 Skillprint · AI Guide</span>
+          <span className="sp-product-tag" data-product="signal">
+            <span className="sp-product-tag__icon" aria-hidden="true"><ConsoleIcon name="code" /></span>
+            <span className="sp-product-tag__copy"><span className="sp-product-tag__audience">AI Labs</span><span className="sp-product-tag__name">Signal</span></span>
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }

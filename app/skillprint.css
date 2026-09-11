@@ -13628,3 +13628,1986 @@ body.peek-drawer-open {
   .page--portal .brand-logo--dark { display: none !important; }
   .page--portal .brand-logo--light { display: block !important; }
 }
+
+
+/* ============================================================================
+   09 · Unique composition · Live Session Console (labs/ai_guide)
+
+   Ported from the reference build "Skillprint · Live Session Console · Hextris
+   demo" (public/). The page is the portal's furniture - a sticky .sp-nav bar,
+   a main column and a rail - and every panel is .sp-card, .ui-badge, .field,
+   .sp-alert, .sp-progress, .sp-progress-ring, .sp-table, .button-group and
+   .code-block. The page class sits on the page's own wrapper rather than on
+   <body>, so the reference's `html > .page--adaptive-assist` rules are
+   descendant rules here.
+
+   Tokens the portal stylesheet did not yet carry (the code surface, the syntax
+   colours, the nav muted text, the accent text and the marketing text scale)
+   are defined on the page scope below, dark first with the light override.
+   ========================================================================== */
+
+.page--adaptive-assist {
+  --space-104: 104px;
+  --space-1600: 1600px;
+  --text-xxs-line-height: 16px;
+  --text-xs-font-size: 12px;
+  --text-sm-line-height: 20px;
+  --nav-muted: color-mix(in srgb, var(--geistface-grey-200) 72%, transparent);
+  --accent-text: var(--mint);
+  --code-surface: var(--deep-navy-900);
+  --code-raised: var(--panel-navy-950);
+  --code-hover: color-mix(in srgb, var(--deep-navy-900) 82%, var(--panel-navy-950));
+  --code-muted: var(--panel-navy-400);
+  --syntax-keyword: var(--mindset-violet-200);
+  --syntax-inserted: var(--core-green-500);
+  --syntax-deleted: var(--skills-pink-500);
+}
+
+html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist {
+  /* Palette steps the portal copy does not carry, from the reference build. */
+  --deep-navy-50:  #f0f2f8;
+  --deep-navy-500:  #5b6788;
+  --skills-pink-800:  #933360;
+  --nav-muted: color-mix(in srgb, var(--geistface-grey-800) 72%, transparent);
+  --accent-text: var(--personality-mint-900);
+  --code-surface: var(--deep-navy-50);
+  --code-raised: var(--geistface-grey-25);
+  --code-hover: color-mix(in srgb, var(--deep-navy-50) 62%, var(--geistface-grey-25));
+  --code-muted: var(--deep-navy-500);
+  --syntax-keyword: var(--mindset-violet-600);
+  --syntax-inserted: var(--core-green-900);
+  --syntax-deleted: var(--skills-pink-800);
+}
+
+/* --------------------------------------------------------------------------
+   Shared components the portal copy was missing: the top bar's inner
+   structure, the code block's head, inline code, choice controls.
+   -------------------------------------------------------------------------- */
+
+.sp-nav--sticky {
+  position: sticky;
+  top: 0;
+}
+
+.sp-nav__inner {
+  width: min(100%, var(--grid-container-max));
+  min-height: var(--space-64);
+  margin-inline: auto;
+  padding-inline: var(--grid-padding);
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.sp-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
+.sp-nav__actions {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.code-head {
+  min-height: var(--space-44);
+  padding: var(--space-10)
+    var(--space-12)
+    var(--space-10)
+    var(--space-16);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-18);
+  border-bottom: 1px solid var(--code-border);
+  background: var(--code-surface);
+  color: var(--code-muted);
+  font-family: var(--skillprint-font-mono);
+  font-size: var(--text-xs-font-size);
+  line-height: var(--text-xxs-line-height);
+}
+
+.code-head button {
+  padding: var(--space-6) var(--space-10);
+  border: 1px solid var(--code-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--code-raised);
+  color: var(--code-text);
+  font-family: var(--skillprint-font-ui);
+  font-size: var(--text-xs-font-size);
+  line-height: var(--text-xxs-line-height);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: var(--transition-interactive);
+}
+
+.code-head button:hover {
+  border-color: var(--code-border-hover);
+  background: var(--code-hover);
+}
+
+.inline-code {
+  padding: var(--space-2) var(--space-6);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-xs);
+  background: var(--code-surface);
+  color: var(--code-text);
+  font-family: var(--skillprint-font-mono);
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+:is(.radio-option, .check-option) {
+  --choice-size: var(--icon-size-xs);
+  --choice-mark: var(--space-6);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--choice-size) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-8);
+  max-width: 100%;
+  color: var(--surface-text);
+  cursor: pointer;
+}
+
+:is(.radio-input, .check-input) {
+  position: absolute;
+  z-index: 1;
+  top: var(--space-2);
+  left: 0;
+  width: var(--choice-size);
+  height: var(--choice-size);
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+:is(.radio-control, .check-control) {
+  position: relative;
+  width: var(--choice-size);
+  height: var(--choice-size);
+  margin-top: var(--space-2);
+  border: 1px solid var(--surface-border-hover);
+  background: var(--surface-box);
+  transition: var(--transition-interactive);
+}
+
+.check-control {
+  border-radius: var(--radius-xs);
+}
+
+:is(.radio-control, .check-control)::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.check-control::after {
+  width: var(--space-10);
+  height: var(--space-6);
+  border-left: var(--space-2) solid var(--geistface-grey-25);
+  border-bottom: var(--space-2) solid var(--geistface-grey-25);
+  transform: translate(-50%, -62%) rotate(-45deg) scale(0.4);
+}
+
+:is(.radio-copy, .check-copy) {
+  min-width: 0;
+  display: grid;
+}
+
+:is(
+  .radio-option:hover,
+  .radio-option.is-hover,
+  .check-option:hover,
+  .check-option.is-hover
+) :is(.radio-control, .check-control) {
+  border-color: var(--mindset-violet-400);
+  background: var(--surface-raised);
+}
+
+:is(
+  .radio-input:checked + .radio-control,
+  .radio-option.is-checked .radio-control,
+  .check-input:checked + .check-control,
+  .check-option.is-checked .check-control
+) {
+  border-color: var(--mindset-violet-500);
+  background: var(--mindset-violet-500);
+}
+
+:is(
+  .check-input:checked + .check-control,
+  .check-option.is-checked .check-control
+)::after {
+  opacity: 1;
+  transform: translate(-50%, -62%) rotate(-45deg) scale(1);
+}
+
+:is(.radio-input, .check-input):active
++ :is(.radio-control, .check-control) {
+  transform: scale(0.94);
+}
+
+:is(
+  .radio-input:focus-visible + .radio-control,
+  .radio-option.is-focus .radio-control,
+  .check-input:focus-visible + .check-control,
+  .check-option.is-focus .check-control
+) {
+  box-shadow:
+    0 0 0 var(--focus-ring-width) var(--focus-inner),
+    0 0 0 calc(var(--focus-ring-width) * 2) var(--focus-default);
+}
+
+:is(
+  .radio-input:disabled + .radio-control,
+  .radio-option.is-disabled .radio-control,
+  .check-input:disabled + .check-control,
+  .check-option.is-disabled .check-control
+) {
+  border-color: var(--surface-border);
+  background: var(--surface-raised);
+}
+
+:is(
+  .radio-input:disabled ~ .radio-copy,
+  .radio-option.is-disabled .radio-copy,
+  .check-input:disabled ~ .check-copy,
+  .check-option.is-disabled .check-copy
+) {
+  color: var(--surface-text-muted);
+  opacity: 0.58;
+}
+
+:is(
+  .radio-option:has(.radio-input:disabled),
+  .radio-option.is-disabled,
+  .check-option:has(.check-input:disabled),
+  .check-option.is-disabled
+) {
+  cursor: not-allowed;
+}
+
+
+
+/* The skip link. Parked above the viewport and slid in on focus, so it reaches
+   keyboard users without showing as stray text for everyone else. Shared by
+   every surface that carries one, the marketing site included. */
+.page--adaptive-assist .skip-link {
+  position: fixed;
+  left: var(--space-16);
+  top: var(--space-12);
+  z-index: 500;
+  padding: var(--space-10) var(--space-14);
+  background: var(--text-strong);
+  color: var(--deep);
+  transform: translateY(-150%);
+  transition: transform var(--duration-fast) ease;
+}
+
+.page--adaptive-assist .skip-link:focus { transform: translateY(0); }
+
+
+.sp-page-label {
+  color: var(--side-nav-muted);
+  font-family: var(--skillprint-font-ui);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.06em;
+}
+
+.sp-page-label--nav {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--nav-muted, var(--ui-muted));
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sp-nav__divider {
+  flex: 0 0 1px;
+  width: 1px;
+  height: var(--space-20);
+  background: var(--nav-border, var(--ui-border));
+}
+
+.sp-nav__brand--labelled {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .sp-nav__brand--labelled {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-block: var(--space-8);
+  }
+
+  .sp-nav__brand--labelled .sp-nav__divider { display: none; }
+}
+
+.sp-product-tag {
+  --product-accent: var(--mindset-violet-400);
+  --product-ink: var(--product-accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.sp-product-tag__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--space-28);
+  height: var(--space-28);
+  border: 1px solid color-mix(in srgb, var(--product-accent) 26%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--product-accent) 12%, transparent);
+  color: var(--product-ink);
+}
+
+.sp-product-tag__icon .sp-icon {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-16);
+}
+
+.sp-product-tag__copy {
+  display: grid;
+  min-width: 0;
+}
+
+.sp-product-tag__audience {
+  overflow: hidden;
+  color: var(--product-tag-text, inherit);
+  font-family: var(--skillprint-font-ui);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sp-product-tag__name {
+  color: var(--product-ink);
+  font-family: var(--skillprint-font-mono);
+  font-size: var(--app-text-xxs-font-size);
+  line-height: var(--app-text-xxs-line-height);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sp-product-tag[data-product="amplify"]    { --product-accent: var(--personality-mint-500); }
+.sp-product-tag[data-product="enterprise"] { --product-accent: var(--personality-blue-500); }
+.sp-product-tag[data-product="flow"]       { --product-accent: var(--core-lime-500); }
+.sp-product-tag[data-product="signal"]     { --product-accent: var(--skills-orange-500); }
+
+html:is([data-surface="light"], [data-theme="light"]) .sp-product-tag[data-product="amplify"]    { --product-ink: var(--personality-mint-900, #28686e); }
+html:is([data-surface="light"], [data-theme="light"]) .sp-product-tag[data-product="enterprise"] { --product-ink: var(--personality-blue-900, #144f79); }
+html:is([data-surface="light"], [data-theme="light"]) .sp-product-tag[data-product="flow"]       { --product-ink: var(--core-lime-900, #4f6221); }
+html:is([data-surface="light"], [data-theme="light"]) .sp-product-tag[data-product="signal"]     { --product-ink: var(--skills-orange-900, #664c22); }
+
+
+
+.page--adaptive-assist .aa-foot .sp-product-tag { --product-tag-text: var(--ui-text); }
+
+/* ==========================================================================
+   09 - Unique composition · Live Session Console (adaptive assist)
+   The Hextris demo scoring dashboard, api.staging.skillprint.co/scoring/admin/
+   hextris-demo/, rebuilt on the system as a Flow product. The shell is the
+   portal's furniture - a sticky .sp-nav bar, a main column and a rail -
+   and every panel is .sp-card, .ui-badge, .field, .sp-alert, .sp-progress,
+   .sp-progress-ring, .sp-table, .button-group and .code-block. Only the
+   dashboard's own geometry is written here; every value is a token.
+   ========================================================================== */
+
+.page--adaptive-assist {
+  --aa-max: var(--space-1600);
+  --aa-gutter: var(--space-32);
+  --aa-rail: var(--space-384);
+  --aa-gap: var(--space-16);
+  --aa-bar: var(--space-56);
+  --aa-negative-text: var(--skills-pink-500);
+  --grid-container-max: var(--aa-max);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ui-page);
+  color: var(--ui-text);
+}
+
+html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist {
+  --aa-negative-text: var(--skills-pink-700);
+  color-scheme: light;
+}
+
+/* The [hidden] attribute is the page's one show/hide mechanism, and several of
+   the boxes it lands on carry display: grid or flex at higher specificity than
+   the UA rule. Same remedy the portal's QA pass settled on: no rule below ever
+   reveals a hidden element, so the override is safe. */
+.page--adaptive-assist [hidden] { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   Top bar: the shared navigation with the page label beside the logo (the
+   shared .sp-page-label), one status badge (the live state) and the theme
+   toggle.
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-topbar .sp-nav__inner {
+  width: min(100% - var(--aa-gutter) * 2, var(--aa-max));
+  min-height: var(--aa-bar);
+  padding-inline: 0;
+  gap: var(--space-12);
+}
+
+.page--adaptive-assist .aa-topbar .brand-logo {
+  width: var(--space-120);
+  height: auto;
+}
+
+.page--adaptive-assist .aa-topbar .sp-nav__actions { gap: var(--space-8); }
+
+.page--adaptive-assist .aa-topbar .icon-button { --icon-button-size: var(--space-36); }
+
+.page--adaptive-assist .aa-live[data-badge-tone="success"] .ui-badge__dot {
+  animation: aa-pulse 1.6s var(--ease-standard) infinite;
+}
+
+@keyframes aa-pulse {
+  50% { opacity: 0.35; }
+}
+
+/* --------------------------------------------------------------------------
+   Page column: the bar, the content and the foot share one width and edges
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-main {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.page--adaptive-assist .aa-container {
+  width: min(100% - var(--aa-gutter) * 2, var(--aa-max));
+  margin-inline: auto;
+  padding-block: var(--space-20) var(--space-40);
+  display: grid;
+  gap: var(--aa-gap);
+}
+
+/* --------------------------------------------------------------------------
+   Cards: one head contract for every panel on the page
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .sp-card {
+  --card-current-padding: 0;
+  --card-current-radius: var(--radius-2xl);
+  display: grid;
+  align-content: start;
+  min-width: 0;
+}
+
+.page--adaptive-assist .aa-card__head {
+  min-height: var(--space-48);
+  padding: var(--space-10) var(--space-14);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8) var(--space-12);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.page--adaptive-assist .aa-card__title:is(h2, h3) {
+  margin: 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--ui-text);
+  font-size: var(--app-text-md-font-size);
+  line-height: var(--app-text-md-line-height);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--app-heading-tracking);
+}
+
+.page--adaptive-assist .aa-card__title .sp-icon {
+  --icon-size: var(--icon-size-sm);
+  --icon-stroke: var(--icon-stroke-sm);
+  color: var(--violet);
+}
+
+.page--adaptive-assist .aa-card__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-card__body {
+  padding: var(--space-14);
+  display: grid;
+  gap: var(--space-12);
+}
+
+.page--adaptive-assist .aa-card__lede {
+  margin: 0;
+  padding: var(--space-10) var(--space-14) 0;
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-start__lede {
+  margin: 0;
+  color: var(--ui-text);
+  font-size: var(--app-text-md-font-size);
+  line-height: var(--app-text-md-line-height);
+}
+
+/* The key folds behind one line, since the demo usually carries its own. */
+.page--adaptive-assist .aa-key-box {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.page--adaptive-assist .aa-key-box__summary {
+  min-height: var(--space-44);
+  padding: var(--space-6) var(--space-12);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6) var(--space-12);
+  color: var(--ui-text);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+  list-style: none;
+  cursor: pointer;
+}
+
+.page--adaptive-assist .aa-key-box__summary::-webkit-details-marker { display: none; }
+
+.page--adaptive-assist .aa-key-box__summary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-default);
+  outline-offset: calc(var(--space-2) * -1);
+  border-radius: var(--radius-lg);
+}
+
+.page--adaptive-assist .aa-key-box__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-key-box__title .sp-icon {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+  color: var(--violet);
+}
+
+.page--adaptive-assist .aa-key-box__state {
+  flex: 1 1 auto;
+  color: var(--ui-muted);
+  font-weight: var(--weight-regular);
+}
+
+.page--adaptive-assist .aa-key-box[data-missing] .aa-key-box__state { color: var(--aa-negative-text); }
+
+.page--adaptive-assist .aa-key-box[open] .aa-tech__chevron { transform: rotate(180deg); }
+
+.page--adaptive-assist .aa-key-box .aa-key {
+  padding: var(--space-4) var(--space-12) var(--space-12);
+}
+
+.page--adaptive-assist .aa-card__note {
+  margin: 0;
+  padding: var(--space-8) var(--space-14) var(--space-12);
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-card__note code,
+.page--adaptive-assist .aa-field__hint code {
+  font-size: var(--app-text-xxs-font-size);
+}
+
+/* Small mono readouts: ids, keys, parameter values. */
+.page--adaptive-assist .aa-mono {
+  color: var(--ui-text);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Key / value rows. Facts read down the left, values in mono on the right. */
+.page--adaptive-assist .aa-kv {
+  margin: 0;
+  display: grid;
+}
+
+.page--adaptive-assist .aa-kv > div {
+  min-height: var(--space-36);
+  padding: var(--space-6) 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  border-top: 1px solid var(--surface-border);
+}
+
+.page--adaptive-assist .aa-kv > div:first-child { border-top: 0; }
+
+.page--adaptive-assist .aa-kv dt,
+.page--adaptive-assist .aa-kv .aa-kv__key {
+  flex: 0 0 auto;
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+}
+
+.page--adaptive-assist .aa-kv dd,
+.page--adaptive-assist .aa-kv .aa-kv__value {
+  margin: 0;
+  min-width: 0;
+  color: var(--ui-text);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.page--adaptive-assist .aa-placeholder {
+  margin: 0;
+  grid-column: 1 / -1;
+  padding: var(--space-20) var(--space-12);
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Idle: the start card and the loop it starts
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: var(--aa-gap);
+  align-items: start;
+}
+
+.page--adaptive-assist .aa-key__control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-key__control input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--app-text-sm-font-size);
+  letter-spacing: 0.02em;
+}
+
+.page--adaptive-assist .aa-key__reveal {
+  --button-height: var(--space-44);
+  flex: 0 0 auto;
+}
+
+.page--adaptive-assist .aa-field__hint {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-loop {
+  margin: 0;
+  padding: var(--space-4) var(--space-14) var(--space-14);
+  list-style: none;
+  display: grid;
+  gap: var(--space-10);
+  counter-reset: aa-step;
+}
+
+.page--adaptive-assist .aa-loop li {
+  display: grid;
+  grid-template-columns: var(--space-28) minmax(0, 1fr);
+  gap: var(--space-10);
+  align-items: start;
+  counter-increment: aa-step;
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-loop li::before {
+  content: counter(aa-step, decimal-leading-zero);
+  width: var(--space-28);
+  height: var(--space-28);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--ui-text);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xxs-font-size);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .aa-loop strong {
+  display: block;
+  color: var(--ui-text);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .aa-start__facts {
+  padding: 0 var(--space-14) var(--space-8);
+}
+
+/* --------------------------------------------------------------------------
+   Live: the game card carries the session's controls. The head names the
+   game with its art, then the picker (the shared dropdown, as a menu) and
+   Exit; a bar beneath holds the three counters, the recording status and the
+   frame's own links. Everything about the run sits with the run.
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-session {
+  display: grid;
+  gap: var(--aa-gap);
+}
+
+.page--adaptive-assist .aa-stage__head { gap: var(--space-8) var(--space-12); }
+
+.page--adaptive-assist .aa-stage__title { gap: var(--space-10); }
+
+/* The game's own artwork as its mark: the catalogue tile, small. */
+.page--adaptive-assist .aa-stage__art {
+  width: var(--space-44);
+  height: var(--space-24);
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--deep-navy-950);
+}
+
+.page--adaptive-assist .aa-stage__tools {
+  flex-wrap: nowrap;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-game-picker .sp-dropdown__trigger {
+  gap: var(--space-8);
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-game-picker .sp-dropdown__trigger > .sp-icon:first-child {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+  color: var(--violet);
+}
+
+.page--adaptive-assist .aa-game-picker .sp-dropdown__copy > strong {
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-semibold);
+}
+
+/* A step wider than the component's default so the longest title fits. */
+.page--adaptive-assist .aa-game-menu { width: var(--space-320); }
+
+.page--adaptive-assist .aa-game-menu .sp-dropdown__copy > strong {
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .aa-game-menu__art {
+  width: var(--space-40);
+  height: var(--space-22);
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--deep-navy-950);
+}
+
+.page--adaptive-assist .aa-game-menu__icon {
+  --icon-size: var(--icon-size-sm);
+  --icon-stroke: var(--icon-stroke-sm);
+  flex: 0 0 auto;
+  color: var(--ui-muted);
+}
+
+.page--adaptive-assist .aa-stage__exit { flex: 0 0 auto; }
+
+.page--adaptive-assist .aa-stage__exit .sp-icon {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+}
+
+.page--adaptive-assist .aa-stage__bar {
+  padding: var(--space-8) var(--space-14);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6) var(--space-10);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.page--adaptive-assist .aa-stats {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.page--adaptive-assist .aa-stat {
+  min-height: var(--space-30);
+  padding: var(--space-2) var(--space-8);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.page--adaptive-assist .aa-stat dt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--ui-muted);
+  font-size: var(--app-text-xxs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-stat dt .sp-icon {
+  --icon-size: var(--icon-size-2xs);
+  --icon-stroke: var(--icon-stroke-12);
+}
+
+.page--adaptive-assist .aa-stat dd {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  color: var(--ui-text);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-stat dd small {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xxs-font-size);
+  font-weight: var(--weight-regular);
+}
+
+.page--adaptive-assist .aa-status {
+  --status-accent: var(--personality-blue-500);
+  flex: 1 1 var(--space-192);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-status .sp-icon {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+  flex: 0 0 auto;
+  color: var(--status-accent);
+}
+
+.page--adaptive-assist .aa-status span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-status[data-alert-tone="success"] { --status-accent: var(--core-green-500); }
+
+.page--adaptive-assist .aa-status[data-alert-tone="danger"] { --status-accent: var(--skills-pink-500); color: var(--ui-text); }
+
+html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa-status { --status-accent: var(--personality-blue-600); }
+
+html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa-status[data-alert-tone="success"] { --status-accent: var(--core-green-700); }
+
+html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa-status[data-alert-tone="danger"] { --status-accent: var(--skills-pink-600); }
+
+.page--adaptive-assist .aa-stage__links {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-copy .sp-icon {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+}
+
+/* The start card's notes read at the app's small size, not the compact
+   alert's own, so the simulated-run note is legible at arm's length. */
+.page--adaptive-assist .sp-alert--compact .sp-alert__text {
+  color: var(--surface-text);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+/* --------------------------------------------------------------------------
+   Live: the stage and the rail
+   -------------------------------------------------------------------------- */
+
+/* The game and the live scores share one row and one height: the panel
+   stretches to the frame, and the skill list inside it scrolls. */
+.page--adaptive-assist .aa-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(var(--aa-rail), 2fr);
+  gap: var(--aa-gap);
+  align-items: stretch;
+}
+
+.page--adaptive-assist .aa-details {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--aa-gap);
+  align-items: stretch;
+}
+
+/* Three cards, one row, one height: the row stretches every card and each
+   card's middle track takes the slack, so the notes sit on one baseline. */
+.page--adaptive-assist .aa-details > .aa-speed { grid-template-rows: auto auto minmax(0, 1fr); }
+
+.page--adaptive-assist .aa-details > .aa-analysis { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+
+.page--adaptive-assist .aa-details > .aa-record { grid-template-rows: auto auto auto minmax(0, 1fr) auto; }
+
+.page--adaptive-assist .aa-details > .aa-speed,
+.page--adaptive-assist .aa-details > .aa-analysis,
+.page--adaptive-assist .aa-details > .aa-record { grid-column: span 2; }
+
+.page--adaptive-assist .aa-card__meta {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-stage {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  overflow: visible;
+}
+
+/* Beside the live scores the frame takes the row's height, so the game is
+   as tall as the panel of scores next to it; alone in its column it keeps a
+   4 : 3 shape instead. */
+.page--adaptive-assist .aa-stage__frame {
+  position: relative;
+  width: 100%;
+  align-self: stretch;
+  min-height: var(--space-384);
+  overflow: hidden;
+  border-block: 1px solid var(--surface-border);
+  background: var(--deep-navy-950);
+}
+
+.page--adaptive-assist .aa-stage__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: var(--deep-navy-950);
+}
+
+.page--adaptive-assist .aa-stage__veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: var(--space-8);
+  background: color-mix(in srgb, var(--deep-navy-950) 84%, transparent);
+  color: var(--geistface-grey-200);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  text-align: center;
+}
+
+.page--adaptive-assist .aa-stage__ready {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-10);
+}
+
+.page--adaptive-assist .aa-stage__ready-hint {
+  color: color-mix(in srgb, var(--geistface-grey-200) 78%, transparent);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-stage__foot {
+  padding: var(--space-10) var(--space-14);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8) var(--space-16);
+}
+
+.page--adaptive-assist .aa-stage__hint {
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-adjust .ui-label {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+}
+
+.page--adaptive-assist .aa-adjust {
+  min-height: var(--space-32);
+  padding: var(--space-4) var(--space-12);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  transition: var(--transition-interactive);
+}
+
+.page--adaptive-assist .aa-adjust.is-fresh {
+  border-color: color-mix(in srgb, var(--violet) 46%, transparent);
+  background: color-mix(in srgb, var(--violet) 14%, var(--surface-raised));
+}
+
+.page--adaptive-assist .aa-adjust__text {
+  color: var(--ui-text);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-adjust__time {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+/* Live scores: the flow ring as the hero, then every skill as a row. */
+.page--adaptive-assist .aa-panel {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  min-height: 0;
+}
+
+.page--adaptive-assist .aa-flow-hero {
+  padding: var(--space-14);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-16);
+  align-items: center;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.page--adaptive-assist .aa-flow__ring {
+  --progress-ring-size: var(--space-112);
+  --progress-ring-stroke: 5;
+  --progress-colour: var(--aa-flow-colour, var(--violet));
+}
+
+.page--adaptive-assist .aa-flow__total {
+  color: var(--ui-muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-flow-hero__name {
+  color: var(--ui-text);
+  font-size: var(--app-text-md-font-size);
+  line-height: var(--app-text-md-line-height);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .aa-flow-hero__copy {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.page--adaptive-assist .aa-flow-hero__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-flow-hero__mood {
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-flow-hero__mood strong {
+  color: var(--ui-text);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .aa-flow-hero__meta {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-skill-list__head {
+  padding: var(--space-8) var(--space-14) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) var(--space-80);
+  gap: var(--space-12);
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+}
+
+.page--adaptive-assist .aa-skill-list__head span:last-child { text-align: end; }
+
+.page--adaptive-assist .aa-skill-list {
+  min-height: var(--space-160);
+  padding: var(--space-6) var(--space-14);
+  display: grid;
+  align-content: start;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.page--adaptive-assist .aa-skill-row {
+  min-height: var(--space-40);
+  padding: var(--space-6) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) var(--space-80);
+  align-items: center;
+  gap: var(--space-12);
+  border-top: 1px solid var(--surface-border);
+  transition: background var(--duration-slow) var(--ease-standard);
+}
+
+.page--adaptive-assist .aa-skill-row:first-child { border-top: 0; }
+
+.page--adaptive-assist .aa-skill-row.is-updated {
+  background: color-mix(in srgb, var(--violet) 12%, transparent);
+}
+
+.page--adaptive-assist .aa-skill-row__name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ui-text);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-skill-row__score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-skill-row__score .sp-progress {
+  flex: 1 1 auto;
+  --progress-colour: var(--violet);
+}
+
+.page--adaptive-assist .aa-skill-row__score .sp-progress__track { height: var(--space-6); }
+
+.page--adaptive-assist .aa-skill-row__value {
+  min-width: var(--space-40);
+  color: var(--ui-text);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.page--adaptive-assist .aa-skill-row .aa-trend {
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+}
+
+.page--adaptive-assist .aa-skill-row .aa-trend { justify-self: end; }
+
+.page--adaptive-assist .aa-flow__value {
+  color: var(--ui-text);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xl-font-size);
+  line-height: var(--app-text-xl-line-height);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist [data-flow-band="very-low"] { --aa-flow-colour: var(--pink); }
+
+.page--adaptive-assist [data-flow-band="low"] { --aa-flow-colour: var(--orange); }
+
+.page--adaptive-assist [data-flow-band="medium"] { --aa-flow-colour: var(--lime); }
+
+.page--adaptive-assist [data-flow-band="high"] { --aa-flow-colour: var(--green); }
+
+.page--adaptive-assist [data-flow-band="very-high"] { --aa-flow-colour: var(--mint); }
+
+/* Skill scores: the shared table, numerals in mono, the score doubled as a bar. */
+.page--adaptive-assist .aa-table {
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-table :is(th, td) {
+  padding: var(--space-10) var(--space-12);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-table :is(th, td):first-child { padding-inline-start: var(--space-14); }
+
+.page--adaptive-assist .aa-table :is(th, td):last-child { padding-inline-end: var(--space-14); }
+
+.page--adaptive-assist .aa-table td {
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xs-font-size);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--duration-slow) var(--ease-standard);
+}
+
+.page--adaptive-assist .aa-table td.aa-table__skill {
+  color: var(--ui-text);
+  font-family: var(--font-ui);
+  font-size: var(--app-text-sm-font-size);
+  font-weight: var(--weight-medium);
+  white-space: normal;
+}
+
+.page--adaptive-assist .aa-table td.is-updated {
+  background: color-mix(in srgb, var(--violet) 14%, transparent);
+}
+
+.page--adaptive-assist .aa-table__score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-table__score .sp-progress {
+  width: var(--space-56);
+  --progress-colour: var(--violet);
+}
+
+.page--adaptive-assist .aa-table__score .sp-progress__track { height: var(--space-4); }
+
+.page--adaptive-assist .aa-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.page--adaptive-assist .aa-trend .sp-icon {
+  --icon-size: var(--icon-size-2xs);
+  --icon-stroke: var(--icon-stroke-12);
+}
+
+.page--adaptive-assist .aa-trend[data-trend="up"] { color: var(--positive-text); }
+
+.page--adaptive-assist .aa-trend[data-trend="down"] { color: var(--aa-negative-text); }
+
+.page--adaptive-assist .aa-trend[data-trend="flat"] { color: var(--ui-muted); }
+
+.page--adaptive-assist .aa-table__placeholder td {
+  padding-block: var(--space-24);
+  color: var(--ui-muted);
+  font-family: var(--font-ui);
+  font-size: var(--app-text-sm-font-size);
+  text-align: center;
+  white-space: normal;
+}
+
+/* Creation speed modifier: two readouts, then the drawing. */
+.page--adaptive-assist .aa-speed__body {
+  padding: var(--space-14);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--space-12);
+}
+
+.page--adaptive-assist .aa-speed__stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-speed__stats > div {
+  padding: var(--space-8) var(--space-12);
+  display: grid;
+  gap: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.page--adaptive-assist .aa-speed__stats dt {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: var(--weight-medium);
+}
+
+.page--adaptive-assist .aa-speed__stats dd {
+  margin: 0;
+  color: var(--ui-text);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-md-font-size);
+  line-height: var(--app-text-md-line-height);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-chart {
+  position: relative;
+  min-height: var(--space-160);
+  display: grid;
+  align-content: center;
+}
+
+.page--adaptive-assist .aa-chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* SVG type is in viewBox units, sized to render at the rail's width. */
+.page--adaptive-assist .aa-chart__svg .grid { stroke: var(--surface-border); stroke-width: 1; }
+
+.page--adaptive-assist .aa-chart__svg .axis-label { fill: var(--ui-muted); font-family: var(--font-mono); font-size: 10px; }
+
+.page--adaptive-assist .aa-chart__svg .area { fill: color-mix(in srgb, var(--violet) 14%, transparent); }
+
+.page--adaptive-assist .aa-chart__svg .line { fill: none; stroke: var(--violet); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.page--adaptive-assist .aa-chart__svg .point { fill: var(--violet); stroke: var(--surface-box); stroke-width: 2; }
+
+.page--adaptive-assist .aa-chart__svg .point.is-latest { fill: var(--mint); }
+
+.page--adaptive-assist .aa-chart__empty {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: var(--space-16);
+  display: grid;
+  place-items: center;
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Live: analysis results, the SDK debug panel and the session record
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-tabs {
+  min-height: var(--space-36);
+  box-shadow: none;
+}
+
+.page--adaptive-assist .aa-tabs .button-group__item {
+  min-height: var(--space-32);
+  min-width: 0;
+  padding: var(--space-6) var(--space-14);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-analysis__panel {
+  padding: var(--space-14);
+}
+
+.page--adaptive-assist .aa-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-skill-item {
+  min-width: 0;
+  padding: var(--space-10) var(--space-12);
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.page--adaptive-assist .aa-skill-item__name {
+  color: var(--ui-text);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.page--adaptive-assist .aa-skill-item__score {
+  color: var(--ui-muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-skill-item__score strong {
+  color: var(--accent-text);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .aa-debug__facts,
+.page--adaptive-assist .aa-record__facts {
+  padding: var(--space-4) var(--space-14);
+}
+
+.page--adaptive-assist .aa-record__id {
+  padding: var(--space-10) var(--space-14) var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.page--adaptive-assist .aa-record__value {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-record__value .aa-mono {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The log and the SDK panel are one click away rather than on the page:
+   the same disclosure the partner analysis uses for its raw JSON. */
+.page--adaptive-assist .aa-tech {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-box);
+}
+
+.page--adaptive-assist .aa-tech[open] { border-color: var(--surface-border-hover); }
+
+.page--adaptive-assist .aa-tech__summary {
+  min-height: var(--space-48);
+  padding: var(--space-8) var(--space-14);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-16);
+  color: var(--ui-text);
+  font-size: var(--app-text-md-font-size);
+  line-height: var(--app-text-md-line-height);
+  font-weight: var(--weight-semibold);
+  list-style: none;
+  cursor: pointer;
+}
+
+.page--adaptive-assist .aa-tech__summary::-webkit-details-marker { display: none; }
+
+.page--adaptive-assist .aa-tech__summary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-default);
+  outline-offset: calc(var(--space-2) * -1);
+  border-radius: var(--radius-2xl);
+}
+
+.page--adaptive-assist .aa-tech__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .aa-tech__title .sp-icon {
+  --icon-size: var(--icon-size-sm);
+  --icon-stroke: var(--icon-stroke-sm);
+  color: var(--violet);
+}
+
+.page--adaptive-assist .aa-tech__meta {
+  flex: 1 1 auto;
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-regular);
+}
+
+.page--adaptive-assist .aa-tech__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  font-weight: var(--weight-medium);
+}
+
+.page--adaptive-assist .aa-tech__chevron {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.page--adaptive-assist .aa-tech[open] .aa-tech__chevron { transform: rotate(180deg); }
+
+.page--adaptive-assist .aa-tech__body > .aa-skills { grid-column: 1 / -1; }
+
+.page--adaptive-assist .aa-tech__body {
+  padding: 0 var(--space-14) var(--space-14);
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--aa-gap);
+  align-items: start;
+  border-top: 1px solid var(--surface-border);
+  padding-top: var(--space-14);
+}
+
+.page--adaptive-assist .aa-debug__controls {
+  padding: var(--space-10) var(--space-14);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  border-top: 1px solid var(--surface-border);
+}
+
+.page--adaptive-assist .aa-debug__controls .button .sp-icon {
+  --icon-size: var(--icon-size-xs);
+  --icon-stroke: var(--icon-stroke-xs);
+}
+
+.page--adaptive-assist .aa-debug__toggle {
+  margin: 0;
+  padding: 0 var(--space-14) var(--space-12);
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+/* --------------------------------------------------------------------------
+   The analysis log: the shared code block, wrapped, scrolling, newest last
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-log {
+  --aa-log-height: var(--space-320);
+}
+
+.page--adaptive-assist .aa-log .code-head {
+  gap: var(--space-12);
+  flex-wrap: wrap;
+}
+
+.page--adaptive-assist .aa-log .code-head strong {
+  color: var(--code-text);
+  font-family: var(--font-ui);
+  font-size: var(--app-text-sm-font-size);
+}
+
+.page--adaptive-assist .aa-log .code-head span {
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-log__body {
+  max-height: var(--aa-log-height);
+  padding: var(--space-14) var(--space-18);
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--code-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs-font-size);
+  line-height: var(--text-sm-line-height);
+}
+
+.page--adaptive-assist .aa-log__body:focus-visible {
+  outline: 0;
+}
+
+.page--adaptive-assist .aa-log__entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-12);
+  padding: var(--space-2) 0;
+}
+
+.page--adaptive-assist .aa-log__time {
+  color: var(--code-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-log__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.page--adaptive-assist .aa-log__entry[data-tone="error"] .aa-log__text { color: var(--syntax-deleted); }
+
+.page--adaptive-assist .aa-log__entry[data-tone="success"] .aa-log__text { color: var(--syntax-inserted); }
+
+.page--adaptive-assist .aa-log__entry[data-tone="update"] .aa-log__text { color: var(--syntax-keyword); }
+
+/* --------------------------------------------------------------------------
+   Foot
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-foot {
+  border-top: 1px solid var(--ui-border);
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-foot__inner {
+  width: min(100% - var(--aa-gutter) * 2, var(--aa-max));
+  margin-inline: auto;
+  padding: var(--space-16) 0 var(--space-24);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-8) var(--space-16);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: the grid tiers, then the phone ladder
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1279px) {
+  .page--adaptive-assist { --aa-rail: var(--space-320); }
+
+  .page--adaptive-assist .aa-details > .aa-speed,
+  .page--adaptive-assist .aa-details > .aa-analysis { grid-column: span 3; }
+
+  .page--adaptive-assist .aa-details > .aa-record { grid-column: span 6; }
+}
+
+@media (max-width: 1023px) {
+  .page--adaptive-assist { --aa-gutter: var(--space-24); }
+
+
+  .page--adaptive-assist .aa-container { padding-block: var(--space-16) var(--space-32); }
+
+  .page--adaptive-assist .aa-start { grid-template-columns: minmax(0, 1fr); }
+
+  .page--adaptive-assist .aa-layout { grid-template-columns: minmax(0, 1fr); }
+
+  .page--adaptive-assist .aa-panel { grid-template-rows: auto auto auto auto; }
+
+  .page--adaptive-assist .aa-skill-list { overflow: visible; }
+
+  .page--adaptive-assist .aa-tech__body { grid-template-columns: minmax(0, 1fr); }
+
+  .page--adaptive-assist .aa-stage { grid-template-rows: auto auto auto auto; }
+
+  .page--adaptive-assist .aa-stage__frame { align-self: start; aspect-ratio: 4 / 3; }
+}
+
+@media (max-width: 767px) {
+  .page--adaptive-assist { --aa-gutter: var(--space-16); --aa-gap: var(--space-12); }
+
+  .page--adaptive-assist .aa-topbar .brand-logo { width: var(--space-104); }
+
+  /* The game card folds: the picker and Exit take a row under the title,
+     the counters sit in three columns, the status and the links each on
+     their own line. */
+  .page--adaptive-assist .aa-stage__tools { width: 100%; justify-content: flex-start; }
+
+  .page--adaptive-assist .aa-game-picker { flex: 1 1 auto; min-width: 0; }
+
+  .page--adaptive-assist .aa-game-picker .sp-dropdown__trigger { width: 100%; }
+
+  .page--adaptive-assist .aa-game-picker .sp-dropdown__menu { right: auto; left: 0; width: 100%; }
+
+  .page--adaptive-assist .aa-stage__bar { padding: var(--space-8); gap: var(--space-6) var(--space-8); }
+
+  .page--adaptive-assist .aa-stats { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .page--adaptive-assist .aa-stat { min-height: var(--space-40); padding: var(--space-4) var(--space-8); display: grid; align-content: center; gap: 0; }
+
+  .page--adaptive-assist .aa-stat dd { flex-wrap: wrap; white-space: normal; }
+
+  .page--adaptive-assist .aa-status { flex-basis: 100%; }
+
+  .page--adaptive-assist .aa-status span { white-space: normal; }
+
+  .page--adaptive-assist .aa-stage__links { margin-inline-start: 0; width: 100%; justify-content: space-between; }
+
+  .page--adaptive-assist .aa-skill-row,
+  .page--adaptive-assist .aa-skill-list__head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--space-64); gap: var(--space-8); }
+
+  .page--adaptive-assist .aa-skill-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .page--adaptive-assist .aa-details > :is(.aa-speed, .aa-analysis, .aa-record) { grid-column: span 6; }
+
+  .page--adaptive-assist .aa-stage__frame { min-height: 0; aspect-ratio: 1 / 1; }
+
+  /* The five-column table becomes a stack of cards, each cell captioned by
+     its heading, the way the Labs leaderboard folds on a phone. */
+  .page--adaptive-assist .aa-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .page--adaptive-assist .aa-table,
+  .page--adaptive-assist .aa-table tbody,
+  .page--adaptive-assist .aa-table tr,
+  .page--adaptive-assist .aa-table td { display: block; }
+
+  .page--adaptive-assist .aa-table tbody { display: grid; gap: var(--space-8); padding: var(--space-12) var(--space-14); }
+
+  .page--adaptive-assist .aa-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-12); padding: var(--space-10) var(--space-12); border: 1px solid var(--surface-border); border-radius: var(--radius-lg); background: var(--surface-raised); }
+
+  .page--adaptive-assist .aa-table :is(th, td),
+  .page--adaptive-assist .aa-table :is(th, td):first-child,
+  .page--adaptive-assist .aa-table :is(th, td):last-child { padding: 0; border: 0; white-space: normal; }
+
+  .page--adaptive-assist .aa-table td.aa-table__skill { grid-column: 1 / -1; }
+
+  .page--adaptive-assist .aa-table td[data-label]::before { content: attr(data-label); display: block; color: var(--ui-muted); font-family: var(--font-ui); font-size: var(--app-text-xxs-font-size); line-height: var(--app-text-xs-line-height); font-weight: var(--weight-medium); }
+
+  .page--adaptive-assist .aa-table__placeholder td { grid-column: 1 / -1; padding-block: var(--space-12); }
+
+  .page--adaptive-assist .aa-log { --aa-log-height: var(--space-256); }
+
+  .page--adaptive-assist .aa-log__body { padding: var(--space-12) var(--space-14); }
+
+  .page--adaptive-assist .aa-log__entry { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: var(--space-4); }
+}
+
+@media (max-width: 480px) {
+  .page--adaptive-assist { --aa-gutter: var(--space-12); }
+
+  /* The labelled brand folds the page label under the logo (shared rule);
+     the bar only tightens its gap. */
+  .page--adaptive-assist .aa-topbar .sp-nav__inner { gap: var(--space-8); }
+
+  .page--adaptive-assist .aa-flow-hero { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+
+  .page--adaptive-assist .aa-flow-hero__label { justify-content: center; }
+
+  .page--adaptive-assist .aa-speed__stats { grid-template-columns: minmax(0, 1fr); }
+
+  .page--adaptive-assist .aa-debug__controls .button { flex: 1 1 calc(50% - var(--space-4)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page--adaptive-assist .aa-live .ui-badge__dot { animation: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Portal additions: the start card's two pickers, the phone-shaped game
+   frame the portal's games are built for, the parameter rows and the
+   recharts trend surface.
+   -------------------------------------------------------------------------- */
+
+.page--adaptive-assist .aa-start__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+
+.page--adaptive-assist .aa-start__fields .field select { width: 100%; }
+
+.page--adaptive-assist .aa-stage__frame--phone {
+  min-height: 0;
+  padding: var(--space-12) 0;
+  display: grid;
+  place-items: center;
+}
+
+.page--adaptive-assist .aa-stage__frame--phone iframe {
+  position: relative;
+  inset: auto;
+  width: min(375px, 100%);
+  height: 812px;
+  border-radius: var(--radius-lg);
+}
+
+.page--adaptive-assist .aa-param-list {
+  margin: 0;
+  padding: 0 var(--space-6);
+  display: grid;
+  max-height: var(--space-192);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.page--adaptive-assist .aa-param-row {
+  appearance: none;
+  width: 100%;
+  min-height: var(--space-40);
+  padding: var(--space-6) var(--space-8);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12);
+  border: 0;
+  border-top: 1px solid var(--surface-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ui-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.page--adaptive-assist .aa-param-row:first-child { border-top: 0; }
+
+.page--adaptive-assist .aa-param-row:hover { background: var(--surface-raised); }
+
+.page--adaptive-assist .aa-param-row[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--violet) 14%, transparent);
+}
+
+.page--adaptive-assist .aa-param-row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-default);
+  outline-offset: calc(var(--space-2) * -1);
+}
+
+.page--adaptive-assist .aa-param-row__name {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page--adaptive-assist .aa-param-row__value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .aa-chart--recharts {
+  min-height: var(--space-192);
+  height: var(--space-192);
+  padding: var(--space-4) var(--space-14) var(--space-8);
+}
+
+.page--adaptive-assist .aa-chart--recharts .recharts-cartesian-axis-tick text { fill: var(--ui-muted); font-family: var(--font-mono); font-size: 10px; }
+
+.page--adaptive-assist .aa-chart--recharts .recharts-cartesian-grid line { stroke: var(--surface-border); }
+
+.page--adaptive-assist .aa-select-row { padding: var(--space-10) var(--space-14) 0; }
+
+.page--adaptive-assist .aa-select-row .field select { width: 100%; }
+
+.page--adaptive-assist .aa-legend {
+  margin: 0;
+  padding: 0 var(--space-14);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-14);
+  list-style: none;
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .aa-legend li { display: inline-flex; align-items: center; gap: var(--space-6); }
+
+.page--adaptive-assist .aa-legend i {
+  width: var(--space-10);
+  height: var(--space-3, 3px);
+  border-radius: var(--radius-full);
+  background: var(--legend-colour, var(--violet));
+}
+
+@media (max-width: 480px) {
+  .page--adaptive-assist .aa-start__fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The portal's games run in a phone-shaped frame, so the panel beside them
+   is taller than its content: the skill list, not the flow hero, takes the
+   slack. */
+.page--adaptive-assist .aa-panel { grid-template-rows: auto auto auto auto minmax(0, 1fr) auto; }
+
+@media (max-width: 1023px) {
+  .page--adaptive-assist .aa-panel { grid-template-rows: auto auto auto auto auto auto; }
+}
+
+/* Phone widths: the stage's tools wrap under the title, the counters wrap
+   their labels, and the game frame never exceeds its card. */
+.page--adaptive-assist .aa-stage__frame--phone { grid-template-columns: minmax(0, 1fr); }
+
+.page--adaptive-assist .aa-stage__frame--phone iframe {
+  width: 100%;
+  max-width: 375px;
+  justify-self: center;
+}
+
+@media (max-width: 767px) {
+  .page--adaptive-assist .aa-stage__tools { flex-wrap: wrap; }
+
+  .page--adaptive-assist .aa-stat dt { white-space: normal; }
+
+  .page--adaptive-assist .aa-stage__frame--phone iframe { height: min(812px, 140vw); }
+}
+
+/* The phone frame keeps the game's own height at every width; the shared
+   4 : 3 and 1 : 1 ratios are for the landscape demo games. */
+.page--adaptive-assist .aa-stage__frame--phone { aspect-ratio: auto; height: auto; }
