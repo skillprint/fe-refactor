@@ -8,9 +8,43 @@ interface ProfileRailProps {
   sessions?: any[];
 }
 
+/** Monday-based weekday index (0 = Monday) of a local date. */
+const weekdayIndex = (d: Date) => (d.getDay() + 6) % 7;
+
+/** Local midnight on the Monday of the week containing `now`. */
+const startOfWeek = (now: Date) => {
+  const start = new Date(now);
+  start.setDate(now.getDate() - weekdayIndex(now));
+  start.setHours(0, 0, 0, 0);
+  return start;
+};
+
 export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sessions = [] }: ProfileRailProps) {
   const completePct = Math.round((skillsCount / totalSkills) * 100) || 0;
   const recentSessions = sessions.slice(0, 5);
+
+  // SKI-141: the "This week" card used to read the lifetime count from the
+  // profile aggregate while the weekday dots read the local session log, so a
+  // fresh session lit a day while the label still said "No sessions yet".
+  // Both now come from the same sessions list, and the label counts the week
+  // the dots show.
+  const weekStart = startOfWeek(new Date());
+  const weekDays = new Set<number>();
+  let weekSessions = 0;
+  sessions.forEach((session) => {
+    const when = new Date(session.date ?? session.timestamp);
+    if (isNaN(when.getTime()) || when < weekStart) return;
+    const day = weekdayIndex(when);
+    if (when.getTime() - weekStart.getTime() >= 7 * 24 * 60 * 60 * 1000) return;
+    weekDays.add(day);
+    weekSessions += 1;
+  });
+  const lifetimeSessions = Math.max(daysPlayed, sessions.length);
+  const streakLabel = weekSessions > 0
+    ? `${weekSessions} ${weekSessions === 1 ? 'session' : 'sessions'} this week`
+    : lifetimeSessions > 0
+      ? 'No sessions this week'
+      : 'No sessions yet';
   
   return (
     <>
@@ -48,22 +82,10 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
           <div className="rail-meter" data-meter={completePct} style={{ '--meter-fill': `${completePct}%` } as React.CSSProperties}><i></i></div>
         </div>
         <div className="layout-flex items-center justify-between gap-md separator-top font-sm">
-          <span className="text-muted" data-state-text="streakLabel">{daysPlayed > 0 ? `${daysPlayed} Sessions` : 'No sessions yet'}</span>
-          <div className="pp-streak-days layout-flex gap-sm" data-pp-streak>
+          <span className="text-muted" data-state-text="streakLabel">{streakLabel}</span>
+          <div className="pp-streak-days layout-flex gap-sm" data-pp-streak aria-label={streakLabel}>
             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, index) => {
-              const now = new Date();
-              const dayOfWeek = (now.getDay() + 6) % 7;
-              const startOfWeek = new Date(now);
-              startOfWeek.setDate(now.getDate() - dayOfWeek);
-              startOfWeek.setHours(0, 0, 0, 0);
-
-              const isActive = sessions.some(session => {
-                const sessionDate = new Date(session.date || session.timestamp);
-                const diffTime = sessionDate.getTime() - startOfWeek.getTime();
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays === index;
-              });
-
+              const isActive = weekDays.has(index);
               const className = `day layout-grid place-center border-subtle radius-round ${isActive ? 'done text-deep' : ''}`;
               return (
                 <span key={index} className={className.trim()}>{label}</span>
