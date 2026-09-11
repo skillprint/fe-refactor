@@ -397,16 +397,21 @@ function HomeContent() {
   return (
     <>
       <PortalLayout>
-        <div className="portal-head" data-home-spot="intro">
+        <div className="portal-head">
           <Breadcrumbs items={[{ label: 'Home' }]} />
           <div className="portal-head__row">
-            <PortalPageTitle>Play games. Build your Skillprint.</PortalPageTitle>
+            {/* SKI-139: the tour's first step rings only the title copy, not the
+                full-width header, so its bubble can sit beside the copy instead
+                of landing on the Get started card underneath. */}
+            <div className="portal-head__copy" data-home-spot="intro">
+              <PortalPageTitle>Play games. Build your Skillprint.</PortalPageTitle>
+              <p>Short games that measure how you think. Play five and you have a Skillprint &mdash; your strengths in mood, cognition and personality.</p>
+            </div>
             <button className="button button--secondary button--md" type="button" onClick={() => window.dispatchEvent(new CustomEvent('skillprint:show-ftue'))}>
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-help"></use></svg>
               How this works
             </button>
           </div>
-          <p>Short games that measure how you think. Play five and you have a Skillprint &mdash; your strengths in mood, cognition and personality.</p>
         </div>
 
         <PortalPageLayout>

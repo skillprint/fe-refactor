@@ -13,6 +13,12 @@ interface TourStep {
     spot: string;
     title: string;
     text: string;
+    /**
+     * SKI-139: side to try first when it fits. The default order starts with
+     * "bottom", which for the page header drops the bubble onto the Get
+     * started card and reads as a tooltip for "Play your first game".
+     */
+    prefer?: 'right';
     fallback?: string;
     fallbackTitle?: string;
     fallbackText?: string;
@@ -22,7 +28,8 @@ const TOUR: TourStep[] = [
     {
         spot: 'intro',
         title: 'What Skillprint is',
-        text: 'Every game here measures how you think while you play. Five of them make your Skillprint.'
+        text: 'Every game here measures how you think while you play. Five of them make your Skillprint.',
+        prefer: 'right'
     },
     {
         spot: 'play',
@@ -63,6 +70,11 @@ export default function HomeTour() {
     const router = useRouter();
 
     const [useFallbackText, setUseFallbackText] = useState(false);
+
+    // Mirrors currentStep so the position-only callbacks can read the step's
+    // placement preference without re-creating themselves on every step.
+    const stepRef = useRef(currentStep);
+    stepRef.current = currentStep;
 
     const bubbleRef = useRef<HTMLDivElement>(null);
     const targetRef = useRef<HTMLElement | null>(null);
@@ -151,10 +163,17 @@ export default function HomeTour() {
         
         let side = 'dock';
         if (view.w > DOCK_UNDER) {
-            if (view.h - box.bottom - GAP >= size.h + EDGE) side = 'bottom';
-            else if (box.top - GAP >= size.h + EDGE) side = 'top';
-            else if (view.w - box.right - GAP >= size.w + EDGE) side = 'right';
-            else if (box.left - GAP >= size.w + EDGE) side = 'left';
+            const fits: Record<string, boolean> = {
+                bottom: view.h - box.bottom - GAP >= size.h + EDGE,
+                top: box.top - GAP >= size.h + EDGE,
+                right: view.w - box.right - GAP >= size.w + EDGE,
+                left: box.left - GAP >= size.w + EDGE,
+            };
+            const prefer = TOUR[stepRef.current]?.prefer;
+            const order = prefer === 'right'
+                ? ['right', 'bottom', 'top', 'left']
+                : ['bottom', 'top', 'right', 'left'];
+            side = order.find((candidate) => fits[candidate]) ?? 'dock';
         }
 
         bubble.dataset.placement = side;
