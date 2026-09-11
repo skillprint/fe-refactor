@@ -3,6 +3,8 @@ import { inactiveGames } from './inactiveGames';
 export interface GameConfig {
   exitButtonPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   hideBottomTabs?: boolean;
+  /** Static JSON whose `sdk_game_parameters` are sent on session start so the backend can auto-provision its GameScoringConfig. */
+  parameterManifest?: string;
   customExitButton?: {
     icon?: string;
     color?: 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'gray';
@@ -205,6 +207,16 @@ export const gameConfigs: Record<string, GameConfig> = {
     hideBottomTabs: true,
     customExitButton: {
       color: 'green',
+      size: 'md'
+    }
+  },
+
+  'dungeon-runner': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Dungeon Runner/backend/game-scoring-config.json',
+    customExitButton: {
+      color: 'red',
       size: 'md'
     }
   }
@@ -639,6 +651,15 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '3-8 minutes',
     skills: ['Reaction Time', 'Precision', 'Divided Attention'],
     instructions: 'Swipe or use arrow keys to move left/right, jump, or slide. Avoid obstacles and collect coins!'
+  },
+  'dungeon-runner': {
+    name: 'Dungeon Runner',
+    description: 'A first-person endless run through a torch-lit dungeon. Dodge beams, pits and barrels while shooting imps and archers.',
+    category: 'Runner',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Perceptual Speed', 'Timing', 'Attention', 'Action', 'Spatial'],
+    instructions: 'A/D change lane, W or Space jumps, S slides. Aim with the mouse and click to fire. Q/E switch weapons. Desktop only.'
   }
 };
 
@@ -739,4 +760,5 @@ export const knownGameSlugs = [
   'doodle-god-next',
   'cut-the-rope',
   'omnomrun',
+  'dungeon-runner',
 ]; 

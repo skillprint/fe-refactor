@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dungeon Runner — iframe harness</title>
+  <style>
+    body { margin: 0; font-family: "Trebuchet MS", Arial, sans-serif; background: #111; color: #eee; display: grid; grid-template-columns: 1fr 340px; height: 100vh; }
+    iframe { width: 100%; height: 100%; border: 0; background: #000; }
+    aside { padding: 12px; overflow: auto; border-left: 1px solid #333; font-size: 13px; }
+    h2 { margin: 0 0 8px; font-size: 14px; letter-spacing: .1em; color: #ffb070; }
+    button { margin: 2px; padding: 5px 8px; background: #2a2a34; color: #eee; border: 1px solid #555; cursor: pointer; font-size: 12px; }
+    button:hover { background: #3a3a48; }
+    img { width: 100%; border: 1px solid #444; margin: 6px 0; background: #000; }
+    pre { background: #000; padding: 8px; height: 220px; overflow: auto; font-size: 11px; white-space: pre-wrap; }
+    label { display: block; margin: 6px 0 2px; color: #aaa; }
+    input, select { width: 100%; box-sizing: border-box; background: #000; color: #eee; border: 1px solid #555; padding: 4px; }
+  </style>
+</head>
+<body>
+  <iframe id="game" src="index.html?targetMood=focus" allow="autoplay"></iframe>
+  <aside>
+    <h2>Portal stand-in</h2>
+    <div>This page plays the role of GameClient.tsx: it receives <code>screenshot</code> messages, echoes <code>skillprint_keydown</code> back as <code>ADJUST_GAME</code>, and can send arbitrary adjustments.</div>
+    <img id="shot" alt="latest screenshot">
+    <div>Screenshots received: <b id="count">0</b></div>
+    <div style="margin-top:8px">
+      <button data-msg="GAME_PAUSE">GAME_PAUSE</button>
+      <button data-msg="GAME_RESUME">GAME_RESUME</button>
+    </div>
+    <label>Parameter</label>
+    <select id="pname"></select>
+    <label>Value</label>
+    <input id="pvalue" value="1">
+    <button id="send">Send ADJUST_GAME</button>
+    <h2 style="margin-top:12px">Log</h2>
+    <pre id="log"></pre>
+  </aside>
+  <script>
+    const frame = document.getElementById('game');
+    const log = (s) => { const el = document.getElementById('log'); el.textContent = `${new Date().toLocaleTimeString()} ${s}\n` + el.textContent.slice(0, 6000); };
+    let count = 0;
+    window.addEventListener('message', (e) => {
+      const m = e.data;
+      if (!m || typeof m !== 'object') return;
+      if (m.type === 'screenshot') {
+        count += 1;
+        document.getElementById('count').textContent = count;
+        document.getElementById('shot').src = m.dataUrl;
+        return;
+      }
+      if (m.type === 'skillprint_keydown') {
+        log(`keydown ${m.key} → applying preset via ADJUST_GAME`);
+        // Mirror the portal: look up the preset inside the game and send each value back.
+        const presets = frame.contentWindow.DungeonRunnerPresets;
+        if (presets && presets[m.key]) {
+          for (const [parameterName, parameterValue] of Object.entries(presets[m.key].values)) {
+            frame.contentWindow.postMessage({ type: 'ADJUST_GAME', data: { parameterName, parameterValue } }, '*');
+          }
+        }
+        return;
+      }
+      if (m.type === 'REGISTER_ADJUSTMENTS') {
+        const sel = document.getElementById('pname');
+        const defs = frame.contentWindow.SKILLPRINT_PARAMETERS || {};
+        sel.innerHTML = Object.keys(defs).map((k) => `<option>${k}</option>`).join('');
+        log(`REGISTER_ADJUSTMENTS (${Object.keys(m.mappings).length} presets, ${Object.keys(defs).length} params)`);
+        return;
+      }
+      log(`${m.type} ${m.data ? JSON.stringify(m.data) : ''}`);
+    });
+    document.querySelectorAll('button[data-msg]').forEach((b) => b.addEventListener('click', () => {
+      frame.contentWindow.postMessage({ type: b.dataset.msg }, '*');
+      log(`sent ${b.dataset.msg}`);
+    }));
+    document.getElementById('send').addEventListener('click', () => {
+      const parameterName = document.getElementById('pname').value;
+      const raw = document.getElementById('pvalue').value;
+      const parameterValue = raw === 'true' ? true : raw === 'false' ? false : Number(raw);
+      frame.contentWindow.postMessage({ type: 'ADJUST_GAME', data: { parameterName, parameterValue } }, '*');
+      log(`sent ADJUST_GAME ${parameterName}=${parameterValue}`);
+    });
+  </script>
+</body>
+</html>

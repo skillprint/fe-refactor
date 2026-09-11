@@ -1,0 +1,171 @@
+{
+  "game_slug": "dungeon-runner",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "playerSpeed": {
+      "type": "number",
+      "min": 6,
+      "max": 20,
+      "default": 10,
+      "description": "Forward running speed in metres per second. The master pace lever: everything arrives faster when it is higher.",
+      "adjustment_guide": "Raise in small steps while the player is not taking hits. Lower immediately after two or more hits in a chunk, or when the target is relax or awe."
+    },
+    "enemySpawnRate": {
+      "type": "number",
+      "min": 0,
+      "max": 8,
+      "default": 3,
+      "description": "Enemies spawned per 100 metres of corridor. 0 removes combat entirely.",
+      "adjustment_guide": "Higher for grit, joy (with low enemyHealth) and attention training. Near 0 for relax and awe. Lower when accuracy drops under 50%."
+    },
+    "enemySpeed": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "default": 1,
+      "description": "Multiplier on enemy approach speed and enemy projectile speed.",
+      "adjustment_guide": "Raise for timing and perceptual speed training when the player is landing shots. Lower when the player is hit by enemies twice in a chunk."
+    },
+    "enemyHealth": {
+      "type": "integer",
+      "min": 1,
+      "max": 5,
+      "default": 2,
+      "description": "Pistol shots needed to kill a standard enemy.",
+      "adjustment_guide": "1 for joy (many fast kills). Raise for action skill so more shots per kill are required. Keep low when accuracy is poor."
+    },
+    "enemyAggression": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "description": "How dangerous enemies are: archer fire rate and imp lunge/lane-tracking chance. 0 makes enemies almost decorative.",
+      "adjustment_guide": "Near 0 for relax. High for grit. Lower it before lowering enemySpawnRate when the player is overwhelmed."
+    },
+    "weaponType": {
+      "type": "integer",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "description": "Forces the current weapon: 0 pistol (precise, slow), 1 shotgun (spread, high damage, short range), 2 plasma (fast projectile, splash). Ammo is refilled on change.",
+      "adjustment_guide": "Pistol for focus (precision). Shotgun for grit and action. Plasma for relax and joy (forgiving). Rotate between values for curiosity and task switching."
+    },
+    "weaponDamage": {
+      "type": "number",
+      "min": 0.5,
+      "max": 3,
+      "default": 1,
+      "description": "Damage multiplier applied to all player weapons.",
+      "adjustment_guide": "Raise to make combat easier without changing pace. Lower for grit when the player dominates."
+    },
+    "obstacleDensity": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 0.4,
+      "description": "Obstacles per corridor segment as a fraction of the maximum. 0 gives clear halls.",
+      "adjustment_guide": "Main timing/spatial lever. Raise while the player dodges cleanly; lower after collisions or pit falls."
+    },
+    "hazardTelegraphTime": {
+      "type": "number",
+      "min": 0.3,
+      "max": 2.5,
+      "default": 1.2,
+      "description": "Seconds of warning before a hazard or enemy becomes a threat: hazards are visible in the distance from the moment they spawn, and this far ahead in time their warning ring and HUD lane marker light up (imps start charging, archers start shooting).",
+      "adjustment_guide": "Direct perceptual speed lever. Lower toward 0.4 only when accuracy is above 70% and no hit was taken in the last chunk. Raise for relax and after repeated hits."
+    },
+    "lightLevel": {
+      "type": "number",
+      "min": 0.2,
+      "max": 1.5,
+      "default": 0.8,
+      "description": "Torch and ambient light intensity. A mood lever, not a difficulty lever. Low values feel oppressive, high values feel safe.",
+      "adjustment_guide": "High for relax and joy. Very low for awe. Slightly dim for focus to narrow attention."
+    }
+  },
+  "adjustment_instructions": "Dungeon Runner is a first-person endless runner-shooter: the player auto-runs down a\n3-lane dungeon corridor, dodges obstacles (barrels: jump or shoot; low beams and blades:\nslide; pits: jump; gates: pick the open lane) and shoots imps (melee rushers) and\nskeleton archers (ranged). The HUD shows HEALTH (bottom left), SCORE / metres / kills /\naccuracy (top left), the current WEAPON and ammo (bottom right), and \"SKILLPRINT\" toasts\n(top right) for adjustments already applied. Read health, accuracy, kills and the number\nof visible enemies/hazards from the frames.\n\nGeneral rules:\n- Change at most two parameters per chunk and prefer the smallest step that moves the\n  player toward the target. The engine only applies one adjustment every 30 seconds, so\n  each single change must be safe on its own.\n- Never raise playerSpeed and enemySpawnRate in the same chunk.\n- If health is below 30 or the player was hit twice or more since the last chunk, ease\n  off first (hazardTelegraphTime up, enemyAggression down) before anything else.\n- weaponType is a hard switch (0 pistol, 1 shotgun, 2 plasma); change it at most once\n  per two minutes.\n\nTarget mood guidance:\n- relax: playerSpeed 6-8, enemySpawnRate 0-1, enemyAggression <= 0.15, obstacleDensity\n  <= 0.25, hazardTelegraphTime >= 1.8, lightLevel >= 1.1, weaponType 2. Bright, slow, safe.\n- focus: playerSpeed 10-13, enemySpawnRate 2-4, obstacleDensity ~0.4,\n  hazardTelegraphTime 0.8-1.2, lightLevel 0.5-0.7 (dim narrows attention), weaponType 0\n  (precision). Keep the challenge steady; avoid big swings.\n- grit: ramp playerSpeed toward 16, enemySpawnRate 5-8, enemySpeed 1.3-1.8,\n  enemyAggression 0.7-1, obstacleDensity 0.7-1, hazardTelegraphTime 0.5-0.8, weaponType 1,\n  weaponDamage 0.7-0.9. Push until the player struggles, ease off one notch, push again.\n- joy: enemySpawnRate 5-8 with enemyHealth 1, enemySpeed <= 0.9, enemyAggression <= 0.3,\n  obstacleDensity <= 0.3, weaponDamage >= 1.5, weaponType 2, lightLevel >= 1.0. Lots of\n  easy kills and feedback.\n- awe: playerSpeed 6-8, enemySpawnRate <= 1, enemyAggression <= 0.2, obstacleDensity\n  <= 0.3, hazardTelegraphTime >= 1.6, lightLevel 0.2-0.35. Dark, slow, vast.\n- curiosity: keep pace moderate and vary things: rotate weaponType, alternate lightLevel\n  between 0.4 and 1.2 across chunks, obstacleDensity 0.3-0.6.\n- creativity, collaborate, empathy: not a good fit for this game; behave like focus.",
+  "skill_adjustment_instructions": "Dungeon Runner trains reaction, timing and aiming under pressure. Use a sawtooth: raise\nthe primary lever for the target skill while the player copes, ease off one step after\nthey fail, then raise again. Read accuracy (top-left HUD), hits taken (health drops) and\nkills from the frames.\n\nPer-skill levers (primary first):\n- perceptual-speed: hazardTelegraphTime down toward 0.4 (only while accuracy > 70% and\n  health is not dropping), then playerSpeed up. Ease off when the player is hit twice.\n- timing: obstacleDensity up to 0.8-1.0, enemySpeed up to 1.6. Ease off after\n  collisions or pit falls.\n- attention: enemySpawnRate up to 6-8 mixed with obstacles, lightLevel down to 0.4-0.5.\n  Ease off when accuracy falls under 50%.\n- action: enemyHealth up to 3-4, weaponType 1, enemySpawnRate 4-6. Ease off when\n  accuracy falls under 40%.\n- spatial / visualization: obstacleDensity up, hazardTelegraphTime 0.8-1.0 so lane\n  changes must be planned early. Ease off after pit falls or gate hits.\n- planning: enemySpawnRate moderate, weaponType 1 (limited ammo), obstacleDensity 0.6.\n- task-switching: alternate weaponType every chunk and alternate between high\n  obstacleDensity / low enemySpawnRate and the reverse.\n- other skills: behave like focus mood guidance.",
+  "notes": "Generated from public/games/live/Dungeon Runner/static/js/params.js by backend/export-config.mjs. Tier 2 parameters (see GAME_PARAMETERS.MD) are implemented in the game and can be added later.",
+  "sdk_game_parameters": [
+    {
+      "name": "playerSpeed",
+      "type": "Float",
+      "description": "Forward running speed in metres per second. The master pace lever: everything arrives faster when it is higher.",
+      "min_value": "6",
+      "max_value": "20",
+      "adjustment_guide": "Raise in small steps while the player is not taking hits. Lower immediately after two or more hits in a chunk, or when the target is relax or awe."
+    },
+    {
+      "name": "enemySpawnRate",
+      "type": "Float",
+      "description": "Enemies spawned per 100 metres of corridor. 0 removes combat entirely.",
+      "min_value": "0",
+      "max_value": "8",
+      "adjustment_guide": "Higher for grit, joy (with low enemyHealth) and attention training. Near 0 for relax and awe. Lower when accuracy drops under 50%."
+    },
+    {
+      "name": "enemySpeed",
+      "type": "Float",
+      "description": "Multiplier on enemy approach speed and enemy projectile speed.",
+      "min_value": "0.5",
+      "max_value": "2",
+      "adjustment_guide": "Raise for timing and perceptual speed training when the player is landing shots. Lower when the player is hit by enemies twice in a chunk."
+    },
+    {
+      "name": "enemyHealth",
+      "type": "Integer",
+      "description": "Pistol shots needed to kill a standard enemy.",
+      "min_value": "1",
+      "max_value": "5",
+      "adjustment_guide": "1 for joy (many fast kills). Raise for action skill so more shots per kill are required. Keep low when accuracy is poor."
+    },
+    {
+      "name": "enemyAggression",
+      "type": "Float",
+      "description": "How dangerous enemies are: archer fire rate and imp lunge/lane-tracking chance. 0 makes enemies almost decorative.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Near 0 for relax. High for grit. Lower it before lowering enemySpawnRate when the player is overwhelmed."
+    },
+    {
+      "name": "weaponType",
+      "type": "Integer",
+      "description": "Forces the current weapon: 0 pistol (precise, slow), 1 shotgun (spread, high damage, short range), 2 plasma (fast projectile, splash). Ammo is refilled on change.",
+      "min_value": "0",
+      "max_value": "2",
+      "adjustment_guide": "Pistol for focus (precision). Shotgun for grit and action. Plasma for relax and joy (forgiving). Rotate between values for curiosity and task switching."
+    },
+    {
+      "name": "weaponDamage",
+      "type": "Float",
+      "description": "Damage multiplier applied to all player weapons.",
+      "min_value": "0.5",
+      "max_value": "3",
+      "adjustment_guide": "Raise to make combat easier without changing pace. Lower for grit when the player dominates."
+    },
+    {
+      "name": "obstacleDensity",
+      "type": "Float",
+      "description": "Obstacles per corridor segment as a fraction of the maximum. 0 gives clear halls.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Main timing/spatial lever. Raise while the player dodges cleanly; lower after collisions or pit falls."
+    },
+    {
+      "name": "hazardTelegraphTime",
+      "type": "Float",
+      "description": "Seconds of warning before a hazard or enemy becomes a threat: hazards are visible in the distance from the moment they spawn, and this far ahead in time their warning ring and HUD lane marker light up (imps start charging, archers start shooting).",
+      "min_value": "0.3",
+      "max_value": "2.5",
+      "adjustment_guide": "Direct perceptual speed lever. Lower toward 0.4 only when accuracy is above 70% and no hit was taken in the last chunk. Raise for relax and after repeated hits."
+    },
+    {
+      "name": "lightLevel",
+      "type": "Float",
+      "description": "Torch and ambient light intensity. A mood lever, not a difficulty lever. Low values feel oppressive, high values feel safe.",
+      "min_value": "0.2",
+      "max_value": "1.5",
+      "adjustment_guide": "High for relax and joy. Very low for awe. Slightly dim for focus to narrow attention."
+    }
+  ]
+}

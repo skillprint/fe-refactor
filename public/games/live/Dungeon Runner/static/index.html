@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="game-icon" content="🔥">
+  <title>Dungeon Runner</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <div id="game">
+    <canvas id="gl"></canvas>
+    <canvas id="hud"></canvas>
+
+    <div id="menu" class="overlay">
+      <div class="panel">
+        <h1 class="title">Dungeon<br>Runner</h1>
+        <p class="subtitle">Run. Dodge. Shoot. Do not stop.</p>
+        <p class="lede">An endless torch-lit dungeon. Imps and archers come for you while beams, pits and barrels block the way. Survive as long as you can.</p>
+        <div id="target" class="target hidden"><span>Target</span><strong id="target-value"></strong></div>
+        <div>
+          <button id="start" class="btn" type="button">Start run</button>
+        </div>
+        <div class="controls">
+          <span><kbd>A</kbd><kbd>D</kbd> / <kbd>◀</kbd><kbd>▶</kbd></span><span>Change lane</span>
+          <span><kbd>W</kbd> / <kbd>Space</kbd></span><span>Jump</span>
+          <span><kbd>S</kbd> / <kbd>Ctrl</kbd></span><span>Slide</span>
+          <span><kbd>Mouse</kbd></span><span>Aim inside the cone, click or hold to fire</span>
+          <span><kbd>Q</kbd><kbd>E</kbd> / wheel</span><span>Switch weapon</span>
+          <span><kbd>Esc</kbd> / <kbd>P</kbd></span><span>Pause</span>
+          <span><kbd>Tab</kbd></span><span>Parameter readout</span>
+        </div>
+        <p id="desktop-note" class="note warn hidden">Dungeon Runner is built for desktop with a mouse and keyboard.</p>
+        <p class="note">Keys 1–9 are reserved for Skillprint difficulty presets.</p>
+      </div>
+    </div>
+
+    <div id="pause" class="overlay hidden">
+      <div class="panel">
+        <h1 class="title" style="font-size:44px">Paused</h1>
+        <p class="lede">The dungeon waits.</p>
+        <div><button id="resume" class="btn" type="button">Resume</button></div>
+      </div>
+    </div>
+
+    <div id="gameover" class="overlay hidden">
+      <div class="panel">
+        <h1 class="title" style="font-size:44px">You died</h1>
+        <p id="death-cause" class="lede"></p>
+        <div class="stats">
+          <div class="stat"><span id="st-score" class="v">0</span><span class="l">Score</span></div>
+          <div class="stat"><span id="st-distance" class="v">0</span><span class="l">Metres</span></div>
+          <div class="stat"><span id="st-kills" class="v">0</span><span class="l">Kills</span></div>
+          <div class="stat"><span id="st-accuracy" class="v">0%</span><span class="l">Accuracy</span></div>
+          <div class="stat"><span id="st-hits" class="v">0</span><span class="l">Hits taken</span></div>
+          <div class="stat"><span id="st-time" class="v">0:00</span><span class="l">Time</span></div>
+        </div>
+        <div><button id="retry" class="btn" type="button">Run again</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/lib/three.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

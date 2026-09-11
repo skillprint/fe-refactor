@@ -1,0 +1,192 @@
+:root {
+  --dr-bg: #05030a;
+  --dr-ink: #f2e8d8;
+  --dr-muted: #a9998a;
+  --dr-blood: #b8202a;
+  --dr-ember: #ff8a3d;
+  --dr-brass: #d9a441;
+  --dr-panel: rgba(12, 8, 16, 0.86);
+  --dr-font: "Impact", "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+  --dr-body: "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--dr-bg);
+  color: var(--dr-ink);
+  font-family: var(--dr-body);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+#gl, #hud {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#hud { pointer-events: none; }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(40, 10, 10, 0.55) 0%, rgba(5, 3, 10, 0.88) 70%);
+  z-index: 10;
+  cursor: default;
+}
+
+.overlay.hidden { display: none; }
+
+.panel {
+  width: min(560px, 92vw);
+  padding: 32px 36px;
+  background: var(--dr-panel);
+  border: 2px solid #3a2a2a;
+  box-shadow: 0 0 0 4px #14090c, 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(184, 32, 42, 0.12);
+  text-align: center;
+}
+
+.title {
+  font-family: var(--dr-font);
+  font-size: clamp(40px, 7vw, 64px);
+  letter-spacing: 0.06em;
+  line-height: 0.95;
+  margin: 0;
+  color: var(--dr-blood);
+  text-shadow: 0 0 18px rgba(255, 60, 60, 0.45), 3px 3px 0 #2a0508;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-family: var(--dr-font);
+  letter-spacing: 0.3em;
+  font-size: 14px;
+  color: var(--dr-brass);
+  text-transform: uppercase;
+}
+
+.lede {
+  margin: 18px 0 0;
+  color: var(--dr-muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.target {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 6px 12px;
+  border: 1px solid #5a3a2a;
+  background: rgba(60, 20, 20, 0.35);
+  color: var(--dr-ember);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.target.hidden { display: none; }
+
+.btn {
+  display: inline-block;
+  margin-top: 22px;
+  padding: 14px 40px;
+  font-family: var(--dr-font);
+  font-size: 24px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff3e0;
+  background: linear-gradient(180deg, #d02a34, #7d1119);
+  border: 2px solid #ffb38a;
+  box-shadow: 0 0 22px rgba(255, 80, 40, 0.35), inset 0 -4px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(255, 110, 60, 0.55), inset 0 -4px 0 rgba(0, 0, 0, 0.35); }
+.btn:active { transform: translateY(1px); }
+.btn.secondary { background: linear-gradient(180deg, #3a3a44, #1c1c24); border-color: #8a8a9a; font-size: 18px; padding: 10px 28px; }
+
+.controls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 22px auto 0;
+  max-width: 380px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--dr-muted);
+}
+
+.controls kbd {
+  display: inline-block;
+  min-width: 26px;
+  padding: 2px 7px;
+  border: 1px solid #6a5a4a;
+  border-bottom-width: 3px;
+  background: #1c1418;
+  color: var(--dr-ink);
+  font-family: var(--dr-body);
+  font-size: 12px;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.stat {
+  padding: 10px 6px;
+  border: 1px solid #3a2a2a;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.stat .v {
+  display: block;
+  font-family: var(--dr-font);
+  font-size: 28px;
+  color: var(--dr-brass);
+}
+
+.stat .l {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--dr-muted);
+  text-transform: uppercase;
+}
+
+.note {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #7c6c5c;
+}
+
+.note.warn { color: var(--dr-ember); }
+.note.hidden { display: none; }

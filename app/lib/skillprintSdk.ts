@@ -38,6 +38,17 @@ interface StartSessionRequest {
     sessionId: string;
     game: string;
     targetMood: string;
+    gameParameters?: SdkGameParameter[];
+}
+
+/** Parameter definition the backend auto-provisions into the game's GameScoringConfig. */
+export interface SdkGameParameter {
+    name: string;
+    type: 'Float' | 'Integer' | 'Boolean' | 'String';
+    description?: string;
+    min_value?: string;
+    max_value?: string;
+    adjustment_guide?: string;
 }
 
 export interface ParameterUpdateResult {
@@ -176,7 +187,7 @@ export class SkillprintClient {
         this.userToken = token;
     }
 
-    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false): Promise<boolean> {
+    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, gameParameters?: SdkGameParameter[]): Promise<boolean> {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
@@ -185,7 +196,8 @@ export class SkillprintClient {
         const requestData: StartSessionRequest = {
             sessionId,
             game: slugToGameId,
-            targetMood
+            targetMood,
+            ...(gameParameters && gameParameters.length ? { gameParameters } : {})
         };
 
         let headers: any = {
@@ -237,7 +249,7 @@ export class SkillprintClient {
                                 }
                             }
 
-                            return await this.startSession(sessionId, targetMood, gameName, true);
+                            return await this.startSession(sessionId, targetMood, gameName, true, gameParameters);
                         }
                     } catch (e) {
                         this.log(`Failed to parse 401 response or refresh token: ${e}`, LogLevel.ERROR);

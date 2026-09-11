@@ -11,7 +11,7 @@ import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
 import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
-import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
+import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getGameBySlug } from '../../api/api';
@@ -69,7 +69,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'whack-em-all': "Whack 'em All",
     'doodle-god-next': 'Doodle God Next',
     'cut-the-rope': 'Cut The Rope',
-    'omnomrun': 'Omnomrun'
+    'omnomrun': 'Omnomrun',
+    'dungeon-runner': 'Dungeon Runner'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
@@ -99,6 +100,19 @@ export const mapSlugToGamePath = (slug: string) => {
     if (dir) return `/games/live/${dir}/static/index.html`;
     return `/games/live/${slug}/static/index.html`;
 };
+
+async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParameter[] | undefined> {
+    if (!manifestUrl) return undefined;
+    try {
+        const res = await fetch(manifestUrl);
+        if (!res.ok) return undefined;
+        const json = await res.json();
+        return Array.isArray(json.sdk_game_parameters) ? json.sdk_game_parameters : undefined;
+    } catch (e) {
+        console.warn('Could not load game parameter manifest', manifestUrl, e);
+        return undefined;
+    }
+}
 
 export default function GameClient({ slug, autoPlay = false }: GameClientProps) {
     const router = useRouter();
@@ -548,7 +562,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
-                client.startSession(sessionId, targetMood, serverSideSlug);
+                loadGameParameters(gameConfig.parameterManifest)
+                    .then((gameParameters) => client.startSession(sessionId, targetMood, serverSideSlug, false, gameParameters))
+                    .catch((e) => console.error('Failed to start Skillprint session', e));
                 shouldPollRef.current = true;
                 pollSessionTips();
             } catch (e) {

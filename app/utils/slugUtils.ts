@@ -51,5 +51,6 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('doodle-god-next') >= 0) return 'doodle-god-next';
     if (lowerSlug.indexOf('cut-the-rope') >= 0) return 'cut-the-rope';
     if (lowerSlug.indexOf('omnomrun') >= 0) return 'omnomrun';
+    if (lowerSlug.indexOf('dungeon-runner') >= 0) return 'dungeon-runner';
     return lowerSlug;
 }

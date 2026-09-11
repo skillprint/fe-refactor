@@ -488,6 +488,46 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'dungeon-runner':
+            // Mirrors PRESETS in public/games/live/Dungeon Runner/static/js/params.js
+            switch (keyNumber) {
+                case 1: return [
+                    { parameterName: 'playerSpeed', parameterValue: 7 },
+                    { parameterName: 'enemySpawnRate', parameterValue: 1 },
+                    { parameterName: 'enemyAggression', parameterValue: 0.1 },
+                    { parameterName: 'obstacleDensity', parameterValue: 0.2 },
+                    { parameterName: 'lightLevel', parameterValue: 1.2 }
+                ]; // Chill stroll
+                case 2: return [{ parameterName: 'playerSpeed', parameterValue: 8 }]; // Slow
+                case 3: return [
+                    { parameterName: 'playerSpeed', parameterValue: 10 },
+                    { parameterName: 'enemySpawnRate', parameterValue: 3 }
+                ]; // Default pace
+                case 4: return [{ parameterName: 'playerSpeed', parameterValue: 14 }]; // Fast
+                case 5: return [
+                    { parameterName: 'enemySpawnRate', parameterValue: 6 },
+                    { parameterName: 'enemySpeed', parameterValue: 1.4 }
+                ]; // Horde
+                case 6: return [
+                    { parameterName: 'weaponType', parameterValue: 1 },
+                    { parameterName: 'weaponDamage', parameterValue: 1.5 }
+                ]; // Shotgun
+                case 7: return [{ parameterName: 'weaponType', parameterValue: 2 }]; // Plasma
+                case 8: return [
+                    { parameterName: 'hazardTelegraphTime', parameterValue: 0.4 },
+                    { parameterName: 'obstacleDensity', parameterValue: 0.8 }
+                ]; // Twitch
+                case 9: return [
+                    { parameterName: 'playerSpeed', parameterValue: 18 },
+                    { parameterName: 'enemySpawnRate', parameterValue: 8 },
+                    { parameterName: 'enemySpeed', parameterValue: 1.8 },
+                    { parameterName: 'enemyAggression', parameterValue: 1 },
+                    { parameterName: 'obstacleDensity', parameterValue: 1 },
+                    { parameterName: 'lightLevel', parameterValue: 0.3 }
+                ]; // Nightmare
+                default:
+                    return [];
+            }
         case 'omnomrun':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'speedScale', parameterValue: 0.6 }]; // Slow runner
