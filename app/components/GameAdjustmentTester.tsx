@@ -551,6 +551,165 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'simon-says':
+            // Note: number keys also drive in-game tile presses once a round reaches the
+            // player's turn (1st..8th tile on screen, up to numTiles of them) — the game's
+            // own listener ignores keys before Play is pressed and while it is showing the
+            // sequence, so these presets are safest to trigger at those two moments.
+            // Difficulty slider maps to three independent timings:
+            //   announcement (0.5x: 1500ms, 1.5x: 500ms)
+            //   gap between tiles (0.5x: 800ms, 1.5x: 300ms)
+            //   gap between rounds (0.5x: 3000ms, 1.5x: 1000ms)
+            switch (keyNumber) {
+                case 1: return [
+                    { parameterName: 'numTiles', parameterValue: 2 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 0.5 }
+                ]; // Beginner
+                case 2: return [
+                    { parameterName: 'numTiles', parameterValue: 3 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 0.7 }
+                ]; // Easy
+                case 3: return [
+                    { parameterName: 'numTiles', parameterValue: 4 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.0 }
+                ]; // Default
+                case 4: return [
+                    { parameterName: 'numTiles', parameterValue: 4 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.15 }
+                ]; // Moderate
+                case 5: return [
+                    { parameterName: 'numTiles', parameterValue: 5 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.2 }
+                ]; // Challenging
+                case 6: return [
+                    { parameterName: 'numTiles', parameterValue: 6 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.3 }
+                ]; // Hard
+                case 7: return [
+                    { parameterName: 'numTiles', parameterValue: 6 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.4 }
+                ]; // Very hard
+                case 8: return [
+                    { parameterName: 'numTiles', parameterValue: 8 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.45 }
+                ]; // Expert
+                case 9: return [
+                    { parameterName: 'numTiles', parameterValue: 8 },
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.5 }
+                ]; // Extreme
+                default:
+                    return [];
+            }
+        case 'solitaire':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'drawCount', parameterValue: 1 }]; // Draw One (easy)
+                case 2: return [{ parameterName: 'drawCount', parameterValue: 2 }];
+                case 3: return [{ parameterName: 'drawCount', parameterValue: 3 }]; // Classic Draw Three (hard)
+                default:
+                    return [];
+            }
+        case 'reaction-time':
+            switch (keyNumber) {
+                case 1: return [
+                    { parameterName: 'difficultyMultiplier', parameterValue: 0.5 },
+                    { parameterName: 'attemptCount', parameterValue: 3 }
+                ]; // Beginner
+                case 2: return [
+                    { parameterName: 'difficultyMultiplier', parameterValue: 0.75 },
+                    { parameterName: 'attemptCount', parameterValue: 4 }
+                ]; // Easy
+                case 3: return [
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.0 },
+                    { parameterName: 'attemptCount', parameterValue: 5 }
+                ]; // Default
+                case 4: return [
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.25 },
+                    { parameterName: 'attemptCount', parameterValue: 6 }
+                ]; // Challenging
+                case 5: return [
+                    { parameterName: 'difficultyMultiplier', parameterValue: 1.5 },
+                    { parameterName: 'attemptCount', parameterValue: 7 }
+                ]; // Expert
+                case 6: return [
+                    { parameterName: 'attemptCount', parameterValue: 10 }
+                ]; // Extended session
+                case 7: return [
+                    { parameterName: 'attemptCount', parameterValue: 3 }
+                ]; // Quick session
+                default:
+                    return [];
+            }
+        case 'dual-n-back':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'nLevel', parameterValue: 1 }, { parameterName: 'stimulusIntervalMs', parameterValue: 3000 }, { parameterName: 'trialCount', parameterValue: 15 }];
+                case 2: return [{ parameterName: 'nLevel', parameterValue: 2 }, { parameterName: 'stimulusIntervalMs', parameterValue: 2500 }, { parameterName: 'trialCount', parameterValue: 20 }];
+                case 3: return [{ parameterName: 'nLevel', parameterValue: 2 }, { parameterName: 'stimulusIntervalMs', parameterValue: 2000 }, { parameterName: 'trialCount', parameterValue: 25 }];
+                case 4: return [{ parameterName: 'nLevel', parameterValue: 3 }, { parameterName: 'stimulusIntervalMs', parameterValue: 2500 }, { parameterName: 'trialCount', parameterValue: 25 }];
+                case 5: return [{ parameterName: 'nLevel', parameterValue: 3 }, { parameterName: 'stimulusIntervalMs', parameterValue: 2000 }, { parameterName: 'trialCount', parameterValue: 30 }];
+                case 6: return [{ parameterName: 'nLevel', parameterValue: 4 }, { parameterName: 'stimulusIntervalMs', parameterValue: 2000 }, { parameterName: 'trialCount', parameterValue: 30 }];
+                case 7: return [{ parameterName: 'nLevel', parameterValue: 5 }, { parameterName: 'stimulusIntervalMs', parameterValue: 1800 }, { parameterName: 'trialCount', parameterValue: 35 }];
+                default:
+                    return [];
+            }
+        case 'stroop-test':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'conflictRatio', parameterValue: 0.2 }, { parameterName: 'responseWindowMs', parameterValue: 3000 }, { parameterName: 'roundCount', parameterValue: 15 }];
+                case 2: return [{ parameterName: 'conflictRatio', parameterValue: 0.4 }, { parameterName: 'responseWindowMs', parameterValue: 2500 }, { parameterName: 'roundCount', parameterValue: 20 }];
+                case 3: return [{ parameterName: 'conflictRatio', parameterValue: 0.5 }, { parameterName: 'responseWindowMs', parameterValue: 2000 }, { parameterName: 'roundCount', parameterValue: 20 }];
+                case 4: return [{ parameterName: 'conflictRatio', parameterValue: 0.6 }, { parameterName: 'responseWindowMs', parameterValue: 1500 }, { parameterName: 'roundCount', parameterValue: 25 }];
+                case 5: return [{ parameterName: 'conflictRatio', parameterValue: 0.75 }, { parameterName: 'responseWindowMs', parameterValue: 1200 }, { parameterName: 'roundCount', parameterValue: 30 }];
+                case 6: return [{ parameterName: 'conflictRatio', parameterValue: 0.9 }, { parameterName: 'responseWindowMs', parameterValue: 1000 }, { parameterName: 'roundCount', parameterValue: 30 }];
+                case 7: return [{ parameterName: 'conflictRatio', parameterValue: 1 }, { parameterName: 'responseWindowMs', parameterValue: 800 }, { parameterName: 'roundCount', parameterValue: 40 }];
+                default:
+                    return [];
+            }
+        case 'typing-speed':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'wordDifficulty', parameterValue: 1 }, { parameterName: 'timeLimitSec', parameterValue: 30 }];
+                case 2: return [{ parameterName: 'wordDifficulty', parameterValue: 1 }, { parameterName: 'timeLimitSec', parameterValue: 60 }];
+                case 3: return [{ parameterName: 'wordDifficulty', parameterValue: 2 }, { parameterName: 'timeLimitSec', parameterValue: 60 }];
+                case 4: return [{ parameterName: 'wordDifficulty', parameterValue: 2 }, { parameterName: 'timeLimitSec', parameterValue: 90 }];
+                case 5: return [{ parameterName: 'wordDifficulty', parameterValue: 3 }, { parameterName: 'timeLimitSec', parameterValue: 60 }];
+                case 6: return [{ parameterName: 'wordDifficulty', parameterValue: 3 }, { parameterName: 'timeLimitSec', parameterValue: 120 }];
+                default:
+                    return [];
+            }
+        case 'guided-breathing':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'inhaleSec', parameterValue: 4 }, { parameterName: 'holdSec', parameterValue: 0 }, { parameterName: 'exhaleSec', parameterValue: 4 }, { parameterName: 'sessionLengthMin', parameterValue: 1 }];
+                case 2: return [{ parameterName: 'inhaleSec', parameterValue: 4 }, { parameterName: 'holdSec', parameterValue: 4 }, { parameterName: 'exhaleSec', parameterValue: 4 }, { parameterName: 'sessionLengthMin', parameterValue: 2 }];
+                case 3: return [{ parameterName: 'inhaleSec', parameterValue: 4 }, { parameterName: 'holdSec', parameterValue: 7 }, { parameterName: 'exhaleSec', parameterValue: 8 }, { parameterName: 'sessionLengthMin', parameterValue: 3 }];
+                case 4: return [{ parameterName: 'inhaleSec', parameterValue: 5 }, { parameterName: 'holdSec', parameterValue: 2 }, { parameterName: 'exhaleSec', parameterValue: 7 }, { parameterName: 'sessionLengthMin', parameterValue: 5 }];
+                case 5: return [{ parameterName: 'inhaleSec', parameterValue: 6 }, { parameterName: 'holdSec', parameterValue: 0 }, { parameterName: 'exhaleSec', parameterValue: 8 }, { parameterName: 'sessionLengthMin', parameterValue: 10 }];
+                default:
+                    return [];
+            }
+        case 'procedural-maze':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'mazeSize', parameterValue: 7 }, { parameterName: 'fogRadius', parameterValue: 0 }];
+                case 2: return [{ parameterName: 'mazeSize', parameterValue: 11 }, { parameterName: 'fogRadius', parameterValue: 0 }];
+                case 3: return [{ parameterName: 'mazeSize', parameterValue: 15 }, { parameterName: 'fogRadius', parameterValue: 0 }];
+                case 4: return [{ parameterName: 'mazeSize', parameterValue: 15 }, { parameterName: 'fogRadius', parameterValue: 3 }];
+                case 5: return [{ parameterName: 'mazeSize', parameterValue: 21 }, { parameterName: 'fogRadius', parameterValue: 3 }];
+                case 6: return [{ parameterName: 'mazeSize', parameterValue: 25 }, { parameterName: 'fogRadius', parameterValue: 2 }];
+                case 7: return [{ parameterName: 'mazeSize', parameterValue: 31 }, { parameterName: 'fogRadius', parameterValue: 2 }];
+                default:
+                    return [];
+            }
+        case 'order-rush':
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'customerSpawnIntervalMs', parameterValue: 5500 }, { parameterName: 'patienceSec', parameterValue: 36 }, { parameterName: 'difficultyMultiplier', parameterValue: 0.6 }]; // Slow shift
+                case 2: return [{ parameterName: 'customerSpawnIntervalMs', parameterValue: 4500 }, { parameterName: 'patienceSec', parameterValue: 28 }, { parameterName: 'difficultyMultiplier', parameterValue: 0.8 }];
+                case 3: return [{ parameterName: 'customerSpawnIntervalMs', parameterValue: 3500 }, { parameterName: 'patienceSec', parameterValue: 22 }, { parameterName: 'difficultyMultiplier', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'customerSpawnIntervalMs', parameterValue: 2800 }, { parameterName: 'patienceSec', parameterValue: 18 }, { parameterName: 'difficultyMultiplier', parameterValue: 1.15 }];
+                case 5: return [{ parameterName: 'customerSpawnIntervalMs', parameterValue: 2200 }, { parameterName: 'patienceSec', parameterValue: 15 }, { parameterName: 'difficultyMultiplier', parameterValue: 1.3 }]; // Dinner rush
+                case 6: return [{ parameterName: 'cookTimeMs', parameterValue: 1800 }]; // Faster kitchen
+                case 7: return [{ parameterName: 'tableCount', parameterValue: 8 }]; // Full dining room
+                case 8: return [{ parameterName: 'sessionLengthSec', parameterValue: 300 }]; // Longer shift
+                case 9: return [{ parameterName: 'customerSpawnIntervalMs', parameterValue: 1600 }, { parameterName: 'patienceSec', parameterValue: 12 }, { parameterName: 'difficultyMultiplier', parameterValue: 1.5 }]; // Impossible mode
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

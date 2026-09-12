@@ -70,7 +70,16 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'doodle-god-next': 'Doodle God Next',
     'cut-the-rope': 'Cut The Rope',
     'omnomrun': 'Omnomrun',
-    'dungeon-runner': 'Dungeon Runner'
+    'dungeon-runner': 'Dungeon Runner',
+    'simon-says': 'Simon Says',
+    'solitaire': 'Solitaire',
+    'reaction-time': 'Reaction Time',
+    'dual-n-back': 'Dual N-Back',
+    'stroop-test': 'Stroop Test',
+    'typing-speed': 'Typing Speed',
+    'guided-breathing': 'Guided Breathing',
+    'procedural-maze': 'Procedural Maze',
+    'order-rush': 'Order Rush'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

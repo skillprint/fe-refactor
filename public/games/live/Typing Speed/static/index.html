@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Typing Speed</title>
+  <link rel="stylesheet" href="../../_shared/game.css">
+  <style>#words{font-size:clamp(1.05rem,2.8vw,1.35rem);line-height:1.9;text-align:left;max-height:8.6em;overflow:hidden;margin-bottom:14px;width:100%}
+#words .w{margin-right:.45em;padding:0 3px;border-radius:4px;opacity:.85}
+#words .w.current{background:rgba(255,255,255,.28);opacity:1}#words .w.good{color:#7bed9f}#words .w.bad{color:#ff6b81;text-decoration:line-through}
+#input{width:min(360px,90%);font-size:1.3rem;padding:10px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.5);background:rgba(0,0,0,.35);color:#fff;text-align:center;outline:none}
+#input:disabled{opacity:.5}</style>
+</head>
+<body>
+  <h1>Typing Speed</h1>
+  <div class="hud"><span><span class="icon">⏱</span><span id="hud-time">60s</span></span><span><span class="icon">⌨️</span><span id="hud-wpm">0</span> wpm</span><span><span class="icon">🎯</span><span id="hud-acc">100%</span></span><span><span class="icon">🏆</span><span id="hud-best">0</span> wpm</span></div>
+  <div class="stage">
+    <button id="play-btn" class="play-button">▶</button>
+    <div id="words"></div>
+    <input id="input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type here" disabled>
+  </div>
+  <p id="msg" class="msg">Type the words, separated by spaces. The timer starts on your first keystroke.</p>
+  <script src="game.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="../../_shared/skillprintScreenshot.js"></script>
+</body>
+</html>

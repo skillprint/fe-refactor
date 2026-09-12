@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Order Rush</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="hud">
+      <div class="hud-item hud-score"><span class="hud-label">Score</span><span id="hud-score">0</span></div>
+      <div class="hud-item hud-tips"><span class="hud-label">Tips</span><span id="hud-tips">$0</span></div>
+      <div class="hud-item hud-combo"><span class="hud-label">Combo</span><span id="hud-combo">x1.0</span></div>
+      <div class="hud-item hud-lives"><span class="hud-label">Lives</span><span id="hud-lives">&#9829;&#9829;&#9829;</span></div>
+      <div class="hud-item hud-timer"><span class="hud-label">Time</span><span id="hud-timer">3:00</span></div>
+    </div>
+
+    <div id="stage">
+      <canvas id="game-canvas"></canvas>
+
+      <div id="start-screen" class="overlay">
+        <h1 class="logo">Order<span>Rush</span></h1>
+        <p class="tagline">Seat &middot; Order &middot; Serve &middot; Bus &mdash; keep every table happy.</p>
+        <button id="play-btn" class="big-btn">&#9654; Open the Doors</button>
+        <div class="howto">
+          <p><b>1.</b> Tap a waiting guest, then tap an empty table to seat them.</p>
+          <p><b>2.</b> Tap the table once they've decided to take their order.</p>
+          <p><b>3.</b> Tap the kitchen counter to grab the finished dish, then tap the matching table to serve it.</p>
+          <p><b>4.</b> Tap a dirty table to clear it for the next guest.</p>
+        </div>
+      </div>
+
+      <div id="upgrade-modal" class="overlay hidden">
+        <h2>Rush Bonus!</h2>
+        <p id="upgrade-sub">Pick a boost for the rest of the shift:</p>
+        <div id="upgrade-choices" class="row"></div>
+      </div>
+
+      <div id="gameover-screen" class="overlay hidden">
+        <h2 id="gameover-title">Shift Complete!</h2>
+        <div id="gameover-stats" class="stats"></div>
+        <button id="restart-btn" class="big-btn">&#8635; Run It Back</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="../../_shared/skillprintScreenshot.js"></script>
+</body>
+</html>

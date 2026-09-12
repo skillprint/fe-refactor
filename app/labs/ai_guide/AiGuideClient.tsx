@@ -37,6 +37,7 @@ const GAMES: GameOption[] = [
   { slug: 'hextris', name: 'Hextris', art: '/assets/images/games/game-hextris.svg', hint: 'Arrow keys rotate the hexagon. P pauses.' },
   { slug: 'box-tower', name: 'Box Tower', art: '/assets/images/games/game-box-tower.svg', hint: 'Tap or click to drop each box.' },
   { slug: '2048', name: '2048', art: '/images/activities/covers/2048.png', hint: 'Arrow keys slide the tiles.' },
+  { slug: 'simon-says', name: 'Simon Says', art: '/assets/images/games/game-simon-says.svg', hint: 'Watch the sequence, then click the tiles back in order.' },
 ];
 
 const FLOW_SERIES: TrendSeries[] = [

@@ -219,6 +219,88 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'red',
       size: 'md'
     }
+  },
+
+  'simon-says': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
+  },
+
+  'dual-n-back': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
+  },
+
+  'stroop-test': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'blue',
+      size: 'md'
+    }
+  },
+
+  'typing-speed': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'green',
+      size: 'md'
+    }
+  },
+
+  'guided-breathing': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'blue',
+      size: 'md'
+    }
+  },
+
+  'procedural-maze': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'orange',
+      size: 'md'
+    }
+  },
+
+  'reaction-time': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'orange',
+      size: 'md'
+    }
+  },
+
+  'solitaire': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'green',
+      size: 'md'
+    }
+  },
+
+  'order-rush': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Order Rush/backend/game-scoring-config.json',
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
   }
 };
 
@@ -660,7 +742,88 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '3-8 minutes',
     skills: ['Perceptual Speed', 'Timing', 'Attention', 'Action', 'Spatial'],
     instructions: 'A/D change lane, W or Space jumps, S slides. Aim with the mouse and click to fire. Q/E switch weapons. Desktop only.'
-  }
+  },
+  'simon-says': {
+    name: 'Simon Says',
+    description: 'Watch, remember, and repeat the growing color sequence',
+    category: 'Memory',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Sequential Memory', 'Auditory-Visual Recall', 'Concentration'],
+    instructions: 'Watch the sequence of colors flash, then repeat it by clicking the buttons in the same order. Each round adds one more color.'
+  },
+  'dual-n-back': {
+    name: 'Dual N-Back',
+    description: 'Track positions and letters N steps back to train working memory',
+    category: 'Memory',
+    difficulty: 'Hard',
+    estimatedTime: '2-4 minutes',
+    skills: ['Working Memory', 'Sustained Attention', 'Updating'],
+    instructions: 'A square lights up and a letter is spoken each trial. Press Position (A) when the square matches the one N trials ago, and Sound (L) when the letter matches.'
+  },
+  'stroop-test': {
+    name: 'Stroop Test',
+    description: 'Name the ink colour, not the word — a classic inhibitory-control challenge',
+    category: 'Attention',
+    difficulty: 'Medium',
+    estimatedTime: '1-3 minutes',
+    skills: ['Selective Attention', 'Inhibitory Control', 'Cognitive Flexibility'],
+    instructions: 'A colour word appears in a coloured ink. Choose the ink colour as fast as you can using the buttons or the R, G, B, Y keys.'
+  },
+  'typing-speed': {
+    name: 'Typing Speed',
+    description: 'Type the passage as fast and accurately as you can',
+    category: 'Verbal',
+    difficulty: 'Easy',
+    estimatedTime: '1-3 minutes',
+    skills: ['Verbal Processing Speed', 'Sustained Focus', 'Motor Coordination'],
+    instructions: 'Type each word followed by a space. The timer starts on your first keystroke; your WPM and accuracy are shown live.'
+  },
+  'guided-breathing': {
+    name: 'Guided Breathing',
+    description: 'Follow the expanding circle through calm, paced breathing cycles',
+    category: 'Wellness',
+    difficulty: 'Easy',
+    estimatedTime: '1-10 minutes',
+    skills: ['Stress Regulation', 'Mindfulness', 'Calm'],
+    instructions: 'Breathe in as the circle grows, hold while it stays large, and breathe out as it shrinks. The session ends automatically.'
+  },
+  'procedural-maze': {
+    name: 'Procedural Maze',
+    description: 'Navigate a freshly generated maze to the exit — optionally through fog',
+    category: 'Spatial',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Spatial Reasoning', 'Planning', 'Exploration'],
+    instructions: 'Move the yellow dot to the green exit with the arrow keys, WASD, swipes, or the on-screen pad. A new maze is generated after each solve.'
+  },
+  'reaction-time': {
+    name: 'Reaction Time Tester',
+    description: 'Measure and improve your reaction speed to visual stimuli',
+    category: 'Cognitive Processing',
+    difficulty: 'Easy',
+    estimatedTime: '2-3 minutes',
+    skills: ['Visual Processing', 'Motor Response', 'Focus'],
+    instructions: 'Wait for the screen to turn green, then click as quickly as possible. Your reaction time will be measured in milliseconds.'
+  },
+  'solitaire': {
+    name: 'Solitaire',
+    description: 'Classic Klondike solitaire — clear the tableau one card at a time',
+    category: 'Card',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Patience', 'Sequential Planning', 'Relaxation'],
+    instructions: 'Drag cards to build descending, alternating-color sequences in the tableau, and move cards up to the foundations by suit, ace to king.'
+  },
+  'order-rush': {
+    name: 'Order Rush',
+    description: 'Run a rush-hour diner — seat guests, take orders, cook, and serve before patience runs out',
+    category: 'Simulation',
+    difficulty: 'Medium',
+    estimatedTime: '3-5 minutes',
+    skills: ['Multitasking', 'Prioritization', 'Divided Attention', 'Working Memory'],
+    instructions: 'Tap a waiting guest, then an empty table to seat them. Tap a seated table once they\'ve decided to take their order. Tap the kitchen counter to grab a finished dish, then tap the matching table to serve it. Tap a dirty table to clear it. Keep every guest happy before their patience runs out!'
+  },
 };
 
 export function getGameConfig(gameSlug: string): GameConfig {
@@ -761,4 +924,13 @@ export const knownGameSlugs = [
   'cut-the-rope',
   'omnomrun',
   'dungeon-runner',
-]; 
+  'simon-says',
+  'dual-n-back',
+  'stroop-test',
+  'typing-speed',
+  'guided-breathing',
+  'procedural-maze',
+  'reaction-time',
+  'solitaire',
+  'order-rush',
+];

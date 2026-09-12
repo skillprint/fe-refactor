@@ -1,0 +1,230 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: white;
+  padding: 10px;
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+}
+
+.play-field {
+  position: relative;
+  max-width: 100vw;
+  margin: clamp(10px, 3vw, 20px) auto clamp(20px, 5vw, 30px);
+}
+
+#board {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #3a3f58;
+  color: #fff;
+  transition: background-color 120ms ease-out;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+#board.wait { background: #c0392b; }
+#board.go { background: #27ae60; }
+#board.early { background: #e67e22; }
+#board.result { background: #2c3e50; }
+
+h1#head {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 15px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+#sub {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  opacity: 0.85;
+  margin: 0 0 24px;
+  max-width: 320px;
+}
+
+#stars {
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+  min-height: 2rem;
+}
+
+.game-info {
+  display: flex;
+  justify-content: center;
+  gap: clamp(15px, 4vw, 30px);
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.score-display,
+.high-score-display {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1vw, 8px);
+}
+
+.score-display .icon,
+.high-score-display .icon {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+}
+
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(70px, 15vw, 100px);
+  height: clamp(70px, 15vw, 100px);
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #4a3f8a;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  z-index: 5;
+}
+
+.play-button:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.play-button.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.6);
+}
+
+.status-badge {
+  position: absolute;
+  top: clamp(-56px, -8vw, -40px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 6;
+}
+
+.status-badge.visible {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.checkmark {
+  width: clamp(36px, 8vw, 48px);
+  height: clamp(36px, 8vw, 48px);
+  display: block;
+  margin: 0 auto 4px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.checkmark.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkmark-circle {
+  fill: none;
+  stroke: #00ff88;
+  stroke-width: 3;
+}
+
+.checkmark-check {
+  fill: none;
+  stroke: #00ff88;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.countdown-ring {
+  width: clamp(44px, 9vw, 60px);
+  height: clamp(44px, 9vw, 60px);
+  display: block;
+  margin: 0 auto;
+  transform: rotate(-90deg);
+}
+
+.countdown-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 4;
+}
+
+.countdown-ring-progress {
+  fill: none;
+  stroke: #00ff88;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+#startBtn {
+  font-size: 1.1rem;
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: none;
+  background: #fff;
+  color: #3a3f58;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#startBtn:active { transform: scale(0.97); }
+
+.difficulty-selector {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 15px auto;
+  max-width: min(320px, 90vw);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px 20px;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.difficulty-selector label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: #fff;
+}
+
+.difficulty-selector input[type='range'] {
+  width: 100%;
+  accent-color: #00ff88;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  body { padding: 5px; }
+  h1 { font-size: 2rem; }
+  #sub { font-size: 0.95rem; }
+  .difficulty-selector { bottom: 10px; padding: 10px 15px; }
+}

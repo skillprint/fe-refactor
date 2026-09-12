@@ -1,0 +1,107 @@
+{
+  "game_slug": "order-rush",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "customerSpawnIntervalMs": {
+      "type": "integer",
+      "min": 1500,
+      "max": 6000,
+      "default": 3500,
+      "description": "Base milliseconds between new guests arriving at the door (the effective rate also ramps faster automatically over the shift). Lower values mean guests arrive more often and increased difficulty.",
+      "adjustment_guide": "Raise first when guests are storming out or the queue is overflowing. Lower gradually when the player is clearing every table with an active combo."
+    },
+    "patienceSec": {
+      "type": "number",
+      "min": 12,
+      "max": 40,
+      "default": 22,
+      "description": "Base seconds a seated guest waits — deciding, waiting to order, or waiting on food — before storming out angry. Higher values are more forgiving and decreased difficulty.",
+      "adjustment_guide": "The safest first lever to raise right after a lost life or a broken combo; it helps immediately without changing the pace of new arrivals."
+    },
+    "cookTimeMs": {
+      "type": "integer",
+      "min": 1500,
+      "max": 6000,
+      "default": 3000,
+      "description": "Base kitchen prep time per dish once an order is taken. Lower values get food to the table faster and decrease difficulty.",
+      "adjustment_guide": "Lower to relieve pressure on players who are seating and ordering fine but losing guests while food is still cooking. Raise only for grit or high-difficulty targets."
+    },
+    "tableCount": {
+      "type": "integer",
+      "min": 2,
+      "max": 8,
+      "default": 4,
+      "description": "Number of open tables in the dining room. Higher values allow more guests to be served at once but raise how many table states the player must track simultaneously.",
+      "adjustment_guide": "Raise gradually to build multitasking load once the player is comfortably keeping pace; avoid raising it in the same adjustment as lowering customerSpawnIntervalMs. Prefer growing it over shrinking it mid-shift."
+    },
+    "difficultyMultiplier": {
+      "type": "number",
+      "min": 0.5,
+      "max": 1.5,
+      "default": 1.0,
+      "description": "Master pace multiplier scaling customerSpawnIntervalMs, patienceSec and cookTimeMs together. Higher values compress the spawn interval and cook time while shrinking patience simultaneously, increasing difficulty; lower values ease all three at once.",
+      "adjustment_guide": "The single broadest lever — prefer it for large mood swings (e.g. relax to grit) rather than moving all three underlying parameters individually."
+    },
+    "sessionLengthSec": {
+      "type": "integer",
+      "min": 60,
+      "max": 360,
+      "default": 180,
+      "description": "Total shift length in seconds. Does not change moment-to-moment difficulty, only how long the shift and its automatic difficulty ramp run for.",
+      "adjustment_guide": "Adjust for session-length or mood-duration purposes only; not a moment-to-moment difficulty lever."
+    }
+  },
+  "adjustment_instructions": "You are adjusting parameters for Order Rush, a restaurant time-management game (Diner Dash-style).\nThe player runs a single dining room for a timed shift: tap a waiting guest then an empty table\nto seat them, tap the table once the guest has decided on an order to send it to the kitchen,\ntap the kitchen counter to pick up a finished dish, then tap the matching table to serve it, and\ntap a dirty table to bus it clean. The HUD shows SCORE, TIPS (a running dollar total), COMBO (a\nmultiplier that grows with each guest served in a row and resets to x1 on any angry departure),\nLIVES (hearts — a seated guest whose patience reaches zero storms out and costs one life; three\nlost lives ends the shift early), and the shift TIMER counting down from sessionLengthSec.\n\nParameters:\n- customerSpawnIntervalMs (integer, 1500-6000): base milliseconds between new guests arriving at\n  the door. Lower values mean guests arrive more often and increased difficulty.\n- patienceSec (number, 12-40): base seconds a seated guest waits — deciding, waiting to order, or\n  waiting on food — before storming out angry. Higher values are more forgiving.\n- cookTimeMs (integer, 1500-6000): base kitchen prep time per dish once an order is taken. Lower\n  values mean faster food and decreased difficulty.\n- tableCount (integer, 2-8): number of open tables. Higher values mean more simultaneous guests\n  and more table states to track at once.\n- difficultyMultiplier (number, 0.5-1.5): a single master pace knob that scales\n  customerSpawnIntervalMs, patienceSec and cookTimeMs together — higher compresses spawn interval\n  and cook time while shrinking patience simultaneously; lower stretches all three out.\n- sessionLengthSec (integer, 60-360): total shift length; does not affect moment-to-moment\n  difficulty.\n\nGiven the player's current flow state, skill metrics, and target mood,\noutput parameter values that guide the player toward the target mood:\n- For 'relax': slow spawns (customerSpawnIntervalMs ~5000-5500), generous patience (~32-36s),\n  forgiving pace (difficultyMultiplier ~0.6-0.7), modest table count (~4). A calm, unhurried\n  dining room with time to think through each guest.\n- For 'focus': standard spawns (~3500), standard patience (~22s), difficultyMultiplier ~1.0,\n  tableCount ~4-5. A steady, even rush that rewards a consistent seat→order→serve→bus rhythm\n  without big swings.\n- For 'grit': fast spawns (customerSpawnIntervalMs ~2000-2500), tight patience (~14-16s),\n  difficultyMultiplier ~1.3-1.5, tableCount ~6-8. A packed dinner rush juggling many tables\n  against the clock.\n- joy: moderate-fast spawns with generous patience and cookTimeMs (guests arrive often but rarely\n  get truly angry), difficultyMultiplier ~1.0-1.1, tableCount ~5-6. Lots of successful serves and\n  combo growth with low risk of losing a life.\n- awe, curiosity, creativity, collaborate, empathy: not a strong fit for this game; behave like\n  focus.\n\nConsider the player's current performance: if flow score is low, a life was just lost, or combo\nkeeps resetting, the game is likely too hard — ease off first by raising patienceSec (it helps\nimmediately without changing arrival pace), then by raising customerSpawnIntervalMs or lowering\ndifficultyMultiplier. If arousal is low and the player is comfortably clearing every table with a\nhealthy combo, the player may be bored — increase challenge by lowering customerSpawnIntervalMs or\nraising difficultyMultiplier before adding more tables, since more tables raises multitasking\nload rather than pace.\n\nAlways adjust gradually from the current parameter values to avoid jarring transitions. Note that\ntableCount changes apply immediately without interrupting seated guests or in-flight orders, but\nshrinking it below the number of currently active tables discards the extra tables' state, so\nprefer growing tableCount over shrinking it mid-shift when possible.",
+  "skill_adjustment_instructions": "Order Rush trains multitasking, prioritization under time pressure, divided attention and\nworking memory (tracking several tables' seat/order/cook/serve/bus states at once). Read SCORE,\nTIPS, COMBO and LIVES from the HUD, and note how many guests are visibly seated or waiting versus\nhow many tables sit dirty or idle to gauge whether the player is keeping up.\n\nPer-skill levers (primary first):\n- multitasking / divided-attention: raise tableCount (more simultaneous states to track) while\n  keeping difficultyMultiplier moderate (~1.0-1.15) so the bottleneck is juggling, not raw speed.\n  Ease off tableCount if dirty or idle tables pile up, a sign the player can't keep pace.\n- prioritization: lower customerSpawnIntervalMs and keep patienceSec modest (~18-20s) so more\n  guests compete for attention than the player can serve strictly in arrival order, forcing\n  triage. Ease off if lives are lost twice in a row.\n- working-memory: raise tableCount so more open orders and cook timers must be tracked at once;\n  keep spawn rate moderate so the load comes from state, not speed.\n- perceptual-speed / reaction-time: lower cookTimeMs and customerSpawnIntervalMs together via\n  difficultyMultiplier so the player must act on ready dishes and order-thought-bubbles quickly.\n  Ease off difficultyMultiplier when combo keeps resetting.\n- other skills: behave like focus mood guidance.",
+  "notes": "Order Rush is an original Skillprint-branded restaurant time-management game (own art, code and branding; not derived from any existing title's assets). Generated to match the shape of public/games/live/Dungeon Runner/backend/game-scoring-config.json; parameters are hand-grounded in public/games/live/Order Rush/static/game.js's `params` object and window.__orderRushControls, and documented in public/games/GAME_PARAMETERS.MD.",
+  "sdk_game_parameters": [
+    {
+      "name": "customerSpawnIntervalMs",
+      "type": "Integer",
+      "description": "Base milliseconds between new guests arriving at the door (the effective rate also ramps faster automatically over the shift). Lower values mean guests arrive more often and increased difficulty.",
+      "min_value": "1500",
+      "max_value": "6000",
+      "adjustment_guide": "Raise first when guests are storming out or the queue is overflowing. Lower gradually when the player is clearing every table with an active combo."
+    },
+    {
+      "name": "patienceSec",
+      "type": "Float",
+      "description": "Base seconds a seated guest waits — deciding, waiting to order, or waiting on food — before storming out angry. Higher values are more forgiving and decreased difficulty.",
+      "min_value": "12",
+      "max_value": "40",
+      "adjustment_guide": "The safest first lever to raise right after a lost life or a broken combo; it helps immediately without changing the pace of new arrivals."
+    },
+    {
+      "name": "cookTimeMs",
+      "type": "Integer",
+      "description": "Base kitchen prep time per dish once an order is taken. Lower values get food to the table faster and decrease difficulty.",
+      "min_value": "1500",
+      "max_value": "6000",
+      "adjustment_guide": "Lower to relieve pressure on players who are seating and ordering fine but losing guests while food is still cooking. Raise only for grit or high-difficulty targets."
+    },
+    {
+      "name": "tableCount",
+      "type": "Integer",
+      "description": "Number of open tables in the dining room. Higher values allow more guests to be served at once but raise how many table states the player must track simultaneously.",
+      "min_value": "2",
+      "max_value": "8",
+      "adjustment_guide": "Raise gradually to build multitasking load once the player is comfortably keeping pace; avoid raising it in the same adjustment as lowering customerSpawnIntervalMs. Prefer growing it over shrinking it mid-shift."
+    },
+    {
+      "name": "difficultyMultiplier",
+      "type": "Float",
+      "description": "Master pace multiplier scaling customerSpawnIntervalMs, patienceSec and cookTimeMs together. Higher values compress the spawn interval and cook time while shrinking patience simultaneously, increasing difficulty; lower values ease all three at once.",
+      "min_value": "0.5",
+      "max_value": "1.5",
+      "adjustment_guide": "The single broadest lever — prefer it for large mood swings (e.g. relax to grit) rather than moving all three underlying parameters individually."
+    },
+    {
+      "name": "sessionLengthSec",
+      "type": "Integer",
+      "description": "Total shift length in seconds. Does not change moment-to-moment difficulty, only how long the shift and its automatic difficulty ramp run for.",
+      "min_value": "60",
+      "max_value": "360",
+      "adjustment_guide": "Adjust for session-length or mood-duration purposes only; not a moment-to-moment difficulty lever."
+    }
+  ]
+}
