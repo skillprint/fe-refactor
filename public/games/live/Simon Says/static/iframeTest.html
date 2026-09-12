@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Simon Says — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'simon-says',
+      params: [{name:'numTiles',default:4},{name:'difficultyMultiplier',default:1}],
+      presets: {1:{numTiles:2,difficultyMultiplier:0.5},2:{numTiles:3,difficultyMultiplier:0.7},3:{numTiles:4,difficultyMultiplier:1.0},4:{numTiles:4,difficultyMultiplier:1.15},5:{numTiles:5,difficultyMultiplier:1.2},6:{numTiles:6,difficultyMultiplier:1.3},7:{numTiles:6,difficultyMultiplier:1.4},8:{numTiles:8,difficultyMultiplier:1.45},9:{numTiles:8,difficultyMultiplier:1.5}},
+      readState: (w) => ({ ...w.__simonState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

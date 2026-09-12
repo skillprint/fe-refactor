@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Dual N-Back — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'dual-n-back',
+      params: [{name:'nLevel',default:2},{name:'stimulusIntervalMs',default:2500},{name:'trialCount',default:20}],
+      presets: {1:{nLevel:1,stimulusIntervalMs:3000,trialCount:15},2:{nLevel:2,stimulusIntervalMs:2500,trialCount:20},3:{nLevel:2,stimulusIntervalMs:2000,trialCount:25},4:{nLevel:3,stimulusIntervalMs:2500,trialCount:25},5:{nLevel:3,stimulusIntervalMs:2000,trialCount:30},6:{nLevel:4,stimulusIntervalMs:2000,trialCount:30},7:{nLevel:5,stimulusIntervalMs:1800,trialCount:35}},
+      readState: (w) => ({ ...w.__nbackState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

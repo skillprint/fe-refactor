@@ -51,5 +51,15 @@ export const unifiedSlugFromBESlug = (slug: string) => {
     if (lowerSlug.indexOf('doodle-god-next') >= 0) return 'doodle-god-next';
     if (lowerSlug.indexOf('cut-the-rope') >= 0) return 'cut-the-rope';
     if (lowerSlug.indexOf('omnomrun') >= 0) return 'omnomrun';
+    if (lowerSlug.indexOf('dungeon-runner') >= 0) return 'dungeon-runner';
+    if (lowerSlug.indexOf('simon-says') >= 0) return 'simon-says';
+    if (lowerSlug.indexOf('solitaire') >= 0) return 'solitaire';
+    if (lowerSlug.indexOf('reaction-time') >= 0) return 'reaction-time';
+    if (lowerSlug.indexOf('dual-n-back') >= 0) return 'dual-n-back';
+    if (lowerSlug.indexOf('stroop-test') >= 0) return 'stroop-test';
+    if (lowerSlug.indexOf('typing-speed') >= 0) return 'typing-speed';
+    if (lowerSlug.indexOf('guided-breathing') >= 0) return 'guided-breathing';
+    if (lowerSlug.indexOf('procedural-maze') >= 0) return 'procedural-maze';
+    if (lowerSlug.indexOf('order-rush') >= 0) return 'order-rush';
     return lowerSlug;
 }

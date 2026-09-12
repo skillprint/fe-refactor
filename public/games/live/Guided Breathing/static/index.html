@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Guided Breathing</title>
+  <link rel="stylesheet" href="../../_shared/game.css">
+  <style>.stage{min-height:360px;background:transparent}
+#circle{width:clamp(120px,32vw,170px);height:clamp(120px,32vw,170px);border-radius:50%;background:radial-gradient(circle at 35% 35%,#a8e6ff,#4fc3f7 55%,#0288d1);box-shadow:0 0 60px rgba(79,195,247,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:scale(1);transition:transform 4s ease-in-out}
+#phase{font-size:1.15rem;font-weight:700;letter-spacing:2px;text-transform:uppercase}#count{font-size:2rem;font-weight:800}</style>
+</head>
+<body>
+  <h1>Guided Breathing</h1>
+  <div class="hud"><span><span class="icon">🔄</span><span id="hud-cycles">0</span> cycles</span><span><span class="icon">⏱</span><span id="hud-time">0:00 / 2:00</span></span></div>
+  <div class="stage">
+    <button id="play-btn" class="play-button">▶</button>
+    <div id="circle"><div id="phase">Ready</div><div id="count"></div></div>
+  </div>
+  <p id="msg" class="msg">Follow the circle: breathe in as it grows, hold, and breathe out as it shrinks.</p>
+  <script src="game.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="../../_shared/skillprintScreenshot.js"></script>
+</body>
+</html>

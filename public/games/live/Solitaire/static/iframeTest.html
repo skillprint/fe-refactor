@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Solitaire — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'solitaire',
+      params: [{name:'drawCount',default:1}],
+      presets: {1:{drawCount:1},2:{drawCount:2},3:{drawCount:3}},
+      readState: (w) => ({ drawCount: w.__solitaireDrawCount, timer: w.document.getElementById('timer')?.innerText, best: w.document.getElementById('best-time')?.innerText }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Reaction Time — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'reaction-time',
+      params: [{name:'difficultyMultiplier',default:1},{name:'attemptCount',default:5}],
+      presets: {1:{difficultyMultiplier:0.5,attemptCount:3},2:{difficultyMultiplier:0.75,attemptCount:4},3:{difficultyMultiplier:1.0,attemptCount:5},4:{difficultyMultiplier:1.25,attemptCount:6},5:{difficultyMultiplier:1.5,attemptCount:7},6:{attemptCount:10},7:{attemptCount:3}},
+      readState: (w) => ({ ...w.__reactionState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>
