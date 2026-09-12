@@ -117,10 +117,11 @@ this, and there's an admin API endpoint for setting them:
 GET/PUT/PATCH https://<marketplace-host>/scoring/api/games/<game-slug>/scoring-config/
 ```
 
-- Auth: Knox admin token, header `Authorization: Token <admin_knox_token>` (an admin/staff
-  `AccountUser`'s Knox token — same auth style as the existing `POST /games/api/games/` create
-  endpoint). This skill cannot mint that token itself; ask the user for one if it's not already
-  available in the environment.
+- Auth: a verified partner API key, header `X-Api-Key: <partner_api_key>` (no admin/Knox token
+  involved). The key scopes the request to that partner's own organization — it can only read or
+  write the scoring config for a game owned by that same organization, and 404s (not 403) on any
+  other game, including unowned platform catalog games. This skill cannot mint that key itself;
+  ask the user for one if it's not already available in the environment.
 - The prose mood-adjustment instructions map to the `adjustment_instructions` field (there's also
   `skill_adjustment_instructions` for the SKILL-optimization-target variant, if the game defines
   one).
@@ -139,7 +140,7 @@ Example `PATCH` body to publish the Hextris artifacts from this skill's worked e
 
 ```bash
 curl -X PATCH "https://<marketplace-host>/scoring/api/games/hextris/scoring-config/" \
-  -H "Authorization: Token <admin_knox_token>" \
+  -H "X-Api-Key: <partner_api_key>" \
   -H "Content-Type: application/json" \
   -d '{
     "adjustment_instructions": "You are adjusting parameters for Hextris, ...",
