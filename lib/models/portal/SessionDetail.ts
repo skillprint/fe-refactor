@@ -38,6 +38,15 @@ export interface SessionDetail {
   /** [] while scoring is still in flight; poll until it populates. */
   cognition: SessionDimensionScore[];
   personality: SessionPersonalityScore[] | null;
+  /**
+   * SKI-181: the game's own score for this session (points, as the game
+   * reported it on stop or in a chunk's game state); null when it reported none.
+   */
+  score: number | null;
+  /** The player's best score on this game before this session; null on a first play. */
+  previousBestScore: number | null;
+  /** True when `score` beats `previousBestScore` (or is a first scored play); false on a tie or with no score. */
+  isPersonalBest: boolean;
 }
 
 export const generateMockSessionDetail = (): SessionDetail => ({
@@ -63,4 +72,7 @@ export const generateMockSessionDetail = (): SessionDetail => ({
     { slug: 'deduction', score: 0, confidence: 0, isExercisedByGame: false, isEstimated: false },
   ],
   personality: [{ trait: 'openness', score: 68, confidence: 0.72 }],
+  score: 4120,
+  previousBestScore: 3421,
+  isPersonalBest: true,
 });

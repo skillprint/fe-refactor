@@ -4640,6 +4640,14 @@ html:is([data-theme="light"], [data-surface="light"]) :is(.page--ontology-wheel,
   letter-spacing: -0.02em;
 }
 
+/* SKI-166: a game that reported no score says so in words, not display digits. */
+.page--game-session .game-result__score-value[data-score-reported="false"] {
+  font-family: var(--font-ui);
+  font-size: var(--app-text-xl-font-size);
+  line-height: var(--app-text-xl-line-height);
+  letter-spacing: 0;
+}
+
 .page--game-session .game-result__score-note {
   line-height: var(--app-text-xs-line-height);
   color: color-mix(in srgb, var(--geistface-grey-200) 62%, transparent);

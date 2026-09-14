@@ -23,14 +23,18 @@ interface GameClientProps {
 }
 
 interface GameResults {
-    score?: number;
-    time?: number;
-    level?: number;
-    achievements?: string[];
-    accuracy?: number;
-    mistakes?: number;
-    bonus?: number;
+    /**
+     * The game's own score as it reported it on GAME_COMPLETE; null when it
+     * reported none (or the player exited early). Never invented (SKI-166).
+     */
+    score: number | null;
+    /** Seconds on the client clock; the dialog prefers the session's own duration once scored. */
+    time: number;
 }
+
+/** A finite number the game reported, or null. Strings and NaN are not scores. */
+const reportedScore = (value: unknown): number | null =>
+    typeof value === 'number' && Number.isFinite(value) ? value : null;
 
 export const SLUG_TO_DIR_MAP: Record<string, string> = {
     '0hh1': '0hh1',
@@ -138,7 +142,10 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     const [sequence, setSequence] = useState<SequenceState>('loading');
     const [isGamePaused, setIsGamePaused] = useState(false);
     const [gameResults, setGameResults] = useState<GameResults | null>(null);
-    const [sessionMood, setSessionMood] = useState<string>('Focus');
+    // The mood slug sent on session start (`localStorage.targetMood`, default
+    // focus). PlayBar, the results dialog and the mood survey all read this one
+    // value, so what the player sees is what the backend was told (SKI-166).
+    const [sessionMood, setSessionMood] = useState<string>(Mood.FOCUS);
     const [adjustmentsApplied, setAdjustmentsApplied] = useState<number>(0);
     const adjustmentsCountRef = useRef(0);
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
@@ -403,32 +410,39 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     const disableSdk = searchParams.get('sdk') === 'false';
     const devToolsEnabled = searchParams.get('dev') === 'true';
 
-    const handleGameComplete = (data: any) => {
-        const endTime = Date.now();
-        const playTime = Math.floor((endTime - gameStartTime) / 1000);
+    /**
+     * Close the Skillprint session. The last-chunk upload goes first: it is
+     * what triggers final scoring, and the backend refuses uploads to a closed
+     * session. `stop` then records the game's own score (SKI-181) so the
+     * results dialog and "Your record" can compare this run with earlier ones.
+     */
+    const finishSession = async (score: number | null) => {
+        const client = skillprintClientRef.current;
+        const sessionId = skillprintSessionIdRef.current;
+        if (!client || !sessionId) return;
+        try {
+            await client.postScreenshots(sessionId, [], true);
+        } catch (e) {
+            console.error('Failed to upload the final session chunk', e);
+        }
+        try {
+            await client.stopSession(sessionId, score);
+        } catch (e) {
+            console.error('Failed to stop the Skillprint session', e);
+        }
+    };
 
-        // Process the game completion data
-        const results: GameResults = {
-            score: data.score || Math.floor(Math.random() * 40) + 60, // Fallback score for demo
-            time: playTime,
-            level: data.level || 1,
-            achievements: data.achievements || generateAchievements(data.score || 70),
-            accuracy: data.accuracy || Math.floor(Math.random() * 30) + 70,
-            mistakes: data.mistakes || Math.floor(Math.random() * 5),
-            bonus: data.bonus || Math.floor(Math.random() * 20)
-        };
+    const handleGameComplete = (data: any) => {
+        const playTime = Math.floor((Date.now() - gameStartTime) / 1000);
+        // Only what the game reported. A game that sends no score gets
+        // "not reported" in the dialog, not a plausible-looking number.
+        const score = reportedScore(data?.score);
 
         shouldPollRef.current = false;
         stopIframe();
+        finishSession(score);
 
-        if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
-        }
-
-
-
-        // Navigate to review page with sessionId
-        setGameResults(results);
+        setGameResults({ score, time: playTime });
         setSequence('calculating');
         pollForFinalResults();
     };
@@ -441,26 +455,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             // remove iframe
             iframeRef.current.remove();
         }
-    };
-
-    const generateAchievements = (score: number): string[] => {
-        const achievements: string[] = [];
-
-        if (score >= 90) {
-            achievements.push('Perfect Score!', 'Master Player', 'Speed Demon');
-        } else if (score >= 80) {
-            achievements.push('Great Performance', 'Quick Thinker');
-        } else if (score >= 70) {
-            achievements.push('Good Effort', 'Getting Better');
-        } else if (score >= 50) {
-            achievements.push('Good Start', 'Keep Going');
-        } else if (score >= 30) {
-            achievements.push('First Steps', 'Learning');
-        } else {
-            achievements.push('Getting Started', 'Try Again');
-        }
-
-        return achievements;
     };
 
     const handlePlayAgain = () => {
@@ -487,30 +481,15 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         if (sequence === 'review' || sequence === 'calculating') {
             handleBackToGames();
         } else {
-            // If game is in progress, navigate to review page
+            // The player left before the game reported a score, so there is
+            // no score to show; the skill and mood reading still happens.
             const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
-
-            // Generate results based on current game state
-            const exitResults: GameResults = {
-                score: Math.max(0, Math.min(100, Math.floor(Math.random() * 40) + 40)), // Fallback score for demo
-                time: currentTime,
-                level: 1, // Default level for early exit
-                achievements: generateAchievements(40), // Default achievements for early exit
-                accuracy: Math.max(0, Math.min(100, Math.floor(Math.random() * 30) + 50)), // Default accuracy for early exit
-                mistakes: Math.floor(Math.random() * 3), // Default mistakes for early exit
-                bonus: Math.floor(Math.random() * 10) // Default bonus for early exit
-            };
 
             stopIframe();
             shouldPollRef.current = false;
+            finishSession(null);
 
-            if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
-            }
-
-
-
-            setGameResults(exitResults);
+            setGameResults({ score: null, time: currentTime });
             setSequence('calculating');
             pollForFinalResults();
         }
@@ -549,7 +528,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             skillprintClientRef.current = client;
 
             try {
-                const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
+                const targetMood = (localStorage.getItem('targetMood') || Mood.FOCUS).toLowerCase();
+                setSessionMood(targetMood);
                 const serverSideSlug = resolvedGame.serverSlug;
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
@@ -656,9 +636,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             {sequence === 'review' && gameResults && (
                 <GameResultDialog
                     gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
-                    score={gameResults.score || 0}
-                    highScore={0}
-                    duration={gameResults.time || 0}
+                    score={gameResults.score}
+                    duration={gameResults.time}
                     adjustmentsCount={adjustmentsApplied}
                     targetMood={sessionMood}
                     onReplay={handlePlayAgain}
