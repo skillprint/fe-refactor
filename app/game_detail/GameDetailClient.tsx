@@ -21,7 +21,7 @@ import { useTaxonomySkills } from '@/lib/models/portal/useTaxonomySkills';
 import { allTaxonomySkills, findTaxonomySkill } from '@/lib/models/portal/TaxonomySkills';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
-import { useProfileBadges } from '@/lib/models/portal/useProfileBadges';
+import { useLibraryGameBadges } from '@/lib/models/portal/useLibraryGameBadges';
 import type { LibraryGame } from '@/lib/models/portal/LibraryGame';
 import type { TaxonomySkillsResponse } from '@/lib/models/portal/TaxonomySkills';
 import { useRecommendedGames } from '@/app/hooks/useRecommendedGames';
@@ -30,7 +30,6 @@ import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { getGameConfig, getGameDetails } from '@/app/config/gameConfig';
 import { baseSlug } from '@/lib/gameSlug';
 import { DEFAULT_GAME_IMAGE, formatEstimatedDuration } from '@/lib/playbookUtils';
-import { getBadgeArt } from '@/lib/badgeArt';
 
 interface GameDetailClientProps {
   /** The `?game=` value: any slug form; the library detail resolves it. */
@@ -91,7 +90,7 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const { data: library } = useLibraryGame();
   const { data: taxonomy } = useTaxonomySkills();
   const { data: profile } = useProfileAggregate();
-  const { data: badges } = useProfileBadges();
+  const { data: gameBadges } = useLibraryGameBadges(canonicalSlug, synthetic);
   const { recommendedGames } = useRecommendedGames(10);
 
   const scores = useMemo(() => profileDimensionMap(profile), [profile]);
@@ -145,13 +144,9 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
 
   const isRecommended = !!game && recommendedGames.some((g: any) => g?.slug && baseSlug(g.slug) === game.baseSlug);
 
-  // A badge this game already earned the player (SKI-130). Which badge a game
-  // *can* earn, and progress toward it, waits on SKI-182; until then there is
-  // no locked state to show, so the card only renders for an earned badge.
-  const earnedBadge = useMemo(() => {
-    if (!game || !badges) return null;
-    return badges.badges.find((b) => b.gameSlug && baseSlug(b.gameSlug) === game.baseSlug) || null;
-  }, [game, badges]);
+  // The badges this game works toward and how far the player is (SKI-182);
+  // empty until the endpoint answers, so the card only renders with data.
+  const badges = gameBadges?.badges ?? [];
 
   if (notFound) {
     return (
@@ -372,17 +367,7 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
             skills={skillPills.slice(0, 3)}
           />
 
-          {earnedBadge && (
-            <GameDetailBadge
-              badgeName={earnedBadge.name}
-              animalName={earnedBadge.animalName}
-              points={earnedBadge.points}
-              art={getBadgeArt(earnedBadge)}
-              earnedAt={earnedBadge.earnedAt}
-              gameTitle={game.name}
-              gameImage={gameImage(game)}
-            />
-          )}
+          <GameDetailBadge badges={badges} gameTitle={game.name} gameImage={gameImage(game)} />
         </PortalPageRail>
       </PortalPageLayout>
     </PortalLayout>

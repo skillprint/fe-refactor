@@ -75,8 +75,9 @@ export function GameDetailRecord({
       : `Played ${community.totalSessions.toLocaleString()} times across Skillprint.`
     : null;
 
+  // The page rail (PortalPageRail) is the sticky container; a second nested
+  // rail here made this card stick on its own and slide over the badge card.
   return (
-    <aside className="portal-rail" aria-label="Your record">
       <article className="rail-card rail-card--record sp-card" aria-labelledby="gdRecord">
         <div className="rail-card__head">
           <h2 className="rail-card__title" id="gdRecord">Your record</h2>
@@ -172,6 +173,5 @@ export function GameDetailRecord({
           </div>
         )}
       </article>
-    </aside>
   );
 }
