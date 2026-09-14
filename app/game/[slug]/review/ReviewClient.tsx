@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUserSession } from '../../../hooks/useUserSession';
 import { useAuth } from '../../../context/AuthContext';
 import { getGameDetails } from '../../../config/gameConfig';
-import { getGameBySlug } from '../../../api/api';
+import { getCatalogGame } from '../../../api/api';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import FirstGameBadge from '../../../components/FirstGameBadge';
@@ -53,7 +53,7 @@ export default function ReviewClient({ slug, sessionId, playbookId }: ReviewClie
     useEffect(() => {
         const fetchGameData = async () => {
             try {
-                const data = await getGameBySlug(decodedSlug);
+                const data = await getCatalogGame(decodedSlug);
                 if (data) {
                     setGameApiData(data);
                 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -185,7 +186,7 @@ const allGames = [
   },
   {
     name: 'Space Trip',
-    slug: 'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20',
+    slug: 'space-trip',
     description: 'Explore space in this adventure',
     skills: ['pattern-matching', 'planning']
   },
@@ -370,7 +371,8 @@ function HomeContent() {
   const nextGames: NextUpGame[] = (nextGameRecs && nextGameRecs.length > 0)
     ? nextGameRecs.map(r => ({ slug: r.game.slug, name: r.game.name }))
     : recommendedGames.map((g: any) => ({ slug: g.slug, name: g.name }));
-  const nextUp = getNextUpCopy(count, nextGames.filter((g: NextUpGame) => g.slug && g.name));
+  // One entry per game: staging still carries a bare placeholder `hextris` beside the real record.
+  const nextUp = getNextUpCopy(count, dedupeByBaseSlug(nextGames.filter((g: NextUpGame) => g.slug && g.name)));
 
   const flowScores = playedSessions.map(s => s.primaryScore).filter((n): n is number => typeof n === 'number');
   const flowScore = flowScores.length ? Math.round(flowScores.reduce((a, b) => a + b, 0) / flowScores.length) : null;
@@ -492,7 +494,7 @@ function HomeContent() {
               {playedSessions.length > 0 ? (
                 <div className="game-rail game-rail--library">
                   {playedSessions.slice(0, 5).map((session, i) => {
-                    const known = allGames.find(g => g.slug === session.gameSlug);
+                    const known = allGames.find(g => baseSlug(g.slug) === baseSlug(session.gameSlug));
                     const details = getGameDetails(session.gameSlug);
                     return (
                       <GameTile

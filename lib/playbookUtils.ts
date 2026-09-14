@@ -1,6 +1,6 @@
 import type { GameTileProps } from '@/components/GameTile';
 import { getGameDetails } from '@/app/config/gameConfig';
-import { unifiedSlugFromBESlug } from '@/app/utils/slugUtils';
+import { baseSlug } from '@/lib/gameSlug';
 import type { PlaybookDetail, PlaybookGame, PlaybookSummary } from './models/portal/Playbooks';
 import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { titleFromSlug } from './skillIcons';
@@ -60,7 +60,7 @@ export function playbookGameUrl(gameSlug: string, playbookSlug: string): string 
 
 export function playbookGameImage(game: Pick<PlaybookGame, 'slug' | 'image'>): string {
   if (game.image) return game.image;
-  const local = getGameDetails(unifiedSlugFromBESlug(game.slug));
+  const local = getGameDetails(baseSlug(game.slug));
   return local?.image || DEFAULT_GAME_IMAGE;
 }
 
@@ -78,7 +78,7 @@ export function playbookGameToTile(
   return {
     id: game.slug,
     title: game.title,
-    description: game.description || getGameDetails(unifiedSlugFromBESlug(game.slug))?.description || '',
+    description: game.description || getGameDetails(baseSlug(game.slug))?.description || '',
     image: playbookGameImage(game),
     url: playbookGameUrl(game.slug, playbook.slug),
     duration: formatEstimatedDuration(game.estimatedDurationSeconds),

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
-import { getGameBySlug } from '../../../api/api';
+import { getCatalogGame } from '../../../api/api';
 import { getAdaptiveParametersForGame } from '../../../utils/adaptiveParameters';
 
 const SKILL_ICONS: Record<string, string> = {
@@ -51,7 +51,7 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
     useEffect(() => {
         const fetchGameData = async () => {
             try {
-                const data = await getGameBySlug(decodedSlug);
+                const data = await getCatalogGame(decodedSlug);
                 if (data) {
                     setGameApiData(data);
                 }

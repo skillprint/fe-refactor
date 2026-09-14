@@ -6,7 +6,7 @@ import { FallbackImage } from '../FallbackImage';
 import { useProfileBadges } from '../../lib/models/portal/useProfileBadges';
 import { getBadgeArt } from '../../lib/badgeArt';
 import { getGameDetails } from '../../app/config/gameConfig';
-import { unifiedSlugFromBESlug } from '../../app/utils/slugUtils';
+import { baseSlug } from '@/lib/gameSlug';
 
 function formatRelativeDate(dateString: string): string {
   if (!dateString) return '';
@@ -55,7 +55,7 @@ export default function ProfileBadges() {
       <div className="pp-badge-grid" data-pp-badges hidden={!hasBadges}>
         {badges.map((badge) => {
           const art = getBadgeArt(badge);
-          const localGame = badge.gameSlug ? getGameDetails(unifiedSlugFromBESlug(badge.gameSlug)) : null;
+          const localGame = badge.gameSlug ? getGameDetails(baseSlug(badge.gameSlug)) : null;
           return (
             <article className="pp-badge-card sp-card" key={`${badge.slug}-${badge.earnedAt}`}>
               <figure className="sp-badge sp-badge--lg" data-badge={badge.slug} data-earned="true" data-seen={badge.seen ? 'true' : 'false'}>

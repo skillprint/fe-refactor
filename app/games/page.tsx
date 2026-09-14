@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useGamesBySkill } from '../hooks/useGamesBySkill';
-import { unifiedSlugFromBESlug } from '../utils/slugUtils';
+import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
 import { newGameSlugs } from '../config/newGames';
 import BuckyballLoading from '../components/BuckyballLoading';
 import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
@@ -69,7 +69,7 @@ function GamesPageContent() {
   // Get all unique games
   const allAvailableGames = useMemo(() => {
     const combined = [...gamesBySkill, ...gamesByMood];
-    const unique = Array.from(new Map(combined.map(item => [item.slug, item])).values());
+    const unique = dedupeByBaseSlug(combined);
     return unique.filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug));
   }, [gamesBySkill, gamesByMood]);
 
@@ -96,7 +96,7 @@ function GamesPageContent() {
 
   if (isNewFilter) {
     filteredGames = filteredGames.filter((game: any) =>
-      newGameSlugs.includes(unifiedSlugFromBESlug(game.slug))
+      newGameSlugs.includes(baseSlug(game.slug))
     );
   }
 

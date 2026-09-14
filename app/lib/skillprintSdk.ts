@@ -126,11 +126,6 @@ export class SkillprintClient {
     private readonly GET_USER_TOKEN_ENDPOINT = '/partners/api/users/auth/token/';
     private readonly GET_USER_PROFILE_ENDPOINT = '/scoring/api/profiles/';
 
-    private readonly GAME_SLUG_TO_NAME_MAP: Record<string, string> = {
-        'gummy-blocks': "gummy-blocks-018b6d5d-9048-40aa-b79a-b7e4435ddb9a"
-    };
-
-
     constructor(options: SkillprintConfigOptions) {
         this.baseUrl = options.baseUrl.replace(/\/$/, '');
         this.apiKey = options.apiKey;
@@ -191,11 +186,10 @@ export class SkillprintClient {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
-        const slugToGameId = this.GAME_SLUG_TO_NAME_MAP[gameName] || gameName;
-
+        // Callers pass the canonical catalog slug (see lib/gameSlug resolveCatalogGame).
         const requestData: StartSessionRequest = {
             sessionId,
-            game: slugToGameId,
+            game: gameName,
             targetMood,
             ...(gameParameters && gameParameters.length ? { gameParameters } : {})
         };

@@ -1,5 +1,6 @@
 'use client';
 
+import { baseSlug } from '@/lib/gameSlug';
 import React, { useState, useEffect, use, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -48,8 +49,9 @@ export default function CorporatePlaybookDetailPage({
         const seenSlugs = new Set();
         
         gamesBySkill.forEach((g: any) => {
-            if (!seenSlugs.has(g.slug) && !BLACKLISTED_GAMES.includes(g.slug)) {
-                seenSlugs.add(g.slug);
+            const key = baseSlug(g.slug);
+            if (!seenSlugs.has(key) && !BLACKLISTED_GAMES.includes(g.slug)) {
+                seenSlugs.add(key);
                 uniqueCatalogGames.push({
                     id: g.slug,
                     title: g.name,

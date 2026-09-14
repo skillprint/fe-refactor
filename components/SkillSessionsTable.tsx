@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import type { SkillCatalogEntry } from '@/lib/skillCatalog';
 import type { LongitudinalMetric } from '@/lib/models/portal/LongitudinalMetric';
 import { usePaginatedSession } from '@/lib/models/portal/usePaginatedSession';
-import { unifiedSlugFromBESlug } from '@/app/utils/slugUtils';
+import { baseSlug } from '@/lib/gameSlug';
 import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { titleFromSlug } from '@/lib/skillIcons';
 
@@ -40,12 +40,12 @@ export function SkillSessionsTable({ skill, metric }: SkillSessionsTableProps) {
   // targeted the mood).
   const rows = useMemo(() => {
     const results = data?.results || [];
-    const trainingSlugs = new Set((metric?.gamesThatTrainThis || []).map((g) => unifiedSlugFromBESlug(g.slug)));
-    const tileSlugs = new Set(skill.gameTiles.map((g) => unifiedSlugFromBESlug(g.id)));
+    const trainingSlugs = new Set((metric?.gamesThatTrainThis || []).map((g) => baseSlug(g.slug)));
+    const tileSlugs = new Set(skill.gameTiles.map((g) => baseSlug(g.id)));
     return results
       .filter((s) => {
         if (skill.pillar === 'mood' && s.primaryMood === skill.id) return true;
-        const slug = unifiedSlugFromBESlug(s.gameSlug || '');
+        const slug = baseSlug(s.gameSlug || '');
         return trainingSlugs.has(slug) || tileSlugs.has(slug);
       })
       .slice(0, MAX_ROWS);
