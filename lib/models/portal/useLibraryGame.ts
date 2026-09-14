@@ -1,70 +1,54 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
 import { LibraryGame, generateMockLibraryGames } from './LibraryGame';
+import { portalFetch } from './portalFetch';
 
-import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api/portal`;
-
+/**
+ * The library games list (SKI-179): active, PWA-playable, publicly listed,
+ * one record per base slug. Public for the SPA origin, so fetched on mount;
+ * the Knox token is sent when we have one and only triggers a retry when the
+ * anonymous request failed.
+ */
 export function useLibraryGame(useSyntheticData: boolean = false) {
-    const { userToken } = useUserSession();
-    const [data, setData] = useState<LibraryGame[] | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+  const { userToken } = useUserSession();
+  const [data, setData] = useState<LibraryGame[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  // A token arriving while the anonymous request is in flight must not start a second one.
+  const inFlight = useRef(false);
 
-    const fetchData = useCallback(async () => {
-        if (useSyntheticData) {
-            setIsLoading(true);
-            setTimeout(() => {
-                setData(generateMockLibraryGames());
-                setIsLoading(false);
-            }, 500); // Simulate network delay
-            return;
-        }
+  const fetchData = useCallback(async () => {
+    if (useSyntheticData) {
+      setData(generateMockLibraryGames());
+      setIsLoading(false);
+      return null;
+    }
+    if (inFlight.current) return null;
+    inFlight.current = true;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const json = await portalFetch<LibraryGame[] | { results: LibraryGame[] }>('/library/games/', userToken);
+      const games = Array.isArray(json) ? json : json?.results || [];
+      setData(games);
+      return games;
+    } catch (err: any) {
+      console.error('Failed to fetch library games:', err);
+      setError(err);
+      return null;
+    } finally {
+      inFlight.current = false;
+      setIsLoading(false);
+    }
+  }, [userToken, useSyntheticData]);
 
-        if (!userToken) {
-            console.warn('No user token available to fetch useLibraryGame.');
-            return null;
-        }
+  useEffect(() => {
+    if (data && !error) return;
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userToken, useSyntheticData]);
 
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await fetch(`${BASE_URL}/library/games/`, {
-                headers: {
-                    'Authorization': `Token ${userToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch useLibraryGame: ${response.status}`);
-            }
-
-            const json = await response.json();
-            setData(json);
-            return json;
-        } catch (err: any) {
-            console.error('Failed to fetch useLibraryGame:', err);
-            setError(err);
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [userToken, useSyntheticData]);
-
-    useEffect(() => {
-        if (useSyntheticData || userToken) {
-            fetchData();
-        }
-    }, [useSyntheticData, userToken, fetchData]);
-
-    return {
-        data,
-        isLoading,
-        error,
-        refetch: fetchData
-    };
+  return { data, isLoading, error, refetch: fetchData };
 }
