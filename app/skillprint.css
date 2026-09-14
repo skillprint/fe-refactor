@@ -8412,6 +8412,13 @@ html:is([data-theme="dark"], [data-surface="dark"]) .page--portal-profile-embed 
 }
 
 
+/* The card is iframed at 420px, where the page-level grid utilities collapse
+   to one column; three stacked stat tiles plus the trait list would overflow
+   the fixed 560px height, so keep the stats on one row here. */
+.page--portal-profile-embed .embed-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .page--portal-profile-embed .embed-stat strong {
   margin-block-start: 2px;
   font-size: var(--app-text-sm-font-size);
@@ -8429,11 +8436,6 @@ html:is([data-theme="dark"], [data-surface="dark"]) .page--portal-profile-embed 
 html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile-embed .embed-trait .sp-progress__fill {
   background: var(--personality-mint-700);
 }
-
-
-.page--portal-profile-embed .embed-trait[data-score="82"] .sp-progress__fill { inline-size: 82%; }
-.page--portal-profile-embed .embed-trait[data-score="76"] .sp-progress__fill { inline-size: 76%; }
-.page--portal-profile-embed .embed-trait[data-score="71"] .sp-progress__fill { inline-size: 71%; }
 
 
 .page--portal-profile-embed .embed-empty {
