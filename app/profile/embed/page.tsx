@@ -3,52 +3,36 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SkillprintClient } from '../../lib/skillprintSdk';
-import { getVisualizeMoodProfile, getVisualizeSkillProfile } from '../../api/api';
 import SkillprintVisualization from '../../components/Skillprint';
+import spBaseState from '../../components/Skillprint/spData';
 import BuckyballLoading from '../../components/BuckyballLoading';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import EmbedCard from '@/components/Profile/EmbedCard';
+import { portalFetch } from '@/lib/models/portal/portalFetch';
+import { HomeSummary, generateMockHomeSummary } from '@/lib/models/portal/HomeSummary';
+import { HomeJustPlayed, generateMockHomeJustPlayed } from '@/lib/models/portal/HomeJustPlayed';
+import { PaginatedSession, generateMockPaginatedSession } from '@/lib/models/portal/PaginatedSession';
+import { ProfileAggregate, generateMockProfileAggregate } from '@/lib/models/portal/ProfileAggregate';
+import { ProfileTrendsResponse, generateMockProfileTrends } from '@/lib/models/portal/ProfileTrends';
+import { TaxonomySkillsResponse, generateMockTaxonomySkills } from '@/lib/models/portal/TaxonomySkills';
+import { buildEmbedData, EmbedData } from './buildEmbedData';
 
-const USER_SKILLS = [
-  'Problem Solving',
-  'Memory',
-  'Speed',
-  'Accuracy',
-  'Pattern Recognition',
-  'Spatial Awareness',
-  'Logic',
-  'Creativity'
-];
+/** How many skill / mood nodes the static graph can label. */
+const GRAPH_SLOTS = {
+  skills: spBaseState.spAttrs.filter((a) => a.group === 'skills').length,
+  moods: spBaseState.spAttrs.filter((a) => a.group === 'mindsets').length,
+};
 
-const USER_MOODS = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
+/** Optional fetch: a failure (or an empty body) leaves the slot null. */
+function settled<T>(result: PromiseSettledResult<T>): T | null {
+  return result.status === 'fulfilled' ? result.value : null;
+}
 
 function EmbedProfileContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [visualizationData, setVisualizationData] = useState<{
-    hasScoreBySkill: { [key: string]: boolean };
-    hasScoreByMood: { [key: string]: boolean };
-    nodeDataMap: { [key: string]: any };
-  } | null>(null);
-
-  const [embedProps, setEmbedProps] = useState<any>({
-    userName: 'Player',
-    flowMedian: 72,
-    flowBest: 82,
-    stats: [
-      { label: 'Flow', value: 72 },
-      { label: 'Sessions', value: 8 },
-      { label: 'Played', value: '1h 12m' }
-    ],
-    traits: [
-      { traitName: 'Pattern Matching', score: 82, iconId: 'ti-cognition-pattern-matching' },
-      { traitName: 'Task Switching', score: 76, iconId: 'ti-cognition-task-switching' },
-      { traitName: 'Planning', score: 71, iconId: 'ti-cognition-planning' },
-    ],
-    targetMood: 'Focus',
-    streakDays: 4,
-  });
+  const [embed, setEmbed] = useState<EmbedData | null>(null);
 
   const [size, setSize] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,245 +64,83 @@ function EmbedProfileContent() {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateSize);
     };
-  }, []);
+  }, [embed]);
 
   const userTokenParam = searchParams.get('userToken');
   const userIdParam = searchParams.get('userId');
   const apiKeyParam = searchParams.get('apiKey');
+  // Dev-only: render the card from the portal mock payloads (same convention as /dev/game-result).
+  const synthetic = process.env.NODE_ENV !== 'production' && searchParams.get('synthetic') === '1';
 
-  // Fetch token and profile data
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
-      console.log('loadData started. userTokenParam:', userTokenParam, 'userIdParam:', userIdParam, 'apiKeyParam:', apiKeyParam);
       setIsLoading(true);
       setError(null);
 
-      const apiKey = apiKeyParam || process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
-      const baseUrl = getApiBaseUrl();
+      if (synthetic) {
+        setEmbed(buildEmbedData({
+          profile: generateMockProfileAggregate(),
+          summary: generateMockHomeSummary(),
+          sessions: generateMockPaginatedSession(),
+          justPlayed: generateMockHomeJustPlayed(),
+          trends: generateMockProfileTrends(),
+          taxonomy: generateMockTaxonomySkills(),
+          graphSlots: GRAPH_SLOTS,
+        }));
+        setIsLoading(false);
+        return;
+      }
+
+      const apiKey = apiKeyParam || process.env.NEXT_PUBLIC_API_KEY || '';
 
       if (!userTokenParam && !userIdParam) {
-        console.warn('Authentication parameters are missing from URL.');
         setError(new Error('Missing authentication parameters. Please provide either "userToken" or "userId" in the URL query parameters.'));
         setIsLoading(false);
         return;
       }
 
       try {
-        let finalToken = userTokenParam;
-
-        const client = new SkillprintClient({
-          apiKey: apiKey,
-          baseUrl: baseUrl,
-          logger: (msg, level) => {
-            console.log(`[Embed Profile SDK] [${level}] ${msg}`);
-          }
-        });
-
-        // 1. Resolve user token from userId if token not provided directly
-        if (!finalToken && userIdParam) {
-          console.log('Resolving userToken for userId via SDK...', userIdParam);
-          const token = await client.createOrGetUserToken(userIdParam);
-          console.log('Token resolved:', token);
-          if (!token) {
-            throw new Error('Failed to retrieve or create user token for the provided userId.');
-          }
-          finalToken = token;
+        // 1. Resolve a Knox token: either passed directly, or minted for the partner's user id.
+        let token = userTokenParam;
+        if (!token && userIdParam) {
+          const client = new SkillprintClient({ apiKey, baseUrl: getApiBaseUrl() });
+          token = await client.createOrGetUserToken(userIdParam);
         }
-
-        if (!finalToken) {
+        if (!token) {
           throw new Error('Failed to resolve user token.');
         }
 
-        // Configure client with userToken
-        client.setUserToken(finalToken);
+        // 2. Portal reads. Only the lifetime profile is required; the rest degrade to placeholders.
+        const [profile, summary, sessions, justPlayed, trends, taxonomy] = await Promise.allSettled([
+          portalFetch<ProfileAggregate>('/profile/', token),
+          portalFetch<HomeSummary>('/home/summary/', token),
+          portalFetch<PaginatedSession>('/sessions/?limit=50', token),
+          portalFetch<HomeJustPlayed>('/home/just-played/', token),
+          portalFetch<ProfileTrendsResponse>('/profile/trends/?period=weekly&points=2', token),
+          portalFetch<TaxonomySkillsResponse>('/taxonomy/skills/', token),
+        ]);
 
-        // 2. Fetch profiles. Only client.getUserProfile() is core/blocking.
-        console.log('Fetching core profile from SDK using token:', finalToken);
-        let profileResponse = null;
-        try {
-          profileResponse = await client.getUserProfile();
-          console.log('Core profile fetched successfully:', profileResponse);
-        } catch (e) {
-          console.error('Blocking error: Failed to fetch core user profile:', e);
-          throw e; // Rethrow to show the calm error display for core failures
+        if (profile.status === 'rejected') {
+          throw profile.reason instanceof Error ? profile.reason : new Error(String(profile.reason));
         }
 
-        console.log('Fetching optional mood profile...');
-        let moodProfile = null;
-        try {
-          moodProfile = await getVisualizeMoodProfile(finalToken, apiKey);
-          console.log('Optional mood profile fetched successfully:', moodProfile);
-        } catch (e) {
-          console.warn('Non-blocking: Failed to fetch mood visualization profile:', e);
-        }
+        if (!isMounted) return;
 
-        console.log('Fetching optional skill profile...');
-        let skillProfile = null;
-        try {
-          skillProfile = await getVisualizeSkillProfile(finalToken, apiKey);
-          console.log('Optional skill profile fetched successfully:', skillProfile);
-        } catch (e) {
-          console.warn('Non-blocking: Failed to fetch skill visualization profile:', e);
-        }
-
-        console.log('Checking component mount state. isMounted =', isMounted);
-        if (!isMounted) {
-          console.warn('Component was unmounted before state could be set.');
-          return;
-        }
-
-        // Process profile response history to obtain latest moods (matching skillprint.tsx layout)
-        let processedProfile: any = null;
-        if (profileResponse && profileResponse.results && profileResponse.results.length > 0) {
-          const p = profileResponse.results[0];
-          const history = p.flowScoreHistory || [];
-          const latestMoodsMap = new Map();
-          history.forEach((entry: any) => {
-            const mood = entry.targetMood;
-            const current = latestMoodsMap.get(mood);
-            if (!current || new Date(entry.timestamp) > new Date(current.timestamp)) {
-              latestMoodsMap.set(mood, entry);
-            }
-          });
-          processedProfile = { ...p, latestMoods: Array.from(latestMoodsMap.values()) };
-        }
-
-        // Map data using visualization parsing rules
-        const hasScoreBySkill: { [key: string]: boolean } = {};
-        const nodeDataBySkill: { [key: string]: any } = {};
-
-        if (skillProfile?.yearlySummary && Array.isArray(skillProfile.yearlySummary)) {
-          skillProfile.yearlySummary.forEach((item: any) => {
-            const skillKey = item.skill || item.mood;
-            if (typeof skillKey === 'string') {
-              const capitalizedSkill = skillKey.charAt(0).toUpperCase() + skillKey.slice(1);
-              nodeDataBySkill[capitalizedSkill] = {
-                yearly: item,
-                weekly: Array.isArray(skillProfile.weeklySessions) ? skillProfile.weeklySessions : [],
-              };
-              nodeDataBySkill[skillKey.toLowerCase()] = nodeDataBySkill[capitalizedSkill];
-              hasScoreBySkill[capitalizedSkill] = true;
-              hasScoreBySkill[skillKey.toLowerCase()] = true;
-            }
-          });
-        }
-
-        if (skillProfile?.currentSession) {
-          const key = skillProfile.currentSession.skill || skillProfile.currentSession.targetMood;
-          if (key && typeof key === 'string') {
-            const capitalizedSkill = key.charAt(0).toUpperCase() + key.slice(1);
-            if (!nodeDataBySkill[capitalizedSkill]) {
-              nodeDataBySkill[capitalizedSkill] = { yearly: null, weekly: [], current: skillProfile.currentSession };
-              nodeDataBySkill[key.toLowerCase()] = nodeDataBySkill[capitalizedSkill];
-              hasScoreBySkill[capitalizedSkill] = true;
-              hasScoreBySkill[key.toLowerCase()] = true;
-            } else {
-              nodeDataBySkill[capitalizedSkill].current = skillProfile.currentSession;
-              nodeDataBySkill[key.toLowerCase()].current = skillProfile.currentSession;
-            }
-          }
-        }
-
-        const hasScoreByMood: { [key: string]: boolean } = {};
-        const nodeDataByMood: { [key: string]: any } = {};
-
-        if (processedProfile?.latestMoods) {
-          processedProfile.latestMoods.forEach((m: any) => {
-            if (!m || !m.targetMood) return;
-            hasScoreByMood[m.targetMood.charAt(0).toUpperCase() + m.targetMood.slice(1)] = true;
-            hasScoreByMood[m.targetMood.toLowerCase()] = true;
-          });
-        }
-
-        if (moodProfile?.yearlySummary && Array.isArray(moodProfile.yearlySummary)) {
-          moodProfile.yearlySummary.forEach((item: any) => {
-            const moodKey = item.mood;
-            if (typeof moodKey === 'string') {
-              const capitalizedMood = moodKey.charAt(0).toUpperCase() + moodKey.slice(1);
-              nodeDataByMood[capitalizedMood] = {
-                yearly: item,
-                weekly: Array.isArray(moodProfile.weeklySessions) ? moodProfile.weeklySessions : [],
-              };
-              nodeDataByMood[moodKey.toLowerCase()] = nodeDataByMood[capitalizedMood];
-              hasScoreByMood[capitalizedMood] = true;
-              hasScoreByMood[moodKey.toLowerCase()] = true;
-            }
-          });
-        }
-
-        if (moodProfile?.currentSession) {
-          const key = moodProfile.currentSession.mood || moodProfile.currentSession.targetMood;
-          if (key && typeof key === 'string') {
-            const capitalizedMood = key.charAt(0).toUpperCase() + key.slice(1);
-            if (!nodeDataByMood[capitalizedMood]) {
-              nodeDataByMood[capitalizedMood] = { yearly: null, weekly: [], current: moodProfile.currentSession };
-              nodeDataByMood[key.toLowerCase()] = nodeDataByMood[capitalizedMood];
-              hasScoreByMood[capitalizedMood] = true;
-              hasScoreByMood[key.toLowerCase()] = true;
-            } else {
-              nodeDataByMood[capitalizedMood].current = moodProfile.currentSession;
-              nodeDataByMood[key.toLowerCase()].current = moodProfile.currentSession;
-            }
-          }
-        }
-
-        console.log(hasScoreBySkill, hasScoreByMood, nodeDataBySkill, nodeDataByMood, "TEST 2");
-
-        setVisualizationData({
-          hasScoreBySkill,
-          hasScoreByMood,
-          nodeDataMap: { ...nodeDataBySkill, ...nodeDataByMood }
-        });
-
-        // Compute stats and traits for EmbedCard
-        const userName = profileResponse?.results?.[0]?.name || profileResponse?.results?.[0]?.username || profileResponse?.results?.[0]?.id || "Player";
-        const sessions = profileResponse?.results?.[0]?.flowScoreHistory?.length || 8;
-        let extractedTraits: any[] = [];
-        if (skillProfile?.yearlySummary && Array.isArray(skillProfile.yearlySummary)) {
-           const sorted = [...skillProfile.yearlySummary].sort((a, b) => (b.score || b.progress || 0) - (a.score || a.progress || 0));
-           extractedTraits = sorted.slice(0, 3).map(t => {
-               const name = (t.skill || t.mood || '').replace(/-/g, ' ');
-               const capName = name.charAt(0).toUpperCase() + name.slice(1);
-               const score = Math.round((t.score || t.progress || 0) * 100) || 0;
-               return {
-                  traitName: capName,
-                  score,
-                  iconId: `ti-cognition-${name.toLowerCase().replace(/ /g, '-')}` 
-               };
-           });
-        }
-        
-        if (extractedTraits.length === 0) {
-            extractedTraits = [
-              { traitName: 'Pattern Matching', score: 82, iconId: 'ti-cognition-pattern-matching' },
-              { traitName: 'Task Switching', score: 76, iconId: 'ti-cognition-task-switching' },
-              { traitName: 'Planning', score: 71, iconId: 'ti-cognition-planning' },
-            ];
-        }
-
-        const topMood = processedProfile?.latestMoods?.[0]?.targetMood || "Focus";
-        const capTargetMood = topMood.charAt(0).toUpperCase() + topMood.slice(1);
-
-        setEmbedProps({
-           userName: userName,
-           flowMedian: 72,
-           flowBest: 82,
-           stats: [
-              { label: 'Flow', value: 72 },
-              { label: 'Sessions', value: sessions },
-              { label: 'Played', value: '1h 12m' }
-           ],
-           traits: extractedTraits,
-           targetMood: capTargetMood,
-           streakDays: 4
-        });
-
+        setEmbed(buildEmbedData({
+          profile: profile.value,
+          summary: settled(summary),
+          sessions: settled(sessions),
+          justPlayed: settled(justPlayed),
+          trends: settled(trends),
+          taxonomy: settled(taxonomy),
+          graphSlots: GRAPH_SLOTS,
+        }));
       } catch (err: any) {
         console.error('Failed to load embed profile data:', err);
         if (isMounted) {
-          setError(err);
+          setError(err instanceof Error ? err : new Error(String(err)));
         }
       } finally {
         if (isMounted) {
@@ -332,48 +154,43 @@ function EmbedProfileContent() {
     return () => {
       isMounted = false;
     };
-  }, [userTokenParam, userIdParam, apiKeyParam]);
-
-  console.log(error, visualizationData, "TEST");
+  }, [userTokenParam, userIdParam, apiKeyParam, synthetic]);
 
   return (
-    <div
-      className="w-screen h-screen flex items-center justify-center overflow-hidden bg-transparent m-0 p-0"
-    >
-      {isLoading ? (
+    <div className="page--portal-profile-embed w-screen h-screen flex items-center justify-center overflow-hidden bg-transparent m-0 p-0">
+      {isLoading || (!error && !embed) ? (
         <BuckyballLoading />
       ) : error ? (
-        <EmbedCard 
-            error={error} 
-            onRetry={() => window.location.reload()} 
+        <EmbedCard
+          error={error}
+          onRetry={() => window.location.reload()}
         />
-      ) : visualizationData ? (
-        <EmbedCard 
-            userName={embedProps.userName}
-            flowMedian={embedProps.flowMedian}
-            flowBest={embedProps.flowBest}
-            stats={embedProps.stats}
-            traits={embedProps.traits}
-            targetMood={embedProps.targetMood}
-            streakDays={embedProps.streakDays}
-            visualizationNode={
-                <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
-                    <SkillprintVisualization
-                        userSkills={USER_SKILLS}
-                        userMoods={USER_MOODS}
-                        hasScoreBySkill={visualizationData.hasScoreBySkill}
-                        hasScoreByMood={visualizationData.hasScoreByMood}
-                        nodeDataMap={visualizationData.nodeDataMap}
-                        size={size > 0 ? size : 200}
-                        useSizeDirectly={true}
-                        interactive={false}
-                    />
-                </div>
-            }
+      ) : embed ? (
+        <EmbedCard
+          userName={embed.userName}
+          summaryText={embed.summaryText}
+          momentumText={embed.momentumText}
+          flowMedian={embed.flowMedian}
+          flowBest={embed.flowBest}
+          stats={embed.stats}
+          traits={embed.traits}
+          targetMood={embed.targetMood}
+          streakDays={embed.streakDays}
+          visualizationNode={
+            <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
+              <SkillprintVisualization
+                userSkills={embed.graph.userSkills}
+                userMoods={embed.graph.userMoods}
+                hasScoreBySkill={embed.graph.hasScoreBySkill}
+                hasScoreByMood={embed.graph.hasScoreByMood}
+                size={size > 0 ? size : 200}
+                useSizeDirectly={true}
+                interactive={false}
+              />
+            </div>
+          }
         />
-      ) : (
-        <BuckyballLoading />
-      )}
+      ) : null}
     </div>
   );
 }

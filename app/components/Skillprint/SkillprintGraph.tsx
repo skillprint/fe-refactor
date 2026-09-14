@@ -153,7 +153,7 @@ const SkillprintGraph: React.FC<SkillprintGraphProps> = ({
                                 />
                             )}
                             <text
-                                transform={ss.text.transform + (isHovered ? ' scale(1.3)' : 'scale(1)')}
+                                transform={(ss.text.transform ?? '') + (isHovered ? ' scale(1.3)' : ' scale(1)')}
 
                                 fill={ss.text.fill}
                                 fontFamily="Inter, sans-serif"
