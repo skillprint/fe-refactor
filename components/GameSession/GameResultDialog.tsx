@@ -22,10 +22,17 @@ const displayName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug
 
 interface GameResultDialogProps {
   gameTitle: string;
-  score: number;
-  highScore?: number;
-  duration: number; // in seconds
+  /**
+   * The game's own score as reported on completion; null when it reported none
+   * (SKI-166). Once the session detail loads, its `score` takes precedence.
+   */
+  score: number | null;
+  /** Previous best to compare against; the session detail's `previousBestScore` takes precedence. Dev use. */
+  previousBestScore?: number | null;
+  /** Seconds on the client clock; the session's own `durationSeconds` takes precedence once scored. */
+  duration: number;
   adjustmentsCount: number;
+  /** Mood slug sent on session start (`focus`); one source of truth for the heading, question and survey POST. */
   targetMood: string;
   onReplay: () => void;
   skillScores?: SkillScores;
@@ -40,7 +47,7 @@ interface GameResultDialogProps {
 export default function GameResultDialog({
   gameTitle,
   score,
-  highScore = 0,
+  previousBestScore = null,
   duration,
   adjustmentsCount,
   targetMood,
@@ -55,32 +62,34 @@ export default function GameResultDialog({
   const { data: session, isProcessing } = useComputedGameMetrics(sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
+  const [surveyError, setSurveyError] = useState<string | null>(null);
   // SKI-140: skills the game did not exercise stay behind a toggle by default.
   const [showAllSkills, setShowAllSkills] = useState(false);
 
-  const handleSurveySubmit = async (score: number) => {
+  // The mood the backend scored against, falling back to the one we sent it.
+  const targetMoodSlug = (session?.mood?.targetMood || targetMood).toLowerCase();
+  const targetMoodLabel = displayName(targetMoodSlug);
+
+  const handleSurveySubmit = async (answer: number) => {
+    // SKI-166: success only on a 2xx. Without a game or a signed-in session
+    // there is nothing to send, and saying "thanks" would be a lie.
     if (!gameSlug || !userToken) {
-      // If we don't have the necessary data, just simulate success for the UI
-      setIsSubmittingSurvey(true);
-      setTimeout(() => {
-        setSurveySubmitted(true);
-        setIsSubmittingSurvey(false);
-      }, 500);
+      setSurveyError('We could not record your answer because this session is not signed in.');
       return;
     }
 
     setIsSubmittingSurvey(true);
+    setSurveyError(null);
     try {
       await submitMoodSurvey({
-        score,
+        score: answer,
         game: gameSlug.toLowerCase(),
-        mood: targetMood
+        mood: targetMoodSlug
       }, userToken);
       setSurveySubmitted(true);
     } catch (error) {
       console.error('Failed to submit survey:', error);
-      // Still show submitted to prevent getting stuck
-      setSurveySubmitted(true);
+      setSurveyError('We could not save your answer. Please try again.');
     } finally {
       setIsSubmittingSurvey(false);
     }
@@ -99,8 +108,31 @@ export default function GameResultDialog({
     return 'red';
   };
 
-  const scoreDiff = score - highScore;
-  const isNewBest = score > highScore && highScore > 0;
+  // The SDK's own metrics are on 0–1; everything the dialog shows is out of 100.
+  const to100 = (value: number) => (value <= 1 ? value * 100 : value);
+
+  // Game score (SKI-181). The session detail is the source of truth once the
+  // stop call has landed; until then the score the game reported on completion
+  // stands in. Nothing here is invented: a game that reported no score reads
+  // "not reported".
+  const gameScore = session?.score ?? score;
+  const previousBest = session ? session.previousBestScore : previousBestScore;
+  const isNewBest = session?.score != null
+    ? session.isPersonalBest
+    : gameScore != null && (previousBest == null || gameScore > previousBest);
+  const scoreDiff = gameScore != null && previousBest != null ? gameScore - previousBest : null;
+  const scoreNote = gameScore == null
+    ? `${gameTitle} did not report a score for this session. The skill and mood scores below do not depend on it.`
+    : scoreDiff == null
+      ? `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`
+      : scoreDiff > 0
+        ? `+${scoreDiff.toLocaleString()} on your previous best of ${previousBest!.toLocaleString()}`
+        : scoreDiff === 0
+          ? `Matches your previous best of ${previousBest!.toLocaleString()}`
+          : `${Math.abs(scoreDiff).toLocaleString()} below your best of ${previousBest!.toLocaleString()}`;
+
+  // Session duration as the backend measured it; the client clock until then.
+  const durationSeconds = session?.durationSeconds || duration;
 
   // Skill scores (SKI-132). The session endpoint is the source of truth: when a
   // game emitted no cognition scores the backend substitutes estimates flagged
@@ -123,8 +155,8 @@ export default function GameResultDialog({
   } else if (skillScores?.metrics && Object.keys(skillScores.metrics).length > 0) {
     skillsData = Object.entries(skillScores.metrics).map(([name, metric]) => ({
       name,
-      score: Math.round(metric.score),
-      band: getBand(metric.score),
+      score: Math.round(to100(metric.score)),
+      band: getBand(to100(metric.score)),
     }));
   }
   const hasEstimatedSkills = skillsData.some((s) => s.isEstimated);
@@ -154,12 +186,10 @@ export default function GameResultDialog({
       }));
   } else if (moodScores) {
     moodsData = [
-      { name: 'Flow score', score: Math.round(moodScores.flowScore), band: getBand(moodScores.flowScore) },
-      { name: 'Confidence', score: Math.round(moodScores.confidence), band: getBand(moodScores.confidence) },
+      { name: 'Flow score', score: Math.round(to100(moodScores.flowScore)), band: getBand(to100(moodScores.flowScore)) },
+      { name: 'Confidence', score: Math.round(to100(moodScores.confidence)), band: getBand(to100(moodScores.confidence)) },
     ];
   }
-
-  const resolvedTargetMood = session?.mood?.targetMood ? displayName(session.mood.targetMood) : targetMood;
 
   const renderMetric = (metric: ResultMetric, index: number, kind: 'Skill' | 'Mood') => (
     <div key={`${kind}-${metric.slug || metric.name}-${index}`} aria-label={`${kind} score: ${metric.name}`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={metric.score} className="game-result__metric layout-grid" data-score={metric.score} data-band={metric.band} data-estimated={metric.isEstimated ? 'true' : undefined} role="progressbar">
@@ -228,7 +258,7 @@ export default function GameResultDialog({
               <div className="layout-grid gap-sm min-width-0">
                 <strong className="font-md leading-lg weight-semibold">How did you feel after playing?</strong>
                 <span className="game-result__mood-question font-sm leading-sm" data-stage-mood-question>
-                  Did {gameTitle} help you feel more {targetMood.toLowerCase()}?
+                  Did {gameTitle} help you feel more {targetMoodLabel.toLowerCase()}?
                 </span>
               </div>
               
@@ -246,7 +276,7 @@ export default function GameResultDialog({
                 <div className="layout-flex gap-md wrap" role="group">
                   <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="-1" type="button" onClick={() => handleSurveySubmit(-1)}>
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-down"></use></svg>
-                    <span data-stage-answer-down>Less {targetMood.toLowerCase()}</span>
+                    <span data-stage-answer-down>Less {targetMoodLabel.toLowerCase()}</span>
                   </button>
                   <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="0" type="button" onClick={() => handleSurveySubmit(0)}>
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-equal"></use></svg>
@@ -254,9 +284,12 @@ export default function GameResultDialog({
                   </button>
                   <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="1" type="button" onClick={() => handleSurveySubmit(1)}>
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-up"></use></svg>
-                    <span data-stage-answer-up>More {targetMood.toLowerCase()}</span>
+                    <span data-stage-answer-up>More {targetMoodLabel.toLowerCase()}</span>
                   </button>
                 </div>
+              )}
+              {surveyError && !surveySubmitted && (
+                <p className="margin-none font-sm" role="alert" style={{ color: 'var(--text-danger, #f87171)' }}>{surveyError}</p>
               )}
             </div>
             <p className="game-result__note margin-none font-xs leading-xs">Your scores may continue to update after playing.</p>
@@ -272,19 +305,19 @@ export default function GameResultDialog({
                   </span>
                 )}
               </div>
-              <strong className="game-result__score-value layout-block">{score.toLocaleString()}</strong>
+              {gameScore == null ? (
+                <strong className="game-result__score-value layout-block text-muted" data-score-reported="false">Not reported</strong>
+              ) : (
+                <strong className="game-result__score-value layout-block" data-score-reported="true">{gameScore.toLocaleString()}</strong>
+              )}
               {/* SKI-140: the number is the game's own points, not a mark out of
                   100 like the skill scores below, so say which scale it is on. */}
-              <span className="game-result__score-note layout-block font-sm">
-                {highScore > 0
-                  ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${highScore.toLocaleString()}`
-                  : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
-              </span>
+              <span className="game-result__score-note layout-block font-sm">{scoreNote}</span>
             </div>
             
             <div className="game-result__summary layout-grid gap-md radius-card padding-xl">
               <div><span className="ui-label layout-block">Game</span><strong className="layout-block" data-stage-title>{gameTitle}</strong></div>
-              <div><span className="ui-label layout-block">Duration</span><strong className="layout-block">{formatDuration(duration)}</strong></div>
+              <div><span className="ui-label layout-block">Duration</span><strong className="layout-block">{formatDuration(durationSeconds)}</strong></div>
               <div title={`Times ${gameTitle} changed its difficulty to match your play during this session.`}>
                 <span className="ui-label layout-block">Live adjustments</span>
                 <strong className="layout-block">{adjustmentsCount} applied</strong>
@@ -336,7 +369,7 @@ export default function GameResultDialog({
             <div className="layout-grid grid-3 gap-lg">
               <div className="game-result__metric layout-grid">
                 <span className="ui-label game-result__metric-name layout-block">Target mood</span>
-                <strong className="game-result__metric-value layout-block" data-stage-mood="">{resolvedTargetMood}</strong>
+                <strong className="game-result__metric-value layout-block" data-stage-mood="">{targetMoodLabel}</strong>
               </div>
               
               {moodsData.map((mood, index) => renderMetric(mood, index, 'Mood'))}

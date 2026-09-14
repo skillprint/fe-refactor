@@ -259,7 +259,12 @@ export class SkillprintClient {
         }
     }
 
-    async stopSession(sessionId: string): Promise<boolean> {
+    /**
+     * Close the session. `score` is the game's own final score (SKI-181); when
+     * given it becomes the session's score, superseding any score reported in
+     * chunk game states. Omit it (or pass null) when the game reported none.
+     */
+    async stopSession(sessionId: string, score?: number | null): Promise<boolean> {
         const url = `${this.baseUrl}${this.STOP_SESSION_ENDPOINT.replace('{sessionId}', sessionId)}`;
         this.log(`Stopping session: POST ${url}`, LogLevel.INFO);
 
@@ -271,10 +276,13 @@ export class SkillprintClient {
             headers['X-Auth-Token'] = `Token ${this.userToken}`;
         }
 
+        const hasScore = typeof score === 'number' && Number.isFinite(score);
+
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: headers
+                headers: headers,
+                ...(hasScore ? { body: JSON.stringify({ score }) } : {})
             });
 
             if (response.ok) {
