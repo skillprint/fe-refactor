@@ -1,70 +1,49 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
 import { LibraryCommunityStats, generateMockLibraryCommunityStats } from './LibraryCommunityStats';
+import { PortalApiError, portalFetch } from './portalFetch';
 
-import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api/portal`;
-
+/** Everyone's play on one game (SKI-181). Needs the Knox token; 404 for an unknown game. */
 export function useLibraryCommunityStats(slug: string, useSyntheticData: boolean = false) {
-    const { userToken } = useUserSession();
-    const [data, setData] = useState<LibraryCommunityStats | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+  const { userToken } = useUserSession();
+  const [data, setData] = useState<LibraryCommunityStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [notFound, setNotFound] = useState(false);
 
-    const fetchData = useCallback(async () => {
-        if (useSyntheticData) {
-            setIsLoading(true);
-            setTimeout(() => {
-                setData(generateMockLibraryCommunityStats());
-                setIsLoading(false);
-            }, 500); // Simulate network delay
-            return;
-        }
+  const fetchData = useCallback(async () => {
+    if (useSyntheticData) {
+      setData(generateMockLibraryCommunityStats());
+      setIsLoading(false);
+      return null;
+    }
+    if (!userToken || !slug) return null;
 
-        if (!userToken) {
-            console.warn('No user token available to fetch useLibraryCommunityStats.');
-            return null;
-        }
+    setIsLoading(true);
+    setError(null);
+    setNotFound(false);
+    try {
+      const json = await portalFetch<LibraryCommunityStats>(`/library/community-stats/${encodeURIComponent(slug)}/`, userToken);
+      setData(json);
+      return json;
+    } catch (err: any) {
+      if (err instanceof PortalApiError && err.status === 404) {
+        setNotFound(true);
+      } else {
+        console.error('Failed to fetch library community stats:', err);
+        setError(err);
+      }
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userToken, useSyntheticData, slug]);
 
-        setIsLoading(true);
-        setError(null);
+  useEffect(() => {
+    if (useSyntheticData || (userToken && slug)) fetchData();
+  }, [useSyntheticData, userToken, slug, fetchData]);
 
-        try {
-            const response = await fetch(`${BASE_URL}/library/community-stats/${slug}/`, {
-                headers: {
-                    'Authorization': `Token ${userToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch useLibraryCommunityStats: ${response.status}`);
-            }
-
-            const json = await response.json();
-            setData(json);
-            return json;
-        } catch (err: any) {
-            console.error('Failed to fetch useLibraryCommunityStats:', err);
-            setError(err);
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [userToken, useSyntheticData, slug]);
-
-    useEffect(() => {
-        if (useSyntheticData || userToken) {
-            fetchData();
-        }
-    }, [useSyntheticData, userToken, fetchData]);
-
-    return {
-        data,
-        isLoading,
-        error,
-        refetch: fetchData
-    };
+  return { data, isLoading, error, notFound, refetch: fetchData };
 }
