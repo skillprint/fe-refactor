@@ -365,13 +365,13 @@ export default function GameClient({ slug }: GameClientProps) {
 
         // Process the game completion data
         const results: GameResults = {
-            score: data.score || Math.floor(Math.random() * 40) + 60, // Fallback score for demo
+            score: data.score ?? 0,
             time: playTime,
             level: data.level || 1,
-            achievements: data.achievements || generateAchievements(data.score || 70),
-            accuracy: data.accuracy || Math.floor(Math.random() * 30) + 70,
-            mistakes: data.mistakes || Math.floor(Math.random() * 5),
-            bonus: data.bonus || Math.floor(Math.random() * 20)
+            achievements: data.achievements || generateAchievements(data.score ?? 0),
+            accuracy: data.accuracy ?? 0,
+            mistakes: data.mistakes ?? 0,
+            bonus: data.bonus ?? 0
         };
 
         shouldPollRef.current = false;
@@ -463,15 +463,16 @@ export default function GameClient({ slug }: GameClientProps) {
             // If game is in progress, navigate to review page
             const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
 
-            // Generate results based on current game state
+            // Player exited before the game reported a score, so there's no
+            // real data to show — use honest zeros rather than faking a result.
             const exitResults: GameResults = {
-                score: Math.max(0, Math.min(100, Math.floor(Math.random() * 40) + 40)), // Fallback score for demo
+                score: 0,
                 time: currentTime,
                 level: 1, // Default level for early exit
-                achievements: generateAchievements(40), // Default achievements for early exit
-                accuracy: Math.max(0, Math.min(100, Math.floor(Math.random() * 30) + 50)), // Default accuracy for early exit
-                mistakes: Math.floor(Math.random() * 3), // Default mistakes for early exit
-                bonus: Math.floor(Math.random() * 10) // Default bonus for early exit
+                achievements: generateAchievements(0),
+                accuracy: 0,
+                mistakes: 0,
+                bonus: 0
             };
 
             stopIframe();
