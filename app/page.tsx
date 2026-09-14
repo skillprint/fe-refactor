@@ -10,7 +10,6 @@ import BuckyballLoading from './components/BuckyballLoading';
 import { useUserSession } from './hooks/useUserSession';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
 import { PlayBySkill } from '@/components/PlayBySkill';
-import { PlaybookWidget } from './components/PlaybookWidget';
 import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
