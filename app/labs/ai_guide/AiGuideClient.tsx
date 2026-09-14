@@ -5,8 +5,8 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { mapSlugToGamePath } from '../../game/[slug]/GameClient';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores } from '../../lib/skillprintSdk';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
-import { mapLocalGameSlugToServerGameSlug } from '../../utils/slugUtils';
-import { getGameCatalogDetail } from '../../api/api';
+import { resolveCatalogGame } from '@/lib/gameSlug';
+import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { useTheme } from '../../components/ThemeProvider';
 import { ConsoleIcon } from '@/components/LiveConsole/ConsoleIcon';
 import { CardHead, CardLede, CardNote } from '@/components/LiveConsole/ConsoleCard';
@@ -107,7 +107,9 @@ export default function AiGuideClient() {
   const sessionFailedRef = useRef(false);
 
   const game = GAMES.find(g => g.slug === selectedGame) || GAMES[0];
-  const serverSlug = mapLocalGameSlugToServerGameSlug(selectedGame);
+  // Canonical catalog slug for the selected game; the ref feeds the message handler closure.
+  const [serverSlug, setServerSlug] = useState(selectedGame);
+  const serverSlugRef = useRef(selectedGame);
   const gamePath = mapSlugToGamePath(selectedGame);
 
   const addLog = useCallback((message: string, level: string = 'info') => {
@@ -176,7 +178,16 @@ export default function AiGuideClient() {
     let isMounted = true;
     const fetchMetadata = async () => {
       try {
-        const detail = await getGameCatalogDetail(mapLocalGameSlugToServerGameSlug(selectedGame));
+        let resolvedSlug = selectedGame;
+        try {
+          resolvedSlug = resolveCatalogGame(selectedGame, await getCatalogGames())?.slug || selectedGame;
+        } catch (e) {
+          console.error('Failed to load game catalog', e);
+        }
+        if (!isMounted) return;
+        serverSlugRef.current = resolvedSlug;
+        setServerSlug(resolvedSlug);
+        const detail = await getGameCatalogDetail(resolvedSlug);
         if (isMounted) {
           setGameMetadata(detail);
           const validTargets: string[] = [];
@@ -299,7 +310,7 @@ export default function AiGuideClient() {
         setIsSessionStarted(true);
         setStartedAt(Date.now());
         try {
-          await clientRef.current.startSession(sessionId, selectedMood, mapLocalGameSlugToServerGameSlug(selectedGame));
+          await clientRef.current.startSession(sessionId, selectedMood, serverSlugRef.current);
           shouldPollRef.current = true;
           pollSessionResults(clientRef.current, sessionId);
         } catch (e) {

@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import type { SkillCatalogEntry } from '@/lib/skillCatalog';
 import type { LongitudinalMetric } from '@/lib/models/portal/LongitudinalMetric';
-import { unifiedSlugFromBESlug } from '@/app/utils/slugUtils';
+import { baseSlug } from '@/lib/gameSlug';
 
 interface SkillStatisticsSectionProps {
   skill: SkillCatalogEntry;
@@ -90,7 +90,7 @@ export function SkillStatisticsSection({ skill, metric }: SkillStatisticsSection
               <ul className="margin-none padding-none layout-flex wrap gap-sm">
                 {trainingGames.map((g) => (
                   <li key={g.id}>
-                    <Link className="ui-tag" href={`/game/${encodeURIComponent(unifiedSlugFromBESlug(g.slug))}`}>{g.name}</Link>
+                    <Link className="ui-tag" href={`/game/${encodeURIComponent(baseSlug(g.slug))}`}>{g.name}</Link>
                   </li>
                 ))}
               </ul>

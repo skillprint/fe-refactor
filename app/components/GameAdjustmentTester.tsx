@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { unifiedSlugFromBESlug } from '../utils/slugUtils';
+import { baseSlug } from '@/lib/gameSlug';
 
 interface GameAdjustmentTesterProps {
     iframeRef: React.RefObject<HTMLIFrameElement | null>;
@@ -20,7 +20,7 @@ export default function GameAdjustmentTester({ iframeRef, slug, onAdjustment }: 
             }
 
             const key = parseInt(keyString, 10);
-            const unifiedSlug = unifiedSlugFromBESlug(slug);
+            const unifiedSlug = baseSlug(slug);
             const adjustments = getAdjustmentsForGame(unifiedSlug, key);
 
             console.log('Sending manual test adjustment:', adjustments);

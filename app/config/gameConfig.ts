@@ -1,3 +1,4 @@
+import { baseSlug } from '@/lib/gameSlug';
 import { inactiveGames } from './inactiveGames';
 
 export interface GameConfig {
@@ -826,31 +827,20 @@ export const gameDetails: Record<string, GameDetails> = {
   },
 };
 
+// Legacy catalog records whose base slug differs from the local key (SKI-180):
+// `match-doodle-2-6697ba5a-…` and `sumagi-2-dbdafb8b-…` are the same games.
+gameDetails['match-doodle-2'] = gameDetails['match-doodle'];
+gameDetails['sumagi-2'] = gameDetails['sumagi'];
+
 export function getGameConfig(gameSlug: string): GameConfig {
-  // Normalize the slug for matching (lowercase, replace spaces with hyphens)
-  const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
-
-  // Try to find exact match first
-  if (gameConfigs[normalizedSlug]) {
-    return gameConfigs[normalizedSlug];
-  }
-
-  // Try to find partial match
-  const partialMatch = Object.keys(gameConfigs).find(key =>
-    key !== 'default' && normalizedSlug.includes(key)
-  );
-
-  if (partialMatch) {
-    return gameConfigs[partialMatch];
-  }
-
-  // Return default configuration
-  return gameConfigs.default;
+  // Canonical base slug: lowercase, legacy UUID suffix stripped (SKI-180).
+  const normalizedSlug = baseSlug(gameSlug);
+  return gameConfigs[normalizedSlug] || gameConfigs.default;
 }
 
 export function getGameDetails(gameSlug: string): GameDetails | null {
-  // Normalize the slug for matching (lowercase, replace spaces with hyphens)
-  const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
+  // Canonical base slug: lowercase, legacy UUID suffix stripped (SKI-180).
+  const normalizedSlug = baseSlug(gameSlug);
 
   // Check inactive games first
   const inactiveMatch = inactiveGames.find(game => game.slug === normalizedSlug);
@@ -867,22 +857,7 @@ export function getGameDetails(gameSlug: string): GameDetails | null {
     } as GameDetails;
   }
 
-  // Try to find exact match first
-  if (gameDetails[normalizedSlug]) {
-    return gameDetails[normalizedSlug];
-  }
-
-  // Try to find partial match
-  const partialMatch = Object.keys(gameDetails).find(key =>
-    normalizedSlug.includes(key)
-  );
-
-  if (partialMatch) {
-    return gameDetails[partialMatch];
-  }
-
-  // Return null if no match found
-  return null;
+  return gameDetails[normalizedSlug] || null;
 }
 
 export const knownGameSlugs = [
@@ -913,7 +888,7 @@ export const knownGameSlugs = [
   'photo-hunt',
   'snake-attack',
   'space-adventure-pinball',
-  'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20',
+  'space-trip',
   'stacks-tower',
   'star-puzzles',
   'sumagi',

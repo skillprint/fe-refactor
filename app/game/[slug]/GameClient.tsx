@@ -13,9 +13,9 @@ import React from 'react';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
-import { getGameBySlug } from '../../api/api';
+import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
-import { unifiedSlugFromBESlug, mapLocalGameSlugToServerGameSlug } from '../../utils/slugUtils';
+import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
 
 interface GameClientProps {
     slug: string;
@@ -59,10 +59,13 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'photo-hunt': 'Photo Hunt',
     'snake-attack': 'Snake Attack',
     'space-adventure-pinball': 'Space Adventure Pinball',
-    'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20': 'Space Trip',
+    'space-trip': 'Space Trip',
     'stacks-tower': 'Stacks Tower',
     'star-puzzles': 'Star Puzzles',
     'sumagi': 'Sumagi',
+    // Legacy catalog records whose base slug carries a `-2` (SKI-180). Remove with the map in SKI-168.
+    'match-doodle-2': 'Match Doodle',
+    'sumagi-2': 'Sumagi',
     'sweet-memory': 'Sweet Memory',
     'ultimate-sudoku': 'Ultimate Sudoku',
     'whack-em-all': "Whack 'em All",
@@ -98,8 +101,14 @@ export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
     'zig-zag-switch': 'Zig Zag Switch'
 };
 
+/** True when the frontend ships a local build for this slug (any slug form). */
+export const hasLocalGameDir = (slug: string) => {
+    const unifiedSlug = baseSlug(slug);
+    return Boolean(SLUG_TO_DIR_MAP[unifiedSlug] || INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]);
+};
+
 export const mapSlugToGamePath = (slug: string) => {
-    const unifiedSlug = unifiedSlugFromBESlug(slug);
+    const unifiedSlug = baseSlug(slug);
 
     const inactiveDir = INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug];
     if (inactiveDir) return `/games/inactive/${inactiveDir}/static/index.html`;
@@ -156,10 +165,14 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
-    const unifiedSlug = unifiedSlugFromBESlug(decodedSlug);
+    const unifiedSlug = baseSlug(decodedSlug);
 
     const [gamePath, setGamePath] = useState<string>('');
     const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
+    // The catalog record this URL slug resolved to. `forSlug` guards against a stale
+    // resolution being used for a new slug while the next lookup is in flight.
+    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string } | null>(null);
+    const [isUnknownGame, setIsUnknownGame] = useState(false);
     const [hasImageError, setHasImageError] = useState(false);
 
     // Get game configuration
@@ -167,34 +180,40 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
     useEffect(() => {
         let isMounted = true;
+        setIsLoadingGamePath(true);
+        setIsUnknownGame(false);
+        setResolvedGame(null);
+
         const resolvePath = async () => {
+            // Any slug form (bare, legacy UUID-suffixed, truncated) resolves to one canonical
+            // catalog record; that record's slug is what the backend gets on session start.
+            let record: { slug: string } | null = null;
             try {
-                const normalizedSlug = unifiedSlugFromBESlug(decodedSlug);
-                const apiData = await getGameBySlug(normalizedSlug);
-
-                let targetSlug = decodedSlug;
-
-                // Validate that the API returned the expected game, avoiding fallbacks like Hextris.
-                if (apiData && apiData.slug) {
-                    const returnedUnified = unifiedSlugFromBESlug(apiData.slug);
-                    if (returnedUnified === normalizedSlug) {
-                        targetSlug = apiData.slug;
-                    }
-                }
-
-                if (isMounted) {
-                    setGamePath(mapSlugToGamePath(targetSlug));
-                }
+                record = resolveCatalogGame(decodedSlug, await getCatalogGames());
             } catch (error) {
-                console.error("Error fetching game slug mapping", error);
-                if (isMounted) {
-                    setGamePath(mapSlugToGamePath(decodedSlug));
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoadingGamePath(false);
+                console.error('Error loading game catalog', error);
+            }
+            if (!record) {
+                // Detail route 404s for unknown slugs (unlike `?slug=`, which returns everything).
+                try {
+                    const detail = await getGameCatalogDetail(decodedSlug);
+                    if (detail?.slug) record = detail;
+                } catch {
+                    // Unknown to the backend; a local build may still exist.
                 }
             }
+            if (!isMounted) return;
+
+            if (!record && !hasLocalGameDir(decodedSlug)) {
+                setIsUnknownGame(true);
+                setIsLoadingGamePath(false);
+                return;
+            }
+
+            const serverSlug = record?.slug || unifiedSlug;
+            setGamePath(mapSlugToGamePath(serverSlug));
+            setResolvedGame({ forSlug: decodedSlug, serverSlug });
+            setIsLoadingGamePath(false);
         };
         resolvePath();
 
@@ -499,8 +518,10 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
 
 
-    // Reset state when slug changes
+    // Reset state and start the Skillprint session once the slug has resolved to a catalog record
     useEffect(() => {
+        if (!resolvedGame || resolvedGame.forSlug !== decodedSlug) return;
+
         setSequence('loading');
         setIsGamePaused(false);
         setGameStartTime(Date.now());
@@ -529,7 +550,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
             try {
                 const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
-                const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
+                const serverSideSlug = resolvedGame.serverSlug;
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
                 loadGameParameters(gameConfig.parameterManifest)
@@ -547,7 +568,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         return () => {
             shouldPollRef.current = false;
         };
-    }, [slug]);
+    }, [resolvedGame, decodedSlug]);
 
     // Update token if it changes (e.g. loads asynchronously)
     useEffect(() => {
@@ -594,6 +615,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             }
         }
     };
+
+    if (isUnknownGame) notFound();
 
     return (
         <div className="page scrollbar-subtle page--game-session margin-none text-default font-ui leading-base" data-sequence={sequence} data-skillprint-page="game-session">

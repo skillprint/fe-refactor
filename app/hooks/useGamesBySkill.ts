@@ -1,5 +1,6 @@
 'use client';
 
+import { baseSlug } from '@/lib/gameSlug';
 import { useEffect, useState } from 'react';
 import { getSkills, getMoods, getCatalogItemsBySkill, getCatalogItemsByMood } from '../api/api';
 
@@ -44,7 +45,7 @@ export function useGamesBySkill() {
                 console.log("DUMP MOODS:", moodsData);
                 
                 const localSpaceTrip = {
-                    slug: 'space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20',
+                    slug: 'space-trip',
                     name: 'Space Trip',
                     description: 'Explore space in this adventure',
                     image: '/games/live/Space Trip/icons/icon-256.png',
@@ -52,7 +53,7 @@ export function useGamesBySkill() {
                     moods: [{ slug: 'focus', name: 'Focus', dimension: 'mood' }]
                 };
                 
-                if (!allGamesMood.some((g: any) => g.slug === localSpaceTrip.slug)) {
+                if (!allGamesMood.some((g: any) => baseSlug(g.slug) === localSpaceTrip.slug)) {
                     allGamesMood.push(localSpaceTrip);
                 }
                 

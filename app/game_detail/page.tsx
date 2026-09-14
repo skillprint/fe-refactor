@@ -4,7 +4,7 @@ import PortalLayout from '@/components/PortalLayout';
 import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from '@/components/LayoutGrid';
 import { PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
 import { gameDetails } from '../config/gameConfig';
-import { unifiedSlugFromBESlug } from '../utils/slugUtils';
+import { baseSlug } from '@/lib/gameSlug';
 import { GameTile } from '@/components/GameTile';
 import { SkillCard } from '@/components/SkillCard';
 import { TraitSkillPill, getSkillIconId } from '@/components/TraitSkillPill';
@@ -26,7 +26,7 @@ interface GameDetailPageProps {
 
 export default async function GameDetailPage({ searchParams }: GameDetailPageProps) {
   const { game: rawGameSlug } = await searchParams;
-  const gameSlug = rawGameSlug ? unifiedSlugFromBESlug(rawGameSlug) : null;
+  const gameSlug = rawGameSlug ? baseSlug(rawGameSlug) : null;
   
   const game = gameSlug ? gameDetails[gameSlug] : null;
 
