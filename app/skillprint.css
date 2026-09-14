@@ -15629,3 +15629,13 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 /* The phone frame keeps the game's own height at every width; the shared
    4 : 3 and 1 : 1 ratios are for the landscape demo games. */
 .page--adaptive-assist .aa-stage__frame--phone { aspect-ratio: auto; height: auto; }
+
+/* SKI-182: a badge the game works toward but the player has not earned yet. */
+.page--portal .rail-card--badge .sp-badge--locked .sp-badge__art {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.page--portal .rail-card--badge .sp-badge__progress .sp-progress {
+  display: block;
+}
