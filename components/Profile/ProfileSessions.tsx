@@ -14,9 +14,12 @@ interface Session {
 
 interface ProfileSessionsProps {
   sessions: Session[];
+  /** Lifetime session count from the profile aggregate; falls back to the fetched page length. */
+  totalCount?: number;
 }
 
-export default function ProfileSessions({ sessions }: ProfileSessionsProps) {
+export default function ProfileSessions({ sessions, totalCount }: ProfileSessionsProps) {
+  const playedCount = totalCount ?? sessions.length;
   const formatDate = (dateValue: string | number) => {
     try {
       const d = new Date(dateValue);
@@ -60,7 +63,7 @@ export default function ProfileSessions({ sessions }: ProfileSessionsProps) {
             </p>
           </div>
           <span className="pp-played radius-full layout-inline-flex items-center gap-sm font-xs weight-semibold no-grow">
-            Games played <strong>{sessions.length}</strong>
+            Games played <strong>{playedCount}</strong>
           </span>
         </div>
         

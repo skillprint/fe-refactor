@@ -7,7 +7,6 @@ import { useAuth } from '../../../context/AuthContext';
 import { getGameDetails } from '../../../config/gameConfig';
 import { getGameBySlug } from '../../../api/api';
 import { PollResultsResponse, SkillprintClient } from '../../../lib/skillprintSdk';
-import { saveGameSession, getGameSessions } from '../../../lib/gameSessionUtils';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import FirstGameBadge from '../../../components/FirstGameBadge';
 import RecommendedGameTile from '../../../components/RecommendedGameTile';
@@ -30,9 +29,10 @@ interface GameResults {
 interface ReviewClientProps {
     slug: string;
     sessionId?: string;
+    playbookId?: string;
 }
 
-export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
+export default function ReviewClient({ slug, sessionId, playbookId }: ReviewClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
     const { status } = useAuth();
@@ -43,7 +43,6 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
     const [gameResults, setGameResults] = useState<GameResults | null>(null);
     const [showBadge, setShowBadge] = useState(false);
     const [nextGameSlug, setNextGameSlug] = useState<string>('');
-    const [playbookId, setPlaybookId] = useState<string | null>(null);
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
@@ -65,16 +64,6 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
         };
         fetchGameData();
     }, [decodedSlug]);
-
-    useEffect(() => {
-        if (sessionId) {
-            const storedSessions = getGameSessions();
-            const session = storedSessions.find(s => s.id === sessionId);
-            if (session?.metadata?.playbookId) {
-                setPlaybookId(session.metadata.playbookId);
-            }
-        }
-    }, [sessionId]);
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
@@ -141,30 +130,11 @@ export default function ReviewClient({ slug, sessionId }: ReviewClientProps) {
                             flowScore = Math.round(polledRes.moodScores.flowScore * 100);
                         }
 
-                        // Update the session in local storage with the real score
-                        const storedSessions = getGameSessions();
-                        const currentSession = storedSessions.find(s => s.id === sessionId);
-
-                        if (currentSession) {
-                            // Update score and potentially other metadata
-                            currentSession.score = flowScore;
-                            // You might want to update other fields from the closed session result if available
-                            if (polledRes.moodScores?.targetMood) {
-                                if (!currentSession.metadata) currentSession.metadata = {};
-                                currentSession.metadata.targetMood = polledRes.moodScores.targetMood;
-                                currentSession.metadata.moodScores = polledRes.moodScores;
-                            }
-
-                            saveGameSession(currentSession);
-                            // Trigger an update event so other components (like GameSessionManager) refresh immediately
-                            window.dispatchEvent(new Event('skillprint_storage_update'));
-                        }
-
-                        // Extract game results from session data if available
-                        // This is a placeholder - adjust based on your actual data structure
+                        // The backend session record (via the Skillprint SDK) is the
+                        // source of truth for the score; nothing local to update.
                         const results: GameResults = {
                             score: flowScore,
-                            time: currentSession?.duration || 0,
+                            time: 0,
                             level: 1,
                             achievements: [],
                             accuracy: 0,

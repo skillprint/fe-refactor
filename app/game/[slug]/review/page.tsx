@@ -13,15 +13,16 @@ interface ReviewPageProps {
     }>;
     searchParams: Promise<{
         sessionId?: string;
+        playbookId?: string;
     }>;
 }
 
 export default async function ReviewPage({ params, searchParams }: ReviewPageProps) {
     const { slug } = await params;
-    const { sessionId } = await searchParams;
+    const { sessionId, playbookId } = await searchParams;
     return (
         <Suspense fallback={<div className="flex h-screen items-center justify-center"><BuckyballLoading /></div>}>
-            <ReviewClient slug={slug} sessionId={sessionId} />
+            <ReviewClient slug={slug} sessionId={sessionId} playbookId={playbookId} />
         </Suspense>
     );
 }

@@ -11,7 +11,6 @@ import BuckyballLoading from '../components/BuckyballLoading';
 import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
 import { usePlaybookList } from '@/lib/models/portal/usePlaybookList';
 import { playbookIconSrc, playbookToneName } from '@/lib/playbookUtils';
-import { useGameSessions } from '../hooks/useGameSessions';
 import { getGameDetails } from '../config/gameConfig';
 import { useAuth } from '../context/AuthContext';
 import PortalLayout from '@/components/PortalLayout';
@@ -36,7 +35,6 @@ function GamesPageContent() {
   const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
   
   const { moods, skills, gamesBySkill, gamesByMood, isLoading } = useGamesBySkill();
-  const { sessions } = useGameSessions();
   const { recommendedGames, isLoading: isLoadingRecommended } = useRecommendedGames(10);
   const { data: playbooks } = usePlaybookList();
 

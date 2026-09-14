@@ -3,12 +3,12 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from './useUserSession';
 import { SkillprintClient, LogLevel, UserProfile } from '../lib/skillprintSdk';
-import { useGameSessions } from './useGameSessions';
+import { useHomeSummary } from '@/lib/models/portal/useHomeSummary';
 import { getApiBaseUrl } from '../utils/cookieUtils';
 
 export function useUserProfile() {
     const { userToken, userId, setToken, isWhitelisted } = useUserSession();
-    const { count, isLoaded: isSessionsLoaded } = useGameSessions();
+    const { data: homeSummary } = useHomeSummary();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -91,10 +91,11 @@ export function useUserProfile() {
 
     // Automatically fetch profile when token is available and user has played at least 3 games
     useEffect(() => {
-        if (userToken && isSessionsLoaded && (count >= 3 || isWhitelisted)) {
+        if (!userToken) return;
+        if (isWhitelisted || (homeSummary && homeSummary.totalSessions >= 3)) {
             fetchUserProfile();
         }
-    }, [userToken, fetchUserProfile, isSessionsLoaded, count, isWhitelisted]);
+    }, [userToken, fetchUserProfile, homeSummary, isWhitelisted]);
 
     return {
         profile,

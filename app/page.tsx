@@ -8,7 +8,6 @@ import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
 import { useUserSession } from './hooks/useUserSession';
-import { useGameSessions } from './hooks/useGameSessions';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
 import { PlayBySkill } from '@/components/PlayBySkill';
 import { PlaybookWidget } from './components/PlaybookWidget';
@@ -352,13 +351,11 @@ function HomeContent() {
     setSkillGames(gamesForSkill);
   }, []);
 
-  // Local session log is only a fallback until the portal summary arrives.
-  const { count: localCount } = useGameSessions();
   const { data: homeSummary } = useHomeSummary();
   const { data: recentSessions } = useHomeRecentSessions();
   const { data: nextGameRecs } = useNextGameRecommendation();
 
-  let count = homeSummary ? homeSummary.totalSessions : localCount;
+  let count = homeSummary?.totalSessions ?? 0;
   if (stateOverride === 'first') count = 0;
   if (stateOverride === 'semi') count = 3;
   if (stateOverride === 'complete') count = 5;

@@ -8,7 +8,8 @@ import ProfileRail from '@/components/Profile/ProfileRail';
 import ProfileGoals from '@/components/Profile/ProfileGoals';
 import ProfileBadges from '@/components/Profile/ProfileBadges';
 import ProfileSessions from '@/components/Profile/ProfileSessions';
-import { useGameSessions } from '../hooks/useGameSessions';
+import { useHomeRecentSessions } from '@/lib/models/portal/useHomeRecentSessions';
+import { usePaginatedSession } from '@/lib/models/portal/usePaginatedSession';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
 import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
@@ -31,7 +32,11 @@ function formatSecondsToDuration(sec: number): string {
 }
 
 function ProfilePageContent() {
-  const { sessions } = useGameSessions();
+  // Recent sessions come from the same endpoint Home uses (useHomeRecentSessions),
+  // so the two pages can never show a different "recent sessions" list again.
+  const { data: recentSessions } = useHomeRecentSessions();
+  const { data: paginatedSessions } = usePaginatedSession(false, { limit: 100 });
+  const sessions = paginatedSessions?.results ?? [];
   const { fetchUserProfile } = useUserProfile();
   const [processedProfile, setProcessedProfile] = useState<any>(null);
   // Portal aggregate (SKI-131): per-dimension score, lifetime baseline and delta.
@@ -68,7 +73,7 @@ function ProfilePageContent() {
     }
     const gamesMap = new Map();
     sessions.forEach((s: any) => {
-      const slug = s.gameSlug || s.gameId;
+      const slug = s.gameSlug;
       if (slug && !gamesMap.has(slug)) {
         gamesMap.set(slug, { slug, name: getGameDetails(slug)?.name || slug });
       }
@@ -146,26 +151,35 @@ function ProfilePageContent() {
   const skillsCount = Math.max(Object.keys(nodeDataBySkill).length, Object.keys(userScores).length);
   const daysPlayed = profileAggregate?.totals?.sessions ?? (processedProfile ? processedProfile.totalSessions || 0 : 0);
 
-  const mappedSessions = sessions.map((s: any) => ({
-    id: s.id,
+  // Both the rail and the full list are mapped from the same portal session
+  // shape ({ sessionId, gameSlug, gameName, playedAt, primaryScore, primaryMood,
+  // durationSeconds }) so "Recent sessions" and "All sessions" never disagree.
+  const mapSessionSummary = (s: { sessionId: string; gameSlug: string; gameName: string; playedAt: string; primaryScore: number | null; primaryMood: string | null; durationSeconds: number }) => ({
+    id: s.sessionId,
     gameSlug: s.gameSlug,
-    gameName: s.gameSlug ? (getGameDetails(s.gameSlug)?.name || s.gameSlug) : 'Unknown',
+    gameName: s.gameName || (s.gameSlug ? (getGameDetails(s.gameSlug)?.name || s.gameSlug) : 'Unknown'),
     gameImage: s.gameSlug ? getGameDetails(s.gameSlug)?.image : undefined,
-    date: s.timestamp,
-    score: s.score || 0,
-    skillMeasured: s.metadata?.skill || s.metadata?.mood || s.parameters?.skill || s.parameters?.mood || 'Unknown'
-  }));
+    date: s.playedAt,
+    score: s.primaryScore ?? 0,
+    skillMeasured: s.primaryMood || 'Unknown',
+    duration: s.durationSeconds ? formatSecondsToDuration(s.durationSeconds) : undefined,
+  });
+
+  // Same endpoint/shape as Home's "Recently played", so the rail's "Recent
+  // sessions" and "This week" always match what Home shows.
+  const railSessions = (recentSessions ?? []).map(mapSessionSummary);
+  const mappedSessions = sessions.map(mapSessionSummary);
 
   return (
     <PortalLayout 
       pageClass="page--portal-profile"
       header={<ProfileHeader />}
       rail={
-        <ProfileRail 
-          skillsCount={skillsCount} 
-          totalSkills={28} 
-          daysPlayed={daysPlayed} 
-          sessions={mappedSessions} 
+        <ProfileRail
+          skillsCount={skillsCount}
+          totalSkills={28}
+          daysPlayed={daysPlayed}
+          sessions={railSessions}
         />
       }
     >
@@ -200,7 +214,7 @@ function ProfilePageContent() {
 
       <ProfileBadges />
 
-      <ProfileSessions sessions={mappedSessions} />
+      <ProfileSessions sessions={mappedSessions} totalCount={profileAggregate?.totals?.sessions} />
     </PortalLayout>
   );
 }

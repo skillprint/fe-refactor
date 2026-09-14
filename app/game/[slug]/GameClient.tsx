@@ -10,7 +10,6 @@ import GameResultDialog from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
-import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
 import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
@@ -381,8 +380,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     };
 
     const searchParams = useSearchParams();
-    const source = searchParams.get('source');
-    const playbookId = searchParams.get('playbookId');
     const disableAdjustments = searchParams.get('adjustments') === 'false';
     const disableSdk = searchParams.get('sdk') === 'false';
     const devToolsEnabled = searchParams.get('dev') === 'true';
@@ -404,24 +401,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
         shouldPollRef.current = false;
         stopIframe();
-
-        // Record the game session
-        const session: GameSession = {
-            id: skillprintSessionIdRef.current || Math.random().toString(36).substr(2, 9),
-            gameSlug: decodedSlug,
-            timestamp: endTime,
-            duration: playTime,
-            score: results.score,
-            completed: true,
-            metadata: {
-                level: results.level,
-                accuracy: results.accuracy,
-                mistakes: results.mistakes,
-                source,
-                playbookId
-            }
-        };
-        saveGameSession(session);
 
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
             skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
@@ -505,24 +484,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
             stopIframe();
             shouldPollRef.current = false;
-
-            // Record the game session
-            const session: GameSession = {
-                id: skillprintSessionIdRef.current || Math.random().toString(36).substr(2, 9),
-                gameSlug: decodedSlug,
-                timestamp: Date.now(),
-                duration: currentTime,
-                score: exitResults.score,
-                completed: true, // Mark as completed for playbook tracking when exiting to review
-                metadata: {
-                    level: exitResults.level,
-                    accuracy: exitResults.accuracy,
-                    mistakes: exitResults.mistakes,
-                    source,
-                    playbookId
-                }
-            };
-            saveGameSession(session);
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
                 skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
