@@ -1,11 +1,8 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { getGameDetails } from '../config/gameConfig';
-import { unifiedSlugFromBESlug } from '../utils/slugUtils';
-import { usePlaybook } from '../hooks/usePlaybook';
-import { useGameSessions } from '../hooks/useGameSessions';
+import { usePlaybookDetail } from '@/lib/models/portal/usePlaybookDetail';
+import { nextGameIndex, playbookGameImage } from '@/lib/playbookUtils';
 import { useAuth } from '../context/AuthContext';
 import GamePreviewShareSheet from './GamePreviewShareSheet';
 
@@ -14,29 +11,15 @@ interface NextPlaybookGameTileProps {
 }
 
 export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTileProps) {
-    const { sessions } = useGameSessions();
     const { status } = useAuth();
     const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
 
-    const { currentPlaybook: playbook, progress } = usePlaybook(playbookId);
-    
-    if (!playbook || status === 'partner' || !playbook.game_ids) return null;
+    const { data: playbook } = usePlaybookDetail(playbookId);
 
-    // Find next game
-    let nextGameSlug = playbook.game_ids[0];
-    let completedCount = 0;
+    if (!playbook || status === 'partner' || !playbook.games.length) return null;
 
-    for (let i = 0; i < playbook.game_ids.length; i++) {
-        const slug = playbook.game_ids[i];
-        const isCompleted = sessions.some(s => s.gameSlug === slug && s.metadata?.playbookId === playbook.id && s.completed);
-        if (isCompleted) {
-            completedCount++;
-        } else if (nextGameSlug === playbook.game_ids[0] && completedCount === i) {
-            nextGameSlug = slug;
-        }
-    }
-
-    const isFinished = completedCount === playbook.game_ids.length;
+    const { playedGames, totalGames, percent } = playbook.progress;
+    const isFinished = playedGames >= totalGames;
 
     if (isFinished) {
         return (
@@ -48,8 +31,8 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
         );
     }
 
-    const game = getGameDetails(nextGameSlug);
-    if (!game) return null;
+    const nextGame = playbook.games[nextGameIndex(playbook)];
+    if (!nextGame) return null;
 
     return (
         <div className="mb-6">
@@ -59,21 +42,19 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
                 className="block group w-full text-left"
             >
                 <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200">
-                    {game.image && (
-                        <div className="relative h-48 w-full bg-secondary">
-                            <img
-                                src={game.image}
-                                alt={game.name}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    )}
+                    <div className="relative h-48 w-full bg-secondary">
+                        <img
+                            src={playbookGameImage(nextGame)}
+                            alt={nextGame.title}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
                     <div className="p-4">
                         <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {game.name}
+                            {nextGame.title}
                         </h3>
                         <p className="text-muted-foreground text-sm mt-2 line-clamp-2">
-                            {game.description}
+                            {nextGame.description}
                         </p>
 
                         <div className="mt-3 flex items-center text-primary text-sm font-medium">
@@ -86,25 +67,25 @@ export default function NextPlaybookGameTile({ playbookId }: NextPlaybookGameTil
                         {/* Progress Meter inside card */}
                         <div className="mt-4">
                             <div className="flex justify-between text-xs font-semibold mb-1.5">
-                                <span className="text-muted-foreground">{completedCount} of {playbook.game_ids.length} games</span>
-                                <span className="text-primary">{Math.round((completedCount / playbook.game_ids.length) * 100)}%</span>
+                                <span className="text-muted-foreground">{playedGames} of {totalGames} games</span>
+                                <span className="text-primary">{percent}%</span>
                             </div>
                             <div className="h-2 bg-secondary rounded-full overflow-hidden">
                                 <div
                                     className="h-full transition-all duration-500 ease-out bg-primary"
-                                    style={{ width: `${Math.round((completedCount / playbook.game_ids.length) * 100)}%` }}
+                                    style={{ width: `${percent}%` }}
                                 />
                             </div>
                         </div>
                     </div>
                 </div>
             </button>
-            <GamePreviewShareSheet 
-                slug={nextGameSlug} 
-                isOpen={isShareSheetOpen} 
-                onClose={() => setIsShareSheetOpen(false)} 
+            <GamePreviewShareSheet
+                slug={nextGame.slug}
+                isOpen={isShareSheetOpen}
+                onClose={() => setIsShareSheetOpen(false)}
                 source="playbook"
-                playbookId={playbook.id}
+                playbookId={playbook.slug}
             />
         </div>
     );

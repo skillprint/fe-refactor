@@ -13,7 +13,6 @@ import RecommendedGameTile from '../../../components/RecommendedGameTile';
 import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
 import MoodSurveyWidget from '../../../components/MoodSurveyWidget';
-import ChallengeWidget from '../../../components/ChallengeWidget';
 import { getApiBaseUrl, getCookie, setCookie } from '../../../utils/cookieUtils';
 
 interface GameResults {
@@ -459,10 +458,6 @@ export default function ReviewClient({ slug, sessionId, playbookId }: ReviewClie
                                 >
                                     Back to Games
                                 </button>
-                            </div>
-
-                            <div className="mt-8">
-                                <ChallengeWidget currentGameId={gameApiData?.id} />
                             </div>
 
                             {/* Recommended Game Tile */}
