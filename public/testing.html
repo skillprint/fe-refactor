@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="How to test the redesigned Skillprint portal, and where to log what you find.">
+<link rel="icon" href="/assets/logos/skillprint-favicon-customer.svg">
+<style>
+  :root {
+    color-scheme: light dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>Skillprint Portal Test Pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground: #faf9fc;
+    --surface: #ffffff;
+    --surface-sunk: #f2f0f7;
+    --ink: #16141f;
+    --muted: #5d5870;
+    --hairline: #e3e0ec;
+    --hairline-strong: #cfcadd;
+    --violet: #4b31e0;
+    --violet-soft: #ede9ff;
+    --teal: #0a7f6d;
+    --teal-soft: #dcf7f1;
+    --amber: #8a5605;
+    --amber-soft: #fbeed6;
+    --rose: #a82635;
+    --rose-soft: #fbe4e6;
+
+    --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+    --font-body: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #131119;
+      --surface: #1c1926;
+      --surface-sunk: #232030;
+      --ink: #edebf4;
+      --muted: #a19ab8;
+      --hairline: #2e2a3c;
+      --hairline-strong: #433d55;
+      --violet: #a896ff;
+      --violet-soft: #272045;
+      --teal: #5bfde1;
+      --teal-soft: #10332e;
+      --amber: #e5b264;
+      --amber-soft: #38290f;
+      --rose: #f2909a;
+      --rose-soft: #3a1a1f;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #131119;
+    --surface: #1c1926;
+    --surface-sunk: #232030;
+    --ink: #edebf4;
+    --muted: #a19ab8;
+    --hairline: #2e2a3c;
+    --hairline-strong: #433d55;
+    --violet: #a896ff;
+    --violet-soft: #272045;
+    --teal: #5bfde1;
+    --teal-soft: #10332e;
+    --amber: #e5b264;
+    --amber-soft: #38290f;
+    --rose: #f2909a;
+    --rose-soft: #3a1a1f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 0 88px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    padding-block: 56px 36px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 6vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+
+  .lede {
+    max-width: var(--measure);
+    font-size: 1.06rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- section scaffolding ---------- */
+
+  section { padding-block: 44px 0; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    text-wrap: balance;
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  h2 .num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--violet);
+    letter-spacing: 0.08em;
+    flex: none;
+    transform: translateY(-2px);
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.08rem;
+    letter-spacing: -0.005em;
+    margin: 0 0 8px;
+  }
+
+  .sub {
+    max-width: var(--measure);
+    color: var(--muted);
+    margin: 0 0 22px;
+  }
+
+  p { max-width: var(--measure); }
+
+  a { color: var(--violet); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; border-radius: 3px; }
+
+  code, .path, kbd {
+    font-family: var(--font-mono);
+    font-size: 0.855em;
+    background: var(--surface-sunk);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 1px 5px;
+    word-break: break-word;
+  }
+
+  kbd { box-shadow: 0 1px 0 var(--hairline-strong); }
+
+  /* ---------- do / expect / flag rows ---------- */
+
+  .check {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 4px 16px;
+    padding-block: 16px;
+    border-top: 1px solid var(--hairline);
+    align-items: start;
+  }
+
+  .check:first-of-type { border-top: 1px solid var(--hairline-strong); }
+
+  .check dt {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 5px;
+  }
+
+  .check dd { margin: 0; }
+  .check dd > :first-child { margin-top: 0; }
+  .check dd > :last-child { margin-bottom: 0; }
+
+  .check dt.is-flag { color: var(--rose); }
+  .check dt.is-expect { color: var(--teal); }
+
+  dl.checks { margin: 0 0 8px; }
+
+  /* ---------- callouts ---------- */
+
+  .note {
+    border-left: 3px solid var(--violet);
+    background: var(--violet-soft);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 20px 0;
+    max-width: var(--measure);
+  }
+
+  .note.is-warn { border-left-color: var(--amber); background: var(--amber-soft); }
+  .note.is-stop { border-left-color: var(--rose); background: var(--rose-soft); }
+
+  .note p { margin: 0; }
+  .note p + p { margin-top: 8px; }
+
+  .note .tag {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .note .tag { color: var(--violet); }
+  .note.is-warn .tag { color: var(--amber); }
+  .note.is-stop .tag { color: var(--rose); }
+
+  /* ---------- page cards ---------- */
+
+  .pages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .page-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .page-card__head h3 { margin: 0; }
+
+  .route {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    flex: none;
+  }
+
+  .page-card__why {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 0 0 14px;
+  }
+
+  .page-card ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .page-card li {
+    position: relative;
+    padding-left: 24px;
+    font-size: 0.93rem;
+  }
+
+  .page-card li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--hairline-strong);
+    border-radius: 3px;
+  }
+
+  /* ---------- flows ---------- */
+
+  ol.flows {
+    counter-reset: flow;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  ol.flows > li {
+    counter-increment: flow;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    padding-block: 15px;
+    border-top: 1px solid var(--hairline);
+    align-items: start;
+  }
+
+  ol.flows > li::before {
+    content: counter(flow, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--violet);
+    padding-top: 4px;
+  }
+
+  ol.flows h3 { margin-bottom: 4px; }
+  ol.flows p { margin: 0; color: var(--muted); font-size: 0.94rem; }
+  ol.flows p em { color: var(--ink); font-style: normal; font-weight: 500; }
+
+  .trail {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink);
+    margin-top: 6px !important;
+  }
+
+  .trail span { color: var(--muted); padding-inline: 3px; }
+
+  /* ---------- plain lists ---------- */
+
+  ul.plain { max-width: var(--measure); padding-left: 20px; }
+  ul.plain li { margin-bottom: 8px; }
+  ul.plain li::marker { color: var(--violet); }
+
+  /* ---------- report template ---------- */
+
+  .report {
+    background: var(--surface-sunk);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 20px 22px;
+    max-width: var(--measure);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.85;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+
+  .report b { color: var(--violet); font-weight: 600; }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--hairline);
+    margin: 0;
+  }
+
+  .url {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    font-weight: 600;
+    color: var(--violet);
+    background: var(--violet-soft);
+    border: 1px solid color-mix(in srgb, var(--violet) 25%, transparent);
+    border-radius: 5px;
+    padding: 2px 7px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .url:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  .start-here {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 26px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--hairline);
+    max-width: var(--measure);
+  }
+
+  .start-here .label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .start-here .url { font-size: 1.02rem; padding: 4px 11px; }
+
+  @media (max-width: 520px) {
+    .check { grid-template-columns: 1fr; gap: 2px; }
+    .check dt { padding-top: 0; }
+    .page-card__head { flex-direction: column; gap: 2px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Skillprint · Redesign</p>
+    <h1>Skillprint Portal Test Pass</h1>
+    <p class="lede">Thanks for helping us test the new Skillprint. This walks you through the five pages in the menu down the left — <strong>Home, Games, Skills, Profile and Settings</strong> — and the paths between them. Work through it top to bottom. Allow about 45 minutes, most of it spent actually playing games.</p>
+    <p class="lede" style="margin-top:14px">You don't need to know anything technical. If something looks wrong, it probably is — tell us, and we'll work out why.</p>
+    <p class="start-here"><span class="label">Test site</span> <a class="url" href="https://redesign.skillprint.co">redesign.skillprint.co</a></p>
+  </header>
+
+  <section>
+    <h2><span class="num">00</span>Before you start</h2>
+    <p class="sub">Two minutes of setup so that anything you find is easy for us to act on.</p>
+
+    <ul class="plain">
+      <li><strong>Open <a class="url" href="https://redesign.skillprint.co">redesign.skillprint.co</a> in Chrome</strong>, on a laptop or desktop to begin with. There's a check on phones near the end.</li>
+      <li><strong>Open the <a class="url" href="https://docs.google.com/spreadsheets/d/1Oo0SdpKPG2opBx6YTWsvTNuWa4CsEJfDHYBICG3LxD4/edit?gid=0#gid=0">bug tracker</a> in a second tab.</strong> Everything you find goes in there, one row per problem. Section 07 explains what goes in each column.</li>
+      <li><strong>Take screenshots generously.</strong> A picture of a broken page saves us three paragraphs of description. On a Mac, <strong>Shift + Command + 4</strong>; on Windows, the <strong>Snipping Tool</strong>.</li>
+    </ul>
+
+    <div class="note">
+      <span class="tag">Play freely</span>
+      <p>This is a test copy of Skillprint, kept separate from the real one. Nothing you do here reaches real players, so sign in, play, start over and play again as often as you like — you cannot break anything.</p>
+      <p>It also means your history here may disappear between visits. That's the test site being a test site, not a bug.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">01</span>Signing in</h2>
+    <p class="sub">You have to sign in before you can see anything. Start here.</p>
+
+    <dl class="checks">
+      <div class="check">
+        <dt>Do</dt>
+        <dd><p>Open <a class="url" href="https://redesign.skillprint.co">redesign.skillprint.co</a>. You should see a welcome card reading <em>“Welcome to Skillprint”</em>, sitting over a background of game pictures drifting slowly sideways. Choose <strong>Play as guest</strong>.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-expect">Expect</dt>
+        <dd><p>A brief pause, then the Home page — with a short guided tour that highlights one part of the page at a time. Step all the way through it. The tour is part of what you're testing.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-flag">Tell us if</dt>
+        <dd><p>The background pictures are missing or broken. The button spins and never finishes. The tour highlights an empty patch of the page instead of the thing it's talking about, or its text is cut off. Or you skip the welcome card entirely and go straight in.</p></dd>
+      </div>
+    </dl>
+
+    <h3>Which sign-in to use</h3>
+    <p><strong>Play as guest</strong> is the one to use for almost everything here. It gives you a brand-new player with no history, which is exactly what the next section needs. Only use <strong>Continue with Google</strong> or <strong>Continue with Facebook</strong> if you've been asked to test those specifically — and if you do, tell us which one you used, because they behave differently.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>From a blank slate to a finished Skillprint</h2>
+    <p class="sub">This is the heart of it. A new player starts with nothing; five games later they have a Skillprint they can read. The Home page rewrites itself at every step along the way, and that's the part most likely to go wrong.</p>
+
+    <h3>Starting from nothing</h3>
+    <p>If you've already been clicking around, reset yourself first:</p>
+    <ul class="plain">
+      <li>Go to <strong>Settings</strong> in the left-hand menu and choose <strong>Sign out</strong>.</li>
+      <li>You'll land back on the welcome card. Choose <strong>Play as guest</strong> again.</li>
+      <li>You're now a completely new player with no games behind you — and the guided tour should run again, which is a good sign the reset worked.</li>
+    </ul>
+
+    <h3>What Home should say as you go</h3>
+    <p>Watch the big card at the top of Home. It should change every time you finish a game.</p>
+
+    <dl class="checks">
+      <div class="check">
+        <dt>Nothing<br>played yet</dt>
+        <dd><p>The card says <strong>Get started</strong> and <em>“Play one game to start your Skillprint.”</em> The buttons are <strong>Play your first game</strong> and <strong>Browse all games</strong>. Off to one side are five empty slots under <em>“Your first 5 sessions”</em>.</p></dd>
+      </div>
+      <div class="check">
+        <dt>1 to 4<br>played</dt>
+        <dd><p>The card switches to <strong>Next up</strong> and starts counting: <em>“1 of 5 sessions”</em>, then 2, and so on. The heading counts down the other way — <em>“Play 4 more games to finish your first Skillprint.”</em> Each slot you've filled shows the picture of the game you actually played, in the order you played them.</p></dd>
+      </div>
+      <div class="check">
+        <dt>All 5<br>played</dt>
+        <dd><p>The card becomes <strong>Your Skillprint is ready</strong>, all five slots have pictures in them, and the main button changes to <strong>Read your Skillprint</strong>, which takes you to your Profile.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-flag">Tell us if</dt>
+        <dd><p>The count doesn't move after you finish a game. The heading and the row of slots disagree about how many you've played. A slot shows the wrong game's picture. Or the wording still talks about “your first game” after you've played several.</p></dd>
+      </div>
+    </dl>
+
+    <div class="note">
+      <span class="tag">Play five different games</span>
+      <p>Each game measures something different, and the page says so. Play five <em>different</em> games rather than the same one five times — otherwise you're not testing the journey a real player takes.</p>
+    </div>
+
+    <h3>Then check your Profile filled in</h3>
+    <p>Go to <strong>Profile</strong> in the left-hand menu. All three of <strong>Mood</strong>, <strong>Cognition</strong> and <strong>Personality</strong> should now show a score, and the list of sessions should show the five games you played, with the right names and dates.</p>
+    <p>Mood settles first and Personality last, so a lower or more uncertain Personality score is expected rather than wrong. One of the three showing <em>nothing at all</em> after five games is worth telling us about.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>Pictures that don't look right</h2>
+    <p class="sub">Artwork goes wrong in two ways, and they look quite different on screen. Both are worth reporting.</p>
+
+    <dl class="checks">
+      <div class="check">
+        <dt class="is-expect">Fine</dt>
+        <dd><p>A game showing its own picture. Nothing to do.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-flag">Tell us</dt>
+        <dd><p>A game showing a plain drawing of an <strong>arcade machine</strong> instead of its own picture. The page still looks tidy, which is deliberate — but it means that game's artwork is missing. Note down the game's name.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-flag">Tell us</dt>
+        <dd><p>A <strong>torn-page icon, a grey box, or a stray line of text</strong> where a picture should be. This one always needs fixing. Send a screenshot.</p></dd>
+      </div>
+    </dl>
+
+    <h3>Where to look</h3>
+    <ul class="plain">
+      <li><strong>Game pictures</strong> on Home, on Games, and in the row of five slots on the Home card.</li>
+      <li><strong>The Skillprint logo</strong> at the top of the left-hand menu. Check it in both the light and dark themes — they're different pictures, and one can break while the other is fine.</li>
+      <li><strong>The small symbols</strong> next to menu items, buttons and skills. When these fail they simply vanish, so you're looking for a <em>gap</em> where a symbol should sit beside its label, rather than anything obviously broken.</li>
+      <li><strong>Badges</strong> on your Profile, and the background artwork on the screen where you play a game.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>Games that won't start, or won't finish</h2>
+    <p class="sub">There are a few different ways a game can let you down, and they have different causes. Please tell us which one you saw.</p>
+
+    <dl class="checks">
+      <div class="check">
+        <dt class="is-expect">Expect</dt>
+        <dd><p>You click a game, it appears within a few seconds, and it responds when you play. When you finish, the screen moves on to working out your score, and then shows you your results.</p></dd>
+      </div>
+      <div class="check">
+        <dt>A</dt>
+        <dd><p><strong>Nothing appears.</strong> The page around it loads, but the area where the game should be stays blank or white.</p></dd>
+      </div>
+      <div class="check">
+        <dt>B</dt>
+        <dd><p><strong>Page not found.</strong> You get an error page instead of a game. Please include the web address — it tells us which game it was.</p></dd>
+      </div>
+      <div class="check">
+        <dt>C</dt>
+        <dd><p><strong>It plays, but never ends.</strong> You finish or lose, and the screen never moves on to your score or results. This one matters a lot, because it stops you completing the run of five.</p></dd>
+      </div>
+      <div class="check">
+        <dt>D</dt>
+        <dd><p><strong>It ends, but doesn't count.</strong> You see your results, but when you go back to Home the count hasn't gone up. Note what the count said before and after.</p></dd>
+      </div>
+    </dl>
+
+    <div class="note is-stop">
+      <span class="tag">Try a couple more first</span>
+      <p>If a game fails, try two or three others before writing it up, and say what happened with those too.</p>
+      <p>“Snake Attack wouldn't load, but 2048 and Hextris were both fine” tells us it's one game. “None of the five I tried would load” tells us something much bigger is broken. Those two reports go to completely different people, so the extra minute genuinely helps.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>The five pages</h2>
+    <p class="sub">Everything here is visible on the page itself. Take one page at a time and work down its list.</p>
+
+    <div class="pages">
+
+      <article class="page-card">
+        <div class="page-card__head">
+          <h3>Home</h3>
+        </div>
+        <p class="page-card__why">Where you land, and where you decide what to play next.</p>
+        <ul>
+          <li>The big card at the top matches how many games you've actually played</li>
+          <li>Suggested games have real names and pictures, with nothing listed twice</li>
+          <li>The circular Skillprint chart draws properly, with labels that don't sit on top of each other</li>
+          <li>Recent sessions match the games you really played</li>
+          <li><strong>How this works</strong> runs the guided tour again</li>
+        </ul>
+      </article>
+
+      <article class="page-card">
+        <div class="page-card__head">
+          <h3>Games</h3>
+        </div>
+        <p class="page-card__why">The full library, and the usual way into a game.</p>
+        <ul>
+          <li>Every game has a picture, a name and its skill labels</li>
+          <li>The filters narrow the list down, and clearing them brings everything back</li>
+          <li>Search finds games by name</li>
+          <li>No game appears twice under slightly different names</li>
+          <li>Clicking a game starts it; clicking the small <strong>i</strong> opens its information page instead</li>
+          <li>If a filter combination matches nothing, the page says so rather than going blank</li>
+        </ul>
+      </article>
+
+      <article class="page-card">
+        <div class="page-card__head">
+          <h3>Skills</h3>
+        </div>
+        <p class="page-card__why">What the games are actually measuring about you.</p>
+        <ul>
+          <li>Three sections appear: Mood, Cognition and Personality</li>
+          <li>The left-hand menu grows a small sub-menu on this page only</li>
+          <li>Clicking Mood, Cognition or Personality jumps you to that section</li>
+          <li>Scrolling by hand moves the highlight in the sub-menu to match where you are</li>
+          <li>Every skill has a proper name and description — no stray lowercase-words-joined-by-hyphens on screen</li>
+          <li>Clicking a skill opens a page about that skill</li>
+        </ul>
+      </article>
+
+      <article class="page-card">
+        <div class="page-card__head">
+          <h3>Profile</h3>
+        </div>
+        <p class="page-card__why">The payoff. Everything else exists to fill this page in.</p>
+        <ul>
+          <li>Scores for Mood, Cognition and Personality</li>
+          <li>Performance trends shows your score now, where you started, and what's changed since</li>
+          <li>Its two charts sit side by side on a wide window and stack neatly on a narrow one</li>
+          <li>The full list of skills runs down the page, without a separate scrolling box inside it</li>
+          <li>The session list matches the games and dates you played</li>
+          <li>Badges show artwork rather than empty frames</li>
+          <li>Goals can be set, and are still there after you reload the page</li>
+          <li>Charts have labels, and nothing runs off the edge</li>
+        </ul>
+      </article>
+
+      <article class="page-card">
+        <div class="page-card__head">
+          <h3>Settings</h3>
+        </div>
+        <p class="page-card__why">A short page, but it holds the two controls you'll use most.</p>
+        <ul>
+          <li><strong>Light</strong> and <strong>Dark</strong> change the look of the whole site straight away</li>
+          <li>Your choice survives a reload, and applies on every other page</li>
+          <li>Nothing becomes hard to read in either theme — pale text on a pale background is a bug</li>
+          <li><strong>Reset the welcome tour</strong> confirms it worked, and the tour runs again on Home after you reload</li>
+          <li>Privacy Policy and Terms of Service both open in new tabs</li>
+          <li><strong>Sign out</strong> takes you back to the welcome card</li>
+        </ul>
+      </article>
+
+    </div>
+
+    <div class="note is-warn">
+      <span class="tag">Then do it all again in dark</span>
+      <p>Switch to <strong>Dark</strong> in Settings and walk the five pages a second time. Dark is where text-you-can't-read tends to hide, and it goes quickly once you already know what each page should look like.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>Getting around</h2>
+    <p class="sub">The paths between pages, in roughly the order a real player hits them. After each one, press your browser's <strong>Back</strong> button and check you end up somewhere sensible rather than on a broken or empty page.</p>
+
+    <ol class="flows">
+      <li>
+        <div>
+          <h3>Every item in the left-hand menu</h3>
+          <p>Click all five in turn. The page you're on should be clearly highlighted, and that highlight should move as you go.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Shrinking the menu</h3>
+          <p>Use the small arrow at the top of the menu to shrink it down to just symbols, then reload the page. <em>It should stay shrunk.</em> Open it back up, reload again, and check that sticks too.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Starting a game from Home</h3>
+          <p>The single most important path in the product — it's what a brand-new player does first.</p>
+          <p class="trail">Home <span>→</span> Play your first game <span>→</span> play <span>→</span> results <span>→</span> Home</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Starting a game from the library</h3>
+          <p>There are two ways in from Games. Check both.</p>
+          <p class="trail">Games <span>→</span> click the game <span>→</span> play</p>
+          <p class="trail">Games <span>→</span> click the i <span>→</span> information page <span>→</span> Play</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>The three ways out of your results</h3>
+          <p>From the results screen after a game, all three should work: <em>play again</em>, <em>back to the library</em>, and <em>view your profile</em>.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Skills, down to a single skill</h3>
+          <p>Check the page you land on is about the skill you actually clicked, and not a different one.</p>
+          <p class="trail">Skills <span>→</span> a section <span>→</span> a skill <span>→</span> its page <span>→</span> Back</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Signing out and back in</h3>
+          <p>Sign out from Settings. You should land on the welcome card, with the left-hand menu gone. Sign back in as a guest and check the site loads cleanly.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>On a phone</h3>
+          <p>Open the site on your phone, or drag your browser window until it's tall and narrow. The left-hand menu should tuck away behind a button that opens and closes it, and <em>no page should slide sideways</em> when you scroll.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>Telling us what you found</h2>
+    <p class="sub">Everything goes in the <a class="url" href="https://docs.google.com/spreadsheets/d/1Oo0SdpKPG2opBx6YTWsvTNuWa4CsEJfDHYBICG3LxD4/edit?gid=0#gid=0">Portal Redesign bug tracker</a>. Add one row per problem at the bottom of the list, and please don't delete or reorder anyone else's rows.</p>
+
+    <div class="note">
+      <span class="tag">Read before you add</span>
+      <p>Have a quick look down the rows already there. Several problems are logged and being worked on, and a duplicate costs us more time to sort out than it saves you to skip. If yours is already listed, there's no need to add it again.</p>
+    </div>
+
+    <h3>What goes in each column</h3>
+
+    <dl class="checks">
+      <div class="check">
+        <dt>Date</dt>
+        <dd><p>Today's date, written as year-month-day — <strong>2026-09-17</strong>.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Reporter</dt>
+        <dd><p>Your name, so we know who to come back to with questions.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Device</dt>
+        <dd><p><strong>Desktop</strong>, <strong>Mobile</strong> or <strong>Tablet</strong>.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Page</dt>
+        <dd><p>Where you were when it happened — Home, Games, Skills, Profile, Settings, or the screen where you play a game.</p></dd>
+      </div>
+      <div class="check">
+        <dt>User state</dt>
+        <dd><p>How far into the journey you were, which often turns out to be the thing that caused it. For example <em>“New sign-in”</em>, <em>“3 games in”</em>, or <em>“Finished all 5”</em>.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Severity</dt>
+        <dd><p>Your first instinct is good enough — we'll adjust it if needed. The four options are explained just below.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Reproducible<br>steps</dt>
+        <dd><p>The important one. Three things: <strong>what you did</strong>, <strong>what happened</strong>, and <strong>what you expected instead</strong>. If you can make it happen again, say exactly which clicks did it.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Other</dt>
+        <dd><p>Your browser, and your screenshot. You can drop the image straight into the cell with <strong>Insert → Image → Image in cell</strong>, or paste a link to it. Also the web address from the top of your browser, which is how we find the exact game or skill you were looking at.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-expect">Leave<br>blank</dt>
+        <dd><p><strong>Status</strong> and <strong>Linear ID</strong> are filled in by Tony once the problem has been picked up. Please leave both empty.</p></dd>
+      </div>
+    </dl>
+
+    <h3>Choosing a severity</h3>
+
+    <dl class="checks">
+      <div class="check">
+        <dt class="is-flag">Blocker</dt>
+        <dd><p>You cannot carry on. You can't sign in, a page won't load, or no game will start at all.</p></dd>
+      </div>
+      <div class="check">
+        <dt class="is-flag">Major</dt>
+        <dd><p>Something important is wrong, but you can work around it. Your games aren't being counted, or your Profile stays empty after five of them.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Minor</dt>
+        <dd><p>Small and annoying, but it doesn't stop you. A count that's off by one, or wording that contradicts what you just did.</p></dd>
+      </div>
+      <div class="check">
+        <dt>Cosmetic</dt>
+        <dd><p>Purely how it looks. A missing picture, something misaligned, odd spacing, a colour that's hard to read.</p></dd>
+      </div>
+    </dl>
+
+    <h3>An example row</h3>
+
+    <pre class="report"><b>Date</b>         2026-09-17
+<b>Reporter</b>     Alex
+<b>Device</b>       Desktop
+<b>Page</b>         Games
+<b>User state</b>   3 games in
+<b>Severity</b>     Major
+<b>Steps</b>        Filtered by Focus and clicked the third game,
+             Snake Attack. The page loaded but the game area
+             stayed white and nothing ever appeared. Expected
+             it to load and play. Happened twice. 2048 and
+             Hextris both worked fine straight after.
+<b>Other</b>        Chrome on a Mac. Screenshot in cell.
+             redesign.skillprint.co/games</pre>
+
+    <h3>Two other things you can log</h3>
+    <p>The tracker has two more tables further down the sheet, and both are genuinely wanted:</p>
+    <ul class="plain">
+      <li><strong>Wording you'd change.</strong> Paste the text as it stands today and the text you think it should say. If a sentence made you stop and re-read it, that's worth logging even if you can't say why.</li>
+      <li><strong>Things that work but feel wrong.</strong> Not a bug — the site does what it was built to do, you just think it should behave differently. Say what you'd change and why. Someone will make a decision on each one.</li>
+    </ul>
+
+    <p style="margin-top:22px">If something looks odd and you're not sure whether it's wrong, log it anyway and say you're unsure. A false alarm costs us a minute. A bug nobody mentioned ships to real players.</p>
+
+    <p>And if something is genuinely nice to use, that's worth saying too — it tells us what not to change.</p>
+
+  </section>
+
+</div>
+
+</body>
+</html>
