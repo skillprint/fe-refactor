@@ -116,15 +116,14 @@ export default function ProfileSkillBreakdown({ scores, baselines = {} }: Profil
                           <i className="radius-full" style={{ '--track-fill': `${Math.max(0, Math.min(100, item.score as number))}%` } as React.CSSProperties}></i>
                         </span>
                         <span className="pp-skill__value font-sm">{Math.round(item.score as number)}</span>
-                        {delta !== null && (
-                          <span
-                            className="font-xs text-muted"
-                            title={`Baseline ${Math.round(baseline!.baselineScore as number)}`}
-                            aria-label={`${delta > 0 ? 'Up' : delta < 0 ? 'Down' : 'Unchanged'} ${Math.abs(Math.round(delta))} since your first reading`}
-                          >
-                            {delta > 0 ? '+' : ''}{Math.round(delta)}
-                          </span>
-                        )}
+                        {/* Always rendered so every scored row has the same column count and the chevron stays in the last column. */}
+                        <span
+                          className="pp-skill__delta font-xs text-muted"
+                          title={delta !== null ? `Baseline ${Math.round(baseline!.baselineScore as number)}` : undefined}
+                          aria-label={delta !== null ? `${delta > 0 ? 'Up' : delta < 0 ? 'Down' : 'Unchanged'} ${Math.abs(Math.round(delta))} since your first reading` : undefined}
+                        >
+                          {delta !== null ? `${delta > 0 ? '+' : ''}${Math.round(delta)}` : ''}
+                        </span>
                       </>
                     ) : (
                       <span className="pp-skill__state font-sm text-muted">Needs play</span>

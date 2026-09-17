@@ -7312,7 +7312,7 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
 .page--portal-profile .pp-skill {
   padding: var(--spacing-md) var(--spacing-xl);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) var(--space-80) var(--space-32) auto;
+  grid-template-columns: auto minmax(0, 1fr) var(--space-80) var(--space-32) var(--space-32) auto;
   align-items: center;
   gap: var(--spacing-lg);
   border-block-end: 1px solid var(--surface-border);
@@ -7364,9 +7364,16 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
   text-align: right;
 }
 
+.page--portal-profile .pp-skill__delta {
+  font-family: var(--skillprint-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
 
 .page--portal-profile .pp-skill--empty {
-  grid-template-columns: auto minmax(0, 1fr) calc(var(--space-80) + var(--space-32) + var(--spacing-lg)) auto;
+  grid-template-columns: auto minmax(0, 1fr) calc(var(--space-80) + var(--space-32) + var(--space-32) + var(--spacing-lg) * 2) auto;
 }
 
 .page--portal-profile .pp-skill__state {
@@ -7745,7 +7752,7 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile {
   }
 
   .page--portal-profile .pp-skill {
-    grid-template-columns: auto minmax(0, 1fr) var(--space-32) auto;
+    grid-template-columns: auto minmax(0, 1fr) var(--space-32) var(--space-32) auto;
   }
 
   .page--portal-profile .pp-skill--empty {
