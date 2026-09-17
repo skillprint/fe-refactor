@@ -132,113 +132,117 @@ export default function ProfilePerformanceTrends() {
         </p>
       </div>
 
-      <article className="chart-card sp-card min-width-0">
-        <div className="chart-card-head">
-          <div className="chart-card-title">
-            <span className="theme-label">{PILLAR_LABELS[pillar]}</span>
-            <strong>{PILLAR_LABELS[pillar]} score, last {series.length || points} {bucketWord}</strong>
-            <span>One point per {period === 'weekly' ? 'week' : 'month'}, against your lifetime baseline</span>
-          </div>
-        </div>
-        
-        <div className="chart-frame h-[320px]" data-pp-trends="" id="ppTrends">
-          {isLoading && !trendsData ? (
-            <div className="p-8 text-center h-full flex flex-col justify-center items-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div></div>
-          ) : !hasPoints ? (
-            <div className="portal-blank">
-              <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
-              <p className="portal-blank__title">Nothing to plot yet</p>
-              <p className="portal-blank__note">This is the empty chart your {PILLAR_LABELS[pillar].toLowerCase()} scores will draw across. Play a game and the first {period === 'weekly' ? 'week' : 'month'} appears.</p>
-              <Link className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></Link>
+      {/* The trend chart and this week's readings sit side by side on wide screens,
+          so the section fills the width the retired Skillprint wheel used to take. */}
+      <div className="pp-trend-grid">
+        <article className="chart-card sp-card min-width-0">
+          <div className="chart-card-head">
+            <div className="chart-card-title">
+              <span className="theme-label">{PILLAR_LABELS[pillar]}</span>
+              <strong>{PILLAR_LABELS[pillar]} score, last {series.length || points} {bucketWord}</strong>
+              <span>One point per {period === 'weekly' ? 'week' : 'month'}, against your lifetime baseline</span>
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              {chartType === 'BarLine' ? (
-                <LineChart data={series} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dy={10} />
-                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dx={-10} />
-                  <RechartsTooltip contentStyle={tooltipStyle} formatter={(value: any, name: any) => [value, name === pillar ? PILLAR_LABELS[pillar] : name]} />
-                  {baselineLine}
-                  <Line type="monotone" dataKey={pillar} name={pillar} stroke="var(--primary)" strokeWidth={3} connectNulls={false} dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 2, stroke: 'var(--background)' }} activeDot={{ r: 6 }} />
-                </LineChart>
-              ) : (
-                <AreaChart data={series} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dy={10} />
-                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dx={-10} />
-                  <RechartsTooltip contentStyle={tooltipStyle} formatter={(value: any, name: any) => [value, name === pillar ? PILLAR_LABELS[pillar] : name]} />
-                  {baselineLine}
-                  <Area type="monotone" dataKey={pillar} name={pillar} stroke="var(--primary)" connectNulls={false} fillOpacity={1} fill="url(#colorScore)" strokeWidth={3} />
-                </AreaChart>
-              )}
-            </ResponsiveContainer>
-          )}
-        </div>
+          </div>
         
-        <div className="chart-key" data-pp-trend-key="">
-          <span className="key-item" data-series={pillar}><i></i>{PILLAR_LABELS[pillar]}</span>
-          {typeof summary?.baselineScore === 'number' && <span className="key-item" data-series="baseline"><i></i>Baseline</span>}
-        </div>
-      </article>
+          <div className="chart-frame h-[320px]" data-pp-trends="" id="ppTrends">
+            {isLoading && !trendsData ? (
+              <div className="p-8 text-center h-full flex flex-col justify-center items-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div></div>
+            ) : !hasPoints ? (
+              <div className="portal-blank">
+                <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
+                <p className="portal-blank__title">Nothing to plot yet</p>
+                <p className="portal-blank__note">This is the empty chart your {PILLAR_LABELS[pillar].toLowerCase()} scores will draw across. Play a game and the first {period === 'weekly' ? 'week' : 'month'} appears.</p>
+                <Link className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></Link>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                {chartType === 'BarLine' ? (
+                  <LineChart data={series} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dy={10} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dx={-10} />
+                    <RechartsTooltip contentStyle={tooltipStyle} formatter={(value: any, name: any) => [value, name === pillar ? PILLAR_LABELS[pillar] : name]} />
+                    {baselineLine}
+                    <Line type="monotone" dataKey={pillar} name={pillar} stroke="var(--primary)" strokeWidth={3} connectNulls={false} dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 2, stroke: 'var(--background)' }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                ) : (
+                  <AreaChart data={series} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dy={10} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)' }} dx={-10} />
+                    <RechartsTooltip contentStyle={tooltipStyle} formatter={(value: any, name: any) => [value, name === pillar ? PILLAR_LABELS[pillar] : name]} />
+                    {baselineLine}
+                    <Area type="monotone" dataKey={pillar} name={pillar} stroke="var(--primary)" connectNulls={false} fillOpacity={1} fill="url(#colorScore)" strokeWidth={3} />
+                  </AreaChart>
+                )}
+              </ResponsiveContainer>
+            )}
+          </div>
+        
+          <div className="chart-key" data-pp-trend-key="">
+            <span className="key-item" data-series={pillar}><i></i>{PILLAR_LABELS[pillar]}</span>
+            {typeof summary?.baselineScore === 'number' && <span className="key-item" data-series="baseline"><i></i>Baseline</span>}
+          </div>
+        </article>
 
-      <article className="chart-card sp-card min-width-0">
-        <div className="chart-card-head">
-          <div className="chart-card-title">
-            <span className="theme-label">This week</span>
-            <strong>Your skills this week</strong>
-            <span>One dimension at a time, this week&apos;s average against your lifetime baseline.</span>
-          </div>
-          <div className="chart-actions status-tabs layout-inline-flex" data-scroll-fade role="group" aria-label="Dimension">
-            {PILLARS.map((p) => (
-              <button key={p} aria-pressed={orbitView === p} className="status-tab" onClick={() => setOrbitView(p)} type="button">{PILLAR_LABELS[p]}</button>
-            ))}
-          </div>
-        </div>
-        
-        {weekRows.length === 0 ? (
-          <div className="portal-blank">
-            <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
-            <p className="portal-blank__title">No {PILLAR_LABELS[orbitView].toLowerCase()} skill has a score this week</p>
-            <p className="portal-blank__note">A finished game puts a reading on the skills it measured.</p>
-            <Link className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></Link>
-          </div>
-        ) : (
-          <div className="pp-breakdown__scroll">
-            <div className="pp-breakdown__group" data-pillar={orbitView} role="group" aria-label={`${PILLAR_LABELS[orbitView]} skills this week`}>
-              {weekRows.map((row) => (
-                <Link key={row.slug} href={`/skills/${row.slug}`} className="pp-skill" data-pillar={orbitView} data-score={row.score}>
-                  <svg className="sp-icon sp-icon--sm pp-skill__icon" aria-hidden="true" viewBox="0 0 24 24">
-                    <use href={`#${skillIconId(orbitView, row.slug)}`}></use>
-                  </svg>
-                  <span className="pp-skill__name weight-medium">{row.name}</span>
-                  <span className="pp-skill__track track radius-full" aria-hidden="true">
-                    <i className="radius-full" style={{ '--track-fill': `${Math.max(0, Math.min(100, row.score))}%` } as React.CSSProperties}></i>
-                  </span>
-                  <span className="pp-skill__value font-sm">{row.score}</span>
-                  <span className="font-xs text-muted" title={row.baseline === null ? 'No baseline yet' : `Baseline ${row.baseline}`}>
-                    {row.change === null ? 'new' : signed(row.change)}
-                  </span>
-                  <svg className="sp-icon sp-icon--sm sp-icon--muted" aria-hidden="true" viewBox="0 0 24 24">
-                    <use href="#ti-chevron-right"></use>
-                  </svg>
-                </Link>
+        <article className="chart-card sp-card min-width-0">
+          <div className="chart-card-head">
+            <div className="chart-card-title">
+              <span className="theme-label">This week</span>
+              <strong>Your skills this week</strong>
+              <span>One dimension at a time, this week&apos;s average against your lifetime baseline.</span>
+            </div>
+            <div className="chart-actions status-tabs layout-inline-flex" data-scroll-fade role="group" aria-label="Dimension">
+              {PILLARS.map((p) => (
+                <button key={p} aria-pressed={orbitView === p} className="status-tab" onClick={() => setOrbitView(p)} type="button">{PILLAR_LABELS[p]}</button>
               ))}
             </div>
           </div>
-        )}
         
-        <div className="chart-key">
-          <span className="key-item" data-series={orbitView}><i></i>{PILLAR_LABELS[orbitView]} this week</span>
-          <span className="key-item" data-series="baseline"><i></i>Change vs baseline</span>
-        </div>
-      </article>
+          {weekRows.length === 0 ? (
+            <div className="portal-blank">
+              <span className="sp-icon-frame sp-icon-frame--md no-grow" aria-hidden="true"><svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg></span>
+              <p className="portal-blank__title">No {PILLAR_LABELS[orbitView].toLowerCase()} skill has a score this week</p>
+              <p className="portal-blank__note">A finished game puts a reading on the skills it measured.</p>
+              <Link className="button button--secondary button--sm" href="/games">Play a game <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg></Link>
+            </div>
+          ) : (
+            <div className="pp-breakdown__scroll">
+              <div className="pp-breakdown__group" data-pillar={orbitView} role="group" aria-label={`${PILLAR_LABELS[orbitView]} skills this week`}>
+                {weekRows.map((row) => (
+                  <Link key={row.slug} href={`/skills/${row.slug}`} className="pp-skill" data-pillar={orbitView} data-score={row.score}>
+                    <svg className="sp-icon sp-icon--sm pp-skill__icon" aria-hidden="true" viewBox="0 0 24 24">
+                      <use href={`#${skillIconId(orbitView, row.slug)}`}></use>
+                    </svg>
+                    <span className="pp-skill__name weight-medium">{row.name}</span>
+                    <span className="pp-skill__track track radius-full" aria-hidden="true">
+                      <i className="radius-full" style={{ '--track-fill': `${Math.max(0, Math.min(100, row.score))}%` } as React.CSSProperties}></i>
+                    </span>
+                    <span className="pp-skill__value font-sm">{row.score}</span>
+                    <span className="font-xs text-muted" title={row.baseline === null ? 'No baseline yet' : `Baseline ${row.baseline}`}>
+                      {row.change === null ? 'new' : signed(row.change)}
+                    </span>
+                    <svg className="sp-icon sp-icon--sm sp-icon--muted" aria-hidden="true" viewBox="0 0 24 24">
+                      <use href="#ti-chevron-right"></use>
+                    </svg>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        
+          <div className="chart-key">
+            <span className="key-item" data-series={orbitView}><i></i>{PILLAR_LABELS[orbitView]} this week</span>
+            <span className="key-item" data-series="baseline"><i></i>Change vs baseline</span>
+          </div>
+        </article>
+      </div>
     </section>
   );
 }

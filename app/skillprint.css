@@ -7064,6 +7064,22 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
   padding-block-start: var(--spacing-lg);
 }
 
+/* The trend chart and the week's readings pair up once the content column is
+   wide enough for two charts, so Performance trends fills the width instead of
+   stacking two full-width cards. */
+.page--portal-profile .pp-trend-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-14);
+  align-items: start;
+}
+
+@media (min-width: 1600px) {
+  .page--portal-profile .pp-trend-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
 /* --------------------------------------------------------------------------
    Game-specific insights
    -------------------------------------------------------------------------- */
@@ -7250,10 +7266,14 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
   flex-direction: column;
 }
 
+/* Once the layout stacks, the breakdown runs its full length: the page has the
+   room the 87-feature Skillprint wheel used to take, and a scroller inside a
+   scroller reads worse than a longer page. Beside the skills wheel it still
+   scrolls, so the two columns end level. */
 .page--portal-profile .pp-wheel-layout__aside .pp-breakdown__scroll {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: var(--space-480);
+  max-height: none;
 }
 
 @media (min-width: 1440px) {
@@ -7264,10 +7284,6 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
   .page--portal-profile .pp-wheel-layout__aside {
     height: 0;
     min-height: 100%;
-  }
-
-  .page--portal-profile .pp-wheel-layout__aside .pp-breakdown__scroll {
-    max-height: none;
   }
 }
 

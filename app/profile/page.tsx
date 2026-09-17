@@ -17,7 +17,6 @@ import { getGameDetails } from '../config/gameConfig';
 import ProfileGameInsights from '@/components/Profile/ProfileGameInsights';
 import { useGameMetrics } from '../hooks/useGameMetrics';
 import ProfileSkillsSection from '@/components/Profile/ProfileSkillsSection';
-import ProfileSkillprintWheel from '@/components/Profile/ProfileSkillprintWheel';
 import ProfilePerformanceTrends from '@/components/Profile/ProfilePerformanceTrends';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
@@ -186,8 +185,7 @@ function ProfilePageContent() {
       <PortalSection ariaLabelledBy="profile-skills-breakdown">
         <ProfileSkillsSection scores={userScores} baselines={skillBaselines} />
       </PortalSection>
-      
-      <ProfileSkillprintWheel />
+
       <ProfilePerformanceTrends />
 
       <ProfileGameInsights 
