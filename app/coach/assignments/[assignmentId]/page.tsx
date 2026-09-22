@@ -136,7 +136,7 @@ export default function AssignmentDetailPage({
             {remindError && <p className="coach-formerror" role="alert">{remindError}</p>}
 
             <div className="coach-tablewrap">
-              <table className="coach-table">
+              <table className="coach-table coach-table--assignment">
                 <thead>
                   <tr>
                     <th scope="col">Player</th>
