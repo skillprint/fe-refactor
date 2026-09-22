@@ -98,7 +98,7 @@ export default function CoachTeamDetailPage({
 
         {roster.data && roster.data.players.length > 0 && (
           <div className="coach-tablewrap">
-            <table className="coach-table">
+            <table className="coach-table coach-table--triage">
               <thead>
                 <tr>
                   <th scope="col">Player</th>

@@ -36,8 +36,11 @@ function MockBar() {
     <div className="coach-mockbar" role="status">
       <strong>Mock data.</strong>
       <span>
-        Every figure below is generated in <code>lib/models/coach/mocks</code> — no player on this
-        screen is real. Set <code>NEXT_PUBLIC_COACH_MOCKS=false</code> to read the live API.
+        Nothing on this screen is a real player.
+        <span className="coach-mockbar__long">
+          {' '}Generated in <code>lib/models/coach/mocks</code>; set{' '}
+          <code>NEXT_PUBLIC_COACH_MOCKS=false</code> to read the live API.
+        </span>
       </span>
     </div>
   );

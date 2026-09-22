@@ -403,3 +403,82 @@
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
+
+/* ── narrow screens ──────────────────────────────────────────────────────── */
+
+/*
+ * A coach checking the squad between matches is on a phone, which the builder's
+ * button-based reordering was chosen for — but the layout around it was never
+ * checked at that width, and three things were wrong:
+ *
+ *  1. the mock banner took a quarter of the viewport before any content;
+ *  2. the header wrapped into four rows;
+ *  3. the roster showed three of six columns behind an undiscoverable
+ *     horizontal scroll.
+ */
+@media (max-width: 640px) {
+  /* The banner has to stay visible — mock data that looks real is the thing it
+     exists to prevent — but it does not need five lines to say so. */
+  .coach-mockbar {
+    padding: 6px 16px;
+    gap: 6px;
+    font-size: var(--app-text-xxs-font-size);
+    line-height: var(--app-text-xxs-line-height);
+  }
+  .coach-mockbar__long { display: none; }
+
+  .coach-top { padding: 10px 16px; gap: 8px; }
+  .coach-brand { font-size: var(--app-text-sm-font-size); }
+  /* The org name is useful context, not navigation; it costs a whole row. */
+  .coach-brand__org { display: none; }
+  .coach-nav { width: 100%; justify-content: flex-start; gap: 2px; }
+  .coach-nav a { padding: 6px 9px; }
+  .coach-nav__who { display: none; }
+  .coach-nav__signout { margin-left: auto; }
+
+  .coach-content { padding: 16px 16px 48px; }
+  .coach-pagehead h1 {
+    font-size: var(--app-display-xs-font-size);
+    line-height: var(--app-display-xs-line-height);
+  }
+  .coach-panel { padding: 14px; border-radius: 12px; }
+
+  /* Tighter cells fit two more columns before the scroll starts. */
+  .coach-table { font-size: var(--app-text-xs-font-size); }
+  .coach-table th,
+  .coach-table td { padding: 8px 6px; }
+  /* The recency pill carries the label and the number; on a phone the number
+     is the part that matters and the word is inferable from the colour. */
+  .coach-pill { padding: 2px 6px; }
+
+  /*
+   * The dimension columns are analysis; the triage question a coach opens this
+   * on a phone to answer is "who has gone quiet", which is the first three
+   * columns. Hidden rather than scrolled-to, and they come back on any wider
+   * screen. Not hidden from assistive tech elsewhere — the player page carries
+   * the same figures in full.
+   */
+  .coach-table--triage th:nth-child(n + 5),
+  .coach-table--triage td:nth-child(n + 5) { display: none; }
+
+  /*
+   * The assignment table cannot use the same rule: its last column is the
+   * Remind button, and hiding everything past the fourth would take the action
+   * with it. So the two timestamp columns are named directly and the action
+   * stays.
+   */
+  .coach-table--assignment th:nth-child(4),
+  .coach-table--assignment td:nth-child(4),
+  .coach-table--assignment th:nth-child(5),
+  .coach-table--assignment td:nth-child(5) { display: none; }
+
+  .coach-actions { justify-content: stretch; }
+  .coach-actions .coach-submit { flex: 1; }
+}
+
+/* A scrollable table should look scrollable. */
+.coach-tablewrap {
+  background:
+    linear-gradient(to right, var(--surface-box) 30%, transparent) left / 24px 100% no-repeat,
+    linear-gradient(to left, var(--surface-box) 30%, transparent) right / 24px 100% no-repeat;
+}
