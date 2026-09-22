@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import './coach.css';
+import { CoachAuthProvider } from '@/lib/models/coach/CoachAuthContext';
 import CoachShell from './components/CoachShell';
 
 export const metadata: Metadata = {
@@ -26,7 +27,9 @@ export default function CoachLayout({ children }: { children: React.ReactNode })
     // guard different things, and the boundary is what stops a single hook
     // deep in the tree from failing the whole build again.
     <Suspense fallback={<div className="coach-app" />}>
-      <CoachShell>{children}</CoachShell>
+      <CoachAuthProvider>
+        <CoachShell>{children}</CoachShell>
+      </CoachAuthProvider>
     </Suspense>
   );
 }

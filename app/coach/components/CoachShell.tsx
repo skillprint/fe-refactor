@@ -1,22 +1,34 @@
 'use client';
 
 /**
- * The `/coach` chrome and auth gate (SKI-212).
+ * The `/coach` chrome and its guard (SKI-212, SKI-213, SKI-253).
  *
  * Separate from `PortalLayout` on purpose: a coach is not a player looking at a
  * different tab, and sharing the player shell would put the player sidebar
  * (Games, Playbooks, Profile) around a roster screen.
  *
- * The gate asks `/api/coach/context/`, which answers `isCoach: false` with a
- * 200 rather than a 403 — the question is asked *in order to* decide what to
- * render, so "no" is an answer. A non-coach gets a plain explanation, not an
- * error page.
+ * ## Three gates, in order, and why that order
+ *
+ * 1. **Restoring.** The stored session is unreadable during server rendering,
+ *    so the first client render always looks signed out. Redirecting here would
+ *    bounce a signed-in coach on every page load.
+ * 2. **Signed in?** No session means the sign-in screen, carrying `next` so a
+ *    deep link survives.
+ * 3. **A coach?** `/api/coach/context/` answers `isCoach: false` with a 200,
+ *    because the question is asked *in order to* decide what to render. A
+ *    signed-in non-coach gets an explanation, not an error.
+ *
+ * Asking 3 before 2 would fire an unauthenticated request on every load and
+ * fill the logs with 401s that mean nothing.
  */
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { COACH_MOCKS_ENABLED, useCoachContext } from '@/lib/models/coach';
+import { usePathname, useRouter } from 'next/navigation';
+import { COACH_MOCKS_ENABLED, useCoachAuth, useCoachContext } from '@/lib/models/coach';
 import { ErrorState, Loading } from './ui';
+
+/** Routes that must render without a session. */
+const PUBLIC_COACH_PATHS = ['/coach/login', '/coach/forgot-password', '/coach/set-password'];
 
 function MockBar() {
   if (!COACH_MOCKS_ENABLED) return null;
@@ -31,13 +43,17 @@ function MockBar() {
   );
 }
 
-export default function CoachShell({ children }: { children: React.ReactNode }) {
+/** The dashboard, once we know who is looking. */
+function CoachDashboard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { session, signOut } = useCoachAuth();
   const { data, isLoading, error, refetch } = useCoachContext();
 
-  const nav = [
-    { href: '/coach/teams', label: 'Teams' },
-  ];
+  async function onSignOut() {
+    await signOut();
+    router.replace('/coach/login');
+  }
 
   return (
     <div className="coach-app">
@@ -51,22 +67,22 @@ export default function CoachShell({ children }: { children: React.ReactNode }) 
             <span className="coach-brand__org">· {data.organizations[0].name}</span>
           )}
         </div>
+
         <nav className="coach-nav" aria-label="Coach sections">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={pathname?.startsWith(item.href) ? 'page' : undefined}
-            >
-              {item.label}
-            </Link>
-          ))}
+          <Link href="/coach/teams" aria-current={pathname?.startsWith('/coach/teams') ? 'page' : undefined}>
+            Teams
+          </Link>
+          <span className="coach-nav__who" title={session?.email}>
+            {session?.displayName}
+          </span>
+          <button type="button" onClick={onSignOut} className="coach-nav__signout">
+            Sign out
+          </button>
         </nav>
       </header>
 
       <div className="coach-content">
         {isLoading && !data && <Loading rows={4} />}
-
         {error && <ErrorState error={error} onRetry={refetch} />}
 
         {data && !data.isCoach && (
@@ -83,4 +99,34 @@ export default function CoachShell({ children }: { children: React.ReactNode }) 
       </div>
     </div>
   );
+}
+
+export default function CoachShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { session, isRestoring } = useCoachAuth();
+
+  const isPublic = PUBLIC_COACH_PATHS.some((path) => pathname?.startsWith(path));
+
+  React.useEffect(() => {
+    if (isRestoring || isPublic || session) return;
+    const next = pathname && pathname !== '/coach' ? `?next=${encodeURIComponent(pathname)}` : '';
+    router.replace(`/coach/login${next}`);
+  }, [isRestoring, isPublic, session, pathname, router]);
+
+  // The credential screens render on their own, with no dashboard chrome
+  // around them — we do not know who this is yet.
+  if (isPublic) return <div className="coach-app">{children}</div>;
+
+  if (isRestoring || !session) {
+    return (
+      <div className="coach-app">
+        <div className="coach-content">
+          <Loading rows={3} />
+        </div>
+      </div>
+    );
+  }
+
+  return <CoachDashboard>{children}</CoachDashboard>;
 }
