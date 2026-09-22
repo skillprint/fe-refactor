@@ -7,7 +7,7 @@
  * sit below it and can each be independently suppressed on a small roster —
  * hence three separate requests rather than one composite endpoint.
  *
- * Roster rows carry `userId` and no name (see SKI-245), so players are labelled
+ * Roster rows carry `userId` and no name (see SKI-251), so players are labelled
  * by id until the payload grows an identity field. The label is produced in one
  * place, `playerLabel`, so adding a name later is a one-line change.
  */
@@ -30,7 +30,7 @@ import {
   Suppressed,
 } from '../../components/ui';
 
-/** Until the roster payload carries identity (SKI-245). */
+/** Until the roster payload carries identity (SKI-251). */
 function playerLabel(player: CoachRosterPlayer): string {
   return `Player ${player.userId}`;
 }

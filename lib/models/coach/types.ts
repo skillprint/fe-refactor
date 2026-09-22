@@ -105,7 +105,7 @@ export interface CoachTeamList {
  *    ENGAGEMENT (level 1), so a roster mixes rows with and without them.
  *
  * There is no name or email here. The roster payload carries `userId` only;
- * identity lives on the player-detail endpoint. See SKI-245.
+ * identity lives on the player-detail endpoint. See SKI-251.
  */
 export interface CoachRosterPlayer {
   userId: number;

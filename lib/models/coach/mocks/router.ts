@@ -1,5 +1,5 @@
 /**
- * Serves `/api/coach/` paths from fixtures (SKI-247).
+ * Serves `/api/coach/` paths from fixtures (SKI-214).
  *
  * This module is the *only* thing that knows mocks exist, besides the one
  * boolean in `coachFetch`. It matches on the same paths the Django `urls.py`
@@ -13,7 +13,7 @@
  * and if the mock never produces one, that branch ships untested.
  *
  * Deleting this directory and flipping `NEXT_PUBLIC_COACH_MOCKS=false` is the
- * whole switch-over (SKI-246).
+ * whole switch-over (SKI-252).
  */
 import { CoachApiError } from '../coachFetch';
 import type { CoachRange } from '../types';

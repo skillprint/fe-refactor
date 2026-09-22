@@ -13,7 +13,7 @@
  * single boolean read in a single place: `coachFetch` either resolves from the
  * mock router or does a real `fetch`, and nothing above it knows which. The
  * hooks, the types and the screens are identical either way, so switching over
- * is flipping `NEXT_PUBLIC_COACH_MOCKS` and deleting `./mocks` — see SKI-246.
+ * is flipping `NEXT_PUBLIC_COACH_MOCKS` and deleting `./mocks` — see SKI-252.
  *
  * Mocks are **on by default** in development and **off in production builds**,
  * so a forgotten env var cannot ship fake rosters to a real coach.
