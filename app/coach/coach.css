@@ -330,3 +330,76 @@
   cursor: pointer;
 }
 .coach-nav__signout:hover { background: var(--surface-raised); color: var(--surface-text); }
+
+/* ── builder and assignment (SKI-225, SKI-226) ───────────────────────────── */
+
+.coach-pagehead--split {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.coach-submit--inline { width: auto; padding: 8px 14px; text-decoration: none; display: inline-block; }
+.coach-submit--ghost {
+  background: transparent;
+  border: 1px solid var(--surface-border);
+  color: var(--surface-text);
+}
+.coach-actions { display: flex; gap: 10px; justify-content: flex-end; margin: 4px 0 8px; flex-wrap: wrap; }
+
+.coach-field textarea {
+  width: 100%; padding: 10px 12px; border-radius: 9px;
+  border: 1px solid var(--surface-border); background: var(--surface-raised);
+  color: var(--surface-text); font-family: inherit;
+  font-size: var(--app-text-sm-font-size); resize: vertical;
+}
+.coach-field select {
+  width: 100%; padding: 10px 12px; border-radius: 9px;
+  border: 1px solid var(--surface-border); background: var(--surface-raised);
+  color: var(--surface-text); font-family: inherit; font-size: var(--app-text-sm-font-size);
+}
+
+.coach-sequence { list-style: none; margin: 0; padding: 0; }
+.coach-sequence__item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border: 1px solid var(--surface-border); border-radius: 10px;
+  background: var(--surface-raised); margin-bottom: 8px;
+}
+.coach-sequence__pos {
+  width: 24px; height: 24px; flex: none; border-radius: 7px;
+  background: var(--surface-strong); display: grid; place-items: center;
+  font-size: var(--app-text-xs-font-size); font-variant-numeric: tabular-nums;
+}
+.coach-sequence__name { flex: 1; font-size: var(--app-text-sm-font-size); }
+.coach-sequence__controls { display: flex; gap: 4px; }
+.coach-sequence__controls button {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--surface-border); background: transparent;
+  color: var(--surface-text-muted); cursor: pointer; font-size: 13px;
+}
+.coach-sequence__controls button:hover:not(:disabled) { background: var(--surface-strong); color: var(--surface-text); }
+.coach-sequence__controls button:disabled { opacity: .35; cursor: not-allowed; }
+
+.coach-picker { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.coach-picker button {
+  width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--surface-border); background: transparent;
+  color: inherit; cursor: pointer; font-family: inherit;
+  display: flex; justify-content: space-between; gap: 12px; align-items: baseline;
+}
+.coach-picker button:hover { background: var(--surface-raised); border-color: var(--surface-border-hover); }
+.coach-picker__name { font-size: var(--app-text-sm-font-size); font-weight: var(--weight-medium); }
+
+.coach-choice { display: flex; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
+.coach-choice label,
+.coach-checklist label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: var(--app-text-sm-font-size); cursor: pointer;
+}
+.coach-checklist { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.coach-checklist li { padding: 7px 10px; border-radius: 8px; background: var(--surface-raised); }
+
+.coach-teamcard__row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

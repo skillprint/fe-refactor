@@ -36,6 +36,15 @@ export {
   writeCoachSession,
 } from './coachAuth';
 export type { CoachSession } from './coachAuth';
+export {
+  useCoachAssignment,
+  useCoachAssignments,
+  useCoachCatalogue,
+  useCoachPlaybook,
+  useCoachPlaybooks,
+  useCoachWrites,
+} from './usePlaybooks';
+export type { CoachCatalogue } from './usePlaybooks';
 export type { CoachResource } from './useCoachResource';
 
 /** Whether the caller coaches anything — asked before rendering `/coach`. */

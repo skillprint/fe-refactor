@@ -88,7 +88,13 @@ export async function coachFetch<T>(
   const target = withQuery(path, params);
 
   if (COACH_MOCKS_ENABLED) {
-    return mockCoachResponse<T>(target);
+    // Writes are mocked too, against a mutable in-memory store, so the builder
+    // and assign flows actually work in the sandbox rather than being read-only
+    // screens with dead buttons.
+    return mockCoachResponse<T>(target, {
+      method: (init.method ?? 'GET').toUpperCase(),
+      body: typeof init.body === 'string' ? JSON.parse(init.body) : undefined,
+    });
   }
 
   const headers: Record<string, string> = {

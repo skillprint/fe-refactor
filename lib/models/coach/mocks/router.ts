@@ -16,6 +16,7 @@
  * whole switch-over (SKI-252).
  */
 import { CoachApiError } from '../coachFetch';
+import { playbookRoutes } from './playbooks';
 import type { CoachRange } from '../types';
 import { CoachVisibilityScope } from '../types';
 import {
@@ -94,8 +95,18 @@ function requirePlayer(userId: number, requires: CoachVisibilityScope) {
   return player;
 }
 
-type Handler = (match: RegExpMatchArray, params: URLSearchParams) => unknown;
+export interface MockRequest {
+  method: string;
+  body?: any;
+}
 
+type Handler = (
+  match: RegExpMatchArray,
+  params: URLSearchParams,
+  request: MockRequest,
+) => unknown;
+
+/** `[method, pattern, handler]`. GET unless stated. */
 const ROUTES: Array<[RegExp, Handler]> = [
   [/^\/context\/$/, () => MOCK_CONTEXT],
 
@@ -208,16 +219,24 @@ const ROUTES: Array<[RegExp, Handler]> = [
   ],
 ];
 
-export async function mockCoachResponse<T>(target: string): Promise<T> {
+export async function mockCoachResponse<T>(
+  target: string,
+  request: MockRequest = { method: 'GET' },
+): Promise<T> {
   const [path, query = ''] = target.split('?');
   const params = new URLSearchParams(query);
 
   await new Promise((resolve) => setTimeout(resolve, LATENCY_MS));
 
+  // Writes live in their own module so the read fixtures stay a pure function
+  // of the request and the mutable store is in one place.
+  const written = playbookRoutes(path, params, request);
+  if (written !== undefined) return written as T;
+
   for (const [pattern, handler] of ROUTES) {
     const match = path.match(pattern);
-    if (match) return handler(match, params) as T;
+    if (match) return handler(match, params, request) as T;
   }
 
-  throw new CoachApiError(404, `No mock handler for ${path}`);
+  throw new CoachApiError(404, `No mock handler for ${request.method} ${path}`);
 }
