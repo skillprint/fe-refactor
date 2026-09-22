@@ -25,6 +25,17 @@ import type {
 export * from './types';
 export { CoachApiError, COACH_MOCKS_ENABLED, COACH_BASE_URL, coachFetch } from './coachFetch';
 export { useCoachResource } from './useCoachResource';
+export { CoachAuthProvider, useCoachAuth } from './CoachAuthContext';
+export {
+  clearCoachSession,
+  coachLogin,
+  coachLogout,
+  readCoachSession,
+  requestPasswordReset,
+  setPassword,
+  writeCoachSession,
+} from './coachAuth';
+export type { CoachSession } from './coachAuth';
 export type { CoachResource } from './useCoachResource';
 
 /** Whether the caller coaches anything — asked before rendering `/coach`. */
