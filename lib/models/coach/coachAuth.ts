@@ -23,12 +23,16 @@
  *
  * ## Mocks
  *
- * Login mirrors `coachFetch`: one switch, `COACH_MOCKS_ENABLED`, decides
- * whether credentials go to the API or to `./mocks/auth`. Set-password and
- * forgot-password are mock-only for now because the backend endpoints do not
- * exist yet (SKI-200) — `requestPasswordReset` and `setPassword` throw a
- * clearly-labelled error when mocks are off rather than silently appearing to
- * work.
+ * Every call here mirrors `coachFetch`: one switch, `COACH_MOCKS_ENABLED`,
+ * decides whether credentials go to the API or to `./mocks/auth`.
+ *
+ * ## Errors
+ *
+ * The credential endpoints (SKI-200) answer every refusal with
+ * `{ code, detail: string[] }`. The messages are written for a coach to read,
+ * so they are shown as they come; `code` rides along on `CoachApiError.detail`
+ * for a screen that wants to branch on it — `invite_expired`,
+ * `invite_already_accepted`, `reset_invalid`, `password_invalid`, …
  */
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
 import { COACH_MOCKS_ENABLED, CoachApiError } from './coachFetch';
@@ -165,26 +169,69 @@ export async function coachLogout(token: string | null): Promise<void> {
   }
 }
 
+/** A credential endpoint's refusal, as a coach-readable `CoachApiError`. */
+async function credentialError(response: Response, fallback: string): Promise<CoachApiError> {
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    /* not JSON */
+  }
+
+  if (response.status === 429) {
+    return new CoachApiError(429, 'Too many attempts. Wait a few minutes and try again.', body);
+  }
+
+  const detail = (body as { detail?: unknown } | undefined)?.detail;
+  const message = Array.isArray(detail)
+    ? detail.filter((line): line is string => typeof line === 'string').join(' ')
+    : typeof detail === 'string'
+      ? detail
+      : '';
+  return new CoachApiError(response.status, message || fallback, body);
+}
+
+async function postCredential(path: string, payload: Record<string, string>) {
+  return fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
 /**
  * Start a password reset.
  *
  * Always resolves, even for an address with no account: telling an anonymous
  * caller which email addresses are coaches is an enumeration oracle, and the
- * screen says "if that address has an account" for the same reason.
+ * screen says "if that address has an account" for the same reason. The API
+ * holds the same line from its side — it answers 202 for every well-formed
+ * address and does no account lookup on the request path at all, so not even
+ * response time differs. Only a malformed address or a rate limit is refused.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
   if (COACH_MOCKS_ENABLED) return mockRequestPasswordReset(email);
-  throw new CoachApiError(
-    501,
-    'Password reset is not wired up yet — the backend endpoint lands in SKI-200.',
-  );
+
+  const response = await postCredential('api/coach/auth/forgot-password/', { email });
+  if (!response.ok) {
+    throw await credentialError(response, `Could not send a reset link (${response.status}).`);
+  }
 }
 
-/** Redeem an invite or reset token and set a password. */
+/**
+ * Redeem an invite or reset token and set a password.
+ *
+ * One endpoint takes both kinds of token, as this screen serves both links;
+ * the API tells them apart by shape. It also returns a signed-in session,
+ * which this deliberately ignores for now: the screen's success state sends
+ * the coach to sign in, and changing that journey is a separate decision from
+ * wiring the endpoint.
+ */
 export async function setPassword(token: string, password: string): Promise<void> {
   if (COACH_MOCKS_ENABLED) return mockSetPassword(token, password);
-  throw new CoachApiError(
-    501,
-    'Setting a password is not wired up yet — the backend endpoint lands in SKI-200.',
-  );
+
+  const response = await postCredential('api/coach/auth/set-password/', { token, password });
+  if (!response.ok) {
+    throw await credentialError(response, `Could not set the password (${response.status}).`);
+  }
 }
