@@ -15662,3 +15662,95 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 .page--portal .rail-card--badge .sp-badge__progress .sp-progress {
   display: block;
 }
+
+/* ── assigned-to-you, portal home (SKI-227) ──────────────────────────────── */
+
+.assigned { margin: 0 0 28px; }
+.assigned__head { margin-bottom: 12px; }
+.assigned__heading {
+  margin: 0 0 2px;
+  font-size: var(--app-text-lg-font-size);
+  line-height: var(--app-text-lg-line-height);
+  font-weight: var(--weight-semibold);
+}
+.assigned__sub {
+  margin: 0;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-sm-font-size);
+}
+.assigned__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.assigned-card {
+  background: var(--surface-box);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.assigned-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.assigned-card__title {
+  margin: 0;
+  font-size: var(--app-text-md-font-size);
+  font-weight: var(--weight-semibold);
+}
+/* Amber, never red. An overdue warm-up is a nudge, not a failure. */
+.assigned-card__due {
+  font-size: var(--app-text-xxs-font-size);
+  line-height: var(--app-text-xxs-line-height);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--surface-text-muted);
+  white-space: nowrap;
+}
+.assigned-card__due--late {
+  background: rgb(214 122 32 / 18%);
+  color: #ffb454;
+  border: 1px solid rgb(214 122 32 / 38%);
+}
+.assigned-card__from,
+.assigned-card__progress {
+  margin: 0;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-xs-font-size);
+}
+.assigned-card__note {
+  margin: 4px 0;
+  font-size: var(--app-text-sm-font-size);
+  font-style: italic;
+  color: var(--surface-text);
+}
+.assigned-card__actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+.assigned-card__start {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, #4f7cff, #7c5cf6);
+  color: #fff;
+  text-decoration: none;
+  font-size: var(--app-text-sm-font-size);
+  font-weight: var(--weight-semibold);
+}
+.assigned-card__start:hover { filter: brightness(1.08); }
+.assigned-card__dismiss {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--surface-text-muted);
+  font-family: inherit;
+  font-size: var(--app-text-sm-font-size);
+  cursor: pointer;
+}
+.assigned-card__dismiss:hover { color: var(--surface-text); text-decoration: underline; }

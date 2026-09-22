@@ -4,6 +4,7 @@ import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import AssignedPlaybooks from './components/AssignedPlaybooks';
 import PortalLayout from "@/components/PortalLayout";
 import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
@@ -414,6 +415,12 @@ function HomeContent() {
 
         <PortalPageLayout>
           <PortalPageMain>
+
+            {/* SKI-227: above "Get started", because a player who has been set
+                work by their coach should meet it before the generic prompt to
+                pick something. Renders nothing at all when there are no
+                assignments, which is most players. */}
+            <AssignedPlaybooks />
 
             {/* Get Started */}
             <PortalSection ariaLabelledBy="nextUpTitle">
