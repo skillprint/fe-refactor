@@ -38,7 +38,7 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
   const [mode, setMode] = useState<'team' | 'player'>('team');
   const [selected, setSelected] = useState<number[]>([]);
   const [dueAt, setDueAt] = useState('');
-  const [cadence, setCadence] = useState<CoachAssignmentCadence>('once');
+  const [cadence, setCadence] = useState<CoachAssignmentCadence>('OneOff');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -158,6 +158,9 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
           <input id="assign-due" type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} />
           <p className="coach-field__hint">Optional. Leave empty for no deadline.</p>
         </div>
+        {/* No "every match day": the backend deliberately has no such cadence
+            (marketplace PR #69) because we do not ingest a match schedule, and
+            offering it here would be an option the API rejects. */}
         <div className="coach-field">
           <label htmlFor="assign-cadence">Repeat</label>
           <select
@@ -165,9 +168,8 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
             value={cadence}
             onChange={(e) => setCadence(e.target.value as CoachAssignmentCadence)}
           >
-            <option value="once">Once</option>
-            <option value="weekly">Every week</option>
-            <option value="match_day">Every match day</option>
+            <option value="OneOff">Once</option>
+            <option value="Weekly">Every week until the due date</option>
           </select>
         </div>
       </Panel>

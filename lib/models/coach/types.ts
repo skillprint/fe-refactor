@@ -313,7 +313,20 @@ export interface CoachPlaybookInput {
   status?: CoachPlaybookStatus;
 }
 
-export type CoachAssignmentCadence = 'once' | 'weekly' | 'match_day';
+/**
+ * Mirrors `coach.PlaybookAssignment.Cadence` as merged (marketplace PR #69).
+ *
+ * **No `match_day`.** The backend leaves it out deliberately: it implies a
+ * match schedule the platform does not ingest in v1, and an enum value with no
+ * behaviour behind it reads as supported in the API, the admin and the UI while
+ * doing nothing. A coach wanting match days sets one-off dates by hand.
+ *
+ * Values are the TextChoices values, not lowercase slugs.
+ */
+export type CoachAssignmentCadence = 'OneOff' | 'Weekly';
+
+/** Mirrors `coach.PlaybookAssignment.Status`. Cancelling is a status change, not a delete. */
+export type CoachAssignmentStatus = 'Active' | 'Completed' | 'Cancelled';
 
 /** Derived from sessions, not self-reported. */
 export type CoachAssignmentPlayerStatus = 'not_started' | 'in_progress' | 'complete';
@@ -331,6 +344,7 @@ export interface CoachAssignment {
   assignedAt: string;
   dueAt: string | null;
   cadence: CoachAssignmentCadence;
+  status: CoachAssignmentStatus;
   note: string;
   playerCount: number;
   completedCount: number;

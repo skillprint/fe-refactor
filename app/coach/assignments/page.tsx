@@ -62,11 +62,8 @@ export default function CoachAssignmentsPage() {
                         )}
                       </td>
                       <td className="coach-meta">
-                        {assignment.cadence === 'once'
-                          ? 'Once'
-                          : assignment.cadence === 'weekly'
-                            ? 'Weekly'
-                            : 'Match day'}
+                        {assignment.cadence === 'OneOff' ? 'Once' : 'Weekly'}
+                        {assignment.status !== 'Active' && ` · ${assignment.status}`}
                       </td>
                       <td className="num">
                         {assignment.completedCount} / {assignment.playerCount}
