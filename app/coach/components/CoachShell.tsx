@@ -72,6 +72,12 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
           <Link href="/coach/teams" aria-current={pathname?.startsWith('/coach/teams') ? 'page' : undefined}>
             Teams
           </Link>
+          <Link href="/coach/playbooks" aria-current={pathname?.startsWith('/coach/playbooks') ? 'page' : undefined}>
+            Playbooks
+          </Link>
+          <Link href="/coach/assignments" aria-current={pathname?.startsWith('/coach/assignments') ? 'page' : undefined}>
+            Assignments
+          </Link>
           <span className="coach-nav__who" title={session?.email}>
             {session?.displayName}
           </span>

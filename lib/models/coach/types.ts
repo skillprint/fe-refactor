@@ -244,3 +244,144 @@ export enum CoachVisibilityScope {
   PROFILE = 2,
   SESSIONS = 3,
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Playbooks and assignment (SKI-225, SKI-226)
+//
+// ⚠️ **These types are a proposal, not a transcription.**
+//
+// Everything above this line was read off the `coach` app already merged on the
+// marketplace `main` branch. Nothing below it exists on the backend yet —
+// SKI-219, SKI-220, SKI-221 and SKI-223 are all still open. The shapes here
+// were designed against the planned models in the spec and are mirrored into
+// those tickets so the API is built to match.
+//
+// That makes the switch-over riskier than it was for the read surface: there,
+// a mismatch was impossible; here, a backend that lands differently will break
+// these screens. Whoever implements SKI-221/223 should either follow this or
+// change it here in the same PR.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A half-built playbook must not be assignable, hence two states. */
+export type CoachPlaybookStatus = 'draft' | 'published';
+
+export interface CoachPlaybookGame {
+  slug: string;
+  name: string;
+  /** Order within the sequence; lower first. */
+  position: number;
+  /** From the catalogue; null when the game has never declared one. */
+  suggestedDurationSeconds: number | null;
+}
+
+export interface CoachPlaybook {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  status: CoachPlaybookStatus;
+  pillar: 'mood' | 'cognition' | 'personality';
+  dimension: string;
+  associatedSkills: string[];
+  associatedMoods: string[];
+  games: CoachPlaybookGame[];
+  /**
+   * Sum of the games' suggested durations, server-side.
+   *
+   * Computed rather than authored: a coach assigning a "10 minute warm-up"
+   * needs to know when it is actually 25, and a hand-typed estimate drifts the
+   * moment a game is added.
+   */
+  estimatedSeconds: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CoachPlaybookList {
+  playbooks: CoachPlaybook[];
+}
+
+/** What a playbook write sends. `games` is an ordered list of slugs. */
+export interface CoachPlaybookInput {
+  title: string;
+  description?: string;
+  pillar?: CoachPlaybook['pillar'];
+  dimension?: string;
+  associatedSkills?: string[];
+  associatedMoods?: string[];
+  games: string[];
+  status?: CoachPlaybookStatus;
+}
+
+export type CoachAssignmentCadence = 'once' | 'weekly' | 'match_day';
+
+/** Derived from sessions, not self-reported. */
+export type CoachAssignmentPlayerStatus = 'not_started' | 'in_progress' | 'complete';
+
+export interface CoachAssignmentTarget {
+  type: 'team' | 'player';
+  id: number;
+  name: string;
+}
+
+export interface CoachAssignment {
+  id: string;
+  playbook: { id: string; title: string };
+  target: CoachAssignmentTarget;
+  assignedAt: string;
+  dueAt: string | null;
+  cadence: CoachAssignmentCadence;
+  note: string;
+  playerCount: number;
+  completedCount: number;
+}
+
+export interface CoachAssignmentList {
+  assignments: CoachAssignment[];
+}
+
+/**
+ * One player's progress through an assignment.
+ *
+ * `userId` with no name, consistent with the roster (SKI-251). `playedGames` /
+ * `totalGames` rather than a percentage, so the UI can say "3 of 5" — which is
+ * what a coach chasing someone actually wants.
+ */
+export interface CoachAssignmentPlayer {
+  userId: number;
+  status: CoachAssignmentPlayerStatus;
+  firstStartedAt: string | null;
+  completedAt: string | null;
+  playedGames: number;
+  totalGames: number;
+  /** Null when never reminded; drives the rate limit. */
+  lastRemindedAt: string | null;
+}
+
+export interface CoachAssignmentDetail {
+  assignment: CoachAssignment;
+  players: CoachAssignmentPlayer[];
+}
+
+export interface CoachAssignmentInput {
+  playbookId: string;
+  targetType: 'team' | 'player';
+  /** Team id, or the player user ids when assigning to a subset. */
+  teamId?: number;
+  userIds?: number[];
+  dueAt?: string | null;
+  cadence?: CoachAssignmentCadence;
+  note?: string;
+}
+
+/**
+ * The result of a remind.
+ *
+ * `skipped` carries the players who were *not* mailed because they were
+ * reminded too recently. A coach who clicks remind twice should be told six
+ * were skipped, not silently mail twenty teenagers again.
+ */
+export interface CoachRemindResult {
+  remindedUserIds: number[];
+  skipped: Array<{ userId: number; reason: string; nextAllowedAt: string }>;
+}
