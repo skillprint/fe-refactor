@@ -23,7 +23,16 @@ import type {
 } from './types';
 
 export * from './types';
-export { CoachApiError, COACH_MOCKS_ENABLED, COACH_BASE_URL, coachFetch } from './coachFetch';
+export {
+  CoachApiError,
+  COACH_ANY_MOCKED,
+  COACH_BASE_URL,
+  COACH_MOCKED_AREAS,
+  coachFetch,
+  isCoachMocked,
+} from './coachFetch';
+export { COACH_MOCK_AREA_LABELS, COACH_MOCK_AREAS } from './mockAreas';
+export type { CoachMockArea } from './mockAreas';
 export { useCoachResource } from './useCoachResource';
 export { CoachAuthProvider, useCoachAuth } from './CoachAuthContext';
 export {

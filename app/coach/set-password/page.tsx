@@ -25,7 +25,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  COACH_MOCKS_ENABLED,
+  isCoachMocked,
   CoachAuthError,
   setPassword,
   tokenKind,
@@ -178,7 +178,7 @@ function SetPasswordForm() {
         <SubmitButton busy={busy}>{kind === 'reset' ? 'Set password and sign in' : 'Finish setting up'}</SubmitButton>
       </form>
 
-      {COACH_MOCKS_ENABLED && (
+      {isCoachMocked('auth') && (
         <p className="coach-auth__sandbox">
           Sandbox links, one per outcome:{' '}
           <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.invite}`}>invite</Link> ·{' '}

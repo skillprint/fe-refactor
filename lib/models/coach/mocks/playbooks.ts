@@ -10,7 +10,8 @@
  * The store lives in module scope, so it resets on reload. That is honest about
  * what it is: nothing here is persisted, and the sandbox banner says so.
  */
-import { CoachApiError } from '../coachFetch';
+import { COACH_BASE_URL, CoachApiError } from '../coachFetch';
+import { readCoachSession } from '../coachAuth';
 import type {
   CoachAssignment,
   CoachAssignmentDetail,
@@ -285,7 +286,28 @@ function updatePlaybook(playbook: CoachPlaybook, input: Partial<CoachPlaybookInp
   return playbook;
 }
 
-function createAssignment(input: CoachAssignmentInput): CoachAssignment {
+/**
+ * A live team's roster, for mixed mode. Fails the way the create would if the
+ * team were not the coach's: the live endpoint 404s, and so does this.
+ */
+async function liveRoster(teamId: number | undefined): Promise<{ name: string; userIds: number[] }> {
+  if (teamId === undefined) {
+    throw new CoachApiError(400, 'Choose a team.', { teamId: ['This field is required.'] });
+  }
+  const session = readCoachSession();
+  const response = await fetch(`${COACH_BASE_URL}/teams/${teamId}/roster/`, {
+    headers: session ? { Authorization: `Token ${session.token}` } : {},
+  });
+  if (!response.ok) {
+    throw new CoachApiError(response.status === 404 ? 400 : response.status, 'Choose a team.', {
+      teamId: ['Unknown team.'],
+    });
+  }
+  const body = (await response.json()) as { team: { name: string }; players: Array<{ userId: number }> };
+  return { name: body.team.name, userIds: body.players.map((player) => player.userId) };
+}
+
+async function createAssignment(input: CoachAssignmentInput): Promise<CoachAssignment> {
   const playbook = playbooks.find((p) => p.id === input?.playbookId);
   if (!playbook) {
     throw new CoachApiError(400, 'Choose a playbook.', { playbookId: ['Unknown playbook.'] });
@@ -302,9 +324,18 @@ function createAssignment(input: CoachAssignmentInput): CoachAssignment {
 
   if (input.targetType === 'team') {
     const team = MOCK_TEAMS.find((t) => t.id === input.teamId);
-    if (!team) throw new CoachApiError(400, 'Choose a team.', { teamId: ['Unknown team.'] });
-    userIds = playersForTeam(team.id).map((p) => p.userId);
-    target = { type: 'team', id: team.id, name: team.name };
+    if (team) {
+      userIds = playersForTeam(team.id).map((p) => p.userId);
+      target = { type: 'team', id: team.id, name: team.name };
+    } else {
+      // Mixed mode: teams are live but assignments are not, so the team the
+      // coach picked is a real one this store has never heard of. Rather than
+      // refuse it, read its roster from the live API and fan out to the real
+      // players — the one place a mocked area reaches into a live one.
+      const live = await liveRoster(input.teamId);
+      userIds = live.userIds;
+      target = { type: 'team', id: input.teamId as number, name: live.name };
+    }
   } else {
     userIds = input.userIds ?? [];
     if (userIds.length === 0) {

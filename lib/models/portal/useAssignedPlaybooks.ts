@@ -19,7 +19,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
-import { COACH_MOCKS_ENABLED } from '../coach/coachFetch';
+import { isCoachMocked } from '../coach/coachFetch';
 import { portalFetch } from './portalFetch';
 import { AssignedPlaybook, generateMockAssignedPlaybooks } from './AssignedPlaybook';
 
@@ -34,7 +34,7 @@ export function useAssignedPlaybooks() {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
-    if (COACH_MOCKS_ENABLED) {
+    if (isCoachMocked('playbooks')) {
       setData(generateMockAssignedPlaybooks().filter((row) => row.dismissedAt === null));
       setIsLoading(false);
       return;
