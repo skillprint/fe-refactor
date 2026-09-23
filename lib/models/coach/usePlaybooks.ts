@@ -18,6 +18,7 @@ import { coachFetch, isCoachMocked } from './coachFetch';
 import { useCoachAuth } from './CoachAuthContext';
 import type {
   CoachAssignment,
+  CoachAssignmentCreated,
   CoachAssignmentDetail,
   CoachAssignmentInput,
   CoachAssignmentList,
@@ -132,8 +133,13 @@ export function useCoachWrites() {
 
     deletePlaybook: (id: string) => write<{ deleted: boolean }>(`/playbooks/${id}/`, 'DELETE'),
 
+    /** Always a list: one per player when assigning to "some players". */
     createAssignment: (input: CoachAssignmentInput) =>
-      write<CoachAssignment>('/assignments/', 'POST', input),
+      write<CoachAssignmentCreated>('/assignments/', 'POST', input),
+
+    /** Close or cancel. One way: a closed assignment is never reopened. */
+    closeAssignment: (id: string, status: 'Completed' | 'Cancelled') =>
+      write<CoachAssignment>(`/assignments/${id}/`, 'PATCH', { status }),
 
     /** `userIds` omitted reminds everyone who is not finished. */
     remind: (assignmentId: string, userIds?: number[]) =>
