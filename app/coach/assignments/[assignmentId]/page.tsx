@@ -26,7 +26,7 @@ import {
   useCoachWrites,
   type CoachRemindResult,
 } from '@/lib/models/coach';
-import { ErrorState, Loading, Panel, Tile } from '../../components/ui';
+import { ErrorState, Loading, Panel, Tile, localDay } from '../../components/ui';
 
 const STATUS_LABEL = {
   not_started: 'Not started',
@@ -124,8 +124,8 @@ export default function AssignmentDetailPage({
           <div className="coach-pagehead">
             <h1>{data.assignment.playbook.title}</h1>
             <p>
-              {data.assignment.target.name} · assigned {data.assignment.assignedAt.slice(0, 10)}
-              {data.assignment.dueAt ? ` · due ${data.assignment.dueAt.slice(0, 10)}` : ''}
+              {data.assignment.target.name} · assigned {localDay(data.assignment.assignedAt)}
+              {data.assignment.dueAt ? ` · due ${localDay(data.assignment.dueAt)}` : ''}
               {!active && (
                 <>
                   {' '}·{' '}
@@ -239,9 +239,9 @@ export default function AssignmentDetailPage({
                         <span className={STATUS_PILL[player.status]}>{STATUS_LABEL[player.status]}</span>
                       </td>
                       <td className="num">{player.playedGames} / {player.totalGames}</td>
-                      <td className="coach-meta">{player.firstStartedAt?.slice(0, 10) ?? '—'}</td>
+                      <td className="coach-meta">{player.firstStartedAt ? localDay(player.firstStartedAt) : '—'}</td>
                       {CAN_REMIND && (
-                        <td className="coach-meta">{player.lastRemindedAt?.slice(0, 10) ?? 'Never'}</td>
+                        <td className="coach-meta">{player.lastRemindedAt ? localDay(player.lastRemindedAt) : 'Never'}</td>
                       )}
                       {remindable && (
                         <td>

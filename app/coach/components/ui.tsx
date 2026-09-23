@@ -180,3 +180,18 @@ export function Sparkline({ points }: { points: Array<{ value: number }> }) {
     </svg>
   );
 }
+
+/**
+ * `YYYY-MM-DD` for an ISO timestamp, in the viewer's own time zone.
+ *
+ * Not `iso.slice(0, 10)`: the API serialises in UTC, so an assignment due at
+ * the end of Friday in California is already Saturday in the string, and
+ * slicing it shows the wrong day. Only called after data loads on the client,
+ * so the server and browser never render it differently.
+ */
+export function localDay(iso: string): string {
+  const moment = new Date(iso);
+  if (Number.isNaN(moment.getTime())) return iso.slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${moment.getFullYear()}-${pad(moment.getMonth() + 1)}-${pad(moment.getDate())}`;
+}
