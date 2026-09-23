@@ -61,7 +61,7 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
     setBusy(true);
     setError(null);
     try {
-      const assignment = await createAssignment({
+      const { assignments } = await createAssignment({
         playbookId,
         targetType: mode,
         ...(mode === 'team' ? { teamId: teamId ?? undefined } : { userIds: selected }),
@@ -69,7 +69,11 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
         cadence,
         note,
       });
-      router.push(`/coach/assignments/${assignment.id}`);
+      // One assignment per player for "some players", so several come back;
+      // the list is the only screen that shows them all.
+      router.push(
+        assignments.length === 1 ? `/coach/assignments/${assignments[0].id}` : '/coach/assignments',
+      );
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not assign.');
       setBusy(false);
@@ -145,7 +149,11 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
                     ))}
                   </ul>
                 )}
-                <p className="coach-meta">{selected.length} selected</p>
+                <p className="coach-meta">
+                  {selected.length} selected
+                  {selected.length > 1 &&
+                    ` · creates ${selected.length} assignments, one per player, so each can be cancelled on its own`}
+                </p>
               </>
             )}
           </>
@@ -156,7 +164,11 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
         <div className="coach-field">
           <label htmlFor="assign-due">Due</label>
           <input id="assign-due" type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} />
-          <p className="coach-field__hint">Optional. Leave empty for no deadline.</p>
+          <p className="coach-field__hint">
+            {cadence === 'Weekly'
+              ? 'Needed for a weekly assignment — it repeats until this date.'
+              : 'Optional. Leave empty for no deadline.'}
+          </p>
         </div>
         {/* No "every match day": the backend deliberately has no such cadence
             (marketplace PR #69) because we do not ingest a match schedule, and

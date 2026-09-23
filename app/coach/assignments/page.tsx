@@ -3,7 +3,7 @@
 /** Everything assigned, newest first (SKI-226). */
 import Link from 'next/link';
 import { useCoachAssignments } from '@/lib/models/coach';
-import { Empty, ErrorState, Loading, Panel } from '../components/ui';
+import { Empty, ErrorState, Loading, Panel, localDay } from '../components/ui';
 
 export default function CoachAssignmentsPage() {
   const { data, isLoading, error, refetch } = useCoachAssignments();
@@ -54,7 +54,7 @@ export default function CoachAssignmentsPage() {
                       <td>
                         {assignment.dueAt ? (
                           <span className={overdue ? 'coach-pill coach-pill--lapsed' : undefined}>
-                            {assignment.dueAt.slice(0, 10)}
+                            {localDay(assignment.dueAt)}
                             {overdue ? ' · overdue' : ''}
                           </span>
                         ) : (

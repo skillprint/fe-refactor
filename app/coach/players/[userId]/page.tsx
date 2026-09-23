@@ -29,6 +29,7 @@ import {
   Empty,
   ErrorState,
   Loading,
+  localDay,
   Panel,
   Sparkline,
   Tile,
@@ -191,7 +192,7 @@ export default function CoachPlayerPage({ params }: { params: Promise<{ userId: 
                 {sessions.data.results.map((session) => (
                   <tr key={session.sessionId}>
                     <td>{session.gameName ?? session.gameSlug ?? 'Unknown game'}</td>
-                    <td>{session.playedAt.slice(0, 10)}</td>
+                    <td>{localDay(session.playedAt)}</td>
                     <td className="num">{session.durationMinutes}m</td>
                   </tr>
                 ))}

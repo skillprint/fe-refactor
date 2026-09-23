@@ -14,6 +14,7 @@ import { COACH_BASE_URL, CoachApiError } from '../coachFetch';
 import { readCoachSession } from '../coachAuth';
 import type {
   CoachAssignment,
+  CoachAssignmentCreated,
   CoachAssignmentDetail,
   CoachAssignmentInput,
   CoachAssignmentPlayer,
@@ -219,9 +220,10 @@ export function playbookRoutes(
   }
 
   const assignmentMatch = path.match(/^\/assignments\/([\w-]+)\/$/);
-  if (assignmentMatch && method === 'GET') {
+  if (assignmentMatch && (method === 'GET' || method === 'PATCH')) {
     const found = assignments.find((a) => a.id === assignmentMatch[1]);
-    if (!found) throw new CoachApiError(404, 'Not found.');
+    if (!found) refuse(404, 'not_found', 'No such assignment.');
+    if (method === 'PATCH') return closeAssignment(found, body?.status);
     return { assignment: summary(found), players: found.players } as CoachAssignmentDetail;
   }
 
@@ -317,74 +319,123 @@ async function liveRoster(teamId: number | undefined): Promise<{ name: string; u
   return { name: body.team.name, userIds: body.players.map((player) => player.userId) };
 }
 
-async function createAssignment(input: CoachAssignmentInput): Promise<CoachAssignment> {
+/** `dueAt` as the server reads it: a bare date means the end of that day. */
+function parseDue(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const moment = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T23:59:59.999`)
+    : new Date(value);
+  if (Number.isNaN(moment.getTime())) {
+    refuse(400, 'invalid_due', 'dueAt must be a date or a datetime.');
+  }
+  if (moment.getTime() < Date.now()) {
+    refuse(400, 'due_in_past', 'The due date has already passed.');
+  }
+  return moment.toISOString();
+}
+
+/**
+ * Mirrors `POST /api/coach/assignments/` (marketplace PR #75).
+ *
+ * **"Some players" is one assignment per player.** The backend model targets a
+ * team or exactly one member — a database constraint — so a hand-picked group
+ * becomes several assignments, and the response is always a list.
+ */
+async function createAssignment(input: CoachAssignmentInput): Promise<CoachAssignmentCreated> {
   const playbook = playbooks.find((p) => p.id === input?.playbookId);
   if (!playbook) {
-    throw new CoachApiError(400, 'Choose a playbook.', { playbookId: ['Unknown playbook.'] });
+    refuse(400, 'unknown_playbook', 'Choose one of your playbooks.');
   }
   if (playbook.status !== 'published') {
     // The reason draft exists at all.
-    throw new CoachApiError(400, 'That playbook is still a draft.', {
-      playbookId: ['Publish it before assigning it.'],
-    });
+    refuse(400, 'playbook_draft', 'That playbook is still a draft — publish it first.');
   }
 
-  let userIds: number[];
-  let target: CoachAssignment['target'];
+  const cadence = input.cadence ?? 'OneOff';
+  if (cadence !== 'OneOff' && cadence !== 'Weekly') {
+    refuse(400, 'invalid_cadence', 'cadence must be OneOff or Weekly.');
+  }
+  const dueAt = parseDue(input.dueAt);
+  if (cadence === 'Weekly' && dueAt === null) {
+    refuse(400, 'due_required', 'A weekly assignment needs a due date.');
+  }
+  const note = input.note ?? '';
+  if (note.length > 2000) {
+    refuse(400, 'note_too_long', 'Keep the note under 2000 characters.');
+  }
+
+  const targets: Array<{ target: CoachAssignment['target']; userIds: number[] }> = [];
 
   if (input.targetType === 'team') {
     const team = MOCK_TEAMS.find((t) => t.id === input.teamId);
     if (team) {
-      userIds = playersForTeam(team.id).map((p) => p.userId);
-      target = { type: 'team', id: team.id, name: team.name };
+      targets.push({
+        target: { type: 'team', id: team.id, name: team.name },
+        userIds: playersForTeam(team.id).map((p) => p.userId),
+      });
     } else {
       // Mixed mode: teams are live but assignments are not, so the team the
       // coach picked is a real one this store has never heard of. Rather than
       // refuse it, read its roster from the live API and fan out to the real
       // players — the one place a mocked area reaches into a live one.
       const live = await liveRoster(input.teamId);
-      userIds = live.userIds;
-      target = { type: 'team', id: input.teamId as number, name: live.name };
-    }
-  } else {
-    userIds = input.userIds ?? [];
-    if (userIds.length === 0) {
-      throw new CoachApiError(400, 'Choose at least one player.', {
-        userIds: ['Select someone to assign this to.'],
+      targets.push({
+        target: { type: 'team', id: input.teamId as number, name: live.name },
+        userIds: live.userIds,
       });
     }
-    target =
-      userIds.length === 1
-        ? { type: 'player', id: userIds[0], name: `Player ${userIds[0]}` }
-        : { type: 'player', id: userIds[0], name: `${userIds.length} players` };
+  } else if (input.targetType === 'player') {
+    const userIds = [...new Set(input.userIds ?? [])];
+    if (userIds.length === 0) {
+      refuse(400, 'players_required', 'Choose at least one player.');
+    }
+    for (const userId of userIds) {
+      targets.push({ target: { type: 'player', id: userId, name: `Player ${userId}` }, userIds: [userId] });
+    }
+  } else {
+    refuse(400, 'invalid_target', "targetType must be 'team' or 'player'.");
   }
 
-  // Fanned out per player at creation, mirroring PlaybookAssignmentPlayer
-  // (SKI-220) — so a roster change later cannot rewrite who was assigned.
-  const players: CoachAssignmentPlayer[] = userIds.map((userId) => ({
-    userId,
-    status: 'not_started',
-    firstStartedAt: null,
-    completedAt: null,
-    playedGames: 0,
-    totalGames: playbook.games.length,
-    lastRemindedAt: null,
-  }));
+  const created = targets.map(({ target, userIds }) => {
+    // Fanned out per player at creation, mirroring PlaybookAssignmentPlayer
+    // (SKI-220) — so a roster change later cannot rewrite who was assigned.
+    const players: CoachAssignmentPlayer[] = userIds.map((userId) => ({
+      userId,
+      status: 'not_started',
+      firstStartedAt: null,
+      completedAt: null,
+      playedGames: 0,
+      totalGames: playbook.games.length,
+      lastRemindedAt: null,
+    }));
+    const assignment: StoredAssignment = {
+      id: `as-${nextId++}`,
+      playbook: { id: playbook.id, title: playbook.title },
+      target,
+      assignedAt: now(),
+      dueAt,
+      cadence,
+      status: 'Active',
+      note,
+      playerCount: players.length,
+      completedCount: 0,
+      players,
+    };
+    return assignment;
+  });
+  assignments.unshift(...created);
+  return { assignments: created.map(summary) };
+}
 
-  const assignment: StoredAssignment = {
-    id: `as-${nextId++}`,
-    playbook: { id: playbook.id, title: playbook.title },
-    target,
-    assignedAt: now(),
-    dueAt: input.dueAt ?? null,
-    cadence: input.cadence ?? 'OneOff',
-    status: 'Active',
-    note: input.note ?? '',
-    playerCount: players.length,
-    completedCount: 0,
-    players,
-  };
-  assignments.unshift(assignment);
+/** Close or cancel: one way, and only from Active — as the server allows. */
+function closeAssignment(assignment: StoredAssignment, wanted: unknown): CoachAssignment {
+  if (wanted !== 'Completed' && wanted !== 'Cancelled') {
+    refuse(400, 'invalid_status', 'status must be Completed or Cancelled.');
+  }
+  if (assignment.status !== 'Active') {
+    refuse(409, 'assignment_closed', 'This assignment is already closed.');
+  }
+  assignment.status = wanted;
   return summary(assignment);
 }
 

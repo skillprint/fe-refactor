@@ -248,18 +248,18 @@ export enum CoachVisibilityScope {
 // ─────────────────────────────────────────────────────────────────────────────
 // Playbooks and assignment (SKI-225, SKI-226)
 //
-// ⚠️ **These types are a proposal, not a transcription.**
+// Transcribed from the backend, with one exception.
 //
-// Everything above this line was read off the `coach` app already merged on the
-// marketplace `main` branch. Nothing below it exists on the backend yet —
-// SKI-219, SKI-220, SKI-221 and SKI-223 are all still open. The shapes here
-// were designed against the planned models in the spec and are mirrored into
-// those tickets so the API is built to match.
+// These started as a proposal written ahead of the API. They now match
+// `coach/playbook_views.py` (marketplace PR #74) and `coach/assignment_views.py`
+// (PR #75), which were built to them and changed them in three places: no mood
+// targets on a playbook, one assignment per player for "some players", and a
+// `dismissed` player status.
 //
-// That makes the switch-over riskier than it was for the read surface: there,
-// a mismatch was impossible; here, a backend that lands differently will break
-// these screens. Whoever implements SKI-221/223 should either follow this or
-// change it here in the same PR.
+// **The exception is remind.** `POST /assignments/{id}/remind/` and
+// `CoachRemindResult` exist only in the mock: reminding sends email, which is
+// Phase 4 (SKI-232), and the assignment screen hides Remind whenever the
+// playbooks area is live.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** A half-built playbook must not be assignable, hence two states. */
@@ -336,8 +336,15 @@ export type CoachAssignmentCadence = 'OneOff' | 'Weekly';
 /** Mirrors `coach.PlaybookAssignment.Status`. Cancelling is a status change, not a delete. */
 export type CoachAssignmentStatus = 'Active' | 'Completed' | 'Cancelled';
 
-/** Derived from sessions, not self-reported. */
-export type CoachAssignmentPlayerStatus = 'not_started' | 'in_progress' | 'complete';
+/**
+ * Derived from sessions since the assignment was made, not self-reported.
+ *
+ * `dismissed` is the player having dismissed it (`dismissed_at`). Nothing sets
+ * that yet — there is no player-side dismiss — but the backend serves it as its
+ * own status rather than folding it into `not_started`, so a coach is never
+ * sent chasing someone who already answered.
+ */
+export type CoachAssignmentPlayerStatus = 'not_started' | 'in_progress' | 'complete' | 'dismissed';
 
 export interface CoachAssignmentTarget {
   type: 'team' | 'player';
@@ -363,6 +370,17 @@ export interface CoachAssignmentList {
 }
 
 /**
+ * What `POST /assignments/` returns: always a list.
+ *
+ * One item for a team. For "some players", one per player — the backend model
+ * targets a team or exactly one member (a database constraint), so a picked
+ * group is several independent assignments, each cancellable on its own.
+ */
+export interface CoachAssignmentCreated {
+  assignments: CoachAssignment[];
+}
+
+/**
  * One player's progress through an assignment.
  *
  * `userId` with no name, consistent with the roster (SKI-251). `playedGames` /
@@ -376,7 +394,10 @@ export interface CoachAssignmentPlayer {
   completedAt: string | null;
   playedGames: number;
   totalGames: number;
-  /** Null when never reminded; drives the rate limit. */
+  /**
+   * Null when never reminded. The live API always serves null: reminders need
+   * email (SKI-232), and until then nobody has been.
+   */
   lastRemindedAt: string | null;
 }
 
@@ -388,9 +409,10 @@ export interface CoachAssignmentDetail {
 export interface CoachAssignmentInput {
   playbookId: string;
   targetType: 'team' | 'player';
-  /** Team id, or the player user ids when assigning to a subset. */
+  /** Team id, or the player user ids — one assignment each — for a subset. */
   teamId?: number;
   userIds?: number[];
+  /** A bare date (`YYYY-MM-DD`) means the end of that day. Weekly needs one. */
   dueAt?: string | null;
   cadence?: CoachAssignmentCadence;
   note?: string;
