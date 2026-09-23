@@ -11992,7 +11992,10 @@ html .page--portal.nav-collapsed .portal-brand .brand-logo,
   padding-inline-end: var(--home-tour-gutter, 0px);
 }
 
-.page--portal-home .portal-spotlight {
+/* Not scoped to .page--portal-home: the spotlight is mounted in the root
+   layout on every page, and without these rules it sits in flow, visible,
+   with the light theme's scrim covering the whole page. */
+.portal-spotlight {
   --spot-scrim: color-mix(in srgb, var(--deep-navy-950) 74%, transparent);
   --spot-ring: color-mix(in srgb, var(--mindset-violet-400) 52%, transparent);
 

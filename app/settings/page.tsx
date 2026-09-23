@@ -10,6 +10,9 @@ import { getCookie, deleteCookie } from '../utils/cookieUtils';
 export default function SettingsPage() {
     const { status, userProfile, logout } = useAuth();
     const { theme, setTheme } = useTheme();
+    // Only 'light' renders light. The default 'skillprint' theme strips the
+    // theme attributes, which leaves the portal's base (dark navy) palette.
+    const isLight = theme === 'light';
     const [userId, setUserId] = useState<string>('');
     const [apiKey, setApiKey] = useState<string>('');
     const [showApiKey, setShowApiKey] = useState(false);
@@ -62,7 +65,7 @@ export default function SettingsPage() {
                             <button 
                                 className="button-group__item" 
                                 type="button"
-                                aria-pressed={theme === 'light' || theme === 'skillprint'}
+                                aria-pressed={isLight}
                                 onClick={() => setTheme('light')}
                             >
                                 <svg className="sp-icon button-group__icon" aria-hidden="true" viewBox="0 0 24 24">
@@ -73,7 +76,7 @@ export default function SettingsPage() {
                             <button 
                                 className="button-group__item" 
                                 type="button"
-                                aria-pressed={theme === 'dark'}
+                                aria-pressed={!isLight}
                                 onClick={() => setTheme('dark')}
                             >
                                 <svg className="sp-icon button-group__icon" aria-hidden="true" viewBox="0 0 24 24">
