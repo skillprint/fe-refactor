@@ -10,7 +10,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { COACH_MOCKS_ENABLED, CoachAuthError, useCoachAuth } from '@/lib/models/coach';
+import { isCoachMocked, CoachAuthError, useCoachAuth } from '@/lib/models/coach';
 import { MOCK_COACH_EMAIL, MOCK_COACH_PASSWORD } from '@/lib/models/coach/mocks/auth';
 import { AuthCard, Field, FormError, SubmitButton } from '../components/AuthForm';
 
@@ -76,7 +76,7 @@ function LoginForm() {
         <SubmitButton busy={busy}>Sign in</SubmitButton>
       </form>
 
-      {COACH_MOCKS_ENABLED && (
+      {isCoachMocked('auth') && (
         <p className="coach-auth__sandbox">
           Sandbox account: <code>{MOCK_COACH_EMAIL}</code> / <code>{MOCK_COACH_PASSWORD}</code>
         </p>

@@ -38,11 +38,11 @@
  *
  * ## Mocks
  *
- * One switch, `COACH_MOCKS_ENABLED`, sends all three to `./mocks/auth`, which
+ * The `auth` mock area (see `./mockAreas`) sends all three to `./mocks/auth`, which
  * reproduces the same codes, the same success shape and the same throttle.
  */
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-import { COACH_BASE_URL, COACH_MOCKS_ENABLED } from './coachFetch';
+import { COACH_BASE_URL, isCoachMocked } from './coachFetch';
 import { CoachAuthError, readAuthError } from './authErrors';
 import { mockCoachLogin, mockRequestPasswordReset, mockSetPassword } from './mocks/auth';
 
@@ -125,7 +125,7 @@ export function clearCoachSession() {
  * no team could not be told apart from a bad password.
  */
 export async function coachLogin(email: string, password: string): Promise<CoachSession> {
-  if (COACH_MOCKS_ENABLED) return mockCoachLogin(email, password);
+  if (isCoachMocked('auth')) return mockCoachLogin(email, password);
 
   const response = await fetch(`${API_BASE_URL}users/api/auth/login/`, {
     method: 'POST',
@@ -152,7 +152,7 @@ export async function coachLogin(email: string, password: string): Promise<Coach
 /** Knox revokes the presented token; a failure still clears the local one. */
 export async function coachLogout(token: string | null): Promise<void> {
   clearCoachSession();
-  if (!token || COACH_MOCKS_ENABLED) return;
+  if (!token || isCoachMocked('auth')) return;
   try {
     await fetch(`${API_BASE_URL}users/api/auth/logout/`, {
       method: 'POST',
@@ -183,7 +183,7 @@ async function postCoachAuth<T>(path: string, body: unknown): Promise<T | null> 
  * link works once and lasts two hours.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
-  if (COACH_MOCKS_ENABLED) return mockRequestPasswordReset(email);
+  if (isCoachMocked('auth')) return mockRequestPasswordReset(email);
   await postCoachAuth('forgot-password', { email });
 }
 
@@ -200,7 +200,7 @@ export async function setPassword(
   token: string,
   password: string,
 ): Promise<CoachSession & { via: 'invite' | 'reset' }> {
-  if (COACH_MOCKS_ENABLED) return mockSetPassword(token, password);
+  if (isCoachMocked('auth')) return mockSetPassword(token, password);
 
   const body = await postCoachAuth<{
     token: string;

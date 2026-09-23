@@ -24,24 +24,61 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { COACH_MOCKS_ENABLED, useCoachAuth, useCoachContext } from '@/lib/models/coach';
+import {
+  CoachApiError,
+  COACH_ANY_MOCKED,
+  COACH_MOCK_AREA_LABELS,
+  COACH_MOCK_AREAS,
+  COACH_MOCKED_AREAS,
+  useCoachAuth,
+  useCoachContext,
+} from '@/lib/models/coach';
 import { ErrorState, Loading } from './ui';
 
 /** Routes that must render without a session. */
 const PUBLIC_COACH_PATHS = ['/coach/login', '/coach/forgot-password', '/coach/set-password'];
 
+/**
+ * Says what on screen is not real.
+ *
+ * With the switch per area, "mock data" alone is no longer true or false — a
+ * coach can be looking at a live roster beside sample assignments. So the
+ * banner names the mocked areas, and when some are live it names those too:
+ * a screen that is half real is the one most likely to be mistaken for wholly
+ * real.
+ */
 function MockBar() {
-  if (!COACH_MOCKS_ENABLED) return null;
+  if (!COACH_ANY_MOCKED) return null;
+
+  const mocked = COACH_MOCK_AREAS.filter((area) => COACH_MOCKED_AREAS.has(area));
+  const live = COACH_MOCK_AREAS.filter((area) => !COACH_MOCKED_AREAS.has(area));
+  const list = (areas: readonly (keyof typeof COACH_MOCK_AREA_LABELS)[]) =>
+    areas.map((area) => COACH_MOCK_AREA_LABELS[area]).join(', ');
+
   return (
     <div className="coach-mockbar" role="status">
-      <strong>Mock data.</strong>
-      <span>
-        Nothing on this screen is a real player.
-        <span className="coach-mockbar__long">
-          {' '}Generated in <code>lib/models/coach/mocks</code>; set{' '}
-          <code>NEXT_PUBLIC_COACH_MOCKS=false</code> to read the live API.
-        </span>
-      </span>
+      {live.length === 0 ? (
+        <>
+          <strong>Mock data.</strong>
+          <span>
+            Nothing on this screen is a real player.
+            <span className="coach-mockbar__long">
+              {' '}Generated in <code>lib/models/coach/mocks</code>; set{' '}
+              <code>NEXT_PUBLIC_COACH_MOCKS=none</code> to read the live API.
+            </span>
+          </span>
+        </>
+      ) : (
+        <>
+          <strong>Partly mock data.</strong>
+          <span>
+            Sample {list(mocked)}; live {list(live)}.
+            <span className="coach-mockbar__long">
+              {' '}The sample areas are waiting on their endpoints (SKI-221, SKI-223).
+            </span>
+          </span>
+        </>
+      )}
     </div>
   );
 }
@@ -57,6 +94,18 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
     await signOut();
     router.replace('/coach/login');
   }
+
+  // A 401 on the context call means the server no longer accepts this
+  // session — Knox expired it, or the coach signed out everywhere from another
+  // device — even though a copy is still stored here. That is not an error to
+  // show; it is a sign-in to ask for. Impossible while every area was mocked,
+  // routine once reads are live.
+  const unauthorised = error instanceof CoachApiError && error.status === 401;
+  React.useEffect(() => {
+    if (!unauthorised) return;
+    const next = pathname && pathname !== '/coach' ? `?next=${encodeURIComponent(pathname)}` : '';
+    signOut().finally(() => router.replace(`/coach/login${next}`));
+  }, [unauthorised, pathname, router, signOut]);
 
   return (
     <div className="coach-app">
@@ -92,7 +141,7 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
 
       <div className="coach-content">
         {isLoading && !data && <Loading rows={4} />}
-        {error && <ErrorState error={error} onRetry={refetch} />}
+        {error && !unauthorised && <ErrorState error={error} onRetry={refetch} />}
 
         {data && !data.isCoach && (
           <div className="coach-state">

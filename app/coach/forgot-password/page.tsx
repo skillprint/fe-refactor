@@ -9,7 +9,7 @@
  */
 import { useState } from 'react';
 import Link from 'next/link';
-import { COACH_MOCKS_ENABLED, CoachAuthError, requestPasswordReset } from '@/lib/models/coach';
+import { isCoachMocked, CoachAuthError, requestPasswordReset } from '@/lib/models/coach';
 import { MOCK_LINK_TOKENS } from '@/lib/models/coach/mocks/auth';
 import { AuthCard, Field, FormError, SubmitButton } from '../components/AuthForm';
 
@@ -56,7 +56,7 @@ export default function CoachForgotPasswordPage() {
           </Link>
         }
       >
-        {COACH_MOCKS_ENABLED && (
+        {isCoachMocked('auth') && (
           <p className="coach-auth__sandbox">
             Nothing was actually sent. The link it would contain is{' '}
             <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.reset}`}>this one</Link>.

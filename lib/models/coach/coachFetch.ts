@@ -15,27 +15,38 @@
  * hooks, the types and the screens are identical either way, so switching over
  * is flipping `NEXT_PUBLIC_COACH_MOCKS` and deleting `./mocks` — see SKI-252.
  *
+ * The switch is per area, so part of the surface can go live while the rest
+ * waits for its endpoints. The decision is made here, per request, from the
+ * path — nothing above this layer needs to know which half it is talking to.
+ *
  * Mocks are **on by default** in development and **off in production builds**,
  * so a forgotten env var cannot ship fake rosters to a real coach.
  */
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
 import { mockCoachResponse } from './mocks/router';
+import { areaForPath, parseCoachMocks, type CoachMockArea } from './mockAreas';
 
 export const COACH_BASE_URL = `${API_BASE_URL}api/coach`;
 
 /**
- * Whether coach data comes from `./mocks` instead of the API.
+ * Which areas of the coach surface are served from `./mocks` — see
+ * `./mockAreas` for the values `NEXT_PUBLIC_COACH_MOCKS` accepts and the one
+ * combination it refuses.
  *
- * Explicit opt-out wins (`NEXT_PUBLIC_COACH_MOCKS=false`); otherwise mocks are
- * used outside production. Exported so the UI can say so on screen — mock data
- * that looks real is worse than no data.
+ * Read here, literally, because Next only inlines `NEXT_PUBLIC_*` variables
+ * that appear by name in the source.
  */
-export const COACH_MOCKS_ENABLED: boolean =
-  process.env.NEXT_PUBLIC_COACH_MOCKS === 'false'
-    ? false
-    : process.env.NEXT_PUBLIC_COACH_MOCKS === 'true'
-      ? true
-      : process.env.NODE_ENV !== 'production';
+export const COACH_MOCKED_AREAS: ReadonlySet<CoachMockArea> = parseCoachMocks(
+  process.env.NEXT_PUBLIC_COACH_MOCKS,
+  process.env.NODE_ENV,
+);
+
+export function isCoachMocked(area: CoachMockArea): boolean {
+  return COACH_MOCKED_AREAS.has(area);
+}
+
+/** True when any area is mocked. Drives the on-screen banner. */
+export const COACH_ANY_MOCKED: boolean = COACH_MOCKED_AREAS.size > 0;
 
 export class CoachApiError extends Error {
   status: number;
@@ -87,7 +98,7 @@ export async function coachFetch<T>(
   const { params, ...init } = options;
   const target = withQuery(path, params);
 
-  if (COACH_MOCKS_ENABLED) {
+  if (isCoachMocked(areaForPath(target))) {
     // Writes are mocked too, against a mutable in-memory store, so the builder
     // and assign flows actually work in the sandbox rather than being read-only
     // screens with dead buttons.

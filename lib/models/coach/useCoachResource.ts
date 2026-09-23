@@ -22,7 +22,8 @@
  * SKI-253 was filed for.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CoachApiError, COACH_MOCKS_ENABLED, coachFetch, type CoachFetchOptions } from './coachFetch';
+import { CoachApiError, coachFetch, isCoachMocked, type CoachFetchOptions } from './coachFetch';
+import { areaForPath } from './mockAreas';
 import { useCoachAuth } from './CoachAuthContext';
 
 export interface CoachResource<T> {
@@ -52,7 +53,9 @@ export function useCoachResource<T>(
 
   const load = useCallback(async () => {
     if (path === null) return;
-    if (!COACH_MOCKS_ENABLED && !userToken) return;
+    // A live request waits for a token; a mocked one has nothing to
+    // authenticate against and would otherwise wait forever.
+    if (!isCoachMocked(areaForPath(path)) && !userToken) return;
 
     const id = ++requestId.current;
     setIsLoading(true);
