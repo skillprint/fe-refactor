@@ -45,17 +45,24 @@ export const MOCK_CATALOGUE: CatalogueGame[] = [
   { slug: 'breathe',        name: 'Breathe',        suggestedDurationSeconds: 300, skills: [], moods: ['relax'] },
 ];
 
+/** Refuse the way the real endpoint does: `{code, detail: [message]}`. */
+function refuse(status: number, code: string, message: string): never {
+  throw new CoachApiError(status, message, { code, detail: [message] });
+}
+
 function catalogueGame(slug: string): CatalogueGame {
   const game = MOCK_CATALOGUE.find((entry) => entry.slug === slug);
   if (!game) {
-    throw new CoachApiError(400, `Unknown game: ${slug}`, {
-      games: [`"${slug}" is not in the catalogue.`],
-    });
+    refuse(400, 'unknown_game', `Not in the catalogue: ${slug}.`);
   }
   return game;
 }
 
 function toPlaybookGames(slugs: string[]): CoachPlaybookGame[] {
+  const repeated = [...new Set(slugs.filter((slug, i) => slugs.indexOf(slug) !== i))];
+  if (repeated.length) {
+    refuse(400, 'duplicate_game', `Each game can appear once; listed twice: ${repeated.join(', ')}.`);
+  }
   return slugs.map((slug, index) => {
     const game = catalogueGame(slug);
     return {
@@ -85,7 +92,7 @@ const playbooks: CoachPlaybook[] = [
     pillar: 'cognition',
     dimension: 'attention',
     associatedSkills: ['processing-speed', 'attention'],
-    associatedMoods: ['focus'],
+    organization: 77,
     games: toPlaybookGames(['reaction-time', 'stroop-test', 'simon-says']),
     estimatedSeconds: 540,
     createdAt: isoDaysAgo(24),
@@ -97,10 +104,10 @@ const playbooks: CoachPlaybook[] = [
     title: 'Post-scrim wind-down',
     description: 'After a long practice. Deliberately low-pressure.',
     status: 'draft',
-    pillar: 'mood',
+    pillar: 'cognition',
     dimension: '',
     associatedSkills: [],
-    associatedMoods: ['relax'],
+    organization: 77,
     games: toPlaybookGames(['breathe', 'typing-speed']),
     estimatedSeconds: 450,
     createdAt: isoDaysAgo(9),
@@ -199,9 +206,7 @@ export function playbookRoutes(
       if (assignments.some((a) => a.playbook.id === playbook.id)) {
         // Deleting a playbook out from under a live assignment would leave
         // players holding a link to nothing.
-        throw new CoachApiError(409, 'This playbook has been assigned and cannot be deleted.', {
-          detail: 'Unassign it first, or archive it instead.',
-        });
+        refuse(409, 'playbook_assigned', "This playbook has been assigned and can't be deleted.");
       }
       playbooks.splice(playbooks.indexOf(playbook), 1);
       return { deleted: true };
@@ -232,18 +237,14 @@ export function playbookRoutes(
 
 function createPlaybook(input: CoachPlaybookInput): CoachPlaybook {
   if (!input?.title?.trim()) {
-    throw new CoachApiError(400, 'A playbook needs a title.', {
-      title: ['This field is required.'],
-    });
+    refuse(400, 'title_required', 'A playbook needs a title.');
   }
   const games = toPlaybookGames(input.games ?? []);
 
   // A published playbook with no games is assignable and does nothing, so the
   // rule lives on publish rather than on save.
   if (input.status === 'published' && games.length === 0) {
-    throw new CoachApiError(400, 'Add at least one game before publishing.', {
-      games: ['A published playbook needs at least one game.'],
-    });
+    refuse(400, 'playbook_empty', 'Add at least one game before publishing.');
   }
 
   const playbook: CoachPlaybook = {
@@ -252,10 +253,10 @@ function createPlaybook(input: CoachPlaybookInput): CoachPlaybook {
     title: input.title.trim(),
     description: input.description ?? '',
     status: input.status ?? 'draft',
-    pillar: input.pillar ?? 'cognition',
+    pillar: 'cognition',
     dimension: input.dimension ?? '',
     associatedSkills: input.associatedSkills ?? [],
-    associatedMoods: input.associatedMoods ?? [],
+    organization: 77,
     games,
     estimatedSeconds: estimate(games),
     createdAt: now(),
@@ -266,22 +267,31 @@ function createPlaybook(input: CoachPlaybookInput): CoachPlaybook {
 }
 
 function updatePlaybook(playbook: CoachPlaybook, input: Partial<CoachPlaybookInput>): CoachPlaybook {
-  if (input.games) {
-    playbook.games = toPlaybookGames(input.games);
-    playbook.estimatedSeconds = estimate(playbook.games);
+  // Validate everything before changing anything, as the real endpoint's
+  // transaction does — a refused save must not leave half the edit applied.
+  const games = input.games ? toPlaybookGames(input.games) : playbook.games;
+  const status = input.status ?? playbook.status;
+  if (input.title !== undefined && !input.title.trim()) {
+    refuse(400, 'title_required', 'A playbook needs a title.');
   }
-  if (input.status === 'published' && playbook.games.length === 0) {
-    throw new CoachApiError(400, 'Add at least one game before publishing.', {
-      games: ['A published playbook needs at least one game.'],
-    });
+  if (status === 'published' && games.length === 0) {
+    refuse(400, 'playbook_empty', 'Add at least one game before publishing.');
   }
+  if (
+    status === 'draft' &&
+    playbook.status === 'published' &&
+    assignments.some((a) => a.playbook.id === playbook.id)
+  ) {
+    refuse(409, 'playbook_assigned', "This playbook has been assigned, so it can't go back to being a draft.");
+  }
+
+  playbook.games = games;
+  playbook.estimatedSeconds = estimate(games);
   if (input.title !== undefined) playbook.title = input.title.trim();
   if (input.description !== undefined) playbook.description = input.description;
   if (input.status !== undefined) playbook.status = input.status;
-  if (input.pillar !== undefined) playbook.pillar = input.pillar;
   if (input.dimension !== undefined) playbook.dimension = input.dimension;
   if (input.associatedSkills !== undefined) playbook.associatedSkills = input.associatedSkills;
-  if (input.associatedMoods !== undefined) playbook.associatedMoods = input.associatedMoods;
   playbook.updatedAt = now();
   return playbook;
 }

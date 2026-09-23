@@ -10,8 +10,11 @@
  * Every write takes the caller's token explicitly, so nothing here has to reach
  * into context and the functions stay testable.
  */
+import { useEffect, useState } from 'react';
 import { useCoachResource, type CoachResource } from './useCoachResource';
-import { coachFetch } from './coachFetch';
+import { portalFetch } from '../portal/portalFetch';
+import type { LibraryGame } from '../portal/LibraryGame';
+import { coachFetch, isCoachMocked } from './coachFetch';
 import { useCoachAuth } from './CoachAuthContext';
 import type {
   CoachAssignment,
@@ -36,14 +39,61 @@ export interface CoachCatalogue {
 }
 
 /**
- * Deliberately served from the coach surface rather than reusing the portal's
- * `useLibraryGame`. The catalogue is the same public data either way, but
- * routing it through `coachFetch` means the builder runs on fixtures with
- * everything else instead of being the one screen that needs a live backend.
- * SKI-252 should point this at `/api/portal/library/games/`.
+ * The catalogue the builder picks from.
+ *
+ * Mocked, it comes from the coach mock router like everything else. Live, it
+ * is the public game library, `GET /api/portal/library/games/` — the same
+ * list players browse, already folded to one record per game with the
+ * canonical `slug`, which is exactly what `POST /api/coach/playbooks/`
+ * resolves (marketplace PR #74). There is deliberately no coach-side copy of
+ * the catalogue to drift from it.
  */
 export function useCoachCatalogue(): CoachResource<CoachCatalogue> {
-  return useCoachResource<CoachCatalogue>('/catalogue/');
+  const mocked = isCoachMocked('playbooks');
+  const mock = useCoachResource<CoachCatalogue>(mocked ? '/catalogue/' : null);
+
+  const [live, setLive] = useState<{ data: CoachCatalogue | null; error: Error | null; isLoading: boolean }>({
+    data: null,
+    error: null,
+    isLoading: !mocked,
+  });
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    if (mocked) return;
+    let cancelled = false;
+    setLive((current) => ({ ...current, isLoading: true, error: null }));
+    // Public and origin-gated, so no token is needed.
+    portalFetch<LibraryGame[] | { results: LibraryGame[] }>('/library/games/')
+      .then((json) => {
+        if (cancelled) return;
+        const games = Array.isArray(json) ? json : json?.results ?? [];
+        setLive({
+          isLoading: false,
+          error: null,
+          data: {
+            games: games.map((game) => ({
+              slug: game.slug,
+              name: game.name,
+              suggestedDurationSeconds: game.suggestedDurationSeconds,
+              skills: game.skills ?? [],
+              moods: game.moods ?? [],
+            })),
+          },
+        });
+      })
+      .catch((caught) => {
+        if (!cancelled) {
+          setLive({ data: null, isLoading: false, error: caught instanceof Error ? caught : new Error(String(caught)) });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mocked, attempt]);
+
+  if (mocked) return mock;
+  return { ...live, refetch: () => setAttempt((n) => n + 1) };
 }
 
 export function useCoachPlaybooks(status?: 'draft' | 'published'): CoachResource<CoachPlaybookList> {

@@ -71,6 +71,24 @@ export class CoachApiError extends Error {
   }
 }
 
+/**
+ * A message a coach can read, from an error body.
+ *
+ * The coach endpoints refuse with `{code, detail: [message]}`, written to be
+ * shown; DRF's own errors put a string in `detail`. Screens display
+ * `error.message`, so taking it from the body here means every screen shows
+ * the server's words — "Add at least one game before publishing" — instead
+ * of "Coach request failed (400): /playbooks/". The mock already did this,
+ * which is how the difference went unnoticed until the endpoints were real.
+ */
+function messageFrom(body: unknown, status: number, target: string): string {
+  const detail = (body as { detail?: unknown } | undefined)?.detail;
+  if (Array.isArray(detail) && typeof detail[0] === 'string') return detail[0];
+  if (typeof detail === 'string') return detail;
+  if (status === 429) return 'Too many requests. Wait a minute and try again.';
+  return `Coach request failed (${status}): ${target}`;
+}
+
 export interface CoachFetchOptions extends RequestInit {
   /** Query parameters; `undefined` values are dropped rather than serialised. */
   params?: Record<string, string | number | undefined>;
@@ -123,11 +141,7 @@ export async function coachFetch<T>(
     } catch {
       // A proxy error page is not JSON; the status still carries the meaning.
     }
-    throw new CoachApiError(
-      response.status,
-      `Coach request failed (${response.status}): ${target}`,
-      detail,
-    );
+    throw new CoachApiError(response.status, messageFrom(detail, response.status, target), detail);
   }
 
   return (await response.json()) as T;

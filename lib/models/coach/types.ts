@@ -280,10 +280,18 @@ export interface CoachPlaybook {
   title: string;
   description: string;
   status: CoachPlaybookStatus;
-  pillar: 'mood' | 'cognition' | 'personality';
+  /**
+   * Always `cognition` for coach-authored playbooks, and there is no
+   * `associatedMoods`: every coach response is held to "no mood dimension in
+   * v1" (the backend's `coach.visibility`), so the API refuses mood targets
+   * rather than returning them (marketplace PR #74).
+   */
+  pillar: 'cognition';
+  /** A skill slug, or "". Never a mood. */
   dimension: string;
   associatedSkills: string[];
-  associatedMoods: string[];
+  /** The owning organisation's id. */
+  organization: number;
   games: CoachPlaybookGame[];
   /**
    * Sum of the games' suggested durations, server-side.
@@ -305,10 +313,10 @@ export interface CoachPlaybookList {
 export interface CoachPlaybookInput {
   title: string;
   description?: string;
-  pillar?: CoachPlaybook['pillar'];
   dimension?: string;
   associatedSkills?: string[];
-  associatedMoods?: string[];
+  /** Required only for a coach of more than one organisation. */
+  organization?: number;
   games: string[];
   status?: CoachPlaybookStatus;
 }
