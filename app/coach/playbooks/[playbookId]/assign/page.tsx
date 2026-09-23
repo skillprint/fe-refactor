@@ -7,11 +7,10 @@
  * roster and switching to "some players" keeps the selection, so narrowing down
  * is not a restart.
  *
- * **The email preview is deliberately absent.** SKI-226 says that if Phase 4
- * has not shipped, the preview and send are hidden rather than stubbed — a
- * mocked-up preview of a template nobody has written would be a promise about
- * wording we have not made. What the screen does say is that nothing is emailed
- * yet, so a coach is not left assuming their players were told.
+ * **Players are emailed when you assign** (SKI-232), unless they have turned
+ * assignment email off or have no real address on file — partner-provisioned
+ * players may not, until SKI-228. The screen says so, so a coach does not
+ * assume everyone was told.
  */
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -200,10 +199,11 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
       </Panel>
 
       <div className="coach-state" style={{ marginBottom: 18 }}>
-        <h3>No email is sent yet</h3>
+        <h3>Players are emailed when you assign this</h3>
         <p>
-          Assignment email lands in Phase 4 (SKI-232). Until then a player sees this in their portal,
-          and is not notified — so tell them yourself.
+          Except anyone who has turned assignment emails off or has no email address on file. Everyone
+          sees it in their portal either way, and players who haven&rsquo;t started get a reminder as
+          the due date gets close.
         </p>
       </div>
 

@@ -1,19 +1,17 @@
 'use client';
 
 /**
- * Per-player status, with close/cancel and — on sample data only — remind
- * (SKI-226).
+ * Per-player status, with close/cancel and remind (SKI-226, SKI-232).
  *
  * Status is derived from sessions since the assignment was made, not
  * self-reported — "in progress" means they actually played some of the
  * sequence.
  *
- * **Remind is hidden when the playbooks area is live.** Reminding sends email,
- * which is Phase 4 (SKI-232), and the API deliberately has no remind endpoint
- * until then: SKI-226's rule is that unbuilt sends are hidden rather than
- * stubbed. On sample data the mock still shows it, with a 24-hour cooldown per
- * player and a report of who was skipped — the behaviour SKI-232 owes on the
- * server.
+ * **Remind is rate-limited on the server** (SKI-232): at most one reminder per
+ * player per assignment per day, and a lifetime cap. The response says who was
+ * skipped and why — already reminded today, no email address on file, turned
+ * reminders off — so a coach who clicks twice is told, rather than quietly
+ * mailing twenty teenagers again. The mock follows the same rules.
  *
  * Closing and cancelling are one-way status changes, never deletes: the record
  * that the work was asked for outlives the coach changing their mind.
@@ -21,7 +19,6 @@
 import { use, useState } from 'react';
 import Link from 'next/link';
 import {
-  isCoachMocked,
   useCoachAssignment,
   useCoachWrites,
   type CoachRemindResult,
@@ -41,9 +38,6 @@ const STATUS_PILL = {
   complete: 'coach-pill coach-pill--active',
   dismissed: 'coach-pill coach-pill--quiet',
 } as const;
-
-/** Only the mock has a remind endpoint; see the module comment. */
-const CAN_REMIND = isCoachMocked('playbooks');
 
 /** Nobody is chased for work they finished or declined. */
 const isOutstanding = (status: keyof typeof STATUS_LABEL) =>
@@ -110,7 +104,7 @@ export default function AssignmentDetailPage({
 
   const active = data?.assignment.status === 'Active';
   const outstanding = players.filter((p) => isOutstanding(p.status)).length;
-  const remindable = CAN_REMIND && active;
+  const remindable = active;
 
   return (
     <>
@@ -211,11 +205,6 @@ export default function AssignmentDetailPage({
               </div>
             )}
             {remindError && <p className="coach-formerror" role="alert">{remindError}</p>}
-            {!CAN_REMIND && active && outstanding > 0 && (
-              <p className="coach-meta" style={{ marginBottom: 14 }}>
-                Reminders arrive with assignment email. Until then, nudge outstanding players yourself.
-              </p>
-            )}
 
             <div className="coach-tablewrap">
               <table className="coach-table coach-table--assignment">
@@ -225,7 +214,7 @@ export default function AssignmentDetailPage({
                     <th scope="col">Status</th>
                     <th scope="col">Games</th>
                     <th scope="col">Started</th>
-                    {CAN_REMIND && <th scope="col">Last reminded</th>}
+                    <th scope="col">Last reminded</th>
                     {remindable && <th scope="col"> </th>}
                   </tr>
                 </thead>
@@ -240,9 +229,7 @@ export default function AssignmentDetailPage({
                       </td>
                       <td className="num">{player.playedGames} / {player.totalGames}</td>
                       <td className="coach-meta">{player.firstStartedAt ? localDay(player.firstStartedAt) : '—'}</td>
-                      {CAN_REMIND && (
-                        <td className="coach-meta">{player.lastRemindedAt ? localDay(player.lastRemindedAt) : 'Never'}</td>
-                      )}
+                      <td className="coach-meta">{player.lastRemindedAt ? localDay(player.lastRemindedAt) : 'Never'}</td>
                       {remindable && (
                         <td>
                           {isOutstanding(player.status) && (

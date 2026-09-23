@@ -161,14 +161,18 @@ const summary = ({ players, ...rest }: StoredAssignment): CoachAssignment => res
 // ── remind rate limit ────────────────────────────────────────────────────────
 
 /**
- * How long before the same player can be reminded again.
- *
- * SKI-226 asks for this explicitly: a coach must not be able to mail a
- * teenager six times in an afternoon. Enforced here *and* owed on the server —
- * a client-side limit is a courtesy, not a control, and the ticket for the real
- * one is SKI-232.
+ * The server's rules (marketplace PR #84): one reminder per player per
+ * assignment per calendar day, and at most this many ever.
  */
-export const REMIND_COOLDOWN_HOURS = 24;
+export const REMINDERS_MAX = 3;
+
+const startOfTomorrow = () => {
+  const date = new Date();
+  date.setHours(24, 0, 0, 0);
+  return date;
+};
+
+const reminderCounts = new Map<string, number>();
 
 // ── routes ───────────────────────────────────────────────────────────────────
 
@@ -440,38 +444,52 @@ function closeAssignment(assignment: StoredAssignment, wanted: unknown): CoachAs
 }
 
 function remind(assignment: StoredAssignment, userIds: number[] | null): CoachRemindResult {
-  const cutoff = Date.now() - REMIND_COOLDOWN_HOURS * 3600 * 1000;
+  const today = new Date().toDateString();
   const reminded: number[] = [];
   const skipped: CoachRemindResult['skipped'] = [];
 
   for (const player of assignment.players) {
     if (userIds && !userIds.includes(player.userId)) continue;
 
-    // Nobody is chased for something they have finished.
-    if (player.status === 'complete') continue;
-
-    const last = player.lastRemindedAt ? new Date(player.lastRemindedAt).getTime() : null;
-    if (last !== null && last > cutoff) {
-      skipped.push({
-        userId: player.userId,
-        reason: `Reminded in the last ${REMIND_COOLDOWN_HOURS} hours.`,
-        nextAllowedAt: new Date(last + REMIND_COOLDOWN_HOURS * 3600 * 1000).toISOString(),
-      });
+    // Finished or declined: skipped silently for "everyone", named when asked.
+    if (player.status === 'complete' || player.status === 'dismissed') {
+      if (userIds) {
+        skipped.push({
+          userId: player.userId,
+          reason: player.status === 'complete' ? 'Already finished.' : 'Dismissed it.',
+          nextAllowedAt: null,
+        });
+      }
       continue;
     }
 
     // Emailing needs a real address, which partner-provisioned players may not
     // have (SKI-228). Surfaced rather than silently dropped.
-    const known = findPlayer(player.userId);
-    if (!known) {
+    if (!findPlayer(player.userId)) {
+      skipped.push({ userId: player.userId, reason: 'No email address on file.', nextAllowedAt: null });
+      continue;
+    }
+
+    const key = `${assignment.id}:${player.userId}`;
+    const count = reminderCounts.get(key) ?? 0;
+    if (count >= REMINDERS_MAX) {
       skipped.push({
         userId: player.userId,
-        reason: 'No email address on file.',
-        nextAllowedAt: now(),
+        reason: `Already reminded ${REMINDERS_MAX} times.`,
+        nextAllowedAt: null,
+      });
+      continue;
+    }
+    if (player.lastRemindedAt && new Date(player.lastRemindedAt).toDateString() === today) {
+      skipped.push({
+        userId: player.userId,
+        reason: 'Already reminded today.',
+        nextAllowedAt: startOfTomorrow().toISOString(),
       });
       continue;
     }
 
+    reminderCounts.set(key, count + 1);
     player.lastRemindedAt = now();
     reminded.push(player.userId);
   }

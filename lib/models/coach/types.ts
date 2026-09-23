@@ -256,10 +256,8 @@ export enum CoachVisibilityScope {
 // targets on a playbook, one assignment per player for "some players", and a
 // `dismissed` player status.
 //
-// **The exception is remind.** `POST /assignments/{id}/remind/` and
-// `CoachRemindResult` exist only in the mock: reminding sends email, which is
-// Phase 4 (SKI-232), and the assignment screen hides Remind whenever the
-// playbooks area is live.
+// Remind (`POST /assignments/{id}/remind/`, `CoachRemindResult`) arrived with
+// assignment email in marketplace PR #84 (SKI-232).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** A half-built playbook must not be assignable, hence two states. */
@@ -395,8 +393,8 @@ export interface CoachAssignmentPlayer {
   playedGames: number;
   totalGames: number;
   /**
-   * Null when never reminded. The live API always serves null: reminders need
-   * email (SKI-232), and until then nobody has been.
+   * The last reminder actually sent and not bounced; null when never reminded.
+   * Read from the delivery log (SKI-230).
    */
   lastRemindedAt: string | null;
 }
@@ -427,7 +425,8 @@ export interface CoachAssignmentInput {
  */
 export interface CoachRemindResult {
   remindedUserIds: number[];
-  skipped: Array<{ userId: number; reason: string; nextAllowedAt: string }>;
+  /** `nextAllowedAt` is null when waiting will not help (no address, finished). */
+  skipped: Array<{ userId: number; reason: string; nextAllowedAt: string | null }>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
