@@ -41,6 +41,20 @@ export function daysUntilDue(dueAt: string | null): number | null {
   return Math.ceil((due.getTime() - Date.now()) / 86_400_000);
 }
 
+/**
+ * How a deadline reads to a player. Overdue says "Was due 2 days ago" — never
+ * OVERDUE or MISSED (SKI-227: these are teenagers).
+ */
+export function dueLabel(dueAt: string | null): { text: string; overdue: boolean } | null {
+  const days = daysUntilDue(dueAt);
+  if (days === null) return null;
+  if (days < -1) return { text: `Was due ${Math.abs(days)} days ago`, overdue: true };
+  if (days === -1) return { text: 'Was due yesterday', overdue: true };
+  if (days === 0) return { text: 'Due today', overdue: false };
+  if (days === 1) return { text: 'Due tomorrow', overdue: false };
+  return { text: `Due in ${days} days`, overdue: false };
+}
+
 const isoInDays = (days: number) => {
   const date = new Date();
   date.setDate(date.getDate() + days);

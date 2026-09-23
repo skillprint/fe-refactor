@@ -2,7 +2,13 @@ import type { Pillar } from '../../skillIcons';
 
 /** `GET /api/portal/playbooks/` and `/playbooks/{slug}/` (SKI-129). */
 
-export type PlaybookSource = 'authored' | 'generated';
+/**
+ * `assigned` is a coach's playbook set for this player (SKI-224). It only
+ * appears for players in a PlayVS coaching organisation, and `usePlaybookList`
+ * leaves it out: assignments have their own surface (`useAssignedPlaybooks`),
+ * so every existing list consumer sees exactly what it did before.
+ */
+export type PlaybookSource = 'authored' | 'generated' | 'assigned';
 
 export interface PlaybookProgress {
   totalGames: number;
@@ -48,7 +54,19 @@ export interface PlaybookTargetSkill {
   category: string | null;
 }
 
+/** Why this playbook is here, when a coach assigned it (SKI-224). */
+export interface PlaybookAssignmentContext {
+  assignmentId: string;
+  assignedByName: string;
+  note: string;
+  dueAt: string | null;
+  status: 'not_started' | 'in_progress' | 'complete' | 'dismissed';
+  dismissedAt: string | null;
+}
+
 export interface PlaybookDetail extends Omit<PlaybookSummary, 'gameCount' | 'currentScore'> {
+  /** Present only when `source` is `assigned`. */
+  assignment?: PlaybookAssignmentContext;
   games: PlaybookGame[];
   targetSkills: PlaybookTargetSkill[];
   howItWorks: string | null;
@@ -74,7 +92,7 @@ export function normalizePlaybookSummary<T extends Partial<PlaybookSummary> & { 
     ...raw,
     title: raw.title || raw.slug,
     description: raw.description || '',
-    source: generated ? 'generated' : 'authored',
+    source: generated ? 'generated' : raw.source === 'assigned' ? 'assigned' : 'authored',
     pillar: (raw.pillar || 'cognition') as Pillar,
     dimension: raw.dimension ?? null,
     currentScore: raw.currentScore ?? null,
@@ -89,8 +107,23 @@ export function normalizePlaybookSummary<T extends Partial<PlaybookSummary> & { 
 
 export function normalizePlaybookDetail(raw: Partial<PlaybookDetail> & { slug: string }): PlaybookDetail {
   const base = normalizePlaybookSummary(raw as any);
+  // The API sends the assignment fields flat, beside the playbook's own;
+  // gathered here so nothing reads them off a playbook that has none.
+  const flat = raw as Partial<PlaybookAssignmentContext>;
+  const assignment: PlaybookAssignmentContext | undefined =
+    base.source === 'assigned' && flat.assignmentId
+      ? {
+          assignmentId: flat.assignmentId,
+          assignedByName: flat.assignedByName ?? 'Your coach',
+          note: flat.note ?? '',
+          dueAt: flat.dueAt ?? null,
+          status: flat.status ?? 'not_started',
+          dismissedAt: flat.dismissedAt ?? null,
+        }
+      : undefined;
   return {
     ...base,
+    assignment,
     games: raw.games || [],
     targetSkills: raw.targetSkills || [],
     howItWorks: raw.howItWorks ?? null,

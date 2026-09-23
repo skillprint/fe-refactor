@@ -14,8 +14,11 @@
  * *player* portal, and a fake assignment from a fake coach reaching a real
  * player is a worse failure than the feature simply not appearing yet.
  *
- * Dismissal is optimistic and local for now; SKI-224 should give it an
- * endpoint, since the coach is meant to see that it happened.
+ * Dismissal is optimistic: the card drops at once, and the dismissal is
+ * posted to `/api/portal/assignments/{id}/dismiss/` so the coach sees it
+ * (SKI-224). If that fails the list is refetched, so a card the server still
+ * holds comes back rather than silently staying hidden. On sample data it is
+ * local only.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
@@ -65,10 +68,21 @@ export function useAssignedPlaybooks() {
     fetchData();
   }, [fetchData]);
 
-  const dismiss = useCallback((assignmentId: string) => {
-    setData((current) => (current ?? []).filter((row) => row.assignmentId !== assignmentId));
-    // TODO(SKI-224): POST the dismissal so the coach sees it.
-  }, []);
+  const dismiss = useCallback(
+    async (assignmentId: string) => {
+      setData((current) => (current ?? []).filter((row) => row.assignmentId !== assignmentId));
+      if (isCoachMocked('playbooks') || !userToken) return;
+      try {
+        await portalFetch(`/assignments/${encodeURIComponent(assignmentId)}/dismiss/`, userToken, {
+          method: 'POST',
+        });
+      } catch (err) {
+        console.error('Failed to dismiss assignment:', err);
+        fetchData();
+      }
+    },
+    [userToken, fetchData],
+  );
 
   return { data, isLoading, error, refetch: fetchData, dismiss };
 }

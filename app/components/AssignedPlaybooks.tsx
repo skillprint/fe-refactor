@@ -25,21 +25,8 @@
  */
 import React from 'react';
 import Link from 'next/link';
-import {
-  daysUntilDue,
-  type AssignedPlaybook,
-} from '@/lib/models/portal/AssignedPlaybook';
+import { dueLabel, type AssignedPlaybook } from '@/lib/models/portal/AssignedPlaybook';
 import { useAssignedPlaybooks } from '@/lib/models/portal/useAssignedPlaybooks';
-
-function dueLabel(dueAt: string | null): { text: string; overdue: boolean } | null {
-  const days = daysUntilDue(dueAt);
-  if (days === null) return null;
-  if (days < -1) return { text: `Was due ${Math.abs(days)} days ago`, overdue: true };
-  if (days === -1) return { text: 'Was due yesterday', overdue: true };
-  if (days === 0) return { text: 'Due today', overdue: false };
-  if (days === 1) return { text: 'Due tomorrow', overdue: false };
-  return { text: `Due in ${days} days`, overdue: false };
-}
 
 function AssignmentCard({
   assignment,
@@ -71,7 +58,11 @@ function AssignmentCard({
       </p>
 
       <div className="assigned-card__actions">
-        <Link href={`/playbooks/${assignment.slug}`} className="assigned-card__start">
+        {/* Which assignment, since the same playbook can be set twice. */}
+        <Link
+          href={`/playbooks/${assignment.slug}?assignment=${encodeURIComponent(assignment.assignmentId)}`}
+          className="assigned-card__start"
+        >
           {playedGames === 0 ? 'Start' : 'Continue'}
         </Link>
         <button

@@ -5,8 +5,17 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { PlaybookDetail, generateMockPlaybookDetail, normalizePlaybookDetail } from './Playbooks';
 import { PortalApiError, portalFetch } from './portalFetch';
 
-/** Hydrated playbook: ordered games, target skills and the player's progress. */
-export function usePlaybookDetail(slug: string, useSyntheticData: boolean = false) {
+/**
+ * Hydrated playbook: ordered games, target skills and the player's progress.
+ *
+ * `assignmentId` says which assignment a coach-assigned slug arrived from — the
+ * same playbook can be assigned twice, with different deadlines (SKI-224).
+ */
+export function usePlaybookDetail(
+  slug: string,
+  useSyntheticData: boolean = false,
+  assignmentId: string | null = null,
+) {
   const { userToken } = useUserSession();
   const [data, setData] = useState<PlaybookDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +33,11 @@ export function usePlaybookDetail(slug: string, useSyntheticData: boolean = fals
     setError(null);
     setNotFound(false);
     try {
-      const json = await portalFetch<PlaybookDetail>(`/playbooks/${encodeURIComponent(slug)}/`, userToken);
+      const query = assignmentId ? `?assignment=${encodeURIComponent(assignmentId)}` : '';
+      const json = await portalFetch<PlaybookDetail>(
+        `/playbooks/${encodeURIComponent(slug)}/${query}`,
+        userToken,
+      );
       setData(normalizePlaybookDetail(json));
     } catch (err: any) {
       if (err instanceof PortalApiError && err.status === 404) {
@@ -37,7 +50,7 @@ export function usePlaybookDetail(slug: string, useSyntheticData: boolean = fals
     } finally {
       setIsLoading(false);
     }
-  }, [userToken, useSyntheticData, slug]);
+  }, [userToken, useSyntheticData, slug, assignmentId]);
 
   useEffect(() => {
     if (useSyntheticData || userToken) fetchData();
