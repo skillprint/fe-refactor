@@ -33,8 +33,11 @@ export {
   readCoachSession,
   requestPasswordReset,
   setPassword,
+  tokenKind,
   writeCoachSession,
 } from './coachAuth';
+export { CoachAuthError } from './authErrors';
+export type { CoachAuthErrorCode } from './authErrors';
 export type { CoachSession } from './coachAuth';
 export {
   useCoachAssignment,

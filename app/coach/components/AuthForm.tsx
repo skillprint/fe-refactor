@@ -6,7 +6,7 @@
  * Centred card, no coach nav — at this point we do not know who they are, and
  * rendering the dashboard shell around a sign-in form implies we do.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export function AuthCard({
   title,
@@ -79,9 +79,21 @@ export function FormError({ message }: { message: string }) {
   );
 }
 
+/**
+ * Disabled until the page has hydrated.
+ *
+ * These routes are server-rendered, so the form is visible before its submit
+ * handler is attached. A click in that window falls through to a native form
+ * submit, which reloads the page — and on set-password the reload drops the
+ * link's token, landing the coach on "this link is incomplete". Found by a test
+ * that typed faster than the page loaded; a coach on a slow phone would find it
+ * the same way.
+ */
 export function SubmitButton({ busy, children }: { busy: boolean; children: React.ReactNode }) {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   return (
-    <button type="submit" className="coach-submit" disabled={busy}>
+    <button type="submit" className="coach-submit" disabled={busy || !hydrated}>
       {busy ? 'Working…' : children}
     </button>
   );

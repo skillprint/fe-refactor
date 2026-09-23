@@ -10,7 +10,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { COACH_MOCKS_ENABLED, useCoachAuth } from '@/lib/models/coach';
+import { COACH_MOCKS_ENABLED, CoachAuthError, useCoachAuth } from '@/lib/models/coach';
 import { MOCK_COACH_EMAIL, MOCK_COACH_PASSWORD } from '@/lib/models/coach/mocks/auth';
 import { AuthCard, Field, FormError, SubmitButton } from '../components/AuthForm';
 
@@ -37,8 +37,18 @@ function LoginForm() {
       await signIn(email, password);
       router.replace(next);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Sign-in failed.');
       setBusy(false);
+      if (caught instanceof CoachAuthError) {
+        if (caught.code === 'credentials_invalid') {
+          // One message for a wrong address and a wrong password, as the API
+          // gives: which of the two was wrong is not for an anonymous caller.
+          return setError('Those credentials were not recognised.');
+        }
+        if (caught.code === 'throttled') {
+          return setError('Too many sign-in attempts from here. Wait a minute and try again.');
+        }
+      }
+      setError(caught instanceof Error ? caught.message : 'Sign-in failed.');
     }
   }
 

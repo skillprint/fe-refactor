@@ -24,6 +24,11 @@ interface CoachAuthValue {
   /** True until the stored session has been read — see the note below. */
   isRestoring: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  /**
+   * Store a session obtained some other way — set-password signs the coach in
+   * directly and hands back a token, so there is no password to sign in with.
+   */
+  adoptSession: (session: CoachSession) => void;
   signOut: () => Promise<void>;
 }
 
@@ -49,6 +54,11 @@ export function CoachAuthProvider({ children }: { children: React.ReactNode }) {
     setSession(next);
   }, []);
 
+  const adoptSession = useCallback((next: CoachSession) => {
+    writeCoachSession(next);
+    setSession(next);
+  }, []);
+
   const signOut = useCallback(async () => {
     const token = session?.token ?? null;
     clearCoachSession();
@@ -57,8 +67,8 @@ export function CoachAuthProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const value = useMemo(
-    () => ({ session, isRestoring, signIn, signOut }),
-    [session, isRestoring, signIn, signOut],
+    () => ({ session, isRestoring, signIn, adoptSession, signOut }),
+    [session, isRestoring, signIn, adoptSession, signOut],
   );
 
   return <CoachAuthContext.Provider value={value}>{children}</CoachAuthContext.Provider>;

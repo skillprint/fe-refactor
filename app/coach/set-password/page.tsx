@@ -3,89 +3,157 @@
 /**
  * Set a password from an invite or reset link (SKI-213).
  *
- * Serves both journeys because they are the same action — redeem a one-time
- * token, choose a password — and splitting them would mean two screens that
- * must not drift on password rules.
+ * One screen for both links because the backend serves both from one endpoint
+ * (marketplace PR #71), telling them apart by the token's shape. The copy
+ * differs — "welcome" for an invite, "choose a new password" for a reset — but
+ * the action and the password rules are the same, and two screens would drift.
+ *
+ * ## Every refusal gets its own next step
+ *
+ * The API codes its refusals precisely so this screen can say what to *do*:
+ * an expired invite needs a new one from an admin, a used one means sign in,
+ * a forwarded one means ask for your own. Those are terminal — the form goes
+ * away, because retyping a password will not fix a dead link. Only
+ * `password_invalid` keeps the form, since that one the coach can fix.
+ *
+ * ## Success signs you in
+ *
+ * The endpoint returns a session, so the coach lands on their teams instead of
+ * being asked to type the password they chose a second ago.
  */
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { COACH_MOCKS_ENABLED, setPassword } from '@/lib/models/coach';
+import {
+  COACH_MOCKS_ENABLED,
+  CoachAuthError,
+  setPassword,
+  tokenKind,
+  useCoachAuth,
+  type CoachAuthErrorCode,
+} from '@/lib/models/coach';
+import { MOCK_LINK_TOKENS } from '@/lib/models/coach/mocks/auth';
 import { AuthCard, Field, FormError, SubmitButton } from '../components/AuthForm';
 
 const MIN_LENGTH = 8;
 
+interface DeadEnd {
+  title: string;
+  body: string;
+  action: { label: string; href: string };
+}
+
+/** The refusals the coach cannot fix from this screen, and what to do instead. */
+const DEAD_ENDS: Partial<Record<CoachAuthErrorCode, DeadEnd>> = {
+  token_invalid: {
+    title: 'This link isn’t valid',
+    body: 'Open it from your email exactly as it was sent — copying part of it, or a mail client that rewrites links, can break it.',
+    action: { label: 'Back to sign in', href: '/coach/login' },
+  },
+  invite_expired: {
+    title: 'This invitation has expired',
+    body: 'Invitations last a week. Ask the person who invited you to send a new one.',
+    action: { label: 'Back to sign in', href: '/coach/login' },
+  },
+  invite_already_accepted: {
+    title: 'You’ve already set up this account',
+    body: 'This invitation has been used. Sign in with the password you chose.',
+    action: { label: 'Sign in', href: '/coach/login' },
+  },
+  invite_already_member: {
+    title: 'You already have access',
+    body: 'Your account is already part of this organisation. Sign in as usual.',
+    action: { label: 'Sign in', href: '/coach/login' },
+  },
+  invite_email_mismatch: {
+    title: 'This invitation was sent to someone else',
+    body: 'It belongs to a different email address — it may have been forwarded. Ask for an invitation of your own.',
+    action: { label: 'Back to sign in', href: '/coach/login' },
+  },
+  reset_invalid: {
+    title: 'This reset link has expired or been used',
+    body: 'Reset links work once and last two hours. Request a new one.',
+    action: { label: 'Send a new link', href: '/coach/forgot-password' },
+  },
+};
+
 function SetPasswordForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const { adoptSession } = useCoachAuth();
   const token = params.get('token') ?? '';
+  const kind = tokenKind(token);
 
   const [password, setPasswordValue] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [problems, setProblems] = useState<string[]>([]);
+  const [deadEnd, setDeadEnd] = useState<DeadEnd | null>(null);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
 
-    // Checked here as well as server-side: a mismatch is the user's typo and
-    // deserves an instant answer, not a round trip.
-    if (password !== confirm) {
-      setError('Those two passwords do not match.');
-      return;
-    }
+    // Checked here as well as server-side: a mismatch is a typo and deserves
+    // an instant answer. The length rule matches Django's MinimumLength
+    // validator; the other three rules are left to the server to state.
+    if (password !== confirm) return setProblems(['Those two passwords do not match.']);
     if (password.length < MIN_LENGTH) {
-      setError(`Use at least ${MIN_LENGTH} characters.`);
-      return;
+      return setProblems([`Use at least ${MIN_LENGTH} characters.`]);
     }
 
     setBusy(true);
-    setError(null);
+    setProblems([]);
     try {
-      await setPassword(token, password);
-      setDone(true);
+      const session = await setPassword(token, password);
+      adoptSession(session);
+      router.replace('/coach/teams');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not set the password.');
-    } finally {
       setBusy(false);
+      if (!(caught instanceof CoachAuthError)) {
+        setProblems([caught instanceof Error ? caught.message : 'Could not set the password.']);
+        return;
+      }
+      const end = DEAD_ENDS[caught.code];
+      if (end) return setDeadEnd(end);
+      if (caught.code === 'throttled') {
+        return setProblems(['Too many attempts from here. Wait a minute and try again.']);
+      }
+      setProblems(caught.messages.length ? caught.messages : [caught.message]);
     }
   }
 
   if (!token) {
+    const end = DEAD_ENDS.token_invalid!;
     return (
       <AuthCard
         title="This link is incomplete"
-        intro="It is missing its token. Open the link from your invitation email exactly as it was sent."
-        footer={
-          <Link href="/coach/login" className="coach-auth__link">
-            Back to sign in
-          </Link>
-        }
+        intro="It’s missing its token. Open the link from your email exactly as it was sent."
+        footer={<Link href={end.action.href} className="coach-auth__link">{end.action.label}</Link>}
       >
         <></>
       </AuthCard>
     );
   }
 
-  if (done) {
+  if (deadEnd) {
     return (
-      <AuthCard
-        title="Password set"
-        intro="You can sign in with it now."
-        footer={
-          <button type="button" className="coach-submit" onClick={() => router.replace('/coach/login')}>
-            Go to sign in
-          </button>
-        }
-      >
-        <></>
+      <AuthCard title={deadEnd.title} intro={deadEnd.body}>
+        <Link href={deadEnd.action.href} className="coach-submit" style={{ textAlign: 'center', textDecoration: 'none' }}>
+          {deadEnd.action.label}
+        </Link>
       </AuthCard>
     );
   }
 
   return (
-    <AuthCard title="Choose a password" intro={`At least ${MIN_LENGTH} characters.`}>
+    <AuthCard
+      title={kind === 'reset' ? 'Choose a new password' : 'Welcome — choose a password'}
+      intro={
+        kind === 'reset'
+          ? 'You’ll be signed in as soon as it’s set.'
+          : 'This finishes setting up your coaching account. You’ll be signed in straight after.'
+      }
+    >
       <form onSubmit={onSubmit} noValidate>
         <Field
           id="coach-new-password"
@@ -94,6 +162,7 @@ function SetPasswordForm() {
           value={password}
           onChange={setPasswordValue}
           autoComplete="new-password"
+          hint="At least 8 characters, not all numbers, and not a common password."
         />
         <Field
           id="coach-confirm-password"
@@ -103,14 +172,20 @@ function SetPasswordForm() {
           onChange={setConfirm}
           autoComplete="new-password"
         />
-        {error && <FormError message={error} />}
-        <SubmitButton busy={busy}>Set password</SubmitButton>
+        {problems.map((problem) => (
+          <FormError key={problem} message={problem} />
+        ))}
+        <SubmitButton busy={busy}>{kind === 'reset' ? 'Set password and sign in' : 'Finish setting up'}</SubmitButton>
       </form>
 
       {COACH_MOCKS_ENABLED && (
         <p className="coach-auth__sandbox">
-          Sandbox: only <code>mock-invite-token</code> is accepted; any other token shows the
-          expired-link path.
+          Sandbox links, one per outcome:{' '}
+          <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.invite}`}>invite</Link> ·{' '}
+          <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.reset}`}>reset</Link> ·{' '}
+          <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.inviteExpired}`}>expired</Link> ·{' '}
+          <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.inviteUsed}`}>used</Link> ·{' '}
+          <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.inviteForwarded}`}>forwarded</Link>
         </p>
       )}
     </AuthCard>
@@ -120,7 +195,14 @@ function SetPasswordForm() {
 export default function CoachSetPasswordPage() {
   return (
     <Suspense fallback={<div className="coach-auth" />}>
-      <SetPasswordForm />
+      {/* Keyed on the token so following one sandbox link from another resets
+          the form rather than showing the previous link's outcome. */}
+      <SetPasswordFormKeyed />
     </Suspense>
   );
+}
+
+function SetPasswordFormKeyed() {
+  const params = useSearchParams();
+  return <SetPasswordForm key={params.get('token') ?? ''} />;
 }
