@@ -28,18 +28,18 @@ const TOUR: TourStep[] = [
     {
         spot: 'intro',
         title: 'What Skillprint is',
-        text: 'Every game here measures how you think while you play. Five of them make your Skillprint.',
+        text: 'These games measure how you think. Play at least five to create your Skillprint.',
         prefer: 'right'
     },
     {
         spot: 'play',
         title: 'Start with one game',
-        text: 'This is the whole first move. A session takes five to ten minutes, and there is nothing in it you can fail.'
+        text: 'Start here. Play just 5 minutes start unlocking insights. Don\'t worry, you won\'t fail.'
     },
     {
         spot: 'run',
         title: 'Five sessions make a Skillprint',
-        text: 'Each game you finish fills a slot. Five different games get you a score faster than one game played five times.'
+        text: 'Skillprint runs broad and deep - Games measure different skills, so playing at least 5 different games is needed. Playing one game longer improves precision, and refines your skills.'
     },
     {
         spot: 'print',
