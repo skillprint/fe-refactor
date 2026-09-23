@@ -399,3 +399,39 @@ export interface CoachRemindResult {
   remindedUserIds: number[];
   skipped: Array<{ userId: number; reason: string; nextAllowedAt: string }>;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Invites (SKI-256)
+//
+// Transcribed, not proposed: read off `coach/invite_views.py` on marketplace
+// `main` (PR #70, SKI-199), which is live on staging. The token is absent on
+// purpose — the API never returns it, because an admin holding it could set a
+// password in a teacher's name.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type CoachInviteRole = 'Coach' | 'Admin';
+
+/** `Expired` is reissued in place by POSTing again; `Pending` cannot be resent. */
+export type CoachInviteStatus = 'Pending' | 'Accepted' | 'Expired';
+
+export interface CoachInvite {
+  id: number;
+  email: string;
+  role: CoachInviteRole;
+  status: CoachInviteStatus;
+  expires: string;
+  organization: { id: number; name: string };
+  team: { id: number; name: string } | null;
+}
+
+export interface CoachInviteList {
+  invites: CoachInvite[];
+}
+
+export interface CoachInviteInput {
+  organization: number;
+  email: string;
+  /** Defaults to Coach server-side. Players are never invited — they arrive by roster sync. */
+  role?: CoachInviteRole;
+  team?: number | null;
+}

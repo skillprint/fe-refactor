@@ -16,7 +16,18 @@ import { CoachAuthError } from '../authErrors';
 import type { CoachSession } from '../coachAuth';
 
 export const MOCK_COACH_EMAIL = 'coach@northgate.edu';
+/**
+ * An organisation admin who also coaches — the account that can reach the
+ * invite screen (SKI-256). Two accounts rather than one so the admin-only
+ * surface can be seen from both sides without editing a fixture.
+ */
+export const MOCK_ADMIN_EMAIL = 'admin@northgate.edu';
 export const MOCK_COACH_PASSWORD = 'playvs';
+
+const MOCK_ACCOUNTS: Record<string, string> = {
+  [MOCK_COACH_EMAIL]: 'Dana Whitfield',
+  [MOCK_ADMIN_EMAIL]: 'Morgan Reyes',
+};
 
 /**
  * One token per set-password outcome. Invites are UUIDs and resets are
@@ -39,7 +50,8 @@ const expiry = () => new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString();
 export async function mockCoachLogin(email: string, password: string): Promise<CoachSession> {
   await wait();
 
-  if (email.trim().toLowerCase() !== MOCK_COACH_EMAIL || password !== MOCK_COACH_PASSWORD) {
+  const address = email.trim().toLowerCase();
+  if (!(address in MOCK_ACCOUNTS) || password !== MOCK_COACH_PASSWORD) {
     // The login serializer's shape, and the same message for a wrong address
     // and a wrong password: which one was wrong is not for an anonymous caller.
     throw new CoachAuthError('credentials_invalid', ['Unable to log in with provided credentials.'], 400);
@@ -48,8 +60,8 @@ export async function mockCoachLogin(email: string, password: string): Promise<C
   return {
     token: 'mock-coach-token',
     expiry: expiry(),
-    email: MOCK_COACH_EMAIL,
-    displayName: 'Dana Whitfield',
+    email: address,
+    displayName: MOCK_ACCOUNTS[address],
   };
 }
 

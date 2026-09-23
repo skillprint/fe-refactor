@@ -31,7 +31,7 @@ export const COACH_MOCK_AREAS: readonly CoachMockArea[] = ['reads', 'auth', 'pla
 
 /** How each area is described to the person looking at the screen. */
 export const COACH_MOCK_AREA_LABELS: Record<CoachMockArea, string> = {
-  reads: 'teams and players',
+  reads: 'teams, players and invites',
   auth: 'sign-in',
   playbooks: 'playbooks and assignments',
 };
