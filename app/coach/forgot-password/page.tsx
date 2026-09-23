@@ -9,7 +9,8 @@
  */
 import { useState } from 'react';
 import Link from 'next/link';
-import { COACH_MOCKS_ENABLED, requestPasswordReset } from '@/lib/models/coach';
+import { COACH_MOCKS_ENABLED, CoachAuthError, requestPasswordReset } from '@/lib/models/coach';
+import { MOCK_LINK_TOKENS } from '@/lib/models/coach/mocks/auth';
 import { AuthCard, Field, FormError, SubmitButton } from '../components/AuthForm';
 
 export default function CoachForgotPasswordPage() {
@@ -26,7 +27,13 @@ export default function CoachForgotPasswordPage() {
       await requestPasswordReset(email);
       setSent(true);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not send the email.');
+      if (caught instanceof CoachAuthError && caught.code === 'throttled') {
+        // 5 an hour per IP. Say so plainly; a coach retrying every few seconds
+        // otherwise sees the same refusal with no idea when it clears.
+        setError('Too many reset requests from here. Try again in an hour.');
+      } else {
+        setError(caught instanceof Error ? caught.message : 'Could not send the email.');
+      }
     } finally {
       setBusy(false);
     }
@@ -38,8 +45,9 @@ export default function CoachForgotPasswordPage() {
         title="Check your email"
         intro={
           <>
-            If <strong>{email}</strong> has a coaching account, a reset link is on its way. The link
-            is single-use and expires.
+            If <strong>{email}</strong> has a coaching account, a reset link is on its way. It
+            works once and expires after two hours. Check spam if it hasn&rsquo;t arrived in a few
+            minutes.
           </>
         }
         footer={
@@ -50,8 +58,8 @@ export default function CoachForgotPasswordPage() {
       >
         {COACH_MOCKS_ENABLED && (
           <p className="coach-auth__sandbox">
-            Nothing was actually sent — email lands in SKI-200. Try the flow at{' '}
-            <code>/coach/set-password?token=mock-invite-token</code>.
+            Nothing was actually sent. The link it would contain is{' '}
+            <Link href={`/coach/set-password?token=${MOCK_LINK_TOKENS.reset}`}>this one</Link>.
           </p>
         )}
       </AuthCard>

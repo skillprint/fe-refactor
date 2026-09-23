@@ -21,17 +21,29 @@
  * token reads children's records. Moving it to an httpOnly cookie needs a
  * server-side route to set it and is tracked separately — see SKI-254.
  *
+ * ## Endpoints
+ *
+ * - Sign-in: the existing `users/api/auth/login/` — `{email, password}` in,
+ *   Knox's `{token, expiry}` out. Reused rather than duplicated (SKI-200).
+ * - Set password: `POST /api/coach/auth/set-password/` — `{token, password}`.
+ *   One endpoint for both invite and reset links, told apart by the token's
+ *   shape. **Success signs the coach straight in**; there is no second
+ *   "now type it again" step.
+ * - Forgot password: `POST /api/coach/auth/forgot-password/` — `{email}`.
+ *   Always 202 with the same body whether or not the address has an account,
+ *   so it cannot be used to learn which teachers are coaches.
+ *
+ * Every refusal is a `CoachAuthError` carrying the API's code — see
+ * `./authErrors`, and the set-password screen for why the codes matter.
+ *
  * ## Mocks
  *
- * Login mirrors `coachFetch`: one switch, `COACH_MOCKS_ENABLED`, decides
- * whether credentials go to the API or to `./mocks/auth`. Set-password and
- * forgot-password are mock-only for now because the backend endpoints do not
- * exist yet (SKI-200) — `requestPasswordReset` and `setPassword` throw a
- * clearly-labelled error when mocks are off rather than silently appearing to
- * work.
+ * One switch, `COACH_MOCKS_ENABLED`, sends all three to `./mocks/auth`, which
+ * reproduces the same codes, the same success shape and the same throttle.
  */
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-import { COACH_MOCKS_ENABLED, CoachApiError } from './coachFetch';
+import { COACH_BASE_URL, COACH_MOCKS_ENABLED } from './coachFetch';
+import { CoachAuthError, readAuthError } from './authErrors';
 import { mockCoachLogin, mockRequestPasswordReset, mockSetPassword } from './mocks/auth';
 
 const STORAGE_KEY = 'coach_session';
@@ -121,21 +133,7 @@ export async function coachLogin(email: string, password: string): Promise<Coach
     body: JSON.stringify({ email, password }),
   });
 
-  if (!response.ok) {
-    let detail: unknown;
-    try {
-      detail = await response.json();
-    } catch {
-      /* not JSON */
-    }
-    throw new CoachApiError(
-      response.status,
-      response.status === 400 || response.status === 401
-        ? 'Those credentials were not recognised.'
-        : `Sign-in failed (${response.status}).`,
-      detail,
-    );
-  }
+  if (!response.ok) throw await readAuthError(response);
 
   const body = (await response.json()) as {
     token: string;
@@ -165,26 +163,60 @@ export async function coachLogout(token: string | null): Promise<void> {
   }
 }
 
+/** POST JSON to a coach auth endpoint; refusals become `CoachAuthError`. */
+async function postCoachAuth<T>(path: string, body: unknown): Promise<T | null> {
+  const response = await fetch(`${COACH_BASE_URL}/auth/${path}/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw await readAuthError(response);
+  // 202 from forgot-password carries a body too, but nothing the caller needs.
+  return response.status === 204 ? null : ((await response.json()) as T);
+}
+
 /**
- * Start a password reset.
+ * Ask for a reset link.
  *
- * Always resolves, even for an address with no account: telling an anonymous
- * caller which email addresses are coaches is an enumeration oracle, and the
- * screen says "if that address has an account" for the same reason.
+ * Resolves for any well-formed address, including ones with no account; only
+ * a malformed address (`invalid_email`) or the 5-an-hour throttle refuses. The
+ * link works once and lasts two hours.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
   if (COACH_MOCKS_ENABLED) return mockRequestPasswordReset(email);
-  throw new CoachApiError(
-    501,
-    'Password reset is not wired up yet — the backend endpoint lands in SKI-200.',
-  );
+  await postCoachAuth('forgot-password', { email });
 }
 
-/** Redeem an invite or reset token and set a password. */
-export async function setPassword(token: string, password: string): Promise<void> {
+/** Which kind of link a token came from, by the same rule the server uses. */
+export function tokenKind(token: string): 'reset' | 'invite' {
+  return token.startsWith('r.') ? 'reset' : 'invite';
+}
+
+/**
+ * Redeem an invite or reset token and set a password — which also signs the
+ * coach in. Returns the session; the caller stores it.
+ */
+export async function setPassword(
+  token: string,
+  password: string,
+): Promise<CoachSession & { via: 'invite' | 'reset' }> {
   if (COACH_MOCKS_ENABLED) return mockSetPassword(token, password);
-  throw new CoachApiError(
-    501,
-    'Setting a password is not wired up yet — the backend endpoint lands in SKI-200.',
-  );
+
+  const body = await postCoachAuth<{
+    token: string;
+    expiry: string | null;
+    via: 'invite' | 'reset';
+    user: { email: string };
+  }>('set-password', { token, password });
+
+  if (!body?.token) throw new CoachAuthError('unknown', ['The server did not return a session.'], 200);
+  return {
+    token: body.token,
+    expiry: body.expiry ?? null,
+    email: body.user.email,
+    // The response carries only the address; a name arrives when SKI-251 or
+    // a profile endpoint gives one.
+    displayName: body.user.email,
+    via: body.via,
+  };
 }
