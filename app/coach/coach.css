@@ -482,3 +482,16 @@
     linear-gradient(to right, var(--surface-box) 30%, transparent) left / 24px 100% no-repeat,
     linear-gradient(to left, var(--surface-box) 30%, transparent) right / 24px 100% no-repeat;
 }
+
+/* Invites (SKI-256): on a phone, who and whether they joined matter; role and
+   team are one tap away in the form that sent it. */
+@media (max-width: 640px) {
+  .coach-table--invites th:nth-child(2),
+  .coach-table--invites td:nth-child(2),
+  .coach-table--invites th:nth-child(3),
+  .coach-table--invites td:nth-child(3) { display: none; }
+  /* Email addresses are long and cannot be abbreviated; let them and the
+     "waiting until" pill wrap instead of pushing the action off-screen. */
+  .coach-table--invites td { white-space: normal; overflow-wrap: anywhere; }
+  .coach-table--invites .coach-pill { white-space: normal; }
+}

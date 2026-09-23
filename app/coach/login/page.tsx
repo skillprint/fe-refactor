@@ -11,7 +11,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { isCoachMocked, CoachAuthError, useCoachAuth } from '@/lib/models/coach';
-import { MOCK_COACH_EMAIL, MOCK_COACH_PASSWORD } from '@/lib/models/coach/mocks/auth';
+import { MOCK_ADMIN_EMAIL, MOCK_COACH_EMAIL, MOCK_COACH_PASSWORD } from '@/lib/models/coach/mocks/auth';
 import { AuthCard, Field, FormError, SubmitButton } from '../components/AuthForm';
 
 function LoginForm() {
@@ -78,7 +78,8 @@ function LoginForm() {
 
       {isCoachMocked('auth') && (
         <p className="coach-auth__sandbox">
-          Sandbox account: <code>{MOCK_COACH_EMAIL}</code> / <code>{MOCK_COACH_PASSWORD}</code>
+          Sandbox accounts (password <code>{MOCK_COACH_PASSWORD}</code>): <code>{MOCK_COACH_EMAIL}</code> — a
+          coach; <code>{MOCK_ADMIN_EMAIL}</code> — an admin, who can also invite.
         </p>
       )}
     </AuthCard>

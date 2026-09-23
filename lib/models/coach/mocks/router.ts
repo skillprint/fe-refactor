@@ -17,6 +17,7 @@
  */
 import { CoachApiError } from '../coachFetch';
 import { playbookRoutes } from './playbooks';
+import { inviteRoutes, mockContextOrganizations } from './invites';
 import type { CoachRange } from '../types';
 import { CoachVisibilityScope } from '../types';
 import {
@@ -108,7 +109,9 @@ type Handler = (
 
 /** `[method, pattern, handler]`. GET unless stated. */
 const ROUTES: Array<[RegExp, Handler]> = [
-  [/^\/context\/$/, () => MOCK_CONTEXT],
+  // Per signed-in sandbox account, so the admin sees an Admin membership and
+  // the coach does not — the invite screen hangs off that difference.
+  [/^\/context\/$/, () => ({ ...MOCK_CONTEXT, organizations: mockContextOrganizations() })],
 
   [
     /^\/teams\/$/,
@@ -230,7 +233,7 @@ export async function mockCoachResponse<T>(
 
   // Writes live in their own module so the read fixtures stay a pure function
   // of the request and the mutable store is in one place.
-  const written = playbookRoutes(path, params, request);
+  const written = playbookRoutes(path, params, request) ?? inviteRoutes(path, request);
   if (written !== undefined) return written as T;
 
   for (const [pattern, handler] of ROUTES) {
