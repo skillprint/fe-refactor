@@ -15754,5 +15754,9 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
   cursor: pointer;
 }
 .assigned-card__dismiss:hover { color: var(--surface-text); text-decoration: underline; }
+/* Settings → Email (SKI-234): one row per kind of email, switch on the right. */
+.pp-email-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: min(100%, 360px); }
+.pp-email-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+
 /* On a playbook's own page: the coach's context above the hero. */
 .assigned-card--detail { margin-bottom: 16px; }
