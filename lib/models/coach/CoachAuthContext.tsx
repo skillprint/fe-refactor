@@ -25,11 +25,12 @@ interface CoachAuthValue {
   isRestoring: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   /**
-   * Store a session obtained some other way — set-password signs the coach in
-   * directly and hands back a token, so there is no password to sign in with.
+   * Record a session obtained some other way — set-password signs the coach in
+   * directly (the API sets the cookie), so there is no password to sign in with.
    */
   adoptSession: (session: CoachSession) => void;
-  signOut: () => Promise<void>;
+  /** This device, or with `everywhere` every device the coach is signed in on. */
+  signOut: (everywhere?: boolean) => Promise<void>;
 }
 
 const CoachAuthContext = createContext<CoachAuthValue | undefined>(undefined);
@@ -59,12 +60,11 @@ export function CoachAuthProvider({ children }: { children: React.ReactNode }) {
     setSession(next);
   }, []);
 
-  const signOut = useCallback(async () => {
-    const token = session?.token ?? null;
+  const signOut = useCallback(async (everywhere = false) => {
     clearCoachSession();
     setSession(null);
-    await coachLogout(token);
-  }, [session]);
+    await coachLogout(everywhere);
+  }, []);
 
   const value = useMemo(
     () => ({ session, isRestoring, signIn, adoptSession, signOut }),

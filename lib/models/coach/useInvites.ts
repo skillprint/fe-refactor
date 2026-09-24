@@ -9,7 +9,6 @@
  */
 import { useCoachResource, type CoachResource } from './useCoachResource';
 import { CoachApiError, coachFetch } from './coachFetch';
-import { useCoachAuth } from './CoachAuthContext';
 import type { CoachInvite, CoachInviteInput, CoachInviteList } from './types';
 
 export function useCoachInvites(): CoachResource<CoachInviteList> {
@@ -17,9 +16,8 @@ export function useCoachInvites(): CoachResource<CoachInviteList> {
 }
 
 export function useSendInvite() {
-  const { session } = useCoachAuth();
   return (input: CoachInviteInput) =>
-    coachFetch<CoachInvite>('/invites/', session?.token ?? null, {
+    coachFetch<CoachInvite>('/invites/', {
       method: 'POST',
       body: JSON.stringify(input),
     });

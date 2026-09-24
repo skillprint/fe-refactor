@@ -108,11 +108,7 @@ function withQuery(path: string, params?: CoachFetchOptions['params']): string {
  * Fetch a coach endpoint. `path` is relative to `/api/coach` and starts with a
  * slash, e.g. `/teams/12/roster/`.
  */
-export async function coachFetch<T>(
-  path: string,
-  token?: string | null,
-  options: CoachFetchOptions = {},
-): Promise<T> {
+export async function coachFetch<T>(path: string, options: CoachFetchOptions = {}): Promise<T> {
   const { params, ...init } = options;
   const target = withQuery(path, params);
 
@@ -130,9 +126,9 @@ export async function coachFetch<T>(
     'Content-Type': 'application/json',
     ...(init.headers as Record<string, string> | undefined),
   };
-  if (token) headers['Authorization'] = `Token ${token}`;
-
-  const response = await fetch(`${COACH_BASE_URL}${target}`, { ...init, headers });
+  // The session is an HttpOnly cookie (SKI-254): the browser attaches it, and
+  // nothing here can read it.
+  const response = await fetch(`${COACH_BASE_URL}${target}`, { ...init, headers, credentials: 'include' });
 
   if (!response.ok) {
     let detail: unknown;

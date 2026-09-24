@@ -1,56 +1,38 @@
 'use client';
 
 /**
- * Coach credentials and session (SKI-213).
+ * The coach session (SKI-213, SKI-254).
  *
- * A coach is not a player, and this is the module that makes that true in the
- * frontend. The player path (`app/hooks/useUserSession.ts`) mints an anonymous
- * UUID and trades it for a Knox token with no credential at all; that token
- * authenticates *a player* and will be refused by every `/api/coach/` endpoint.
+ * **The credential is an HttpOnly cookie the API sets** (marketplace PR #89).
+ * Sign-in and set-password hand it to the browser and nothing else: no
+ * response body carries the token, and nothing here stores one. Every coach
+ * request goes with `credentials: 'include'`, and the API honours the cookie
+ * only from this app's own origin.
  *
- * ## Storage, and why it differs from the player path
+ * It used to live in `localStorage`, readable by any script on the page — one
+ * injected script away from every roster the coach holds. What remains in
+ * storage (`coach_profile`) is who is signed in and until when, for the header
+ * and the guard; losing it costs a sign-in, not a roster.
  *
- * The player token is deliberately **not** cached (`USE_TOKEN_CACHING = false`)
- * — it is disposable and re-minted on demand. A coach signs in with a real
- * password, so re-minting is not possible and a session that evaporates on
- * refresh is unusable. The token is therefore persisted.
- *
- * It is persisted in `localStorage`, which means it is readable by any script
- * on the origin. That is the standard trade-off and it is the same exposure the
- * rest of this app already carries, but it is a heavier one here because the
- * token reads children's records. Moving it to an httpOnly cookie needs a
- * server-side route to set it and is tracked separately — see SKI-254.
- *
- * ## Endpoints
- *
- * - Sign-in: the existing `users/api/auth/login/` — `{email, password}` in,
- *   Knox's `{token, expiry}` out. Reused rather than duplicated (SKI-200).
+ * - Sign in: `POST /api/coach/auth/login/` — `{email, password}`, coach accounts
+ *   only.
  * - Set password: `POST /api/coach/auth/set-password/` — `{token, password}`.
  *   One endpoint for both invite and reset links, told apart by the token's
- *   shape. **Success signs the coach straight in**; there is no second
- *   "now type it again" step.
- * - Forgot password: `POST /api/coach/auth/forgot-password/` — `{email}`.
- *   Always 202 with the same body whether or not the address has an account,
- *   so it cannot be used to learn which teachers are coaches.
- *
- * Every refusal is a `CoachAuthError` carrying the API's code — see
- * `./authErrors`, and the set-password screen for why the codes matter.
- *
- * ## Mocks
- *
- * The `auth` mock area (see `./mockAreas`) sends all three to `./mocks/auth`, which
- * reproduces the same codes, the same success shape and the same throttle.
+ *   shape; success signs the coach in.
+ * - Sign out: `POST /api/coach/auth/logout/` — this device, or `{everywhere:
+ *   true}` for every one.
  */
-import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
 import { COACH_BASE_URL, isCoachMocked } from './coachFetch';
 import { CoachAuthError, readAuthError } from './authErrors';
 import { mockCoachLogin, mockRequestPasswordReset, mockSetPassword } from './mocks/auth';
 
-const STORAGE_KEY = 'coach_session';
+/** Who is signed in, for the header and the guard. Not a credential. */
+const STORAGE_KEY = 'coach_profile';
+/** Where the token itself used to be kept, before SKI-254. Cleared on sight. */
+const LEGACY_TOKEN_KEY = 'coach_session';
 
 export interface CoachSession {
-  token: string;
-  /** ISO-8601, or null when the token has no TTL. */
+  /** ISO-8601, or null when the session has no TTL. */
   expiry: string | null;
   email: string;
   displayName: string;
@@ -89,12 +71,14 @@ const safeStorage = {
  * by panel.
  */
 export function readCoachSession(): CoachSession | null {
+  // A token stored by an older build must not linger where scripts can read it.
+  safeStorage.remove(LEGACY_TOKEN_KEY);
   const raw = safeStorage.get(STORAGE_KEY);
   if (!raw) return null;
 
   try {
     const session = JSON.parse(raw) as CoachSession;
-    if (!session?.token) return null;
+    if (!session?.email) return null;
     if (session.expiry && new Date(session.expiry).getTime() <= Date.now()) {
       safeStorage.remove(STORAGE_KEY);
       return null;
@@ -116,50 +100,39 @@ export function clearCoachSession() {
 }
 
 /**
- * Exchange credentials for a Knox token.
+ * Sign in. The API sets the session cookie; the body says who and until when.
  *
- * Hits the existing `users/api/auth/login/`, which takes `{email, password}`
- * and returns `{token, expiry, user}`. It does **not** check that the user is a
- * coach — that is `/api/coach/context/`'s job, and the shell asks it after
- * sign-in. Conflating the two here would mean a coach with a valid password but
- * no team could not be told apart from a bad password.
+ * Coach accounts only: a correct password on an account that coaches nothing
+ * is refused with `not_a_coach`, rather than signing in to an empty app.
  */
 export async function coachLogin(email: string, password: string): Promise<CoachSession> {
   if (isCoachMocked('auth')) return mockCoachLogin(email, password);
 
-  const response = await fetch(`${API_BASE_URL}users/api/auth/login/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+  const body = await postCoachAuth<{ expiry: string | null; user: { email: string } }>('login', {
+    email,
+    password,
   });
-
-  if (!response.ok) throw await readAuthError(response);
-
-  const body = (await response.json()) as {
-    token: string;
-    expiry?: string | null;
-    user?: { email?: string; username?: string; firstName?: string };
-  };
-
-  return {
-    token: body.token,
-    expiry: body.expiry ?? null,
-    email: body.user?.email ?? email,
-    displayName: body.user?.firstName || body.user?.username || body.user?.email || email,
-  };
+  const address = body?.user?.email ?? email;
+  return { expiry: body?.expiry ?? null, email: address, displayName: address };
 }
 
-/** Knox revokes the presented token; a failure still clears the local one. */
-export async function coachLogout(token: string | null): Promise<void> {
+/**
+ * End the session: this device, or every device the coach is signed in on.
+ * The profile is cleared first — the coach asked to be signed out, and a
+ * network failure should not leave the app looking signed in.
+ */
+export async function coachLogout(everywhere = false): Promise<void> {
   clearCoachSession();
-  if (!token || isCoachMocked('auth')) return;
+  if (isCoachMocked('auth')) return;
   try {
-    await fetch(`${API_BASE_URL}users/api/auth/logout/`, {
+    await fetch(`${COACH_BASE_URL}/auth/logout/`, {
       method: 'POST',
-      headers: { Authorization: `Token ${token}` },
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ everywhere }),
     });
   } catch {
-    // The local session is already gone, which is what the coach asked for.
+    // Signed out here already; the cookie expires on its own.
   }
 }
 
@@ -167,6 +140,9 @@ export async function coachLogout(token: string | null): Promise<void> {
 async function postCoachAuth<T>(path: string, body: unknown): Promise<T | null> {
   const response = await fetch(`${COACH_BASE_URL}/auth/${path}/`, {
     method: 'POST',
+    // Sign-in and set-password answer with the session cookie; without this
+    // the browser would drop it.
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
@@ -194,7 +170,7 @@ export function tokenKind(token: string): 'reset' | 'invite' {
 
 /**
  * Redeem an invite or reset token and set a password — which also signs the
- * coach in. Returns the session; the caller stores it.
+ * coach in (the API sets the cookie). Returns who is signed in.
  */
 export async function setPassword(
   token: string,
@@ -203,15 +179,13 @@ export async function setPassword(
   if (isCoachMocked('auth')) return mockSetPassword(token, password);
 
   const body = await postCoachAuth<{
-    token: string;
     expiry: string | null;
     via: 'invite' | 'reset';
     user: { email: string };
   }>('set-password', { token, password });
 
-  if (!body?.token) throw new CoachAuthError('unknown', ['The server did not return a session.'], 200);
+  if (!body?.user) throw new CoachAuthError('unknown', ['The server did not return a session.'], 200);
   return {
-    token: body.token,
     expiry: body.expiry ?? null,
     email: body.user.email,
     // The response carries only the address; a name arrives when SKI-251 or

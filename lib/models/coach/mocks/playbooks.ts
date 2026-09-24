@@ -11,7 +11,6 @@
  * what it is: nothing here is persisted, and the sandbox banner says so.
  */
 import { COACH_BASE_URL, CoachApiError } from '../coachFetch';
-import { readCoachSession } from '../coachAuth';
 import type {
   CoachAssignment,
   CoachAssignmentCreated,
@@ -310,9 +309,8 @@ async function liveRoster(teamId: number | undefined): Promise<{ name: string; u
   if (teamId === undefined) {
     throw new CoachApiError(400, 'Choose a team.', { teamId: ['This field is required.'] });
   }
-  const session = readCoachSession();
   const response = await fetch(`${COACH_BASE_URL}/teams/${teamId}/roster/`, {
-    headers: session ? { Authorization: `Token ${session.token}` } : {},
+    credentials: 'include',
   });
   if (!response.ok) {
     throw new CoachApiError(response.status === 404 ? 400 : response.status, 'Choose a team.', {
