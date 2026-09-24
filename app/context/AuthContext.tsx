@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { setCookie, deleteCookie } from '../utils/cookieUtils';
+import { clearPlayerSession } from '../../lib/models/portal/playerSession';
 
 type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner' | 'organization';
 
@@ -106,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         safeStorage.setItem('auth_status', 'loggedOut');
         safeStorage.removeItem('user_profile');
         safeStorage.removeItem('org_token');
+        clearPlayerSession();
         safeStorage.removeItem('user_id');
         safeStorage.removeItem('userId');
         deleteCookie('user_id');

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
 import { isUserWhitelisted } from '../config/whitelist';
 import { getApiBaseUrl } from '../utils/cookieUtils';
+import { readPlayerSession } from '../../lib/models/portal/playerSession';
 
 // Configuration flag to enable/disable user token caching. 
 // Set to false for now, can be overridden in the future.
@@ -53,6 +54,20 @@ export function useUserSession() {
                     router.replace(newPath, { scroll: false });
 
                     // Stop here to wait for re-render with clean URL
+                    return;
+                }
+            }
+
+            // 1b. A player session from an assignment email's link (SKI-233)
+            // is a specific account, not a guest: use it as-is, and keep its
+            // token where the SDK looks first so games start as this player.
+            if (!currentUserId) {
+                const playerSession = readPlayerSession();
+                if (playerSession) {
+                    setUserId(String(playerSession.userId));
+                    localStorage.setItem('userToken', playerSession.token);
+                    activeTokenPromise = Promise.resolve(playerSession.token);
+                    setUserToken(playerSession.token);
                     return;
                 }
             }

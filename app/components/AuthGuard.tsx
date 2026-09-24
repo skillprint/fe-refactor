@@ -16,7 +16,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             // credential (CoachShell / SKI-213). It is excluded here because
             // this guard only knows about *player* sessions, and it was
             // bouncing coaches to the player welcome screen (SKI-253).
-            const isPublicRoute = pathname === '/' || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/corporate') || pathname.startsWith('/benchmark') || pathname.startsWith('/coach');
+            const isPublicRoute = pathname === '/' || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/corporate') || pathname.startsWith('/benchmark') || pathname.startsWith('/coach') || pathname.startsWith('/start');
             const isEmbedded = typeof window !== 'undefined' && window.self !== window.top;
 
             if (status === 'loggedOut' && !isPublicRoute && !isEmbedded) {
