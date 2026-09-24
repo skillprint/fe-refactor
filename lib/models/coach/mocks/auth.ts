@@ -58,7 +58,6 @@ export async function mockCoachLogin(email: string, password: string): Promise<C
   }
 
   return {
-    token: 'mock-coach-token',
     expiry: expiry(),
     email: address,
     displayName: MOCK_ACCOUNTS[address],
@@ -161,7 +160,6 @@ export async function mockSetPassword(
 
   // Success signs the coach in, exactly as the real endpoint does.
   return {
-    token: 'mock-coach-token',
     expiry: expiry(),
     email: isReset ? MOCK_COACH_EMAIL : 'new.coach@northgate.edu',
     displayName: isReset ? 'Dana Whitfield' : 'new.coach@northgate.edu',

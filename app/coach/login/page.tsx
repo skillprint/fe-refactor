@@ -44,6 +44,9 @@ function LoginForm() {
           // gives: which of the two was wrong is not for an anonymous caller.
           return setError('Those credentials were not recognised.');
         }
+        if (caught.code === 'not_a_coach') {
+          return setError("That account isn't a coaching account. Players sign in on Skillprint itself.");
+        }
         if (caught.code === 'throttled') {
           return setError('Too many sign-in attempts from here. Wait a minute and try again.');
         }

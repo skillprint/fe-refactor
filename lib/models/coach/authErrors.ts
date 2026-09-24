@@ -15,6 +15,8 @@
 export type CoachAuthErrorCode =
   /** Login: wrong address or password. Deliberately not told apart. */
   | 'credentials_invalid'
+  /** Login: a correct password, on an account that coaches nothing. */
+  | 'not_a_coach'
   /** Set-password: malformed, unknown, or missing token. */
   | 'token_invalid'
   | 'invite_expired'
@@ -33,6 +35,8 @@ export type CoachAuthErrorCode =
   | 'unknown';
 
 const KNOWN: ReadonlySet<string> = new Set([
+  'credentials_invalid',
+  'not_a_coach',
   'token_invalid',
   'invite_expired',
   'invite_already_accepted',

@@ -90,8 +90,8 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
   const { session, signOut } = useCoachAuth();
   const { data, isLoading, error, refetch } = useCoachContext();
 
-  async function onSignOut() {
-    await signOut();
+  async function onSignOut(everywhere = false) {
+    await signOut(everywhere);
     router.replace('/coach/login');
   }
 
@@ -140,8 +140,17 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
           <span className="coach-nav__who" title={session?.email}>
             {session?.displayName}
           </span>
-          <button type="button" onClick={onSignOut} className="coach-nav__signout">
+          <button type="button" onClick={() => onSignOut()} className="coach-nav__signout">
             Sign out
+          </button>
+          {/* A lost or shared device: end the session there too (SKI-254). */}
+          <button
+            type="button"
+            onClick={() => onSignOut(true)}
+            className="coach-nav__signout"
+            title="Sign out on every device, including ones you can't reach"
+          >
+            Sign out everywhere
           </button>
         </nav>
       </header>

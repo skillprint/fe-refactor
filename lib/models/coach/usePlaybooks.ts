@@ -15,7 +15,6 @@ import { useCoachResource, type CoachResource } from './useCoachResource';
 import { portalFetch } from '../portal/portalFetch';
 import type { LibraryGame } from '../portal/LibraryGame';
 import { coachFetch, isCoachMocked } from './coachFetch';
-import { useCoachAuth } from './CoachAuthContext';
 import type {
   CoachAssignment,
   CoachAssignmentCreated,
@@ -115,11 +114,8 @@ export function useCoachAssignment(id: string | null): CoachResource<CoachAssign
 
 /** The write helpers, bound to the current coach session. */
 export function useCoachWrites() {
-  const { session } = useCoachAuth();
-  const token = session?.token ?? null;
-
   const write = <T,>(path: string, method: string, body?: unknown) =>
-    coachFetch<T>(path, token, {
+    coachFetch<T>(path, {
       method,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });

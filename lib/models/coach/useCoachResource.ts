@@ -38,7 +38,9 @@ export function useCoachResource<T>(
   options: CoachFetchOptions = {},
 ): CoachResource<T> {
   const { session } = useCoachAuth();
-  const userToken = session?.token ?? null;
+  // Signed in, as far as this tab knows. The cookie is the credential; a
+  // stale profile simply earns a 401, which the shell turns into sign-in.
+  const signedIn = session !== null;
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<CoachApiError | Error | null>(null);
@@ -53,16 +55,16 @@ export function useCoachResource<T>(
 
   const load = useCallback(async () => {
     if (path === null) return;
-    // A live request waits for a token; a mocked one has nothing to
+    // A live request waits for a session; a mocked one has nothing to
     // authenticate against and would otherwise wait forever.
-    if (!isCoachMocked(areaForPath(path)) && !userToken) return;
+    if (!isCoachMocked(areaForPath(path)) && !signedIn) return;
 
     const id = ++requestId.current;
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await coachFetch<T>(path, userToken, {
+      const result = await coachFetch<T>(path, {
         ...options,
         params: JSON.parse(optionsKey),
       });
@@ -78,7 +80,7 @@ export function useCoachResource<T>(
     // `options` is intentionally not a dependency — `optionsKey` stands in for
     // its only meaningful part, and including it would loop on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, optionsKey, userToken]);
+  }, [path, optionsKey, signedIn]);
 
   useEffect(() => {
     load();
