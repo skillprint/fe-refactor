@@ -6,6 +6,7 @@ import PortalHead from '../../components/PortalHead';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
 import { getCookie, deleteCookie } from '../utils/cookieUtils';
+import { useNotificationPreferences } from '../../lib/models/portal/useNotificationPreferences';
 
 export default function SettingsPage() {
     const { status, userProfile, logout } = useAuth();
@@ -14,6 +15,7 @@ export default function SettingsPage() {
     const [apiKey, setApiKey] = useState<string>('');
     const [showApiKey, setShowApiKey] = useState(false);
     const [showTourResetAlert, setShowTourResetAlert] = useState(false);
+    const email = useNotificationPreferences();
 
     useEffect(() => {
         // Fetch user ID
@@ -83,6 +85,52 @@ export default function SettingsPage() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Email (SKI-234): one switch per kind of email this player can get.
+                        The weekly summary switch is the old weekly_email_opt_in, not a
+                        second copy of it. */}
+                    {email.data && email.data.length > 0 && (
+                        <div className="pp-setting separator-bottom" id="ppEmail">
+                            <div>
+                                <h2>Email</h2>
+                                <p className="margin-none text-muted font-sm">
+                                    Choose what we email you about. Account emails, like password resets, are always sent.
+                                </p>
+                                {email.error && (
+                                    <p className="margin-none font-sm text--danger" role="alert">{email.error}</p>
+                                )}
+                            </div>
+                            <ul className="pp-email-list">
+                                {email.data.map((row) => (
+                                    <li key={row.category} className="pp-email-row">
+                                        <div>
+                                            <span className="font-sm weight-semibold" id={`email-${row.category}`}>{row.label}</span>
+                                            <p className="margin-none text-muted font-xs">{row.description}</p>
+                                        </div>
+                                        <button
+                                            className="sp-toggle"
+                                            type="button"
+                                            role="switch"
+                                            aria-checked={row.enabled}
+                                            aria-labelledby={`email-${row.category}`}
+                                            disabled={email.saving === row.category}
+                                            onClick={() => email.setEnabled(row.category, !row.enabled)}
+                                        >
+                                            <span className="sp-toggle__thumb"></span>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {!email.data && email.error && (
+                        <div className="pp-setting separator-bottom">
+                            <div>
+                                <h2>Email</h2>
+                                <p className="margin-none text-muted font-sm">{email.error}</p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Reset the welcome tour */}
                     <div className="pp-setting separator-bottom">
