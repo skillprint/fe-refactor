@@ -129,7 +129,7 @@ export default function CoachPlayerPage({ params }: { params: Promise<{ userId: 
                     <tr key={entry.slug}>
                       <td style={{ textTransform: 'capitalize' }}>{dimensionLabel(entry.slug)}</td>
                       <td className="num">{entry.value}</td>
-                      <td className="num">{entry.sessions}</td>
+                      <td className="num">{entry.sessionCount}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -266,7 +266,7 @@ export function playerPayload(player: MockPlayer, days: number): CoachPlayer {
     payload.skillProfile = dimensionsFor(player).map((d) => ({
       slug: d.slug,
       value: d.value,
-      sessions: Math.max(1, Math.round(player.sessionsInRange / 3)),
+      sessionCount: Math.max(1, Math.round(player.sessionsInRange / 3)),
     }));
   }
 
