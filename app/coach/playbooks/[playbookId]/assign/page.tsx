@@ -20,6 +20,7 @@ import {
   useCoachRoster,
   useCoachTeams,
   useCoachWrites,
+  playerLabel,
   type CoachAssignmentCadence,
 } from '@/lib/models/coach';
 import { ErrorState, Loading, Panel } from '../../../components/ui';
@@ -138,8 +139,7 @@ export default function AssignPage({ params }: { params: Promise<{ playbookId: s
                               )
                             }
                           />
-                          {/* No name until SKI-251 lands. */}
-                          Player {player.userId}
+                          {playerLabel(player)}
                           <span className="coach-meta">
                             {' '}· last played {player.lastPlayed ?? 'never'}
                           </span>

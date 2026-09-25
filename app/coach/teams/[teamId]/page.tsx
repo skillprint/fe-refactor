@@ -7,9 +7,8 @@
  * sit below it and can each be independently suppressed on a small roster —
  * hence three separate requests rather than one composite endpoint.
  *
- * Roster rows carry `userId` and no name (see SKI-251), so players are labelled
- * by id until the payload grows an identity field. The label is produced in one
- * place, `playerLabel`, so adding a name later is a one-line change.
+ * Rows are named with the shared `playerLabel`: the school's display name, or
+ * the player's id when there is none (SKI-251).
  */
 import { use, useState } from 'react';
 import Link from 'next/link';
@@ -17,7 +16,7 @@ import {
   useCoachRoster,
   useCoachTeamGames,
   useCoachTeamTrends,
-  type CoachRosterPlayer,
+  playerLabel,
 } from '@/lib/models/coach';
 import {
   ActivityPill,
@@ -29,11 +28,6 @@ import {
   Sparkline,
   Suppressed,
 } from '../../components/ui';
-
-/** Until the roster payload carries identity (SKI-251). */
-function playerLabel(player: CoachRosterPlayer): string {
-  return `Player ${player.userId}`;
-}
 
 export default function CoachTeamDetailPage({
   params,

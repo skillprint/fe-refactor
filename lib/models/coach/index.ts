@@ -23,6 +23,7 @@ import type {
 } from './types';
 
 export * from './types';
+export { playerLabel } from './playerLabel';
 export {
   CoachApiError,
   COACH_ANY_MOCKED,

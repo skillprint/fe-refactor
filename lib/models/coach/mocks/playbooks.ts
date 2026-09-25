@@ -22,8 +22,14 @@ import type {
   CoachPlaybookInput,
   CoachRemindResult,
 } from '../types';
+import { playerLabel } from '../playerLabel';
 import { MOCK_TEAMS, findPlayer, isoDaysAgo, playersForTeam } from './fixtures';
 import type { MockRequest } from './router';
+
+/** As the backend resolves it: the partner-sent name, or null (SKI-251). */
+function nameOf(userId: number): string | null {
+  return findPlayer(userId)?.displayName ?? null;
+}
 
 /** A slice of the public game catalogue, enough for the picker. */
 export interface CatalogueGame {
@@ -131,6 +137,7 @@ const assignments: StoredAssignment[] = [
         played >= playbook.games.length ? 'complete' : played > 0 ? 'in_progress' : 'not_started';
       return {
         userId: player.userId,
+        displayName: player.displayName,
         status,
         firstStartedAt: played > 0 ? isoDaysAgo(4) : null,
         completedAt: status === 'complete' ? isoDaysAgo(2) : null,
@@ -392,7 +399,8 @@ async function createAssignment(input: CoachAssignmentInput): Promise<CoachAssig
       refuse(400, 'players_required', 'Choose at least one player.');
     }
     for (const userId of userIds) {
-      targets.push({ target: { type: 'player', id: userId, name: `Player ${userId}` }, userIds: [userId] });
+      const name = playerLabel({ userId, displayName: nameOf(userId) });
+      targets.push({ target: { type: 'player', id: userId, name }, userIds: [userId] });
     }
   } else {
     refuse(400, 'invalid_target', "targetType must be 'team' or 'player'.");
@@ -403,6 +411,7 @@ async function createAssignment(input: CoachAssignmentInput): Promise<CoachAssig
     // (SKI-220) — so a roster change later cannot rewrite who was assigned.
     const players: CoachAssignmentPlayer[] = userIds.map((userId) => ({
       userId,
+      displayName: nameOf(userId),
       status: 'not_started',
       firstStartedAt: null,
       completedAt: null,
@@ -454,6 +463,7 @@ function remind(assignment: StoredAssignment, userIds: number[] | null): CoachRe
       if (userIds) {
         skipped.push({
           userId: player.userId,
+          displayName: player.displayName,
           reason: player.status === 'complete' ? 'Already finished.' : 'Dismissed it.',
           nextAllowedAt: null,
         });
@@ -464,7 +474,12 @@ function remind(assignment: StoredAssignment, userIds: number[] | null): CoachRe
     // Emailing needs a real address, which partner-provisioned players may not
     // have (SKI-228). Surfaced rather than silently dropped.
     if (!findPlayer(player.userId)) {
-      skipped.push({ userId: player.userId, reason: 'No email address on file.', nextAllowedAt: null });
+      skipped.push({
+        userId: player.userId,
+        displayName: player.displayName,
+        reason: 'No email address on file.',
+        nextAllowedAt: null,
+      });
       continue;
     }
 
@@ -473,6 +488,7 @@ function remind(assignment: StoredAssignment, userIds: number[] | null): CoachRe
     if (count >= REMINDERS_MAX) {
       skipped.push({
         userId: player.userId,
+        displayName: player.displayName,
         reason: `Already reminded ${REMINDERS_MAX} times.`,
         nextAllowedAt: null,
       });
@@ -481,6 +497,7 @@ function remind(assignment: StoredAssignment, userIds: number[] | null): CoachRe
     if (player.lastRemindedAt && new Date(player.lastRemindedAt).toDateString() === today) {
       skipped.push({
         userId: player.userId,
+        displayName: player.displayName,
         reason: 'Already reminded today.',
         nextAllowedAt: startOfTomorrow().toISOString(),
       });

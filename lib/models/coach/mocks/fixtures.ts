@@ -64,6 +64,8 @@ export interface MockPlayer {
   userId: number;
   email: string;
   username: string;
+  /** As the partner sent it. One player has none, to show the id fallback. */
+  displayName: string | null;
   teamId: number;
   /** What this player's coach has been granted. Drives layering everywhere. */
   scope: CoachVisibilityScope;
@@ -76,22 +78,22 @@ export interface MockPlayer {
 }
 
 export const MOCK_PLAYERS: MockPlayer[] = [
-  { userId: 4821, email: 'a.okafor@northgate.edu',  username: 'Voltage',   teamId: 1, scope: CoachVisibilityScope.SESSIONS,   lastPlayedDaysAgo: 0,    sessionsInRange: 31, minutesInRange: 214.5, totalSessions: 142, measuredDimensions: 6 },
-  { userId: 4822, email: 'm.delgado@northgate.edu', username: 'Mirage',    teamId: 1, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 1,    sessionsInRange: 24, minutesInRange: 168.0, totalSessions: 97,  measuredDimensions: 5 },
-  { userId: 4823, email: 'j.whitlock@northgate.edu',username: 'Fenrir',    teamId: 1, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 2,    sessionsInRange: 19, minutesInRange: 133.5, totalSessions: 88,  measuredDimensions: 4 },
-  { userId: 4824, email: 's.parvin@northgate.edu',  username: 'Nyx',       teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 3,    sessionsInRange: 17, minutesInRange: 120.0, totalSessions: 64,  measuredDimensions: 5 },
-  { userId: 4825, email: 'r.ibarra@northgate.edu',  username: 'Cinder',    teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 6,    sessionsInRange: 11, minutesInRange: 77.5,  totalSessions: 41,  measuredDimensions: 3 },
+  { userId: 4821, email: 'a.okafor@northgate.edu',  username: 'Voltage', displayName: 'Amara Okafor',   teamId: 1, scope: CoachVisibilityScope.SESSIONS,   lastPlayedDaysAgo: 0,    sessionsInRange: 31, minutesInRange: 214.5, totalSessions: 142, measuredDimensions: 6 },
+  { userId: 4822, email: 'm.delgado@northgate.edu', username: 'Mirage', displayName: 'Mateo Delgado',    teamId: 1, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 1,    sessionsInRange: 24, minutesInRange: 168.0, totalSessions: 97,  measuredDimensions: 5 },
+  { userId: 4823, email: 'j.whitlock@northgate.edu',username: 'Fenrir', displayName: 'Jonah Whitlock',    teamId: 1, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 2,    sessionsInRange: 19, minutesInRange: 133.5, totalSessions: 88,  measuredDimensions: 4 },
+  { userId: 4824, email: 's.parvin@northgate.edu',  username: 'Nyx', displayName: 'Sara Parvin',       teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 3,    sessionsInRange: 17, minutesInRange: 120.0, totalSessions: 64,  measuredDimensions: 5 },
+  { userId: 4825, email: 'r.ibarra@northgate.edu',  username: 'Cinder', displayName: 'Rosa Ibarra',    teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 6,    sessionsInRange: 11, minutesInRange: 77.5,  totalSessions: 41,  measuredDimensions: 3 },
   // Exactly one measured dimension: both extremes must be omitted.
-  { userId: 4826, email: 't.nakamura@northgate.edu',username: 'Lumen',     teamId: 1, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 9,    sessionsInRange: 4,  minutesInRange: 26.0,  totalSessions: 12,  measuredDimensions: 1 },
+  { userId: 4826, email: 't.nakamura@northgate.edu',username: 'Lumen', displayName: 'Taro Nakamura',     teamId: 1, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 9,    sessionsInRange: 4,  minutesInRange: 26.0,  totalSessions: 12,  measuredDimensions: 1 },
   // Lapsed: past LAPSED_AFTER_DAYS (14).
-  { userId: 4827, email: 'd.abara@northgate.edu',   username: 'Static',    teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 22,   sessionsInRange: 1,  minutesInRange: 6.5,   totalSessions: 19,  measuredDimensions: 2 },
-  // Never played — lastPlayed null, everything zero.
-  { userId: 4828, email: 'k.brennan@northgate.edu', username: 'Rook',      teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: null, sessionsInRange: 0,  minutesInRange: 0.0,   totalSessions: 0,   measuredDimensions: 0 },
+  { userId: 4827, email: 'd.abara@northgate.edu',   username: 'Static', displayName: 'Dayo Abara',    teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 22,   sessionsInRange: 1,  minutesInRange: 6.5,   totalSessions: 19,  measuredDimensions: 2 },
+  // Never played — lastPlayed null, everything zero. Unnamed, too.
+  { userId: 4828, email: 'k.brennan@northgate.edu', username: 'Rook', displayName: null,      teamId: 1, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: null, sessionsInRange: 0,  minutesInRange: 0.0,   totalSessions: 0,   measuredDimensions: 0 },
 
   // JV squad — three players, below the aggregate floor.
-  { userId: 4901, email: 'p.oyelaran@northgate.edu',username: 'Tinder',    teamId: 2, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 1,    sessionsInRange: 9,  minutesInRange: 61.0,  totalSessions: 23,  measuredDimensions: 4 },
-  { userId: 4902, email: 'l.castillo@northgate.edu',username: 'Ember',     teamId: 2, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 4,    sessionsInRange: 6,  minutesInRange: 40.5,  totalSessions: 15,  measuredDimensions: 3 },
-  { userId: 4903, email: 'h.sørensen@northgate.edu',username: 'Drift',     teamId: 2, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 11,   sessionsInRange: 2,  minutesInRange: 13.0,  totalSessions: 8,   measuredDimensions: 2 },
+  { userId: 4901, email: 'p.oyelaran@northgate.edu',username: 'Tinder', displayName: 'Priya Oyelaran',    teamId: 2, scope: CoachVisibilityScope.PROFILE,    lastPlayedDaysAgo: 1,    sessionsInRange: 9,  minutesInRange: 61.0,  totalSessions: 23,  measuredDimensions: 4 },
+  { userId: 4902, email: 'l.castillo@northgate.edu',username: 'Ember', displayName: 'Lucía Castillo',     teamId: 2, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 4,    sessionsInRange: 6,  minutesInRange: 40.5,  totalSessions: 15,  measuredDimensions: 3 },
+  { userId: 4903, email: 'h.sørensen@northgate.edu',username: 'Drift', displayName: 'Henrik Sørensen',     teamId: 2, scope: CoachVisibilityScope.ENGAGEMENT, lastPlayedDaysAgo: 11,   sessionsInRange: 2,  minutesInRange: 13.0,  totalSessions: 8,   measuredDimensions: 2 },
 ];
 
 export function playersForTeam(teamId: number): MockPlayer[] {
@@ -170,6 +172,7 @@ export function teamSummary(team: MockTeam): CoachTeamSummary {
 export function rosterRow(player: MockPlayer): CoachRosterPlayer {
   const row: CoachRosterPlayer = {
     userId: player.userId,
+    displayName: player.displayName,
     lastPlayed: player.lastPlayedDaysAgo === null ? null : isoDaysAgo(player.lastPlayedDaysAgo),
     sessionsInRange: player.sessionsInRange,
     minutesInRange: player.minutesInRange,
@@ -248,6 +251,7 @@ export function seriesPoints(
 export function playerPayload(player: MockPlayer, days: number): CoachPlayer {
   const payload: CoachPlayer = {
     userId: player.userId,
+    displayName: player.displayName,
     email: player.email,
     username: player.username,
     lastPlayed: player.lastPlayedDaysAgo === null ? null : isoDaysAgo(player.lastPlayedDaysAgo),
