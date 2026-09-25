@@ -24,6 +24,8 @@ import type {
 
 export * from './types';
 export { playerLabel } from './playerLabel';
+export { parseRosterLines, type RosterEntry } from './rosterInput';
+export { useCoachRosterWrites } from './useRoster';
 export {
   CoachApiError,
   COACH_ANY_MOCKED,

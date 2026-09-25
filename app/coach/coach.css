@@ -495,3 +495,54 @@
   .coach-table--invites td { white-space: normal; overflow-wrap: anywhere; }
   .coach-table--invites .coach-pill { white-space: normal; }
 }
+
+/* ── Roster editing (SKI-202) ─────────────────────────────────────────── */
+.coach-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font: inherit;
+  resize: vertical;
+}
+.coach-field textarea:focus {
+  outline: 2px solid #6f9dff;
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.coach-rosteradd {
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+}
+.coach-rosteradd__results { margin-top: 14px; }
+.coach-rosteradd__results ul { margin: 6px 0 0; padding-left: 18px; }
+.coach-rosteradd__results li { margin: 3px 0; overflow-wrap: anywhere; }
+.coach-rosteradd__results li[data-status='refused'] strong { color: #ff9d9d; }
+.coach-rowactions { display: inline-flex; gap: 10px; white-space: nowrap; }
+.coach-linkbutton {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #8fb1ff;
+  font: inherit;
+  font-size: var(--app-text-sm-font-size);
+  cursor: pointer;
+}
+.coach-linkbutton:hover:not(:disabled) { text-decoration: underline; }
+.coach-linkbutton:disabled { opacity: .6; cursor: progress; }
+.coach-rowedit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.coach-rowedit input {
+  min-width: 10rem;
+  padding: 6px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font: inherit;
+}
+.coach-rowedit .coach-formerror,
+.coach-rowactions .coach-formerror { margin: 0; padding: 4px 8px; white-space: normal; }
