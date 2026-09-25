@@ -174,7 +174,12 @@ export type CoachTeamGames = {
 export interface CoachSkillProfileEntry {
   slug: string;
   value: number;
-  sessions: number;
+  /**
+   * Sessions that measured this dimension. Not `sessions`: that name is the
+   * level-3 session list, and the backend's visibility gate stripped the
+   * count along with it at level 2 (SKI-237).
+   */
+  sessionCount: number;
 }
 
 export interface CoachSessionLink {
