@@ -104,11 +104,13 @@ export interface CoachTeamList {
  * 2. They are stripped per row for players whose consent grant stops at
  *    ENGAGEMENT (level 1), so a roster mixes rows with and without them.
  *
- * There is no name or email here. The roster payload carries `userId` only;
- * identity lives on the player-detail endpoint. See SKI-251.
+ * `displayName` is the only identity on a row, and it is never an email:
+ * the name the school's partner sent, else a username the player chose, else
+ * null. Label rows with `playerLabel`, not by hand. See SKI-251.
  */
 export interface CoachRosterPlayer {
   userId: number;
+  displayName: string | null;
   lastPlayed: string | null;
   sessionsInRange: number;
   minutesInRange: number;
@@ -196,7 +198,10 @@ export interface CoachSessionLink {
  */
 export interface CoachPlayer {
   userId: number;
-  email: string;
+  /** Resolved as on the roster; null when the player has no name. */
+  displayName: string | null;
+  /** Null for a partner-provisioned account, whose address is a placeholder. */
+  email: string | null;
   username: string;
   lastPlayed: string | null;
   totalSessions: number;
@@ -387,6 +392,7 @@ export interface CoachAssignmentCreated {
  */
 export interface CoachAssignmentPlayer {
   userId: number;
+  displayName: string | null;
   status: CoachAssignmentPlayerStatus;
   firstStartedAt: string | null;
   completedAt: string | null;
@@ -426,7 +432,12 @@ export interface CoachAssignmentInput {
 export interface CoachRemindResult {
   remindedUserIds: number[];
   /** `nextAllowedAt` is null when waiting will not help (no address, finished). */
-  skipped: Array<{ userId: number; reason: string; nextAllowedAt: string | null }>;
+  skipped: Array<{
+    userId: number;
+    displayName: string | null;
+    reason: string;
+    nextAllowedAt: string | null;
+  }>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

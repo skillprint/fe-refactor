@@ -21,6 +21,7 @@ import Link from 'next/link';
 import {
   useCoachAssignment,
   useCoachWrites,
+  playerLabel,
   type CoachRemindResult,
 } from '@/lib/models/coach';
 import { ErrorState, Loading, Panel, Tile, localDay } from '../../components/ui';
@@ -197,7 +198,7 @@ export default function AssignmentDetailPage({
                   <ul className="coach-meta" style={{ margin: '8px 0 0', paddingLeft: 18 }}>
                     {result.skipped.map((skip) => (
                       <li key={skip.userId}>
-                        Player {skip.userId} — {skip.reason}
+                        {playerLabel(skip)} — {skip.reason}
                       </li>
                     ))}
                   </ul>
@@ -222,7 +223,7 @@ export default function AssignmentDetailPage({
                   {players.map((player) => (
                     <tr key={player.userId}>
                       <td>
-                        <Link href={`/coach/players/${player.userId}`}>Player {player.userId}</Link>
+                        <Link href={`/coach/players/${player.userId}`}>{playerLabel(player)}</Link>
                       </td>
                       <td>
                         <span className={STATUS_PILL[player.status]}>{STATUS_LABEL[player.status]}</span>

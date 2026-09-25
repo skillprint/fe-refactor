@@ -21,6 +21,7 @@ import {
   useCoachPlayer,
   useCoachPlayerSessions,
   useCoachPlayerTrends,
+  playerLabel,
 } from '@/lib/models/coach';
 import {
   ActivityPill,
@@ -60,7 +61,7 @@ export default function CoachPlayerPage({ params }: { params: Promise<{ userId: 
       </Link>
 
       <div className="coach-pagehead">
-        <h1>{player?.username || (valid ? `Player ${id}` : 'Player')}</h1>
+        <h1>{valid ? playerLabel({ userId: id, displayName: player?.displayName }) : 'Player'}</h1>
         <p>{player?.email ?? 'Engagement, profile and sessions as your grant allows.'}</p>
       </div>
 
