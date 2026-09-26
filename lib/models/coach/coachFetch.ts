@@ -140,5 +140,7 @@ export async function coachFetch<T>(path: string, options: CoachFetchOptions = {
     throw new CoachApiError(response.status, messageFrom(detail, response.status, target), detail);
   }
 
+  // A DELETE answers 204 with no body (SKI-202); there is nothing to parse.
+  if (response.status === 204) return null as T;
   return (await response.json()) as T;
 }

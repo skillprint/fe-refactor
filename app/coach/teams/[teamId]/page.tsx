@@ -8,7 +8,8 @@
  * hence three separate requests rather than one composite endpoint.
  *
  * Rows are named with the shared `playerLabel`: the school's display name, or
- * the player's id when there is none (SKI-251).
+ * the player's id when there is none (SKI-251). Coaches build the roster here
+ * too (SKI-202): add players by pasting names and emails, rename, remove.
  */
 import { use, useState } from 'react';
 import Link from 'next/link';
@@ -28,6 +29,7 @@ import {
   Sparkline,
   Suppressed,
 } from '../../components/ui';
+import { AddPlayers, RosterRowActions } from './RosterEditor';
 
 export default function CoachTeamDetailPage({
   params,
@@ -38,6 +40,7 @@ export default function CoachTeamDetailPage({
   const id = Number(teamId);
 
   const [days, setDays] = useState(30);
+  const [adding, setAdding] = useState(false);
 
   const roster = useCoachRoster(Number.isFinite(id) ? id : null, days);
   const trends = useCoachTeamTrends(Number.isFinite(id) ? id : null, 90, 'week');
@@ -65,6 +68,14 @@ export default function CoachTeamDetailPage({
         note="Who is turning up, and where they are strongest and weakest."
         actions={
           <div className="coach-controls">
+            <button
+              type="button"
+              className="coach-submit coach-submit--ghost coach-submit--inline"
+              aria-expanded={adding}
+              onClick={() => setAdding((open) => !open)}
+            >
+              {adding ? 'Done adding' : 'Add players'}
+            </button>
             <label className="coach-meta" htmlFor="coach-range">
               Range
             </label>
@@ -80,13 +91,15 @@ export default function CoachTeamDetailPage({
           </div>
         }
       >
+        {(adding || roster.data?.players.length === 0) && Number.isFinite(id) && (
+          <AddPlayers teamId={id} onChanged={roster.refetch} />
+        )}
         {roster.isLoading && !roster.data && <Loading rows={5} />}
         {roster.error && <ErrorState error={roster.error} onRetry={roster.refetch} />}
 
         {roster.data && roster.data.players.length === 0 && (
           <Empty title="Nobody on this roster yet">
-            A team with no players is a real state, not an error — import a roster or add players to
-            see them here.
+            Add your players above: paste names and emails, one per line.
           </Empty>
         )}
 
@@ -101,6 +114,9 @@ export default function CoachTeamDetailPage({
                   <th scope="col">Minutes</th>
                   <th scope="col">Strongest</th>
                   <th scope="col">Weakest</th>
+                  <th scope="col">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -137,6 +153,9 @@ export default function CoachTeamDetailPage({
                       ) : (
                         <span className="coach-pill coach-pill--locked">—</span>
                       )}
+                    </td>
+                    <td>
+                      <RosterRowActions teamId={id} player={player} onChanged={roster.refetch} />
                     </td>
                   </tr>
                 ))}

@@ -118,6 +118,32 @@ export interface CoachRosterPlayer {
   bottomDimension?: CoachDimensionValue;
 }
 
+// ── /api/coach/teams/{id}/players/ (SKI-202) ─────────────────────────────────
+
+/** A player as the roster writes return them. */
+export interface CoachRosterRef {
+  userId: number;
+  displayName: string | null;
+}
+
+/**
+ * One result per entry sent, in order. `code` names a refusal:
+ * `invalid_email`, `duplicate`, `invalid_name`, `invalid_entry`,
+ * `not_a_player`, or `needs_support` (the address has a Skillprint account
+ * outside the school, which only support can link).
+ */
+export interface CoachAddPlayerResult {
+  email: string | null;
+  status: 'added' | 'already_on_team' | 'refused';
+  code: string | null;
+  detail: string | null;
+  player: CoachRosterRef | null;
+}
+
+export interface CoachAddPlayersResult {
+  results: CoachAddPlayerResult[];
+}
+
 export interface CoachRoster {
   team: CoachTeamRef;
   range: CoachRange;

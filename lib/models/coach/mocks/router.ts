@@ -18,6 +18,7 @@
 import { CoachApiError } from '../coachFetch';
 import { playbookRoutes } from './playbooks';
 import { inviteRoutes, mockContextOrganizations } from './invites';
+import { rosterRoutes } from './roster';
 import type { CoachRange } from '../types';
 import { CoachVisibilityScope } from '../types';
 import {
@@ -233,7 +234,8 @@ export async function mockCoachResponse<T>(
 
   // Writes live in their own module so the read fixtures stay a pure function
   // of the request and the mutable store is in one place.
-  const written = playbookRoutes(path, params, request) ?? inviteRoutes(path, request);
+  const written =
+    playbookRoutes(path, params, request) ?? inviteRoutes(path, request) ?? rosterRoutes(path, request);
   if (written !== undefined) return written as T;
 
   for (const [pattern, handler] of ROUTES) {
