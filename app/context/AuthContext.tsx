@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { setCookie, deleteCookie } from '../utils/cookieUtils';
 
-type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner' | 'organization';
+type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner';
 
 interface AuthContextType {
     status: AuthStatus;
@@ -11,7 +11,6 @@ interface AuthContextType {
     userProfile: { firstName: string; picture?: string } | null;
     loginAsGuest: () => void;
     loginWithSocialId: (socialId: string, profile: { firstName: string; picture?: string }) => void;
-    loginAsOrg: (token: string, profile: { firstName: string }) => void;
     logout: () => void;
 }
 
@@ -80,6 +79,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         }
 
+        // The org prototype that signed browsers in as an 'organization' is
+        // gone (SKI-217). A browser still holding that status would otherwise
+        // count as signed in with a token nothing accepts.
+        if (safeStorage.getItem('auth_status') === 'organization') {
+            safeStorage.setItem('auth_status', 'loggedOut');
+            safeStorage.removeItem('org_token');
+            safeStorage.removeItem('user_profile');
+        }
+
         const storedStatus = safeStorage.getItem('auth_status') as AuthStatus | null;
         if (storedStatus) {
             setStatus(storedStatus);
@@ -122,17 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCookie('user_id', socialId);
     };
 
-    const loginAsOrg = (token: string, profile: { firstName: string }) => {
-        setStatus('organization');
-        setUserProfile(profile);
-        safeStorage.setItem('auth_status', 'organization');
-        safeStorage.setItem('user_profile', JSON.stringify(profile));
-        safeStorage.setItem('org_token', token);
-        // Cookies are set dynamically by the API, but we maintain the frontend state here.
-    };
-
     return (
-        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, loginWithSocialId, loginAsOrg, logout }}>
+        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, loginWithSocialId, logout }}>
             {children}
         </AuthContext.Provider>
     );
