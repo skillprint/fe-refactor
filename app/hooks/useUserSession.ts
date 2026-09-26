@@ -6,13 +6,14 @@ import { SkillprintClient, LogLevel } from '../lib/skillprintSdk';
 import { isUserWhitelisted } from '../config/whitelist';
 import { getApiBaseUrl } from '../utils/cookieUtils';
 import { readPlayerSession } from '../../lib/models/portal/playerSession';
+import { forgetToken, holdToken, sharedToken } from '../../lib/models/portal/sharedToken';
 
 // Configuration flag to enable/disable user token caching. 
 // Set to false for now, can be overridden in the future.
 const USE_TOKEN_CACHING = false;
 
-// Global promise cache to prevent duplicate fetching across components and Strict Mode
-let activeTokenPromise: Promise<string | null> | null = null;
+// The token request is shared across components (and Strict Mode's double
+// render) per identity, in lib/models/portal/sharedToken.
 
 export function useUserSession() {
     const router = useRouter();
@@ -66,7 +67,7 @@ export function useUserSession() {
                 if (playerSession) {
                     setUserId(String(playerSession.userId));
                     localStorage.setItem('userToken', playerSession.token);
-                    activeTokenPromise = Promise.resolve(playerSession.token);
+                    holdToken(`player:${playerSession.userId}`, playerSession.token);
                     setUserToken(playerSession.token);
                     return;
                 }
@@ -100,10 +101,11 @@ export function useUserSession() {
                 try {
                     // Use SDK to create token (will create user if needed)
                     // We cast currentUserId to string because flow analysis might not catch it inside async
-                    if (!activeTokenPromise) {
-                        activeTokenPromise = client.createOrGetUserToken(currentUserId as string);
-                    }
-                    const token = await activeTokenPromise;
+                    // Shared per identity: a guest never reuses a token held
+                    // for someone else, such as a player who just signed out.
+                    const token = await sharedToken(`guest:${currentUserId}`, () =>
+                        client.createOrGetUserToken(currentUserId as string),
+                    );
                     if (token) {
                         if (USE_TOKEN_CACHING) {
                             localStorage.setItem('userToken', token);
@@ -114,7 +116,7 @@ export function useUserSession() {
                     }
                 } catch (e) {
                     console.error("Failed to retrieve or create user token", e);
-                    activeTokenPromise = null; // Allow retry on failure
+                    forgetToken(`guest:${currentUserId}`); // Allow retry on failure
                     // If create user fails because already created (or other error),
                     // we still have the userId stored in localStorage from step 1/2/3.
                 }
@@ -131,9 +133,9 @@ export function useUserSession() {
         if (USE_TOKEN_CACHING) {
             localStorage.setItem('userToken', token);
         }
-        activeTokenPromise = Promise.resolve(token);
+        holdToken(`guest:${userId}`, token);
         setUserToken(token);
-    }, []);
+    }, [userId]);
 
     return {
         getUserId: () => userId,
