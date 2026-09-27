@@ -86,6 +86,14 @@ export interface CoachTeamSummary {
   medianMinutes: number;
 }
 
+/** `POST /api/coach/teams/`: a coach who creates a team coaches it. */
+export interface CoachTeamInput {
+  name: string;
+  season?: string;
+  /** Needed only by staff at more than one school. */
+  organization?: number;
+}
+
 export interface CoachTeamList {
   teams: CoachTeamSummary[];
 }
@@ -500,9 +508,14 @@ export interface CoachInviteList {
 }
 
 export interface CoachInviteInput {
-  organization: number;
+  /** Needed for a school-wide invite; taken from `team` when omitted. */
+  organization?: number;
   email: string;
-  /** Defaults to Coach server-side. Players are never invited — they arrive by roster sync. */
+  /**
+   * Defaults to Coach server-side. A coach may invite only a Coach, onto a team
+   * they coach; an admin may invite either. Players are never invited — coaches
+   * add them on the team roster.
+   */
   role?: CoachInviteRole;
   team?: number | null;
 }

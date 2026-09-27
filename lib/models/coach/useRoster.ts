@@ -1,5 +1,5 @@
 /**
- * Roster writes: add, rename and remove players on a team (SKI-202).
+ * Team and roster writes: create a team; add, rename and remove players (SKI-202).
  *
  * Coaches build their own rosters. The screen refetches the roster after each
  * write rather than patching it locally, so what it shows is always what the
@@ -7,7 +7,7 @@
  */
 import { coachFetch } from './coachFetch';
 import type { RosterEntry } from './rosterInput';
-import type { CoachAddPlayersResult, CoachRosterRef } from './types';
+import type { CoachAddPlayersResult, CoachRosterRef, CoachTeamInput, CoachTeamSummary } from './types';
 
 export function useCoachRosterWrites() {
   const write = <T,>(path: string, method: string, body?: unknown) =>
@@ -17,6 +17,9 @@ export function useCoachRosterWrites() {
     });
 
   return {
+    /** A coach who creates a team is put on it as its coach. */
+    createTeam: (input: CoachTeamInput) => write<CoachTeamSummary>('/teams/', 'POST', input),
+
     addPlayers: (teamId: number, players: RosterEntry[]) =>
       write<CoachAddPlayersResult>(`/teams/${teamId}/players/`, 'POST', { players }),
 

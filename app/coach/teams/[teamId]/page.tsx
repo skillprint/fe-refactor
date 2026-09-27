@@ -30,6 +30,7 @@ import {
   Suppressed,
 } from '../../components/ui';
 import { AddPlayers, RosterRowActions } from './RosterEditor';
+import { TeamInvites } from './TeamInvites';
 
 export default function CoachTeamDetailPage({
   params,
@@ -164,6 +165,8 @@ export default function CoachTeamDetailPage({
           </div>
         )}
       </Panel>
+
+      {Number.isFinite(id) && <TeamInvites teamId={id} />}
 
       <Panel title="Team trends" note="Cognition dimensions, weekly averages over 90 days.">
         {trends.isLoading && !trends.data && <Loading rows={3} />}
