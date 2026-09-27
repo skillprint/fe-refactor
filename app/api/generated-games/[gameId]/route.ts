@@ -1,3 +1,9 @@
+/**
+ * One generated game and its parameters, for the sandbox's edit mode.
+ *
+ * Moved from /api/org/games/{id} when the org prototype went (SKI-218): it
+ * never read org data, only the caller's own GeneratedGame.
+ */
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
