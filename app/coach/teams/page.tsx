@@ -10,15 +10,19 @@
 import Link from 'next/link';
 import { useCoachTeams } from '@/lib/models/coach';
 import { ErrorState, Loading, Panel, Tile } from '../components/ui';
+import { NewTeam } from './NewTeam';
 
 export default function CoachTeamsPage() {
   const { data, isLoading, error, refetch } = useCoachTeams();
 
   return (
     <>
-      <div className="coach-pagehead">
-        <h1>Teams</h1>
-        <p>Engagement across every squad you coach.</p>
+      <div className="coach-pagehead coach-pagehead--split">
+        <div>
+          <h1>Teams</h1>
+          <p>Engagement across every squad you coach.</p>
+        </div>
+        <NewTeam />
       </div>
 
       {isLoading && !data && (
@@ -32,10 +36,7 @@ export default function CoachTeamsPage() {
       {data && data.teams.length === 0 && (
         <div className="coach-state">
           <h3>No teams yet</h3>
-          <p>
-            Once a roster is imported or a team is created for you, it appears here with its
-            engagement figures.
-          </p>
+          <p>Create your first team with &ldquo;New team&rdquo;, then add its players.</p>
         </div>
       )}
 

@@ -546,3 +546,17 @@
 }
 .coach-rowedit .coach-formerror,
 .coach-rowactions .coach-formerror { margin: 0; padding: 4px 8px; white-space: normal; }
+
+/* ── Team creation and co-coach invites ───────────────────────────────── */
+.coach-newteam { max-width: 420px; }
+.coach-newteam select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font: inherit;
+}
+.coach-invitelist { margin: 0; padding-left: 18px; }
+.coach-invitelist li { margin: 3px 0; overflow-wrap: anywhere; }

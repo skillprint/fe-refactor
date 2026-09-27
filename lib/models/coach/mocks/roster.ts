@@ -9,7 +9,7 @@
 import { CoachApiError } from '../coachFetch';
 import { CoachVisibilityScope } from '../types';
 import type { CoachAddPlayerResult } from '../types';
-import { MOCK_PLAYERS, MOCK_TEAMS, type MockPlayer } from './fixtures';
+import { MOCK_PLAYERS, MOCK_TEAMS, teamSummary, type MockPlayer } from './fixtures';
 import type { MockRequest } from './router';
 
 /** Typing this shows the refusal a real account at another school gets. */
@@ -72,7 +72,27 @@ function addOne(teamId: number, entry: unknown, index: number, seen: Set<string>
   return { email, status: 'added', code: null, detail: null, player: ref(player) };
 }
 
+function slugify(name: string): string {
+  return name.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_-]+/g, '-').slice(0, 56) || 'team';
+}
+
+function createTeam(body: { name?: unknown; season?: unknown } | undefined) {
+  const name = typeof body?.name === 'string' ? body.name.trim() : '';
+  if (!name) throw new CoachApiError(400, 'Give the team a name.', { code: 'name_required' });
+  if (name.length > 255) throw new CoachApiError(400, 'That name is too long.', { code: 'name_too_long' });
+  const season = typeof body?.season === 'string' ? body.season.trim() : '';
+  const base = slugify(name);
+  const taken = new Set(MOCK_TEAMS.map((team) => team.slug));
+  let slug = base;
+  for (let n = 2; taken.has(slug); n += 1) slug = `${base}-${n}`;
+  const team = { id: Math.max(...MOCK_TEAMS.map((t) => t.id)) + 1, name, slug, season: season || null, isActive: true };
+  MOCK_TEAMS.push(team);
+  return teamSummary(team);
+}
+
 export function rosterRoutes(path: string, request: MockRequest): unknown | undefined {
+  if (path === '/teams/' && request.method === 'POST') return createTeam(request.body);
+
   const add = path.match(/^\/teams\/(\d+)\/players\/$/);
   if (add && request.method === 'POST') {
     const teamId = Number(add[1]);

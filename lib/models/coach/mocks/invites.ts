@@ -61,10 +61,21 @@ function refuse(code: string, message: string, status = 400): never {
   throw new CoachApiError(status, message, { code, detail: [message] });
 }
 
+/** The mock coach coaches every mock team; the mock admin administers the school. */
+function coachedTeamIds(): number[] {
+  return readCoachSession() ? MOCK_TEAMS.map((team) => team.id) : [];
+}
+
 function create(input: CoachInviteInput): CoachInvite {
-  // Not administered and nonexistent answer the same, as on the real endpoint.
-  if (!administeredOrgIds().includes(Number(input?.organization))) {
+  const isAdmin = administeredOrgIds().includes(Number(input?.organization ?? ORG.id));
+  const coachesTeam = input?.team != null && coachedTeamIds().includes(Number(input.team));
+  // As on the real endpoint: an admin invites anyone; a coach only a Coach,
+  // onto a team they coach. Anything else reads as not found.
+  if (!isAdmin && !coachesTeam) {
     refuse('not_found', 'No such organisation.', 404);
+  }
+  if (!isAdmin && (input.role ?? 'Coach') !== 'Coach') {
+    refuse('invalid_role', 'Coaches can invite other coaches to their own team. Only an admin can invite an admin.');
   }
 
   const email = (input.email ?? '').trim().toLowerCase();
@@ -72,7 +83,7 @@ function create(input: CoachInviteInput): CoachInvite {
 
   const role = input.role ?? 'Coach';
   if (role !== 'Coach' && role !== 'Admin') {
-    refuse('invalid_role', 'Invite a Coach or an Admin. Players are provisioned by your roster sync, not invited by email.');
+    refuse('invalid_role', "Invite a Coach or an Admin. Add players on the team's roster instead: they aren't invited by email.");
   }
 
   let team: CoachInvite['team'] = null;
@@ -107,7 +118,12 @@ export function inviteRoutes(path: string, request: MockRequest): unknown | unde
   if (path !== '/invites/') return undefined;
   if (request.method === 'POST') return create(request.body as CoachInviteInput);
   const orgs = administeredOrgIds();
-  return { invites: invites.filter((invite) => orgs.includes(invite.organization.id)) };
+  const teams = coachedTeamIds();
+  return {
+    invites: invites.filter(
+      (invite) => orgs.includes(invite.organization.id) || (invite.team !== null && teams.includes(invite.team.id)),
+    ),
+  };
 }
 
 /** The context the real `/context/` would return for the signed-in sandbox account. */

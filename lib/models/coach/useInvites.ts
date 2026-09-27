@@ -44,7 +44,9 @@ export function inviteRefusal(error: unknown): string {
     case 'team_not_found':
       return 'That team no longer exists. Refresh and pick another.';
     case 'not_found':
-      return 'You can’t invite people to that organisation — only its admins can.';
+      return 'You can invite people to your own teams, or anywhere at a school you administer.';
+    case 'invalid_role':
+      return 'Coaches can invite other coaches to their own team. Only an admin can invite an admin.';
     default:
       if (error.status === 429) return 'Too many requests. Wait a minute and try again.';
       return body?.detail?.[0] ?? 'Could not send the invite.';
