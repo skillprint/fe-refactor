@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
+import { baseSlug } from '@/lib/gameSlug';
 
 export interface GamePillProps {
   slug: string;
@@ -74,7 +75,7 @@ export function GamePill({ slug, name, description, image }: GamePillProps) {
               <span className="game-peek__time">5–10 min</span>
               <span className="game-peek__genre">Puzzle</span>
             </span>
-            <Link className="game-peek__cue" href={`/game_session/?game=${slug}`} tabIndex={-1}>
+            <Link className="game-peek__cue" href={`/game/${encodeURIComponent(baseSlug(slug))}`} tabIndex={-1}>
               <span className="game-peek__cue-label">Play</span>
               <svg className="sp-icon sp-icon--sm" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
             </Link>
