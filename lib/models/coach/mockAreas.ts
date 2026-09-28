@@ -14,7 +14,7 @@
  * | unset                    | everything outside production, nothing in it |
  * | `true` / `all`           | everything                               |
  * | `false` / `none`         | nothing                                  |
- * | `playbooks`              | playbooks and assignments only           |
+ * | `playbooks`              | playbooks, assignments and challenges    |
  * | any comma list of areas  | exactly those                            |
  *
  * **One rule is enforced rather than documented:** if sign-in is mocked,
@@ -33,7 +33,7 @@ export const COACH_MOCK_AREAS: readonly CoachMockArea[] = ['reads', 'auth', 'pla
 export const COACH_MOCK_AREA_LABELS: Record<CoachMockArea, string> = {
   reads: 'teams, players and invites',
   auth: 'sign-in',
-  playbooks: 'playbooks and assignments',
+  playbooks: 'playbooks, assignments and challenges',
 };
 
 export function parseCoachMocks(
@@ -66,6 +66,7 @@ export function areaForPath(path: string): CoachMockArea {
   if (
     bare.startsWith('/playbooks') ||
     bare.startsWith('/assignments') ||
+    bare.startsWith('/challenges') ||
     bare.startsWith('/catalogue')
   ) {
     return 'playbooks';

@@ -27,6 +27,12 @@ export { playerLabel } from './playerLabel';
 export { parseRosterLines, type RosterEntry } from './rosterInput';
 export { useCoachRosterWrites } from './useRoster';
 export {
+  useCoachChallenge,
+  useCoachChallengeLeaderboard,
+  useCoachChallenges,
+  useCoachChallengeWrites,
+} from './useChallenges';
+export {
   CoachApiError,
   COACH_ANY_MOCKED,
   COACH_BASE_URL,
