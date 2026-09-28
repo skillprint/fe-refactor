@@ -152,6 +152,10 @@ export default function CoachGuidePage() {
           </li>
         </ol>
         <p>
+          Each new player gets a <strong>welcome email</strong> saying you&rsquo;ve added them to the team, and that
+          their first playbook email is how they get in. See <a href="#emails">Emails</a>.
+        </p>
+        <p>
           <strong>If an address can&rsquo;t be added:</strong> a typo or duplicate is flagged on its line. An address
           that already has a Skillprint account outside your school can&rsquo;t be added from here. Skillprint support
           can add it for you. A coach or admin at your school can&rsquo;t also be added as a player.
@@ -255,6 +259,14 @@ export default function CoachGuidePage() {
             </thead>
             <tbody>
               <tr>
+                <td>Welcome</td>
+                <td>
+                  A player you add to a team, the first time they&rsquo;re on it. Re-adding someone after removing them
+                  doesn&rsquo;t send it again. It has no sign-in link; their first playbook email does.
+                </td>
+                <td className="coach-meta">&ldquo;{'{Your name}'} added you to {'{team}'}&rdquo;</td>
+              </tr>
+              <tr>
                 <td>New playbook</td>
                 <td>
                   Each player you assign, as soon as you choose <strong>Assign</strong>, and a player who joins the
@@ -297,7 +309,7 @@ export default function CoachGuidePage() {
           </li>
           <li>
             Each email says why the player is getting it (&ldquo;a coach at {'{school}'} assigned you a
-            playbook&rdquo;) and has an unsubscribe link. Players can also switch either kind off under{' '}
+            playbook&rdquo;) and has an unsubscribe link. Players can also switch each kind off under{' '}
             <strong>Settings</strong>, then <strong>Email</strong>.
           </li>
         </ul>
