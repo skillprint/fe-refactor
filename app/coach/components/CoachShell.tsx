@@ -39,6 +39,13 @@ import { ErrorState, Loading } from './ui';
 const PUBLIC_COACH_PATHS = ['/coach/login', '/coach/forgot-password', '/coach/set-password'];
 
 /**
+ * Open to anyone, but shown inside the dashboard when signed in. The coach
+ * guide is linked from the admin's welcome email, before the coach has an
+ * account (docs/COACH_ADMIN_README.md).
+ */
+const OPEN_COACH_PATHS = ['/coach/guide'];
+
+/**
  * Says what on screen is not real.
  *
  * With the switch per area, "mock data" alone is no longer true or false — a
@@ -133,6 +140,9 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
           <Link href="/coach/challenges" aria-current={pathname?.startsWith('/coach/challenges') ? 'page' : undefined}>
             Challenges
           </Link>
+          <Link href="/coach/guide" aria-current={pathname?.startsWith('/coach/guide') ? 'page' : undefined}>
+            Guide
+          </Link>
           {/* Admin-only: the invite endpoint lists only organisations the
               caller administers, so a coach would find nothing there. */}
           {data?.organizations?.some((org) => org.role === 'Admin') && (
@@ -184,16 +194,26 @@ export default function CoachShell({ children }: { children: React.ReactNode }) 
   const { session, isRestoring } = useCoachAuth();
 
   const isPublic = PUBLIC_COACH_PATHS.some((path) => pathname?.startsWith(path));
+  const isOpen = OPEN_COACH_PATHS.some((path) => pathname?.startsWith(path));
 
   React.useEffect(() => {
-    if (isRestoring || isPublic || session) return;
+    if (isRestoring || isPublic || isOpen || session) return;
     const next = pathname && pathname !== '/coach' ? `?next=${encodeURIComponent(pathname)}` : '';
     router.replace(`/coach/login${next}`);
-  }, [isRestoring, isPublic, session, pathname, router]);
+  }, [isRestoring, isPublic, isOpen, session, pathname, router]);
 
   // The credential screens render on their own, with no dashboard chrome
   // around them — we do not know who this is yet.
   if (isPublic) return <div className="coach-app">{children}</div>;
+
+  // Signed out on an open page: the page on its own, with no dashboard.
+  if (isOpen && !session && !isRestoring) {
+    return (
+      <div className="coach-app">
+        <div className="coach-content">{children}</div>
+      </div>
+    );
+  }
 
   if (isRestoring || !session) {
     return (
