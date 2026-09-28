@@ -73,7 +73,7 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
             // 1-3 modifies velocity, 4-6 modifies perfect range, 7-9 does both.
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Very Slow
-                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 15 }]; // Default
+                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Default
                 case 3: return [{ parameterName: 'stackVelocity', parameterValue: 35 }]; // Fast
                 case 4: return [{ parameterName: 'perfectRange', parameterValue: 0.1 }];  // Extremely hard perfects
                 case 5: return [{ parameterName: 'perfectRange', parameterValue: 1 }];    // Default

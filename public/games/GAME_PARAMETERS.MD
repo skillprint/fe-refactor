@@ -7,7 +7,7 @@ This file documents all variables mapped per instrumented game to the `ADJUST_GA
 Controls the side-to-side scrolling velocity of the active dropping block, as well as the alignment threshold for scoring a perfect placement.
 
 **Parameters**
-- `stackVelocity` (Number): Global scrolling speed modifier. Default is ~15.
+- `stackVelocity` (Number): Global scrolling speed modifier (pixels per frame). Default is 5.
 - `perfectRange` (Number): Allowed padding around the previous underlying tower block to trigger a perfect drop. Default is 1.
 
 **JSON Payload Example**
@@ -26,7 +26,7 @@ Controls the side-to-side scrolling velocity of the active dropping block, as we
 
 **Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
 - `1`: `{ stackVelocity: 5 }` (Very Slow)
-- `2`: `{ stackVelocity: 15 }` (Default)
+- `2`: `{ stackVelocity: 5 }` (Default)
 - `3`: `{ stackVelocity: 35 }` (Fast)
 - `4`: `{ perfectRange: 0.1 }` (Extremely hard perfects)
 - `5`: `{ perfectRange: 1 }` (Default)
