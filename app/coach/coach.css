@@ -580,8 +580,37 @@
 .coach-guide h2 { margin: 0 0 10px; font-size: var(--app-text-xl-font-size, 1.25rem); }
 .coach-guide h3 { margin: 22px 0 8px; font-size: var(--app-text-md-font-size, 1rem); }
 .coach-guide ol, .coach-guide ul { padding-left: 22px; }
+.coach-guide ul { list-style: disc; }
+.coach-guide ol { list-style: decimal; }
+.coach-guide ul ul { list-style: circle; }
+.coach-guide p { margin: 0 0 10px; }
+.coach-guide a { text-decoration: underline; text-underline-offset: 2px; }
+/* Prose tables wrap; the dashboard's tables don't. */
+.coach-guide .coach-table th, .coach-guide .coach-table td { white-space: normal; vertical-align: top; }
 .coach-guide li { margin: 5px 0; }
 .coach-guide code { padding: 1px 5px; border-radius: 5px; background: var(--surface-raised); font-size: .9em; overflow-wrap: anywhere; }
 .coach-guide__toc { margin: 0 0 28px; padding: 12px 16px; border: 1px solid var(--surface-border); border-radius: 12px; }
 .coach-guide__toc ol { margin: 0; columns: 2 220px; }
 .coach-guide__metrics td:first-child { white-space: nowrap; font-weight: var(--weight-medium); }
+
+/* A guide rendered from a Markdown document (lib/markdown.ts). */
+.coach-doc h1 {
+  font-weight: var(--app-heading-weight);
+  margin: 0 0 12px;
+  font-size: var(--app-display-sm-font-size);
+  line-height: var(--app-display-sm-line-height);
+  letter-spacing: var(--app-title-tracking);
+}
+.coach-doc h2 { margin-top: 34px; scroll-margin-top: 80px; }
+.coach-doc .md-tablewrap { overflow-x: auto; margin: 12px 0; }
+.coach-doc pre { margin: 12px 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-raised); overflow-x: auto; }
+.coach-doc pre code { padding: 0; background: none; overflow-wrap: normal; }
+.coach-doc blockquote { margin: 12px 0; padding: 4px 16px; border-left: 3px solid var(--surface-border); }
+.coach-doc .md-task { list-style: none; margin-left: -22px; }
+.coach-doc .md-task input { appearance: none; width: 14px; height: 14px; margin: 0 6px 0 0; vertical-align: -2px; border: 1.5px solid var(--surface-text-muted); border-radius: 3px; }
+.coach-doc .md-task input:checked { background: var(--surface-text-muted); }
+.coach-doc .coach-table td:first-child { white-space: nowrap; }
+.coach-doc a { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .coach-doc h1 { font-size: var(--app-display-xs-font-size); line-height: var(--app-display-xs-line-height); }
+}

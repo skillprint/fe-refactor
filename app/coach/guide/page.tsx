@@ -18,6 +18,7 @@ const SECTIONS = [
   ['coaches', 'Invite a co-coach'],
   ['playbooks', 'Build a playbook'],
   ['assign', 'Assign a playbook'],
+  ['emails', 'Emails: what goes out, and when'],
   ['challenges', 'Challenges and leaderboards'],
   ['engagement', 'Engagement: every figure you can see'],
   ['privacy', 'What you can and can’t see'],
@@ -156,6 +157,10 @@ export default function CoachGuidePage() {
           can add it for you. A coach or admin at your school can&rsquo;t also be added as a player.
         </p>
         <p>
+          Send your players the <Link href="/guide">player guide</Link>. It tells them what to do when you set a
+          playbook, how challenges work, and how to manage their emails.
+        </p>
+        <p>
           On each roster row, <strong>Rename</strong> changes how the player appears to you and other coaches at your
           school. <strong>Remove</strong> takes them off the team; their history is kept, and you can add them back.
         </p>
@@ -228,10 +233,134 @@ export default function CoachGuidePage() {
           when they were last reminded.
         </p>
         <p>
-          <strong>Remind</strong> emails the players who haven&rsquo;t finished, or just the ones you pick. Each player
-          gets at most one reminder a day, and three per assignment; the result says who was skipped and why.
-          Skillprint also reminds players who haven&rsquo;t started, automatically, from two days before it&rsquo;s
-          due. Players who join the team later pick up its open assignments.
+          <strong>Remind</strong> emails the players who haven&rsquo;t finished, or just the ones you pick. Skillprint
+          also reminds players automatically; see <a href="#emails">Emails</a> for the rules. Players who join the
+          team later pick up its open assignments.
+        </p>
+      </section>
+
+      <section id="emails">
+        <h2>Emails: what goes out, and when</h2>
+        <p>Skillprint sends every email itself, from Skillprint. You never need to email a player a link.</p>
+
+        <h3>To your players</h3>
+        <div className="coach-tablewrap">
+          <table className="coach-table coach-guide__metrics">
+            <thead>
+              <tr>
+                <th scope="col">Email</th>
+                <th scope="col">Who gets it, and when</th>
+                <th scope="col">Subject</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>New playbook</td>
+                <td>
+                  Each player you assign, as soon as you choose <strong>Assign</strong>, and a player who joins the
+                  team while the assignment is still open, when they join.
+                </td>
+                <td className="coach-meta">&ldquo;{'{Your name}'} set you {'{playbook}'}&rdquo;</td>
+              </tr>
+              <tr>
+                <td>Automatic reminder</td>
+                <td>Players who haven&rsquo;t started, from two days before it&rsquo;s due.</td>
+                <td className="coach-meta">
+                  &ldquo;{'{Playbook}'} is due {'{Friday}'}&rdquo;, or &ldquo;A reminder about {'{playbook}'}&rdquo;
+                </td>
+              </tr>
+              <tr>
+                <td>Your reminder</td>
+                <td>
+                  When you choose <strong>Remind</strong>: players who haven&rsquo;t finished, or the ones you pick.
+                </td>
+                <td className="coach-meta">The same as the automatic one.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>
+            The new-playbook email says who set it and from which school, the number of games, your{' '}
+            <strong>Note</strong>, and the due date, with a <strong>Start here</strong> link. Write the note for the
+            player: they read it in the email as well as on the playbook.
+          </li>
+          <li>
+            Every email carries a fresh sign-in link. It works once and lasts 48 hours. It&rsquo;s also how players
+            without a password get into Skillprint, so a player who&rsquo;s been signed out gets back in through your
+            next assignment or reminder.
+          </li>
+          <li>
+            A player gets at most <strong>one reminder a day</strong> and <strong>three per assignment</strong>, yours
+            and the automatic ones counted together. Nobody is reminded about work they&rsquo;ve finished or set
+            aside.
+          </li>
+          <li>
+            Each email says why the player is getting it (&ldquo;a coach at {'{school}'} assigned you a
+            playbook&rdquo;) and has an unsubscribe link. Players can also switch either kind off under{' '}
+            <strong>Settings</strong>, then <strong>Email</strong>.
+          </li>
+        </ul>
+
+        <h3>When Remind skips someone</h3>
+        <p>After you choose Remind, it says who was reminded and who was skipped, with the reason:</p>
+        <div className="coach-tablewrap">
+          <table className="coach-table coach-guide__metrics">
+            <thead>
+              <tr>
+                <th scope="col">Reason</th>
+                <th scope="col">What to do</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Already finished.</td>
+                <td>Nothing. They&rsquo;re done.</td>
+              </tr>
+              <tr>
+                <td>Dismissed it.</td>
+                <td>They chose <em>Not now</em>. Have a word with them in person if it matters.</td>
+              </tr>
+              <tr>
+                <td>Already reminded today.</td>
+                <td>Try again tomorrow.</td>
+              </tr>
+              <tr>
+                <td>Already reminded 3 times.</td>
+                <td>No more emails for this assignment. Follow up in person.</td>
+              </tr>
+              <tr>
+                <td>Turned reminders off.</td>
+                <td>The player switched reminders off. That&rsquo;s their choice; follow up in person.</td>
+              </tr>
+              <tr>
+                <td>Emails to this address bounce.</td>
+                <td>
+                  Earlier emails didn&rsquo;t arrive. Check the address with the player. If it&rsquo;s wrong, add
+                  them with the right one and remove the old row; if it&rsquo;s right, their school&rsquo;s mail may be
+                  blocking Skillprint.
+                </td>
+              </tr>
+              <tr>
+                <td>No email address on file.</td>
+                <td>They were added without a real address. Add them with their email and remove the old row.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>To you</h3>
+        <ul>
+          <li>
+            <strong>Your invite</strong>, when an admin or another coach invites you. Its link lasts 7 days.
+          </li>
+          <li>
+            <strong>Password reset</strong>, when you use <em>Forgot your password?</em> on the sign-in page.
+          </li>
+        </ul>
+        <p className="coach-meta">
+          Skillprint doesn&rsquo;t email you when players finish or fall behind. Check <strong>Assignments</strong> and
+          your team pages for that.
         </p>
       </section>
 
