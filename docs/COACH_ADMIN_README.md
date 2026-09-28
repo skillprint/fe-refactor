@@ -4,6 +4,8 @@ For a school's **admin**: how to get your coaches onto Skillprint Coach, get the
 
 - **The app:** https://playvs.skillprint.co/coach
 - **The coach guide:** https://playvs.skillprint.co/coach/guide. It opens without signing in, so you can send it before a coach has an account.
+- **The player guide:** https://playvs.skillprint.co/guide, for coaches to send their players.
+- **This guide, as a page:** https://playvs.skillprint.co/coach/admin-guide
 
 ## Who's who
 
@@ -51,7 +53,7 @@ Once they've accepted:
 
 - [ ] **Send them the guide:** https://playvs.skillprint.co/coach/guide. It walks through everything below, step by step.
 - [ ] **Make sure they have a team.** Either invite them onto one (step 2), or let them create their own: **Teams → New team**. A coach who creates a team coaches it.
-- [ ] **Have them add their players:** on the team, **Add players**, then paste `Name, email` one per line. Players don't set a password; they get in through the links in their assignment emails.
+- [ ] **Have them add their players:** on the team, **Add players**, then paste `Name, email` one per line. Players don't set a password; they get in through the links in their assignment emails. Then send the players the player guide: https://playvs.skillprint.co/guide
 - [ ] **Have them build a playbook and publish it** (**Playbooks → New playbook**), then **Assign** it to the team with a due date.
 - [ ] **Optionally, a challenge:** **Challenges → New challenge**, for a play goal or a skill improvement, with team and PlayVS-wide leaderboards.
 

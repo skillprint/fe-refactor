@@ -41,9 +41,10 @@ const PUBLIC_COACH_PATHS = ['/coach/login', '/coach/forgot-password', '/coach/se
 /**
  * Open to anyone, but shown inside the dashboard when signed in. The coach
  * guide is linked from the admin's welcome email, before the coach has an
- * account (docs/COACH_ADMIN_README.md).
+ * account; the admin guide (docs/COACH_ADMIN_README.md) is sent to a new admin
+ * the same way, and is deliberately not in the menu.
  */
-const OPEN_COACH_PATHS = ['/coach/guide'];
+const OPEN_COACH_PATHS = ['/coach/guide', '/coach/admin-guide'];
 
 /**
  * Says what on screen is not real.
