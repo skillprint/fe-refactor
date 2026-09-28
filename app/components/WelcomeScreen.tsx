@@ -1,11 +1,12 @@
 'use client';
 
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
+import { useEffect, useRef, useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import Script from 'next/script';
 import { useLinkedIn } from 'react-linkedin-login-oauth2';
 import { knownGameSlugs, getGameDetails } from '../config/gameConfig';
+import { googlePicture, signInWithGoogle } from '../../lib/models/portal/googleSignIn';
 
 const ROWS = [
   { duration: 115, delay: -41, reverse: false },
@@ -25,8 +26,21 @@ const ROWS = [
 ];
 
 export function WelcomeScreen() {
-    const { loginAsGuest, loginWithSocialId } = useAuth();
+    const { loginAsGuest, completeGoogleSignIn, loginWithProfile } = useAuth();
     const [isCompletingLogin, setIsCompletingLogin] = useState(false);
+    const [signInError, setSignInError] = useState<string | null>(null);
+    // Google renders its own button, sized in pixels; match the column.
+    const providersRef = useRef<HTMLDivElement>(null);
+    const [googleWidth, setGoogleWidth] = useState(320);
+    useEffect(() => {
+        const node = providersRef.current;
+        if (!node) return;
+        const measure = () => setGoogleWidth(Math.min(400, Math.max(200, Math.floor(node.clientWidth))));
+        measure();
+        const observer = new ResizeObserver(measure);
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, []);
 
     const { linkedInLogin } = useLinkedIn({
         clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || 'dummy-client-id',
@@ -43,10 +57,10 @@ export function WelcomeScreen() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    loginWithSocialId(`linkedin-${data.id || code.substring(0, 8)}`, {
+                    loginWithProfile({
                         firstName: data.firstName || 'LinkedIn User',
                         picture: data.picture
-                    });
+                    }, data.email);
                 } else {
                     console.error('LinkedIn backend error:', await response.text());
                     setIsCompletingLogin(false);
@@ -66,11 +80,10 @@ export function WelcomeScreen() {
             (window as any).FB.login((response: any) => {
                 if (response.authResponse) {
                     (window as any).FB.api('/me', { fields: 'name,email,picture' }, (userInfo: any) => {
-                        const socialId = userInfo.id || userInfo.userID;
-                        if (socialId) {
+                        if (userInfo.id || userInfo.userID) {
                             const firstName = userInfo.name ? userInfo.name.split(' ')[0] : 'User';
                             const picture = userInfo.picture?.data?.url;
-                            handleLoginAction(() => loginWithSocialId(socialId, { firstName, picture }));
+                            handleLoginAction(() => loginWithProfile({ firstName, picture }, userInfo.email));
                         }
                     });
                 } else {
@@ -88,30 +101,22 @@ export function WelcomeScreen() {
         action();
     };
 
-    const loginWithGoogle = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            setIsCompletingLogin(true);
-            try {
-                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                });
-                const decoded = await userInfoRes.json();
-                if (decoded && decoded.sub) {
-                    const firstName = decoded.given_name || decoded.name || 'User';
-                    const picture = decoded.picture;
-                    loginWithSocialId(decoded.sub, { firstName, picture });
-                } else {
-                    setIsCompletingLogin(false);
-                }
-            } catch (err) {
-                console.error('Failed to fetch Google user info', err);
-                setIsCompletingLogin(false);
-            }
-        },
-        onError: errorResponse => {
-            console.error('Google Login Failed', errorResponse);
-        },
-    });
+    const handleGoogleCredential = async (credential?: string) => {
+        if (!credential) {
+            setSignInError('Google sign-in didn\'t complete. Try again, or play as a guest.');
+            return;
+        }
+        setSignInError(null);
+        setIsCompletingLogin(true);
+        try {
+            const result = await signInWithGoogle(credential);
+            completeGoogleSignIn(result, googlePicture(credential));
+        } catch (err) {
+            console.error('Google sign-in failed', err);
+            setSignInError('We couldn\'t sign you in with Google. Try again, or play as a guest.');
+            setIsCompletingLogin(false);
+        }
+    };
 
     // Build pool of known good game images for the animated tiles
     const tileImages = [
@@ -221,20 +226,29 @@ export function WelcomeScreen() {
                                         <span className="auth-divider__rule no-grow border-none" aria-hidden="true"></span>
                                     </p>
                                     
-                                    <div className="auth-providers layout-grid gap-md">
-                                        <button 
-                                            className="auth-provider button button--secondary button--md full-width" 
-                                            type="button" 
-                                            onClick={() => loginWithGoogle()}
-                                        >
-                                            <img className="auth-provider__mark" src="/assets/logos/google-mark.svg" alt="" width="20" height="20" />
-                                            <span>Continue with Google</span>
-                                        </button>
+                                    <div className="auth-providers layout-grid gap-md" ref={providersRef}>
+                                        {/* Google's own button: only it hands back an ID token,
+                                            which the backend verifies (SKI-264). */}
+                                        <div className="auth-provider-google layout-flex justify-center">
+                                            <GoogleLogin
+                                                onSuccess={({ credential }) => handleGoogleCredential(credential)}
+                                                onError={() => setSignInError('Google sign-in didn\'t complete. Try again, or play as a guest.')}
+                                                text="continue_with"
+                                                theme="outline"
+                                                size="large"
+                                                shape="rectangular"
+                                                logo_alignment="center"
+                                                width={googleWidth}
+                                            />
+                                        </div>
                                         <button className="auth-provider button button--secondary button--md full-width" type="button" onClick={handleFacebookLogin}>
                                             <img className="auth-provider__mark" src="/assets/logos/facebook-mark.svg" alt="" width="20" height="20" />
                                             <span>Continue with Facebook</span>
                                         </button>
                                     </div>
+                                    {signInError && (
+                                        <p className="margin-none text-center text-muted font-sm" role="alert">{signInError}</p>
+                                    )}
                                 </>
                             )}
                         </div>
