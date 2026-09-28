@@ -19,6 +19,12 @@ interface AuthContextType {
      */
     completeGoogleSignIn: (result: GoogleSignInResult, picture?: string) => void;
     /**
+     * Make this browser the account a verified link signed it in as (an email
+     * confirmation link, SKI-265). A signed-out browser becomes a guest; a
+     * signed-in one keeps its status and name.
+     */
+    adoptAccount: (internalId: string, token: string) => void;
+    /**
      * A provider whose token the backend does not verify yet (Facebook,
      * LinkedIn): the browser stays the guest it is and just shows the name.
      * `reportedEmail` is held in memory only, to prefill the email prompt;
@@ -139,16 +145,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         deleteCookie('ftue_completed');
     };
 
-    const completeGoogleSignIn = (result: GoogleSignInResult, picture?: string) => {
-        const profile = { firstName: result.firstName || 'Player', picture };
+    const switchIdentity = (internalId: string, token: string) => {
         // The account's internalId is this browser's identity from now on:
         // useUserSession and the SDK read `userId`, legacy routes the cookie.
-        safeStorage.setItem('userId', result.internalId);
-        safeStorage.setItem('user_id', result.internalId);
-        setCookie('user_id', result.internalId);
+        safeStorage.setItem('userId', internalId);
+        safeStorage.setItem('user_id', internalId);
+        setCookie('user_id', internalId);
         // A token cached for the previous guest must not outlive the switch.
         safeStorage.removeItem('userToken');
-        holdToken(`guest:${result.internalId}`, result.token);
+        holdToken(`guest:${internalId}`, token);
+    };
+
+    const adoptAccount = (internalId: string, token: string) => {
+        const switching = safeStorage.getItem('userId') !== internalId;
+        switchIdentity(internalId, token);
+        // A different account's name must not carry over to this one.
+        if (status === 'loggedOut' || (switching && status === 'social')) {
+            setStatus('guest');
+            setUserProfile(null);
+            safeStorage.setItem('auth_status', 'guest');
+            safeStorage.removeItem('user_profile');
+        }
+    };
+
+    const completeGoogleSignIn = (result: GoogleSignInResult, picture?: string) => {
+        const profile = { firstName: result.firstName || 'Player', picture };
+        switchIdentity(result.internalId, result.token);
         setStatus('social');
         setUserProfile(profile);
         safeStorage.setItem('auth_status', 'social');
@@ -166,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, completeGoogleSignIn, loginWithProfile, reportedEmail, logout }}>
+        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, completeGoogleSignIn, adoptAccount, loginWithProfile, reportedEmail, logout }}>
             {children}
         </AuthContext.Provider>
     );

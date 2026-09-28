@@ -5,6 +5,7 @@ import { SkillScores, MoodScores } from '../../app/lib/skillprintSdk';
 import { submitMoodSurvey } from '../../app/api/api';
 import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
 import { titleFromSlug } from '../../lib/skillIcons';
+import EmailPromptCard from '../../app/components/EmailPromptCard';
 
 interface ResultMetric {
   name: string;
@@ -35,6 +36,8 @@ interface GameResultDialogProps {
   sessionId?: string;
   /** Dev only: render the mock session (includes an estimated score) instead of fetching. */
   useSyntheticData?: boolean;
+  /** Dev only: show the email prompt whatever the session count (SKI-265). */
+  forceEmailPrompt?: boolean;
 }
 
 export default function GameResultDialog({
@@ -50,7 +53,8 @@ export default function GameResultDialog({
   gameSlug,
   userToken,
   sessionId,
-  useSyntheticData = false
+  useSyntheticData = false,
+  forceEmailPrompt = false
 }: GameResultDialogProps) {
   const { data: session, isProcessing } = useComputedGameMetrics(sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
@@ -343,6 +347,8 @@ export default function GameResultDialog({
             </div>
             {moodsData.length === 0 && renderEmpty(isProcessing ? 'Reading the mood this session moved.' : 'No mood scores were recorded for this session.')}
           </section>
+
+          <EmailPromptCard force={forceEmailPrompt} />
 
         </div>
         

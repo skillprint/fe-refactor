@@ -15761,5 +15761,31 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 .pp-email-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: min(100%, 360px); }
 .pp-email-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 
+/* The email opt-in form (SKI-265): Settings → Email and the results-dialog card. */
+.email-capture { display: grid; gap: 16px; min-width: min(100%, 360px); max-width: 480px; }
+.email-capture__group { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.email-capture__group legend { padding: 0; margin-bottom: 8px; }
+.email-capture__options { display: grid; gap: 10px; }
+.email-capture__options--inline { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.email-capture__option { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.email-capture__option--block { align-items: flex-start; }
+.email-capture__option input { accent-color: #7c5cf6; width: 16px; height: 16px; margin: 2px 0 0; flex: none; }
+.email-capture__input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-box);
+  color: var(--surface-text);
+  font: inherit;
+  font-size: var(--app-text-sm-font-size);
+}
+.email-capture__input:hover { border-color: var(--surface-border-hover); }
+.email-capture__input:focus-visible { outline: 2px solid #7c5cf6; outline-offset: 1px; }
+.email-capture__actions { display: grid; gap: 8px; justify-items: start; }
+.email-capture__done { display: grid; gap: 6px; justify-items: start; max-width: 480px; }
+.email-prompt-card { display: grid; gap: 12px; }
+.email-prompt-card__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
 /* On a playbook's own page: the coach's context above the hero. */
 .assigned-card--detail { margin-bottom: 16px; }

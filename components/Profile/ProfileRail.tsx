@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import EmailRailLink from '../../app/components/EmailRailLink';
 
 interface ProfileRailProps {
   skillsCount: number;
@@ -68,6 +69,7 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
             <use href="#ti-chevron-right"></use>
           </svg>
         </Link>
+        <EmailRailLink />
       </article>
 
       <article className="rail-card sp-card" aria-labelledby="summaryTitle">
