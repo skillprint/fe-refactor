@@ -519,3 +519,108 @@ export interface CoachInviteInput {
   role?: CoachInviteRole;
   team?: number | null;
 }
+
+// ── /api/coach/challenges/ (SKI-218: Challenge kept alive) ───────────────────
+//
+// Coach-side only for now. A play challenge counts sessions or minutes
+// (engagement, level 1). A skill challenge measures improvement on a cognition
+// dimension; each player's figures sit under `skillProgress`, which the
+// backend serves only with a profile-level (2) grant.
+
+export type CoachChallengeKind = 'Play' | 'Skill';
+export type CoachChallengeMetric = 'Sessions' | 'Minutes';
+export type CoachChallengeState = 'upcoming' | 'active' | 'ended' | 'cancelled';
+
+export interface CoachChallenge {
+  id: number;
+  title: string;
+  description: string;
+  kind: CoachChallengeKind;
+  metric: CoachChallengeMetric | null;
+  dimension: string | null;
+  /** Play: the games that count; empty means any game. */
+  games: Array<{ slug: string; name: string }>;
+  /** Per player: sessions, minutes, or points of improvement. */
+  goal: number;
+  startsOn: string;
+  endsOn: string;
+  state: CoachChallengeState;
+  team: { id: number; name: string };
+}
+
+export interface CoachChallengeList {
+  challenges: CoachChallenge[];
+}
+
+export interface CoachChallengeInput {
+  team: number;
+  title: string;
+  description?: string;
+  kind: CoachChallengeKind;
+  metric?: CoachChallengeMetric;
+  games?: string[];
+  dimension?: string;
+  goal: number;
+  startsOn: string;
+  endsOn: string;
+}
+
+export interface CoachSkillProgress {
+  /** Window average minus the 28-day baseline; null without a baseline. */
+  improvement: number | null;
+  progress?: number | null;
+  met?: boolean;
+}
+
+export interface CoachChallengePlayer {
+  userId: number;
+  displayName: string | null;
+  /** Play only. */
+  value?: number;
+  progress?: number | null;
+  met?: boolean;
+  /** Skill only, and only with a profile-level grant. */
+  skillProgress?: CoachSkillProgress;
+}
+
+export interface CoachChallengeTeamTotal {
+  players: number;
+  playersMet?: number;
+  /** Play: total sessions or minutes, against goal × players. */
+  value?: number;
+  goal?: number;
+  /** Skill: an aggregate, withheld under 5 measured players. */
+  measuredPlayers?: number;
+  averageImprovement?: number;
+  suppressed?: boolean;
+  suppressionReason?: string;
+}
+
+export interface CoachChallengeDetail {
+  challenge: CoachChallenge;
+  teamTotal: CoachChallengeTeamTotal;
+  players: CoachChallengePlayer[];
+}
+
+export type CoachLeaderboardScope = 'team' | 'playvs';
+
+/** `own: false` rows are anonymous: a rank and a figure, no id, name or school. */
+export interface CoachLeaderboardRow {
+  rank: number;
+  own: boolean;
+  userId?: number;
+  displayName?: string | null;
+  value?: number;
+  skillProgress?: CoachSkillProgress;
+}
+
+export interface CoachChallengeLeaderboard {
+  challenge: CoachChallenge;
+  scope: CoachLeaderboardScope;
+  rows: CoachLeaderboardRow[];
+  rankedPlayers: number;
+  /** Team scope: players left out because their skill figure isn't visible. */
+  hiddenPlayers?: number;
+  suppressed?: boolean;
+  suppressionReason?: string;
+}

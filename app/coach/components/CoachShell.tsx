@@ -130,6 +130,9 @@ function CoachDashboard({ children }: { children: React.ReactNode }) {
           <Link href="/coach/assignments" aria-current={pathname?.startsWith('/coach/assignments') ? 'page' : undefined}>
             Assignments
           </Link>
+          <Link href="/coach/challenges" aria-current={pathname?.startsWith('/coach/challenges') ? 'page' : undefined}>
+            Challenges
+          </Link>
           {/* Admin-only: the invite endpoint lists only organisations the
               caller administers, so a coach would find nothing there. */}
           {data?.organizations?.some((org) => org.role === 'Admin') && (

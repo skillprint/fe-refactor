@@ -560,3 +560,16 @@
 }
 .coach-invitelist { margin: 0; padding-left: 18px; }
 .coach-invitelist li { margin: 3px 0; overflow-wrap: anywhere; }
+
+/* ── Challenges ──────────────────────────────────────────────────────────── */
+.coach-newchallenge { max-width: 520px; }
+.coach-newchallenge select { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--surface-border); background: var(--surface-raised); color: var(--surface-text); font: inherit; }
+.coach-newchallenge fieldset { border: none; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.coach-newchallenge legend { margin-bottom: 6px; font-size: var(--app-text-sm-font-size); font-weight: var(--weight-medium); }
+.coach-dates { display: flex; gap: 12px; flex-wrap: wrap; }
+.coach-dates .coach-field { flex: 1 1 140px; }
+.coach-leaderboard { list-style: none; margin: 0; padding: 0; }
+.coach-leaderboard li { display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 10px; align-items: center; padding: 7px 6px; border-bottom: 1px solid var(--surface-border); }
+.coach-leaderboard li[data-own='false'] { color: var(--surface-text-muted); }
+.coach-leaderboard__rank { font-variant-numeric: tabular-nums; font-weight: var(--weight-medium); }
+.coach-leaderboard__value { font-variant-numeric: tabular-nums; white-space: nowrap; }
