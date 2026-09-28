@@ -50,7 +50,7 @@ export default function GuideClient() {
           <h2>How you get in</h2>
           <p>
             You don&rsquo;t need to sign up or remember a password. Your coach adds you to their team using your email
-            address.
+            address, and you get an email saying so: &ldquo;Coach Rivera added you to Varsity&rdquo;.
           </p>
           <ol>
             <li>
@@ -137,6 +137,14 @@ export default function GuideClient() {
               </thead>
               <tbody>
                 <tr>
+                  <td>Welcome</td>
+                  <td>
+                    When your coach adds you to a team. There&rsquo;s nothing to do yet; it says who added you and
+                    what to expect.
+                  </td>
+                  <td>&ldquo;Coach Rivera added you to Varsity&rdquo;</td>
+                </tr>
+                <tr>
                   <td>New playbook</td>
                   <td>
                     As soon as your coach sets you one. It has their note, the due date, and your{' '}
@@ -160,14 +168,15 @@ export default function GuideClient() {
               You&rsquo;ll get at most <strong>one reminder a day</strong>, and <strong>three</strong> for any one
               playbook. None once you&rsquo;ve finished it or chosen <strong>Not now</strong>.
             </li>
-            <li>Every email says why you&rsquo;re getting it: a coach at your school set you a playbook.</li>
+            <li>Every email says why you&rsquo;re getting it, such as a coach at your school setting you a playbook.</li>
           </ul>
 
           <h3>Turning emails off</h3>
           <ul>
             <li>
               Go to <strong>Settings</strong>, then <strong>Email</strong>, and switch off{' '}
-              <em>New assignments from a coach</em> or <em>Reminders about unfinished assignments</em>.
+              <em>New assignments from a coach</em>, <em>Reminders about unfinished assignments</em> or{' '}
+              <em>Being added to a team</em>.
             </li>
             <li>
               Or use the <strong>unsubscribe</strong> link at the bottom of any email. It stops just that kind of
