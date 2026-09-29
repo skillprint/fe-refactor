@@ -349,15 +349,7 @@ export default function AiGuideClient() {
   }, [sessionId, selectedGame, selectedMood]);
 
   const handleIframeLoad = () => {
-    if (iframeRef.current) {
-      const doc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-      if (doc) {
-        const script = doc.createElement('script');
-        script.src = '/lib/skillprint-js-sdk/main-manager.js';
-        doc.body.appendChild(script);
-      }
-      iframeRef.current.contentWindow?.postMessage({ type: 'GAME_RESUME' }, '*');
-    }
+    iframeRef.current?.contentWindow?.postMessage({ type: 'GAME_RESUME' }, '*');
     setGameLoaded(true);
     addLog(`${game.name} loaded in the frame. The session opens with the API when play starts.`);
   };
