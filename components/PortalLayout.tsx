@@ -3,6 +3,7 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import TimezoneSync from '../app/components/TimezoneSync';
 
 export interface PortalLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export interface PortalLayoutProps {
 export default function PortalLayout({ children, pageClass, header, rail }: PortalLayoutProps) {
   return (
     <div className={`portal-app ${pageClass || ''}`.trim()} data-portal-shell>
+      <TimezoneSync />
       <Sidebar />
       <button onClick={() => document.body.classList.remove('nav-open')} className="portal-scrim" type="button" aria-label="Close navigation" data-portal-nav-close></button>
       <div className="portal-main">
