@@ -335,7 +335,8 @@ export default function AiGuideClient() {
           clientRef.current.setLastScreenshotDataURI(base64String);
           const res = await fetch(base64String);
           const blob = await res.blob();
-          clientRef.current.postScreenshots(sessionId, [blob]);
+          // A failed upload (e.g. the session already closed) is logged by the client.
+          clientRef.current.postScreenshots(sessionId, [blob]).catch(() => {});
         } catch (e) {
           console.error('Failed to process screenshot', e);
         }
