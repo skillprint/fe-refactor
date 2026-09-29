@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useUserSession } from '../../hooks/useUserSession';
 import PlayStage from '../../../components/GameSession/PlayStage';
@@ -243,8 +243,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         // Do not set shouldPollRef.current = true here. It is already set in useEffect,
         // and setting it here can re-enable polling during exit/navigation race conditions.
 
-        // Set up message listener for communication with the game
-        window.addEventListener('message', handleGameMessage);
+        // Set up message listener for communication with the game. Adding the same
+        // function again on a reload (Play Again) is a no-op.
+        window.addEventListener('message', onWindowMessage);
         countPlayerInputs();
 
         if (autoPlay) {
@@ -310,6 +311,18 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         }
     };
 
+    // The window listener has to be one stable function: a handler from an old render
+    // can't be removed later, and it would keep uploading this game's screenshots to
+    // the session it was created with after a client-side navigation.
+    const handleGameMessageRef = useRef(handleGameMessage);
+    handleGameMessageRef.current = handleGameMessage;
+    const onWindowMessage = useCallback((event: MessageEvent) => handleGameMessageRef.current(event), []);
+
+    // A failed upload (e.g. the session already closed) is logged by the client.
+    const uploadScreenshots = (...args: Parameters<SkillprintClient['postScreenshots']>) => {
+        skillprintClientRef.current?.postScreenshots(...args).catch(() => {});
+    };
+
     const recordReportedGameState = (data: any) => {
         const next: ReportedGameState = { ...reportedGameStateRef.current };
         if (typeof data?.score === 'number') next.score = data.score;
@@ -331,7 +344,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
                     // Each chunk carries the game's latest state, so the session keeps a score
                     // even if the final upload never arrives.
-                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount());
+                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount());
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
@@ -475,7 +488,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             const finalState = typeof results.score === 'number'
                 ? { ...reportedGameStateRef.current, score: results.score, isGameOver: true }
                 : reportedGameStateRef.current;
-            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, finalState, takeInputCount());
+            uploadScreenshots(skillprintSessionIdRef.current, [], true, finalState, takeInputCount());
         }
 
         // Navigate to review page with sessionId
@@ -486,9 +499,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
     const stopIframe = () => {
         console.log('stopIframe', iframeRef.current);
+        window.removeEventListener('message', onWindowMessage);
         if (iframeRef.current) {
-            // remove event listener
-            window.removeEventListener('message', handleGameMessage);
             // remove iframe
             iframeRef.current.remove();
         }
@@ -535,7 +547,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             shouldPollRef.current = false;
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, reported, takeInputCount());
+                uploadScreenshots(skillprintSessionIdRef.current, [], true, reported, takeInputCount());
             }
 
             setGameResults(exitResults);
@@ -616,9 +628,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     // Cleanup message listener
     useEffect(() => {
         return () => {
-            window.removeEventListener('message', handleGameMessage);
+            window.removeEventListener('message', onWindowMessage);
         };
-    }, []);
+    }, [onWindowMessage]);
 
     const injectJavascriptIntoIframe = () => {
         if (iframeRef.current) {
