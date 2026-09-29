@@ -609,8 +609,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             } catch (e) {
                 console.error('Failed to start Skillprint session', e);
             }
-
-            injectJavascriptIntoIframe();
         }
 
         return () => {
@@ -631,18 +629,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             window.removeEventListener('message', onWindowMessage);
         };
     }, [onWindowMessage]);
-
-    const injectJavascriptIntoIframe = () => {
-        if (iframeRef.current) {
-            const iframeDocument = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-            const scriptUrl = '/lib/skillprint-js-sdk/main-manager.js';
-            if (iframeDocument) {
-                const script = iframeDocument.createElement('script');
-                script.src = scriptUrl;
-                iframeDocument.body.appendChild(script);
-            }
-        }
-    };
 
     const handleTogglePlay = () => {
         if (sequence === 'playing') {
