@@ -38,6 +38,11 @@ export interface SessionDetail {
   /** [] while scoring is still in flight; poll until it populates. */
   cognition: SessionDimensionScore[];
   personality: SessionPersonalityScore[] | null;
+  /** The game's own score for this session; null when the game reported none. */
+  score?: number | null;
+  /** The player's best score in earlier sessions of this game; null when none had a score. */
+  previousBestScore?: number | null;
+  isPersonalBest?: boolean;
 }
 
 export const generateMockSessionDetail = (): SessionDetail => ({

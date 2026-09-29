@@ -39,6 +39,7 @@ interface GameResultDialogProps {
   gameTitle: string;
   /** The game's own points; undefined when the game didn't report one. */
   score?: number;
+  /** Dev only: the previous best to compare against. Real sessions use the backend's. */
   highScore?: number;
   outcome?: SessionOutcome;
   duration: number; // in seconds
@@ -126,9 +127,12 @@ export default function GameResultDialog({
     return 'red';
   };
 
+  // The backend knows the player's earlier scores in this game; null means none of
+  // them had a score, so this one is the first to compare against.
+  const previousBest = session?.previousBestScore ?? (highScore > 0 ? highScore : null);
   const hasScore = typeof score === 'number';
-  const scoreDiff = hasScore ? score - highScore : 0;
-  const isNewBest = hasScore && score > highScore && highScore > 0;
+  const scoreDiff = hasScore && previousBest !== null ? score - previousBest : 0;
+  const isNewBest = hasScore && previousBest !== null && score > previousBest;
 
   // Skill scores (SKI-132). The session endpoint is the source of truth: when a
   // game emitted no cognition scores the backend substitutes estimates flagged
@@ -313,8 +317,8 @@ export default function GameResultDialog({
               <span className="game-result__score-note layout-block font-sm">
                 {!hasScore
                   ? `${gameTitle} doesn't report a score to Skillprint. Your skill scores below come from how you played.`
-                  : highScore > 0
-                    ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${highScore.toLocaleString()}`
+                  : previousBest !== null
+                    ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${previousBest.toLocaleString()}`
                     : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
               </span>
             </div>
