@@ -302,8 +302,11 @@ export class SkillprintClient {
      * `gameState` is what the game last reported about itself (e.g. `{score}`). It is
      * sent as the last screenshot's `game_state<n>` field; the backend takes its
      * `score` as the session's score.
+     *
+     * `inputCount` is how many player inputs the chunk covers. The backend leaves a
+     * chunk with 0 out of skill scores; omit it when inputs aren't being counted.
      */
-    async postScreenshots(sessionId: string, screenshots: Blob[], isLastChunk: boolean = false, gameState?: object | null): Promise<boolean> {
+    async postScreenshots(sessionId: string, screenshots: Blob[], isLastChunk: boolean = false, gameState?: object | null, inputCount?: number | null): Promise<boolean> {
         const url = `${this.baseUrl}${this.UPLOAD_SCREENSHOTS_ENDPOINT.replace('{sessionId}', sessionId)}`;
         this.log(`Posting ${screenshots.length} screenshots (isLastChunk: ${isLastChunk}): POST ${url}`, LogLevel.INFO);
 
@@ -367,6 +370,10 @@ export class SkillprintClient {
             // The last chunk always carries exactly one screenshot (index 0).
             const index = isLastChunk ? 0 : screenshots.length - 1;
             formData.append(`game_state${index}`, JSON.stringify(gameState));
+        }
+
+        if (typeof inputCount === 'number') {
+            formData.append('input_count', String(inputCount));
         }
 
         let headers: any = {};
