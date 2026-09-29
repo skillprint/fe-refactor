@@ -10,12 +10,14 @@ import GameResultDialog from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
-import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
+import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
+import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
+import { titleFromSlug } from '@/lib/skillIcons';
 import { sessionAttribution } from '@/lib/emailLinks';
 
 interface GameClientProps {
@@ -24,13 +26,9 @@ interface GameClientProps {
 }
 
 interface GameResults {
+    /** The game's own points. Undefined when the game didn't report one. */
     score?: number;
     time?: number;
-    level?: number;
-    achievements?: string[];
-    accuracy?: number;
-    mistakes?: number;
-    bonus?: number;
 }
 
 export const SLUG_TO_DIR_MAP: Record<string, string> = {
@@ -139,11 +137,15 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     const [sequence, setSequence] = useState<SequenceState>('loading');
     const [isGamePaused, setIsGamePaused] = useState(false);
     const [gameResults, setGameResults] = useState<GameResults | null>(null);
-    const [sessionMood, setSessionMood] = useState<string>('Focus');
+    // Chosen per game once the catalog record resolves (chooseTargetMood).
+    const [sessionMoodSlug, setSessionMoodSlug] = useState<string>('focus');
+    const sessionMood = titleFromSlug(sessionMoodSlug);
     const [adjustmentsApplied, setAdjustmentsApplied] = useState<number>(0);
     const adjustmentsCountRef = useRef(0);
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
     const skillprintSessionIdRef = useRef<string>('');
+    // True once the backend accepted the session; surveys only reference a recorded one.
+    const [sessionRecorded, setSessionRecorded] = useState(false);
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -172,7 +174,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
     // The catalog record this URL slug resolved to. `forSlug` guards against a stale
     // resolution being used for a new slug while the next lookup is in flight.
-    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string } | null>(null);
+    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string; moods: CatalogMood[] } | null>(null);
     const [isUnknownGame, setIsUnknownGame] = useState(false);
     const [hasImageError, setHasImageError] = useState(false);
 
@@ -188,7 +190,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         const resolvePath = async () => {
             // Any slug form (bare, legacy UUID-suffixed, truncated) resolves to one canonical
             // catalog record; that record's slug is what the backend gets on session start.
-            let record: { slug: string } | null = null;
+            let record: { slug: string; moods?: CatalogMood[] } | null = null;
             try {
                 record = resolveCatalogGame(decodedSlug, await getCatalogGames());
             } catch (error) {
@@ -213,7 +215,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
             const serverSlug = record?.slug || unifiedSlug;
             setGamePath(mapSlugToGamePath(serverSlug));
-            setResolvedGame({ forSlug: decodedSlug, serverSlug });
+            setResolvedGame({ forSlug: decodedSlug, serverSlug, moods: Array.isArray(record?.moods) ? record.moods : [] });
             setIsLoadingGamePath(false);
         };
         resolvePath();
@@ -408,15 +410,10 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         const endTime = Date.now();
         const playTime = Math.floor((endTime - gameStartTime) / 1000);
 
-        // Process the game completion data
+        // Only the game knows its score; never invent one.
         const results: GameResults = {
-            score: data.score || Math.floor(Math.random() * 40) + 60, // Fallback score for demo
+            score: typeof data?.score === 'number' ? data.score : undefined,
             time: playTime,
-            level: data.level || 1,
-            achievements: data.achievements || generateAchievements(data.score || 70),
-            accuracy: data.accuracy || Math.floor(Math.random() * 30) + 70,
-            mistakes: data.mistakes || Math.floor(Math.random() * 5),
-            bonus: data.bonus || Math.floor(Math.random() * 20)
         };
 
         shouldPollRef.current = false;
@@ -442,26 +439,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             // remove iframe
             iframeRef.current.remove();
         }
-    };
-
-    const generateAchievements = (score: number): string[] => {
-        const achievements: string[] = [];
-
-        if (score >= 90) {
-            achievements.push('Perfect Score!', 'Master Player', 'Speed Demon');
-        } else if (score >= 80) {
-            achievements.push('Great Performance', 'Quick Thinker');
-        } else if (score >= 70) {
-            achievements.push('Good Effort', 'Getting Better');
-        } else if (score >= 50) {
-            achievements.push('Good Start', 'Keep Going');
-        } else if (score >= 30) {
-            achievements.push('First Steps', 'Learning');
-        } else {
-            achievements.push('Getting Started', 'Try Again');
-        }
-
-        return achievements;
     };
 
     const handlePlayAgain = () => {
@@ -491,16 +468,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             // If game is in progress, navigate to review page
             const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
 
-            // Generate results based on current game state
-            const exitResults: GameResults = {
-                score: Math.max(0, Math.min(100, Math.floor(Math.random() * 40) + 40)), // Fallback score for demo
-                time: currentTime,
-                level: 1, // Default level for early exit
-                achievements: generateAchievements(40), // Default achievements for early exit
-                accuracy: Math.max(0, Math.min(100, Math.floor(Math.random() * 30) + 50)), // Default accuracy for early exit
-                mistakes: Math.floor(Math.random() * 3), // Default mistakes for early exit
-                bonus: Math.floor(Math.random() * 10) // Default bonus for early exit
-            };
+            // An exit mid-game has no score from the game.
+            const exitResults: GameResults = { time: currentTime };
 
             stopIframe();
             shouldPollRef.current = false;
@@ -550,7 +519,10 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             skillprintClientRef.current = client;
 
             try {
-                const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
+                // The mood must be one the game carries, or the backend refuses the session.
+                const targetMood = chooseTargetMood(searchParams.get('mood'), resolvedGame.moods);
+                setSessionMoodSlug(targetMood);
+                setSessionRecorded(false);
                 const serverSideSlug = resolvedGame.serverSlug;
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
@@ -559,6 +531,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 const attribution = sessionAttribution(new URLSearchParams(window.location.search));
                 loadGameParameters(gameConfig.parameterManifest)
                     .then((gameParameters) => client.startSession(sessionId, targetMood, serverSideSlug, false, gameParameters, attribution))
+                    .then((ok) => { if (ok && skillprintSessionIdRef.current === sessionId) setSessionRecorded(true); })
                     .catch((e) => console.error('Failed to start Skillprint session', e));
                 shouldPollRef.current = true;
                 pollSessionTips();
@@ -660,17 +633,19 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             {sequence === 'review' && gameResults && (
                 <GameResultDialog
                     gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
-                    score={gameResults.score || 0}
+                    score={gameResults.score}
                     highScore={0}
                     duration={gameResults.time || 0}
                     adjustmentsCount={adjustmentsApplied}
                     targetMood={sessionMood}
+                    targetMoodSlug={sessionMoodSlug}
                     onReplay={handlePlayAgain}
                     skillScores={lastSessionResponse?.skillScores}
                     moodScores={lastSessionResponse?.moodScores}
-                    gameSlug={decodedSlug}
+                    gameSlug={resolvedGame?.serverSlug || decodedSlug}
                     userToken={userToken}
                     sessionId={skillprintSessionIdRef.current}
+                    sessionRecorded={sessionRecorded}
                 />
             )}
 
