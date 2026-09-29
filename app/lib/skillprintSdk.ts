@@ -39,6 +39,8 @@ interface StartSessionRequest {
     game: string;
     targetMood: string;
     gameParameters?: SdkGameParameter[];
+    /** Recorded on the session as device_context: e.g. how the player got here (SKI-271). */
+    deviceContext?: Record<string, unknown>;
 }
 
 /** Parameter definition the backend auto-provisions into the game's GameScoringConfig. */
@@ -182,7 +184,7 @@ export class SkillprintClient {
         this.userToken = token;
     }
 
-    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, gameParameters?: SdkGameParameter[]): Promise<boolean> {
+    async startSession(sessionId: string, targetMood: string, gameName: string, isRetry: boolean = false, gameParameters?: SdkGameParameter[], deviceContext?: Record<string, unknown>): Promise<boolean> {
         const url = `${this.baseUrl}${this.START_SESSION_ENDPOINT}`;
         this.log(`Starting session: POST ${url}`, LogLevel.INFO);
 
@@ -191,7 +193,8 @@ export class SkillprintClient {
             sessionId,
             game: gameName,
             targetMood,
-            ...(gameParameters && gameParameters.length ? { gameParameters } : {})
+            ...(gameParameters && gameParameters.length ? { gameParameters } : {}),
+            ...(deviceContext && Object.keys(deviceContext).length ? { deviceContext } : {})
         };
 
         let headers: any = {
@@ -243,7 +246,7 @@ export class SkillprintClient {
                                 }
                             }
 
-                            return await this.startSession(sessionId, targetMood, gameName, true, gameParameters);
+                            return await this.startSession(sessionId, targetMood, gameName, true, gameParameters, deviceContext);
                         }
                     } catch (e) {
                         this.log(`Failed to parse 401 response or refresh token: ${e}`, LogLevel.ERROR);
