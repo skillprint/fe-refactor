@@ -6,7 +6,7 @@ import { useUserSession } from '../../hooks/useUserSession';
 import PlayStage from '../../../components/GameSession/PlayStage';
 import SessionVeil from '../../../components/GameSession/SessionVeil';
 import PlayBar from '../../../components/GameSession/PlayBar';
-import GameResultDialog from '../../../components/GameSession/GameResultDialog';
+import GameResultDialog, { SessionOutcome } from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
@@ -29,6 +29,13 @@ interface GameResults {
     /** The game's own points. Undefined when the game didn't report one. */
     score?: number;
     time?: number;
+    outcome: SessionOutcome;
+}
+
+/** What the game last told the shell about itself, from `gameState` / `GAME_SCORE_UPDATE`. */
+interface ReportedGameState {
+    score?: number;
+    isGameOver?: boolean;
 }
 
 export const SLUG_TO_DIR_MAP: Record<string, string> = {
@@ -158,6 +165,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     const [latestAdjustment, setLatestAdjustment] = useState<Adjustment | null>(null);
     const processedAdjustmentsRef = useRef<Set<string>>(new Set());
     const lastAdjustmentTimeRef = useRef<number>(0);
+    // Null until the game reports its state; most games never do.
+    const reportedGameStateRef = useRef<ReportedGameState | null>(null);
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
@@ -262,10 +271,18 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             case 'GAME_RESUME':
                 setIsGamePaused(false);
                 break;
+            case 'gameState':
             case 'GAME_SCORE_UPDATE':
-                // Handle real-time score updates if needed
+                recordReportedGameState(data);
                 break;
         }
+    };
+
+    const recordReportedGameState = (data: any) => {
+        const next: ReportedGameState = { ...reportedGameStateRef.current };
+        if (typeof data?.score === 'number') next.score = data.score;
+        if (typeof data?.isGameOver === 'boolean') next.isGameOver = data.isGameOver;
+        reportedGameStateRef.current = next;
     };
 
     const handleScreenshot = async (event: MessageEvent) => {
@@ -412,8 +429,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
         // Only the game knows its score; never invent one.
         const results: GameResults = {
-            score: typeof data?.score === 'number' ? data.score : undefined,
+            score: typeof data?.score === 'number' ? data.score : reportedGameStateRef.current?.score,
             time: playTime,
+            outcome: 'complete',
         };
 
         shouldPollRef.current = false;
@@ -447,6 +465,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         setGameResults(null);
         setAdjustmentsApplied(0);
         adjustmentsCountRef.current = 0;
+        reportedGameStateRef.current = null;
 
         // Reload the iframe to restart the game
         if (iframeRef.current) {
@@ -468,8 +487,14 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             // If game is in progress, navigate to review page
             const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
 
-            // An exit mid-game has no score from the game.
-            const exitResults: GameResults = { time: currentTime };
+            // The score is whatever the game last reported, if it reports one at all.
+            // Only a game that says it's over counts as complete.
+            const reported = reportedGameStateRef.current;
+            const exitResults: GameResults = {
+                score: reported?.score,
+                time: currentTime,
+                outcome: reported?.isGameOver ? 'complete' : reported ? 'exited' : 'unknown',
+            };
 
             stopIframe();
             shouldPollRef.current = false;
@@ -499,6 +524,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         setLatestAdjustment(null);
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
+        reportedGameStateRef.current = null;
 
         // Initialize Skillprint Session
         if (!disableSdk) {
@@ -635,6 +661,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
                     score={gameResults.score}
                     highScore={0}
+                    outcome={gameResults.outcome}
                     duration={gameResults.time || 0}
                     adjustmentsCount={adjustmentsApplied}
                     targetMood={sessionMood}
