@@ -167,6 +167,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
     const lastAdjustmentTimeRef = useRef<number>(0);
     // Null until the game reports its state; most games never do.
     const reportedGameStateRef = useRef<ReportedGameState | null>(null);
+    // Player inputs in the game frame since the last upload. Null when the frame
+    // can't be listened to, so the backend treats the count as unknown, not as idle.
+    const inputCountRef = useRef<number | null>(null);
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
@@ -242,12 +245,41 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
         // Set up message listener for communication with the game
         window.addEventListener('message', handleGameMessage);
+        countPlayerInputs();
 
         if (autoPlay) {
             if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
             }
         }
+    };
+
+    // Chunks with no input are left out of skill scores (NEW-30): a still screen
+    // shows what the game looks like, not what the player can do. Capture phase on
+    // the frame's window sees every event before a game can stop it.
+    const countPlayerInputs = () => {
+        inputCountRef.current = null;
+        try {
+            const frameWindow = iframeRef.current?.contentWindow;
+            if (!frameWindow) return;
+            const count = () => {
+                if (inputCountRef.current !== null) inputCountRef.current += 1;
+            };
+            for (const type of ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel']) {
+                frameWindow.addEventListener(type, count, { capture: true, passive: true });
+            }
+            inputCountRef.current = 0;
+        } catch (e) {
+            // A cross-origin frame can't be listened to; leave the count unknown.
+            console.warn('Player inputs not counted', e);
+        }
+    };
+
+    /** The inputs since the last upload, and start counting afresh. */
+    const takeInputCount = () => {
+        const count = inputCountRef.current;
+        if (count !== null) inputCountRef.current = 0;
+        return count;
     };
 
     const handleGameMessage = (event: MessageEvent) => {
@@ -299,7 +331,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
                     // Each chunk carries the game's latest state, so the session keeps a score
                     // even if the final upload never arrives.
-                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current);
+                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount());
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
@@ -443,7 +475,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             const finalState = typeof results.score === 'number'
                 ? { ...reportedGameStateRef.current, score: results.score, isGameOver: true }
                 : reportedGameStateRef.current;
-            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, finalState);
+            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, finalState, takeInputCount());
         }
 
         // Navigate to review page with sessionId
@@ -503,7 +535,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             shouldPollRef.current = false;
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, reported);
+                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, reported, takeInputCount());
             }
 
             setGameResults(exitResults);
