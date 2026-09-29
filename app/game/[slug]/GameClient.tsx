@@ -16,6 +16,7 @@ import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
+import { sessionAttribution } from '@/lib/emailLinks';
 
 interface GameClientProps {
     slug: string;
@@ -553,8 +554,11 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 const serverSideSlug = resolvedGame.serverSlug;
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
+                // How the player got here -- an email, a playbook -- goes on the
+                // session, so a click in an email can be followed to a play (SKI-271).
+                const attribution = sessionAttribution(new URLSearchParams(window.location.search));
                 loadGameParameters(gameConfig.parameterManifest)
-                    .then((gameParameters) => client.startSession(sessionId, targetMood, serverSideSlug, false, gameParameters))
+                    .then((gameParameters) => client.startSession(sessionId, targetMood, serverSideSlug, false, gameParameters, attribution))
                     .catch((e) => console.error('Failed to start Skillprint session', e));
                 shouldPollRef.current = true;
                 pollSessionTips();
