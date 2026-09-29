@@ -58,7 +58,7 @@ function GameSandboxContent() {
     // If editId param is passed, update game config
     useEffect(() => {
         if (editId) {
-            fetch(`/api/org/games/${editId}`)
+            fetch(`/api/generated-games/${editId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.game) {
