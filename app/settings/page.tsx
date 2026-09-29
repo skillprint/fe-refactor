@@ -10,6 +10,7 @@ import { useNotificationPreferences } from '../../lib/models/portal/useNotificat
 import { useEmailAddress } from '../../lib/models/portal/useEmailAddress';
 import { useUserSession } from '../hooks/useUserSession';
 import EmailCapture from '../components/EmailCapture';
+import EmailSchedule from '../components/EmailSchedule';
 
 export default function SettingsPage() {
     const { status, userProfile, logout } = useAuth();
@@ -219,6 +220,7 @@ function EmailSettings() {
                     </button>
                 </div>
                 <EmailToggleList prefs={prefs} />
+                <EmailSchedule />
             </div>
         );
     } else if (state.pending && !changing) {
