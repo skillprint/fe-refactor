@@ -297,7 +297,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     const fetchedResponse = await fetch(base64String);
                     const blob = await fetchedResponse.blob();
 
-                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob]);
+                    // Each chunk carries the game's latest state, so the session keeps a score
+                    // even if the final upload never arrives.
+                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current);
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
@@ -438,10 +440,11 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         stopIframe();
 
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+            const finalState = typeof results.score === 'number'
+                ? { ...reportedGameStateRef.current, score: results.score, isGameOver: true }
+                : reportedGameStateRef.current;
+            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, finalState);
         }
-
-
 
         // Navigate to review page with sessionId
         setGameResults(results);
@@ -500,10 +503,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             shouldPollRef.current = false;
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true, reported);
             }
-
-
 
             setGameResults(exitResults);
             setSequence('calculating');
@@ -660,7 +661,6 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 <GameResultDialog
                     gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
                     score={gameResults.score}
-                    highScore={0}
                     outcome={gameResults.outcome}
                     duration={gameResults.time || 0}
                     adjustmentsCount={adjustmentsApplied}
