@@ -78,7 +78,9 @@ function update(dt) {
 				difficulty: typeof waveone !== 'undefined' ? waveone.difficulty : 0,
 				blocksOnScreen: typeof blocks !== 'undefined' ? blocks.length : 0,
 				lockedBlocks: typeof MainHex !== 'undefined' && MainHex.blocks ? MainHex.blocks.reduce(function (acc, val) { return acc + val.length; }, 0) : 0,
-				gameState: typeof gameState !== 'undefined' ? gameState : 0
+				gameState: typeof gameState !== 'undefined' ? gameState : 0,
+				// Read by the portal shell to tell a finished game from an early exit.
+				isGameOver: typeof gameState !== 'undefined' && gameState === 2
 			};
 			if (window.parent) {
 				window.parent.postMessage({ type: 'gameState', data: state }, '*');

@@ -21,11 +21,26 @@ interface ResultMetric {
 
 const displayName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug(slug);
 
+/**
+ * How the session ended, as far as the game told us. `complete`: the game
+ * reported its end (game over, level done). `exited`: the player left while the
+ * game said it was still running. `unknown`: the game reports neither, so we
+ * can't say.
+ */
+export type SessionOutcome = 'complete' | 'exited' | 'unknown';
+
+const OUTCOME_LABELS: Record<SessionOutcome, string> = {
+  complete: 'Game complete',
+  exited: 'Ended early',
+  unknown: 'Session ended',
+};
+
 interface GameResultDialogProps {
   gameTitle: string;
   /** The game's own points; undefined when the game didn't report one. */
   score?: number;
   highScore?: number;
+  outcome?: SessionOutcome;
   duration: number; // in seconds
   adjustmentsCount: number;
   targetMood: string;
@@ -49,6 +64,7 @@ export default function GameResultDialog({
   gameTitle,
   score,
   highScore = 0,
+  outcome = 'unknown',
   duration,
   adjustmentsCount,
   targetMood,
@@ -209,8 +225,8 @@ export default function GameResultDialog({
         <div className="popup__content scrollbar-violet relative">
           
           <div className="layout-flex items-start justify-between gap-2xl">
-            <span className="ui-label game-result__status layout-inline-flex items-center gap-md">
-              <i className="radius-round"></i>Game complete
+            <span className="ui-label game-result__status layout-inline-flex items-center gap-md" data-outcome={outcome}>
+              <i className="radius-round"></i>{OUTCOME_LABELS[outcome]}
             </span>
             <Link 
               href="/games"
