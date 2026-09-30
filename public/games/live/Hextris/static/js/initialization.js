@@ -258,8 +258,10 @@ function startBtnHandler() {
 	}
 
 	if (importing == 1) {
+		// A first game (nothing saved) starts here rather than in resumeGame().
 		init(1);
 		checkVisualElements(0);
+		Skillprint.LevelStart();
 	} else {
 		resumeGame();
 	}

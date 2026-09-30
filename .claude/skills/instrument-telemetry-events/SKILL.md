@@ -25,94 +25,55 @@ for every game — there is nothing to instrument there today, and the missing p
 structured game-state blob alongside each frame) has no backend endpoint to send it to yet. Don't
 invent one; see **Known gaps** below and tell the user it needs backend work first.
 
-## Ground truth: what exists today, and what's actually dead
+## Ground truth: how an event reaches the backend (updated 2026-09-30)
 
-Verified against the current code (September 2026) — don't trust older assumptions:
+Verified against the code; re-check Step 1 each time, since this moves:
 
-- **The event-ingestion endpoint is real**: `POST /games/api/sessions/telemetry?session_id=<id>&game_slug=<slug>`
-  (`SessionAddTelemetryAPIView`, marketplace `games/views.py`), body `{"event": {...arbitrary JSON...}}`,
-  appended to the session's `telemetry` JSONField. Auth: partner API key or SPA-origin (no Knox
-  requirement). It does **not** validate the event name against any vocabulary — anything JSON-shaped
-  is accepted and stored.
-- **Nothing on the frontend calls it.** `_shared/harness.js` (the shared dev harness used by
-  Stroop Test, Simon Says, Order Rush, Typing Speed, Reaction Time, Dual N-Back, Guided Breathing,
-  Procedural Maze, etc.) only knows how to POST session start/stop and screenshots, plus send
-  `ADJUST_GAME`. It has **no `sendEvent`/telemetry function at all**.
-- **An older convention exists but is unwired.** A family of Construct/CreateJS-era games (Sweet
-  Memory, Match Doodle, Fruit Sorting, Photo Hunt, Sumagi, Star Puzzles, Colorize 2, Gems of Hanoi,
-  Mahjong Deluxe) call a local `spLogEvent(o)` → global `logEvent(params)` → `postMessage`
-  (`messageType: 'gameEvent'`) — real per-action events like Sweet Memory's `LEVEL_START`, `FLIP`,
-  `MATCH`, `UNMATCH`, `LEVEL_COMPLETE`. **The live portal's message handler
-  (`app/game/[slug]/GameClient.tsx`) has no `case` for `'gameEvent'`** — these events are emitted
-  into the void today. (The only place that even reads `'gameEvent'` is the separate dev tool
-  `app/labs/ai_guide/AiGuideClient.tsx`, and only to trigger a session start on `LEVEL_START` — it
-  never forwards or persists the event.)
-- **Hextris has a commented-out Layer-2 precedent**: `static/skillprint.js` defines `sendCW`/`sendCCW`
-  hooks meant to call `logEvent({event: "CLOCKWISE_TAP", ...})` and `"ANTICLOCKWISE_TAP"` — every
-  `logEvent(...)` call in that file is commented out. This is exactly the kind of granular,
-  game-specific event Layer 2 wants; it was scaffolded once and never finished.
-- **Dungeon Runner is a separate, newer, more minimal bridge** (`static/js/skillprint.js`) —
-  `GAME_SCORE_UPDATE`/`GAME_COMPLETE` postMessages only, no per-action `logEvent` mechanism, and its
-  `iframeTest.html` reimplements session start/stop with a drifted, snake_case wire shape
-  (`session_id`, `skills`) instead of the shared harness's camelCase (`sessionId`, `targetSkill`).
-- **No fixed vocabulary is enforced anywhere**, frontend or backend. The closest thing is a set of
-  Python constants on `games.models.GameSchema` (`CONTROL_EVENTS`, `POSITIVE_EVENTS`,
-  `NEGATIVE_EVENTS`) used by two scoring heuristics — not an enum, not validated at the API layer,
-  and it doesn't include `GAME_PAUSE`, `GAME_RESUME`, `MATCH`, or `UNMATCH` even though those
-  already appear ad hoc in game code.
+- **The path is the screenshot upload, not `sessions/telemetry`.** A game posts
+  `{type: 'gameEvent', data: {event, at, ...fields}}` to its parent. `at` is when it happened, in
+  epoch ms: `performance.timeOrigin + performance.now()`, which reads the same in the game frame
+  and the portal. `GameClient.tsx`'s `'gameEvent'` case calls `SkillprintClient.recordEvent()`,
+  which stamps it onto the session's `SessionTimeline` (skillprint-js-sdk) as ms from session
+  start. The next screenshot upload carries it as `events`, and the closing upload takes the
+  rest. The backend appends them to `Session.telemetry` (marketplace #119).
+- **Screenshots carry their own time too.** `SkillprintLib/skillprintScreenshot.js` posts
+  `capturedAt` (same clock), sent as `offset_ms<n>` and stored as
+  `GameChunkAnalysis.frame_offsets_ms`. Each chunk's vision prompts list the events whose own
+  `timestamp` falls in that chunk's window (marketplace #120), whichever upload brought them.
+- **Don't post to `POST /games/api/sessions/telemetry`.** It takes one event per request, and it
+  has `authentication_classes = []`, so it 404s every player-owned session, which is every portal
+  session (marketplace #110).
+- **Reference implementation: Hextris** (`public/games/live/Hextris/static/skillprint.js`).
+  `Skillprint.send(event, data)` posts the message. Its hooks sit in `Hex.rotate` (every applied
+  rotation, keys or taps), in `checking.js` (MATCH), in `view.js` (pause and resume), and in the
+  start, restart and game-over paths in `main.js`, `initialization.js` and `input.js`.
+- **The legacy convention is still dead.** Construct/CreateJS-era games (Sweet Memory, Match
+  Doodle, Fruit Sorting, Photo Hunt, Sumagi, Star Puzzles, Colorize 2, Gems of Hanoi, Mahjong
+  Deluxe) call `spLogEvent` → `logEvent` → a JSON-string `postMessage` (`messageType: 'gameEvent'`).
+  `skillprintScreenshot.js` redefines `globalThis.logEvent` as a no-op, and the portal only reads
+  the object form. Several of these games have strict legacy `GameSchema` rows
+  (`games/fixtures/game_schema_fixture.json`). `Session.save()` validates every telemetry entry
+  against them, so an entry that doesn't match breaks the session's saves. Check the game's
+  schema before turning one of these on (marketplace #36 makes schemas permissive).
+- **Universal vocabulary:** the SDK's `GameEvent` enum is exactly marketplace's
+  `GameSchema.UNIVERSAL_TELEMETRY_EVENTS` (since #119). Anything else is game-specific.
 
-## Step 1: Check whether the plumbing already exists (do this every time — it may have been fixed since this skill last ran)
+## Step 1: Check the plumbing still exists
 
 ```bash
-grep -n "'gameEvent'" app/game/*/GameClient.tsx app/game/**/*.tsx 2>/dev/null
-grep -n "sendTelemetryEvent\|sendEvent" public/games/live/_shared/harness.js
+grep -n "'gameEvent'" "app/game/[slug]/GameClient.tsx"
+grep -n "recordEvent\|SessionTimeline" app/lib/skillprintSdk.ts
+grep -n "capturedAt" public/games/live/SkillprintLib/skillprintScreenshot.js
 ```
 
-- If both are present and functioning, skip to Step 3 (instrument the specific game) — the plumbing
-  is done.
-- If either is missing, you need to add it (Step 2) before any event you add to a game will reach
-  the backend. **Do not tell the user a game is "instrumented with telemetry" if events are only
-  reaching `postMessage` and dying there** — that's the exact bug this skill exists to avoid
-  repeating.
+If any is missing, restore it before instrumenting a game: an event that only reaches
+`postMessage` is not instrumented.
 
-## Step 2: Wire the plumbing (one-time, repo-wide — not per-game)
+## Step 2: Emit from the game
 
-This is a real code change to shared, production-serving files. Show the user the diff before
-committing; this isn't a live-backend write (nothing here is prohibited or needs live-write
-confirmation), but it does affect every game's runtime message handling, so don't do it silently
-inside a larger unrelated task.
-
-1. **Add a send helper.** In `public/games/live/_shared/harness.js` (or, for games not on the
-   shared harness, in the per-game `skillprintShim.js`), add a small function that does what
-   `logEvent` in `public/games/live/inject.js` already does, but targeting the real parent origin
-   rather than an unsubstituted `{% TARGET_ORIGIN %}` template:
-   ```js
-   function sendTelemetryEvent(event, fields = {}) {
-     window.parent.postMessage(
-       JSON.stringify({ ...fields, event, messageType: 'gameEvent' }),
-       '*' // or the harness's known parent origin, matching how ADJUST_GAME/screenshot messages are posted
-     );
-   }
-   ```
-   Match whatever origin convention the rest of the harness already uses for its other
-   `postMessage` calls — don't introduce a third convention.
-
-2. **Add the receiving case in the portal.** In `app/game/[slug]/GameClient.tsx`, the message
-   switch already handles `'screenshot'`, `'GAME_COMPLETE'`, `'GAME_PAUSE'`, `'GAME_RESUME'`,
-   `'GAME_SCORE_UPDATE'`. Add a case for `'gameEvent'` that parses the JSON payload and POSTs it to
-   the existing backend endpoint:
-   ```
-   POST {apiBase}/games/api/sessions/telemetry?session_id=<current sessionId>&game_slug=<slug>
-   Authorization: <same auth the portal already uses for record-session/sessions calls>
-   Body: {"event": <the parsed gameEvent payload, minus the messageType wrapper>}
-   ```
-   Reuse the session id already held by the component (the one used for
-   `record-session`/`sessions/{id}/stop`) — don't generate a new one.
-
-3. **Confirm it round-trips**: instrument a trivial event in one game, play it in the real portal
-   (not just `iframeTest.html`, which never exercises `GameClient.tsx`), then check the session's
-   telemetry — either via the data API (`GET /data/v1/telemetry-events/`, if the user has data-API
-   credentials) or by asking a backend engineer to check `Session.objects.get(session_id=...).telemetry`.
+Add a sender like Hextris's `Skillprint.send`, which posts `{type: 'gameEvent', data: {event,
+at, ...}}` to `window.parent` with target `'*'`, the convention the game's other messages use.
+Stamp `at` when the thing happens, not when it's convenient to send.
 
 ## Step 3: Instrument the specific game
 
@@ -125,7 +86,8 @@ Use only this fixed list — don't expand it per-game (that's what Layer 2 is fo
 one that doesn't genuinely apply to this game's structure:
 
 `GAME_START`, `GAME_END`, `LEVEL_START`, `LEVEL_COMPLETE`, `LEVEL_FAILED`, `LEVEL_RESTART`,
-`LEVEL_QUIT`, `GAME_PAUSE`, `GAME_RESUME`, `MATCH`, `UNMATCH`
+`LEVEL_QUIT`, `GAME_PAUSE`, `GAME_RESUME`, `MATCH`, `UNMATCH`, `HINT`, `GENERIC_POSITIVE`, `GENERIC_NEGATIVE`
+(the SDK's `GameEvent`)
 
 - The first seven have real precedent across existing games (Sweet Memory, Fruit Sorting, Photo
   Hunt, Star Puzzles as `TRY_*`, Colorize 2, Sumagi) and as `GameSchema.CONTROL_EVENTS` constants
@@ -165,9 +127,12 @@ one that doesn't genuinely apply to this game's structure:
    moment (add a temporary `console.log` or watch it in the harness's on-screen log if testing
    through `iframeTest.html` — but remember `iframeTest.html` bypasses `GameClient.tsx`, so this
    only proves the game emits the event, not that it reaches the backend).
-2. Confirm it reaches the backend: play through the real portal page (`/game/<slug>`), then check
-   the session's telemetry landed (data API, or ask a backend engineer to inspect `Session.telemetry`
-   / the derived `TelemetryEvent` rows for that session).
+2. Confirm it reaches the backend: play through the real portal page (`/game/<slug>`), then
+   compare what the uploads sent with what `Session.telemetry` holds. Wrap `window.fetch` in the
+   page to read each `record-session` form's `events` field. A backend that isn't deployed yet
+   can run as the throwaway E2E stack from the `marketplace-local-stack` memory. Count the events
+   on both sides: on 2026-09-30 a whole-model `session.save()` in `scoring/hextrix.py` silently
+   dropped two thirds of them (fixed in #119).
 3. Report both results separately. "The game emits the event" and "the event reached the backend"
    are different claims — don't collapse them.
 
@@ -188,13 +153,16 @@ to "what would the backend need to fully support the three-layer design":
    agent to declare "this game emits `CLOCKWISE_TAP` with this payload shape" the way
    `game-tuning-params`' Step 6 can declare parameter definitions via
    `scoring/api/games/<slug>/scoring-config/`.
-3. **No structured game-state capture alongside screenshots (Layer 0).** `GameChunkAnalysis` stores
+3. **(Mostly done.)** Screenshots can now carry `game_state<n>` (score and anything else) and
+   `offset_ms<n>`. The rest of this item predates that:
+   **No structured game-state capture alongside screenshots (Layer 0).** `GameChunkAnalysis` stores
    images/video plus capture timing and `biometric_signals` (sensor data), but there's no field for
    an arbitrary client-submitted game-state JSON blob (score, level, entity positions) per frame —
    exactly the pairing a world-model trainer needs. Adding this is a schema + serializer + SDK
    change (an optional `game_state` JSON field alongside each `screenshot_N` in the
    `record-session` upload), not something this skill can create from the frontend side alone.
-4. **No cross-check between events and vision-derived scoring** — the specific "low-cost sanity
+4. **(Partly done: #120 puts each chunk's events into its vision prompts; there's still no QA
+   gate.)** **No cross-check between events and vision-derived scoring** — the specific "low-cost sanity
    check on the vision pipeline" the design doc calls out (event says `LEVEL_COMPLETE` fired but
    vision-derived `game_progress` didn't move → flag the chunk) does not exist. Scoring
    (`scoring/schema_builder.py`, `tasks/api_layer.py`) never reads `session.telemetry` at all today;
@@ -204,7 +172,7 @@ to "what would the backend need to fully support the three-layer design":
    the other half of Layer 2's stated purpose ("training signal for the vision-based scorer
    itself"). This needs the scoring pipeline to actually join `TelemetryEvent` rows against
    `GameChunkAnalysis` scores for the same session/time-window, which isn't implemented.
-6. **The production ingestion path itself is incomplete** (see Steps 1–2 above) — `GameClient.tsx`
+6. **(Closed by the upload path above.)** **The production ingestion path itself was incomplete** (see Steps 1–2 above) — `GameClient.tsx`
    doesn't forward `gameEvent` messages, and no shared harness function sends them. This one is
    partly a frontend gap this skill *can* close (Step 2); listed here because until it's closed,
    every other item on this list is moot for any game actually served through the live portal.
