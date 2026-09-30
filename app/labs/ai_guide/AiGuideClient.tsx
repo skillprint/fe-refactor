@@ -335,7 +335,8 @@ export default function AiGuideClient() {
           clientRef.current.setLastScreenshotDataURI(base64String);
           const res = await fetch(base64String);
           const blob = await res.blob();
-          clientRef.current.postScreenshots(sessionId, [blob]);
+          // A failed upload (e.g. the session already closed) is logged by the client.
+          clientRef.current.postScreenshots(sessionId, [blob]).catch(() => {});
         } catch (e) {
           console.error('Failed to process screenshot', e);
         }
@@ -348,15 +349,7 @@ export default function AiGuideClient() {
   }, [sessionId, selectedGame, selectedMood]);
 
   const handleIframeLoad = () => {
-    if (iframeRef.current) {
-      const doc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-      if (doc) {
-        const script = doc.createElement('script');
-        script.src = '/lib/skillprint-js-sdk/main-manager.js';
-        doc.body.appendChild(script);
-      }
-      iframeRef.current.contentWindow?.postMessage({ type: 'GAME_RESUME' }, '*');
-    }
+    iframeRef.current?.contentWindow?.postMessage({ type: 'GAME_RESUME' }, '*');
     setGameLoaded(true);
     addLog(`${game.name} loaded in the frame. The session opens with the API when play starts.`);
   };

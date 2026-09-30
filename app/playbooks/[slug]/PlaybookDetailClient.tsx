@@ -11,6 +11,8 @@ import { OtherPlaybooksCard } from '@/components/OtherPlaybooksCard';
 import { SkillCard, SkillCardProps } from '@/components/SkillCard';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
 import { usePlaybookDetail } from '@/lib/models/portal/usePlaybookDetail';
+import { dueLabel } from '@/lib/models/portal/AssignedPlaybook';
+import type { PlaybookAssignmentContext } from '@/lib/models/portal/Playbooks';
 import { usePlaybookList } from '@/lib/models/portal/usePlaybookList';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
@@ -19,6 +21,29 @@ import { skillIconId } from '@/lib/skillIcons';
 
 interface PlaybookDetailClientProps {
   slug: string;
+  /** Which coach assignment this arrived from, if any (SKI-224). */
+  assignmentId?: string | null;
+}
+
+/**
+ * Who set this and by when (SKI-227), in the same voice as the home card:
+ * overdue is amber and says "Was due 2 days ago", never a failure.
+ */
+function AssignmentContext({ assignment }: { assignment: PlaybookAssignmentContext }) {
+  const due = dueLabel(assignment.dueAt);
+  return (
+    <section className="assigned-card assigned-card--detail" aria-label="Assigned by your coach">
+      <div className="assigned-card__head">
+        <p className="assigned-card__from">From {assignment.assignedByName}</p>
+        {due && (
+          <span className={`assigned-card__due${due.overdue ? ' assigned-card__due--late' : ''}`}>
+            {due.text}
+          </span>
+        )}
+      </div>
+      {assignment.note && <p className="assigned-card__note">&ldquo;{assignment.note}&rdquo;</p>}
+    </section>
+  );
 }
 
 function BackToGames() {
@@ -32,9 +57,9 @@ function BackToGames() {
   );
 }
 
-export default function PlaybookDetailClient({ slug }: PlaybookDetailClientProps) {
+export default function PlaybookDetailClient({ slug, assignmentId = null }: PlaybookDetailClientProps) {
   const decodedSlug = decodeURIComponent(slug);
-  const { data: playbook, isLoading, error, notFound } = usePlaybookDetail(decodedSlug);
+  const { data: playbook, isLoading, error, notFound } = usePlaybookDetail(decodedSlug, false, assignmentId);
   const { data: allPlaybooks } = usePlaybookList();
   const { data: profile } = useProfileAggregate();
 
@@ -119,6 +144,8 @@ export default function PlaybookDetailClient({ slug }: PlaybookDetailClientProps
 
   return (
     <PortalLayout pageClass="page--portal-playbook-detail" header={pageHeader} rail={railContent}>
+      {playbook.assignment && <AssignmentContext assignment={playbook.assignment} />}
+
       <PlaybookHero playbook={playbook} startUrl={startUrl} isFinished={isFinished} />
 
       <PlaybookSequence games={games} playedCount={played} />

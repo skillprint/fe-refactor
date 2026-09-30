@@ -205,7 +205,7 @@ export const getRecommendations = async (limit: number = 1) => {
     return await get(url, false);
 };
 
-export const submitMoodSurvey = async (data: { score: number, game: string, mood: string }, token?: string | null) => {
+export const submitMoodSurvey = async (data: { score: number, game: string, mood: string, session?: string }, token?: string | null) => {
     const url = `games/api/surveys/mood/`;
     const headers: any = { "Content-Type": "application/json" };
     if (token) {

@@ -3504,6 +3504,25 @@ html:is([data-theme="light"], [data-surface="light"]) .sp-tour__dot[data-current
   background: var(--green);
 }
 
+.page--game-session .game-result__status[data-outcome="exited"] {
+  border-color: color-mix(in srgb, var(--orange) 38%, transparent);
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+}
+
+.page--game-session .game-result__status[data-outcome="exited"] i {
+  background: var(--orange);
+}
+
+.page--game-session .game-result__status[data-outcome="unknown"] {
+  border-color: color-mix(in srgb, currentColor 24%, transparent);
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.page--game-session .game-result__status[data-outcome="unknown"] i {
+  background: currentColor;
+  opacity: 0.6;
+}
+
 
 .page--game-session .game-result__close {
   width: var(--space-40);
@@ -15665,3 +15684,131 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 .page--portal .rail-card--badge .sp-badge__progress .sp-progress {
   display: block;
 }
+
+/* ── assigned-to-you, portal home (SKI-227) ──────────────────────────────── */
+
+.assigned { margin: 0 0 28px; }
+.assigned__head { margin-bottom: 12px; }
+.assigned__heading {
+  margin: 0 0 2px;
+  font-size: var(--app-text-lg-font-size);
+  line-height: var(--app-text-lg-line-height);
+  font-weight: var(--weight-semibold);
+}
+.assigned__sub {
+  margin: 0;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-sm-font-size);
+}
+.assigned__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.assigned-card {
+  background: var(--surface-box);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.assigned-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.assigned-card__title {
+  margin: 0;
+  font-size: var(--app-text-md-font-size);
+  font-weight: var(--weight-semibold);
+}
+/* Amber, never red. An overdue warm-up is a nudge, not a failure. */
+.assigned-card__due {
+  font-size: var(--app-text-xxs-font-size);
+  line-height: var(--app-text-xxs-line-height);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--surface-text-muted);
+  white-space: nowrap;
+}
+.assigned-card__due--late {
+  background: rgb(214 122 32 / 18%);
+  color: #ffb454;
+  border: 1px solid rgb(214 122 32 / 38%);
+}
+.assigned-card__from,
+.assigned-card__progress {
+  margin: 0;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-xs-font-size);
+}
+.assigned-card__note {
+  margin: 4px 0;
+  font-size: var(--app-text-sm-font-size);
+  font-style: italic;
+  color: var(--surface-text);
+}
+.assigned-card__actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+.assigned-card__start {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, #4f7cff, #7c5cf6);
+  color: #fff;
+  text-decoration: none;
+  font-size: var(--app-text-sm-font-size);
+  font-weight: var(--weight-semibold);
+}
+.assigned-card__start:hover { filter: brightness(1.08); }
+.assigned-card__dismiss {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--surface-text-muted);
+  font-family: inherit;
+  font-size: var(--app-text-sm-font-size);
+  cursor: pointer;
+}
+.assigned-card__dismiss:hover { color: var(--surface-text); text-decoration: underline; }
+/* Settings → Email (SKI-234): one row per kind of email, switch on the right. */
+.pp-email-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: min(100%, 360px); }
+.pp-email-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+
+/* The email opt-in form (SKI-265): Settings → Email and the results-dialog card. */
+.email-capture { display: grid; gap: 16px; min-width: min(100%, 360px); max-width: 480px; }
+.email-capture__group { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.email-capture__group legend { padding: 0; margin-bottom: 8px; }
+.email-capture__options { display: grid; gap: 10px; }
+.email-capture__options--inline { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.email-capture__option { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.email-capture__option--block { align-items: flex-start; }
+.email-capture__option input { accent-color: #7c5cf6; width: 16px; height: 16px; margin: 2px 0 0; flex: none; }
+.email-capture__input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-box);
+  color: var(--surface-text);
+  font: inherit;
+  font-size: var(--app-text-sm-font-size);
+}
+.email-capture__input:hover { border-color: var(--surface-border-hover); }
+.email-capture__input:focus-visible { outline: 2px solid #7c5cf6; outline-offset: 1px; }
+.email-capture__actions { display: grid; gap: 8px; justify-items: start; }
+.email-capture__done { display: grid; gap: 6px; justify-items: start; max-width: 480px; }
+.email-prompt-card { display: grid; gap: 12px; }
+/* Settings → Email → When (SKI-272): label on the left, select on the right. */
+.email-schedule { min-width: min(100%, 360px); max-width: 520px; }
+.email-schedule__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.email-schedule__select { width: auto; min-width: 11rem; max-width: 100%; }
+.email-prompt-card__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* On a playbook's own page: the coach's context above the hero. */
+.assigned-card--detail { margin-bottom: 16px; }

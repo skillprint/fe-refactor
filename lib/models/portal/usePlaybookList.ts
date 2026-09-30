@@ -5,7 +5,14 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { PlaybookListResponse, PlaybookSummary, generateMockPlaybookList, normalizePlaybookSummary } from './Playbooks';
 import { portalFetch } from './portalFetch';
 
-/** Authored playbooks first, then the player's generated weak-dimension playbooks. */
+/**
+ * Authored playbooks first, then the player's generated weak-dimension playbooks.
+ *
+ * Coach-assigned entries (SKI-224) are dropped here. The API lists them first,
+ * and the home widget features the first playbook in this list, so passing them
+ * through would quietly change what every existing surface shows. They have
+ * their own hook, `useAssignedPlaybooks`, and their own section on the home.
+ */
 export function usePlaybookList(useSyntheticData: boolean = false) {
   const { userToken } = useUserSession();
   const [data, setData] = useState<PlaybookSummary[] | null>(null);
@@ -23,7 +30,11 @@ export function usePlaybookList(useSyntheticData: boolean = false) {
     setError(null);
     try {
       const json = await portalFetch<PlaybookListResponse>('/playbooks/', userToken);
-      setData((json.playbooks || []).map(normalizePlaybookSummary));
+      setData(
+        (json.playbooks || [])
+          .filter((raw) => raw.source !== 'assigned')
+          .map(normalizePlaybookSummary),
+      );
     } catch (err: any) {
       console.error('Failed to fetch playbooks:', err);
       setError(err);

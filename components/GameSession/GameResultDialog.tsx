@@ -5,6 +5,7 @@ import { SkillScores, MoodScores } from '../../app/lib/skillprintSdk';
 import { submitMoodSurvey } from '../../app/api/api';
 import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
 import { titleFromSlug } from '../../lib/skillIcons';
+import EmailPromptCard from '../../app/components/EmailPromptCard';
 
 interface ResultMetric {
   name: string;
@@ -20,67 +21,94 @@ interface ResultMetric {
 
 const displayName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug(slug);
 
+/**
+ * How the session ended, as far as the game told us. `complete`: the game
+ * reported its end (game over, level done). `exited`: the player left while the
+ * game said it was still running. `unknown`: the game reports neither, so we
+ * can't say.
+ */
+export type SessionOutcome = 'complete' | 'exited' | 'unknown';
+
+const OUTCOME_LABELS: Record<SessionOutcome, string> = {
+  complete: 'Game complete',
+  exited: 'Ended early',
+  unknown: 'Session ended',
+};
+
 interface GameResultDialogProps {
   gameTitle: string;
-  score: number;
+  /** The game's own points; undefined when the game didn't report one. */
+  score?: number;
+  /** Dev only: the previous best to compare against. Real sessions use the backend's. */
   highScore?: number;
+  outcome?: SessionOutcome;
   duration: number; // in seconds
   adjustmentsCount: number;
   targetMood: string;
+  /** Mood slug the session targeted, for the survey. Defaults to targetMood lowercased. */
+  targetMoodSlug?: string;
   onReplay: () => void;
   skillScores?: SkillScores;
   moodScores?: MoodScores;
   gameSlug?: string;
   userToken?: string | null;
   sessionId?: string;
+  /** False when the backend never accepted the session, so the survey mustn't reference it. */
+  sessionRecorded?: boolean;
   /** Dev only: render the mock session (includes an estimated score) instead of fetching. */
   useSyntheticData?: boolean;
+  /** Dev only: show the email prompt whatever the session count (SKI-265). */
+  forceEmailPrompt?: boolean;
 }
 
 export default function GameResultDialog({
   gameTitle,
   score,
   highScore = 0,
+  outcome = 'unknown',
   duration,
   adjustmentsCount,
   targetMood,
+  targetMoodSlug,
   onReplay,
   skillScores,
   moodScores,
   gameSlug,
   userToken,
   sessionId,
-  useSyntheticData = false
+  sessionRecorded = true,
+  useSyntheticData = false,
+  forceEmailPrompt = false
 }: GameResultDialogProps) {
   const { data: session, isProcessing } = useComputedGameMetrics(sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
+  const [surveyError, setSurveyError] = useState<string | null>(null);
   // SKI-140: skills the game did not exercise stay behind a toggle by default.
   const [showAllSkills, setShowAllSkills] = useState(false);
 
+  // Guests may answer too (the backend stores user=null), so only the game is required.
+  // A failure is shown, never swallowed: a lost answer has to be visible.
   const handleSurveySubmit = async (score: number) => {
-    if (!gameSlug || !userToken) {
-      // If we don't have the necessary data, just simulate success for the UI
-      setIsSubmittingSurvey(true);
-      setTimeout(() => {
-        setSurveySubmitted(true);
-        setIsSubmittingSurvey(false);
-      }, 500);
+    if (!gameSlug) {
+      console.error('Mood survey not sent: no game slug');
+      setSurveyError('We couldn’t save your answer.');
       return;
     }
 
     setIsSubmittingSurvey(true);
+    setSurveyError(null);
     try {
       await submitMoodSurvey({
         score,
-        game: gameSlug.toLowerCase(),
-        mood: targetMood
+        game: gameSlug,
+        mood: targetMoodSlug || targetMood.toLowerCase(),
+        ...(sessionId && sessionRecorded ? { session: sessionId } : {})
       }, userToken);
       setSurveySubmitted(true);
     } catch (error) {
-      console.error('Failed to submit survey:', error);
-      // Still show submitted to prevent getting stuck
-      setSurveySubmitted(true);
+      console.error('Failed to submit mood survey:', error);
+      setSurveyError('We couldn’t save your answer. Try again.');
     } finally {
       setIsSubmittingSurvey(false);
     }
@@ -99,8 +127,12 @@ export default function GameResultDialog({
     return 'red';
   };
 
-  const scoreDiff = score - highScore;
-  const isNewBest = score > highScore && highScore > 0;
+  // The backend knows the player's earlier scores in this game; null means none of
+  // them had a score, so this one is the first to compare against.
+  const previousBest = session?.previousBestScore ?? (highScore > 0 ? highScore : null);
+  const hasScore = typeof score === 'number';
+  const scoreDiff = hasScore && previousBest !== null ? score - previousBest : 0;
+  const isNewBest = hasScore && previousBest !== null && score > previousBest;
 
   // Skill scores (SKI-132). The session endpoint is the source of truth: when a
   // game emitted no cognition scores the backend substitutes estimates flagged
@@ -197,8 +229,8 @@ export default function GameResultDialog({
         <div className="popup__content scrollbar-violet relative">
           
           <div className="layout-flex items-start justify-between gap-2xl">
-            <span className="ui-label game-result__status layout-inline-flex items-center gap-md">
-              <i className="radius-round"></i>Game complete
+            <span className="ui-label game-result__status layout-inline-flex items-center gap-md" data-outcome={outcome}>
+              <i className="radius-round"></i>{OUTCOME_LABELS[outcome]}
             </span>
             <Link 
               href="/games"
@@ -243,6 +275,12 @@ export default function GameResultDialog({
                   <span className="font-sm weight-medium">Thanks for your feedback!</span>
                 </div>
               ) : (
+                <>
+                {surveyError && (
+                  <p className="margin-none font-sm" role="alert" style={{ color: 'var(--skills-pink-500)' }}>
+                    {surveyError}
+                  </p>
+                )}
                 <div className="layout-flex gap-md wrap" role="group">
                   <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="-1" type="button" onClick={() => handleSurveySubmit(-1)}>
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-down"></use></svg>
@@ -257,6 +295,7 @@ export default function GameResultDialog({
                     <span data-stage-answer-up>More {targetMood.toLowerCase()}</span>
                   </button>
                 </div>
+                </>
               )}
             </div>
             <p className="game-result__note margin-none font-xs leading-xs">Your scores may continue to update after playing.</p>
@@ -272,13 +311,15 @@ export default function GameResultDialog({
                   </span>
                 )}
               </div>
-              <strong className="game-result__score-value layout-block">{score.toLocaleString()}</strong>
+              <strong className="game-result__score-value layout-block">{hasScore ? score.toLocaleString() : '—'}</strong>
               {/* SKI-140: the number is the game's own points, not a mark out of
                   100 like the skill scores below, so say which scale it is on. */}
               <span className="game-result__score-note layout-block font-sm">
-                {highScore > 0
-                  ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${highScore.toLocaleString()}`
-                  : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
+                {!hasScore
+                  ? `${gameTitle} doesn't report a score to Skillprint. Your skill scores below come from how you played.`
+                  : previousBest !== null
+                    ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${previousBest.toLocaleString()}`
+                    : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
               </span>
             </div>
             
@@ -343,6 +384,8 @@ export default function GameResultDialog({
             </div>
             {moodsData.length === 0 && renderEmpty(isProcessing ? 'Reading the mood this session moved.' : 'No mood scores were recorded for this session.')}
           </section>
+
+          <EmailPromptCard force={forceEmailPrompt} />
 
         </div>
         
