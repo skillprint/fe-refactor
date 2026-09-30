@@ -2,6 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { setCookie, deleteCookie } from '../utils/cookieUtils';
+import { clearPlayerSession } from '../../lib/models/portal/playerSession';
+import { holdToken } from '../../lib/models/portal/sharedToken';
+import type { GoogleSignInResult } from '../../lib/models/portal/googleSignIn';
 
 type AuthStatus = 'loggedOut' | 'guest' | 'social' | 'partner';
 
@@ -10,7 +13,26 @@ interface AuthContextType {
     isLoading: boolean;
     userProfile: { firstName: string; picture?: string } | null;
     loginAsGuest: () => void;
-    loginWithSocialId: (socialId: string, profile: { firstName: string; picture?: string }) => void;
+    /**
+     * A sign-in the backend verified and resolved to an account (Google,
+     * SKI-264): this browser becomes that account from now on.
+     */
+    completeGoogleSignIn: (result: GoogleSignInResult, picture?: string) => void;
+    /**
+     * Make this browser the account a verified link signed it in as (an email
+     * confirmation link, SKI-265). A signed-out browser becomes a guest; a
+     * signed-in one keeps its status and name.
+     */
+    adoptAccount: (internalId: string, token: string) => void;
+    /**
+     * A provider whose token the backend does not verify yet (Facebook,
+     * LinkedIn): the browser stays the guest it is and just shows the name.
+     * `reportedEmail` is held in memory only, to prefill the email prompt;
+     * it is never trusted and never stored.
+     */
+    loginWithProfile: (profile: { firstName: string; picture?: string }, reportedEmail?: string) => void;
+    /** The address an unverified provider reported this page load, if any. */
+    reportedEmail: string | null;
     logout: () => void;
 }
 
@@ -27,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [status, setStatus] = useState<AuthStatus>('loggedOut');
     const [isLoading, setIsLoading] = useState(true);
     const [userProfile, setUserProfile] = useState<{ firstName: string; picture?: string } | null>(null);
+    const [reportedEmail, setReportedEmail] = useState<string | null>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -111,27 +134,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         setStatus('loggedOut');
         setUserProfile(null);
+        setReportedEmail(null);
         safeStorage.setItem('auth_status', 'loggedOut');
         safeStorage.removeItem('user_profile');
         safeStorage.removeItem('org_token');
+        clearPlayerSession();
         safeStorage.removeItem('user_id');
         safeStorage.removeItem('userId');
         deleteCookie('user_id');
         deleteCookie('ftue_completed');
     };
 
-    const loginWithSocialId = (socialId: string, profile: { firstName: string; picture?: string }) => {
+    const switchIdentity = (internalId: string, token: string) => {
+        // The account's internalId is this browser's identity from now on:
+        // useUserSession and the SDK read `userId`, legacy routes the cookie.
+        safeStorage.setItem('userId', internalId);
+        safeStorage.setItem('user_id', internalId);
+        setCookie('user_id', internalId);
+        // A token cached for the previous guest must not outlive the switch.
+        safeStorage.removeItem('userToken');
+        holdToken(`guest:${internalId}`, token);
+    };
+
+    const adoptAccount = (internalId: string, token: string) => {
+        const switching = safeStorage.getItem('userId') !== internalId;
+        switchIdentity(internalId, token);
+        // A different account's name must not carry over to this one.
+        if (status === 'loggedOut' || (switching && status === 'social')) {
+            setStatus('guest');
+            setUserProfile(null);
+            safeStorage.setItem('auth_status', 'guest');
+            safeStorage.removeItem('user_profile');
+        }
+    };
+
+    const completeGoogleSignIn = (result: GoogleSignInResult, picture?: string) => {
+        const profile = { firstName: result.firstName || 'Player', picture };
+        switchIdentity(result.internalId, result.token);
         setStatus('social');
         setUserProfile(profile);
         safeStorage.setItem('auth_status', 'social');
         safeStorage.setItem('user_profile', JSON.stringify(profile));
-        safeStorage.setItem('user_id', socialId); // Added to sync with localStorage
-        // Treat the socialId as the local user_id setting so the profile data fetches properly
-        setCookie('user_id', socialId);
+    };
+
+    const loginWithProfile = (profile: { firstName: string; picture?: string }, email?: string) => {
+        // No identity change: a provider id the backend has not verified is
+        // not a credential, so it must not become this browser's userId.
+        setStatus('social');
+        setUserProfile(profile);
+        setReportedEmail(email || null);
+        safeStorage.setItem('auth_status', 'social');
+        safeStorage.setItem('user_profile', JSON.stringify(profile));
     };
 
     return (
-        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, loginWithSocialId, logout }}>
+        <AuthContext.Provider value={{ status, isLoading, userProfile, loginAsGuest, completeGoogleSignIn, adoptAccount, loginWithProfile, reportedEmail, logout }}>
             {children}
         </AuthContext.Provider>
     );

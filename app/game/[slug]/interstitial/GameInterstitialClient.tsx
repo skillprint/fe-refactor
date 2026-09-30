@@ -69,12 +69,15 @@ export default function GameInterstitialClient({ slug }: GameInterstitialClientP
     const searchParams = useSearchParams();
     const source = searchParams.get('source');
     const playbookId = searchParams.get('playbookId');
+    // The email a player came from (SKI-271), for the session's attribution.
+    const nid = searchParams.get('nid');
 
     const handleStartGame = () => {
         setIsLoading(true);
         const params = new URLSearchParams();
         if (source) params.set('source', source);
         if (playbookId) params.set('playbookId', playbookId);
+        if (nid) params.set('nid', nid);
 
         const queryString = params.toString();
         const url = `/game/${encodeURIComponent(decodedSlug)}${queryString ? `?${queryString}` : ''}`;

@@ -1,0 +1,616 @@
+/*
+ * Coach surface styles (SKI-212).
+ *
+ * Deliberately a separate stylesheet with its own `coach-` prefix rather than
+ * reusing `portal-` classes. The two surfaces share design *tokens* — the same
+ * palette, type scale and radii, so they look like one product — but not
+ * component classes, so restyling the coach dashboard cannot move a pixel in
+ * the player portal.
+ */
+
+.coach-app {
+  min-height: 100vh;
+  background: var(--surface-canvas);
+  color: var(--surface-text);
+  font-family: var(--skillprint-font-ui);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── mock banner ─────────────────────────────────────────────────────────── */
+
+.coach-mockbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  background: #7a4b00;
+  color: #ffe9c2;
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+.coach-mockbar strong { font-weight: var(--weight-semibold); }
+.coach-mockbar code {
+  font-family: var(--skillprint-font-mono);
+  background: rgb(0 0 0 / 25%);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ── chrome ──────────────────────────────────────────────────────────────── */
+
+.coach-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-panel);
+  flex-wrap: wrap;
+}
+.coach-brand { display: flex; align-items: center; gap: 10px; font-weight: var(--weight-semibold); }
+.coach-brand__mark {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: linear-gradient(140deg, #4f7cff, #8b5cf6);
+  display: grid; place-items: center; color: #fff; font-size: 13px;
+}
+.coach-brand__org {
+  color: var(--surface-text-muted);
+  font-weight: var(--weight-regular);
+  font-size: var(--app-text-sm-font-size);
+}
+.coach-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.coach-nav a {
+  padding: 6px 12px; border-radius: 8px; text-decoration: none;
+  color: var(--surface-text-muted); font-size: var(--app-text-sm-font-size);
+}
+.coach-nav a:hover { background: var(--surface-raised); color: var(--surface-text); }
+.coach-nav a[aria-current='page'] { background: var(--surface-strong); color: var(--surface-text); }
+
+.coach-content { padding: 24px 20px 64px; max-width: 1180px; width: 100%; margin: 0 auto; }
+
+.coach-pagehead { margin-bottom: 20px; }
+.coach-pagehead h1 {
+  font-size: var(--app-display-sm-font-size);
+  line-height: var(--app-display-sm-line-height);
+  letter-spacing: var(--app-title-tracking);
+  font-weight: var(--app-heading-weight);
+  margin: 0 0 4px;
+}
+.coach-pagehead p { margin: 0; color: var(--surface-text-muted); font-size: var(--app-text-sm-font-size); }
+.coach-back {
+  display: inline-block; margin-bottom: 10px; color: var(--surface-text-muted);
+  text-decoration: none; font-size: var(--app-text-sm-font-size);
+}
+.coach-back:hover { color: var(--surface-text); }
+
+/* ── panels and tiles ────────────────────────────────────────────────────── */
+
+.coach-panel {
+  background: var(--surface-box);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.coach-panel__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.coach-panel__head h2 {
+  margin: 0; font-size: var(--app-text-lg-font-size);
+  line-height: var(--app-text-lg-line-height); font-weight: var(--weight-semibold);
+}
+.coach-panel__note { margin: 0; color: var(--surface-text-muted); font-size: var(--app-text-xs-font-size); }
+
+.coach-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.coach-tile {
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px; padding: 14px;
+}
+.coach-tile__label {
+  color: var(--surface-text-muted); font-size: var(--app-text-xs-font-size);
+  text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px;
+}
+.coach-tile__value {
+  font-size: var(--app-display-xs-font-size); line-height: var(--app-display-xs-line-height);
+  font-weight: var(--weight-semibold); margin: 0;
+}
+.coach-tile__value--warn { color: #ffb454; }
+.coach-tile__hint { margin: 4px 0 0; color: var(--surface-text-muted); font-size: var(--app-text-xs-font-size); }
+
+/* ── team cards ──────────────────────────────────────────────────────────── */
+
+.coach-teamgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.coach-teamcard {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--surface-box); border: 1px solid var(--surface-border);
+  border-radius: 14px; padding: 18px; transition: border-color .15s ease, transform .15s ease;
+}
+.coach-teamcard:hover { border-color: var(--surface-border-hover); transform: translateY(-1px); }
+.coach-teamcard h3 { margin: 0 0 2px; font-size: var(--app-text-md-font-size); font-weight: var(--weight-semibold); }
+.coach-teamcard__season { margin: 0 0 14px; color: var(--surface-text-muted); font-size: var(--app-text-xs-font-size); }
+
+/* ── table ───────────────────────────────────────────────────────────────── */
+
+.coach-tablewrap { overflow-x: auto; }
+.coach-table { width: 100%; border-collapse: collapse; font-size: var(--app-text-sm-font-size); }
+.coach-table th, .coach-table td {
+  text-align: left; padding: 10px 12px;
+  border-bottom: 1px solid var(--surface-border); white-space: nowrap;
+}
+.coach-table th {
+  color: var(--surface-text-muted); font-weight: var(--weight-medium);
+  font-size: var(--app-text-xs-font-size); text-transform: uppercase; letter-spacing: .04em;
+}
+.coach-table tbody tr:hover { background: var(--surface-raised); }
+.coach-table td.num { font-variant-numeric: tabular-nums; }
+.coach-table a { color: inherit; text-decoration: none; font-weight: var(--weight-medium); }
+.coach-table a:hover { text-decoration: underline; }
+
+.coach-pill {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: var(--app-text-xxs-font-size); line-height: var(--app-text-xxs-line-height);
+  border: 1px solid transparent; white-space: nowrap;
+}
+.coach-pill--active { background: rgb(52 168 110 / 18%); color: #6ee7a8; border-color: rgb(52 168 110 / 35%); }
+.coach-pill--lapsed { background: rgb(214 122 32 / 18%); color: #ffb454; border-color: rgb(214 122 32 / 38%); }
+.coach-pill--quiet  { background: var(--surface-strong); color: var(--surface-text-muted); }
+.coach-pill--never  { background: var(--surface-strong); color: var(--surface-text-muted); }
+.coach-pill--locked { background: var(--surface-strong); color: var(--surface-text-muted); }
+
+.coach-dim { display: inline-flex; gap: 6px; align-items: baseline; }
+.coach-dim__value { font-variant-numeric: tabular-nums; color: var(--surface-text-muted); }
+
+/* ── states ──────────────────────────────────────────────────────────────── */
+
+.coach-state {
+  border: 1px dashed var(--surface-border);
+  border-radius: 12px; padding: 22px; text-align: center; color: var(--surface-text-muted);
+  font-size: var(--app-text-sm-font-size);
+}
+.coach-state h3 {
+  margin: 0 0 6px; color: var(--surface-text);
+  font-size: var(--app-text-md-font-size); font-weight: var(--weight-semibold);
+}
+.coach-state p { margin: 0 auto; max-width: 52ch; }
+.coach-state--error { border-style: solid; border-color: rgb(220 80 80 / 45%); }
+.coach-state--consent { border-color: rgb(214 122 32 / 45%); }
+
+.coach-skeleton {
+  height: 12px; border-radius: 6px; background: var(--surface-raised);
+  animation: coach-pulse 1.4s ease-in-out infinite;
+}
+@keyframes coach-pulse { 0%, 100% { opacity: .45 } 50% { opacity: .85 } }
+
+/* ── sparkline ───────────────────────────────────────────────────────────── */
+
+.coach-spark { display: block; width: 100%; height: 44px; overflow: visible; }
+.coach-spark path { fill: none; stroke: #6f9dff; stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.coach-spark .coach-spark__fill { fill: rgb(111 157 255 / 13%); stroke: none; }
+
+.coach-serieslist { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.coach-series { background: var(--surface-raised); border: 1px solid var(--surface-border); border-radius: 12px; padding: 12px; }
+.coach-series__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.coach-series__name { font-size: var(--app-text-sm-font-size); font-weight: var(--weight-medium); text-transform: capitalize; }
+.coach-series__value { font-variant-numeric: tabular-nums; color: var(--surface-text-muted); font-size: var(--app-text-xs-font-size); }
+
+/* ── misc ────────────────────────────────────────────────────────────────── */
+
+.coach-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.coach-controls select {
+  background: var(--surface-raised); color: var(--surface-text);
+  border: 1px solid var(--surface-border); border-radius: 8px;
+  padding: 5px 9px; font-size: var(--app-text-xs-font-size); font-family: inherit;
+}
+.coach-meta { color: var(--surface-text-muted); font-size: var(--app-text-xs-font-size); }
+
+/* ── credential screens (SKI-213) ────────────────────────────────────────── */
+
+.coach-auth {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+}
+.coach-auth__card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface-box);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 28px;
+}
+.coach-auth__title {
+  margin: 0 0 6px;
+  font-size: var(--app-display-xs-font-size);
+  line-height: var(--app-display-xs-line-height);
+  font-weight: var(--app-heading-weight);
+  letter-spacing: var(--app-title-tracking);
+}
+.coach-auth__intro {
+  margin: 0 0 20px;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+.coach-auth__footer { margin-top: 18px; text-align: center; }
+.coach-auth__link {
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-sm-font-size);
+  text-decoration: none;
+}
+.coach-auth__link:hover { color: var(--surface-text); text-decoration: underline; }
+.coach-auth__sandbox {
+  margin: 18px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgb(122 75 0 / 28%);
+  border: 1px solid rgb(214 122 32 / 38%);
+  color: #ffd79a;
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+.coach-auth__sandbox code {
+  font-family: var(--skillprint-font-mono);
+  background: rgb(0 0 0 / 25%);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.coach-field { margin-bottom: 14px; }
+.coach-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--app-text-sm-font-size);
+  font-weight: var(--weight-medium);
+}
+.coach-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font-family: inherit;
+  font-size: var(--app-text-sm-font-size);
+}
+.coach-field input:focus {
+  outline: 2px solid #6f9dff;
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.coach-field__hint {
+  margin: 5px 0 0;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-xs-font-size);
+}
+
+.coach-formerror {
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgb(220 80 80 / 14%);
+  border: 1px solid rgb(220 80 80 / 42%);
+  color: #ff9d9d;
+  font-size: var(--app-text-sm-font-size);
+}
+
+.coach-submit {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 9px;
+  border: none;
+  background: linear-gradient(140deg, #4f7cff, #7c5cf6);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--app-text-sm-font-size);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+.coach-submit:hover:not(:disabled) { filter: brightness(1.08); }
+.coach-submit:disabled { opacity: .6; cursor: progress; }
+
+.coach-nav__who {
+  padding: 6px 10px;
+  color: var(--surface-text-muted);
+  font-size: var(--app-text-sm-font-size);
+}
+.coach-nav__signout {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: transparent;
+  color: var(--surface-text-muted);
+  font-family: inherit;
+  font-size: var(--app-text-sm-font-size);
+  cursor: pointer;
+}
+.coach-nav__signout:hover { background: var(--surface-raised); color: var(--surface-text); }
+
+/* ── builder and assignment (SKI-225, SKI-226) ───────────────────────────── */
+
+.coach-pagehead--split {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.coach-submit--inline { width: auto; padding: 8px 14px; text-decoration: none; display: inline-block; }
+.coach-submit--ghost {
+  background: transparent;
+  border: 1px solid var(--surface-border);
+  color: var(--surface-text);
+}
+.coach-actions { display: flex; gap: 10px; justify-content: flex-end; margin: 4px 0 8px; flex-wrap: wrap; }
+
+.coach-field textarea {
+  width: 100%; padding: 10px 12px; border-radius: 9px;
+  border: 1px solid var(--surface-border); background: var(--surface-raised);
+  color: var(--surface-text); font-family: inherit;
+  font-size: var(--app-text-sm-font-size); resize: vertical;
+}
+.coach-field select {
+  width: 100%; padding: 10px 12px; border-radius: 9px;
+  border: 1px solid var(--surface-border); background: var(--surface-raised);
+  color: var(--surface-text); font-family: inherit; font-size: var(--app-text-sm-font-size);
+}
+
+.coach-sequence { list-style: none; margin: 0; padding: 0; }
+.coach-sequence__item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border: 1px solid var(--surface-border); border-radius: 10px;
+  background: var(--surface-raised); margin-bottom: 8px;
+}
+.coach-sequence__pos {
+  width: 24px; height: 24px; flex: none; border-radius: 7px;
+  background: var(--surface-strong); display: grid; place-items: center;
+  font-size: var(--app-text-xs-font-size); font-variant-numeric: tabular-nums;
+}
+.coach-sequence__name { flex: 1; font-size: var(--app-text-sm-font-size); }
+.coach-sequence__controls { display: flex; gap: 4px; }
+.coach-sequence__controls button {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--surface-border); background: transparent;
+  color: var(--surface-text-muted); cursor: pointer; font-size: 13px;
+}
+.coach-sequence__controls button:hover:not(:disabled) { background: var(--surface-strong); color: var(--surface-text); }
+.coach-sequence__controls button:disabled { opacity: .35; cursor: not-allowed; }
+
+.coach-picker { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.coach-picker button {
+  width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--surface-border); background: transparent;
+  color: inherit; cursor: pointer; font-family: inherit;
+  display: flex; justify-content: space-between; gap: 12px; align-items: baseline;
+}
+.coach-picker button:hover { background: var(--surface-raised); border-color: var(--surface-border-hover); }
+.coach-picker__name { font-size: var(--app-text-sm-font-size); font-weight: var(--weight-medium); }
+
+.coach-choice { display: flex; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
+.coach-choice label,
+.coach-checklist label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: var(--app-text-sm-font-size); cursor: pointer;
+}
+.coach-checklist { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.coach-checklist li { padding: 7px 10px; border-radius: 8px; background: var(--surface-raised); }
+
+.coach-teamcard__row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ── narrow screens ──────────────────────────────────────────────────────── */
+
+/*
+ * A coach checking the squad between matches is on a phone, which the builder's
+ * button-based reordering was chosen for — but the layout around it was never
+ * checked at that width, and three things were wrong:
+ *
+ *  1. the mock banner took a quarter of the viewport before any content;
+ *  2. the header wrapped into four rows;
+ *  3. the roster showed three of six columns behind an undiscoverable
+ *     horizontal scroll.
+ */
+@media (max-width: 640px) {
+  /* The banner has to stay visible — mock data that looks real is the thing it
+     exists to prevent — but it does not need five lines to say so. */
+  .coach-mockbar {
+    padding: 6px 16px;
+    gap: 6px;
+    font-size: var(--app-text-xxs-font-size);
+    line-height: var(--app-text-xxs-line-height);
+  }
+  .coach-mockbar__long { display: none; }
+
+  .coach-top { padding: 10px 16px; gap: 8px; }
+  .coach-brand { font-size: var(--app-text-sm-font-size); }
+  /* The org name is useful context, not navigation; it costs a whole row. */
+  .coach-brand__org { display: none; }
+  .coach-nav { width: 100%; justify-content: flex-start; gap: 2px; }
+  .coach-nav a { padding: 6px 9px; }
+  .coach-nav__who { display: none; }
+  .coach-nav__signout { margin-left: auto; }
+
+  .coach-content { padding: 16px 16px 48px; }
+  .coach-pagehead h1 {
+    font-size: var(--app-display-xs-font-size);
+    line-height: var(--app-display-xs-line-height);
+  }
+  .coach-panel { padding: 14px; border-radius: 12px; }
+
+  /* Tighter cells fit two more columns before the scroll starts. */
+  .coach-table { font-size: var(--app-text-xs-font-size); }
+  .coach-table th,
+  .coach-table td { padding: 8px 6px; }
+  /* The recency pill carries the label and the number; on a phone the number
+     is the part that matters and the word is inferable from the colour. */
+  .coach-pill { padding: 2px 6px; }
+
+  /*
+   * The dimension columns are analysis; the triage question a coach opens this
+   * on a phone to answer is "who has gone quiet", which is the first three
+   * columns. Hidden rather than scrolled-to, and they come back on any wider
+   * screen. Not hidden from assistive tech elsewhere — the player page carries
+   * the same figures in full.
+   */
+  .coach-table--triage th:nth-child(n + 5),
+  .coach-table--triage td:nth-child(n + 5) { display: none; }
+
+  /*
+   * The assignment table cannot use the same rule: its last column is the
+   * Remind button, and hiding everything past the fourth would take the action
+   * with it. So the two timestamp columns are named directly and the action
+   * stays.
+   */
+  .coach-table--assignment th:nth-child(4),
+  .coach-table--assignment td:nth-child(4),
+  .coach-table--assignment th:nth-child(5),
+  .coach-table--assignment td:nth-child(5) { display: none; }
+
+  .coach-actions { justify-content: stretch; }
+  .coach-actions .coach-submit { flex: 1; }
+}
+
+/* A scrollable table should look scrollable. */
+.coach-tablewrap {
+  background:
+    linear-gradient(to right, var(--surface-box) 30%, transparent) left / 24px 100% no-repeat,
+    linear-gradient(to left, var(--surface-box) 30%, transparent) right / 24px 100% no-repeat;
+}
+
+/* Invites (SKI-256): on a phone, who and whether they joined matter; role and
+   team are one tap away in the form that sent it. */
+@media (max-width: 640px) {
+  .coach-table--invites th:nth-child(2),
+  .coach-table--invites td:nth-child(2),
+  .coach-table--invites th:nth-child(3),
+  .coach-table--invites td:nth-child(3) { display: none; }
+  /* Email addresses are long and cannot be abbreviated; let them and the
+     "waiting until" pill wrap instead of pushing the action off-screen. */
+  .coach-table--invites td { white-space: normal; overflow-wrap: anywhere; }
+  .coach-table--invites .coach-pill { white-space: normal; }
+}
+
+/* ── Roster editing (SKI-202) ─────────────────────────────────────────── */
+.coach-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font: inherit;
+  resize: vertical;
+}
+.coach-field textarea:focus {
+  outline: 2px solid #6f9dff;
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.coach-rosteradd {
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+}
+.coach-rosteradd__results { margin-top: 14px; }
+.coach-rosteradd__results ul { margin: 6px 0 0; padding-left: 18px; }
+.coach-rosteradd__results li { margin: 3px 0; overflow-wrap: anywhere; }
+.coach-rosteradd__results li[data-status='refused'] strong { color: #ff9d9d; }
+.coach-rowactions { display: inline-flex; gap: 10px; white-space: nowrap; }
+.coach-linkbutton {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #8fb1ff;
+  font: inherit;
+  font-size: var(--app-text-sm-font-size);
+  cursor: pointer;
+}
+.coach-linkbutton:hover:not(:disabled) { text-decoration: underline; }
+.coach-linkbutton:disabled { opacity: .6; cursor: progress; }
+.coach-rowedit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.coach-rowedit input {
+  min-width: 10rem;
+  padding: 6px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font: inherit;
+}
+.coach-rowedit .coach-formerror,
+.coach-rowactions .coach-formerror { margin: 0; padding: 4px 8px; white-space: normal; }
+
+/* ── Team creation and co-coach invites ───────────────────────────────── */
+.coach-newteam { max-width: 420px; }
+.coach-newteam select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--surface-text);
+  font: inherit;
+}
+.coach-invitelist { margin: 0; padding-left: 18px; }
+.coach-invitelist li { margin: 3px 0; overflow-wrap: anywhere; }
+
+/* ── Challenges ──────────────────────────────────────────────────────────── */
+.coach-newchallenge { max-width: 520px; }
+.coach-newchallenge select { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--surface-border); background: var(--surface-raised); color: var(--surface-text); font: inherit; }
+.coach-newchallenge fieldset { border: none; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.coach-newchallenge legend { margin-bottom: 6px; font-size: var(--app-text-sm-font-size); font-weight: var(--weight-medium); }
+.coach-dates { display: flex; gap: 12px; flex-wrap: wrap; }
+.coach-dates .coach-field { flex: 1 1 140px; }
+.coach-leaderboard { list-style: none; margin: 0; padding: 0; }
+.coach-leaderboard li { display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 10px; align-items: center; padding: 7px 6px; border-bottom: 1px solid var(--surface-border); }
+.coach-leaderboard li[data-own='false'] { color: var(--surface-text-muted); }
+.coach-leaderboard__rank { font-variant-numeric: tabular-nums; font-weight: var(--weight-medium); }
+.coach-leaderboard__value { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ── Coach guide ─────────────────────────────────────────────────────────── */
+.coach-guide { max-width: 860px; line-height: 1.6; }
+.coach-guide section { margin: 0 0 34px; scroll-margin-top: 80px; }
+.coach-guide h2 { margin: 0 0 10px; font-size: var(--app-text-xl-font-size, 1.25rem); }
+.coach-guide h3 { margin: 22px 0 8px; font-size: var(--app-text-md-font-size, 1rem); }
+.coach-guide ol, .coach-guide ul { padding-left: 22px; }
+.coach-guide ul { list-style: disc; }
+.coach-guide ol { list-style: decimal; }
+.coach-guide ul ul { list-style: circle; }
+.coach-guide p { margin: 0 0 10px; }
+.coach-guide a { text-decoration: underline; text-underline-offset: 2px; }
+/* Prose tables wrap; the dashboard's tables don't. */
+.coach-guide .coach-table th, .coach-guide .coach-table td { white-space: normal; vertical-align: top; }
+.coach-guide li { margin: 5px 0; }
+.coach-guide code { padding: 1px 5px; border-radius: 5px; background: var(--surface-raised); font-size: .9em; overflow-wrap: anywhere; }
+.coach-guide__toc { margin: 0 0 28px; padding: 12px 16px; border: 1px solid var(--surface-border); border-radius: 12px; }
+.coach-guide__toc ol { margin: 0; columns: 2 220px; }
+.coach-guide__metrics td:first-child { white-space: nowrap; font-weight: var(--weight-medium); }
+
+/* A guide rendered from a Markdown document (lib/markdown.ts). */
+.coach-doc h1 {
+  font-weight: var(--app-heading-weight);
+  margin: 0 0 12px;
+  font-size: var(--app-display-sm-font-size);
+  line-height: var(--app-display-sm-line-height);
+  letter-spacing: var(--app-title-tracking);
+}
+.coach-doc h2 { margin-top: 34px; scroll-margin-top: 80px; }
+.coach-doc .md-tablewrap { overflow-x: auto; margin: 12px 0; }
+.coach-doc pre { margin: 12px 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-raised); overflow-x: auto; }
+.coach-doc pre code { padding: 0; background: none; overflow-wrap: normal; }
+.coach-doc blockquote { margin: 12px 0; padding: 4px 16px; border-left: 3px solid var(--surface-border); }
+.coach-doc .md-task { list-style: none; margin-left: -22px; }
+.coach-doc .md-task input { appearance: none; width: 14px; height: 14px; margin: 0 6px 0 0; vertical-align: -2px; border: 1.5px solid var(--surface-text-muted); border-radius: 3px; }
+.coach-doc .md-task input:checked { background: var(--surface-text-muted); }
+.coach-doc .coach-table td:first-child { white-space: nowrap; }
+.coach-doc a { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .coach-doc h1 { font-size: var(--app-display-xs-font-size); line-height: var(--app-display-xs-line-height); }
+}

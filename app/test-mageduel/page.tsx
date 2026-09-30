@@ -104,7 +104,8 @@ export default function TestMageDuelPage() {
                         skillprintClientRef.current.setLastScreenshotDataURI(base64String);
                         const fetchedResponse = await fetch(base64String);
                         const blob = await fetchedResponse.blob();
-                        skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob]);
+                        // A failed upload (e.g. the session already closed) is logged by the client.
+                        skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob]).catch(() => {});
                     }
                 } catch (e) {
                     console.error('Failed to process screenshot', e);
