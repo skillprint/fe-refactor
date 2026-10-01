@@ -1,6 +1,7 @@
 'use client';
 
 import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
+import { hasLocalGameDir } from '@/lib/localGames';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -16,7 +17,6 @@ import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
 import { getGameDetails } from './config/gameConfig';
-import { hasLocalGameDir } from '@/lib/localGames';
 import { getCookie, setCookie } from './utils/cookieUtils';
 import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from '@/components/LayoutGrid';
 import { PortalPageTitle, PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
