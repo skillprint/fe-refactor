@@ -252,6 +252,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
             }
+            // Keyboard games should take keys without a click into the frame first.
+            iframeRef.current?.focus();
         }
     };
 
