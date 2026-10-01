@@ -15538,19 +15538,18 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 
 .page--adaptive-assist .aa-start__fields .field select { width: 100%; }
 
+/* The game spans the card edge to edge, between the frame's top and bottom
+   rules; each game scales itself to the space it's given. */
 .page--adaptive-assist .aa-stage__frame--phone {
   min-height: 0;
-  padding: var(--space-12) 0;
   display: grid;
-  place-items: center;
 }
 
 .page--adaptive-assist .aa-stage__frame--phone iframe {
   position: relative;
   inset: auto;
-  width: min(375px, 100%);
+  width: 100%;
   height: 812px;
-  border-radius: var(--radius-lg);
 }
 
 .page--adaptive-assist .aa-param-list {
@@ -15667,12 +15666,6 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 /* Phone widths: the stage's tools wrap under the title, the counters wrap
    their labels, and the game frame never exceeds its card. */
 .page--adaptive-assist .aa-stage__frame--phone { grid-template-columns: minmax(0, 1fr); }
-
-.page--adaptive-assist .aa-stage__frame--phone iframe {
-  width: 100%;
-  max-width: 375px;
-  justify-self: center;
-}
 
 @media (max-width: 767px) {
   .page--adaptive-assist .aa-stage__tools { flex-wrap: wrap; }
