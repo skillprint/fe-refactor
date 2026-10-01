@@ -38,6 +38,7 @@ const GAMES: GameOption[] = [
   { slug: 'box-tower', name: 'Box Tower', art: '/assets/images/games/game-box-tower.svg', hint: 'Tap or click to drop each box.' },
   { slug: '2048', name: '2048', art: '/images/activities/covers/2048.png', hint: 'Arrow keys slide the tiles.' },
   { slug: 'simon-says', name: 'Simon Says', art: '/assets/images/games/game-simon-says.svg', hint: 'Watch the sequence, then click the tiles back in order.' },
+  { slug: 'crossy-chicken', name: 'Crossy Chicken', art: '/assets/images/games/game-chicken.svg', hint: 'Arrow keys or tap to hop. Dodge the traffic and ride the logs.' },
 ];
 
 const FLOW_SERIES: TrendSeries[] = [
