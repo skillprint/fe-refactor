@@ -55,6 +55,7 @@ export function formatEstimatedDuration(seconds: number | null | undefined): str
 /** Sum of the games' suggested durations, as the hero's "Est. time". */
 export function playbookEstimatedTime(playbook: PlaybookDetail): string {
   if (playbook.estTime) return playbook.estTime;
+  if (!playbook.games.length) return '—';
   const total = playbook.games.reduce((n, g) => n + (g.estimatedDurationSeconds || 0), 0);
   if (!total) return `${playbook.games.length * 5}–${playbook.games.length * 10} min`;
   const mins = Math.round(total / 60);

@@ -1,6 +1,7 @@
 'use client';
 
 import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
+import { hasLocalGameDir } from '@/lib/localGames';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -374,7 +375,7 @@ function HomeContent() {
     ? nextGameRecs.map(r => ({ slug: r.game.slug, name: r.game.name }))
     : recommendedGames.map((g: any) => ({ slug: g.slug, name: g.name }));
   // One entry per game: staging still carries a bare placeholder `hextris` beside the real record.
-  const nextUp = getNextUpCopy(count, dedupeByBaseSlug(nextGames.filter((g: NextUpGame) => g.slug && g.name)));
+  const nextUp = getNextUpCopy(count, dedupeByBaseSlug(nextGames.filter((g: NextUpGame) => g.slug && g.name && hasLocalGameDir(g.slug))));
 
   const flowScores = playedSessions.map(s => s.primaryScore).filter((n): n is number => typeof n === 'number');
   const flowScore = flowScores.length ? Math.round(flowScores.reduce((a, b) => a + b, 0) / flowScores.length) : null;

@@ -685,6 +685,16 @@ export const gameDetails: Record<string, GameDetails> = {
   //   skills: ['Timing', 'Precision'],
   //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
   // },
+  'mage-duel': {
+    name: 'Mage Duel',
+    description: 'Duel a dark warlord by casting spells: type each word\'s translation before he strikes.',
+    image: '/games/live/mage-duel-2d/static/assets/hero.png',
+    category: 'Language',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Verbal', 'Memory', 'Perceptual Speed'],
+    instructions: 'Type the translation of each spell word to cast it the moment it matches. Heal words restore your health; every typo is counted.'
+  },
   'line-color': {
     name: 'Line Color',
     description: 'Line Color',
