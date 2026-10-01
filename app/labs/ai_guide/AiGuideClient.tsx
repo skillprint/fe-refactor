@@ -40,6 +40,7 @@ const GAMES: GameOption[] = [
   { slug: 'simon-says', name: 'Simon Says', art: '/assets/images/games/game-simon-says.svg', hint: 'Watch the sequence, then click the tiles back in order.' },
   { slug: 'crossy-chicken', name: 'Crossy Chicken', art: '/assets/images/games/game-chicken.svg', hint: 'Arrow keys or tap to hop. Dodge the traffic and ride the logs.' },
   { slug: 'space-trip', name: 'Space Trip', art: '/assets/images/games/game-space-trip.svg', hint: 'Hold the pointer where you want to fly. Dodge rocks and grab fuel before the tank runs dry.' },
+  { slug: 'gummy-blocks', name: 'Gummy Blocks', art: '/assets/images/games/game-gummy-blocks.svg', hint: 'Drag pieces onto the board. Fill a row or column to clear it.' },
 ];
 
 const FLOW_SERIES: TrendSeries[] = [
