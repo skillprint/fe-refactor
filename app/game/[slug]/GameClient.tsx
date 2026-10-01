@@ -6,7 +6,7 @@ import { useUserSession } from '../../hooks/useUserSession';
 import PlayStage from '../../../components/GameSession/PlayStage';
 import SessionVeil from '../../../components/GameSession/SessionVeil';
 import PlayBar from '../../../components/GameSession/PlayBar';
-import GameResultDialog, { SessionOutcome } from '../../../components/GameSession/GameResultDialog';
+import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome } from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
@@ -31,6 +31,8 @@ interface GameResults {
     score?: number;
     time?: number;
     outcome: SessionOutcome;
+    /** Under MIN_SCORED_SECONDS: shown without skill or mood scores. */
+    unscored?: boolean;
 }
 
 /** What the game last told the shell about itself, from `gameState` / `GAME_SCORE_UPDATE`. */
@@ -398,6 +400,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             score: typeof data?.score === 'number' ? data.score : reportedGameStateRef.current?.score,
             time: playTime,
             outcome: 'complete',
+            unscored: playTime < MIN_SCORED_SECONDS,
         };
 
         shouldPollRef.current = false;
@@ -412,6 +415,16 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
         // Navigate to review page with sessionId
         setGameResults(results);
+        showResults(results);
+    };
+
+    // A session too short to score goes straight to the results; waiting up to
+    // 30s for scores that shouldn't exist is what made a 2s session hang.
+    const showResults = (results: GameResults) => {
+        if (results.unscored) {
+            setSequence('review');
+            return;
+        }
         setSequence('calculating');
         pollForFinalResults();
     };
@@ -460,6 +473,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 score: reported?.score,
                 time: currentTime,
                 outcome: reported?.isGameOver ? 'complete' : reported ? 'exited' : 'unknown',
+                unscored: currentTime < MIN_SCORED_SECONDS,
             };
 
             stopIframe();
@@ -470,8 +484,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             }
 
             setGameResults(exitResults);
-            setSequence('calculating');
-            pollForFinalResults();
+            showResults(exitResults);
         }
     };
 
@@ -622,6 +635,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     userToken={userToken}
                     sessionId={skillprintSessionIdRef.current}
                     sessionRecorded={sessionRecorded}
+                    unscored={gameResults.unscored}
                 />
             )}
 
