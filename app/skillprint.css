@@ -10815,6 +10815,17 @@ html .page--portal.nav-collapsed .portal-brand .brand-logo,
   background: var(--deep-navy-950);
 }
 
+/* The game stops above the play bar instead of running underneath it, so the
+   bar never covers a game's own timer or menu. Reserved in every sequence so
+   the iframe doesn't resize when play starts. */
+.page--game-session .play-field__game {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  width: 100%;
+  height: calc(100% - var(--play-bar-inset) - var(--play-bar-safe) - var(--play-bar-height));
+}
+
 
 /* --- Welcome-field carousel (re-scoped for .page--game-session) --- */
 .page--game-session .welcome-field {

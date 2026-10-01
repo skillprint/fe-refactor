@@ -662,7 +662,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     <iframe
                         ref={iframeRef}
                         src={gamePath}
-                        className="w-full h-full border-0 absolute inset-0 z-10"
+                        className="play-field__game border-0 z-10"
                         title={`${decodedSlug} Game`}
                         allowFullScreen
                         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
