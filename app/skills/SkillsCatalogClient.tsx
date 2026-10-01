@@ -15,12 +15,12 @@ import { buildSkillCatalog, featureCardProps } from '@/lib/skillCatalog';
 export default function SkillsCatalogClient() {
   const { data: taxonomy, isLoading: isTaxonomyLoading, error } = useTaxonomySkills();
   const { data: profile } = useProfileAggregate();
-  const { gamesBySkill, gamesByMood } = useGamesBySkill();
+  const { gamesBySkill, gamesByMood, isLoading: isGamesLoading } = useGamesBySkill();
 
   const scores = useMemo(() => profileDimensionMap(profile), [profile]);
   const catalog = useMemo(
-    () => buildSkillCatalog(taxonomy, gamesBySkill, gamesByMood, scores),
-    [taxonomy, gamesBySkill, gamesByMood, scores]
+    () => buildSkillCatalog(taxonomy, gamesBySkill, gamesByMood, scores, !isGamesLoading),
+    [taxonomy, gamesBySkill, gamesByMood, scores, isGamesLoading]
   );
 
   const totalSkills = catalog.reduce((n, d) => n + d.skills.length, 0);

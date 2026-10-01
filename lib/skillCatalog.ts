@@ -102,16 +102,35 @@ export function buildSkillEntry(
   };
 }
 
+/**
+ * The backend rotates each pillar's featured skill weekly without checking
+ * whether any playable game measures it. Once the games have loaded, step
+ * forward from its pick to the next skill that has games, so the featured
+ * card never says "No games in the library measure X yet". Personality is
+ * left alone: no catalogue game is tagged with a personality trait.
+ */
+function pickFeatured(dim: TaxonomyDimension, skills: SkillCatalogEntry[], gamesReady: boolean): SkillCatalogEntry | null {
+  const pick = skills.find((s) => s.featured) || skills.find((s) => s.id === dim.featuredSlug) || null;
+  if (!pick || !gamesReady || dim.pillar === 'personality' || pick.gameTiles.length > 0) return pick;
+  const start = skills.indexOf(pick);
+  for (let i = 1; i < skills.length; i++) {
+    const next = skills[(start + i) % skills.length];
+    if (next.gameTiles.length > 0) return next;
+  }
+  return pick;
+}
+
 export function buildSkillCatalog(
   taxonomy: TaxonomySkillsResponse | null | undefined,
   gamesBySkill: any[],
   gamesByMood: any[],
-  scores: Record<string, ProfileDimensionStat>
+  scores: Record<string, ProfileDimensionStat>,
+  gamesReady: boolean = true
 ): SkillCatalogDimension[] {
   if (!taxonomy) return [];
   return taxonomy.dimensions.map((dim: TaxonomyDimension) => {
     const skills = dim.skills.map((s) => buildSkillEntry(s, gamesBySkill, gamesByMood, scores));
-    const featured = skills.find((s) => s.featured) || skills.find((s) => s.id === dim.featuredSlug) || null;
+    const featured = pickFeatured(dim, skills, gamesReady);
     return {
       pillar: dim.pillar,
       title: dim.displayName || pillarLabel(dim.pillar),
