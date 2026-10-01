@@ -1,35 +1,26 @@
-window.__skillprint_speed = 1;
+// Crossy Chicken parameter shim. Expects ../../../live/_shared/skillprintC3.js,
+// which owns the game clock, screenshots and input forwarding.
+//
+// Example adjustment format expected:
+// {
+// "parameterName": "speedModifier",
+// "parameterValue": 1.2
+// }
+//
+// speedModifier (0.6-1.6, default 1) scales game time: cars, trains, logs and
+// the chicken's hop all run faster or slower. The export is minified, so its
+// event-sheet globals (CamSpeed etc.) can't be reached by name.
 
-const originalPerfNow = performance.now;
-let perfOffset = originalPerfNow.call(performance);
-let lastRealTime = perfOffset;
-
-performance.now = function () {
-    const realTime = originalPerfNow.call(performance);
-    const delta = realTime - lastRealTime;
-    perfOffset += delta * window.__skillprint_speed;
-    lastRealTime = realTime;
-    return perfOffset;
-};
-
-const originalDateNow = Date.now;
-let dateOffset = originalDateNow.call(Date);
-let lastDateRealTime = dateOffset;
-
-Date.now = function () {
-    const realTime = originalDateNow.call(Date);
-    const delta = realTime - lastDateRealTime;
-    dateOffset += delta * window.__skillprint_speed;
-    lastDateRealTime = realTime;
-    return Math.floor(dateOffset);
-};
+const SPEED_MIN = 0.6;
+const SPEED_MAX = 1.6;
 
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
         const { parameterName, parameterValue } = obj;
+        const value = Number(parameterValue);
 
-        if (parameterName === "speedModifier") {
-            window.__skillprint_speed = parameterValue;
+        if (parameterName === "speedModifier" && Number.isFinite(value)) {
+            window.SkillprintC3.setSpeed(Math.min(SPEED_MAX, Math.max(SPEED_MIN, value)));
         }
     }
 }
@@ -39,9 +30,3 @@ window.addEventListener('message', function (event) {
         window.adjustGame(event.data.data);
     }
 });
-
-window.addEventListener('keydown', function (event) {
-    if (/^[1-9]$/.test(event.key)) {
-        window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
-    }
-}, true);

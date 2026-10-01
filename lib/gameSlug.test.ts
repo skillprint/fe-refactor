@@ -40,6 +40,7 @@ test('baseSlug normalises case, spaces and legacy aliases, and leaves ordinary s
   assert.equal(baseSlug('Space Trip'), 'space-trip');
   assert.equal(baseSlug('space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20'), 'space-trip');
   assert.equal(baseSlug('0h-h1'), '0hh1');
+  assert.equal(baseSlug('crossy-chicken-1'), 'crossy-chicken');
   assert.equal(baseSlug('flapcat-steampunk-2'), 'flapcat-steampunk-2');
   assert.equal(baseSlug('sudoku-20240101'), 'sudoku-20240101');
   assert.equal(baseSlug(''), '');
@@ -52,6 +53,10 @@ const CATALOG = [
   { slug: 'mage-duel', url: null },
   { slug: 'gummy-blocks-018b6d5d-9048-40aa-b79a-b7e4435ddb9a', url: '' , external_web_url: 'https://cdn/gummy' },
 ];
+
+test('resolveCatalogGame finds an aliased record from its base slug', () => {
+  assert.equal(resolveCatalogGame('crossy-chicken', [{ slug: 'crossy-chicken-1', url: null }])?.slug, 'crossy-chicken-1');
+});
 
 test('resolveCatalogGame prefers the playable record over a bare placeholder', () => {
   assert.equal(resolveCatalogGame('hextris', CATALOG)?.slug, 'hextris-475aff99-6346-4ea4-b432-dc8aa51f2178');
