@@ -18,6 +18,7 @@ import { useLibraryGame } from '@/lib/models/portal/useLibraryGame';
 import { useLibraryPersonalStats } from '@/lib/models/portal/useLibraryPersonalStats';
 import { useLibraryCommunityStats } from '@/lib/models/portal/useLibraryCommunityStats';
 import { useTaxonomySkills } from '@/lib/models/portal/useTaxonomySkills';
+import { hasLocalGameDir } from '@/lib/localGames';
 import { allTaxonomySkills, findTaxonomySkill } from '@/lib/models/portal/TaxonomySkills';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
@@ -134,7 +135,7 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
     if (!game || !library) return [];
     const mine = new Set([...game.skills.map((s) => s.slug), ...game.moods.map((m) => m.slug)]);
     return library
-      .filter((g) => g.baseSlug !== game.baseSlug && getGameDetails(g.baseSlug))
+      .filter((g) => g.baseSlug !== game.baseSlug && hasLocalGameDir(g.baseSlug))
       .map((g) => ({ game: g, overlap: [...g.skills, ...g.moods].filter((s) => mine.has(s)).length }))
       .filter((x) => x.overlap > 0)
       .sort((a, b) => b.overlap - a.overlap)

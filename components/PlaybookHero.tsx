@@ -96,7 +96,7 @@ export function PlaybookHero({ playbook, startUrl, isFinished }: PlaybookHeroPro
                             <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
                                 <use href="#ti-play"></use>
                             </svg>
-                            <span>{isFinished ? 'Play the set again' : playbook.progress.playedGames > 0 ? 'Continue routine' : 'Start routine'}</span>
+                            <span>{playbook.games.length === 0 ? 'Browse games' : isFinished ? 'Play the set again' : playbook.progress.playedGames > 0 ? 'Continue routine' : 'Start routine'}</span>
                         </Link>
                     </div>
                 </div>

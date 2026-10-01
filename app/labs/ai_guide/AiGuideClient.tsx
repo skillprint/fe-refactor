@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback, CSSProperties } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { mapSlugToGamePath } from '../../game/[slug]/GameClient';
+import { mapSlugToGamePath } from '@/lib/localGames';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores } from '../../lib/skillprintSdk';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { resolveCatalogGame } from '@/lib/gameSlug';

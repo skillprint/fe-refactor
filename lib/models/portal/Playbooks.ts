@@ -1,4 +1,5 @@
 import type { Pillar } from '../../skillIcons';
+import { hasLocalGameDir } from '../../localGames';
 
 /** `GET /api/portal/playbooks/` and `/playbooks/{slug}/` (SKI-129). */
 
@@ -121,10 +122,18 @@ export function normalizePlaybookDetail(raw: Partial<PlaybookDetail> & { slug: s
           dismissedAt: flat.dismissedAt ?? null,
         }
       : undefined;
+  // Backend-generated playbooks can include games this frontend has no build
+  // for; their tiles would open a 404. Drop them and count progress over what's left.
+  const games = (raw.games || []).filter((g) => hasLocalGameDir(g.slug));
+  const playedGames = Math.min(base.progress.playedGames, games.length);
+  const progress: PlaybookProgress = raw.games && games.length !== raw.games.length
+    ? { totalGames: games.length, playedGames, percent: games.length ? Math.round((playedGames / games.length) * 100) : 0 }
+    : base.progress;
   return {
     ...base,
+    progress,
     assignment,
-    games: raw.games || [],
+    games,
     targetSkills: raw.targetSkills || [],
     howItWorks: raw.howItWorks ?? null,
   };
