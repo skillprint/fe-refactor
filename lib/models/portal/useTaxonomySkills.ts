@@ -5,6 +5,20 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { TaxonomySkillsResponse, generateMockTaxonomySkills } from './TaxonomySkills';
 import { portalFetch } from './portalFetch';
 
+// The backend Skill table carries an "NA" (not applicable) row used to tag
+// games that measure no skill. It isn't a skill, so it never gets a card.
+const PLACEHOLDER_SKILL_SLUGS = new Set(['na']);
+
+function withoutPlaceholderSkills(json: TaxonomySkillsResponse): TaxonomySkillsResponse {
+  return {
+    ...json,
+    dimensions: json.dimensions.map((d) => ({
+      ...d,
+      skills: d.skills.filter((s) => !PLACEHOLDER_SKILL_SLUGS.has(s.slug)),
+    })),
+  };
+}
+
 /**
  * The official skill taxonomy grouped by pillar, with one featured skill per
  * pillar (SKI-133). The endpoint is public (SPA origin), so we fetch on mount
@@ -26,7 +40,7 @@ export function useTaxonomySkills(useSyntheticData: boolean = false) {
     setError(null);
     try {
       const json = await portalFetch<TaxonomySkillsResponse>('/taxonomy/skills/', userToken);
-      setData(json);
+      setData(withoutPlaceholderSkills(json));
     } catch (err: any) {
       console.error('Failed to fetch taxonomy skills:', err);
       setError(err);
