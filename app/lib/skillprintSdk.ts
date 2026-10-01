@@ -263,8 +263,10 @@ export class SkillprintClient {
      * `inputCount` is how many player inputs the chunk covers. The backend leaves a
      * chunk with 0 out of skill scores; omit it when inputs aren't being counted.
      *
-     * `capturedAt` is when the (last) screenshot was taken, in epoch ms. It and the
-     * events queued since the last upload go with the batch, each in session time.
+     * `capturedAt` is when the (last) screenshot was taken, in epoch ms. The batch
+     * carries that time and the events logged up to it, both in session time;
+     * events logged after it wait for the next upload. This client decides which
+     * events go with which upload, so the backend does no time arithmetic.
      */
     async postScreenshots(sessionId: string, screenshots: Blob[], isLastChunk: boolean = false, gameState?: object | null, inputCount?: number | null, capturedAt?: number | null): Promise<boolean> {
         if (screenshots.length === 0 && !isLastChunk) {
@@ -296,19 +298,20 @@ export class SkillprintClient {
             while (this.timeline.pendingEvents > MAX_EVENTS_PER_UPLOAD) {
                 await this.sessions.postScreenshots(sessionId, [], false, { events: this.timeline.takeEvents() });
             }
-            const events = this.timeline.takeEvents();
+            const events = this.timeline.eventsForUpload(null);
             this.timeline.reset();
             await this.sessions.postScreenshots(sessionId, batch, true, { gameStates, inputCount, offsetsMs, events });
             return true;
         }
 
-        const events = this.timeline.takeEvents();
+        // Without a capture time there's nothing to split by; send all of them.
+        const events = this.timeline.eventsForUpload(offset);
         try {
             await this.sessions.postScreenshots(sessionId, batch, false, { gameStates, inputCount, offsetsMs, events });
         } catch (error) {
             // A network error or 5xx may pass next time; a 4xx won't.
             if (!(error instanceof SkillprintApiError && error.status < 500) && this.timeline.isStarted) {
-                this.timeline.requeue(events);
+                this.timeline.requeue(events ?? []);
             }
             throw error;
         }
