@@ -6,6 +6,13 @@ import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { titleFromSlug } from './skillIcons';
 
 export const DEFAULT_GAME_IMAGE = '/assets/images/games/game-arcade-machine.svg';
+
+/** `onError` for a game thumbnail: swap a missing image for the generic art, once. */
+export function showDefaultGameImageOnError(e: { currentTarget: HTMLImageElement }) {
+  if (e.currentTarget.getAttribute('src') !== DEFAULT_GAME_IMAGE) {
+    e.currentTarget.src = DEFAULT_GAME_IMAGE;
+  }
+}
 export const PLAYBOOK_ICON_BASE = '/assets/icons';
 
 /** Generated playbooks carry no presentation; pick one off the pillar. */

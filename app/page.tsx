@@ -16,6 +16,7 @@ import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
 import { getGameDetails } from './config/gameConfig';
+import { DEFAULT_GAME_IMAGE, showDefaultGameImageOnError } from '@/lib/playbookUtils';
 import { getCookie, setCookie } from './utils/cookieUtils';
 import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from '@/components/LayoutGrid';
 import { PortalPageTitle, PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
@@ -449,7 +450,7 @@ function HomeContent() {
                         const details = getGameDetails(session.gameSlug);
                         return (
                           <li key={session.sessionId} className="nextup-slot">
-                            <img src={details?.image || '/images/default-game.jpg'} alt={session.gameName || 'Game'} />
+                            <img src={details?.image || DEFAULT_GAME_IMAGE} alt={session.gameName || 'Game'} onError={showDefaultGameImageOnError} />
                           </li>
                         );
                       }
@@ -479,7 +480,7 @@ function HomeContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.screenshot || game.image || '/images/default-game.jpg'}
+                    image={game.screenshot || game.image || DEFAULT_GAME_IMAGE}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
@@ -509,7 +510,7 @@ function HomeContent() {
                         id={session.gameSlug}
                         title={session.gameName}
                         description={known?.description || ''}
-                        image={details?.image || '/images/default-game.jpg'}
+                        image={details?.image || DEFAULT_GAME_IMAGE}
                         url={`/game/${session.gameSlug}`}
                         skills={known?.skills ? known.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const })) : []}
                         tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
@@ -541,7 +542,7 @@ function HomeContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description || 'Check out this new game!'}
-                    image={game.screenshot || '/images/default-game.jpg'}
+                    image={game.screenshot || DEFAULT_GAME_IMAGE}
                     url={`/game/${game.slug}`}
                     statusBadge="New"
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[(i + 2) % 6]}
