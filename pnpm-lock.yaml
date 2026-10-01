@@ -81,8 +81,8 @@ importers:
         specifier: ^6.37.7
         version: 6.37.7(pg-hstore@2.3.4)(pg@8.19.0)
       skillprint-js-sdk:
-        specifier: 1.1.0-beta.7
-        version: 1.1.0-beta.7
+        specifier: 1.1.0-beta.8
+        version: 1.1.0-beta.8
       umzug:
         specifier: ^3.8.2
         version: 3.8.2(@types/node@20.19.11)
@@ -2876,8 +2876,8 @@ packages:
   simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
 
-  skillprint-js-sdk@1.1.0-beta.7:
-    resolution: {integrity: sha512-1I2kNt3tfrZQCuOndDa+IFhWAMQR5ZPU8KNCwIsXkI+AhaZV5MfizUr/MKdEdQ/SO6n94e37xwA3VSroIueKUQ==}
+  skillprint-js-sdk@1.1.0-beta.8:
+    resolution: {integrity: sha512-u863O1T4zSlzznRIcPN3EcqW1GFgdkW6Yxyz42do/9NNKrpifwoUQAjKD6fty1WwiPYuuXi0lZZ5K4wK7J1ZcA==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -6267,7 +6267,7 @@ snapshots:
       is-arrayish: 0.3.2
     optional: true
 
-  skillprint-js-sdk@1.1.0-beta.7: {}
+  skillprint-js-sdk@1.1.0-beta.8: {}
 
   slash@3.0.0: {}
 

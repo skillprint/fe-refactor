@@ -132,6 +132,10 @@ function Hex(sideLength) {
 
 		this.targetAngle = this.targetAngle - steps * 60;
 		this.lastRotate = Date.now();
+		// Keys and taps both end here, so every applied rotation is counted once.
+		if (gameState === 1) {
+			Skillprint.Rotate(steps, { score: score });
+		}
 	};
 
 	this.draw = function () {
