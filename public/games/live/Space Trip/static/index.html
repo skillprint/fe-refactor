@@ -2,15 +2,10 @@
 <html>
 <head>
 <script>
-function logEvent(params) {
-  params.messageType = 'gameEvent';
-  const paramsAsJSON = JSON.stringify(params);
-  if (globalThis.ReactNativeWebView) {
-    globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
-  } else {
-    window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
-  }
-}
+// The event sheet's script actions call logEvent (LEVEL_START, COIN_GEN, HIT...).
+// Nothing forwards these to the backend yet, so they go nowhere, as they did
+// when SkillprintLib's screenshot script redefined this.
+function logEvent(params) {}
 globalThis.logEvent = logEvent;
 </script>
 
@@ -27,8 +22,6 @@ globalThis.logEvent = logEvent;
 	<link rel="icon" type="image/png" href="icons/icon-256.png">
 
 <link rel="stylesheet" href="style.css">
-	<script src="../../SkillprintLib/html2canvas.min.js"></script>
-    <script src="../../SkillprintLib/skillprintScreenshot.js"></script>
 </head>
 <body>
 <div id="fb-root"></div>
@@ -39,10 +32,11 @@ globalThis.logEvent = logEvent;
 			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
 		</div>
 	</noscript>
+	<script src="../../_shared/skillprintC3.js"></script>
+	<script src="skillprintShim.js"></script>
 	<script src="scripts/supportcheck.js"></script>
 	<script src="scripts/offlineclient.js" type="module"></script>
 	<script src="scripts/main.js" type="module"></script>
 	<script src="scripts/register-sw.js" type="module"></script>
-	<script src="skillprintShim.js"></script>
 </body>
 </html>

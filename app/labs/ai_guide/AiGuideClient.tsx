@@ -39,6 +39,7 @@ const GAMES: GameOption[] = [
   { slug: '2048', name: '2048', art: '/images/activities/covers/2048.png', hint: 'Arrow keys slide the tiles.' },
   { slug: 'simon-says', name: 'Simon Says', art: '/assets/images/games/game-simon-says.svg', hint: 'Watch the sequence, then click the tiles back in order.' },
   { slug: 'crossy-chicken', name: 'Crossy Chicken', art: '/assets/images/games/game-chicken.svg', hint: 'Arrow keys or tap to hop. Dodge the traffic and ride the logs.' },
+  { slug: 'space-trip', name: 'Space Trip', art: '/assets/images/games/game-space-trip.svg', hint: 'Hold the pointer where you want to fly. Dodge rocks and grab fuel before the tank runs dry.' },
 ];
 
 const FLOW_SERIES: TrendSeries[] = [
