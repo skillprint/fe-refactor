@@ -6,6 +6,13 @@ import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { titleFromSlug } from './skillIcons';
 
 export const DEFAULT_GAME_IMAGE = '/assets/images/games/game-arcade-machine.svg';
+
+/** `onError` for a game thumbnail: swap a missing image for the generic art, once. */
+export function showDefaultGameImageOnError(e: { currentTarget: HTMLImageElement }) {
+  if (e.currentTarget.getAttribute('src') !== DEFAULT_GAME_IMAGE) {
+    e.currentTarget.src = DEFAULT_GAME_IMAGE;
+  }
+}
 export const PLAYBOOK_ICON_BASE = '/assets/icons';
 
 /** Generated playbooks carry no presentation; pick one off the pillar. */
@@ -48,6 +55,7 @@ export function formatEstimatedDuration(seconds: number | null | undefined): str
 /** Sum of the games' suggested durations, as the hero's "Est. time". */
 export function playbookEstimatedTime(playbook: PlaybookDetail): string {
   if (playbook.estTime) return playbook.estTime;
+  if (!playbook.games.length) return '—';
   const total = playbook.games.reduce((n, g) => n + (g.estimatedDurationSeconds || 0), 0);
   if (!total) return `${playbook.games.length * 5}–${playbook.games.length * 10} min`;
   const mins = Math.round(total / 60);

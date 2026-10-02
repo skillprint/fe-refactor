@@ -272,12 +272,16 @@ function CBoard(iX,iY,oParentContainer){
             this._checkLines();
             
             //CHECK IF MUST SPAWN NEW PIECES
+            //PIECE_TO_PLACE can change mid-round (skillprintShim.js), so refill the empty slots
+            //once at least that many are placed, never slots still holding a piece
             _iNumPiecePlaced++;
-            if(_iNumPiecePlaced === PIECE_TO_PLACE){
-                for(var k=0;k<PIECE_TO_PLACE;k++){
-                    this.spawnPieces(k,Math.floor(Math.random()*500),s_oPieceSettings.getRandPieceInfos());
+            if(_iNumPiecePlaced >= PIECE_TO_PLACE){
+                for(var k=0;k<_aCurPieces.length;k++){
+                    if(_aCurPieces[k] === null){
+                        this.spawnPieces(k,Math.floor(Math.random()*500),s_oPieceSettings.getRandPieceInfos());
+                    }
                 }
-                
+
                 _iNumPiecePlaced = 0;
             }
             

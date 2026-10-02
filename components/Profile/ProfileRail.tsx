@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { DEFAULT_GAME_IMAGE, showDefaultGameImageOnError } from '@/lib/playbookUtils';
 import EmailRailLink from '../../app/components/EmailRailLink';
 
 interface ProfileRailProps {
@@ -110,7 +111,7 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
           {recentSessions.map((session, i) => (
             <li key={session.id || i}>
               <Link className="rail-list__link" href={`/game/${session.gameSlug || session.id}`}>
-                <img className="rail-thumb" alt="" src={session.gameImage || '/images/default-game.jpg'} />
+                <img className="rail-thumb" alt="" src={session.gameImage || DEFAULT_GAME_IMAGE} onError={showDefaultGameImageOnError} />
                 <span className="rail-list__name">{session.gameName}</span>
                 <span className="rail-list__value">{session.score}</span>
               </Link>

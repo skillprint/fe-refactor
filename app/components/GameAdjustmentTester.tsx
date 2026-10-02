@@ -73,7 +73,7 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
             // 1-3 modifies velocity, 4-6 modifies perfect range, 7-9 does both.
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Very Slow
-                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 15 }]; // Default
+                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Default
                 case 3: return [{ parameterName: 'stackVelocity', parameterValue: 35 }]; // Fast
                 case 4: return [{ parameterName: 'perfectRange', parameterValue: 0.1 }];  // Extremely hard perfects
                 case 5: return [{ parameterName: 'perfectRange', parameterValue: 1 }];    // Default
@@ -218,16 +218,17 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'gummy-blocks':
+            // Easy to hard: smaller pieces and a tray that refills sooner, up to the game as designed (9).
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'PIECE_TO_PLACE', parameterValue: 1 }];
-                case 2: return [{ parameterName: 'PIECE_TO_PLACE', parameterValue: 2 }];
-                case 3: return [{ parameterName: 'PIECE_TO_PLACE', parameterValue: 3 }];
-                case 4: return [{ parameterName: 'PIECE_TO_PLACE', parameterValue: 4 }];
-                case 5: return [{ parameterName: 'PIECE_TO_PLACE', parameterValue: 5 }];
-                case 6: return [{ parameterName: 'NUM_ROWS', parameterValue: 6 }];
-                case 7: return [{ parameterName: 'NUM_ROWS', parameterValue: 8 }];
-                case 8: return [{ parameterName: 'NUM_ROWS', parameterValue: 10 }];
-                case 9: return [{ parameterName: 'NUM_ROWS', parameterValue: 12 }];
+                case 1: return [{ parameterName: 'maxPieceCells', parameterValue: 3 }, { parameterName: 'piecesToPlace', parameterValue: 1 }];
+                case 2: return [{ parameterName: 'maxPieceCells', parameterValue: 3 }, { parameterName: 'piecesToPlace', parameterValue: 2 }];
+                case 3: return [{ parameterName: 'maxPieceCells', parameterValue: 4 }, { parameterName: 'piecesToPlace', parameterValue: 1 }];
+                case 4: return [{ parameterName: 'maxPieceCells', parameterValue: 4 }, { parameterName: 'piecesToPlace', parameterValue: 2 }];
+                case 5: return [{ parameterName: 'maxPieceCells', parameterValue: 5 }, { parameterName: 'piecesToPlace', parameterValue: 2 }];
+                case 6: return [{ parameterName: 'maxPieceCells', parameterValue: 5 }, { parameterName: 'piecesToPlace', parameterValue: 3 }];
+                case 7: return [{ parameterName: 'maxPieceCells', parameterValue: 9 }, { parameterName: 'piecesToPlace', parameterValue: 1 }];
+                case 8: return [{ parameterName: 'maxPieceCells', parameterValue: 9 }, { parameterName: 'piecesToPlace', parameterValue: 2 }];
+                case 9: return [{ parameterName: 'maxPieceCells', parameterValue: 9 }, { parameterName: 'piecesToPlace', parameterValue: 3 }];
                 default:
                     return [];
             }

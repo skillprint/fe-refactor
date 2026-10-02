@@ -6,7 +6,7 @@ import { useUserSession } from '../../hooks/useUserSession';
 import PlayStage from '../../../components/GameSession/PlayStage';
 import SessionVeil from '../../../components/GameSession/SessionVeil';
 import PlayBar from '../../../components/GameSession/PlayBar';
-import GameResultDialog, { SessionOutcome } from '../../../components/GameSession/GameResultDialog';
+import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome } from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
@@ -16,6 +16,7 @@ import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
+import { hasLocalGameDir, mapSlugToGamePath } from '@/lib/localGames';
 import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
 import { titleFromSlug } from '@/lib/skillIcons';
 import { sessionAttribution } from '@/lib/emailLinks';
@@ -30,6 +31,8 @@ interface GameResults {
     score?: number;
     time?: number;
     outcome: SessionOutcome;
+    /** Under MIN_SCORED_SECONDS: shown without skill or mood scores. */
+    unscored?: boolean;
 }
 
 /** What the game last told the shell about itself, from `gameState` / `GAME_SCORE_UPDATE`. */
@@ -37,92 +40,6 @@ interface ReportedGameState {
     score?: number;
     isGameOver?: boolean;
 }
-
-export const SLUG_TO_DIR_MAP: Record<string, string> = {
-    '0hh1': '0hh1',
-    '2048': '2048',
-    'alchemy': 'Alchemy',
-    'box-tower': 'Box Tower',
-    'brick-out': 'Brick Out',
-    'bubble-spirit': 'Bubble Spirit',
-    'change-word': 'Change Word',
-    'colorize-2': 'Colorize 2',
-    'flapcat-steampunk': 'Flapcat Steampunk',
-    'flapcat-steampunk-2': 'Flapcat Steampunk 2',
-    'fruit-boom': 'Fruit Boom',
-    'fruit-sorting': 'Fruit Sorting',
-    'garden-match': 'Garden Match',
-    'gems-of-hanoi': 'Gems of Hanoi',
-    'gummy-blocks': 'Gummy Blocks',
-    'hextris': 'Hextris',
-    'hiding-master': 'Hiding Master',
-    'i-love-hue': 'I Love Hue',
-    'impossible-10': 'Impossible 10',
-    'katana-fruits': 'Katana Fruits',
-    'mahjong-deluxe': 'Mahjong Deluxe',
-    'match-doodle': 'Match Doodle',
-    'mine-rusher': 'Mine Rusher',
-    'photo-hunt': 'Photo Hunt',
-    'snake-attack': 'Snake Attack',
-    'space-adventure-pinball': 'Space Adventure Pinball',
-    'space-trip': 'Space Trip',
-    'stacks-tower': 'Stacks Tower',
-    'star-puzzles': 'Star Puzzles',
-    'sumagi': 'Sumagi',
-    // Legacy catalog records whose base slug carries a `-2` (SKI-180). Remove with the map in SKI-168.
-    'match-doodle-2': 'Match Doodle',
-    'sumagi-2': 'Sumagi',
-    'sweet-memory': 'Sweet Memory',
-    'ultimate-sudoku': 'Ultimate Sudoku',
-    'whack-em-all': "Whack 'em All",
-    'doodle-god-next': 'Doodle God Next',
-    'cut-the-rope': 'Cut The Rope',
-    'omnomrun': 'Omnomrun',
-    'dungeon-runner': 'Dungeon Runner',
-    'simon-says': 'Simon Says',
-    'solitaire': 'Solitaire',
-    'reaction-time': 'Reaction Time',
-    'dual-n-back': 'Dual N-Back',
-    'stroop-test': 'Stroop Test',
-    'typing-speed': 'Typing Speed',
-    'guided-breathing': 'Guided Breathing',
-    'procedural-maze': 'Procedural Maze',
-    'order-rush': 'Order Rush'
-};
-
-export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
-    'airport-rush': 'Airport Rush',
-    'circle-word': 'Circle Word',
-    'color-bump': 'Color Bump',
-    'crossy-chicken': 'Crossy Chicken',
-    'jigsaw-puzzle': 'Jigsaw Puzzle',
-    'jumper-frog': 'Jumper Frog',
-    'miner-block': 'Miner Block',
-    'pipe-flow': 'Pipe Flow',
-    'slide': 'Slide',
-    'sweet-candy-saga': 'Sweet Candy Saga',
-    'twenty-one': 'Twenty-One',
-    'unlock-blox': 'Unlock Blox',
-    'word-search': 'Word Search',
-    'zig-zag-switch': 'Zig Zag Switch'
-};
-
-/** True when the frontend ships a local build for this slug (any slug form). */
-export const hasLocalGameDir = (slug: string) => {
-    const unifiedSlug = baseSlug(slug);
-    return Boolean(SLUG_TO_DIR_MAP[unifiedSlug] || INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]);
-};
-
-export const mapSlugToGamePath = (slug: string) => {
-    const unifiedSlug = baseSlug(slug);
-
-    const inactiveDir = INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug];
-    if (inactiveDir) return `/games/inactive/${inactiveDir}/static/index.html`;
-
-    const dir = SLUG_TO_DIR_MAP[unifiedSlug];
-    if (dir) return `/games/live/${dir}/static/index.html`;
-    return `/games/live/${slug}/static/index.html`;
-};
 
 async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParameter[] | undefined> {
     if (!manifestUrl) return undefined;
@@ -219,7 +136,9 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             }
             if (!isMounted) return;
 
-            if (!record && !hasLocalGameDir(decodedSlug)) {
+            // A catalogue record alone isn't enough: without a local build the
+            // iframe would load a 404 and still start a scored session.
+            if (!hasLocalGameDir(record?.slug || decodedSlug)) {
                 setIsUnknownGame(true);
                 setIsLoadingGamePath(false);
                 return;
@@ -252,6 +171,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
             }
+            // Keyboard games should take keys without a click into the frame first.
+            iframeRef.current?.focus();
         }
     };
 
@@ -492,6 +413,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             score: typeof data?.score === 'number' ? data.score : reportedGameStateRef.current?.score,
             time: playTime,
             outcome: 'complete',
+            unscored: playTime < MIN_SCORED_SECONDS,
         };
 
         shouldPollRef.current = false;
@@ -506,6 +428,16 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
         // Navigate to review page with sessionId
         setGameResults(results);
+        showResults(results);
+    };
+
+    // A session too short to score goes straight to the results; waiting up to
+    // 30s for scores that shouldn't exist is what made a 2s session hang.
+    const showResults = (results: GameResults) => {
+        if (results.unscored) {
+            setSequence('review');
+            return;
+        }
         setSequence('calculating');
         pollForFinalResults();
     };
@@ -554,6 +486,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 score: reported?.score,
                 time: currentTime,
                 outcome: reported?.isGameOver ? 'complete' : reported ? 'exited' : 'unknown',
+                unscored: currentTime < MIN_SCORED_SECONDS,
             };
 
             stopIframe();
@@ -564,8 +497,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             }
 
             setGameResults(exitResults);
-            setSequence('calculating');
-            pollForFinalResults();
+            showResults(exitResults);
         }
     };
 
@@ -675,7 +607,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     <iframe
                         ref={iframeRef}
                         src={gamePath}
-                        className="w-full h-full border-0 absolute inset-0 z-10"
+                        className="play-field__game border-0 z-10"
                         title={`${decodedSlug} Game`}
                         allowFullScreen
                         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
@@ -716,6 +648,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     userToken={userToken}
                     sessionId={skillprintSessionIdRef.current}
                     sessionRecorded={sessionRecorded}
+                    unscored={gameResults.unscored}
                 />
             )}
 

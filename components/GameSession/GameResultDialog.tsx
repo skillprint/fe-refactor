@@ -29,6 +29,12 @@ const displayName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug
  */
 export type SessionOutcome = 'complete' | 'exited' | 'unknown';
 
+/**
+ * Sessions shorter than this aren't scored: a few seconds of play (or a game
+ * that never loaded) carries no signal, and an estimate would only mislead.
+ */
+export const MIN_SCORED_SECONDS = 30;
+
 const OUTCOME_LABELS: Record<SessionOutcome, string> = {
   complete: 'Game complete',
   exited: 'Ended early',
@@ -55,6 +61,8 @@ interface GameResultDialogProps {
   sessionId?: string;
   /** False when the backend never accepted the session, so the survey mustn't reference it. */
   sessionRecorded?: boolean;
+  /** True when the session was under MIN_SCORED_SECONDS: no skill, mood or survey sections. */
+  unscored?: boolean;
   /** Dev only: render the mock session (includes an estimated score) instead of fetching. */
   useSyntheticData?: boolean;
   /** Dev only: show the email prompt whatever the session count (SKI-265). */
@@ -77,10 +85,11 @@ export default function GameResultDialog({
   userToken,
   sessionId,
   sessionRecorded = true,
+  unscored = false,
   useSyntheticData = false,
   forceEmailPrompt = false
 }: GameResultDialogProps) {
-  const { data: session, isProcessing } = useComputedGameMetrics(sessionId, useSyntheticData);
+  const { data: session, isProcessing } = useComputedGameMetrics(unscored ? undefined : sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
   const [surveyError, setSurveyError] = useState<string | null>(null);
@@ -230,7 +239,7 @@ export default function GameResultDialog({
           
           <div className="layout-flex items-start justify-between gap-2xl">
             <span className="ui-label game-result__status layout-inline-flex items-center gap-md" data-outcome={outcome}>
-              <i className="radius-round"></i>{OUTCOME_LABELS[outcome]}
+              <i className="radius-round"></i>{unscored ? 'Too short to score' : OUTCOME_LABELS[outcome]}
             </span>
             <Link 
               href="/games"
@@ -250,56 +259,60 @@ export default function GameResultDialog({
             <div className="min-width-0">
               <h2 id="resultTitle">Your Skillprint analysis</h2>
               <p className="game-result__description font-md leading-lg margin-none" data-stage-blurb>
-                We read your {gameTitle} session and scored the skills and the mood it moved.
+                {unscored
+                  ? `This ${gameTitle} session lasted under ${MIN_SCORED_SECONDS} seconds, too short to measure your skills or mood. Play a little longer and we'll score the next one.`
+                  : `We read your ${gameTitle} session and scored the skills and the mood it moved.`}
               </p>
             </div>
           </div>
 
-          <section aria-label="Session feedback" className="game-result__section separator-top layout-grid">
-            <div className="game-result__mood layout-flex flex-col items-start gap-lg w-full">
-              <div className="layout-grid gap-sm min-width-0">
-                <strong className="font-md leading-lg weight-semibold">How did you feel after playing?</strong>
-                <span className="game-result__mood-question font-sm leading-sm" data-stage-mood-question>
-                  Did {gameTitle} help you feel more {targetMood.toLowerCase()}?
-                </span>
-              </div>
+          {!unscored && (
+            <section aria-label="Session feedback" className="game-result__section separator-top layout-grid">
+              <div className="game-result__mood layout-flex flex-col items-start gap-lg w-full">
+                <div className="layout-grid gap-sm min-width-0">
+                  <strong className="font-md leading-lg weight-semibold">How did you feel after playing?</strong>
+                  <span className="game-result__mood-question font-sm leading-sm" data-stage-mood-question>
+                    Did {gameTitle} help you feel more {targetMood.toLowerCase()}?
+                  </span>
+                </div>
               
-              {isSubmittingSurvey ? (
-                <div className="layout-flex items-center gap-md padding-block-sm text-muted">
-                  <span aria-hidden="true" className="session-spinner" style={{ width: '24px', height: '24px' }}></span>
-                  <span className="font-sm">Submitting your response...</span>
-                </div>
-              ) : surveySubmitted ? (
-                <div className="layout-flex items-center gap-md padding-block-sm" style={{ color: 'var(--text-success)' }}>
-                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-check"></use></svg>
-                  <span className="font-sm weight-medium">Thanks for your feedback!</span>
-                </div>
-              ) : (
-                <>
-                {surveyError && (
-                  <p className="margin-none font-sm" role="alert" style={{ color: 'var(--skills-pink-500)' }}>
-                    {surveyError}
-                  </p>
+                {isSubmittingSurvey ? (
+                  <div className="layout-flex items-center gap-md padding-block-sm text-muted">
+                    <span aria-hidden="true" className="session-spinner" style={{ width: '24px', height: '24px' }}></span>
+                    <span className="font-sm">Submitting your response...</span>
+                  </div>
+                ) : surveySubmitted ? (
+                  <div className="layout-flex items-center gap-md padding-block-sm" style={{ color: 'var(--text-success)' }}>
+                    <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-check"></use></svg>
+                    <span className="font-sm weight-medium">Thanks for your feedback!</span>
+                  </div>
+                ) : (
+                  <>
+                  {surveyError && (
+                    <p className="margin-none font-sm" role="alert" style={{ color: 'var(--skills-pink-500)' }}>
+                      {surveyError}
+                    </p>
+                  )}
+                  <div className="layout-flex gap-md wrap" role="group">
+                    <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="-1" type="button" onClick={() => handleSurveySubmit(-1)}>
+                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-down"></use></svg>
+                      <span data-stage-answer-down>Less {targetMood.toLowerCase()}</span>
+                    </button>
+                    <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="0" type="button" onClick={() => handleSurveySubmit(0)}>
+                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-equal"></use></svg>
+                      About the same
+                    </button>
+                    <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="1" type="button" onClick={() => handleSurveySubmit(1)}>
+                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-up"></use></svg>
+                      <span data-stage-answer-up>More {targetMood.toLowerCase()}</span>
+                    </button>
+                  </div>
+                  </>
                 )}
-                <div className="layout-flex gap-md wrap" role="group">
-                  <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="-1" type="button" onClick={() => handleSurveySubmit(-1)}>
-                    <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-down"></use></svg>
-                    <span data-stage-answer-down>Less {targetMood.toLowerCase()}</span>
-                  </button>
-                  <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="0" type="button" onClick={() => handleSurveySubmit(0)}>
-                    <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-equal"></use></svg>
-                    About the same
-                  </button>
-                  <button aria-pressed="false" className="game-result__mood-answer button button--secondary button--sm" data-mood-answer="1" type="button" onClick={() => handleSurveySubmit(1)}>
-                    <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-up"></use></svg>
-                    <span data-stage-answer-up>More {targetMood.toLowerCase()}</span>
-                  </button>
-                </div>
-                </>
-              )}
-            </div>
-            <p className="game-result__note margin-none font-xs leading-xs">Your scores may continue to update after playing.</p>
-          </section>
+              </div>
+              <p className="game-result__note margin-none font-xs leading-xs">Your scores may continue to update after playing.</p>
+            </section>
+          )}
 
           <div className="game-result__overview layout-grid gap-lg">
             <div className="game-result__score layout-grid radius-card padding-xl">
@@ -316,7 +329,7 @@ export default function GameResultDialog({
                   100 like the skill scores below, so say which scale it is on. */}
               <span className="game-result__score-note layout-block font-sm">
                 {!hasScore
-                  ? `${gameTitle} doesn't report a score to Skillprint. Your skill scores below come from how you played.`
+                  ? `${gameTitle} doesn't report a score to Skillprint.${unscored ? '' : ' Your skill scores below come from how you played.'}`
                   : previousBest !== null
                     ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${previousBest.toLocaleString()}`
                     : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
@@ -338,52 +351,56 @@ export default function GameResultDialog({
             </div>
           </div>
 
-          <section aria-label="Skill scores" className="game-result__section separator-top layout-grid relative">
-            <h3 className="portal-eyebrow game-result__section-title">Skill scores</h3>
-            {skillsData.length > 0 && (
-              <p className="game-result__note margin-none">
-                Each skill is scored from 0 to 100.
-                {hasUnmeasuredSkills && !showAllSkills && ` Only the skills ${gameTitle} measures are shown.`}
-              </p>
-            )}
-            {skillsData.length === 0 ? (
-              renderEmpty(isProcessing ? 'Scoring your session. Skill scores appear here as soon as they are ready.' : 'This session did not produce skill scores.')
-            ) : (
-              <div className="layout-grid grid-4 gap-lg">
-                {visibleSkills.map((skill, index) => renderMetric(skill, index, 'Skill'))}
-              </div>
-            )}
-            {hasUnmeasuredSkills && (
-              <button
-                type="button"
-                className="button button--tertiary button--sm justify-self-start"
-                aria-expanded={showAllSkills}
-                onClick={() => setShowAllSkills((open) => !open)}
-              >
-                {showAllSkills
-                  ? `Hide the ${unmeasuredCount} ${unmeasuredCount === 1 ? 'skill' : 'skills'} ${gameTitle} does not measure`
-                  : `Show ${unmeasuredCount} more ${unmeasuredCount === 1 ? 'skill' : 'skills'} ${gameTitle} does not measure`}
-              </button>
-            )}
-            {hasEstimatedSkills && (
-              <p className="game-result__note margin-none font-xs leading-xs">
-                Scores marked <strong>Estimated</strong> come from your play time rather than a measurement, because this game does not report them directly yet. They are shown for context only and do not change your profile.
-              </p>
-            )}
-          </section>
+          {!unscored && (
+            <>
+              <section aria-label="Skill scores" className="game-result__section separator-top layout-grid relative">
+                <h3 className="portal-eyebrow game-result__section-title">Skill scores</h3>
+                {skillsData.length > 0 && (
+                  <p className="game-result__note margin-none">
+                    Each skill is scored from 0 to 100.
+                    {hasUnmeasuredSkills && !showAllSkills && ` Only the skills ${gameTitle} measures are shown.`}
+                  </p>
+                )}
+                {skillsData.length === 0 ? (
+                  renderEmpty(isProcessing ? 'Scoring your session. Skill scores appear here as soon as they are ready.' : 'This session did not produce skill scores.')
+                ) : (
+                  <div className="layout-grid grid-4 gap-lg">
+                    {visibleSkills.map((skill, index) => renderMetric(skill, index, 'Skill'))}
+                  </div>
+                )}
+                {hasUnmeasuredSkills && (
+                  <button
+                    type="button"
+                    className="button button--tertiary button--sm justify-self-start"
+                    aria-expanded={showAllSkills}
+                    onClick={() => setShowAllSkills((open) => !open)}
+                  >
+                    {showAllSkills
+                      ? `Hide the ${unmeasuredCount} ${unmeasuredCount === 1 ? 'skill' : 'skills'} ${gameTitle} does not measure`
+                      : `Show ${unmeasuredCount} more ${unmeasuredCount === 1 ? 'skill' : 'skills'} ${gameTitle} does not measure`}
+                  </button>
+                )}
+                {hasEstimatedSkills && (
+                  <p className="game-result__note margin-none font-xs leading-xs">
+                    Scores marked <strong>Estimated</strong> come from your play time rather than a measurement, because this game does not report them directly yet. They are shown for context only and do not change your profile.
+                  </p>
+                )}
+              </section>
 
-          <section aria-label="Mood analysis" className="game-result__section separator-top layout-grid relative">
-            <h3 className="portal-eyebrow game-result__section-title">Mood analysis</h3>
-            <div className="layout-grid grid-3 gap-lg">
-              <div className="game-result__metric layout-grid">
-                <span className="ui-label game-result__metric-name layout-block">Target mood</span>
-                <strong className="game-result__metric-value layout-block" data-stage-mood="">{resolvedTargetMood}</strong>
-              </div>
+              <section aria-label="Mood analysis" className="game-result__section separator-top layout-grid relative">
+                <h3 className="portal-eyebrow game-result__section-title">Mood analysis</h3>
+                <div className="layout-grid grid-3 gap-lg">
+                  <div className="game-result__metric layout-grid">
+                    <span className="ui-label game-result__metric-name layout-block">Target mood</span>
+                    <strong className="game-result__metric-value layout-block" data-stage-mood="">{resolvedTargetMood}</strong>
+                  </div>
               
-              {moodsData.map((mood, index) => renderMetric(mood, index, 'Mood'))}
-            </div>
-            {moodsData.length === 0 && renderEmpty(isProcessing ? 'Reading the mood this session moved.' : 'No mood scores were recorded for this session.')}
-          </section>
+                  {moodsData.map((mood, index) => renderMetric(mood, index, 'Mood'))}
+                </div>
+                {moodsData.length === 0 && renderEmpty(isProcessing ? 'Reading the mood this session moved.' : 'No mood scores were recorded for this session.')}
+              </section>
+            </>
+          )}
 
           <EmailPromptCard force={forceEmailPrompt} />
 

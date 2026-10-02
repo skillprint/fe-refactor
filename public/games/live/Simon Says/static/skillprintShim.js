@@ -33,3 +33,9 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true); // Use capture phase to intercept before the game calls preventDefault()
+
+// The game is played by clicking or tapping, so forward pointer presses too:
+// the AI Guide opens its session on the first skillprint_mousedown.
+window.addEventListener('pointerdown', function () {
+    window.parent.postMessage({ type: 'skillprint_mousedown' }, '*');
+}, true);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { mapSlugToGamePath } from '../game/[slug]/GameClient';
+import { mapSlugToGamePath } from '@/lib/localGames';
 
 type VLMStatus = 'idle' | 'capturing' | 'processing' | 'ready';
 

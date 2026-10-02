@@ -24,6 +24,8 @@ const UUID_SUFFIX = /-[0-9a-f]{8}(?:-[0-9a-f]{1,4}){1,3}(?:-[0-9a-f]{1,12})?$/;
 // Legacy spellings that predate the slug rules.
 const ALIASES: Record<string, string> = {
   '0h-h1': '0hh1',
+  // Staging's bare `crossy-chicken` is an unlisted placeholder; the catalog record took `-1`.
+  'crossy-chicken-1': 'crossy-chicken',
 };
 
 export function baseSlug(slug: string): string {

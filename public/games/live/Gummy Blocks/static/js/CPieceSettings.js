@@ -122,9 +122,13 @@ function CPieceSettings(){
     
         
     this.getRandPieceInfos = function(){
-        var iRand = Math.floor(Math.random()*NUM_PIECES);
-        
-        return _aPieceConfig[iRand];
+        // MAX_PIECE_CELLS (skillprintShim.js) leaves out the bigger shapes.
+        var aPool = _aPieceConfig.filter(function(oPiece){
+            return oPiece.num_cell <= MAX_PIECE_CELLS;
+        });
+        var iRand = Math.floor(Math.random()*aPool.length);
+
+        return aPool[iRand];
     };
 
     

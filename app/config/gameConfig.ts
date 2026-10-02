@@ -451,7 +451,7 @@ export const gameDetails: Record<string, GameDetails> = {
     image: '/images/activities/covers/snake-attack-3b730898-fe67-4e51-a655-57c81bd3efbc.png',
     category: 'Arcade',
     difficulty: 'Medium',
-    estimatedTime: '3-8 minutes',
+    estimatedTime: '1-3 minutes',
     skills: ['Strategic Planning', 'Risk Management', 'Quick Thinking'],
     instructions: 'Control the snake to eat food and grow longer. Avoid hitting walls or your own tail.'
   },
@@ -685,6 +685,16 @@ export const gameDetails: Record<string, GameDetails> = {
   //   skills: ['Timing', 'Precision'],
   //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
   // },
+  'mage-duel': {
+    name: 'Mage Duel',
+    description: 'Duel a dark warlord by casting spells: type each word\'s translation before he strikes.',
+    image: '/games/live/mage-duel-2d/static/assets/hero.png',
+    category: 'Language',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Verbal', 'Memory', 'Perceptual Speed'],
+    instructions: 'Type the translation of each spell word to cast it the moment it matches. Heal words restore your health; every typo is counted.'
+  },
   'line-color': {
     name: 'Line Color',
     description: 'Line Color',
@@ -858,6 +868,13 @@ export function getGameDetails(gameSlug: string): GameDetails | null {
   }
 
   return gameDetails[normalizedSlug] || null;
+}
+
+/** Card-sized play time for a game ("1-3 minutes" → "1–3 min"), or the generic range when the game has none. */
+export function gameDurationLabel(gameSlug: string): string {
+  const estimate = getGameDetails(gameSlug)?.estimatedTime;
+  if (!estimate) return '5–10 min';
+  return estimate.replace(/(\d+)\s*-\s*(\d+)/, '$1–$2').replace(/\s*minutes?$/, ' min');
 }
 
 export const knownGameSlugs = [

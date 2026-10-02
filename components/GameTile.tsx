@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { TraitSkillPill } from './TraitSkillPill';
 import { DEFAULT_GAME_IMAGE } from '@/lib/playbookUtils';
+import { gameDurationLabel } from '@/app/config/gameConfig';
 
 export interface GameTileSkill {
   id: string;
@@ -31,7 +32,7 @@ export function GameTile({
   image,
   animatedImage,
   url,
-  duration = '5–10 min',
+  duration,
   skills = [],
   statusBadge,
   tone = 'pink'
@@ -83,7 +84,7 @@ export function GameTile({
         
         <span className="duration layout-inline-flex items-center gap-md text-muted font-sm weight-semibold">
           <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-clock"></use></svg>
-          {duration}
+          {duration ?? gameDurationLabel(id)}
         </span>
         
         {skills && skills.length > 0 && (
