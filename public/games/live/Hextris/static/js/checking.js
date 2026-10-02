@@ -54,24 +54,12 @@ function consolidateBlocks(hex, side, index) {
 	//console.log(hex.blocks[side][index].color);
 	//fill deleting	
 	floodFill(hex, side, index, deleting);
-	if (deleting.length == 2) {
-		Skillprint.TwoColorsMeet({
-			color: hex.blocks[side][index].color == "#e74c3c" ? "RED" : hex.blocks[side][index].color == "#f1c40f" ? "YELLOW" : hex.blocks[side][index].color == "#3498db" ? "BLUE" : "GREEN",
-			score: score
-		});
-		//console.log("2 Colors Meet " + (hex.blocks[side][index].color == "#e74c3c" ? "RED" : hex.blocks[side][index].color == "#f1c40f" ? "YELLOW" : hex.blocks[side][index].color == "#3498db" ? "BLUE" : "GREEN"));
-	}
 	//make sure there are more than 3 blocks to be deleted
 	if (deleting.length < 3) {
 		//console.log("< 3");
 		return;
 	}
 	var i;
-	Skillprint.ThreeColorsMeet({
-		color: hex.blocks[side][index].color == "#e74c3c" ? "RED" : hex.blocks[side][index].color == "#f1c40f" ? "YELLOW" : hex.blocks[side][index].color == "#3498db" ? "BLUE" : "GREEN",
-		score: score
-	});
-	//console.log("3 Colors Meet " + (hex.blocks[side][index].color == "#e74c3c" ? "RED" : hex.blocks[side][index].color == "#f1c40f" ? "YELLOW" : hex.blocks[side][index].color == "#3498db" ? "BLUE" : "GREEN"));
 	for (i = 0; i < deleting.length; i++) {
 		var arr = deleting[i];
 		//console.log(arr);
@@ -108,7 +96,10 @@ function consolidateBlocks(hex, side, index) {
 	//console.log(deletedBlocks[0].color);
 	score += adder;
 	Skillprint.BlockMatch({
-		color: deletedBlocks[0].color == "#e74c3c" ? "RED" : hex.blocks[side][index].color == "#f1c40f" ? "YELLOW" : hex.blocks[side][index].color == "#3498db" ? "BLUE" : "GREEN",
+		color: Skillprint.colorName(deletedBlocks[0].color),
+		blocks: deleting.length,
+		combo: hex.comboMultiplier,
+		points: adder,
 		score: score
 	});
 }

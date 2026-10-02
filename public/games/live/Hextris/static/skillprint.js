@@ -1,90 +1,75 @@
 var GameState = "";
 
+// Telemetry events for the Skillprint portal. Each is posted to the parent
+// shell as {type: 'gameEvent', data: {event, at, ...}}, where `at` is when it
+// happened in epoch milliseconds (performance.timeOrigin + performance.now(),
+// which the shell's clock matches). The shell turns it into session time and
+// sends it with the next screenshot upload.
+//
+// Universal events (the SDK's GameEvent): GAME_START, LEVEL_START,
+// LEVEL_FAILED, LEVEL_RESTART, GAME_PAUSE, GAME_RESUME, MATCH. Hextris is
+// endless, so a run is a level: it starts, and it fails at game over.
+// Game-specific: ROTATE_CLOCKWISE, ROTATE_ANTICLOCKWISE.
+
+var COLOR_NAMES = { "#e74c3c": "RED", "#f1c40f": "YELLOW", "#3498db": "BLUE", "#2ecc71": "GREEN" };
+
 var Skillprint = {
+  gameStarted: false,
+
+  now() {
+    return typeof performance !== "undefined" && performance.timeOrigin
+      ? performance.timeOrigin + performance.now()
+      : Date.now();
+  },
+
+  send(event, data) {
+    if (!window.parent || window.parent === window) return;
+    var payload = Object.assign({}, data || {}, { event: event, at: Skillprint.now() });
+    window.parent.postMessage({ type: "gameEvent", data: payload }, "*");
+  },
+
+  colorName(color) {
+    return COLOR_NAMES[color] || color;
+  },
+
   LevelStart() {
-    // logEvent({
-    //   event: "LEVEL_START"
-    // });
-    // console.log("LEVEL_START");
+    if (!Skillprint.gameStarted) {
+      Skillprint.gameStarted = true;
+      Skillprint.send("GAME_START");
+    }
+    Skillprint.send("LEVEL_START", { score: typeof score !== "undefined" ? score : 0 });
     GameState = "Play";
   },
 
-  sendCW(data) {
-    // logEvent({
-    //   event: "CLOCKWISE_TAP",
-    //   score: data.score
-    // });
-    // console.log("CLOCKWISE_TAP - " + data.score);
-  },
-
-  sendCCW(data) {
-    // logEvent({
-    //   event: "ANTICLOCKWISE_TAP",
-    //   score: data.score
-    // });
-    // console.log("ANTICLOCKWISE_TAP - " + data.score);
-  },
-
-  TwoColorsMeet(data) {
-    // logEvent({
-    //   event: "2_COLORS",
-    //   color: data.color,
-    //   score: data.score
-    // });
-    // console.log("2_COLORS (" + data.color + ") - " + data.score);
-  },
-
-  ThreeColorsMeet(data) {
-    // logEvent({
-    //   event: "3_COLORS",
-    //   color: data.color,
-    //   score: data.score
-    // });
-    // console.log("3_COLORS (" + data.color + ") - " + data.score);
+  // steps is Hex.rotate's: 1 turns the hexagon anticlockwise (left key, A,
+  // or a tap on the left half), -1 clockwise.
+  Rotate(steps, data) {
+    Skillprint.send(steps > 0 ? "ROTATE_ANTICLOCKWISE" : "ROTATE_CLOCKWISE", data);
   },
 
   BlockMatch(data) {
-    // logEvent({
-    //   event: "MATCH",
-    //   color: data.color,
-    //   score: data.score
-    // });
-    // console.log("MATCH (" + data.color + ") - " + data.score);
+    Skillprint.send("MATCH", data);
   },
 
   sendPause() {
-    // logEvent({
-    //   event: "GAME_PAUSE"
-    // });
-    // console.log("GAME_PAUSE");
+    Skillprint.send("GAME_PAUSE");
     GameState = "Pause";
   },
 
   sendResume() {
-    // logEvent({
-    //   event: "GAME_RESUME"
-    // });
-    // console.log("GAME_RESUME");
+    Skillprint.send("GAME_RESUME");
     GameState = "Play";
   },
 
   LevelFailed(data) {
-    // logEvent({
-    //   event: "LEVEL_FAILED",
-    //   score: data.score
-    // });
-    // console.log("LEVEL_FAILED - " + data.score);
+    Skillprint.send("LEVEL_FAILED", data);
     GameState = "End";
   },
 
   LevelRestart(data) {
-    // logEvent({
-    //   event: "LEVEL_RESTART",
-    //   score: data.score
-    // });
-    // console.log("LEVEL_RESTART - " + data.score);
+    Skillprint.send("LEVEL_RESTART", data);
     setTimeout(function () {
       Skillprint.LevelStart();
     }, 100);
   }
-}
+};

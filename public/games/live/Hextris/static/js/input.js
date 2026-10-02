@@ -106,9 +106,16 @@ function addKeyListeners() {
 		keys: "enter",
 		on_keydown: function () {
 			if (gameState == 1 || importing == 1) {
+				// Enter restarts a run in play, or starts the first one.
+				if (gameState == 1) {
+					Skillprint.LevelRestart({ score: score });
+				}
+				var firstRun = importing == 1 && gameState != 1;
 				init(1);
+				if (firstRun) Skillprint.LevelStart();
 			}
 			if (gameState == 2) {
+				Skillprint.LevelRestart({ score: score });
 				init();
 				$("#gameoverscreen").fadeOut();
 			}
@@ -251,22 +258,12 @@ function handleClickTap(x, y) {
 	if (gameState != -2 && gameState !== 0 && gameState !== 2) {
 		if (x < window.innerWidth / 2) {
 			MainHex.rotate(1);
-			if (GameState == "Play") {
-				Skillprint.sendCCW({
-					score: score
-				});
-			}
 		}
 	}
 
 	if (gameState != -2 && gameState !== 0 && gameState !== 2) {
 		if (x > window.innerWidth / 2) {
 			MainHex.rotate(-1);
-			if (GameState == "Play") {
-				Skillprint.sendCW({
-					score: score
-				});
-			}
 		}
 	}
 }

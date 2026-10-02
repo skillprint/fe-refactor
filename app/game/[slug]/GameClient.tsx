@@ -229,7 +229,19 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
             case 'GAME_SCORE_UPDATE':
                 recordReportedGameState(data);
                 break;
+            case 'gameEvent':
+                recordGameEvent(data);
+                break;
         }
+    };
+
+    // A discrete event from the game, universal (LEVEL_START, MATCH, ...) or its
+    // own (Hextris's ROTATE_CLOCKWISE), with `at`: when it happened, in epoch ms.
+    // It goes to the backend with the next screenshot upload.
+    const recordGameEvent = (data: any) => {
+        if (!skillprintSessionIdRef.current || typeof data?.event !== 'string' || !data.event) return;
+        const { event: name, at, ...rest } = data;
+        skillprintClientRef.current?.recordEvent(name, rest, typeof at === 'number' ? at : undefined);
     };
 
     // The window listener has to be one stable function: a handler from an old render
@@ -265,7 +277,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
                     // Each chunk carries the game's latest state, so the session keeps a score
                     // even if the final upload never arrives.
-                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount());
+                    const capturedAt = typeof base64Data.capturedAt === 'number' ? base64Data.capturedAt : null;
+                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount(), capturedAt);
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
