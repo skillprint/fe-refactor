@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import "./skillprint.css";
+import "./pattern-motion.css";
 import HomeTour from './components/HomeTour';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";

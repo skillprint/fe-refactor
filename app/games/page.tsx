@@ -10,7 +10,9 @@ import { newGameSlugs } from '../config/newGames';
 import BuckyballLoading from '../components/BuckyballLoading';
 import GamePreviewShareSheet from '../components/GamePreviewShareSheet';
 import { usePlaybookList } from '@/lib/models/portal/usePlaybookList';
-import { playbookIconSrc, playbookToneName } from '@/lib/playbookUtils';
+import { usePlaybookDetail } from '@/lib/models/portal/usePlaybookDetail';
+import type { PlaybookSummary } from '@/lib/models/portal/Playbooks';
+import { nextGameIndex, playbookIconSrc, playbookToneName } from '@/lib/playbookUtils';
 import { getGameDetails } from '../config/gameConfig';
 import { useAuth } from '../context/AuthContext';
 import PortalLayout from '@/components/PortalLayout';
@@ -21,6 +23,26 @@ import { PlaybookTile } from '@/components/PlaybookTile';
 import { GameRail } from '@/components/GameRail';
 import { GamesFilter, SkillOption } from '@/components/GamesFilter';
 import { useRecommendedGames } from '../hooks/useRecommendedGames';
+
+// The list response has no games, so each tile reads its playbook's detail for
+// the thumbnail: the next game in sequence, as the playbook page picks it.
+function PlaybookRailTile({ playbook }: { playbook: PlaybookSummary }) {
+  const { data: detail } = usePlaybookDetail(playbook.slug);
+  const next = detail?.games.length ? detail.games[nextGameIndex(detail)] : undefined;
+  return (
+    <PlaybookTile
+      id={playbook.slug}
+      title={playbook.title}
+      description={playbook.description}
+      iconSrc={playbookIconSrc(playbook)}
+      previewGame={next && { slug: next.slug, title: next.title, image: next.image }}
+      totalGames={playbook.progress.totalGames || playbook.gameCount}
+      completedGames={playbook.progress.playedGames}
+      isFinished={playbook.progress.totalGames > 0 && playbook.progress.playedGames >= playbook.progress.totalGames}
+      tone={playbookToneName(playbook) as any}
+    />
+  );
+}
 
 function GamesPageContent() {
   const searchParams = useSearchParams();
@@ -139,7 +161,7 @@ function GamesPageContent() {
                 </Link>
               </div>
               <GameRail isLibrary>
-                {recommendedGames.slice(0, 5).map((game: any, i: number) => (
+                {recommendedGames.slice(0, 4).map((game: any, i: number) => (
                   <GameTile
                     key={game.slug}
                     id={game.slug}
@@ -170,19 +192,9 @@ function GamesPageContent() {
                   <p className="portal-blank__note">Play a few games and we will build playbooks around the skills with the most headroom.</p>
                 </div>
               ) : (
-                <GameRail>
+                <GameRail className="game-rail--playbooks">
                   {playbookData.map((playbook) => (
-                    <PlaybookTile
-                      key={playbook.slug}
-                      id={playbook.slug}
-                      title={playbook.title}
-                      description={playbook.description}
-                      iconSrc={playbookIconSrc(playbook)}
-                      totalGames={playbook.progress.totalGames || playbook.gameCount}
-                      completedGames={playbook.progress.playedGames}
-                      isFinished={playbook.progress.totalGames > 0 && playbook.progress.playedGames >= playbook.progress.totalGames}
-                      tone={playbookToneName(playbook) as any}
-                    />
+                    <PlaybookRailTile key={playbook.slug} playbook={playbook} />
                   ))}
                 </GameRail>
               )}

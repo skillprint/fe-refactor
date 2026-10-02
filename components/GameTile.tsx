@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { TraitSkillPill } from './TraitSkillPill';
+import { PatternArt, patternArtFile } from './PatternArt';
 import { DEFAULT_GAME_IMAGE } from '@/lib/playbookUtils';
 import { gameDurationLabel } from '@/app/config/gameConfig';
 
@@ -37,6 +38,8 @@ export function GameTile({
   statusBadge,
   tone = 'pink'
 }: GameTileProps) {
+  // Games the design has drawn get its moving pattern card; the rest keep their cover.
+  const artFile = patternArtFile(id, title);
 
   return (
     <article className={`game-card game-card--portal sp-card sp-card--interactive card--flush tone tone--${tone} min-width-0 layout-flex flow-column clip`}>
@@ -44,7 +47,7 @@ export function GameTile({
       <Link href={url} className="media-open layout-block full-width padding-none border-none surface-transparent text-left" aria-label={`Play ${title}`} tabIndex={-1}>
         <div className="game-media position-relative clip">
           <div className="art-stack stack position-absolute inset-none clip">
-            <img
+            {artFile ? <PatternArt file={artFile} alt={`${title} game artwork`} /> : <img
               alt={`${title} game artwork`}
               className="art-layer art-static position-absolute layout-block opaque"
               src={image}
@@ -55,8 +58,8 @@ export function GameTile({
                   e.currentTarget.src = DEFAULT_GAME_IMAGE;
                 }
               }}
-            />
-            {animatedImage && (
+            />}
+            {!artFile && animatedImage && (
               <img alt="" aria-hidden="true" className="art-layer art-animated position-absolute layout-block" src={animatedImage} />
             )}
           </div>

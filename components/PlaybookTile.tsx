@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { PatternArt, patternArtFile } from './PatternArt';
 
 export interface PlaybookTileProps {
   id: string;
@@ -9,6 +10,8 @@ export interface PlaybookTileProps {
   /** Next unplayed game; omit to send the player to the playbook page to start. */
   nextGameSlug?: string;
   nextGameImage?: string;
+  /** Game shown in the progress thumbnail: the next one to play. */
+  previewGame?: { slug: string; title: string; image?: string | null };
   totalGames: number;
   completedGames: number;
   isFinished: boolean;
@@ -22,6 +25,7 @@ export function PlaybookTile({
   iconSrc,
   nextGameSlug,
   nextGameImage,
+  previewGame,
   totalGames,
   completedGames,
   isFinished,
@@ -34,6 +38,10 @@ export function PlaybookTile({
     ? detailUrl
     : `/game/${encodeURIComponent(nextGameSlug)}/interstitial?source=playbook&playbookId=${encodeURIComponent(id)}`;
 
+  // The design's moving pattern art when it has a drawing for the game, as on game cards.
+  const artFile = previewGame ? patternArtFile(previewGame.slug, previewGame.title) : null;
+  const previewImage = previewGame?.image || nextGameImage || '/assets/images/games/game-arcade-machine.svg';
+
   return (
     <article className={`game-card game-card--portal playbook-card sp-card sp-card--interactive card--flush tone tone--${tone} min-width-0 layout-flex flow-column clip`}>
       <div className="playbook-card__head">
@@ -45,8 +53,12 @@ export function PlaybookTile({
       </div>
 
       <div className="playbook-card__progress layout-flex items-center">
-        <span className="playbook-card__preview layout-block clip">
-          <img alt="" aria-hidden="true" className="layout-block" src={nextGameImage || '/assets/images/games/game-arcade-machine.svg'} width="64" height="64" />
+        <span className="playbook-card__preview layout-block position-relative clip">
+          {artFile ? (
+            <PatternArt file={artFile} alt="" />
+          ) : (
+            <img alt="" aria-hidden="true" className="layout-block" src={previewImage} width="64" height="64" />
+          )}
         </span>
         <div className="playbook-card__tally min-width-0">
           <p className="playbook-card__count">{completedGames} of {totalGames} games played</p>

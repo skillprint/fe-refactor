@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+import { useLogoMotion } from './useLogoMotion';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeSkillSection, setActiveSkillSection] = useState('mood');
   const pathname = usePathname();
+  const brandRef = useRef<HTMLAnchorElement>(null);
+  useLogoMotion(brandRef);
   const isSkillsPage = pathname === '/skills' || pathname === '/skills/';
 
   useEffect(() => {
@@ -68,7 +71,7 @@ export default function Sidebar() {
   return (
     <aside className="portal-sidebar sp-side-nav" id="portalNav" aria-label="Games Portal" data-portal-nav>
       <div className="portal-sidebar__head">
-        <Link className="portal-brand" href="/">
+        <Link ref={brandRef} className="portal-brand" href="/">
           <img className="brand-logo brand-logo--dark" src="/assets/logos/skillprint-logo-customer-dark.svg" alt="Skillprint" />
           <img className="brand-logo brand-logo--light" src="/assets/logos/skillprint-logo-customer-light.svg" alt="Skillprint" />
           <img className="portal-brand__mark" src="/assets/logos/skillprint-favicon-customer.svg" alt="" aria-hidden="true" width="32" height="32" />
