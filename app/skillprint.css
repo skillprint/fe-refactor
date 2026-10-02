@@ -15829,3 +15829,10 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
   .page--portal-games .game-rail--library,
   .page--portal-games .game-rail--playbooks { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
 }
+
+/* Portal v2 logo hover motion (js/logo-motion.js; components/useLogoMotion.ts):
+   while it plays, the animated icon covers the logo image's own icon. */
+.sp-logo-motion { position: absolute; pointer-events: none; overflow: visible; display: none; }
+.is-logo-playing > .sp-logo-motion { display: block; }
+.is-logo-playing img.brand-logo { clip-path: inset(0 0 0 20.64%); }
+.is-logo-playing img.portal-brand__mark { opacity: 0; }
