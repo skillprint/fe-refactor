@@ -15816,3 +15816,16 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 
 /* On a playbook's own page: the coach's context above the hero. */
 .assigned-card--detail { margin-bottom: 16px; }
+
+/* Portal v2 (css/portal-v2.css, 30 September 2026): on the Games page the
+   recommended row and the playbooks run the full width, four and three across,
+   like the grid below. Last in the file so it outranks the shared rail rules,
+   as portal-v2.css does by loading after skillprint.css. */
+@media (min-width: 1101px) {
+  .page--portal-games .game-rail--library { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; }
+  .page--portal-games .game-rail--playbooks { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+}
+@media (min-width: 641px) and (max-width: 1100px) {
+  .page--portal-games .game-rail--library,
+  .page--portal-games .game-rail--playbooks { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+}

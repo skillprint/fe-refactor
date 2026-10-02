@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Photo Hunt icon</title>
+  <svg x="120" y="35" width="140" height="140" viewBox="0 0 512 512">
+<g><path d="m481 0h-225l-150 256 150 256h225z" fill="#e3e5eb"/><path d="m31 0h225v512h-225z" fill="#eceef2"/><path d="m166 285 90 167h165v-92z" fill="#1f8ac3"/><path d="m91 360v92h165v-167z" fill="#27baff"/><path d="m421 360v-300h-165l-90 150 90 150z" fill="#eceef2"/><path d="m91 60h165v300h-165z" fill="#f7f8fa"/><path d="m256 120-52.5 105 52.5 105c57.99 0 105-47.01 105-105s-47.01-105-105-105z" fill="#fd80ac"/><path d="m151 225c0 57.99 47.01 105 105 105v-210c-57.99 0-105 47.01-105 105z" fill="#fba9c7"/></g>
+  </svg>
+</svg>

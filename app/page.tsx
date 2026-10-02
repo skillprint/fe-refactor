@@ -23,6 +23,7 @@ import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from 
 import { PortalPageTitle, PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { GameTile } from '@/components/GameTile';
+import { GameRail } from '@/components/GameRail';
 import { useRecommendedGames } from './hooks/useRecommendedGames';
 import { MockDataTag } from '@/components/MockDataTag';
 import HomeSkillprintWheel from '@/components/HomeSkillprintWheel';
@@ -474,7 +475,7 @@ function HomeContent() {
                   All games <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
                 </Link>
               </div>
-              <div className="game-rail game-rail--library">
+              <GameRail isLibrary>
                 {recommendedGames.slice(0, 4).map((game: any, i: number) => (
                   <GameTile
                     key={game.slug}
@@ -487,7 +488,7 @@ function HomeContent() {
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
                   />
                 ))}
-              </div>
+              </GameRail>
             </PortalSection>
 
             {/* Recently Played */}
@@ -501,7 +502,7 @@ function HomeContent() {
                 )}
               </div>
               {playedSessions.length > 0 ? (
-                <div className="game-rail game-rail--library">
+                <GameRail isLibrary>
                   {playedSessions.slice(0, 5).map((session, i) => {
                     const known = allGames.find(g => baseSlug(g.slug) === baseSlug(session.gameSlug));
                     const details = getGameDetails(session.gameSlug);
@@ -518,7 +519,7 @@ function HomeContent() {
                       />
                     );
                   })}
-                </div>
+                </GameRail>
               ) : (
                 <IconInfoCardWithDescription 
                   title="No sessions yet" 
@@ -536,7 +537,7 @@ function HomeContent() {
                   All games <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
                 </Link>
               </div>
-              <div className="game-rail game-rail--library">
+              <GameRail isLibrary>
                 {fetchedNewGames.slice(0, 4).map((game: any, i: number) => (
                   <GameTile
                     key={game.slug}
@@ -549,7 +550,7 @@ function HomeContent() {
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[(i + 2) % 6]}
                   />
                 ))}
-              </div>
+              </GameRail>
             </PortalSection>
 
             {/* Play by skill */}

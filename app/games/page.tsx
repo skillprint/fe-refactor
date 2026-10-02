@@ -139,7 +139,7 @@ function GamesPageContent() {
                 </Link>
               </div>
               <GameRail isLibrary>
-                {recommendedGames.slice(0, 5).map((game: any, i: number) => (
+                {recommendedGames.slice(0, 4).map((game: any, i: number) => (
                   <GameTile
                     key={game.slug}
                     id={game.slug}
@@ -170,7 +170,7 @@ function GamesPageContent() {
                   <p className="portal-blank__note">Play a few games and we will build playbooks around the skills with the most headroom.</p>
                 </div>
               ) : (
-                <GameRail>
+                <GameRail className="game-rail--playbooks">
                   {playbookData.map((playbook) => (
                     <PlaybookTile
                       key={playbook.slug}

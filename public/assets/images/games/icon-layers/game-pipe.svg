@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Pipe Flow icon</title>
+  <svg x="120" y="35" width="140" height="140" viewBox="0 0 512 512">
+<g><path d="m377 181h-121-75v-90l-30-30h-91l-30 30v135c0 57.891 48.109 105 106 105h120 75v90l30 30h91l30-30v-135c0-57.891-47.109-105-105-105z" fill="#b9e7fd"/><path d="m331 421 30 30h91l30-30v-135c0-57.891-47.109-105-105-105h-121v150h75z" fill="#94dbfd"/><path d="m256 151h-30v210h30 30v-210z" fill="#e1e5f0"/><path d="m256 151h30v210h-30z" fill="#b9e7fd"/><path d="m331 421h151v76h-151z" fill="#b9e7fd"/><path d="m30 15h151v76h-151z" fill="#e1e5f0"/><path d="m0 0h211v30h-211z" fill="#b9e7fd"/><path d="m301 482h211v30h-211z" fill="#94dbfd"/></g>
+  </svg>
+</svg>
