@@ -62,6 +62,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'change-word': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Change Word/backend/game-scoring-config.json',
     customExitButton: {
       color: 'green',
       size: 'sm'

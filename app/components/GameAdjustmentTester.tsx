@@ -174,17 +174,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'change-word':
-            // Change word uses `timer` in ms for limits per level
+            // Change Word: timeMultiplier (time per word), rampMultiplier (how fast it shrinks), hintsPerStage
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'timer', parameterValue: 120000 }]; // 120s
-                case 2: return [{ parameterName: 'timer', parameterValue: 90000 }];
-                case 3: return [{ parameterName: 'timer', parameterValue: 60000 }];
-                case 4: return [{ parameterName: 'timer', parameterValue: 40000 }]; // Approximating Default
-                case 5: return [{ parameterName: 'timer', parameterValue: 30000 }];
-                case 6: return [{ parameterName: 'timer', parameterValue: 20000 }];
-                case 7: return [{ parameterName: 'timer', parameterValue: 10000 }];
-                case 8: return [{ parameterName: 'timer', parameterValue: 5000 }];  // 5 seconds
-                case 9: return [{ parameterName: 'timer', parameterValue: 1000 }];  // Impossible 1 sec
+                case 1: return [{ parameterName: 'timeMultiplier', parameterValue: 2.0 }]; // Twice the time
+                case 2: return [{ parameterName: 'timeMultiplier', parameterValue: 1.5 }];
+                case 3: return [{ parameterName: 'timeMultiplier', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'timeMultiplier', parameterValue: 0.75 }];
+                case 5: return [{ parameterName: 'timeMultiplier', parameterValue: 0.5 }]; // Half the time
+                case 6: return [{ parameterName: 'rampMultiplier', parameterValue: 0 }]; // Time stops shrinking
+                case 7: return [{ parameterName: 'rampMultiplier', parameterValue: 2 }]; // Shrinks twice as fast
+                case 8: return [{ parameterName: 'hintsPerStage', parameterValue: 10 }]; // Refill hints
+                case 9: return [
+                    { parameterName: 'timeMultiplier', parameterValue: 0.5 },
+                    { parameterName: 'rampMultiplier', parameterValue: 2 },
+                    { parameterName: 'hintsPerStage', parameterValue: 0 }
+                ]; // Hard mode
                 default:
                     return [];
             }
