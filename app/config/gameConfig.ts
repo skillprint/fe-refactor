@@ -140,6 +140,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'match-doodle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Match Doodle/backend/game-scoring-config.json',
+  },
+
   'mine-rusher': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,

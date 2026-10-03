@@ -263,16 +263,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'match-doodle':
+            // pairs / clusterSpread / cardRotation; all apply to the level in play
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'pairs', parameterValue: 2 }];
-                case 2: return [{ parameterName: 'pairs', parameterValue: 3 }];
-                case 3: return [{ parameterName: 'pairs', parameterValue: 4 }];
-                case 4: return [{ parameterName: 'pairs', parameterValue: 5 }]; // Default level 1
-                case 5: return [{ parameterName: 'pairs', parameterValue: 6 }];
-                case 6: return [{ parameterName: 'pairs', parameterValue: 8 }];
-                case 7: return [{ parameterName: 'pairs', parameterValue: 10 }];
-                case 8: return [{ parameterName: 'pairs', parameterValue: 15 }];
-                case 9: return [{ parameterName: 'pairs', parameterValue: 20 }];
+                case 1: return [{ parameterName: 'pairs', parameterValue: 3 }];
+                case 2: return [{ parameterName: 'pairs', parameterValue: 10 }];
+                case 3: return [{ parameterName: 'pairs', parameterValue: 25 }];
+                case 4: return [{ parameterName: 'clusterSpread', parameterValue: 0.5 }]; // Dense heap
+                case 5: return [{ parameterName: 'clusterSpread', parameterValue: 1.0 }]; // Default
+                case 6: return [{ parameterName: 'clusterSpread', parameterValue: 2.0 }]; // Spread out
+                case 7: return [{ parameterName: 'cardRotation', parameterValue: 0 }]; // Upright
+                case 8: return [{ parameterName: 'cardRotation', parameterValue: 180 }]; // Default
+                case 9: return [
+                    { parameterName: 'pairs', parameterValue: 40 },
+                    { parameterName: 'clusterSpread', parameterValue: 0.5 },
+                    { parameterName: 'cardRotation', parameterValue: 180 }
+                ]; // Hard mode
                 default:
                     return [];
             }
