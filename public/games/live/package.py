@@ -13,10 +13,6 @@ INJECTED_SCRIPT_FILE = "./inject.js"
 # )
 # GAME_IDS_URL = "https://qa-marketplace.skillprint.co/games/map.json/" # f"{MAP_HOST}/v2/games/map.json"
 
-# TARGET_ORIGIN = (
-    # os.environ.get("TARGET_ORIGIN").rstrip("/") or "https://app.skillprint.co"
-# )
-
 if __name__ == "__main__":
     with open(INJECTED_SCRIPT_FILE, 'r') as injected_script_file:
         injected_js = injected_script_file.read()
@@ -35,9 +31,6 @@ if __name__ == "__main__":
     # assert isinstance(id_map, dict), "Invalid mapping!"
 
 
-
-    # # set the host origin that's allowed to play the game
-    # injected_js = injected_js.replace("{% TARGET_ORIGIN %}", TARGET_ORIGIN)
 
     # print(id_map)
 
