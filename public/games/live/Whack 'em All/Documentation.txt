@@ -1,23 +1,39 @@
 ===============
 Whack em All Event List
 ===============
-GAME_START => Player select level and game mode
+Sent through the global logEvent (skillprintEvent in js/ctl_utils.js), which
+the portal's SkillprintLib forwards as gameEvents; the portal stamps each with
+the session time. Characters: 0-3 = animals (10/20/30/40 points), 4 = bomb (-100).
+timeleft = seconds left in the 60 s round.
+---------------
+GAME_START => A round starts (first play, or after Restart)
 	- GAME_START (event)
-	- 2020-08-01T08:34:01.527Z (timestamp)
+	- 60 (timeleft)
 ---------------
-Tap => Tap on the animal/bomb
+ANIMAL / BOMB => Player tapped a character
 	- ANIMAL/BOMB (event)
-	- 0 (score)
-	- 0 (timeleft)
-	- 2020-08-01T08:34:01.527Z (timestamp)
+	- 0-4 (character)
+	- 10/20/30/40/-100, times the multiplier (points)
+	- 1/2 (multiplier; 2 while the super hammer is active)
+	- 0 (score, after this tap)
+	- 0.0 (timeleft)
 ---------------
-GAME_RESTART => Player restart the game
+ESCAPED / BOMB_AVOIDED => A character went back down without being tapped
+	- ESCAPED (an animal was missed) / BOMB_AVOIDED (a bomb was correctly left alone) (event)
+	- 0-4 (character)
+	- 0.0 (timeleft)
+---------------
+WHIFF => Player tapped an empty hole, or a character already hit
+	- WHIFF (event)
+	- 0.0 (timeleft)
+---------------
+GAME_RESTART => Player pressed Restart on the end panel
 	- GAME_RESTART (event)
-	- 2020-08-01T08:34:01.527Z (timestamp)
+	- 0 (score of the round just finished)
 ---------------
-GAME_END => Player quit or time end
+GAME_END => The round ended: time ran out, or the player quit
 	- GAME_END (event)
+	- time/quit (reason)
 	- 0 (score)
-	- 2020-08-01T08:34:01.527Z (timestamp)
+	- 0.0 (timeleft)
 ---------------
-
