@@ -29,3 +29,9 @@ LEVEL_RESTART => Player re-starts the game
 	- LEVEL_RESTART (event)
 	- 0 (level)
 ---------------
+OBJECTIVES_CHANGED => The Skillprint `pairs` knob changed the pairs in the level in play
+	- OBJECTIVES_CHANGED (event)
+	- 0 (level)
+	- 0 (objectives)
+---------------
+Notes: `time` is the elapsed time in the level in milliseconds (the clock counts up; there is no time limit). `object_done` on MATCH/UNMATCH is the number of pairs found so far in the level. LEVEL_START `objectives` is the number of pairs in the level.
