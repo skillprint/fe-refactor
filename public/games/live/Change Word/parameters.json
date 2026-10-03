@@ -1,0 +1,23 @@
+{
+    "timeMultiplier": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Time allowed per word, as a multiple of each word-length tier's own (30 s for 3-letter words, 40 s for 4, 50 s for 5, 60 s for 6). Applies to the word in play and every later word. Lower values add time pressure."
+    },
+    "rampMultiplier": {
+        "max": 2.0,
+        "min": 0.0,
+        "type": "float",
+        "default": 1.0,
+        "description": "How fast time per word shrinks after each solved word, as a multiple of each tier's own step (3 s for 3-letter words, 2 s for 4, 1 s for 5-6). 0 keeps the time constant; 2 squeezes twice as fast."
+    },
+    "hintsPerStage": {
+        "max": 10,
+        "min": 0,
+        "type": "integer",
+        "default": 5,
+        "description": "Hints of each kind (which letters can change; what they can change to) per word-length tier. Changing it refills or removes the current tier's hints now. Fewer hints make the player rely on their own vocabulary."
+    }
+}
