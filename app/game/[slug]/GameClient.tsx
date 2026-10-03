@@ -11,6 +11,7 @@ import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
 import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
+import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
@@ -20,6 +21,9 @@ import { hasLocalGameDir, mapSlugToGamePath } from '@/lib/localGames';
 import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
 import { titleFromSlug } from '@/lib/skillIcons';
 import { sessionAttribution } from '@/lib/emailLinks';
+
+/** Minimum time between batches of difficulty changes sent to the game. */
+const ADJUSTMENT_COOLDOWN_MS = 30000;
 
 interface GameClientProps {
     slug: string;
@@ -302,47 +306,36 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                 if (polledRes && polledRes.state === "OPEN") {
                     setLastSessionResponse(polledRes);
 
-                    // Process telemetry adjustments
-                    if (!disableAdjustments && polledRes.telemetry && polledRes.telemetry.length > 0) {
+                    // Process telemetry adjustments. `telemetry` also holds the
+                    // game's events, which aren't adjustments (see lib/adjustments).
+                    if (!disableAdjustments) {
                         try {
+                            const pending = pendingAdjustments(polledRes.telemetry, processedAdjustmentsRef.current);
                             const now = Date.now();
-                            // Check cooldown (30 seconds)
-                            if (now - lastAdjustmentTimeRef.current >= 30000) {
-                                // Find the latest adjustment we haven't processed yet
-                                // Sort by date descending to get latest first
-                                const sortedTelemetry = [...polledRes.telemetry].sort((a, b) =>
-                                    new Date(b.adjustment.createDate).getTime() - new Date(a.adjustment.createDate).getTime()
-                                );
+                            // At most one batch per cooldown, so the game isn't retuned
+                            // on every poll. A batch carries the newest value for each
+                            // parameter decided since the last one, oldest decision
+                            // first; older values for a parameter are skipped, never
+                            // applied after a newer one.
+                            if (pending.length > 0 && now - lastAdjustmentTimeRef.current >= ADJUSTMENT_COOLDOWN_MS) {
+                                const batch = latestPerParameter(pending);
+                                markApplied(pending, processedAdjustmentsRef.current);
+                                lastAdjustmentTimeRef.current = now;
+                                adjustmentsCountRef.current += batch.length;
+                                setAdjustmentsApplied(adjustmentsCountRef.current);
 
-                                // Find the first one that hasn't been processed
-                                const latestItem = sortedTelemetry.find(item => {
-                                    const adj = item.adjustment;
-                                    const adjId = `${adj.gameSlug}-${adj.createDate}-${adj.parameterName}`;
-                                    return !processedAdjustmentsRef.current.has(adjId);
-                                });
-
-                                if (latestItem && latestItem.adjustment) {
-                                    const adj = latestItem.adjustment;
-                                    const adjId = `${adj.gameSlug}-${adj.createDate}-${adj.parameterName}`;
-
+                                for (const adj of batch) {
                                     console.log("Applying game adjustment:", adj);
-                                    processedAdjustmentsRef.current.add(adjId);
-                                    lastAdjustmentTimeRef.current = now;
-                                    adjustmentsCountRef.current += 1;
-                                    setAdjustmentsApplied(adjustmentsCountRef.current);
-
-                                    // Send to iframe
-                                    if (iframeRef.current?.contentWindow) {
-                                        iframeRef.current.contentWindow.postMessage({
-                                            type: 'ADJUST_GAME',
-                                            data: adj
-                                        }, '*');
-                                    }
-
-                                    // Show banner
-                                    setCurrentAdjustment(adj);
-                                    setLatestAdjustment(adj);
+                                    iframeRef.current?.contentWindow?.postMessage({
+                                        type: 'ADJUST_GAME',
+                                        data: adj
+                                    }, '*');
                                 }
+
+                                // Show the most recent change
+                                const last = batch[batch.length - 1];
+                                setCurrentAdjustment(last);
+                                setLatestAdjustment(last);
                             }
                         } catch (err) {
                             console.error("Error processing telemetry:", err);
