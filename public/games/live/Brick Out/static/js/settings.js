@@ -32,6 +32,12 @@ var TYPES_OF_BONUS = 10;
 var MAX_BRICK_FOR_ROW = 7;
 
 var MAX_BALL_SPAWN = 4;
+// Skillprint difficulty knobs (set live by skillprintShim.js).
+// BALL_SPEED_RATE: base ball speed multiplier; the speed power-ups move the
+// ball within 0.5x-1.5x of it (MIN/MAX_VELOCITY_LIMIT).
+// BONUS_DROP_RATE: multiplies each level's power-up drop chance.
+var BALL_SPEED_RATE = 1;
+var BONUS_DROP_RATE = 1;
 
 var MAX_VELOCITY_LIMIT = 1.5;
 var MIN_VELOCITY_LIMIT = 0.5;
