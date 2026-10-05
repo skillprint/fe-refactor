@@ -31,22 +31,43 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return;
 
         const root = document.documentElement;
+        const body = document.body;
         // Remove all possible theme classes/attributes first
-        root.classList.remove('dark', 'midnight', 'skillprint', 'light');
+        root.classList.remove('dark', 'light');
+        body.classList.remove('dark', 'light');
         root.removeAttribute('data-theme');
+        root.removeAttribute('data-surface');
+        root.removeAttribute('data-appearance');
+        body.removeAttribute('data-theme');
+        body.removeAttribute('data-surface');
+        body.removeAttribute('data-appearance');
 
         if (theme === 'dark') {
             root.setAttribute('data-theme', 'dark');
+            root.setAttribute('data-surface', 'dark');
+            body.setAttribute('data-theme', 'dark');
+            body.setAttribute('data-surface', 'dark');
             root.classList.add('dark');
+            body.classList.add('dark');
         } else if (theme === 'midnight') {
-            root.setAttribute('data-theme', 'midnight');
-            root.classList.add('midnight'); // Optional, but consistent
+            root.setAttribute('data-theme', 'dark');
+            root.setAttribute('data-surface', 'dark');
+            root.setAttribute('data-appearance', 'midnight');
+            body.setAttribute('data-theme', 'dark');
+            body.setAttribute('data-surface', 'dark');
+            body.setAttribute('data-appearance', 'midnight');
+            root.classList.add('dark');
+            body.classList.add('dark');
         } else if (theme === 'light') {
             root.setAttribute('data-theme', 'light');
+            root.setAttribute('data-surface', 'light');
+            body.setAttribute('data-theme', 'light');
+            body.setAttribute('data-surface', 'light');
             root.classList.add('light');
+            body.classList.add('light');
         } else {
             // Skillprint (default)
-            root.removeAttribute('data-theme');
+            // Leave attributes un-set or set defaults here if needed
         }
         localStorage.setItem('theme', theme);
     }, [theme, mounted]);

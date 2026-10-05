@@ -54,6 +54,11 @@ const getElementForScreenshot = () => {
 
 
 const takeScreenshot = async () => {
+    // When the frame was taken, in epoch ms (the parent page's clock reads the
+    // same). Rasterising takes a while, so the parent can't time it on arrival.
+    const capturedAt = typeof performance !== 'undefined' && performance.timeOrigin
+        ? performance.timeOrigin + performance.now()
+        : Date.now();
     const skillprintScreenshotSlement = getElementForScreenshot();
     // console.log(skillprintScreenshotSlement);
 
@@ -82,7 +87,7 @@ const takeScreenshot = async () => {
             addToLocalStorage('screenshot', dataUrl);
         }
 
-        window.parent.postMessage({ type: 'screenshot', dataUrl }, "*");
+        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt }, "*");
     })
 }
 

@@ -1,160 +1,75 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useUserSession } from '../../hooks/useUserSession';
-import FloatingExitButton from '../../components/FloatingExitButton';
-import { getGameConfig, knownGameSlugs } from '../../config/gameConfig';
+import PlayStage from '../../../components/GameSession/PlayStage';
+import SessionVeil from '../../../components/GameSession/SessionVeil';
+import PlayBar from '../../../components/GameSession/PlayBar';
+import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome } from '../../../components/GameSession/GameResultDialog';
+import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
+import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
-import { saveGameSession, GameSession } from '../../lib/gameSessionUtils';
-import { SkillprintClient, Mood, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment } from '../../lib/skillprintSdk';
+import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
-import { getGameBySlug } from '../../api/api';
+import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
+import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
+import { hasLocalGameDir, mapSlugToGamePath } from '@/lib/localGames';
+import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
+import { titleFromSlug } from '@/lib/skillIcons';
+import { sessionAttribution } from '@/lib/emailLinks';
 
 interface GameClientProps {
     slug: string;
+    autoPlay?: boolean;
 }
 
 interface GameResults {
+    /** The game's own points. Undefined when the game didn't report one. */
     score?: number;
     time?: number;
-    level?: number;
-    achievements?: string[];
-    accuracy?: number;
-    mistakes?: number;
-    bonus?: number;
+    outcome: SessionOutcome;
+    /** Under MIN_SCORED_SECONDS: shown without skill or mood scores. */
+    unscored?: boolean;
 }
 
-export const mapLocalGameSlugToServerGameSlug = (slug: string) => {
-    const map: any = {
-        '/games/live/Change Word/static/index.html': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782',
-        'change-word': 'change-word-0bc38905-8138-43f2-9ff5-a01a5f038782'
+/** What the game last told the shell about itself, from `gameState` / `GAME_SCORE_UPDATE`. */
+interface ReportedGameState {
+    score?: number;
+    isGameOver?: boolean;
+}
+
+async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParameter[] | undefined> {
+    if (!manifestUrl) return undefined;
+    try {
+        const res = await fetch(manifestUrl);
+        if (!res.ok) return undefined;
+        const json = await res.json();
+        return Array.isArray(json.sdk_game_parameters) ? json.sdk_game_parameters : undefined;
+    } catch (e) {
+        console.warn('Could not load game parameter manifest', manifestUrl, e);
+        return undefined;
     }
-
-    console.log("Mapped: ", slug, map[slug]);
-
-    return map[slug] || slug;
 }
 
-export const unifiedSlugFromBESlug = (slug: string) => {
-    const lowerSlug = slug.toLowerCase().replace(/\s+/g, '-');
-    if (lowerSlug.indexOf('0hh1') >= 0 || lowerSlug.indexOf('0h-h1') >= 0) return '0hh1';
-    if (lowerSlug.indexOf('2048') >= 0) return '2048';
-    if (lowerSlug.indexOf('alchemy') >= 0) return 'alchemy';
-    if (lowerSlug.indexOf('box-tower') >= 0) return 'box-tower';
-    if (lowerSlug.indexOf('brick-out-54e74305-8000-4605-b6b7-cf9412dd285b') >= 0) return 'brick-out';
-    if (lowerSlug.indexOf('bubble-spirit') >= 0) return 'bubble-spirit';
-    if (lowerSlug.indexOf('change-word') >= 0) return 'change-word';
-    if (lowerSlug.indexOf('colorize-2') >= 0) return 'colorize-2';
-    if (lowerSlug.indexOf('flapcat-steampunk-2') >= 0) return 'flapcat-steampunk-2';
-    if (lowerSlug.indexOf('flapcat-steampunk') >= 0) return 'flapcat-steampunk';
-    if (lowerSlug.indexOf('fruit-boom') >= 0) return 'fruit-boom';
-    if (lowerSlug.indexOf('fruit-sorting') >= 0) return 'fruit-sorting';
-    if (lowerSlug.indexOf('garden-match') >= 0) return 'garden-match';
-    if (lowerSlug.indexOf('gems-of-hanoi') >= 0) return 'gems-of-hanoi';
-    if (lowerSlug.indexOf('gummy-blocks') >= 0) return 'gummy-blocks';
-    if (lowerSlug.indexOf('hextris') >= 0) return 'hextris';
-    if (lowerSlug.indexOf('hiding-master') >= 0) return 'hiding-master';
-    if (lowerSlug.indexOf('i-love-hue') >= 0) return 'i-love-hue';
-    if (lowerSlug.indexOf('impossible-10') >= 0) return 'impossible-10';
-    if (lowerSlug.indexOf('katana-fruits') >= 0) return 'katana-fruits';
-    if (lowerSlug.indexOf('mahjong-deluxe') >= 0) return 'mahjong-deluxe';
-    if (lowerSlug.indexOf('match-doodle') >= 0) return 'match-doodle';
-    if (lowerSlug.indexOf('mine-rusher') >= 0) return 'mine-rusher';
-    if (lowerSlug.indexOf('photo-hunt') >= 0) return 'photo-hunt';
-    if (lowerSlug.indexOf('snake-attack') >= 0) return 'snake-attack';
-    if (lowerSlug.indexOf('space-adventure-pinball') >= 0) return 'space-adventure-pinball';
-    if (lowerSlug.indexOf('space-trip') >= 0) return 'space-trip';
-    if (lowerSlug.indexOf('stacks-tower') >= 0) return 'stacks-tower';
-    if (lowerSlug.indexOf('star-puzzles') >= 0) return 'star-puzzles';
-    if (lowerSlug.indexOf('sumagi') >= 0) return 'sumagi';
-    if (lowerSlug.indexOf('sweet-memory') >= 0) return 'sweet-memory';
-    if (lowerSlug.indexOf('ultimate-sudoku') >= 0) return 'ultimate-sudoku';
-    if (lowerSlug.indexOf('whack-em-all') >= 0 || lowerSlug.indexOf('whack') >= 0) return 'whack-em-all';
-    if (lowerSlug.indexOf('doodle-god-next') >= 0) return 'doodle-god-next';
-    if (lowerSlug.indexOf('cut-the-rope') >= 0) return 'cut-the-rope';
-    if (lowerSlug.indexOf('omnomrun') >= 0) return 'omnomrun';
-
-    return slug;
-}
-
-
-export const SLUG_TO_DIR_MAP: Record<string, string> = {
-    '0hh1': '0hh1',
-    '2048': '2048',
-    'alchemy': 'Alchemy',
-    'box-tower': 'Box Tower',
-    'brick-out': 'Brick Out',
-    'bubble-spirit': 'Bubble Spirit',
-    'change-word': 'Change Word',
-    'colorize-2': 'Colorize 2',
-    'flapcat-steampunk': 'Flapcat Steampunk',
-    'flapcat-steampunk-2': 'Flapcat Steampunk 2',
-    'fruit-boom': 'Fruit Boom',
-    'fruit-sorting': 'Fruit Sorting',
-    'garden-match': 'Garden Match',
-    'gems-of-hanoi': 'Gems of Hanoi',
-    'gummy-blocks': 'Gummy Blocks',
-    'hextris': 'Hextris',
-    'hiding-master': 'Hiding Master',
-    'i-love-hue': 'I Love Hue',
-    'impossible-10': 'Impossible 10',
-    'katana-fruits': 'Katana Fruits',
-    'mahjong-deluxe': 'Mahjong Deluxe',
-    'match-doodle': 'Match Doodle',
-    'mine-rusher': 'Mine Rusher',
-    'photo-hunt': 'Photo Hunt',
-    'snake-attack': 'Snake Attack',
-    'space-adventure-pinball': 'Space Adventure Pinball',
-    'space-trip': 'Space Trip',
-    'stacks-tower': 'Stacks Tower',
-    'star-puzzles': 'Star Puzzles',
-    'sumagi': 'Sumagi',
-    'sweet-memory': 'Sweet Memory',
-    'ultimate-sudoku': 'Ultimate Sudoku',
-    'whack-em-all': "Whack 'em All",
-    'doodle-god-next': 'Doodle God Next',
-    'cut-the-rope': 'Cut The Rope',
-    'omnomrun': 'Omnomrun'
-};
-
-export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
-    'airport-rush': 'Airport Rush',
-    'circle-word': 'Circle Word',
-    'color-bump': 'Color Bump',
-    'crossy-chicken': 'Crossy Chicken',
-    'jigsaw-puzzle': 'Jigsaw Puzzle',
-    'jumper-frog': 'Jumper Frog',
-    'miner-block': 'Miner Block',
-    'pipe-flow': 'Pipe Flow',
-    'slide': 'Slide',
-    'sweet-candy-saga': 'Sweet Candy Saga',
-    'twenty-one': 'Twenty-One',
-    'unlock-blox': 'Unlock Blox',
-    'word-search': 'Word Search',
-    'zig-zag-switch': 'Zig Zag Switch'
-};
-
-export const mapSlugToGamePath = (slug: string) => {
-    const unifiedSlug = unifiedSlugFromBESlug(slug);
-
-    const inactiveDir = INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug];
-    if (inactiveDir) return `/games/inactive/${inactiveDir}/static/index.html`;
-
-    const dir = SLUG_TO_DIR_MAP[unifiedSlug];
-    if (dir) return `/games/live/${dir}/static/index.html`;
-    return `/games/live/${slug}/static/index.html`;
-};
-
-export default function GameClient({ slug }: GameClientProps) {
+export default function GameClient({ slug, autoPlay = false }: GameClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
-    const [isIframeLoaded, setIsIframeLoaded] = useState(false);
-    const [gameState, setGameState] = useState<'playing' | 'completed' | 'paused'>('playing');
+    type SequenceState = 'loading' | 'ready' | 'playing' | 'calculating' | 'review' | 'badge';
+    const [sequence, setSequence] = useState<SequenceState>('loading');
+    const [isGamePaused, setIsGamePaused] = useState(false);
+    const [gameResults, setGameResults] = useState<GameResults | null>(null);
+    // Chosen per game once the catalog record resolves (chooseTargetMood).
+    const [sessionMoodSlug, setSessionMoodSlug] = useState<string>('focus');
+    const sessionMood = titleFromSlug(sessionMoodSlug);
+    const [adjustmentsApplied, setAdjustmentsApplied] = useState<number>(0);
+    const adjustmentsCountRef = useRef(0);
     const [gameStartTime, setGameStartTime] = useState<number>(Date.now());
     const skillprintSessionIdRef = useRef<string>('');
+    // True once the backend accepted the session; surveys only reference a recorded one.
+    const [sessionRecorded, setSessionRecorded] = useState(false);
     const skillprintClientRef = useRef<SkillprintClient | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -164,8 +79,14 @@ export default function GameClient({ slug }: GameClientProps) {
     const shouldPollRef = useRef(false);
     const [lastSessionResponse, setLastSessionResponse] = useState<PollResultsResponse | null>(null);
     const [currentAdjustment, setCurrentAdjustment] = useState<Adjustment | null>(null);
+    const [latestAdjustment, setLatestAdjustment] = useState<Adjustment | null>(null);
     const processedAdjustmentsRef = useRef<Set<string>>(new Set());
     const lastAdjustmentTimeRef = useRef<number>(0);
+    // Null until the game reports its state; most games never do.
+    const reportedGameStateRef = useRef<ReportedGameState | null>(null);
+    // Player inputs in the game frame since the last upload. Null when the frame
+    // can't be listened to, so the backend treats the count as unknown, not as idle.
+    const inputCountRef = useRef<number | null>(null);
 
     const getApiKey = () => {
         return process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
@@ -176,43 +97,57 @@ export default function GameClient({ slug }: GameClientProps) {
 
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
+    const unifiedSlug = baseSlug(decodedSlug);
 
     const [gamePath, setGamePath] = useState<string>('');
     const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
+    // The catalog record this URL slug resolved to. `forSlug` guards against a stale
+    // resolution being used for a new slug while the next lookup is in flight.
+    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string; moods: CatalogMood[] } | null>(null);
+    const [isUnknownGame, setIsUnknownGame] = useState(false);
+    const [hasImageError, setHasImageError] = useState(false);
 
     // Get game configuration
-    const gameConfig = getGameConfig(decodedSlug);
+    const gameConfig = getGameConfig(unifiedSlug);
 
     useEffect(() => {
         let isMounted = true;
+        setIsLoadingGamePath(true);
+        setIsUnknownGame(false);
+        setResolvedGame(null);
+
         const resolvePath = async () => {
+            // Any slug form (bare, legacy UUID-suffixed, truncated) resolves to one canonical
+            // catalog record; that record's slug is what the backend gets on session start.
+            let record: { slug: string; moods?: CatalogMood[] } | null = null;
             try {
-                const normalizedSlug = unifiedSlugFromBESlug(decodedSlug);
-                const apiData = await getGameBySlug(normalizedSlug);
-
-                let targetSlug = decodedSlug;
-
-                // Validate that the API returned the expected game, avoiding fallbacks like Hextris.
-                if (apiData && apiData.slug) {
-                    const returnedUnified = unifiedSlugFromBESlug(apiData.slug);
-                    if (returnedUnified === normalizedSlug) {
-                        targetSlug = apiData.slug;
-                    }
-                }
-
-                if (isMounted) {
-                    setGamePath(mapSlugToGamePath(targetSlug));
-                }
+                record = resolveCatalogGame(decodedSlug, await getCatalogGames());
             } catch (error) {
-                console.error("Error fetching game slug mapping", error);
-                if (isMounted) {
-                    setGamePath(mapSlugToGamePath(decodedSlug));
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoadingGamePath(false);
+                console.error('Error loading game catalog', error);
+            }
+            if (!record) {
+                // Detail route 404s for unknown slugs (unlike `?slug=`, which returns everything).
+                try {
+                    const detail = await getGameCatalogDetail(decodedSlug);
+                    if (detail?.slug) record = detail;
+                } catch {
+                    // Unknown to the backend; a local build may still exist.
                 }
             }
+            if (!isMounted) return;
+
+            // A catalogue record alone isn't enough: without a local build the
+            // iframe would load a 404 and still start a scored session.
+            if (!hasLocalGameDir(record?.slug || decodedSlug)) {
+                setIsUnknownGame(true);
+                setIsLoadingGamePath(false);
+                return;
+            }
+
+            const serverSlug = record?.slug || unifiedSlug;
+            setGamePath(mapSlugToGamePath(serverSlug));
+            setResolvedGame({ forSlug: decodedSlug, serverSlug, moods: Array.isArray(record?.moods) ? record.moods : [] });
+            setIsLoadingGamePath(false);
         };
         resolvePath();
 
@@ -222,13 +157,51 @@ export default function GameClient({ slug }: GameClientProps) {
     }, [decodedSlug]);
 
     const handleIframeLoad = () => {
-        setIsIframeLoaded(true);
+        setSequence(autoPlay ? 'playing' : 'ready');
         setGameStartTime(Date.now());
         // Do not set shouldPollRef.current = true here. It is already set in useEffect,
         // and setting it here can re-enable polling during exit/navigation race conditions.
 
-        // Set up message listener for communication with the game
-        window.addEventListener('message', handleGameMessage);
+        // Set up message listener for communication with the game. Adding the same
+        // function again on a reload (Play Again) is a no-op.
+        window.addEventListener('message', onWindowMessage);
+        countPlayerInputs();
+
+        if (autoPlay) {
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
+            }
+            // Keyboard games should take keys without a click into the frame first.
+            iframeRef.current?.focus();
+        }
+    };
+
+    // Chunks with no input are left out of skill scores (NEW-30): a still screen
+    // shows what the game looks like, not what the player can do. Capture phase on
+    // the frame's window sees every event before a game can stop it.
+    const countPlayerInputs = () => {
+        inputCountRef.current = null;
+        try {
+            const frameWindow = iframeRef.current?.contentWindow;
+            if (!frameWindow) return;
+            const count = () => {
+                if (inputCountRef.current !== null) inputCountRef.current += 1;
+            };
+            for (const type of ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel']) {
+                frameWindow.addEventListener(type, count, { capture: true, passive: true });
+            }
+            inputCountRef.current = 0;
+        } catch (e) {
+            // A cross-origin frame can't be listened to; leave the count unknown.
+            console.warn('Player inputs not counted', e);
+        }
+    };
+
+    /** The inputs since the last upload, and start counting afresh. */
+    const takeInputCount = () => {
+        const count = inputCountRef.current;
+        if (count !== null) inputCountRef.current = 0;
+        return count;
     };
 
     const handleGameMessage = (event: MessageEvent) => {
@@ -247,15 +220,47 @@ export default function GameClient({ slug }: GameClientProps) {
                 handleGameComplete(data);
                 break;
             case 'GAME_PAUSE':
-                setGameState('paused');
+                setIsGamePaused(true);
                 break;
             case 'GAME_RESUME':
-                setGameState('playing');
+                setIsGamePaused(false);
                 break;
+            case 'gameState':
             case 'GAME_SCORE_UPDATE':
-                // Handle real-time score updates if needed
+                recordReportedGameState(data);
+                break;
+            case 'gameEvent':
+                recordGameEvent(data);
                 break;
         }
+    };
+
+    // A discrete event from the game, universal (LEVEL_START, MATCH, ...) or its
+    // own (Hextris's ROTATE_CLOCKWISE), with `at`: when it happened, in epoch ms.
+    // It goes to the backend with the next screenshot upload.
+    const recordGameEvent = (data: any) => {
+        if (!skillprintSessionIdRef.current || typeof data?.event !== 'string' || !data.event) return;
+        const { event: name, at, ...rest } = data;
+        skillprintClientRef.current?.recordEvent(name, rest, typeof at === 'number' ? at : undefined);
+    };
+
+    // The window listener has to be one stable function: a handler from an old render
+    // can't be removed later, and it would keep uploading this game's screenshots to
+    // the session it was created with after a client-side navigation.
+    const handleGameMessageRef = useRef(handleGameMessage);
+    handleGameMessageRef.current = handleGameMessage;
+    const onWindowMessage = useCallback((event: MessageEvent) => handleGameMessageRef.current(event), []);
+
+    // A failed upload (e.g. the session already closed) is logged by the client.
+    const uploadScreenshots = (...args: Parameters<SkillprintClient['postScreenshots']>) => {
+        skillprintClientRef.current?.postScreenshots(...args).catch(() => {});
+    };
+
+    const recordReportedGameState = (data: any) => {
+        const next: ReportedGameState = { ...reportedGameStateRef.current };
+        if (typeof data?.score === 'number') next.score = data.score;
+        if (typeof data?.isGameOver === 'boolean') next.isGameOver = data.isGameOver;
+        reportedGameStateRef.current = next;
     };
 
     const handleScreenshot = async (event: MessageEvent) => {
@@ -270,7 +275,10 @@ export default function GameClient({ slug }: GameClientProps) {
                     const fetchedResponse = await fetch(base64String);
                     const blob = await fetchedResponse.blob();
 
-                    skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [blob]);
+                    // Each chunk carries the game's latest state, so the session keeps a score
+                    // even if the final upload never arrives.
+                    const capturedAt = typeof base64Data.capturedAt === 'number' ? base64Data.capturedAt : null;
+                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount(), capturedAt);
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
@@ -320,6 +328,8 @@ export default function GameClient({ slug }: GameClientProps) {
                                     console.log("Applying game adjustment:", adj);
                                     processedAdjustmentsRef.current.add(adjId);
                                     lastAdjustmentTimeRef.current = now;
+                                    adjustmentsCountRef.current += 1;
+                                    setAdjustmentsApplied(adjustmentsCountRef.current);
 
                                     // Send to iframe
                                     if (iframeRef.current?.contentWindow) {
@@ -331,6 +341,7 @@ export default function GameClient({ slug }: GameClientProps) {
 
                                     // Show banner
                                     setCurrentAdjustment(adj);
+                                    setLatestAdjustment(adj);
                                 }
                             }
                         } catch (err) {
@@ -353,94 +364,100 @@ export default function GameClient({ slug }: GameClientProps) {
         setTimeout(poll, 2000);
     };
 
+    const pollForFinalResults = async () => {
+        if (!skillprintClientRef.current || !skillprintSessionIdRef.current || disableSdk) {
+            setTimeout(() => setSequence('review'), 2000);
+            return;
+        }
+
+        let attempts = 0;
+        const maxAttempts = 15; // 30 seconds max
+        const poll = async () => {
+            if (attempts >= maxAttempts) {
+                setSequence('review');
+                return;
+            }
+
+            try {
+                const polledRes = await skillprintClientRef.current!.pollParameterResults(skillprintSessionIdRef.current);
+                if (polledRes) {
+                    setLastSessionResponse(polledRes);
+                    // If state is closed, or we have populated skillScores, move to review
+                    if (polledRes.state === "CLOSED" || (polledRes.skillScores && polledRes.skillScores.analyzedAt)) {
+                        setSequence('review');
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('Error polling for final results', e);
+            }
+
+            attempts++;
+            setTimeout(poll, 2000);
+        };
+
+        poll();
+    };
+
     const searchParams = useSearchParams();
-    const source = searchParams.get('source');
-    const playbookId = searchParams.get('playbookId');
     const disableAdjustments = searchParams.get('adjustments') === 'false';
     const disableSdk = searchParams.get('sdk') === 'false';
+    const devToolsEnabled = searchParams.get('dev') === 'true';
 
     const handleGameComplete = (data: any) => {
         const endTime = Date.now();
         const playTime = Math.floor((endTime - gameStartTime) / 1000);
 
-        // Process the game completion data
+        // Only the game knows its score; never invent one.
         const results: GameResults = {
-            score: data.score ?? 0,
+            score: typeof data?.score === 'number' ? data.score : reportedGameStateRef.current?.score,
             time: playTime,
-            level: data.level || 1,
-            achievements: data.achievements || generateAchievements(data.score ?? 0),
-            accuracy: data.accuracy ?? 0,
-            mistakes: data.mistakes ?? 0,
-            bonus: data.bonus ?? 0
+            outcome: 'complete',
+            unscored: playTime < MIN_SCORED_SECONDS,
         };
 
         shouldPollRef.current = false;
         stopIframe();
 
-        // Record the game session
-        const session: GameSession = {
-            id: skillprintSessionIdRef.current || Math.random().toString(36).substr(2, 9),
-            gameSlug: decodedSlug,
-            timestamp: endTime,
-            duration: playTime,
-            score: results.score,
-            completed: true,
-            metadata: {
-                level: results.level,
-                accuracy: results.accuracy,
-                mistakes: results.mistakes,
-                source,
-                playbookId
-            }
-        };
-        saveGameSession(session);
-
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-            skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+            const finalState = typeof results.score === 'number'
+                ? { ...reportedGameStateRef.current, score: results.score, isGameOver: true }
+                : reportedGameStateRef.current;
+            uploadScreenshots(skillprintSessionIdRef.current, [], true, finalState, takeInputCount());
         }
-
-
 
         // Navigate to review page with sessionId
-        if (skillprintSessionIdRef.current) {
-            router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
+        setGameResults(results);
+        showResults(results);
+    };
+
+    // A session too short to score goes straight to the results; waiting up to
+    // 30s for scores that shouldn't exist is what made a 2s session hang.
+    const showResults = (results: GameResults) => {
+        if (results.unscored) {
+            setSequence('review');
+            return;
         }
+        setSequence('calculating');
+        pollForFinalResults();
     };
 
     const stopIframe = () => {
         console.log('stopIframe', iframeRef.current);
+        window.removeEventListener('message', onWindowMessage);
         if (iframeRef.current) {
-            // remove event listener
-            window.removeEventListener('message', handleGameMessage);
             // remove iframe
             iframeRef.current.remove();
         }
     };
 
-    const generateAchievements = (score: number): string[] => {
-        const achievements: string[] = [];
-
-        if (score >= 90) {
-            achievements.push('Perfect Score!', 'Master Player', 'Speed Demon');
-        } else if (score >= 80) {
-            achievements.push('Great Performance', 'Quick Thinker');
-        } else if (score >= 70) {
-            achievements.push('Good Effort', 'Getting Better');
-        } else if (score >= 50) {
-            achievements.push('Good Start', 'Keep Going');
-        } else if (score >= 30) {
-            achievements.push('First Steps', 'Learning');
-        } else {
-            achievements.push('Getting Started', 'Try Again');
-        }
-
-        return achievements;
-    };
-
     const handlePlayAgain = () => {
-        // Reset game state
-        setGameState('playing');
+        setSequence('loading');
         setGameStartTime(Date.now());
+        setGameResults(null);
+        setAdjustmentsApplied(0);
+        adjustmentsCountRef.current = 0;
+        reportedGameStateRef.current = null;
 
         // Reload the iframe to restart the game
         if (iframeRef.current) {
@@ -450,75 +467,54 @@ export default function GameClient({ slug }: GameClientProps) {
 
     const handleBackToGames = () => {
         // Reset game state when actually leaving
-        setGameState('playing');
+        setSequence('playing');
         setGameStartTime(Date.now());
         router.push('/games');
     };
 
     const handleExitGame = () => {
-        if (gameState === 'completed') {
-            // If game is already completed, just go back to games
+        if (sequence === 'review' || sequence === 'calculating') {
             handleBackToGames();
         } else {
             // If game is in progress, navigate to review page
             const currentTime = Math.floor((Date.now() - gameStartTime) / 1000);
 
-            // Player exited before the game reported a score, so there's no
-            // real data to show — use honest zeros rather than faking a result.
+            // The score is whatever the game last reported, if it reports one at all.
+            // Only a game that says it's over counts as complete.
+            const reported = reportedGameStateRef.current;
             const exitResults: GameResults = {
-                score: 0,
+                score: reported?.score,
                 time: currentTime,
-                level: 1, // Default level for early exit
-                achievements: generateAchievements(0),
-                accuracy: 0,
-                mistakes: 0,
-                bonus: 0
+                outcome: reported?.isGameOver ? 'complete' : reported ? 'exited' : 'unknown',
+                unscored: currentTime < MIN_SCORED_SECONDS,
             };
 
             stopIframe();
             shouldPollRef.current = false;
 
-            // Record the game session
-            const session: GameSession = {
-                id: skillprintSessionIdRef.current || Math.random().toString(36).substr(2, 9),
-                gameSlug: decodedSlug,
-                timestamp: Date.now(),
-                duration: currentTime,
-                score: exitResults.score,
-                completed: true, // Mark as completed for playbook tracking when exiting to review
-                metadata: {
-                    level: exitResults.level,
-                    accuracy: exitResults.accuracy,
-                    mistakes: exitResults.mistakes,
-                    source,
-                    playbookId
-                }
-            };
-            saveGameSession(session);
-
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-                skillprintClientRef.current.postScreenshots(skillprintSessionIdRef.current, [], true);
+                uploadScreenshots(skillprintSessionIdRef.current, [], true, reported, takeInputCount());
             }
 
-
-
-            // Navigate to review page with sessionId
-            if (skillprintSessionIdRef.current) {
-                router.push(`/game/${decodedSlug}/review?sessionId=${skillprintSessionIdRef.current}`);
-            }
+            setGameResults(exitResults);
+            showResults(exitResults);
         }
     };
 
 
 
-    // Reset state when slug changes
+    // Reset state and start the Skillprint session once the slug has resolved to a catalog record
     useEffect(() => {
-        setIsIframeLoaded(false);
-        setGameState('playing');
+        if (!resolvedGame || resolvedGame.forSlug !== decodedSlug) return;
+
+        setSequence('loading');
+        setIsGamePaused(false);
         setGameStartTime(Date.now());
         setCurrentAdjustment(null);
+        setLatestAdjustment(null);
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
+        reportedGameStateRef.current = null;
 
         // Initialize Skillprint Session
         if (!disableSdk) {
@@ -539,24 +535,31 @@ export default function GameClient({ slug }: GameClientProps) {
             skillprintClientRef.current = client;
 
             try {
-                const targetMood = localStorage.getItem('targetMood') || Mood.FOCUS;
-                const serverSideSlug = mapLocalGameSlugToServerGameSlug(decodedSlug);
+                // The mood must be one the game carries, or the backend refuses the session.
+                const targetMood = chooseTargetMood(searchParams.get('mood'), resolvedGame.moods);
+                setSessionMoodSlug(targetMood);
+                setSessionRecorded(false);
+                const serverSideSlug = resolvedGame.serverSlug;
 
                 console.log('Starting session for slug', serverSideSlug, decodedSlug);
-                client.startSession(sessionId, targetMood, serverSideSlug);
+                // How the player got here -- an email, a playbook -- goes on the
+                // session, so a click in an email can be followed to a play (SKI-271).
+                const attribution = sessionAttribution(new URLSearchParams(window.location.search));
+                loadGameParameters(gameConfig.parameterManifest)
+                    .then((gameParameters) => client.startSession(sessionId, targetMood, serverSideSlug, false, gameParameters, attribution))
+                    .then((ok) => { if (ok && skillprintSessionIdRef.current === sessionId) setSessionRecorded(true); })
+                    .catch((e) => console.error('Failed to start Skillprint session', e));
                 shouldPollRef.current = true;
                 pollSessionTips();
             } catch (e) {
                 console.error('Failed to start Skillprint session', e);
             }
-
-            injectJavascriptIntoIframe();
         }
 
         return () => {
             shouldPollRef.current = false;
         };
-    }, [slug]);
+    }, [resolvedGame, decodedSlug]);
 
     // Update token if it changes (e.g. loads asynchronously)
     useEffect(() => {
@@ -568,82 +571,131 @@ export default function GameClient({ slug }: GameClientProps) {
     // Cleanup message listener
     useEffect(() => {
         return () => {
-            window.removeEventListener('message', handleGameMessage);
+            window.removeEventListener('message', onWindowMessage);
         };
-    }, []);
+    }, [onWindowMessage]);
 
-    const injectJavascriptIntoIframe = () => {
-        if (iframeRef.current) {
-            const iframeDocument = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-            const scriptUrl = '/lib/skillprint-js-sdk/main-manager.js';
-            if (iframeDocument) {
-                const script = iframeDocument.createElement('script');
-                script.src = scriptUrl;
-                iframeDocument.body.appendChild(script);
+    const handleTogglePlay = () => {
+        if (sequence === 'playing') {
+            setIsGamePaused(true);
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_PAUSE' }, '*');
+            }
+        } else if (sequence === 'ready') {
+            setSequence('playing');
+            setGameStartTime(Date.now());
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
+            }
+        } else {
+            setIsGamePaused(false);
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
             }
         }
     };
 
+    if (isUnknownGame) notFound();
+
     return (
-        <div className="font-sans min-h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="flex flex-col min-h-screen">
-                {/* Game iframe */}
-                <main className="flex-1 relative">
-                    {isLoadingGamePath ? (
-                        <div className="w-full h-full min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 border-0">
-                            <div className="flex flex-col items-center gap-4">
-                                <svg className="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span className="text-gray-500 dark:text-gray-400 font-medium">Loading Game...</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <iframe
-                            ref={iframeRef}
-                            src={gamePath}
-                            className="w-full h-full min-h-screen border-0"
-                            title={`${decodedSlug} Game`}
-                            allowFullScreen
-                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-                            onLoad={handleIframeLoad}
-                        />
-                    )}
-
-                    {/* Adjustment Banner */}
-                    {currentAdjustment && (
-                        <GameAdjustmentBanner
-                            parameterName={currentAdjustment.parameterName}
-                            parameterValue={currentAdjustment.parameterValue}
-                            onDismiss={() => setCurrentAdjustment(null)}
-                        />
-                    )}
-
-                    {/* Floating exit button - only show when iframe is loaded */}
-                    {isIframeLoaded && (
-                        <FloatingExitButton
-                            position={gameConfig.exitButtonPosition}
-                            color={gameConfig.customExitButton?.color || 'red'}
-                            size={gameConfig.customExitButton?.size || 'md'}
-                            onClick={handleExitGame}
-                        />
-                    )}
-
-                    {/* Hidden keyboard adjustment tester */}
-                    {!disableAdjustments && (
-                        <GameAdjustmentTester
-                            iframeRef={iframeRef}
-                            slug={decodedSlug}
-                            onAdjustment={(adj) => setCurrentAdjustment(adj)}
-                        />
-                    )}
-                </main>
+        <div className="page scrollbar-subtle page--game-session margin-none text-default font-ui leading-base" data-sequence={sequence} data-skillprint-page="game-session">
+            <div aria-hidden="true" className="play-field" data-stage-field>
+                <AnimatedGameTiles />
+                <img alt="" className="play-field__art" data-stage-art src={`/assets/images/games/game-${unifiedSlug}.svg`} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.closest('.play-field')?.setAttribute('data-tiles-active', ''); }} />
+                
+                {!isLoadingGamePath && (
+                    <iframe
+                        ref={iframeRef}
+                        src={gamePath}
+                        className="play-field__game border-0 z-10"
+                        title={`${decodedSlug} Game`}
+                        allowFullScreen
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                        onLoad={handleIframeLoad}
+                        style={{
+                            opacity: (sequence === 'playing' || sequence === 'calculating' || sequence === 'review' || sequence === 'ready') ? 1 : 0,
+                            pointerEvents: sequence === 'playing' ? 'auto' : 'none'
+                        }}
+                    />
+                )}
             </div>
 
+            {sequence === 'ready' && (
+                <PlayStage gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug} onPlay={() => handleTogglePlay()} />
+            )}
 
+            {sequence === 'loading' && (
+                <SessionVeil step="loading" title="Loading game" description={`${getGameDetails(unifiedSlug)?.name || unifiedSlug} is starting up.`} isCanvas />
+            )}
 
+            {sequence === 'calculating' && (
+                <SessionVeil step="calculating" title="Calculating results" description="Just a moment while we analyse your gameplay." />
+            )}
 
+            {sequence === 'review' && gameResults && (
+                <GameResultDialog
+                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
+                    score={gameResults.score}
+                    outcome={gameResults.outcome}
+                    duration={gameResults.time || 0}
+                    adjustmentsCount={adjustmentsApplied}
+                    targetMood={sessionMood}
+                    targetMoodSlug={sessionMoodSlug}
+                    onReplay={handlePlayAgain}
+                    skillScores={lastSessionResponse?.skillScores}
+                    moodScores={lastSessionResponse?.moodScores}
+                    gameSlug={resolvedGame?.serverSlug || decodedSlug}
+                    userToken={userToken}
+                    sessionId={skillprintSessionIdRef.current}
+                    sessionRecorded={sessionRecorded}
+                    unscored={gameResults.unscored}
+                />
+            )}
+
+            {sequence === 'playing' && (
+                <PlayBar
+                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
+                    gameSlug={unifiedSlug}
+                    onExit={handleExitGame}
+                    targetMood={sessionMood}
+                    adjustmentName={latestAdjustment?.parameterName}
+                    adjustmentValue={latestAdjustment?.parameterValue}
+                    adjustmentCreateDate={latestAdjustment?.createDate}
+                />
+            )}
+
+            {/* Sequence steps for testing */}
+            {devToolsEnabled && (
+                <nav aria-label="Sequence steps" className="session-rail layout-flex items-center" style={{ position: 'fixed', bottom: 10, left: 10, zIndex: 9999 }}>
+                    <button aria-pressed={sequence === 'loading'} className="session-rail__step button button--tertiary" onClick={() => setSequence('loading')} type="button">Load</button>
+                    <button aria-pressed={sequence === 'ready'} className="session-rail__step button button--tertiary" onClick={() => setSequence('ready')} type="button">Start</button>
+                    <button aria-pressed={sequence === 'playing'} className="session-rail__step button button--tertiary" onClick={() => setSequence('playing')} type="button">Play</button>
+                    <button aria-pressed={sequence === 'calculating'} className="session-rail__step button button--tertiary" onClick={() => setSequence('calculating')} type="button">Calculate</button>
+                    <button aria-pressed={sequence === 'review'} className="session-rail__step button button--tertiary" onClick={() => setSequence('review')} type="button">Review</button>
+                </nav>
+            )}
+
+            {/* Hidden keyboard adjustment tester */}
+            {!disableAdjustments && (
+                <GameAdjustmentTester
+                    iframeRef={iframeRef}
+                    slug={decodedSlug}
+                    onAdjustment={(adj) => {
+                        setCurrentAdjustment(adj);
+                        setLatestAdjustment(adj);
+                    }}
+                />
+            )}
+
+            {/* Adjustment Banner (disabled, using bottom bar notification instead)
+            {currentAdjustment && (
+                <GameAdjustmentBanner
+                    parameterName={currentAdjustment.parameterName}
+                    parameterValue={currentAdjustment.parameterValue}
+                    onDismiss={() => setCurrentAdjustment(null)}
+                />
+            )}
+            */}
         </div>
     );
 }

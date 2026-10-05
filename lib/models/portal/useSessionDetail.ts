@@ -1,70 +1,45 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
 import { SessionDetail, generateMockSessionDetail } from './SessionDetail';
-
-import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api`;
+import { portalFetch } from './portalFetch';
 
 export function useSessionDetail(sessionId: string, useSyntheticData: boolean = false) {
-    const { userToken } = useUserSession();
-    const [data, setData] = useState<SessionDetail | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+  const { userToken } = useUserSession();
+  const [data, setData] = useState<SessionDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-    const fetchData = useCallback(async () => {
-        if (useSyntheticData) {
-            setIsLoading(true);
-            setTimeout(() => {
-                setData(generateMockSessionDetail());
-                setIsLoading(false);
-            }, 500); // Simulate network delay
-            return;
-        }
+  const fetchData = useCallback(async () => {
+    if (useSyntheticData) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setData(generateMockSessionDetail());
+        setIsLoading(false);
+      }, 500);
+      return null;
+    }
+    if (!userToken || !sessionId) return null;
 
-        if (!userToken) {
-            console.warn('No user token available to fetch useSessionDetail.');
-            return null;
-        }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const json = await portalFetch<SessionDetail>(`/sessions/${encodeURIComponent(sessionId)}/`, userToken);
+      setData(json);
+      return json;
+    } catch (err: any) {
+      console.error('Failed to fetch session detail:', err);
+      setError(err);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userToken, useSyntheticData, sessionId]);
 
-        setIsLoading(true);
-        setError(null);
+  useEffect(() => {
+    if (useSyntheticData || (userToken && sessionId)) fetchData();
+  }, [useSyntheticData, userToken, sessionId, fetchData]);
 
-        try {
-            const response = await fetch(`${BASE_URL}/sessions/${sessionId}/`, {
-                headers: {
-                    'Authorization': `Token ${userToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch useSessionDetail: ${response.status}`);
-            }
-
-            const json = await response.json();
-            setData(json);
-            return json;
-        } catch (err: any) {
-            console.error('Failed to fetch useSessionDetail:', err);
-            setError(err);
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [userToken, useSyntheticData, sessionId]);
-
-    useEffect(() => {
-        if (useSyntheticData || userToken) {
-            fetchData();
-        }
-    }, [useSyntheticData, userToken, fetchData]);
-
-    return {
-        data,
-        isLoading,
-        error,
-        refetch: fetchData
-    };
+  return { data, isLoading, error, refetch: fetchData };
 }

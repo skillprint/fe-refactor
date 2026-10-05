@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Guided Breathing — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'guided-breathing',
+      params: [{name:'inhaleSec',default:4},{name:'holdSec',default:4},{name:'exhaleSec',default:6},{name:'sessionLengthMin',default:2}],
+      presets: {1:{inhaleSec:4,holdSec:0,exhaleSec:4,sessionLengthMin:1},2:{inhaleSec:4,holdSec:4,exhaleSec:4,sessionLengthMin:2},3:{inhaleSec:4,holdSec:7,exhaleSec:8,sessionLengthMin:3},4:{inhaleSec:5,holdSec:2,exhaleSec:7,sessionLengthMin:5},5:{inhaleSec:6,holdSec:0,exhaleSec:8,sessionLengthMin:10}},
+      readState: (w) => ({ ...w.__breathState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

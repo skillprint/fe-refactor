@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Stroop Test</title>
+  <link rel="stylesheet" href="../../_shared/game.css">
+  <style>#word{font-size:clamp(2.6rem,10vw,4.5rem);font-weight:900;letter-spacing:4px;margin:18px 0 26px;text-shadow:0 3px 8px rgba(0,0,0,.35);transition:transform .1s}
+#word.pop{transform:scale(1.12)}
+#answers .btn{min-width:96px;color:#111;border-color:rgba(255,255,255,.6)}</style>
+</head>
+<body>
+  <h1>Stroop Test</h1>
+  <div class="hud"><span><span class="icon">📊</span><span id="hud-round">0/20</span></span><span><span class="icon">🎯</span><span id="hud-acc">0%</span></span><span><span class="icon">⚡</span><span id="hud-rt">— ms</span></span><span><span class="icon">🏆</span><span id="hud-best">0%</span></span></div>
+  <div class="stage">
+    <button id="play-btn" class="play-button">▶</button>
+    <div id="word">READY</div>
+    <div class="row" id="answers"></div>
+  </div>
+  <p id="msg" class="msg">Pick the INK colour of the word, not what it says. Keys: R G B Y.</p>
+  <script src="game.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="../../_shared/skillprintScreenshot.js"></script>
+</body>
+</html>

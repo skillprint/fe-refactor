@@ -1,0 +1,223 @@
+/* Copied verbatim from the Portal v2 export (css/pattern-motion.css); see scripts/build-pattern-motion.py. */
+/* ==========================================================================
+   Pattern motion · animated game card backgrounds
+   One inline SVG per card is both the static and the moving background: at
+   rest every animation sits paused on its first frame, which is the existing
+   static design; hovering the card (or keyboard focus inside it) flips one
+   inherited custom property to `running`, and leaving flips it back, so the
+   animation pauses where it is and resumes from there. Nothing is swapped.
+
+   Geometry is drawn in the library's own 380 x 210 canvas and scaled with
+   preserveAspectRatio="xMidYMid slice", the same crop the artwork's
+   object-fit: cover gives. Every distance below is in those canvas units, so
+   one speed reads the same on every card size.
+   ========================================================================== */
+
+:root {
+  /* Canvas units per second. The card is 380 units wide, so 14 is one card
+     width every ~27 seconds. Every pattern derives its duration from this. */
+  --pm-speed: 14;
+}
+
+.pm-bg {
+  --pm-light: var(--mindset-violet-500, #573eeb);
+  --pm-dark: var(--mindset-violet-600, #4c37d0);
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The Games page paints every bare svg as a stroked icon (.page--portal-games svg:
+   stroke currentColor, 1.8 wide, round caps and joins). A background is not an icon:
+   its shapes would inherit that outline and those caps, so the root puts every
+   inherited paint property back to the SVG default, at a specificity that outranks it. */
+svg.pm-bg.pm-bg {
+  fill: none;
+  stroke: none;
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 4;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  stroke-opacity: 1;
+  fill-opacity: 1;
+  fill-rule: nonzero;
+  paint-order: normal;
+  vector-effect: none;
+  shape-rendering: auto;
+  color: inherit;
+}
+
+.pm-bg .pm-l { fill: var(--pm-light); }
+.pm-bg .pm-d { fill: var(--pm-dark); }
+
+/* The shared timing contract. A pattern sets --pm-distance: the canvas-unit
+   length of one seamless cycle (a translation's length, an orbit's
+   circumference, a ring's growth) - and the duration follows from the speed. */
+.pm-anim {
+  animation-duration: calc(var(--pm-distance) / var(--pm-speed) * 1s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-play-state: var(--pm-play, paused);
+}
+
+/* Straight travel by exactly one repeat distance: --pm-dx / --pm-dy. */
+.pm-shift { animation-name: pm-shift; }
+
+@keyframes pm-shift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(calc(var(--pm-dx, 0) * 1px), calc(var(--pm-dy, 0) * 1px)); }
+}
+
+/* Playback. Only the hovered or keyboard-focused card runs; every other card
+   holds a paused animation, which does no per-frame work. */
+.game-card--portal:is(:hover, :has(:focus-visible)),
+.featured-card:is(:hover, :has(:focus-visible)) {
+  --pm-play: running;
+}
+
+/* Touch screens have no hover to end the motion, and reduced motion asks for
+   none: both keep the first frame, which is the static design. */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .pm-anim { animation: none !important; }
+}
+
+/* Colours: the library pairs a step with its neighbour; the ground is the first, the shapes the second.
+   Two of the steps have no portal token yet, so every token carries the library hex as its fallback. */
+.pm-bg[data-tone="lime"] { --pm-light: var(--core-lime-500, #c1ee16); --pm-dark: var(--core-lime-600, #a7ce18); }
+.pm-bg[data-tone="green"] { --pm-light: var(--core-green-500, #09e08f); --pm-dark: var(--core-green-600, #09c280); }
+.pm-bg[data-tone="blue"] { --pm-light: var(--personality-blue-400, #62ccfe); --pm-dark: var(--personality-blue-500, #27baff); }
+.pm-bg[data-tone="violet"] { --pm-light: var(--mindset-violet-500, #573eeb); --pm-dark: var(--mindset-violet-600, #4c37d0); }
+.pm-bg[data-tone="magenta"] { --pm-light: var(--mindset-magenta-500, #ae4dd5); --pm-dark: var(--mindset-magenta-600, #9744bd); }
+.pm-bg[data-tone="pink"] { --pm-light: var(--skills-pink-500, #ff518d); --pm-dark: var(--skills-pink-600, #dd477f); }
+.pm-bg[data-tone="orange"] { --pm-light: var(--skills-orange-400, #fdc65a); --pm-dark: var(--skills-orange-500, #ffb21b); }
+.pm-bg[data-tone="panel-navy"] { --pm-light: var(--panel-navy-800, #2b3159); --pm-dark: var(--panel-navy-900, #212549); }
+
+/* ==========================================================================
+   Patterns
+   ========================================================================== */
+
+/* h-stripes */
+.pm-bg[data-pattern="h-stripes"] { --pm-distance: 15; --pm-dx: 0; --pm-dy: 15; }
+
+/* v-stripes */
+.pm-bg[data-pattern="v-stripes"] { --pm-distance: 27.142857; --pm-dx: 27.142857; --pm-dy: 0; }
+
+/* concentric-circles */
+/* Concentric Circles: every disc is a unit circle (r = 17) scaled by its band index k; one cycle grows
+   k -> k + 2, i.e. every edge moves out by 34 (one light + one dark band) at constant speed. */
+.pm-bg[data-pattern="concentric-circles"] { --pm-distance: 34; }
+.pm-bg[data-pattern="concentric-circles"] circle { transform: scale(var(--k, 0)); animation-name: pm-concentric-circles-grow; }
+.pm-bg[data-pattern="concentric-circles"] .pm-late { animation-name: pm-concentric-circles-late; }
+@keyframes pm-concentric-circles-grow { from { transform: scale(var(--k, 0)); } to { transform: scale(calc(var(--k, 0) + 2)); } }
+@keyframes pm-concentric-circles-late { 0%, 50% { transform: scale(0); } to { transform: scale(1); } }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(1) { --k: 12; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(2) { --k: 11; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(3) { --k: 10; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(4) { --k: 9; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(5) { --k: 8; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(6) { --k: 7; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(7) { --k: 6; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(8) { --k: 5; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(9) { --k: 4; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(10) { --k: 3; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(11) { --k: 2; }
+.pm-bg[data-pattern="concentric-circles"] circle:nth-of-type(12) { --k: 1; }
+
+/* hex-nest */
+/* Hex Nest: every hexagon is a unit hexagon (vertex radius 19) scaled by its band index k; one cycle
+   grows k -> k + 2: vertices move out by 38, edges (apothem) by 38 x cos30 = 32.909. */
+.pm-bg[data-pattern="hex-nest"] { --pm-distance: 32.90896534380867; }
+.pm-bg[data-pattern="hex-nest"] path { transform: scale(var(--k, 0)); animation-name: pm-hex-nest-grow; }
+.pm-bg[data-pattern="hex-nest"] .pm-late { animation-name: pm-hex-nest-late; }
+@keyframes pm-hex-nest-grow { from { transform: scale(var(--k, 0)); } to { transform: scale(calc(var(--k, 0) + 2)); } }
+@keyframes pm-hex-nest-late { 0%, 50% { transform: scale(0); } to { transform: scale(1); } }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(1) { --k: 11; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(2) { --k: 10; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(3) { --k: 9; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(4) { --k: 8; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(5) { --k: 7; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(6) { --k: 6; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(7) { --k: 5; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(8) { --k: 4; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(9) { --k: 3; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(10) { --k: 2; }
+.pm-bg[data-pattern="hex-nest"] path:nth-of-type(11) { --k: 1; }
+
+/* triangles */
+.pm-bg[data-pattern="triangles"] { --pm-distance: 41.13620667976083; --pm-dx: 0; --pm-dy: 41.13620667976083; }
+
+/* diagonal-stripes */
+/* Drawn inside rotate(45): local +x is screen (1,1)/sqrt2, so this is a 26-unit move toward the bottom-right. */
+.pm-bg[data-pattern="diagonal-stripes"] { --pm-distance: 26; --pm-dx: 26; --pm-dy: 0; }
+
+/* checkerboard */
+/* Two cells: a one-cell shift swaps the colours. */
+.pm-bg[data-pattern="checkerboard"] { --pm-distance: 76; --pm-dx: 0; --pm-dy: 76; }
+
+/* dot-grid */
+.pm-bg[data-pattern="dot-grid"]{--pm-distance:96.92161458443294}
+.pm-bg[data-pattern="dot-grid"] .pm-anim{animation-name:pm-dot-grid-loop}
+.pm-bg[data-pattern="dot-grid"][data-variant="orbit"]{--pm-distance:85.27180059743723}
+.pm-bg[data-pattern="dot-grid"][data-variant="orbit"] .pm-anim{animation-name:pm-dot-grid-orbit}
+@keyframes pm-dot-grid-loop{0%{transform:translate(0px,0px)}14.0025%{transform:translate(0px,13.571px)}15.8354%{transform:translate(0.231px,15.328px)}17.6683%{transform:translate(0.909px,16.964px)}19.5012%{transform:translate(1.987px,18.37px)}21.3342%{transform:translate(3.393px,19.448px)}23.1671%{transform:translate(5.029px,20.126px)}25%{transform:translate(6.786px,20.357px)}39.0025%{transform:translate(20.357px,20.357px)}40.8354%{transform:translate(22.113px,20.126px)}42.6683%{transform:translate(23.75px,19.448px)}44.5012%{transform:translate(25.155px,18.37px)}46.3342%{transform:translate(26.234px,16.964px)}48.1671%{transform:translate(26.912px,15.328px)}50%{transform:translate(27.143px,13.571px)}64.0025%{transform:translate(27.143px,0px)}65.8354%{transform:translate(26.912px,-1.756px)}67.6683%{transform:translate(26.234px,-3.393px)}69.5012%{transform:translate(25.155px,-4.798px)}71.3342%{transform:translate(23.75px,-5.877px)}73.1671%{transform:translate(22.113px,-6.554px)}75%{transform:translate(20.357px,-6.786px)}89.0025%{transform:translate(6.786px,-6.786px)}90.8354%{transform:translate(5.029px,-6.554px)}92.6683%{transform:translate(3.393px,-5.877px)}94.5012%{transform:translate(1.987px,-4.798px)}96.3342%{transform:translate(0.909px,-3.393px)}98.1671%{transform:translate(0.231px,-1.756px)}100%{transform:translate(0px,0px)}}
+@keyframes pm-dot-grid-orbit{0%{transform:translate(0px,0px)}2.0833%{transform:translate(0.116px,1.771px)}4.1667%{transform:translate(0.462px,3.513px)}6.25%{transform:translate(1.033px,5.194px)}8.3333%{transform:translate(1.818px,6.786px)}10.4167%{transform:translate(2.804px,8.262px)}12.5%{transform:translate(3.975px,9.596px)}14.5833%{transform:translate(5.31px,10.767px)}16.6667%{transform:translate(6.786px,11.753px)}18.75%{transform:translate(8.378px,12.538px)}20.8333%{transform:translate(10.059px,13.109px)}22.9167%{transform:translate(11.8px,13.455px)}25%{transform:translate(13.571px,13.571px)}27.0833%{transform:translate(15.343px,13.455px)}29.1667%{transform:translate(17.084px,13.109px)}31.25%{transform:translate(18.765px,12.538px)}33.3333%{transform:translate(20.357px,11.753px)}35.4167%{transform:translate(21.833px,10.767px)}37.5%{transform:translate(23.168px,9.596px)}39.5833%{transform:translate(24.338px,8.262px)}41.6667%{transform:translate(25.325px,6.786px)}43.75%{transform:translate(26.11px,5.194px)}45.8333%{transform:translate(26.68px,3.513px)}47.9167%{transform:translate(27.027px,1.771px)}50%{transform:translate(27.143px,0px)}52.0833%{transform:translate(27.027px,-1.771px)}54.1667%{transform:translate(26.68px,-3.513px)}56.25%{transform:translate(26.11px,-5.194px)}58.3333%{transform:translate(25.325px,-6.786px)}60.4167%{transform:translate(24.338px,-8.262px)}62.5%{transform:translate(23.168px,-9.596px)}64.5833%{transform:translate(21.833px,-10.767px)}66.6667%{transform:translate(20.357px,-11.753px)}68.75%{transform:translate(18.765px,-12.538px)}70.8333%{transform:translate(17.084px,-13.109px)}72.9167%{transform:translate(15.343px,-13.455px)}75%{transform:translate(13.571px,-13.571px)}77.0833%{transform:translate(11.8px,-13.455px)}79.1667%{transform:translate(10.059px,-13.109px)}81.25%{transform:translate(8.378px,-12.538px)}83.3333%{transform:translate(6.786px,-11.753px)}85.4167%{transform:translate(5.31px,-10.767px)}87.5%{transform:translate(3.975px,-9.596px)}89.5833%{transform:translate(2.804px,-8.262px)}91.6667%{transform:translate(1.818px,-6.786px)}93.75%{transform:translate(1.033px,-5.194px)}95.8333%{transform:translate(0.462px,-3.513px)}97.9167%{transform:translate(0.116px,-1.771px)}100%{transform:translate(0px,0px)}}
+
+/* scallops */
+.pm-bg[data-pattern="scallops"] { --pm-distance: 34.54545454545455; --pm-dx: 2; --pm-dy: 0; }
+/* --pm-dx is in the path's own units: it sits inside scale(r), so 2 = 2r = 34.5455 canvas units. */
+
+/* chevrons */
+.pm-bg[data-pattern="chevrons"] { --pm-distance: 21.11111111111111; --pm-dx: 2; --pm-dy: 0; }
+/* --pm-dx is in the path's own units: it sits inside scale(w/2), so 2 = w = 21.1111 canvas units. */
+
+/* plus-grid */
+.pm-bg[data-pattern="plus-grid"] { --pm-distance: 31.666667; --pm-dx: 0; --pm-dy: 31.666667; }
+/* Bars are dashes of one stroked path: width = bar thickness, dash = arm length, gap = pitch - arm.
+   The colour still comes only from the shared dark token that .pm-d uses. */
+.pm-bg[data-pattern="plus-grid"] .pm-d { fill: none; stroke: var(--pm-dark); stroke-width: 9.5; stroke-dasharray: 22.8 8.866667; }
+
+/* diamond-lattice */
+.pm-bg[data-pattern="diamond-lattice"]{--pm-distance:135.690260418206}
+.pm-bg[data-pattern="diamond-lattice"] .pm-anim{animation-name:pm-diamond-lattice-loop}
+.pm-bg[data-pattern="diamond-lattice"][data-variant="orbit"]{--pm-distance:119.38052083641213}
+.pm-bg[data-pattern="diamond-lattice"][data-variant="orbit"] .pm-anim{animation-name:pm-diamond-lattice-orbit}
+@keyframes pm-diamond-lattice-loop{0%{transform:translate(0px,0px)}14.0025%{transform:translate(0px,19px)}15.8354%{transform:translate(0.324px,21.459px)}17.6683%{transform:translate(1.273px,23.75px)}19.5012%{transform:translate(2.782px,25.718px)}21.3342%{transform:translate(4.75px,27.227px)}23.1671%{transform:translate(7.041px,28.176px)}25%{transform:translate(9.5px,28.5px)}39.0025%{transform:translate(28.5px,28.5px)}40.8354%{transform:translate(30.959px,28.176px)}42.6683%{transform:translate(33.25px,27.227px)}44.5012%{transform:translate(35.218px,25.718px)}46.3342%{transform:translate(36.727px,23.75px)}48.1671%{transform:translate(37.676px,21.459px)}50%{transform:translate(38px,19px)}64.0025%{transform:translate(38px,0px)}65.8354%{transform:translate(37.676px,-2.459px)}67.6683%{transform:translate(36.727px,-4.75px)}69.5012%{transform:translate(35.218px,-6.718px)}71.3342%{transform:translate(33.25px,-8.227px)}73.1671%{transform:translate(30.959px,-9.176px)}75%{transform:translate(28.5px,-9.5px)}89.0025%{transform:translate(9.5px,-9.5px)}90.8354%{transform:translate(7.041px,-9.176px)}92.6683%{transform:translate(4.75px,-8.227px)}94.5012%{transform:translate(2.782px,-6.718px)}96.3342%{transform:translate(1.273px,-4.75px)}98.1671%{transform:translate(0.324px,-2.459px)}100%{transform:translate(0px,0px)}}
+@keyframes pm-diamond-lattice-orbit{0%{transform:translate(0px,0px)}2.0833%{transform:translate(0.163px,2.48px)}4.1667%{transform:translate(0.647px,4.918px)}6.25%{transform:translate(1.446px,7.271px)}8.3333%{transform:translate(2.546px,9.5px)}10.4167%{transform:translate(3.926px,11.566px)}12.5%{transform:translate(5.565px,13.435px)}14.5833%{transform:translate(7.434px,15.074px)}16.6667%{transform:translate(9.5px,16.454px)}18.75%{transform:translate(11.729px,17.554px)}20.8333%{transform:translate(14.082px,18.353px)}22.9167%{transform:translate(16.52px,18.837px)}25%{transform:translate(19px,19px)}27.0833%{transform:translate(21.48px,18.837px)}29.1667%{transform:translate(23.918px,18.353px)}31.25%{transform:translate(26.271px,17.554px)}33.3333%{transform:translate(28.5px,16.454px)}35.4167%{transform:translate(30.566px,15.074px)}37.5%{transform:translate(32.435px,13.435px)}39.5833%{transform:translate(34.074px,11.566px)}41.6667%{transform:translate(35.454px,9.5px)}43.75%{transform:translate(36.554px,7.271px)}45.8333%{transform:translate(37.353px,4.918px)}47.9167%{transform:translate(37.837px,2.48px)}50%{transform:translate(38px,0px)}52.0833%{transform:translate(37.837px,-2.48px)}54.1667%{transform:translate(37.353px,-4.918px)}56.25%{transform:translate(36.554px,-7.271px)}58.3333%{transform:translate(35.454px,-9.5px)}60.4167%{transform:translate(34.074px,-11.566px)}62.5%{transform:translate(32.435px,-13.435px)}64.5833%{transform:translate(30.566px,-15.074px)}66.6667%{transform:translate(28.5px,-16.454px)}68.75%{transform:translate(26.271px,-17.554px)}70.8333%{transform:translate(23.918px,-18.353px)}72.9167%{transform:translate(21.48px,-18.837px)}75%{transform:translate(19px,-19px)}77.0833%{transform:translate(16.52px,-18.837px)}79.1667%{transform:translate(14.082px,-18.353px)}81.25%{transform:translate(11.729px,-17.554px)}83.3333%{transform:translate(9.5px,-16.454px)}85.4167%{transform:translate(7.434px,-15.074px)}87.5%{transform:translate(5.565px,-13.435px)}89.5833%{transform:translate(3.926px,-11.566px)}91.6667%{transform:translate(2.546px,-9.5px)}93.75%{transform:translate(1.446px,-7.271px)}95.8333%{transform:translate(0.647px,-4.918px)}97.9167%{transform:translate(0.163px,-2.48px)}100%{transform:translate(0px,0px)}}
+
+/* waves */
+.pm-bg[data-pattern="waves"] { --pm-distance: 126.66666666666667; --pm-dx: 20; --pm-dy: 0; }
+/* --pm-dx is in the path's own units: it sits inside scale(P/20), so 20 = P = 126.6667 canvas units. */
+
+/* ticks */
+.pm-bg[data-pattern="ticks"] { --pm-distance: 40; --pm-dx: 0; --pm-dy: 40; }
+/* Ticks are dashes of one stroked line per row: width = tick height, dash = tick width, gap = pitch - width.
+   The colour still comes only from the shared dark token that .pm-d uses. */
+.pm-bg[data-pattern="ticks"] .pm-d { fill: none; stroke: var(--pm-dark); stroke-width: 14; stroke-dasharray: 4 16; }
+
+/* grid-lines */
+.pm-bg[data-pattern="grid-lines"] { --pm-distance: 23.75; --pm-dx: 0; --pm-dy: 23.75; }
+/* Each line family is the dashes of ONE stroked line: dash = line thickness, gap = spacing - thickness,
+   stroke width = the canvas height (static verticals) or width (moving horizontals).
+   The colour still comes only from the shared dark token that .pm-d uses. */
+.pm-bg[data-pattern="grid-lines"] .pm-d { fill: none; stroke: var(--pm-dark); stroke-width: 210; stroke-dasharray: 2.4 21.35; }
+.pm-bg[data-pattern="grid-lines"] .pm-anim { stroke-width: 380; }
+
+/* honeycomb */
+.pm-bg[data-pattern="honeycomb"] { --pm-distance: 51; --pm-dx: 0; --pm-dy: 51; }
+/* Light gaps = three families of dashed straight lines: width = gap, dash = cell edge, gap = cell crossing.
+   The colour still comes only from the shared light token that .pm-l uses; the ground is .pm-d. */
+.pm-bg[data-pattern="honeycomb"] .pm-l { fill: none; stroke: var(--pm-light); stroke-width: 2.94449; stroke-dasharray: 17 34; }
+
+/* bubbles */
+/* Rise by D = 222: the shortest whole-bubble loop that keeps frame one exact (D_min = 221.79, see NOTES.md). */
+.pm-bg[data-pattern="bubbles"] { --pm-distance: 222; --pm-dx: 0; --pm-dy: -222; }
+
+/* sunburst */
+/* Sunburst: rotate clockwise about the burst centre (the path's user-space origin, set by the parent g) by one ray
+   period, 360/32 = 11.25deg. --pm-distance = arc length per cycle at r = 220.5 (centre to top-centre of the canvas). */
+.pm-bg[data-pattern="sunburst"] { --pm-distance: 43.295073757; }
+.pm-bg[data-pattern="sunburst"] .pm-anim { animation-name: pm-sunburst-spin; }
+@keyframes pm-sunburst-spin { from { transform: rotate(0deg); } to { transform: rotate(11.25deg); } }

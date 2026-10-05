@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dual N-Back</title>
+  <link rel="stylesheet" href="../../_shared/game.css">
+  <style>#grid{display:grid;grid-template-columns:repeat(3,clamp(60px,18vw,90px));gap:8px;margin-bottom:14px}
+.cell{aspect-ratio:1;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:clamp(1.6rem,6vw,2.6rem);font-weight:800;color:#4a3f8a;transition:background .15s}
+.cell.on{background:#ffeaa7;box-shadow:0 0 30px rgba(255,234,167,.8)}</style>
+</head>
+<body>
+  <h1>Dual N-Back</h1>
+  <div class="hud"><span><span class="icon">🧠</span><b id="hud-n">2</b>-back</span><span><span class="icon">📊</span><span id="hud-trial">0/20</span></span><span><span class="icon">🎯</span><span id="hud-acc">0%</span></span><span><span class="icon">🏆</span><span id="hud-best">0%</span></span></div>
+  <div class="stage">
+    <button id="play-btn" class="play-button">▶</button>
+    <div id="grid"></div>
+    <div class="row"><button id="pos-btn" class="btn">Position (A)</button><button id="snd-btn" class="btn">Sound (L)</button></div>
+  </div>
+  <p id="msg" class="msg">Press a button when the position or letter matches the one N steps back.</p>
+  <script src="game.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="../../_shared/skillprintScreenshot.js"></script>
+</body>
+</html>

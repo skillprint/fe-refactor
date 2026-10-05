@@ -14,6 +14,25 @@ const nextConfig: NextConfig = {
   // We use this option so we can avoid having the `.html` extension at the end of the page URLs.
   trailingSlash: true,
 
+  // Pages that render a checked-in Markdown document at request time need the
+  // file shipped with their serverless function; tracing can't see a path
+  // built at runtime.
+  outputFileTracingIncludes: {
+    '/coach/admin-guide': ['./docs/COACH_ADMIN_README.md'],
+  },
+
+  // SKI-144: the profile skill breakdown used to link to /profile/skills/<slug>,
+  // which never had a route. Keep old links (bookmarks, the bug tracker) working.
+  async redirects() {
+    return [
+      {
+        source: '/profile/skills/:slug',
+        destination: '/skills/:slug',
+        permanent: true,
+      },
+    ];
+  },
+
   // Rewrites for development to proxy API requests and avoid CORS
   // Note: These won't work in the static export, but help during development
   async rewrites() {

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { setupCache } from 'axios-cache-interceptor';
 import { getCookie, getApiBaseUrl } from "../utils/cookieUtils";
+import { resolveCatalogGame } from "@/lib/gameSlug";
 
 // const instance = Axios.create();
 // const axios = setupCache(instance);
@@ -181,10 +182,22 @@ export const getSkills = async () => {
     return await get(skills_path, true);
 };
 
-export const getGameBySlug = async (slug: string) => {
-    const url = `${catalog_path}?slug=${slug}`;
+// The whole public catalog, cached. `?slug=` is not a backend filter (it silently returns
+// every game), so callers resolve a slug against this list with lib/gameSlug instead.
+export const getCatalogGames = async (): Promise<any[]> => {
+    const url = `${catalog_path}?limit=300`;
     const response = await get(url, true);
-    return response.results && response.results.length > 0 ? response.results[0] : null;
+    return Array.isArray(response) ? response : (response?.results || []);
+};
+
+// The canonical catalog record for any slug form, or null when the game is unknown.
+export const getCatalogGame = async (slug: string) => {
+    return resolveCatalogGame(slug, await getCatalogGames());
+};
+
+export const getGameCatalogDetail = async (slug: string) => {
+    const url = `${catalog_path}${slug}/`;
+    return await get(url, true);
 };
 
 export const getRecommendations = async (limit: number = 1) => {
@@ -192,7 +205,7 @@ export const getRecommendations = async (limit: number = 1) => {
     return await get(url, false);
 };
 
-export const submitMoodSurvey = async (data: { score: number, game: string, mood: string }, token?: string | null) => {
+export const submitMoodSurvey = async (data: { score: number, game: string, mood: string, session?: string }, token?: string | null) => {
     const url = `games/api/surveys/mood/`;
     const headers: any = { "Content-Type": "application/json" };
     if (token) {

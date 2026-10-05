@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Procedural Maze — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'procedural-maze',
+      params: [{name:'mazeSize',default:11},{name:'fogRadius',default:0}],
+      presets: {1:{mazeSize:7,fogRadius:0},2:{mazeSize:11,fogRadius:0},3:{mazeSize:15,fogRadius:0},4:{mazeSize:15,fogRadius:3},5:{mazeSize:21,fogRadius:3},6:{mazeSize:25,fogRadius:2},7:{mazeSize:31,fogRadius:2}},
+      readState: (w) => ({ ...w.__mazeState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

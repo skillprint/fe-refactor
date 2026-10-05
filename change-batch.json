@@ -1,0 +1,18 @@
+{
+  "Comment": "Point redesign.skillprint.co to Vercel",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "redesign.skillprint.co.",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "cname.vercel-dns.com."
+          }
+        ]
+      }
+    }
+  ]
+}

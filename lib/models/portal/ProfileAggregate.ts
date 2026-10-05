@@ -1,46 +1,78 @@
+/** `GET /api/portal/profile/` — lifetime aggregate profile. camelCase on the wire. */
+
 export interface ProfileDimensionStat {
   slug: string;
   score: number;
+  /** First-ever recorded score for the dimension; null with no rollup history. */
+  baselineScore: number | null;
+  /** score - baselineScore; null when baseline is null. */
+  delta: number | null;
   sessions: number;
 }
 
 export interface ProfileWeeklyGridItem {
   date: string;
-  mood_score: number | null;
-  cognition_score: number | null;
-  session_count: number;
+  moodScore: number | null;
+  cognitionScore: number | null;
+  sessionCount: number;
+}
+
+export interface ProfilePercentileItem {
+  slug: string;
+  percentile: number | null;
 }
 
 export interface ProfileAggregate {
-  user: { first_name: string; joined_at: string; };
-  totals: { sessions: number; total_play_seconds: number; active_days: number; };
-  top_dimensions: {
+  user: { firstName: string; joinedAt: string };
+  totals: { sessions: number; totalPlaySeconds: number; activeDays: number };
+  topDimensions: {
     mood: ProfileDimensionStat[];
     cognition: ProfileDimensionStat[];
     personality: ProfileDimensionStat[];
   };
   percentiles: {
-    mood: { slug: string; percentile: number }[];
-    cognition: { slug: string; percentile: number }[];
-    personality: { slug: string; percentile: number }[];
+    mood: ProfilePercentileItem[];
+    cognition: ProfilePercentileItem[];
+    personality: ProfilePercentileItem[];
   };
-  weekly_grid: ProfileWeeklyGridItem[];
+  weeklyGrid: ProfileWeeklyGridItem[];
+}
+
+/** Flatten `topDimensions` into slug → stat, across all three pillars. */
+export function profileDimensionMap(profile: ProfileAggregate | null | undefined): Record<string, ProfileDimensionStat> {
+  const out: Record<string, ProfileDimensionStat> = {};
+  if (!profile) return out;
+  for (const pillar of ['mood', 'cognition', 'personality'] as const) {
+    for (const stat of profile.topDimensions?.[pillar] || []) {
+      out[stat.slug] = stat;
+    }
+  }
+  return out;
 }
 
 export const generateMockProfileAggregate = (): ProfileAggregate => ({
-  user: { first_name: "Gabriel", joined_at: "2025-11-15T00:00:00Z" },
-  totals: { sessions: 142, total_play_seconds: 47520, active_days: 38 },
-  top_dimensions: {
-    mood: [{ slug: "focus", score: 74, sessions: 80 }],
-    cognition: [{ slug: "attention", score: 81, sessions: 92 }],
-    personality: [{ slug: "conscientiousness", score: 72, sessions: 50 }]
+  user: { firstName: 'Gabriel', joinedAt: '2025-11-15T00:00:00Z' },
+  totals: { sessions: 142, totalPlaySeconds: 47520, activeDays: 38 },
+  topDimensions: {
+    mood: [
+      { slug: 'focus', score: 74, baselineScore: 51, delta: 23, sessions: 80 },
+      { slug: 'relax', score: 68, baselineScore: null, delta: null, sessions: 45 },
+    ],
+    cognition: [
+      { slug: 'attention', score: 81, baselineScore: 60, delta: 21, sessions: 92 },
+      { slug: 'pattern-matching', score: 76, baselineScore: 70, delta: 6, sessions: 88 },
+    ],
+    personality: [
+      { slug: 'conscientiousness', score: 72, baselineScore: 66, delta: 6, sessions: 50 },
+      { slug: 'openness', score: 68, baselineScore: 62, delta: 6, sessions: 50 },
+    ],
   },
   percentiles: {
-    mood: [{ slug: "focus", percentile: 78 }],
-    cognition: [{ slug: "attention", percentile: 85 }],
-    personality: [{ slug: "openness", percentile: 70 }]
+    mood: [{ slug: 'focus', percentile: 78 }],
+    cognition: [{ slug: 'attention', percentile: 85 }],
+    personality: [{ slug: 'openness', percentile: 70 }],
   },
-  weekly_grid: [
-    { date: "2026-04-28", mood_score: 72, cognition_score: 68, session_count: 3 }
-  ]
+  weeklyGrid: [
+    { date: '2026-04-28', moodScore: 72, cognitionScore: 68, sessionCount: 3 },
+  ],
 });

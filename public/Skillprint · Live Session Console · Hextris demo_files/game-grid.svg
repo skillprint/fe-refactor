@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>0h h1</title>
+  <desc>Skillprint game card — checkerboard in skills-orange-400/500, grid icon</desc>
+  <defs><clipPath id="clip-grid"><rect width="380" height="210"/></clipPath></defs>
+  <rect width="380" height="210" fill="#fdc65a"/>
+  <g clip-path="url(#clip-grid)">
+    <rect x="38.00" y="0.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="114.00" y="0.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="190.00" y="0.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="266.00" y="0.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="342.00" y="0.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="0.00" y="38.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="76.00" y="38.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="152.00" y="38.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="228.00" y="38.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="304.00" y="38.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="38.00" y="76.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="114.00" y="76.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="190.00" y="76.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="266.00" y="76.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="342.00" y="76.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="0.00" y="114.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="76.00" y="114.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="152.00" y="114.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="228.00" y="114.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="304.00" y="114.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="38.00" y="152.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="114.00" y="152.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="190.00" y="152.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="266.00" y="152.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="342.00" y="152.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="0.00" y="190.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="76.00" y="190.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="152.00" y="190.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="228.00" y="190.00" width="38.00" height="38.00" fill="#ffb21b"/>
+    <rect x="304.00" y="190.00" width="38.00" height="38.00" fill="#ffb21b"/>
+  </g>
+  <svg x="120" y="35" width="140" height="140" viewBox="0 0 512 512">
+<path d="m68 68h376v376h-376z" fill="#eceef2"/><path d="m256 68h188v376h-188z" fill="#b9e7fd"/><path d="m512 83v-30h-53v-53h-30v53h-346v-53h-30v53h-53v30h53v346h-53v30h53v53h30v-53h346v53h30v-53h53v-30h-53v-346zm-365 346h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm94 282h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm94 282h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm94 282h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64z" fill="#ff518d"/><path d="m512 83v-30h-53v-53h-30v53h-173v406h173v53h30v-53h53v-30h-53v-346zm-177 346h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm94 282h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64zm0-94h-64v-64h64z" fill="#ba3e70"/>
+  </svg>
+</svg>

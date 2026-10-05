@@ -1,0 +1,21 @@
+'use client';
+
+import { useRef } from 'react';
+import Link from 'next/link';
+import { useLogoMotion } from './useLogoMotion';
+
+export default function TopBar() {
+  const brandRef = useRef<HTMLAnchorElement>(null);
+  useLogoMotion(brandRef);
+  return (
+    <header className="portal-topbar">
+      <Link ref={brandRef} className="portal-topbar__brand" href="/" aria-label="Skillprint home">
+        <img className="brand-logo brand-logo--dark" src="/assets/logos/skillprint-logo-customer-dark.svg" alt="Skillprint" />
+        <img className="brand-logo brand-logo--light" src="/assets/logos/skillprint-logo-customer-light.svg" alt="Skillprint" />
+      </Link>
+      <button onClick={() => document.body.classList.toggle('nav-open')} className="icon-button portal-nav-toggle" type="button" aria-label="Open navigation" aria-controls="portalNav" aria-expanded="false" data-portal-nav-open data-home-spot="routes-sm">
+        <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-menu"></use></svg>
+      </button>
+    </header>
+  );
+}

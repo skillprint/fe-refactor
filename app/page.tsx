@@ -1,22 +1,36 @@
 'use client';
 
+import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
+import { hasLocalGameDir } from '@/lib/localGames';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import TopNav from "./components/TopNav";
+import { useSearchParams } from 'next/navigation';
+import AssignedPlaybooks from './components/AssignedPlaybooks';
+import PortalLayout from "@/components/PortalLayout";
 import ProgressBanner from "./components/ProgressBanner";
 import { useGamesByMood } from './hooks/useGamesByMood';
 import BuckyballLoading from './components/BuckyballLoading';
 import { useUserSession } from './hooks/useUserSession';
-import { useGameSessions } from './hooks/useGameSessions';
-import { useUserProfile } from './hooks/useUserProfile';
-import { PlaybookWidget } from './components/PlaybookWidget';
-import SkillprintVisualization from './components/Skillprint';
-import { useSkillprintVisualizationData } from './hooks/useSkillprintVisualizationData';
+import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
+import { PlayBySkill } from '@/components/PlayBySkill';
 import GamePreviewShareSheet from './components/GamePreviewShareSheet';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { useAuth } from './context/AuthContext';
 import { getGameDetails } from './config/gameConfig';
+import { DEFAULT_GAME_IMAGE, showDefaultGameImageOnError } from '@/lib/playbookUtils';
 import { getCookie, setCookie } from './utils/cookieUtils';
+import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from '@/components/LayoutGrid';
+import { PortalPageTitle, PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { GameTile } from '@/components/GameTile';
+import { GameRail } from '@/components/GameRail';
+import { useRecommendedGames } from './hooks/useRecommendedGames';
+import { MockDataTag } from '@/components/MockDataTag';
+import HomeSkillprintWheel from '@/components/HomeSkillprintWheel';
+import { useHomeSummary } from '@/lib/models/portal/useHomeSummary';
+import { useHomeRecentSessions } from '@/lib/models/portal/useHomeRecentSessions';
+import { useNextGameRecommendation } from '@/lib/models/portal/useNextGameRecommendation';
+import type { HomeRecentSession } from '@/lib/models/portal/HomeRecentSessions';
 
 // Skills data
 const skills = [
@@ -198,15 +212,124 @@ const gradients = [
   'from-indigo-500 to-purple-500',
 ];
 
+// The Get started card is one run of five sessions. Every line of copy below is
+// derived from how far through that run the player is, so the card cannot say
+// "play your first game" to someone with three sessions behind them.
+const RUN_TARGET = 5;
+const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five'];
+
+type NextUpGame = { slug: string; name: string };
+
+function getNextUpCopy(count: number, nextGames: NextUpGame[]) {
+  const played = Math.min(Math.max(count, 0), RUN_TARGET);
+  const remaining = RUN_TARGET - played;
+  const next = nextGames[0];
+  const playHref = `/game/${next?.slug || 'hextris'}`;
+
+  if (played === 0) {
+    return {
+      eyebrow: 'Get started',
+      title: 'Play one game to start your Skillprint.',
+      lede: 'Nothing here is scored until you play. A session takes five to ten minutes, and five of them make your first Skillprint.',
+      primary: { label: 'Play your first game', href: playHref, icon: 'ti-play' },
+      secondary: { label: 'Browse all games', href: '/games' },
+      runCount: `Your first ${RUN_TARGET} sessions`,
+      runNote: 'Each game measures a different set of skills, so five different games build your Skillprint faster than one played five times.',
+      slotsLabel: `No sessions played yet. ${RUN_TARGET} still to play.`,
+    };
+  }
+
+  if (remaining > 0) {
+    const names = nextGames.slice(0, Math.min(remaining, 2)).map(g => g.name);
+    const measured = names.length === 2
+      ? `${names[0]} and ${names[1]} measure`
+      : names.length === 1
+        ? `${names[0]} measures`
+        : 'Each new game measures';
+    const sessionsWord = played === 1 ? 'session' : 'sessions';
+    const moreWord = remaining === 1 ? 'session' : 'sessions';
+    return {
+      eyebrow: 'Next up',
+      title: `Play ${remaining} more ${remaining === 1 ? 'game' : 'games'} to finish your first Skillprint.`,
+      lede: `${measured} the skills your first ${NUMBER_WORDS[played]} ${sessionsWord} missed. ${NUMBER_WORDS[remaining][0].toUpperCase()}${NUMBER_WORDS[remaining].slice(1)} more ${moreWord} and all three dimensions have a score.`,
+      primary: { label: next ? `Play ${next.name}` : 'Play your next game', href: playHref, icon: 'ti-play' },
+      secondary: { label: 'Choose another game', href: '/games' },
+      runCount: `${played} of ${RUN_TARGET} sessions`,
+      runNote: 'Each game measures a different set of skills, so a varied run builds your Skillprint faster than a repeated one.',
+      slotsLabel: `${played} of ${RUN_TARGET} sessions played. ${remaining} still to play.`,
+    };
+  }
+
+  return {
+    eyebrow: 'Your Skillprint is ready',
+    title: 'All five sessions are in. Your first Skillprint is ready to read.',
+    lede: 'Mood, cognition and personality now all have a score. Nothing resets from here \u2014 every further session sharpens the same Skillprint.',
+    primary: { label: 'Read your Skillprint', href: '/profile', icon: 'ti-arrow-right' },
+    secondary: { label: 'Keep playing', href: '/games' },
+    runCount: `${RUN_TARGET} of ${RUN_TARGET} sessions`,
+    runNote: 'The run is complete. New games reach skills these five did not, so your Skillprint keeps sharpening as you play.',
+    slotsLabel: `All ${RUN_TARGET} sessions played.`,
+  };
+}
+
+type PillarKey = 'mood' | 'cognition' | 'personality';
+const PILLARS: { key: PillarKey; label: string }[] = [
+  { key: 'mood', label: 'Mood' },
+  { key: 'cognition', label: 'Cognition' },
+  { key: 'personality', label: 'Personality' },
+];
+
+/* The rail's "what is readable" card. A pillar with a score is described by
+   how settled that score is; a pillar without one says what it still needs. */
+function pillarLabel(score: number | null | undefined, played: number, remaining: number) {
+  if (typeof score === 'number') {
+    if (score >= 70) return 'Clear';
+    if (score >= 40) return 'Settling';
+    return 'Emerging';
+  }
+  if (played === 0) return 'Needs play';
+  if (remaining > 0) return `${remaining} more ${remaining === 1 ? 'game' : 'games'}`;
+  return 'Needs a longer run';
+}
+
+function getReadCopy(played: number, remaining: number) {
+  if (played === 0) {
+    return {
+      title: 'What you will see here',
+      note: 'Mood scores first, cognition next, personality last. This card always says what still needs play.',
+    };
+  }
+  if (remaining > 0) {
+    return {
+      title: 'What is readable so far',
+      note: `Mood scores first, cognition next, personality last. ${NUMBER_WORDS[remaining][0].toUpperCase()}${NUMBER_WORDS[remaining].slice(1)} more ${remaining === 1 ? 'session reaches' : 'sessions reach'} the rest.`,
+    };
+  }
+  return {
+    title: 'What is readable now',
+    note: 'All three now have a score. Personality is the slowest to settle, so it keeps moving the longest.',
+  };
+}
+
 function HomeContent() {
+  const searchParams = useSearchParams();
+  const stateOverride = searchParams.get('state');
+
   const { isWhitelisted } = useUserSession();
   const [featuredSkill, setFeaturedSkill] = useState(skills[0]);
   const [skillGames, setSkillGames] = useState<any[]>([]);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [previewGameSlug, setPreviewGameSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.body.classList.add('page--portal-home');
+    return () => {
+      document.body.classList.remove('page--portal-home');
+    };
+  }, []);
 
   // Fetch games for the "New Games" section using the 'relax' mood
   const { games: fetchedNewGames, isLoading: isLoadingNewGames } = useGamesByMood('relax');
+  const { recommendedGames, isLoading: isLoadingRecommended } = useRecommendedGames(4);
 
   useEffect(() => {
     if (fetchedNewGames.length > 0) {
@@ -214,14 +337,8 @@ function HomeContent() {
     }
   }, [fetchedNewGames]);
 
-  useEffect(() => {
-    // Check for spotlight cookie
-    const hasSeenSpotlight = getCookie('spotlight_dismissed');
-    if (!hasSeenSpotlight) {
-      // setShowTooltip(true);
-    }
 
-    // Randomly select a skill on component mount
+  useEffect(() => {
     const randomSkill = skills[Math.floor(Math.random() * skills.length)];
     setFeaturedSkill(randomSkill);
 
@@ -238,448 +355,320 @@ function HomeContent() {
     setSkillGames(gamesForSkill);
   }, []);
 
-  const dismissTooltip = () => {
-    setShowTooltip(false);
-    setCookie('spotlight_dismissed', 'true');
-  };
+  const { data: homeSummary } = useHomeSummary();
+  const { data: recentSessions } = useHomeRecentSessions();
+  const { data: nextGameRecs } = useNextGameRecommendation();
 
-  // Skillprint Visualization Logic
-  const { count, isLoaded } = useGameSessions();
-  const { fetchUserProfile, profile } = useUserProfile();
-  const [processedProfile, setProcessedProfile] = useState<any>(null);
-  const { nodeDataMap, hasScoreByMood, hasScoreBySkill } = useSkillprintVisualizationData(processedProfile);
+  let count = homeSummary?.totalSessions ?? 0;
+  if (stateOverride === 'first') count = 0;
+  if (stateOverride === 'semi') count = 3;
+  if (stateOverride === 'complete') count = 5;
 
-  const sampleSkillsForVis = [
-    { id: '1', name: 'Problem Solving', level: 85, category: 'Cognitive', color: '#3B82F6' },
-    { id: '2', name: 'Memory', level: 78, category: 'Cognitive', color: '#10B981' },
-    { id: '3', name: 'Speed', level: 92, category: 'Cognitive', color: '#F59E0B' },
-    { id: '4', name: 'Accuracy', level: 88, category: 'Cognitive', color: '#EF4444' },
-    { id: '5', name: 'Pattern Recognition', level: 76, category: 'Cognitive', color: '#8B5CF6' },
-    { id: '6', name: 'Spatial Awareness', level: 82, category: 'Cognitive', color: '#06B6D4' },
-    { id: '7', name: 'Logic', level: 89, category: 'Cognitive', color: '#84CC16' },
-    { id: '8', name: 'Creativity', level: 71, category: 'Cognitive', color: '#F97316' },
-  ];
-  const userSkillsForVis = sampleSkillsForVis.map(s => s.name);
-  const userMoodsForVis = ['Innovate', 'Relax', 'Focus', 'Collaborate'];
+  const playedInRun = Math.min(count, RUN_TARGET);
+  const remainingInRun = RUN_TARGET - playedInRun;
 
-  useEffect(() => {
-    if (profile && profile.results && profile.results.length > 0) {
-      const p = profile.results[0];
-      const history = p.flowScoreHistory || [];
-      const latestMoodsMap = new Map();
-      history.forEach((entry: any) => {
-        const mood = entry.targetMood;
-        const current = latestMoodsMap.get(mood);
-        if (!current || new Date(entry.timestamp) > new Date(current.timestamp)) {
-          latestMoodsMap.set(mood, entry);
-        }
-      });
-      setProcessedProfile({ ...p, latestMoods: Array.from(latestMoodsMap.values()) });
-    }
-  }, [profile]);
+  // Newest first on the wire; the slot row reads in the order they were played.
+  const playedSessions: HomeRecentSession[] = recentSessions ?? [];
+  const runSlots = [...playedSessions].slice(0, RUN_TARGET).reverse();
+
+  // The portal recommender leads; the legacy games recommender fills in until it answers.
+  const nextGames: NextUpGame[] = (nextGameRecs && nextGameRecs.length > 0)
+    ? nextGameRecs.map(r => ({ slug: r.game.slug, name: r.game.name }))
+    : recommendedGames.map((g: any) => ({ slug: g.slug, name: g.name }));
+  // One entry per game: staging still carries a bare placeholder `hextris` beside the real record.
+  const nextUp = getNextUpCopy(count, dedupeByBaseSlug(nextGames.filter((g: NextUpGame) => g.slug && g.name && hasLocalGameDir(g.slug))));
+
+  const flowScores = playedSessions.map(s => s.primaryScore).filter((n): n is number => typeof n === 'number');
+  const flowScore = flowScores.length ? Math.round(flowScores.reduce((a, b) => a + b, 0) / flowScores.length) : null;
+  const streakDays = homeSummary?.streakDays ?? 0;
+
+  // Pillar meters. The dev state overrides carry the reference design's figures.
+  const pillarScores: Record<PillarKey, number | null> = stateOverride === 'semi'
+    ? { mood: 72, cognition: 38, personality: 14 }
+    : stateOverride === 'complete'
+      ? { mood: 84, cognition: 76, personality: 58 }
+      : stateOverride === 'first'
+        ? { mood: null, cognition: null, personality: null }
+        : {
+          mood: homeSummary?.pillarAverages?.mood ?? null,
+          cognition: homeSummary?.pillarAverages?.cognition ?? null,
+          personality: homeSummary?.pillarAverages?.personality ?? null,
+        };
+  const readCopy = getReadCopy(playedInRun, remainingInRun);
 
   return (
-    <div className="font-sans min-h-screen bg-background">
-      {/* Spotlight Overlay */}
-      {showTooltip && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"
-          onClick={dismissTooltip}
-        />
-      )}
-      <div className="flex flex-col min-h-screen">
-        <TopNav />
-        <ProgressBanner />
-
-        <div className="px-4 sm:px-8 py-8 bg-background">
-          <div className="max-w-[1440px] mx-auto w-full">
-            <PlaybookWidget />
+    <>
+      <PortalLayout>
+        <div className="portal-head">
+          <Breadcrumbs items={[{ label: 'Home' }]} />
+          <div className="portal-head__row">
+            {/* SKI-139: the tour's first step rings only the title copy, not the
+                full-width header, so its bubble can sit beside the copy instead
+                of landing on the Get started card underneath. */}
+            <div className="portal-head__copy" data-home-spot="intro">
+              <PortalPageTitle>Play games. Build your Skillprint.</PortalPageTitle>
+              <p>Short games that measure how you think. Play five and you have a Skillprint &mdash; your strengths in mood, cognition and personality.</p>
+            </div>
+            <button className="button button--secondary button--md" type="button" onClick={() => window.dispatchEvent(new CustomEvent('skillprint:show-ftue'))}>
+              <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-help"></use></svg>
+              How this works
+            </button>
           </div>
         </div>
-        {/* Hero Section
-        <div className="bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-500 dark:to-purple-500 px-8 py-12 sm:py-16">
-          <div className="max-w-4xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 dark:text-white">
-              Skillprint
-            </h1>
-            <p className="text-xl mb-8 dark:text-white text-white">
-              Build skills through engaging games and track your progress
-            </p>
 
-            <div className="flex gap-4 items-center flex-col sm:flex-row">
-              <a
-                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:opacity-90 font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto shadow-lg dark:text-white dark:hover:text-background dark:hover:bg-foreground dark:border-white"
-                href="/games"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-                Play Games
-              </a>
-              <a
-                className="rounded-full border-2 border-foreground transition-colors flex items-center justify-center bg-transparent text-foreground hover:bg-foreground hover:text-background font-medium text-sm sm:text-base h-12 px-6 w-full sm:w-auto dark:text-white dark:hover:text-background dark:hover:bg-foreground dark:border-white"
-                href="/profile"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                View Profile
-              </a>
-            </div>
-          </div>
-        </div> */}
+        <PortalPageLayout>
+          <PortalPageMain>
 
-        {/* Skillprint View for Active Users */}
-        {isLoaded && (count >= 3 || isWhitelisted) && (
-          <div className="bg-card border-b border-border">
-            <div className="px-4 sm:px-8 py-12 max-w-[1440px] mx-auto w-full">
-              <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-6">
-                <div className="flex-1 space-y-2">
-                  <h2 className="text-2xl font-bold text-foreground">
-                    Your Profile is Unlocked!
-                  </h2>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    Great job! You've played enough sessions and revealed your unique cognitive breakdown.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                    <Link
-                      href="/profile"
-                      className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-primary-foreground bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105 hover:shadow-primary/25"
-                    >
-                      View Full Analysis
-                      <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
+            {/* SKI-227: above "Get started", because a player who has been set
+                work by their coach should meet it before the generic prompt to
+                pick something. Renders nothing at all when there are no
+                assignments, which is most players. */}
+            <AssignedPlaybooks />
+
+            {/* Get Started */}
+            <PortalSection ariaLabelledBy="nextUpTitle">
+              <div className="portal-nextup sp-card" data-home-spot="nextup">
+                <div className="portal-nextup__copy">
+                  <span className="portal-eyebrow">{nextUp.eyebrow}</span>
+                  <PortalSectionTitle id="nextUpTitle">{nextUp.title}</PortalSectionTitle>
+                  <p className="portal-nextup__lede">{nextUp.lede}</p>
+                  <div className="portal-nextup__actions" data-home-spot="play">
+                    <Link className="button button--primary button--lg" href={nextUp.primary.href}>
+                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href={`#${nextUp.primary.icon}`}></use></svg>
+                      <span>{nextUp.primary.label}</span>
+                    </Link>
+                    <Link className="button button--secondary button--lg" href={nextUp.secondary.href}>
+                      <span>{nextUp.secondary.label}</span>
+                      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                     </Link>
                   </div>
                 </div>
-                <div className="flex-1 w-full max-w-[500px]">
-                  <SkillprintVisualization
-                    userSkills={userSkillsForVis}
-                    userMoods={userMoodsForVis}
-                    hasScoreBySkill={hasScoreBySkill}
-                    hasScoreByMood={hasScoreByMood}
-                    nodeDataMap={nodeDataMap}
-                    size={400}
-                    useSizeDirectly={true}
-                    initialState="reset"
-                    hasMenu={false}
+                <div className="portal-nextup__progress" data-home-spot="run">
+                  <p className="nextup-progress__count">{nextUp.runCount}</p>
+                  <ol className="nextup-slots" aria-label={nextUp.slotsLabel}>
+                    {Array.from({ length: RUN_TARGET }).map((_, i) => {
+                      const session = i < playedInRun ? runSlots[i] : undefined;
+                      if (session) {
+                        const details = getGameDetails(session.gameSlug);
+                        return (
+                          <li key={session.sessionId} className="nextup-slot">
+                            <img src={details?.image || DEFAULT_GAME_IMAGE} alt={session.gameName || 'Game'} onError={showDefaultGameImageOnError} />
+                          </li>
+                        );
+                      }
+                      return <li key={i} className="nextup-slot nextup-slot--empty"></li>;
+                    })}
+                  </ol>
+                  <p className="nextup-progress__note">{nextUp.runNote}</p>
+                </div>
+              </div>
+            </PortalSection>
+
+            {/* Recommended */}
+            <PortalSection ariaLabelledBy="pickTitle">
+              <div className="portal-section__bar">
+                <div>
+                  <PortalSectionTitle id="pickTitle">Start with one of these</PortalSectionTitle>
+                  <PortalSectionHint>Short, forgiving games that read a wide spread of skills. Any of them is a fine first move.</PortalSectionHint>
+                </div>
+                <Link className="portal-section__link" href="/games">
+                  All games <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                </Link>
+              </div>
+              <GameRail isLibrary>
+                {recommendedGames.slice(0, 4).map((game: any, i: number) => (
+                  <GameTile
+                    key={game.slug}
+                    id={game.slug}
+                    title={game.name}
+                    description={game.description}
+                    image={game.screenshot || game.image || DEFAULT_GAME_IMAGE}
+                    url={`/game/${game.slug}`}
+                    skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
+                    tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                  />
+                ))}
+              </GameRail>
+            </PortalSection>
+
+            {/* Recently Played */}
+            <PortalSection ariaLabelledBy="recentTitle">
+              <div className="portal-section__bar">
+                <PortalSectionTitle id="recentTitle">Recently played</PortalSectionTitle>
+                {playedSessions.length > 0 && (
+                  <Link className="portal-section__link" href="/profile#sessions">
+                    All sessions <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                  </Link>
+                )}
+              </div>
+              {playedSessions.length > 0 ? (
+                <GameRail isLibrary>
+                  {playedSessions.slice(0, 5).map((session, i) => {
+                    const known = allGames.find(g => baseSlug(g.slug) === baseSlug(session.gameSlug));
+                    const details = getGameDetails(session.gameSlug);
+                    return (
+                      <GameTile
+                        key={session.sessionId}
+                        id={session.gameSlug}
+                        title={session.gameName}
+                        description={known?.description || ''}
+                        image={details?.image || DEFAULT_GAME_IMAGE}
+                        url={`/game/${session.gameSlug}`}
+                        skills={known?.skills ? known.skills.map((s: string) => ({ id: s, name: s, dimension: 'cognition' as const })) : []}
+                        tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
+                      />
+                    );
+                  })}
+                </GameRail>
+              ) : (
+                <IconInfoCardWithDescription 
+                  title="No sessions yet" 
+                  note="Every game you finish lands here with the date, your flow score and the skills it measured." 
+                  iconId="ti-clock" 
+                />
+              )}
+            </PortalSection>
+
+            {/* New Games */}
+            <PortalSection ariaLabelledBy="newTitle">
+              <div className="portal-section__bar">
+                <PortalSectionTitle id="newTitle">New games</PortalSectionTitle>
+                <Link className="portal-section__link" href="/games">
+                  All games <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                </Link>
+              </div>
+              <GameRail isLibrary>
+                {fetchedNewGames.slice(0, 4).map((game: any, i: number) => (
+                  <GameTile
+                    key={game.slug}
+                    id={game.slug}
+                    title={game.name}
+                    description={game.description || 'Check out this new game!'}
+                    image={game.screenshot || DEFAULT_GAME_IMAGE}
+                    url={`/game/${game.slug}`}
+                    statusBadge="New"
+                    tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[(i + 2) % 6]}
+                  />
+                ))}
+              </GameRail>
+            </PortalSection>
+
+            {/* Play by skill */}
+            <PortalSection ariaLabelledBy="bySkillTitle">
+              <div className="portal-section__bar">
+                <div>
+                  <PortalSectionTitle id="bySkillTitle">Play by skill</PortalSectionTitle>
+                  <PortalSectionHint>Every game measures all three at once. Start from the one you most want to improve.</PortalSectionHint>
+                </div>
+                <Link className="portal-section__link" href="/skills">
+                  All skills <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chevron-right"></use></svg>
+                </Link>
+              </div>
+              <PlayBySkill />
+            </PortalSection>
+
+          </PortalPageMain>
+
+          <PortalPageRail ariaLabelledBy="printTitle">
+            <article className="rail-card rail-print sp-card" data-home-spot="print">
+              <div className="rail-card__head">
+                <h2 className="rail-card__title" id="printTitle">Your Skillprint</h2>
+                <span className="ui-badge ui-badge--sm">
+                  {playedInRun === 0 ? 'Not started' : playedInRun < RUN_TARGET ? 'Forming' : 'Ready'}
+                </span>
+              </div>
+
+              {playedInRun < RUN_TARGET ? (
+                <HomeSkillprintWheel
+                  person="base"
+                  ariaLabel="The blank Skillprint wheel"
+                  description="The blank Skillprint wheel — the circular map of 87 game features that every Skillprint is drawn on, shown here with no scores inked onto it yet."
+                >
+                  <span className="rail-print__veil">
+                    <span className="ui-badge ui-badge--sm">{playedInRun} of {RUN_TARGET} sessions</span>
+                  </span>
+                </HomeSkillprintWheel>
+              ) : (
+                <div style={{ position: 'relative' }}>
+                  <MockDataTag />
+                  <HomeSkillprintWheel
+                    person="ada"
+                    ariaLabel="Your Skillprint"
+                    description="Your Skillprint, inked from five completed sessions — the heavier a line, the more evidence sits behind it."
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* New Games Section */}
-        <div className="relative bg-white border-b border-border">
-          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
-            {/* Tooltip for first item - Positioned relative to the section */}
-            {showTooltip && (
-              <div className="absolute top-24 left-80 sm:left-96 z-[60] w-64 bg-popover p-4 rounded-xl shadow-2xl border border-border animate-bounce-slight">
-                <div className="absolute top-6 -left-2 -translate-x-1/2 rotate-45 w-4 h-4 bg-popover border-l border-b border-border"></div>
-                <h3 className="font-bold text-foreground mb-1">Game Tile</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  This is a game tile. Click it to begin your game!
-                </p>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dismissTooltip();
-                  }}
-                  className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wide"
-                >
-                  Got it
-                </button>
-              </div>
-            )}
-
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground mb-1">
-                  New Games
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Check out our latest additions
-                </p>
-              </div>
-              <Link
-                href="/games?filter=new"
-                className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
-              >
-                See all
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-
-            {/* Horizontal scrollable game cards */}
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-              <div className="flex gap-4 min-w-min">
-                {isLoadingNewGames ? (
-                  <div className="w-full py-12 flex justify-center items-center">
-                    <BuckyballLoading />
-                  </div>
-                ) : fetchedNewGames.length > 0 ? (
-                  fetchedNewGames.map((game, index) => (
-                    <div key={game.slug} className={`relative ${index === 0 && showTooltip ? 'z-10' : ''}`}>
-                      <button
-                        onClick={() => setPreviewGameSlug(game.slug)}
-                        className="block group flex-shrink-0 w-80 text-left"
-                      >
-                        <div className={`bg-gradient-to-br ${gradients[index % gradients.length]} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
-                          <div className="flex-1 p-5 flex flex-col justify-between items-start">
-                            <div>
-                              <div className="flex gap-2 text-white/90 mb-2">
-                                {/* Use basic icon for 'new' or no icon just the pill */}
-                                <div className="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
-                                  NEW
-                                </div>
-                              </div>
-                              <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
-                                {game.name}
-                              </h3>
-                            </div>
-
-                            <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
-                              Play
-                            </button>
-                          </div>
-
-                          {game.screenshot && (
-                            <div className="relative aspect-square h-full shrink-0">
-                              <img
-                                src={game.screenshot}
-                                alt={game.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-muted-foreground py-8">No games found for this mood.</div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Browse by Mood & Skill Section */}
-        <div className="bg-[#efefef]">
-          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-1">
-                Explore by Mood & Skill
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Find the perfect game for your current state of mind or goal
+              <p className="margin-none text-muted font-sm leading-md">
+                {playedInRun === 0
+                  ? 'Every Skillprint is drawn on this wheel. Yours is blank until you play — each game you finish fills in the parts it measures.'
+                  : playedInRun < RUN_TARGET
+                    ? `${NUMBER_WORDS[playedInRun][0].toUpperCase()}${NUMBER_WORDS[playedInRun].slice(1)} ${playedInRun === 1 ? 'session' : 'sessions'} in. Enough to score mood; cognition and personality need more play before the wheel can fill them in.`
+                    : 'Drawn from five sessions. The heavier a line, the more play sits behind it; faint lines are skills no game has reached yet.'
+                }
               </p>
-            </div>
 
-            <div className="space-y-8">
-              {/* Moods Row */}
-              <div>
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
-                  Moods
-                </h3>
-                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-                  {moods.map((mood) => (
-                    <Link
-                      key={mood.id}
-                      href={`/games?tab=moods&filter=${mood.id}`}
-                      className="flex-shrink-0 group"
-                    >
-                      <div className="flex items-center gap-4 px-3 py-4 bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-                        <div className={`rounded-xl flex items-center justify-center`}>
-                          <img src={mood.image} alt={mood.name} className="w-8 h-8 object-contain rounded-xl" />
-                        </div>
-                        <div>
-                          <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
-                            {mood.name}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              <dl className="rail-stats">
+                <div className="rail-stat"><dt>Sessions</dt><dd>{count}</dd></div>
+                <div className="rail-stat"><dt>Flow</dt><dd>{flowScore ?? <>&mdash;</>}</dd></div>
+                <div className="rail-stat"><dt>Streak</dt><dd>{streakDays}</dd></div>
+              </dl>
 
-              {/* Skills Row */}
-              <div>
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-1">
-                  Skills
-                </h3>
-                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-                  {skills.map((skill) => (
-                    <Link
-                      key={skill.id}
-                      href={`/games?tab=skills&filter=${skill.apiSlug}`}
-                      className="flex-shrink-0 group"
-                    >
-                      <div className="flex items-center gap-4 px-3 py-4 rounded-2xl border border-border hover:shadow-xl hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 bg-white">
-                        <div className={`rounded-xl flex items-center justify-center`}>
-                          <img src={skill.image} alt={skill.name} className="w-8 h-8 object-contain rounded-xl" />
-                        </div>
-                        <div>
-                          <span className="block font-bold text-foreground group-hover:text-primary transition-colors">
-                            {skill.name}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Featured Skill Section */}
-        <div className="border-t border-border bg-white border-b">
-          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
-            <div className="mb-6">
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`${featuredSkill.gradient} flex items-center justify-center`}>
-                    <img src={featuredSkill.image} alt={featuredSkill.name} className="w-10 h-10 object-contain rounded-xl" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-foreground mb-1">
-                      Featured Skill: {featuredSkill.name}
-                    </h2>
-                    <p className="text-muted-foreground text-sm">
-                      {featuredSkill.description}
-                    </p>
-                  </div>
-                </div>
-                {/* Gradient underline */}
-                <div className={`h-1 bg-gradient-to-r ${featuredSkill.gradient} rounded-full`}></div>
-              </div>
-
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Games to develop this skill
-                </h3>
-                <Link
-                  href={`/games?tab=skills&filter=${featuredSkill.apiSlug}`}
-                  className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
-                >
-                  View all
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+              {playedInRun === 0 ? (
+                <Link className="button button--primary button--md full-width" href={nextUp.primary.href}>
+                  <span>Play your first game</span>
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
                 </Link>
+              ) : (
+                <Link className="button button--primary button--md full-width" href="/profile">
+                  <span>View profile</span>
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
+                </Link>
+              )}
+            </article>
+
+            <article className="rail-card sp-card" aria-labelledby="railReadTitle" data-home-spot="read">
+              <div className="rail-card__head">
+                <span className="rail-card__label" id="railReadTitle">{readCopy.title}</span>
               </div>
-            </div>
-
-
-
-            {/* Horizontal scrollable skill game cards */}
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-              <div className="flex gap-4 min-w-min">
-                {skillGames.length > 0 ? (
-                  skillGames.map((game) => (
-                    <button
-                      key={game.slug}
-                      onClick={() => setPreviewGameSlug(game.slug)}
-                      className="block group flex-shrink-0 w-80 text-left"
-                    >
-                      <div className={`bg-gradient-to-br ${featuredSkill.gradient} rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-row h-44`}>
-                        <div className="flex-1 p-5 flex flex-col justify-between items-start">
-                          <div>
-                            <h3 className="text-xl font-bold text-white leading-tight mt-1 line-clamp-2">
-                              {game.name}
-                            </h3>
-                          </div>
-                          <button className="bg-white text-black font-bold py-2 px-6 rounded-xl hover:bg-gray-100 transition-colors mt-2 text-lg">
-                            Play
-                          </button>
-                        </div>
-
-                        {game.image ? (
-                          <div className="relative aspect-square h-full shrink-0">
-                            <img
-                              src={game.image}
-                              alt={game.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="relative aspect-square h-full shrink-0 flex items-center justify-center bg-black/10">
-                            <img src={featuredSkill.image} alt={featuredSkill.name} className="w-16 h-16 object-contain invert brightness-0 opacity-50" />
-                          </div>
-                        )}
+              <div className="layout-grid gap-lg">
+                {PILLARS.map(pillar => {
+                  const score = pillarScores[pillar.key];
+                  return (
+                    <div key={pillar.key} className="layout-grid gap-sm" data-dimension={pillar.key}>
+                      <div className="layout-flex items-center justify-between gap-md font-sm">
+                        <span className="weight-semibold">{pillar.label}</span>
+                        <span className="text-muted">{pillarLabel(score, playedInRun, remainingInRun)}</span>
                       </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="w-full py-12 flex justify-center items-center">
-                    <BuckyballLoading />
-                  </div>
-                )}
+                      <div
+                        className="rail-meter"
+                        role="meter"
+                        aria-label={`${pillar.label} score`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={score ?? 0}
+                        style={{ '--meter': `${Math.max(0, Math.min(100, score ?? 0))}%` } as React.CSSProperties}
+                      >
+                        <i></i>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats or Additional Content */}
-        <div className="bg-[#efefef]">
-          <div className="px-4 sm:px-8 py-8 max-w-[1440px] w-full mx-auto">
-            <div className="max-w-4xl">
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                What would you like to do today?
-              </h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link
-                  href="/games"
-                  className="group p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-blue-500 rounded-lg group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-foreground mb-1">Browse All Games</h3>
-                      <p className="text-sm text-muted-foreground">Explore our full collection of games</p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/profile"
-                  className="group p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-transparent hover:border-purple-500 dark:hover:border-purple-400 transition-all duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-purple-500 rounded-lg group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-foreground mb-1">View Your Progress</h3>
-                      <p className="text-sm text-muted-foreground">Track your skills and achievements</p>
-                    </div>
-                  </div>
-                </Link>
+              <p className="margin-none text-muted font-sm leading-md">{readCopy.note}</p>
+              <div className="cluster gap-md">
+                <Link className="button button--secondary button--sm" href="/skills">View skills</Link>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            </article>
+          </PortalPageRail>
+        </PortalPageLayout>
+      </PortalLayout>
       <GamePreviewShareSheet
         slug={previewGameSlug}
         isOpen={!!previewGameSlug}
         onClose={() => setPreviewGameSlug(null)}
       />
-    </div>
+    </>
   );
 }
 

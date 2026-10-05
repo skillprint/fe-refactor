@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { Outfit, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
-import FTUECarousel from "./components/FTUECarousel";
+import "./skillprint.css";
+import "./pattern-motion.css";
+import HomeTour from './components/HomeTour';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard } from "./components/AuthGuard";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Suspense } from "react";
+import PortalSprite from "@/components/PortalSprite";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -26,8 +29,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Skillprint",
-  description: "Your gaming personality profile",
+  title: {
+    template: "Skillprint Portal · %s",
+    default: "Skillprint Portal · Home",
+  },
+  description: "The Skillprint Games Portal home — continue a game, pick a recommendation, and read the playbook driving them.",
 };
 
 export default function RootLayout({
@@ -36,17 +42,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-brand-family="customer" data-surface="light" data-theme="light">
       <body
-        className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased`}
+        className={`${outfit.variable} ${geistMono.variable} ${inter.variable} antialiased page scrollbar-subtle page--portal margin-none text-default font-ui leading-base`}
         suppressHydrationWarning
       >
+        <PortalSprite />
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id'}>
           <AuthProvider>
             <ThemeProvider>
               <AuthGuard>
                 <Suspense fallback={null}>
-                  <FTUECarousel />
+                  <HomeTour />
                 </Suspense>
                 <Toaster position="top-center" />
                 {children}

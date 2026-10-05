@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Typing Speed — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'typing-speed',
+      params: [{name:'wordDifficulty',default:1},{name:'timeLimitSec',default:60}],
+      presets: {1:{wordDifficulty:1,timeLimitSec:30},2:{wordDifficulty:1,timeLimitSec:60},3:{wordDifficulty:2,timeLimitSec:60},4:{wordDifficulty:2,timeLimitSec:90},5:{wordDifficulty:3,timeLimitSec:60},6:{wordDifficulty:3,timeLimitSec:120}},
+      readState: (w) => ({ ...w.__typingState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

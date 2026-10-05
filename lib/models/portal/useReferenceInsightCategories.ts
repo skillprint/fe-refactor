@@ -5,7 +5,7 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { InsightCategory, generateMockInsightCategories } from './ReferenceInsightCategories';
 
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api`;
+const BASE_URL = `${API_BASE_URL}api/portal`;
 
 export function useReferenceInsightCategories(useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGameDetails } from '../config/gameConfig';
-import { getGameBySlug } from '../api/api';
+import { getCatalogGame } from '../api/api';
 import { getAdaptiveParametersForGame } from '../utils/adaptiveParameters';
 
 const SKILL_ICONS: Record<string, string> = {
@@ -53,7 +53,7 @@ export default function GamePreviewShareSheet({ slug, isOpen, onClose, source, p
         const decodedSlug = decodeURIComponent(slug);
         const fetchGameData = async () => {
             try {
-                const data = await getGameBySlug(decodedSlug);
+                const data = await getCatalogGame(decodedSlug);
                 if (data) {
                     setGameApiData(data);
                 }

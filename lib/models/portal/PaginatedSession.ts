@@ -1,11 +1,12 @@
+/** `GET /api/portal/sessions/?limit=&cursor=&game_slug=&mood=` — camelCase on the wire. */
 export interface SessionSummaryItem {
-  session_id: string;
-  game_name: string;
-  game_slug: string;
-  played_at: string;
-  duration_seconds: number;
-  primary_mood: string;
-  primary_score: number;
+  sessionId: string;
+  gameName: string;
+  gameSlug: string;
+  playedAt: string;
+  durationSeconds: number;
+  primaryMood: string | null;
+  primaryScore: number | null;
 }
 
 export interface PaginatedSession {
@@ -14,18 +15,25 @@ export interface PaginatedSession {
   results: SessionSummaryItem[];
 }
 
+export interface SessionListQuery {
+  limit?: number;
+  cursor?: string;
+  gameSlug?: string;
+  mood?: string;
+}
+
 export const generateMockPaginatedSession = (): PaginatedSession => ({
   next: null,
   previous: null,
   results: [
     {
-      session_id: "a1b2c3d4",
-      game_name: "Hextris",
-      game_slug: "hextris",
-      played_at: new Date().toISOString(),
-      duration_seconds: 330,
-      primary_mood: "focus",
-      primary_score: 72
-    }
-  ]
+      sessionId: 'a1b2c3d4',
+      gameName: 'Hextris',
+      gameSlug: 'hextris',
+      playedAt: new Date().toISOString(),
+      durationSeconds: 330,
+      primaryMood: 'focus',
+      primaryScore: 72,
+    },
+  ],
 });

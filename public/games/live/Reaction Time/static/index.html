@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Reaction Time Tester</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="play-field">
+    <div id="board">
+      <button id="play-btn" class="play-button">▶</button>
+      <div id="status-badge" class="status-badge">
+        <svg id="checkmark" class="checkmark" viewBox="0 0 52 52">
+          <circle class="checkmark-circle" cx="26" cy="26" r="25"></circle>
+          <path class="checkmark-check" d="M14.1 27.2l7.1 7.2 16.7-16.6" fill="none"></path>
+        </svg>
+        <svg id="countdown-ring" class="countdown-ring" viewBox="0 0 60 60">
+          <circle class="countdown-ring-bg" cx="30" cy="30" r="26"></circle>
+          <circle id="countdown-ring-progress" class="countdown-ring-progress" cx="30" cy="30" r="26"></circle>
+        </svg>
+      </div>
+      <h1 id="head">Reaction Time</h1>
+      <p id="sub">Click when the screen turns green. Don't click too soon!</p>
+      <div id="stars"></div>
+      <div class="game-info">
+        <div class="score-display">
+          <span class="icon">📊</span>
+          <span id="current-attempt"><b>0</b>/5</span>
+        </div>
+        <div class="high-score-display">
+          <span class="icon">🏆</span>
+          <span id="best-time"><b>—</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="difficulty-selector">
+    <label for="difficulty-slider">Difficulty: <span id="difficulty-value">1.00x</span></label>
+    <input id="difficulty-slider" type="range" min="0.5" max="1.5" step="0.1" value="1" style="width: 100%;">
+  </div>
+
+  <script src="script.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="../../_shared/skillprintScreenshot.js"></script>
+</body>
+</html>

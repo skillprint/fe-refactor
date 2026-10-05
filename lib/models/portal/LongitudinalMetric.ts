@@ -1,51 +1,58 @@
+/** `GET /api/portal/metrics/{pillar}/{dimension}/?range=D|W|M|6M|Y` — camelCase on the wire. */
+
+export type MetricRange = 'D' | 'W' | 'M' | '6M' | 'Y';
+
 export interface BucketItem {
   label: string;
   date: string;
   score: number | null;
-  session_count: number;
-  is_empty: boolean;
+  sessionCount: number;
+  isEmpty: boolean;
 }
 
 export interface LongitudinalMetric {
   pillar: string;
   dimension: string;
-  display_name: string;
+  displayName: string;
   about: string;
-  range: string;
+  range: MetricRange | string;
   period: { start: string; end: string };
-  average: number;
+  average: number | null;
   buckets: BucketItem[];
-  trend: { direction: string; magnitude_pct: number; label: string };
+  trend: { direction: string; magnitudePct: number | null; label: string };
   comparison: {
-    this_period: { label: string; score: number };
-    prior_period: { label: string; score: number };
-    delta: number;
-    delta_pct: number;
+    thisPeriod: { label: string; score: number | null };
+    priorPeriod: { label: string; score: number | null };
+    delta: number | null;
+    deltaPct: number | null;
   };
-  stats: { sessions: number; total_play_seconds: number; peak_score: number; consistency: number | null };
+  stats: { sessions: number; totalPlaySeconds: number; peakScore: number | null; consistency: number | null };
+  /** null until percentile ranks are scheduled (tracked separately on the backend). */
   percentile: number | null;
-  games_that_train_this: { id: number; name: string; slug: string }[];
+  gamesThatTrainThis: { id: number; name: string; slug: string }[];
 }
 
 export const generateMockLongitudinalMetric = (): LongitudinalMetric => ({
-  pillar: "mood",
-  dimension: "focus",
-  display_name: "Focus",
-  about: "Deep concentration",
-  range: "W",
-  period: { start: "2026-04-27", end: "2026-05-04" },
+  pillar: 'mood',
+  dimension: 'focus',
+  displayName: 'Focus',
+  about: 'Deep concentration',
+  range: 'W',
+  period: { start: '2026-04-27', end: '2026-05-04' },
   average: 68,
   buckets: [
-    { label: "Mon", date: "2026-04-28", score: 72, session_count: 2, is_empty: false }
+    { label: 'Mon', date: '2026-04-28', score: 72, sessionCount: 2, isEmpty: false },
+    { label: 'Tue', date: '2026-04-29', score: null, sessionCount: 0, isEmpty: true },
+    { label: 'Wed', date: '2026-04-30', score: 65, sessionCount: 1, isEmpty: false },
   ],
-  trend: { direction: "improving", magnitude_pct: 8, label: "Up 8%" },
+  trend: { direction: 'improving', magnitudePct: 8, label: 'Up 8%' },
   comparison: {
-    this_period: { label: "Recent", score: 72 },
-    prior_period: { label: "Prior", score: 64 },
+    thisPeriod: { label: 'Recent', score: 72 },
+    priorPeriod: { label: 'Prior', score: 64 },
     delta: 8,
-    delta_pct: 12
+    deltaPct: 12,
   },
-  stats: { sessions: 5, total_play_seconds: 1650, peak_score: 81, consistency: null },
+  stats: { sessions: 5, totalPlaySeconds: 1650, peakScore: 81, consistency: null },
   percentile: null,
-  games_that_train_this: [{ id: 42, name: "Hextris", slug: "hextris" }]
+  gamesThatTrainThis: [{ id: 42, name: 'Hextris', slug: 'hextris' }],
 });

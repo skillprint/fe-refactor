@@ -1,8 +1,11 @@
+import { baseSlug } from '@/lib/gameSlug';
 import { inactiveGames } from './inactiveGames';
 
 export interface GameConfig {
   exitButtonPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   hideBottomTabs?: boolean;
+  /** Static JSON whose `sdk_game_parameters` are sent on session start so the backend can auto-provision its GameScoringConfig. */
+  parameterManifest?: string;
   customExitButton?: {
     icon?: string;
     color?: 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'gray';
@@ -207,6 +210,98 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'green',
       size: 'md'
     }
+  },
+
+  'dungeon-runner': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Dungeon Runner/backend/game-scoring-config.json',
+    customExitButton: {
+      color: 'red',
+      size: 'md'
+    }
+  },
+
+  'simon-says': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
+  },
+
+  'dual-n-back': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
+  },
+
+  'stroop-test': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'blue',
+      size: 'md'
+    }
+  },
+
+  'typing-speed': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'green',
+      size: 'md'
+    }
+  },
+
+  'guided-breathing': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'blue',
+      size: 'md'
+    }
+  },
+
+  'procedural-maze': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'orange',
+      size: 'md'
+    }
+  },
+
+  'reaction-time': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'orange',
+      size: 'md'
+    }
+  },
+
+  'solitaire': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'green',
+      size: 'md'
+    }
+  },
+
+  'order-rush': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Order Rush/backend/game-scoring-config.json',
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
   }
 };
 
@@ -245,7 +340,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'bubble-spirit': {
     name: 'Bubble Spirit',
     description: 'Pop bubbles in this puzzle game',
-    image: '/images/activities/covers/bubble-spirit-d1e8e962-1243-4e94-a9f4-351dec27ae8a.png',
+    image: '/games/live/Bubble%20Spirit/static/html5games/images/logo.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '5-10 minutes',
@@ -255,7 +350,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'change-word': {
     name: 'Change Word',
     description: 'Transform words letter by letter',
-    image: '/images/activities/covers/change-word-0bc38905-8138-43f2-9ff5-a01a5f038782.png',
+    image: '/games/live/Change%20Word/change-word.png',
     category: 'Word Game',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -314,7 +409,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'i-love-hue': {
     name: 'I Love Hue',
     description: 'Arrange colors in perfect harmony',
-    image: '/images/activities/covers/i-love-hue-115ad80c-adb3-47fb-8be7-4b683133a94e.png',
+    image: '/games/live/I%20Love%20Hue/i-love-hue.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-20 minutes',
@@ -356,14 +451,14 @@ export const gameDetails: Record<string, GameDetails> = {
     image: '/images/activities/covers/snake-attack-3b730898-fe67-4e51-a655-57c81bd3efbc.png',
     category: 'Arcade',
     difficulty: 'Medium',
-    estimatedTime: '3-8 minutes',
+    estimatedTime: '1-3 minutes',
     skills: ['Strategic Planning', 'Risk Management', 'Quick Thinking'],
     instructions: 'Control the snake to eat food and grow longer. Avoid hitting walls or your own tail.'
   },
   'space-trip': {
     name: 'Space Trip',
     description: 'Explore space in this adventure',
-    image: '/images/activities/covers/space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20.png',
+    image: '/games/live/Space%20Trip/icons/icon-256.png',
     category: 'Adventure',
     difficulty: 'Medium',
     estimatedTime: '10-25 minutes',
@@ -413,7 +508,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'flapcat-steampunk-2': {
     name: 'Flapcat Steampunk 2',
     description: 'More steampunk flying adventures',
-    image: '/games/live/Flapcat Steampunk 2/screenshot.png',
+    image: '/games/live/Flapcat%20Steampunk%202/screenshot.png',
     category: 'Arcade',
     difficulty: 'Hard',
     estimatedTime: '2-5 minutes',
@@ -423,7 +518,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'fruit-sorting': {
     name: 'Fruit Sorting',
     description: 'Sort the fruits into the right baskets',
-    image: '/images/activities/covers/fruit-sorting-2-778da931-ec64-4123-9aa0-2b21c7994d.png',
+    image: '/games/live/Fruit%20Sorting/icon_144.png',
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-5 minutes',
@@ -503,7 +598,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'stacks-tower': {
     name: 'Stacks Tower',
     description: 'Stack blocks to build a tower',
-    image: '/games/live/Stacks Tower/screenshot.png',
+    image: '/games/live/Stacks%20Tower/screenshot.png',
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -553,7 +648,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'infinite-runner-3d': {
   //   name: 'Infinite Runner 3D',
   //   description: 'Run and jump in this 3D infinite runner',
-  //   image: '/games/live/Infinite Runner 3D/icon_144.png',
+  //   image: '/games/live/Infinite%20Runner%203D/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -563,7 +658,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'flappy-bird-1': {
   //   name: 'Flappy Bird',
   //   description: 'Flappy Bird',
-  //   image: '/games/live/Flappy Bird/icon_144.png',
+  //   image: '/games/live/Flappy%20Bird/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -573,7 +668,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // '  ': {
   //   name: 'Last War Frontline',
   //   description: 'Last War Frontline',
-  //   image: '/games/live/Last War Frontline/icon_144.png',
+  //   image: '/games/live/Last%20War%20Frontline/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -583,17 +678,27 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'fruit-ninja': {
   //   name: 'Fruit Ninja',
   //   description: 'Fruit Ninja',
-  //   image: '/games/live/Fruit Ninja/icon_144.png',
+  //   image: '/games/live/Fruit%20Ninja/icon_144.png',
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
   //   skills: ['Timing', 'Precision'],
   //   instructions: 'Tap to jump and avoid obstacles. Collect coins to score.'
   // },
+  'mage-duel': {
+    name: 'Mage Duel',
+    description: 'Duel a dark warlord by casting spells: type each word\'s translation before he strikes.',
+    image: '/games/live/mage-duel-2d/static/assets/hero.png',
+    category: 'Language',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Verbal', 'Memory', 'Perceptual Speed'],
+    instructions: 'Type the translation of each spell word to cast it the moment it matches. Heal words restore your health; every typo is counted.'
+  },
   'line-color': {
     name: 'Line Color',
     description: 'Line Color',
-    image: '/games/live/Line Color/icon_144.png',
+    image: '/images/activities/covers/2048.png', // Temporary fallback
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -613,7 +718,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'doodle-god-next': {
     name: 'Doodle God Next',
     description: 'Combine basic elements like fire, water, earth, and air to create new elements and build a whole universe!',
-    image: '/games/live/Doodle God Next/static/data/splash/god.png',
+    image: '/games/live/Doodle%20God%20Next/static/data/splash/god.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-30 minutes',
@@ -623,7 +728,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'cut-the-rope': {
     name: 'Cut The Rope',
     description: 'Cut the ropes to feed candy to the little monster Om Nom in this physics-based puzzle game!',
-    image: '/games/live/Cut The Rope/static/res/img/icon.png',
+    image: '/games/live/Cut%20The%20Rope/static/res/img/icon.png',
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -639,34 +744,113 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '3-8 minutes',
     skills: ['Reaction Time', 'Precision', 'Divided Attention'],
     instructions: 'Swipe or use arrow keys to move left/right, jump, or slide. Avoid obstacles and collect coins!'
-  }
+  },
+  'dungeon-runner': {
+    name: 'Dungeon Runner',
+    description: 'A first-person endless run through a torch-lit dungeon. Dodge beams, pits and barrels while shooting imps and archers.',
+    category: 'Runner',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Perceptual Speed', 'Timing', 'Attention', 'Action', 'Spatial'],
+    instructions: 'A/D change lane, W or Space jumps, S slides. Aim with the mouse and click to fire. Q/E switch weapons. Desktop only.'
+  },
+  'simon-says': {
+    name: 'Simon Says',
+    description: 'Watch, remember, and repeat the growing color sequence',
+    category: 'Memory',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Sequential Memory', 'Auditory-Visual Recall', 'Concentration'],
+    instructions: 'Watch the sequence of colors flash, then repeat it by clicking the buttons in the same order. Each round adds one more color.'
+  },
+  'dual-n-back': {
+    name: 'Dual N-Back',
+    description: 'Track positions and letters N steps back to train working memory',
+    category: 'Memory',
+    difficulty: 'Hard',
+    estimatedTime: '2-4 minutes',
+    skills: ['Working Memory', 'Sustained Attention', 'Updating'],
+    instructions: 'A square lights up and a letter is spoken each trial. Press Position (A) when the square matches the one N trials ago, and Sound (L) when the letter matches.'
+  },
+  'stroop-test': {
+    name: 'Stroop Test',
+    description: 'Name the ink colour, not the word — a classic inhibitory-control challenge',
+    category: 'Attention',
+    difficulty: 'Medium',
+    estimatedTime: '1-3 minutes',
+    skills: ['Selective Attention', 'Inhibitory Control', 'Cognitive Flexibility'],
+    instructions: 'A colour word appears in a coloured ink. Choose the ink colour as fast as you can using the buttons or the R, G, B, Y keys.'
+  },
+  'typing-speed': {
+    name: 'Typing Speed',
+    description: 'Type the passage as fast and accurately as you can',
+    category: 'Verbal',
+    difficulty: 'Easy',
+    estimatedTime: '1-3 minutes',
+    skills: ['Verbal Processing Speed', 'Sustained Focus', 'Motor Coordination'],
+    instructions: 'Type each word followed by a space. The timer starts on your first keystroke; your WPM and accuracy are shown live.'
+  },
+  'guided-breathing': {
+    name: 'Guided Breathing',
+    description: 'Follow the expanding circle through calm, paced breathing cycles',
+    category: 'Wellness',
+    difficulty: 'Easy',
+    estimatedTime: '1-10 minutes',
+    skills: ['Stress Regulation', 'Mindfulness', 'Calm'],
+    instructions: 'Breathe in as the circle grows, hold while it stays large, and breathe out as it shrinks. The session ends automatically.'
+  },
+  'procedural-maze': {
+    name: 'Procedural Maze',
+    description: 'Navigate a freshly generated maze to the exit — optionally through fog',
+    category: 'Spatial',
+    difficulty: 'Medium',
+    estimatedTime: '2-5 minutes',
+    skills: ['Spatial Reasoning', 'Planning', 'Exploration'],
+    instructions: 'Move the yellow dot to the green exit with the arrow keys, WASD, swipes, or the on-screen pad. A new maze is generated after each solve.'
+  },
+  'reaction-time': {
+    name: 'Reaction Time Tester',
+    description: 'Measure and improve your reaction speed to visual stimuli',
+    category: 'Cognitive Processing',
+    difficulty: 'Easy',
+    estimatedTime: '2-3 minutes',
+    skills: ['Visual Processing', 'Motor Response', 'Focus'],
+    instructions: 'Wait for the screen to turn green, then click as quickly as possible. Your reaction time will be measured in milliseconds.'
+  },
+  'solitaire': {
+    name: 'Solitaire',
+    description: 'Classic Klondike solitaire — clear the tableau one card at a time',
+    category: 'Card',
+    difficulty: 'Medium',
+    estimatedTime: '5-15 minutes',
+    skills: ['Patience', 'Sequential Planning', 'Relaxation'],
+    instructions: 'Drag cards to build descending, alternating-color sequences in the tableau, and move cards up to the foundations by suit, ace to king.'
+  },
+  'order-rush': {
+    name: 'Order Rush',
+    description: 'Run a rush-hour diner — seat guests, take orders, cook, and serve before patience runs out',
+    category: 'Simulation',
+    difficulty: 'Medium',
+    estimatedTime: '3-5 minutes',
+    skills: ['Multitasking', 'Prioritization', 'Divided Attention', 'Working Memory'],
+    instructions: 'Tap a waiting guest, then an empty table to seat them. Tap a seated table once they\'ve decided to take their order. Tap the kitchen counter to grab a finished dish, then tap the matching table to serve it. Tap a dirty table to clear it. Keep every guest happy before their patience runs out!'
+  },
 };
 
+// Legacy catalog records whose base slug differs from the local key (SKI-180):
+// `match-doodle-2-6697ba5a-…` and `sumagi-2-dbdafb8b-…` are the same games.
+gameDetails['match-doodle-2'] = gameDetails['match-doodle'];
+gameDetails['sumagi-2'] = gameDetails['sumagi'];
+
 export function getGameConfig(gameSlug: string): GameConfig {
-  // Normalize the slug for matching (lowercase, replace spaces with hyphens)
-  const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
-
-  // Try to find exact match first
-  if (gameConfigs[normalizedSlug]) {
-    return gameConfigs[normalizedSlug];
-  }
-
-  // Try to find partial match
-  const partialMatch = Object.keys(gameConfigs).find(key =>
-    key !== 'default' && normalizedSlug.includes(key)
-  );
-
-  if (partialMatch) {
-    return gameConfigs[partialMatch];
-  }
-
-  // Return default configuration
-  return gameConfigs.default;
+  // Canonical base slug: lowercase, legacy UUID suffix stripped (SKI-180).
+  const normalizedSlug = baseSlug(gameSlug);
+  return gameConfigs[normalizedSlug] || gameConfigs.default;
 }
 
 export function getGameDetails(gameSlug: string): GameDetails | null {
-  // Normalize the slug for matching (lowercase, replace spaces with hyphens)
-  const normalizedSlug = gameSlug.toLowerCase().replace(/\s+/g, '-');
+  // Canonical base slug: lowercase, legacy UUID suffix stripped (SKI-180).
+  const normalizedSlug = baseSlug(gameSlug);
 
   // Check inactive games first
   const inactiveMatch = inactiveGames.find(game => game.slug === normalizedSlug);
@@ -683,22 +867,14 @@ export function getGameDetails(gameSlug: string): GameDetails | null {
     } as GameDetails;
   }
 
-  // Try to find exact match first
-  if (gameDetails[normalizedSlug]) {
-    return gameDetails[normalizedSlug];
-  }
+  return gameDetails[normalizedSlug] || null;
+}
 
-  // Try to find partial match
-  const partialMatch = Object.keys(gameDetails).find(key =>
-    normalizedSlug.includes(key)
-  );
-
-  if (partialMatch) {
-    return gameDetails[partialMatch];
-  }
-
-  // Return null if no match found
-  return null;
+/** Card-sized play time for a game ("1-3 minutes" → "1–3 min"), or the generic range when the game has none. */
+export function gameDurationLabel(gameSlug: string): string {
+  const estimate = getGameDetails(gameSlug)?.estimatedTime;
+  if (!estimate) return '5–10 min';
+  return estimate.replace(/(\d+)\s*-\s*(\d+)/, '$1–$2').replace(/\s*minutes?$/, ' min');
 }
 
 export const knownGameSlugs = [
@@ -739,4 +915,14 @@ export const knownGameSlugs = [
   'doodle-god-next',
   'cut-the-rope',
   'omnomrun',
-]; 
+  'dungeon-runner',
+  'simon-says',
+  'dual-n-back',
+  'stroop-test',
+  'typing-speed',
+  'guided-breathing',
+  'procedural-maze',
+  'reaction-time',
+  'solitaire',
+  'order-rush',
+];

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Stroop Test — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'stroop-test',
+      params: [{name:'conflictRatio',default:0.5},{name:'responseWindowMs',default:2000},{name:'roundCount',default:20}],
+      presets: {1:{conflictRatio:0.2,responseWindowMs:3000,roundCount:15},2:{conflictRatio:0.4,responseWindowMs:2500,roundCount:20},3:{conflictRatio:0.5,responseWindowMs:2000,roundCount:20},4:{conflictRatio:0.6,responseWindowMs:1500,roundCount:25},5:{conflictRatio:0.75,responseWindowMs:1200,roundCount:30},6:{conflictRatio:0.9,responseWindowMs:1000,roundCount:30},7:{conflictRatio:1,responseWindowMs:800,roundCount:40}},
+      readState: (w) => ({ ...w.__stroopState }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

@@ -1,11 +1,226 @@
-import { Suspense } from 'react';
-import Skillprint from './skillprint';
-import BuckyballLoading from '../components/BuckyballLoading';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import PortalLayout from '@/components/PortalLayout';
+import { PortalSection } from '@/components/LayoutGrid';
+import ProfileHeader from '@/components/Profile/ProfileHeader';
+import ProfileRail from '@/components/Profile/ProfileRail';
+import ProfileGoals from '@/components/Profile/ProfileGoals';
+import ProfileBadges from '@/components/Profile/ProfileBadges';
+import ProfileSessions from '@/components/Profile/ProfileSessions';
+import { useHomeRecentSessions } from '@/lib/models/portal/useHomeRecentSessions';
+import { usePaginatedSession } from '@/lib/models/portal/usePaginatedSession';
+import { useUserProfile } from '../hooks/useUserProfile';
+import { useSkillprintVisualizationData } from '../hooks/useSkillprintVisualizationData';
+import { useGoalSetting, AVAILABLE_SKILLS, AVAILABLE_MOODS } from '../hooks/useGoalSetting';
+import { getGameDetails } from '../config/gameConfig';
+import ProfileGameInsights from '@/components/Profile/ProfileGameInsights';
+import { useGameMetrics } from '../hooks/useGameMetrics';
+import ProfileSkillsSection from '@/components/Profile/ProfileSkillsSection';
+import ProfilePerformanceTrends from '@/components/Profile/ProfilePerformanceTrends';
+import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
+import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
+import type { SkillBaselineMap } from '@/components/Profile/ProfileSkillBreakdown';
+
+function formatSecondsToDuration(sec: number): string {
+  if (!sec || isNaN(sec)) return '0m 0s';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function ProfilePageContent() {
+  // Recent sessions come from the same endpoint Home uses (useHomeRecentSessions),
+  // so the two pages can never show a different "recent sessions" list again.
+  const { data: recentSessions } = useHomeRecentSessions();
+  const { data: paginatedSessions } = usePaginatedSession(false, { limit: 100 });
+  const sessions = paginatedSessions?.results ?? [];
+  const { fetchUserProfile } = useUserProfile();
+  const [processedProfile, setProcessedProfile] = useState<any>(null);
+  // Portal aggregate (SKI-131): per-dimension score, lifetime baseline and delta.
+  const { data: profileAggregate } = useProfileAggregate();
+  const aggregateDimensions = React.useMemo(() => profileDimensionMap(profileAggregate), [profileAggregate]);
+
+  const {
+    goalSkills,
+    goalMoods,
+    isLoading: isGoalsLoading,
+    isSavingSkills,
+    isSavingMoods,
+    saveSkills,
+    saveMoods,
+  } = useGoalSetting();
+
+  useEffect(() => {
+    fetchUserProfile().then(data => {
+      if (data) {
+        setProcessedProfile(data.processedProfile);
+      }
+    });
+  }, [fetchUserProfile]);
+
+  const [selectedGames, setSelectedGames] = useState<string[]>([]);
+  const uniqueGames = React.useMemo(() => {
+    if (!sessions || sessions.length === 0) {
+      // Fallback to reference design games if no local sessions exist
+      const refSlugs = ['snake-attack', 'gummy-blocks', 'box-tower', 'cat-focus', 'hextris'];
+      return refSlugs.map(slug => ({ 
+        slug, 
+        name: getGameDetails(slug)?.name || slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
+      }));
+    }
+    const gamesMap = new Map();
+    sessions.forEach((s: any) => {
+      const slug = s.gameSlug;
+      if (slug && !gamesMap.has(slug)) {
+        gamesMap.set(slug, { slug, name: getGameDetails(slug)?.name || slug });
+      }
+    });
+    return Array.from(gamesMap.values());
+  }, [sessions]);
+
+  useEffect(() => {
+    if (uniqueGames.length > 0 && selectedGames.length === 0) {
+      setSelectedGames(uniqueGames.map(g => g.slug));
+    }
+  }, [uniqueGames, selectedGames]);
+
+  const { data: metricsData, isLoading: isMetricsLoading } = useGameMetrics(selectedGames);
+
+  const parsedChartData = React.useMemo(() => {
+    if (!metricsData) return [];
+    const chartPoints: { name: string; score: number }[] = [];
+
+    if (metricsData.flow && typeof metricsData.flow.avgScore === 'number') {
+      chartPoints.push({ name: 'Flow', score: Math.round(metricsData.flow.avgScore * 100) });
+    }
+    if (metricsData.moods) {
+      Object.entries(metricsData.moods).forEach(([name, details]: [string, any]) => {
+        const score = details.avg_score || details.avgScore || 0;
+        chartPoints.push({ name: name.charAt(0).toUpperCase() + name.slice(1), score: Math.round(score * 100) });
+      });
+    }
+    if (metricsData.skills) {
+      Object.entries(metricsData.skills).forEach(([name, details]: [string, any]) => {
+        const score = details.avg_score || details.avgScore || 0;
+        chartPoints.push({ name: name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' '), score: Math.round(score * 100) });
+      });
+    }
+    return chartPoints;
+  }, [metricsData]);
+
+  const { nodeDataBySkill } = useSkillprintVisualizationData(processedProfile);
+
+  const legacyScores = React.useMemo(() => {
+    const s: Record<string, number> = {};
+    if (!processedProfile) return s;
+    const processCategory = (category: any) => {
+      if (!category) return;
+      Object.entries(category).forEach(([key, val]: [string, any]) => {
+        let avg = val.avg_score ?? val.avgScore ?? val.score ?? 0;
+        if (avg <= 1 && avg > 0) avg *= 100; // scale 0-1 to 0-100 if necessary
+        s[key.toLowerCase().replace(/_/g, '-')] = avg;
+      });
+    };
+    processCategory(processedProfile.skills);
+    processCategory(processedProfile.moods);
+    processCategory(processedProfile.personality);
+    return s;
+  }, [processedProfile]);
+
+  // Portal scores win; the legacy scoring profile fills any dimension the
+  // rollups have not reached yet.
+  const userScores = React.useMemo(() => {
+    const merged: Record<string, number> = { ...legacyScores };
+    Object.values(aggregateDimensions).forEach((stat) => {
+      if (typeof stat.score === 'number') merged[stat.slug] = stat.score;
+    });
+    return merged;
+  }, [legacyScores, aggregateDimensions]);
+
+  const skillBaselines = React.useMemo<SkillBaselineMap>(() => {
+    const out: SkillBaselineMap = {};
+    Object.values(aggregateDimensions).forEach((stat) => {
+      out[stat.slug] = { baselineScore: stat.baselineScore, delta: stat.delta };
+    });
+    return out;
+  }, [aggregateDimensions]);
+
+  const skillsCount = Math.max(Object.keys(nodeDataBySkill).length, Object.keys(userScores).length);
+  const daysPlayed = profileAggregate?.totals?.sessions ?? (processedProfile ? processedProfile.totalSessions || 0 : 0);
+
+  // Both the rail and the full list are mapped from the same portal session
+  // shape ({ sessionId, gameSlug, gameName, playedAt, primaryScore, primaryMood,
+  // durationSeconds }) so "Recent sessions" and "All sessions" never disagree.
+  const mapSessionSummary = (s: { sessionId: string; gameSlug: string; gameName: string; playedAt: string; primaryScore: number | null; primaryMood: string | null; durationSeconds: number }) => ({
+    id: s.sessionId,
+    gameSlug: s.gameSlug,
+    gameName: s.gameName || (s.gameSlug ? (getGameDetails(s.gameSlug)?.name || s.gameSlug) : 'Unknown'),
+    gameImage: s.gameSlug ? getGameDetails(s.gameSlug)?.image : undefined,
+    date: s.playedAt,
+    score: s.primaryScore ?? 0,
+    skillMeasured: s.primaryMood || 'Unknown',
+    duration: s.durationSeconds ? formatSecondsToDuration(s.durationSeconds) : undefined,
+  });
+
+  // Same endpoint/shape as Home's "Recently played", so the rail's "Recent
+  // sessions" and "This week" always match what Home shows.
+  const railSessions = (recentSessions ?? []).map(mapSessionSummary);
+  const mappedSessions = sessions.map(mapSessionSummary);
+
+  return (
+    <PortalLayout 
+      pageClass="page--portal-profile"
+      header={<ProfileHeader />}
+      rail={
+        <ProfileRail
+          skillsCount={skillsCount}
+          totalSkills={28}
+          daysPlayed={daysPlayed}
+          sessions={railSessions}
+        />
+      }
+    >
+      <PortalSection ariaLabelledBy="profile-skills-breakdown">
+        <ProfileSkillsSection scores={userScores} baselines={skillBaselines} />
+      </PortalSection>
+
+      <ProfilePerformanceTrends />
+
+      <ProfileGameInsights 
+        uniqueGames={uniqueGames}
+        selectedGames={selectedGames}
+        setSelectedGames={setSelectedGames}
+        isMetricsLoading={isMetricsLoading}
+        metricsData={metricsData}
+        parsedChartData={parsedChartData}
+        formatSecondsToDuration={formatSecondsToDuration}
+      />
+
+      <ProfileGoals 
+        goalSkills={goalSkills}
+        goalMoods={goalMoods}
+        isGoalsLoading={isGoalsLoading}
+        isSavingSkills={isSavingSkills}
+        isSavingMoods={isSavingMoods}
+        saveSkills={saveSkills}
+        saveMoods={saveMoods}
+        availableSkills={AVAILABLE_SKILLS}
+        availableMoods={AVAILABLE_MOODS}
+      />
+
+      <ProfileBadges />
+
+      <ProfileSessions sessions={mappedSessions} totalCount={profileAggregate?.totals?.sessions} />
+    </PortalLayout>
+  );
+}
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><BuckyballLoading /></div>}>
-      <Skillprint />
-    </Suspense>
+    <React.Suspense fallback={<div>Loading profile...</div>}>
+      <ProfilePageContent />
+    </React.Suspense>
   );
 }

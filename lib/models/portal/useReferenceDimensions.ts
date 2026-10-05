@@ -5,7 +5,7 @@ import { useUserSession } from '../../../app/hooks/useUserSession';
 import { ReferenceDimensions, generateMockReferenceDimensions } from './ReferenceDimensions';
 
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
-const BASE_URL = `${API_BASE_URL}api`;
+const BASE_URL = `${API_BASE_URL}api/portal`;
 
 export function useReferenceDimensions(useSyntheticData: boolean = false) {
     const { userToken } = useUserSession();
@@ -32,7 +32,7 @@ export function useReferenceDimensions(useSyntheticData: boolean = false) {
         setError(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}reference/dimensions/`, {
+            const response = await fetch(`${BASE_URL}/reference/dimensions/`, {
                 headers: {
                     'Authorization': `Token ${userToken}`,
                     'Content-Type': 'application/json'

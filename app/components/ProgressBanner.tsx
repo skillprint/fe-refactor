@@ -1,15 +1,31 @@
 'use client';
 
-import { useGameSessions } from '../hooks/useGameSessions';
+import { useHomeSummary } from '@/lib/models/portal/useHomeSummary';
+import { hasViewedProfile, markProfileAsViewed } from '../lib/gameSessionUtils';
 import { useUserSession } from '../hooks/useUserSession';
 import { useRouter } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 
 function ProgressBannerInner() {
-    const { count, isLoaded, profileViewed, markViewed } = useGameSessions();
+    const { data: homeSummary, isLoading } = useHomeSummary();
     const { isWhitelisted } = useUserSession();
     const router = useRouter();
     const targetGames = 3;
+    const count = homeSummary?.totalSessions ?? 0;
+    const isLoaded = !isLoading && homeSummary !== null;
+
+    // "Have you seen your profile" is a per-browser UI dismissal flag, not
+    // session data, so it stays in localStorage even though the play count
+    // above now comes from the backend.
+    const [profileViewed, setProfileViewed] = useState(false);
+    useEffect(() => {
+        setProfileViewed(hasViewedProfile());
+    }, []);
+    const markViewed = useCallback(() => {
+        markProfileAsViewed();
+        setProfileViewed(true);
+    }, []);
+
     const isProfileReady = count >= targetGames || isWhitelisted;
 
     if (!isLoaded) return null;

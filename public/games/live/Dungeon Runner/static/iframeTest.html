@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dungeon Runner — iframe harness</title>
+  <style>
+    body { margin: 0; font-family: "Trebuchet MS", Arial, sans-serif; background: #111; color: #eee; display: grid; grid-template-columns: 1fr 340px; height: 100vh; }
+    iframe { width: 100%; height: 100%; border: 0; background: #000; }
+    aside { padding: 12px; overflow: auto; border-left: 1px solid #333; font-size: 13px; }
+    h2 { margin: 0 0 8px; font-size: 14px; letter-spacing: .1em; color: #ffb070; }
+    button { margin: 2px; padding: 5px 8px; background: #2a2a34; color: #eee; border: 1px solid #555; cursor: pointer; font-size: 12px; }
+    button:hover { background: #3a3a48; }
+    img { width: 100%; border: 1px solid #444; margin: 6px 0; background: #000; }
+    pre { background: #000; padding: 8px; height: 220px; overflow: auto; font-size: 11px; white-space: pre-wrap; }
+    label { display: block; margin: 6px 0 2px; color: #aaa; }
+    input, select { width: 100%; box-sizing: border-box; background: #000; color: #eee; border: 1px solid #555; padding: 4px; }
+  </style>
+</head>
+<body>
+  <iframe id="game" src="index.html?targetMood=focus" allow="autoplay"></iframe>
+  <aside>
+    <h2>Skillprint SDK Config</h2>
+    <label>Session ID</label>
+    <input id="session-id" value="550e8400-e29b-41d4-a716-446655440000" style="font-size: 11px;">
+    <label style="margin-top: 4px;">API Key</label>
+    <input id="api-key" value="" placeholder="Partner API key" style="font-size: 11px;">
+    <label style="margin-top: 4px;">Target Mood</label>
+    <select id="target-mood" style="font-size: 11px;">
+      <option value="focus">Focus</option>
+      <option value="relax">Relax</option>
+      <option value="energize">Energize</option>
+    </select>
+    <label style="margin-top: 4px;">Target Skill</label>
+    <select id="target-skill" style="font-size: 11px;">
+      <option value="memory">Memory</option>
+      <option value="attention">Attention</option>
+      <option value="processing-speed">Processing Speed</option>
+    </select>
+    <label style="margin-top: 4px;">API Base</label>
+    <input id="api-base" value="https://api.staging.skillprint.co" style="font-size: 11px;">
+    <div style="margin-top: 8px; font-size: 11px;">
+      <button id="start-session" style="background: #2a4a2a; width: 48%; margin-right: 4%;">▶ Start</button>
+      <button id="stop-session" style="background: #4a2a2a; width: 48%; display: none;">⏹ Stop</button>
+    </div>
+    <div style="margin-top: 6px; font-size: 11px; color: #888;">
+      Backend: <b id="backend-status">ready</b>
+    </div>
+
+    <h2 style="margin-top: 12px">Screenshots</h2>
+    <img id="shot" alt="latest screenshot" style="display: none;">
+    <div>Received: <b id="count">0</b></div>
+
+    <h2 style="margin-top: 12px">Parameters</h2>
+    <label>Parameter</label>
+    <select id="pname"></select>
+    <label>Value</label>
+    <input id="pvalue" value="1">
+    <button id="send">Send ADJUST_GAME</button>
+
+    <h2 style="margin-top: 12px">Results</h2>
+    <pre id="results" style="height: auto; background: #000; padding: 8px; font-size: 11px; display: none; border: 1px solid #333;"></pre>
+
+    <h2 style="margin-top: 12px">Log</h2>
+    <pre id="log"></pre>
+  </aside>
+  <script>
+    const frame = document.getElementById('game');
+    const log = (s) => { const el = document.getElementById('log'); el.textContent = `${new Date().toLocaleTimeString()} ${s}\n` + el.textContent.slice(0, 6000); };
+    let count = 0;
+    let sessionActive = false;
+    let sessionStartTime = null;
+
+    async function startSessionOnBackend() {
+      const apiBase = document.getElementById('api-base').value;
+      const apiKey = document.getElementById('api-key').value;
+      const sessionId = document.getElementById('session-id').value;
+      const targetMood = document.getElementById('target-mood').value;
+      const targetSkill = document.getElementById('target-skill').value;
+
+      if (!apiKey) {
+        log('✗ API Key required');
+        return false;
+      }
+
+      try {
+        document.getElementById('backend-status').textContent = 'starting...';
+        const url = `${apiBase}/games/api/sessions/`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Api-Key ${apiKey}`
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            game: 'dungeon-runner',
+            targetMood: targetMood,
+            skills: [targetSkill],
+            game_parameters: []
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          document.getElementById('backend-status').textContent = 'active ✓';
+          log(`✓ Session started on backend: ${sessionId}`);
+          return result;
+        } else {
+          const error = await response.text();
+          document.getElementById('backend-status').textContent = 'error';
+          log(`✗ Backend error: ${response.status}`);
+          return false;
+        }
+      } catch (e) {
+        document.getElementById('backend-status').textContent = 'error';
+        log(`✗ Backend connection failed: ${e.message}`);
+        return false;
+      }
+    }
+
+    async function stopSessionOnBackend() {
+      const apiBase = document.getElementById('api-base').value;
+      const apiKey = document.getElementById('api-key').value;
+      const sessionId = document.getElementById('session-id').value;
+
+      try {
+        document.getElementById('backend-status').textContent = 'uploading...';
+        const url = `${apiBase}/games/api/record-session/${sessionId}/`;
+        const formData = new FormData();
+        formData.append('session_id', sessionId);
+        formData.append('screenshots_count', count);
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Api-Key ${apiKey}`
+          },
+          body: formData
+        });
+
+        if (response.ok) {
+          log(`✓ Uploaded ${count} screenshots to backend`);
+          document.getElementById('backend-status').textContent = 'completed ✓';
+          return true;
+        } else {
+          log(`✗ Upload error: ${response.status}`);
+          return false;
+        }
+      } catch (e) {
+        log(`✗ Upload failed: ${e.message}`);
+        return false;
+      }
+    }
+
+    function handleStartSession() {
+      sessionActive = true;
+      sessionStartTime = Date.now();
+      startSessionOnBackend();
+      document.getElementById('start-session').style.display = 'none';
+      document.getElementById('stop-session').style.display = 'inline-block';
+      frame.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
+      log('→ Session started');
+    }
+
+    function handleStopSession() {
+      sessionActive = false;
+      stopSessionOnBackend();
+      document.getElementById('start-session').style.display = 'inline-block';
+      document.getElementById('stop-session').style.display = 'none';
+      frame.contentWindow.postMessage({ type: 'GAME_PAUSE' }, '*');
+      log('← Session stopped');
+    }
+
+    document.getElementById('start-session').addEventListener('click', handleStartSession);
+    document.getElementById('stop-session').addEventListener('click', handleStopSession);
+    window.addEventListener('message', (e) => {
+      const m = e.data;
+      if (!m || typeof m !== 'object') return;
+      if (m.type === 'screenshot') {
+        count += 1;
+        document.getElementById('count').textContent = count;
+        document.getElementById('shot').src = m.dataUrl;
+        return;
+      }
+      if (m.type === 'skillprint_keydown') {
+        log(`keydown ${m.key} → applying preset via ADJUST_GAME`);
+        // Mirror the portal: look up the preset inside the game and send each value back.
+        const presets = frame.contentWindow.DungeonRunnerPresets;
+        if (presets && presets[m.key]) {
+          for (const [parameterName, parameterValue] of Object.entries(presets[m.key].values)) {
+            frame.contentWindow.postMessage({ type: 'ADJUST_GAME', data: { parameterName, parameterValue } }, '*');
+          }
+        }
+        return;
+      }
+      if (m.type === 'REGISTER_ADJUSTMENTS') {
+        const sel = document.getElementById('pname');
+        const defs = frame.contentWindow.SKILLPRINT_PARAMETERS || {};
+        sel.innerHTML = Object.keys(defs).map((k) => `<option>${k}</option>`).join('');
+        log(`REGISTER_ADJUSTMENTS (${Object.keys(m.mappings).length} presets, ${Object.keys(defs).length} params)`);
+        return;
+      }
+      log(`${m.type} ${m.data ? JSON.stringify(m.data) : ''}`);
+    });
+    document.querySelectorAll('button[data-msg]').forEach((b) => b.addEventListener('click', () => {
+      frame.contentWindow.postMessage({ type: b.dataset.msg }, '*');
+      log(`sent ${b.dataset.msg}`);
+    }));
+    document.getElementById('send').addEventListener('click', () => {
+      const parameterName = document.getElementById('pname').value;
+      const raw = document.getElementById('pvalue').value;
+      const parameterValue = raw === 'true' ? true : raw === 'false' ? false : Number(raw);
+      frame.contentWindow.postMessage({ type: 'ADJUST_GAME', data: { parameterName, parameterValue } }, '*');
+      log(`sent ADJUST_GAME ${parameterName}=${parameterValue}`);
+    });
+  </script>
+</body>
+</html>

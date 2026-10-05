@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { mapSlugToGamePath } from '../game/[slug]/GameClient';
+import { mapSlugToGamePath } from '@/lib/localGames';
 
 type VLMStatus = 'idle' | 'capturing' | 'processing' | 'ready';
 
@@ -45,15 +45,6 @@ export default function HextrisVLMDemo() {
     // Handle iframe load and attach the screenshot listener
     const handleIframeLoad = () => {
         if (iframeRef.current) {
-            // Inject the script that sets up screenshot polling (same as GameClient)
-            const iframeDocument = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
-            const scriptUrl = '/lib/skillprint-js-sdk/main-manager.js';
-            if (iframeDocument) {
-                const script = iframeDocument.createElement('script');
-                script.src = scriptUrl;
-                iframeDocument.body.appendChild(script);
-            }
-
             window.addEventListener('message', handleGameMessage);
         }
     };

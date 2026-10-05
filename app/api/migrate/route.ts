@@ -22,6 +22,7 @@ import * as createQuickJumpers from '@/migrations/17-create-quick-jumpers';
 import * as addRoleToUsers from '@/migrations/18-add-role-to-users';
 import * as createCustomLayouts from '@/migrations/19-create-custom-layouts';
 import * as addThemeToCustomLayouts from '@/migrations/20-add-theme-to-custom-layouts';
+import * as seedConsumerPlaybooks from '@/migrations/21-seed-consumer-playbooks';
 
 
 export async function GET() {
@@ -132,6 +133,11 @@ export async function GET() {
                     name: '20-add-theme-to-custom-layouts',
                     up: async () => addThemeToCustomLayouts.up({ context: sequelize, name: '20-add-theme-to-custom-layouts' }),
                     down: async () => addThemeToCustomLayouts.down({ context: sequelize, name: '20-add-theme-to-custom-layouts' }),
+                },
+                {
+                    name: '21-seed-consumer-playbooks',
+                    up: async () => seedConsumerPlaybooks.up({ context: sequelize }),
+                    down: async () => seedConsumerPlaybooks.down({ context: sequelize }),
                 }
             ],
             context: sequelize,
