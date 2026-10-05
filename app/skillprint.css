@@ -5704,6 +5704,12 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal [data-dimens
   grid-template-rows: auto auto 1fr auto;
 }
 
+/* Pin the button to the last row. A card with no games has one child fewer,
+   which put the button in the 1fr row and stretched it to fill the card. */
+.page--portal-skills .skill-card__action {
+  grid-row: -2;
+}
+
 
 :is(.page--portal-game-detail, .page--portal-playbook-detail) .skill-card {
   grid-template-rows: auto 1fr auto;
