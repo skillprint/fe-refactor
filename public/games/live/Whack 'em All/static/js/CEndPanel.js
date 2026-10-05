@@ -148,6 +148,7 @@ function CEndPanel() {
     };
 
     this._onRestart = function () {
+        skillprintEvent({event: "GAME_RESTART", score: s_oGame.getScore()});
         $(s_oMain).trigger("show_interlevel_ad");
         _oGroup.visible = false;
 
