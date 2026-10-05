@@ -92,7 +92,7 @@ function CGame(oData, iLevel) {
         var oSpriteBrick = s_oSpriteLibrary.getSprite("brick0");
         _pBrickDim = {x: oSpriteBrick.width / 2, y: oSpriteBrick.height / 2};
 
-        _iSpeedBallRate = 1;
+        _iSpeedBallRate = BALL_SPEED_RATE;
         _iRadius = (oSpriteBall.height / 2) + OFFSET_RADIUS_BALL;
         _iLevel = iLevel;
         _iScore = s_oMain.getScoreTillLevel(_iLevel);
@@ -326,7 +326,7 @@ function CGame(oData, iLevel) {
             _bSlowBall = false;
             _bFastBall = false;
 
-            _iSpeedBallRate = 1;
+            _iSpeedBallRate = BALL_SPEED_RATE;
 
             this.checkOtherActiveBonus();
             //create a ball if the user has more than a life
@@ -628,7 +628,7 @@ function CGame(oData, iLevel) {
         for (var i = 0; i < _aBall.length; i++) {
             _aBall[i].setVelocityRate(_iSpeedBallRate);
         }
-        if (_iSpeedBallRate < 1) {
+        if (_iSpeedBallRate < BALL_SPEED_RATE) {
             _bSlowBall = true;
             this.audioPowerUpMalus();
         }
@@ -662,7 +662,7 @@ function CGame(oData, iLevel) {
             _aBall[i].setVelocityRate(_iSpeedBallRate);
         }
 
-        if (_iSpeedBallRate > 1) {
+        if (_iSpeedBallRate > BALL_SPEED_RATE) {
             _bFastBall = true;
             this.audioPowerUpMalus();
         }
@@ -1034,10 +1034,10 @@ function CGame(oData, iLevel) {
     this.nextLevel = function () {
         this.unloadLevel();
         _iLevel++;
-        logEvent({event: "LEVEL_START", level: iLevel});
+        logEvent({event: "LEVEL_START", level: _iLevel});
         this.createLevel();
         var oSpriteBall = s_oSpriteLibrary.getSprite("normal_ball");
-        _iSpeedBallRate = 1;
+        _iSpeedBallRate = BALL_SPEED_RATE;
         this.createABall(0, _oPadding.x, _oPadding.y - _iRadius - _pPaddingDim.y, oSpriteBall, true);
         _bShotLeft = true;
         _bLaunch = false;
@@ -1375,7 +1375,7 @@ function CGame(oData, iLevel) {
 
     this.randomBonus = function (iXPos, iYPos) {
         var iRand = Math.floor(Math.random() * 100);
-        if (iRand < SPAWN_BONUS_PROBABILITY[_iLevel-1] && _iTotBrick > 0) {
+        if (iRand < SPAWN_BONUS_PROBABILITY[_iLevel-1] * BONUS_DROP_RATE && _iTotBrick > 0) {
             this.generateABonus(iXPos, iYPos);
         }
     };
@@ -1463,6 +1463,18 @@ function CGame(oData, iLevel) {
                     this.__updatePhysics();
                 }
             }
+        }
+    };
+
+    // Skillprint: retune the base ball speed now, for every ball in play.
+    // The speed power-ups keep working within 0.5x-1.5x of the new base.
+    this.setBallSpeed = function (fRate) {
+        BALL_SPEED_RATE = fRate;
+        MIN_VELOCITY_LIMIT = 0.5 * fRate;
+        MAX_VELOCITY_LIMIT = 1.5 * fRate;
+        _iSpeedBallRate = fRate;
+        for (var i = 0; i < _aBall.length; i++) {
+            _aBall[i].setVelocityRate(_iSpeedBallRate);
         }
     };
 

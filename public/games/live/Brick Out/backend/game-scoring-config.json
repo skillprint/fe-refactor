@@ -1,0 +1,59 @@
+{
+  "game_slug": "brick-out-54e74305-8000-4605-b6b7-cf9412dd285b",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "ballSpeed": {
+      "type": "number",
+      "min": 0.6,
+      "max": 1.6,
+      "default": 1.0,
+      "description": "Base ball speed multiplier (1.0 = the game's normal speed). Applied to the balls in play and kept through lost balls and new levels. The speed power-ups still move the ball within 0.5x-1.5x of this base. Higher values make the game faster and harder.",
+      "adjustment_guide": "The main difficulty lever. Raise in steps of about 0.1 while the player keeps rallies going (few BALL_LOST). Lower after two or more lost balls in a chunk, or for relax."
+    },
+    "bonusDropRate": {
+      "type": "number",
+      "min": 0.0,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Multiplies each level's power-up drop chance (0 = no power-ups, 2 = twice as many). Power-ups (larger paddle, multi-ball, fire ball, extra life...) mostly help the player, so lower values make the game harder.",
+      "adjustment_guide": "Raise to ease a struggling player or for joy and curiosity (more variety). Lower for focus and grit, so success comes from paddle control rather than power-ups."
+    },
+    "maxBallSpawn": {
+      "type": "integer",
+      "min": 1,
+      "max": 6,
+      "default": 4,
+      "description": "Most balls in play from the multi-ball power-up (1 = no extra balls). More balls clear bricks faster but split attention.",
+      "adjustment_guide": "Lower for focus (one ball to track). Raise for joy and arousal (chaotic fun). It only matters once a multi-ball power-up drops."
+    }
+  },
+  "adjustment_instructions": "Brick Out is a brick-breaker: the player moves a paddle to bounce a ball into rows of bricks and clears a level by destroying them all; the ball is lost if it falls past the paddle, and the player has 3 lives. Power-ups drop from broken bricks (larger or smaller paddle, multi-ball, fire ball, floor, magnetic paddle, shot, extra life, ball speed up/down).\nLevers: ballSpeed is the main difficulty lever (higher = less time to react); bonusDropRate sets how often power-ups help (lower = harder); maxBallSpawn caps multi-ball (more balls = more to track).\n- relax: ballSpeed 0.6-0.8, bonusDropRate 1.2-1.5, maxBallSpawn 2-3.\n- focus: ballSpeed 1.0-1.3, bonusDropRate 0.5-0.8, maxBallSpawn 1-2 (one ball to track closely).\n- grit: ballSpeed 1.3-1.6, bonusDropRate 0.3-0.6, maxBallSpawn 2-3; ease off if several balls are lost in a row.\n- joy: ballSpeed 0.9-1.2, bonusDropRate 1.5-2.0, maxBallSpawn 4-6 (frequent, chaotic power-ups).\nChange ballSpeed in small steps (about 0.1) so the change feels fair; lower it after two or more lost balls in a chunk.",
+  "skill_adjustment_instructions": "Brick Out trains Action and Timing (paddle control), Spatial (predicting the ball's path) and Attention/Perceptual Speed (tracking fast or multiple balls).\n- action, timing, perceptual-speed: raise ballSpeed gradually while rallies stay long; keep bonusDropRate at or below 1.\n- attention: maxBallSpawn 3-6 with moderate ballSpeed (1.0-1.2) to train tracking several balls; lower maxBallSpawn if balls are lost quickly.\n- spatial: moderate ballSpeed (0.9-1.2) and bonusDropRate 0.5-1 so the player relies on reading angles rather than power-ups.",
+  "notes": "Brick Out's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'brick-out' keys. Replaces the retired MAX/MIN_VELOCITY_LIMIT and TIME_BOUNCE_BALL, which never changed difficulty.",
+  "sdk_game_parameters": [
+    {
+      "name": "ballSpeed",
+      "type": "Float",
+      "description": "Base ball speed multiplier (1.0 = the game's normal speed). Applied to the balls in play and kept through lost balls and new levels. The speed power-ups still move the ball within 0.5x-1.5x of this base. Higher values make the game faster and harder.",
+      "min_value": "0.6",
+      "max_value": "1.6",
+      "adjustment_guide": "The main difficulty lever. Raise in steps of about 0.1 while the player keeps rallies going (few BALL_LOST). Lower after two or more lost balls in a chunk, or for relax."
+    },
+    {
+      "name": "bonusDropRate",
+      "type": "Float",
+      "description": "Multiplies each level's power-up drop chance (0 = no power-ups, 2 = twice as many). Power-ups (larger paddle, multi-ball, fire ball, extra life...) mostly help the player, so lower values make the game harder.",
+      "min_value": "0.0",
+      "max_value": "2.0",
+      "adjustment_guide": "Raise to ease a struggling player or for joy and curiosity (more variety). Lower for focus and grit, so success comes from paddle control rather than power-ups."
+    },
+    {
+      "name": "maxBallSpawn",
+      "type": "Integer",
+      "description": "Most balls in play from the multi-ball power-up (1 = no extra balls). More balls clear bricks faster but split attention.",
+      "min_value": "1",
+      "max_value": "6",
+      "adjustment_guide": "Lower for focus (one ball to track). Raise for joy and arousal (chaotic fun). It only matters once a multi-ball power-up drops."
+    }
+  ]
+}
