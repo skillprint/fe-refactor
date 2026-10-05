@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, CSSProperties
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { mapSlugToGamePath } from '@/lib/localGames';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores } from '../../lib/skillprintSdk';
+import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { resolveCatalogGame } from '@/lib/gameSlug';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
@@ -243,26 +244,18 @@ export default function AiGuideClient() {
             setMoodScoresHistory(prev => [...prev, { timestamp: Date.now(), scores: res.moodScores! }]);
           }
 
-          if (res.telemetry && res.telemetry.length > 0) {
-            const newAdjustments = [...res.telemetry]
-              .sort((a, b) => new Date(b.adjustment.createDate).getTime() - new Date(a.adjustment.createDate).getTime())
-              .map(t => t.adjustment)
-              .filter(adj => {
-                const id = `${adj.gameSlug}-${adj.createDate}-${adj.parameterName}`;
-                if (!processedAdjustmentsRef.current.has(id)) {
-                  processedAdjustmentsRef.current.add(id);
-                  if (iframeRef.current?.contentWindow) {
-                    iframeRef.current.contentWindow.postMessage({ type: 'ADJUST_GAME', data: adj }, '*');
-                  }
-                  return true;
-                }
-                return false;
-              });
-
-            if (newAdjustments.length > 0) {
-              setAdjustments(prev => [...newAdjustments, ...prev].slice(0, 200));
-              newAdjustments.forEach(adj => addLog(`Game adjusted: ${adj.parameterName} → ${adj.parameterValue}`, 'success'));
+          // `telemetry` also holds the game's events, which aren't adjustments
+          // (see lib/adjustments). Send the newest value for each parameter,
+          // oldest decision first, so a stale value never lands last.
+          const newAdjustments = pendingAdjustments(res.telemetry, processedAdjustmentsRef.current);
+          if (newAdjustments.length > 0) {
+            markApplied(newAdjustments, processedAdjustmentsRef.current);
+            for (const adj of latestPerParameter(newAdjustments)) {
+              iframeRef.current?.contentWindow?.postMessage({ type: 'ADJUST_GAME', data: adj }, '*');
             }
+            // The panel lists every change, newest first.
+            setAdjustments(prev => [...newAdjustments].reverse().concat(prev).slice(0, 200));
+            newAdjustments.forEach(adj => addLog(`Game adjusted: ${adj.parameterName} → ${adj.parameterValue}`, 'success'));
           }
 
           if (res.state === 'CLOSED') {
