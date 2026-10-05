@@ -3,8 +3,8 @@
 <head>
 <script>
 // The event sheet's script actions call logEvent (LEVEL_START, SPAWN, SLASHED...).
-// Nothing forwards these to the backend yet, so they go nowhere, as they did
-// when SkillprintLib's screenshot script redefined this.
+// ../../_shared/skillprintC3.js replaces this no-op with a forwarder that posts
+// them to the portal as gameEvents; it stays a no-op outside the portal.
 function logEvent(params) {}
 globalThis.logEvent = logEvent;
 </script>
