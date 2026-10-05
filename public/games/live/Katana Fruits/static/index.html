@@ -2,14 +2,13 @@
 <html>
     <head>
 <script>
+// Queues logEvent calls until ../../SkillprintLib/skillprintScreenshot.js loads
+// and posts them, and every later call, to the portal (fe-refactor#45).
 function logEvent(params) {
-  params.messageType = 'gameEvent';
-  const paramsAsJSON = JSON.stringify(params);
-  if (globalThis.ReactNativeWebView) {
-    globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
-  } else {
-    window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
-  }
+  try {
+    var queue = globalThis.__skillprintPendingEvents = globalThis.__skillprintPendingEvents || [];
+    if (queue.length < 200) queue.push({ json: JSON.stringify(params), at: performance.timeOrigin + performance.now() });
+  } catch (e) {}
 }
 globalThis.logEvent = logEvent;
 </script>
@@ -57,6 +56,7 @@ globalThis.logEvent = logEvent;
         <script type="text/javascript" src="js/CCreditsPanel.js"></script>
         <script type="text/javascript" src="js/CCTLText.js"></script>
         <script type="text/javascript" src="js/sprintf.js"></script>
+        <script src="../../SkillprintLib/html2canvas.min.js"></script>
         <script src="../../SkillprintLib/skillprintScreenshot.js"></script>
         <script src="skillprintShim.js"></script>
     </head>
