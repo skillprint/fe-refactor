@@ -1,0 +1,23 @@
+{
+    "pairs": {
+        "max": 40,
+        "min": 2,
+        "type": "integer",
+        "default": 5,
+        "description": "Pairs of doodle cards in the heap. Setting it replaces the built-in progression (5, 10, 15 ... 40 pairs over 8 levels) for the level in play and every later level: pairs are dealt into the heap or taken out of it immediately. More pairs mean a bigger heap to search."
+    },
+    "clusterSpread": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Size of the heap the cards are scattered in, as a multiple of the game's own (which grows with the number of cards). Lower values pack the cards tighter so more of them overlap and hide each other; higher values spread them out. Applies to the heap in play immediately."
+    },
+    "cardRotation": {
+        "max": 180,
+        "min": 0,
+        "type": "integer",
+        "default": 180,
+        "description": "Largest tilt of a card in the heap, in degrees. 0 = every card upright, 180 = any orientation (the game's default). Applies to the heap in play immediately; cards the player drags still spin a little."
+    }
+}

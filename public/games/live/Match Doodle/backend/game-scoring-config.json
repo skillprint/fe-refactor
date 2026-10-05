@@ -1,0 +1,59 @@
+{
+  "game_slug": "match-doodle-2-6697ba5a-8a64-42f6-adbd-6546dc65583",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "pairs": {
+      "type": "integer",
+      "min": 2,
+      "max": 40,
+      "default": 5,
+      "description": "Pairs of doodle cards in the heap. Setting it replaces the built-in progression (5, 10, 15 ... 40 pairs over 8 levels) for the level in play and every later level: pairs are dealt into the heap or taken out of it immediately. More pairs mean a bigger heap to search.",
+      "adjustment_guide": "The main load lever. Raise in steps of 2-5 while the player matches quickly with few UNMATCH events (short gaps between MATCH events). Lower when UNMATCH events pile up or the gaps between MATCH events grow long. LEVEL_START and OBJECTIVES_CHANGED report the pairs in play as objectives."
+    },
+    "clusterSpread": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Size of the heap the cards are scattered in, as a multiple of the game's own (which grows with the number of cards). Lower values pack the cards tighter so more of them overlap and hide each other; higher values spread them out. Applies to the heap in play immediately.",
+      "adjustment_guide": "Lower (0.5-0.8) for focus and attention training, since overlapping cards must be uncovered or dragged apart. Raise (1.3-2.0) for relax or a struggling player so every doodle is visible at a glance."
+    },
+    "cardRotation": {
+      "type": "integer",
+      "min": 0,
+      "max": 180,
+      "default": 180,
+      "description": "Largest tilt of a card in the heap, in degrees. 0 = every card upright, 180 = any orientation (the game's default). Applies to the heap in play immediately; cards the player drags still spin a little.",
+      "adjustment_guide": "Lower (0-45) for relax, joy or a struggling player so doodles are easy to recognise. Keep 120-180 for spatial and pattern-matching training, where the player has to recognise a rotated doodle."
+    }
+  },
+  "adjustment_instructions": "Match Doodle: a heap of doodle cards sits on the table; one card is dealt onto the drop pad and the player finds its twin in the heap and drags it onto the pad. A wrong card bounces back. A level ends when every pair is matched; there is no time limit (the clock counts up).\nLevers: pairs is the main load lever (more cards to search); clusterSpread sets how tightly the heap is packed (lower = more overlap); cardRotation sets how tilted the cards are (higher = harder to recognise).\n- relax: pairs 4-8, clusterSpread 1.3-2.0, cardRotation 0-45.\n- focus: pairs 10-20, clusterSpread 0.6-0.9, cardRotation 90-180.\n- grit: pairs 20-40, clusterSpread 0.5-0.7, cardRotation 180; ease pairs down when UNMATCH events pile up.\n- joy: pairs 5-12, clusterSpread 1.0-1.5, cardRotation 0-90 (quick, satisfying matches).\nChange pairs in steps of 2-5. Ease clusterSpread up before cutting pairs when a player is stuck.",
+  "skill_adjustment_instructions": "Match Doodle trains Pattern Matching and Perceptual Speed (visual search for a doodle's twin), with Attention (ignoring look-alike distractors) and Spatial (recognising rotated doodles).\n- pattern matching, perceptual speed: raise pairs (15-40) so the search set is large; clusterSpread 0.8-1.2 so cards stay visible.\n- attention: clusterSpread 0.5-0.8 so cards overlap and must be uncovered; pairs 10-25.\n- spatial: cardRotation 120-180 with moderate pairs (8-15), so recognising rotated doodles is the challenge.\n- action: moderate pairs (8-15) and clusterSpread 0.6-0.9, so dragging cards apart and onto the pad is part of the challenge.",
+  "notes": "Match Doodle's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'match-doodle' keys. `pairs` keeps its old name; it used to take effect only at the next level and now applies to the level in play.",
+  "sdk_game_parameters": [
+    {
+      "name": "pairs",
+      "type": "Integer",
+      "description": "Pairs of doodle cards in the heap. Setting it replaces the built-in progression (5, 10, 15 ... 40 pairs over 8 levels) for the level in play and every later level: pairs are dealt into the heap or taken out of it immediately. More pairs mean a bigger heap to search.",
+      "min_value": "2",
+      "max_value": "40",
+      "adjustment_guide": "The main load lever. Raise in steps of 2-5 while the player matches quickly with few UNMATCH events (short gaps between MATCH events). Lower when UNMATCH events pile up or the gaps between MATCH events grow long. LEVEL_START and OBJECTIVES_CHANGED report the pairs in play as objectives."
+    },
+    {
+      "name": "clusterSpread",
+      "type": "Float",
+      "description": "Size of the heap the cards are scattered in, as a multiple of the game's own (which grows with the number of cards). Lower values pack the cards tighter so more of them overlap and hide each other; higher values spread them out. Applies to the heap in play immediately.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "Lower (0.5-0.8) for focus and attention training, since overlapping cards must be uncovered or dragged apart. Raise (1.3-2.0) for relax or a struggling player so every doodle is visible at a glance."
+    },
+    {
+      "name": "cardRotation",
+      "type": "Integer",
+      "description": "Largest tilt of a card in the heap, in degrees. 0 = every card upright, 180 = any orientation (the game's default). Applies to the heap in play immediately; cards the player drags still spin a little.",
+      "min_value": "0",
+      "max_value": "180",
+      "adjustment_guide": "Lower (0-45) for relax, joy or a struggling player so doodles are easy to recognise. Keep 120-180 for spatial and pattern-matching training, where the player has to recognise a rotated doodle."
+    }
+  ]
+}
