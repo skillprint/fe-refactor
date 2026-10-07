@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, CSSProperties } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { mapSlugToGamePath } from '@/lib/localGames';
-import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores } from '../../lib/skillprintSdk';
+import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores, epochNow } from '../../lib/skillprintSdk';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { resolveCatalogGame } from '@/lib/gameSlug';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
@@ -23,6 +23,10 @@ import {
   formatClock,
   formatDuration,
 } from '@/components/LiveConsole/scores';
+import { useBiometrics } from './biometrics/useBiometrics';
+import { BiometricsDock } from './biometrics/BiometricsDock';
+import { BiometricsPanel } from './biometrics/BiometricsPanel';
+import { BIOMETRIC_BASELINE_EVENT, BIOMETRIC_EVENT } from './biometrics/engine/signals';
 
 const getApiKey = () => process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
 
@@ -73,6 +77,9 @@ export default function AiGuideClient() {
 
   const gameQuery = searchParams.get('game');
   const moodQuery = searchParams.get('mood');
+  // ?bio_src=/path.webm reads a same-origin video instead of the camera (repeatable runs).
+  const bioSourceQuery = searchParams.get('bio_src');
+  const bioSource = bioSourceQuery?.startsWith('/') ? bioSourceQuery : null;
 
   const [selectedGame, setSelectedGame] = useState(gameQuery || 'hextris');
   const [selectedMood, setSelectedMood] = useState<string>(moodQuery || Mood.FOCUS);
@@ -101,6 +108,10 @@ export default function AiGuideClient() {
   const [keyShown, setKeyShown] = useState(false);
   const [gameLoaded, setGameLoaded] = useState(false);
   const [flash, setFlash] = useState(false);
+  const [bioOn, setBioOn] = useState(() => searchParams.get('bio') === '1');
+  const [bioExpanded, setBioExpanded] = useState(false);
+  const [bioSent, setBioSent] = useState(0);
+  const [bioLastSent, setBioLastSent] = useState<Record<string, unknown> | null>(null);
 
   const sessionEndedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -109,6 +120,7 @@ export default function AiGuideClient() {
   const processedAdjustmentsRef = useRef(new Set<string>());
   const sessionStartedRef = useRef(false);
   const sessionFailedRef = useRef(false);
+  const bioSentRef = useRef(0);
 
   const game = GAMES.find(g => g.slug === selectedGame) || GAMES[0];
   // Canonical catalog slug for the selected game; the ref feeds the message handler closure.
@@ -120,6 +132,31 @@ export default function AiGuideClient() {
     const date = new Date();
     setLogs(prev => [{ time: date.toLocaleTimeString(), timestamp: date.getTime(), level, message }, ...prev].slice(0, 200));
   }, []);
+
+  // Biometrics: one reading a second while the session is open, queued on the
+  // session timeline as a game-specific BIOMETRIC event, so it rides with the
+  // next screenshot upload into Session.telemetry and that chunk's prompts.
+  const handleBiometricReading = useCallback((data: Record<string, unknown>, at: number) => {
+    const client = clientRef.current;
+    if (!client || !sessionStartedRef.current || sessionEndedRef.current) return;
+    client.recordEvent(BIOMETRIC_EVENT, data, at);
+    if (bioSentRef.current === 0) addLog('Biometric readings are going out with the session as BIOMETRIC events.', 'success');
+    bioSentRef.current += 1;
+    setBioSent(bioSentRef.current);
+    setBioLastSent({ event: BIOMETRIC_EVENT, ...data });
+  }, [addLog]);
+
+  const handleBiometricBaseline = useCallback(({ hr, rmssd }: { hr: number; rmssd: number | null }) => {
+    clientRef.current?.recordEvent(BIOMETRIC_BASELINE_EVENT, { hr: Math.round(hr * 10) / 10, hrv: rmssd === null ? null : Math.round(rmssd) });
+    addLog(`Biometric baseline set: ${hr.toFixed(0)} bpm.`);
+  }, [addLog]);
+
+  const bio = useBiometrics(bioOn, handleBiometricReading, bioSource);
+
+  const toggleBiometrics = () => {
+    if (bioOn) setBioExpanded(false);
+    setBioOn(!bioOn);
+  };
 
   // Sync state to URL
   useEffect(() => {
@@ -133,10 +170,15 @@ export default function AiGuideClient() {
       currentParams.set('mood', selectedMood);
       changed = true;
     }
+    if ((currentParams.get('bio') === '1') !== bioOn) {
+      if (bioOn) currentParams.set('bio', '1');
+      else currentParams.delete('bio');
+      changed = true;
+    }
     if (changed) {
       router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
     }
-  }, [selectedGame, selectedMood, pathname, router, searchParams]);
+  }, [selectedGame, selectedMood, bioOn, pathname, router, searchParams]);
 
   // Initialise the SDK and a fresh session id for every run
   useEffect(() => {
@@ -156,6 +198,9 @@ export default function AiGuideClient() {
     setStartedAt(null);
     setClosedAt(null);
     setGameLoaded(false);
+    setBioSent(0);
+    setBioLastSent(null);
+    bioSentRef.current = 0;
     sessionEndedRef.current = false;
     processedAdjustmentsRef.current.clear();
     shouldPollRef.current = false;
@@ -243,8 +288,11 @@ export default function AiGuideClient() {
             setMoodScoresHistory(prev => [...prev, { timestamp: Date.now(), scores: res.moodScores! }]);
           }
 
-          if (res.telemetry && res.telemetry.length > 0) {
-            const newAdjustments = [...res.telemetry]
+          // Session.telemetry also holds the events the session logged (BIOMETRIC
+          // readings among them); only the entries with an adjustment are changes.
+          const adjustmentItems = (res.telemetry || []).filter(t => t?.adjustment);
+          if (adjustmentItems.length > 0) {
+            const newAdjustments = [...adjustmentItems]
               .sort((a, b) => new Date(b.adjustment.createDate).getTime() - new Date(a.adjustment.createDate).getTime())
               .map(t => t.adjustment)
               .filter(adj => {
@@ -335,12 +383,15 @@ export default function AiGuideClient() {
             console.warn('Invalid screenshot data format received:', eventData);
             return;
           }
+          // Stamped on arrival, so the events logged up to this frame (biometric
+          // readings among them) ride with it and later ones wait for the next.
+          const capturedAt = epochNow();
           setFramesCaptured(n => n + 1);
           clientRef.current.setLastScreenshotDataURI(base64String);
           const res = await fetch(base64String);
           const blob = await res.blob();
           // A failed upload (e.g. the session already closed) is logged by the client.
-          clientRef.current.postScreenshots(sessionId, [blob]).catch(() => {});
+          clientRef.current.postScreenshots(sessionId, [blob], false, null, null, capturedAt).catch(() => {});
         } catch (e) {
           console.error('Failed to process screenshot', e);
         }
@@ -520,6 +571,15 @@ export default function AiGuideClient() {
               <span className="ui-badge__dot" aria-hidden="true" />
               <span>{live.label}</span>
             </span>
+            <button
+              className={bioOn ? 'button button--primary button--sm aa-bio-toggle' : 'button button--secondary button--sm aa-bio-toggle'}
+              type="button"
+              onClick={toggleBiometrics}
+              aria-pressed={bioOn}
+              title={bioOn ? 'Turn biometrics off and release the camera' : 'Read heart rate and more from your camera, and send it with the session'}
+            >
+              <ConsoleIcon name="camera" /><span>Biometrics</span>
+            </button>
             <button className="icon-button" type="button" onClick={toggleTheme} aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'} title="Toggle colour mode">
               <ConsoleIcon name={isLight ? 'moon' : 'sun'} />
             </button>
@@ -931,8 +991,36 @@ export default function AiGuideClient() {
               </details>
             </section>
           )}
+
+          {bioOn && bioExpanded && (
+            <BiometricsPanel
+              snapshot={bio.snapshot}
+              engine={bio.engine}
+              loadError={bio.loadError}
+              sessionOpen={sessionStatus === 'Open'}
+              readingsSent={bioSent}
+              lastSent={bioLastSent}
+              onBaseline={handleBiometricBaseline}
+            />
+          )}
         </div>
       </main>
+
+      {bioOn && (
+        <BiometricsDock
+          snapshot={bio.snapshot}
+          engine={bio.engine}
+          loadError={bio.loadError}
+          sessionOpen={sessionStatus === 'Open'}
+          readingsSent={bioSent}
+          expanded={bioExpanded}
+          onToggleExpanded={() => {
+            setBioExpanded(v => !v);
+            if (!bioExpanded) requestAnimationFrame(() => document.getElementById('biometricsPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+          }}
+          onTurnOff={toggleBiometrics}
+        />
+      )}
 
       <footer className="aa-foot">
         <div className="aa-foot__inner">

@@ -15627,6 +15627,11 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
   padding: var(--space-4) var(--space-14) var(--space-8);
 }
 
+/* .aa-chart centres its one row, which leaves the row as tall as its content;
+   ResponsiveContainer's height: 100% then resolves to 0 and recharts draws
+   nothing. Stretch the row whenever a chart (not the empty note) is inside. */
+.page--adaptive-assist .aa-chart--recharts:has(> .recharts-responsive-container) { align-content: stretch; }
+
 .page--adaptive-assist .aa-chart--recharts .recharts-cartesian-axis-tick text { fill: var(--ui-muted); font-family: var(--font-mono); font-size: 10px; }
 
 .page--adaptive-assist .aa-chart--recharts .recharts-cartesian-grid line { stroke: var(--surface-border); }
@@ -15842,3 +15847,295 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
 .is-logo-playing > .sp-logo-motion { display: block; }
 .is-logo-playing img.brand-logo { clip-path: inset(0 0 0 20.64%); }
 .is-logo-playing img.portal-brand__mark { opacity: 0; }
+
+/* ==========================================================================
+   AI Guide · Biometrics (app/labs/ai_guide/biometrics). The top bar's one
+   toggle, the small dock it opens (the annotated camera and the headline
+   readings) and the full panel the dock expands into, on the console's cards.
+   ========================================================================== */
+
+.page--adaptive-assist {
+  --bio-grid: color-mix(in srgb, var(--ui-muted) 22%, transparent);
+  --bio-dock-width: 288px;
+}
+
+.page--adaptive-assist .aa-bio-toggle .sp-icon { --icon-size: var(--icon-size-sm); }
+
+/* The canvas the engine draws the frame and overlay into, mirrored like a selfie view. */
+.page--adaptive-assist .bio-view {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #000;
+  border-radius: var(--radius-md);
+  transform: scaleX(-1);
+}
+
+/* ── The dock ────────────────────────────────────────────────────────────── */
+
+.page--adaptive-assist .bio-dock {
+  position: fixed;
+  right: var(--space-16);
+  bottom: var(--space-16);
+  z-index: 40;
+  width: var(--bio-dock-width);
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-10);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl, 12px);
+  background: var(--surface-box);
+  color: var(--ui-text);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.28);
+}
+
+.page--adaptive-assist .bio-dock__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.page--adaptive-assist .bio-dock__title {
+  margin: 0 auto 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .bio-dock__title .sp-icon { --icon-size: var(--icon-size-sm); color: var(--violet); }
+
+.page--adaptive-assist .bio-dock__stage { position: relative; }
+
+.page--adaptive-assist .bio-dock__inline {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--adaptive-assist .bio-dock[data-compact] { width: auto; min-width: 240px; }
+
+.page--adaptive-assist .bio-dock[data-compact] :is(.bio-dock__stage, .bio-dock__readings, .bio-dock__note) { display: none; }
+
+.page--adaptive-assist .bio-dock__veil {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-12);
+  text-align: center;
+  color: #c9c9d1;
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .bio-dock__readings {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .bio-dock__readings dt {
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+}
+
+.page--adaptive-assist .bio-dock__readings dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .bio-dock__readings small,
+.page--adaptive-assist .bio-panel__extras small {
+  margin-inline-start: 2px;
+  color: var(--ui-muted);
+  font-weight: 400;
+  font-size: var(--app-text-xs-font-size);
+}
+
+.page--adaptive-assist .bio-dock__hr strong { font-size: 24px; line-height: 1; }
+
+.page--adaptive-assist .bio-dock__readings .bio-dock__hint {
+  font-family: inherit;
+  font-weight: 400;
+  color: var(--ui-muted);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.page--adaptive-assist .bio-dock__note {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 11px;
+  line-height: 15px;
+}
+
+/* ── The full panel ──────────────────────────────────────────────────────── */
+
+.page--adaptive-assist .bio-panel {
+  margin-top: var(--aa-gap);
+  /* Room for the dock, so it never sits on the panel's last line. */
+  margin-bottom: var(--space-104);
+}
+
+.page--adaptive-assist .bio-panel__controls,
+.page--adaptive-assist .bio-panel__settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-10) var(--space-20, 20px);
+  padding: var(--space-12) var(--space-14) 0;
+}
+
+.page--adaptive-assist .bio-panel__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .bio-panel__settings .field { min-width: 120px; }
+
+.page--adaptive-assist .bio-panel__rois {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-12);
+}
+
+.page--adaptive-assist .bio-panel__rois legend,
+.page--adaptive-assist .bio-panel__settings .field label {
+  margin-bottom: var(--space-4);
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+}
+
+.page--adaptive-assist .bio-panel__lambda input { width: 160px; }
+
+.page--adaptive-assist .bio-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--ui-muted);
+  font-size: var(--app-text-sm-font-size);
+}
+
+.page--adaptive-assist .bio-panel__muted {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-weight: 400;
+}
+
+.page--adaptive-assist .bio-panel__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--aa-gap);
+  padding: var(--space-14);
+}
+
+.page--adaptive-assist .bio-panel__camera,
+.page--adaptive-assist .bio-panel__methods { display: grid; align-content: start; gap: var(--space-10); min-width: 0; }
+
+.page--adaptive-assist .bio-panel__subhead {
+  margin: 0 0 var(--space-6);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+  font-weight: var(--weight-semibold);
+}
+
+.page--adaptive-assist .bio-panel__quality { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-16); }
+
+.page--adaptive-assist .bio-panel__quality > div:nth-child(2) { border-top: 0; }
+
+.page--adaptive-assist .bio-table td,
+.page--adaptive-assist .bio-table th { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.page--adaptive-assist .bio-table td:first-child,
+.page--adaptive-assist .bio-table th:first-child { text-align: left; }
+
+.page--adaptive-assist .bio-table tr.is-primary td { font-weight: var(--weight-semibold); color: var(--ui-text); }
+
+.page--adaptive-assist .bio-table__hr { font-size: var(--app-text-md-font-size); font-weight: var(--weight-semibold); }
+
+.page--adaptive-assist .bio-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: var(--space-6);
+  border-radius: 2px;
+  background: var(--swatch);
+  vertical-align: -1px;
+}
+
+.page--adaptive-assist .bio-panel__extras {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-8);
+}
+
+.page--adaptive-assist .bio-panel__extras > div {
+  padding: var(--space-6) var(--space-10);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+}
+
+.page--adaptive-assist .bio-panel__extras dt { color: var(--ui-muted); font-size: var(--app-text-xs-font-size); }
+
+.page--adaptive-assist .bio-panel__extras dd { margin: 0; font-family: var(--font-mono); font-weight: var(--weight-semibold); }
+
+.page--adaptive-assist .bio-panel__charts,
+.page--adaptive-assist .bio-panel__payloads {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--aa-gap);
+  padding: 0 var(--space-14) var(--space-14);
+}
+
+.page--adaptive-assist .bio-panel__payloads { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.page--adaptive-assist .bio-panel__charts .aa-legend { padding: 0 0 var(--space-6); }
+
+.page--adaptive-assist .bio-pulse { display: block; width: 100%; height: var(--space-192); }
+
+.page--adaptive-assist .bio-json {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: var(--space-10);
+  border-radius: var(--radius-md);
+  background: var(--code-surface);
+  color: var(--ui-text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 1023px) {
+  .page--adaptive-assist .bio-panel__grid,
+  .page--adaptive-assist .bio-panel__charts,
+  .page--adaptive-assist .bio-panel__payloads { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .page--adaptive-assist { --bio-dock-width: 200px; }
+  .page--adaptive-assist .aa-bio-toggle span { display: none; }
+  .page--adaptive-assist .bio-dock { right: var(--space-8); bottom: var(--space-8); padding: var(--space-8); }
+  .page--adaptive-assist .bio-dock__readings { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .page--adaptive-assist .bio-dock__hr { grid-column: 1 / -1; }
+  .page--adaptive-assist .bio-dock__note { display: none; }
+}
