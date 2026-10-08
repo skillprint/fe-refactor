@@ -2,7 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LiveApi, type Pairing } from './liveApi';
-import { emptyWatchState, WatchPoller, type WatchSample, type WatchState } from './watchFeed';
+import { WatchRtcLink } from './rtc';
+import { applyRtcReading, emptyWatchState, WatchPoller, type WatchSample, type WatchState } from './watchFeed';
+
+/** How readings are reaching the page right now. */
+export type WatchTransport = 'direct' | 'server';
+
+const POLL_MS = 2000;
+// While WebRTC carries the readings, the server is asked for status only, now and then.
+const STATUS_POLL_MS = 15000;
+const RETRY_BASE_MS = 5000;
+const RETRY_MAX_MS = 60000;
+// Measurement times already passed to onSample, so a reading that arrives over
+// both paths is recorded once. Bounded: an hour of one-a-second readings.
+const RECORDED_CAP = 3600;
 
 const STORAGE_KEY = 'aa-watch-session';
 
@@ -41,12 +54,19 @@ export type WatchSampleListener = (sample: WatchSample, state: WatchState) => vo
  * session on the marketplace API (`apiBase`), and calls `onSample` once for
  * every new heart-rate reading. Turning it off with `end()` closes the live
  * session; unmounting only stops polling, so a reload picks the pairing back up.
+ *
+ * Once a watch is paired, readings come straight from the iPhone app over a
+ * WebRTC data channel (the backend only brokers the handshake). Whenever that
+ * link is down, the page polls the backend, which the watch keeps uploading to,
+ * and keeps retrying the direct link.
  */
 export function useAppleWatch(enabled: boolean, apiBase: string, onSample?: WatchSampleListener) {
   const [state, setState] = useState<WatchState | null>(null);
   const [pairing, setPairing] = useState<Pairing | null>(null);
   const [setupError, setSetupError] = useState<string | null>(null);
   const [restartKey, setRestartKey] = useState(0);
+  const [transport, setTransport] = useState<WatchTransport>('server');
+  const [directIssue, setDirectIssue] = useState<string | null>(null);
   const sessionRef = useRef<StoredSession | null>(null);
   const sampleRef = useRef(onSample);
   useEffect(() => {
@@ -57,6 +77,8 @@ export function useAppleWatch(enabled: boolean, apiBase: string, onSample?: Watc
     if (!enabled) return;
     let cancelled = false;
     let poller: WatchPoller | null = null;
+    let link: WatchRtcLink | null = null;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
     const api = new LiveApi(apiBase);
     setSetupError(null);
     setState(emptyWatchState());
@@ -73,12 +95,28 @@ export function useAppleWatch(enabled: boolean, apiBase: string, onSample?: Watc
         sessionRef.current = session;
         setPairing(session.pairing);
         const { liveSessionId, viewerToken } = session;
+        const recorded = new Set<number>();
+        let direct = false;
+
+        const emit = (sample: WatchSample, current: WatchState) => {
+          if (recorded.has(sample.t)) return;
+          recorded.add(sample.t);
+          if (recorded.size > RECORDED_CAP) recorded.delete(recorded.values().next().value as number);
+          sampleRef.current?.(sample, current);
+        };
+        // The server's status can trail the direct link (or miss the watch entirely when
+        // the watch can't reach it); while readings flow directly, the watch is live.
+        const shown = (current: WatchState): WatchState =>
+          direct && current.status !== 'ended' ? { ...current, status: 'live', error: null } : current;
+
         poller = new WatchPoller({
-          fetchFeed: (cursor) => api.feed(liveSessionId, viewerToken, cursor),
+          fetchFeed: (cursor) => api.feed(liveSessionId, viewerToken, cursor, { samples: !direct }),
+          intervalMs: () => (direct ? STATUS_POLL_MS : POLL_MS),
           onUpdate: (next, added) => {
             if (cancelled) return;
-            setState(next);
-            for (const sample of added) sampleRef.current?.(sample, next);
+            setState(shown(next));
+            for (const sample of added) emit(sample, next);
+            if (next.paired && !link && retryTimer === null) startLink();
             // The live session ended (12 h), or the backend forgot it: start a new one.
             if ((next.status === 'error' || next.status === 'ended') && !poller?.running) {
               writeStored(null);
@@ -86,6 +124,47 @@ export function useAppleWatch(enabled: boolean, apiBase: string, onSample?: Watc
             }
           },
         });
+
+        let attempts = 0;
+        const startLink = () => {
+          if (cancelled || link || typeof RTCPeerConnection === 'undefined') return;
+          const current = new WatchRtcLink({
+            api,
+            liveSessionId,
+            viewerToken,
+            onStatus: (status, detail) => {
+              if (cancelled || link !== current) return;
+              if (status === 'connected') {
+                attempts = 0;
+                direct = true;
+                setTransport('direct');
+                setDirectIssue(null);
+              } else if (status === 'failed') {
+                direct = false;
+                link = null;
+                setTransport('server');
+                setDirectIssue(detail ?? null);
+                poller?.pollNow();
+                const delay = Math.min(RETRY_MAX_MS, RETRY_BASE_MS * 2 ** attempts++);
+                retryTimer = setTimeout(() => {
+                  retryTimer = null;
+                  startLink();
+                }, delay);
+              }
+            },
+            onReading: (reading) => {
+              if (cancelled || !poller) return;
+              const next = applyRtcReading(poller.state, reading);
+              if (!next) return;
+              poller.setState(next);
+              setState(shown(next));
+              const sample = next.samples.find((s) => s.t === reading.t);
+              if (sample) emit(sample, next);
+            },
+          });
+          link = current;
+          void current.connect();
+        };
         poller.start();
       } catch (e) {
         if (!cancelled) setSetupError(String((e as Error).message ?? e));
@@ -95,6 +174,9 @@ export function useAppleWatch(enabled: boolean, apiBase: string, onSample?: Watc
     return () => {
       cancelled = true;
       poller?.stop();
+      link?.close();
+      if (retryTimer !== null) clearTimeout(retryTimer);
+      setTransport('server');
     };
   }, [enabled, apiBase, restartKey]);
 
@@ -124,5 +206,5 @@ export function useAppleWatch(enabled: boolean, apiBase: string, onSample?: Watc
     }
   }, []);
 
-  return { state, pairing, setupError, newCode, end };
+  return { state, pairing, setupError, newCode, end, transport, directIssue };
 }

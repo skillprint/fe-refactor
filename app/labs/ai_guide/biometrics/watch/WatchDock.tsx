@@ -5,6 +5,7 @@ import { ConsoleIcon } from '@/components/LiveConsole/ConsoleIcon';
 import { fmt } from '../labels';
 import type { Pairing } from './liveApi';
 import { qrSVG } from './qr';
+import type { WatchTransport } from './useAppleWatch';
 import { WINDOW_MS, ZONES, type WatchState } from './watchFeed';
 
 type Tone = 'success' | 'warning' | 'danger' | 'neutral';
@@ -57,12 +58,16 @@ interface Props {
   readingsSent: number;
   /** The webcam's heart rate, when it's on and reading, to compare against. */
   cameraBpm: number | null;
+  /** Readings straight from the iPhone over WebRTC, or polled from the server. */
+  transport: WatchTransport;
+  /** Why the direct link isn't up, when it tried and failed. */
+  directIssue: string | null;
   onNewCode: () => void;
   onTurnOff: () => void;
 }
 
 /** Apple Watch heart rate: the pairing QR code until a watch claims it, then the readings. */
-export function WatchDock({ state, pairing, setupError, sessionOpen, readingsSent, cameraBpm, onNewCode, onTurnOff }: Props) {
+export function WatchDock({ state, pairing, setupError, sessionOpen, readingsSent, cameraBpm, transport, directIssue, onNewCode, onTurnOff }: Props) {
   const badge = watchBadge(state, setupError);
   const paired = Boolean(state?.paired);
   const [now, setNow] = useState(() => Date.now());
@@ -86,7 +91,9 @@ export function WatchDock({ state, pairing, setupError, sessionOpen, readingsSen
     ? message
     : !paired
       ? null
-      : sessionOpen
+      : transport === 'server' && directIssue
+        ? `No direct link to the iPhone: ${directIssue} Readings come via the server meanwhile.`
+        : sessionOpen
         ? `${readingsSent} ${readingsSent === 1 ? 'reading' : 'readings'} sent with the session as BIOMETRIC events.`
         : readingsSent > 0
           ? `${readingsSent} ${readingsSent === 1 ? 'reading was' : 'readings were'} sent with this session.`
@@ -134,7 +141,7 @@ export function WatchDock({ state, pairing, setupError, sessionOpen, readingsSen
               </dd>
               <dd className="bio-dock__hint">
                 {age === null ? 'Waiting for the first reading' : age < 60 ? `${age}s ago` : `${Math.floor(age / 60)}m ago`}
-                {state?.deviceNames.length ? ` · ${state.deviceNames.join(', ')}` : ''}
+                {transport === 'direct' ? ' · direct from iPhone' : ' · via server'}
               </dd>
             </div>
             <div>

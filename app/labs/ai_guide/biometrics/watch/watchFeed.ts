@@ -65,17 +65,24 @@ const round1 = (v: number) => Math.round(v * 10) / 10;
  * this response added (newest last), which become session events.
  */
 export function applyFeed(state: WatchState, feed: Feed): { state: WatchState; added: WatchSample[] } {
-  const known = new Set(state.samples.map((s) => s.id));
+  // The same reading can arrive twice, over WebRTC and then from the server, so
+  // samples are matched on when the watch measured them as well as by id.
+  const knownIds = new Set(state.samples.map((s) => s.id));
+  const knownTimes = new Set(state.samples.map((s) => s.t));
   const added = (feed.samples ?? [])
-    .filter((s) => !known.has(s.id) && s.id > state.cursor)
+    .filter((s) => !knownIds.has(s.id) && s.id > state.cursor)
     .map((s) => ({ id: s.id, t: Date.parse(s.t), bpm: s.bpm }))
-    .filter((s) => Number.isFinite(s.t))
+    .filter((s) => Number.isFinite(s.t) && !knownTimes.has(s.t))
     .sort((a, b) => a.t - b.t);
   const samples = state.samples.concat(added).sort((a, b) => a.t - b.t);
   const newest = samples.length ? samples[samples.length - 1].t : 0;
 
-  const bpm = feed.latest?.bpm ?? null;
-  const baselineBpm = feed.baselineBpm ?? null;
+  // A direct (WebRTC) reading can be newer than the server's latest; keep the newer.
+  const feedLatestT = feed.latest ? Date.parse(feed.latest.t) : null;
+  const keepOwn = state.sampledAt !== null && (feedLatestT === null || state.sampledAt > feedLatestT);
+  const bpm = keepOwn ? state.bpm : feed.latest?.bpm ?? null;
+  const sampledAt = keepOwn ? state.sampledAt : feedLatestT;
+  const baselineBpm = feed.baselineBpm ?? state.baselineBpm;
   const deltaBpm = bpm !== null && baselineBpm !== null ? round1(bpm - baselineBpm) : null;
 
   let status: WatchStatus = 'waiting';
@@ -89,7 +96,7 @@ export function applyFeed(state: WatchState, feed: Feed): { state: WatchState; a
       paired: Boolean(feed.paired),
       deviceNames: (feed.devices ?? []).map((d) => d.name || 'Apple Watch'),
       bpm,
-      sampledAt: feed.latest ? Date.parse(feed.latest.t) : null,
+      sampledAt,
       baselineBpm,
       deltaBpm,
       zone: zoneFor(deltaBpm),
@@ -98,6 +105,34 @@ export function applyFeed(state: WatchState, feed: Feed): { state: WatchState; a
       error: null,
     },
     added,
+  };
+}
+
+/**
+ * Folds one reading from the WebRTC link into `state`. Returns null for a reading
+ * already held (the same measurement time), so it isn't recorded twice.
+ */
+export function applyRtcReading(state: WatchState, reading: { t: number; bpm: number; rest: number | null }): WatchState | null {
+  if (state.samples.some((s) => s.t === reading.t)) return null;
+  const sample: WatchSample = { id: -reading.t, t: reading.t, bpm: reading.bpm };
+  const samples = state.samples.concat(sample).sort((a, b) => a.t - b.t);
+  const newest = samples[samples.length - 1].t;
+  const isNewest = state.sampledAt === null || reading.t >= state.sampledAt;
+  // The server's baseline (also used for chunk backfill) wins; the phone's fills in until it arrives.
+  const baselineBpm = state.baselineBpm ?? reading.rest;
+  const bpm = isNewest ? reading.bpm : state.bpm;
+  const deltaBpm = bpm !== null && baselineBpm !== null ? round1(bpm - baselineBpm) : null;
+  return {
+    ...state,
+    status: 'live',
+    paired: true,
+    bpm,
+    sampledAt: isNewest ? reading.t : state.sampledAt,
+    baselineBpm,
+    deltaBpm,
+    zone: zoneFor(deltaBpm),
+    samples: samples.filter((s) => s.t >= newest - WINDOW_MS),
+    error: null,
   };
 }
 
@@ -156,7 +191,8 @@ export function watchEvent(sample: WatchSample, baselineBpm: number | null): Rec
 export interface WatchPollerOptions {
   fetchFeed: (cursor: number) => Promise<Feed>;
   onUpdate: (state: WatchState, added: WatchSample[]) => void;
-  intervalMs?: number;
+  /** A number, or a function so the page can poll slower while WebRTC carries the readings. */
+  intervalMs?: number | (() => number);
   maxBackoffMs?: number;
   // Wrapped, never stored bare: browsers throw "Illegal invocation" when
   // setTimeout is called as a method of something other than the window.
@@ -183,6 +219,19 @@ export class WatchPoller {
     void this.tick(++this.generation);
   }
 
+  /** Replaces the state (e.g. after a WebRTC reading) so the next poll builds on it. */
+  setState(state: WatchState) {
+    this.state = state;
+  }
+
+  /** Polls now instead of waiting out the current interval (e.g. when WebRTC drops). */
+  pollNow() {
+    if (!this.running) return;
+    if (this.timer !== null) (this.opts.clearTimer ?? ((id) => clearTimeout(id)))(this.timer);
+    this.timer = null;
+    void this.tick(++this.generation);
+  }
+
   stop() {
     this.running = false;
     this.generation += 1;
@@ -195,7 +244,8 @@ export class WatchPoller {
 
   private async tick(generation: number) {
     if (!this.running || generation !== this.generation) return;
-    const interval = this.opts.intervalMs ?? 2000;
+    const configured = this.opts.intervalMs ?? 2000;
+    const interval = typeof configured === 'function' ? configured() : configured;
     let delay = interval;
     let added: WatchSample[] = [];
     try {

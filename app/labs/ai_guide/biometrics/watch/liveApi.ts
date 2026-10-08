@@ -50,6 +50,19 @@ export interface Feed {
   cursor: number;
 }
 
+export interface IceServer {
+  urls: string[];
+  username?: string;
+  credential?: string;
+}
+
+export interface RtcAnswer {
+  offerId: string;
+  status: 'pending' | 'answered' | 'expired';
+  sdp?: string;
+  deviceName?: string;
+}
+
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
 export class LiveApi {
@@ -94,8 +107,27 @@ export class LiveApi {
     return this.request('POST', 'live/', { body: { label } });
   }
 
-  feed(liveSessionId: string, token: string, after = 0): Promise<Feed> {
-    return this.request('GET', `live/${liveSessionId}/${after ? `?after=${after}` : ''}`, { token });
+  /** `samples: false` asks for status only, for when readings arrive over WebRTC instead. */
+  feed(liveSessionId: string, token: string, after = 0, { samples = true }: { samples?: boolean } = {}): Promise<Feed> {
+    const query = new URLSearchParams();
+    if (after) query.set('after', String(after));
+    if (!samples) query.set('samples', '0');
+    const qs = query.toString();
+    return this.request('GET', `live/${liveSessionId}/${qs ? `?${qs}` : ''}`, { token });
+  }
+
+  // ── WebRTC handshake: the backend only passes the two descriptions along ──
+
+  rtcConfig(liveSessionId: string, token: string): Promise<{ iceServers: IceServer[] }> {
+    return this.request('GET', `live/${liveSessionId}/rtc/config/`, { token });
+  }
+
+  postOffer(liveSessionId: string, token: string, sdp: string): Promise<{ offerId: string; expiresAt: string }> {
+    return this.request('POST', `live/${liveSessionId}/rtc/offer/`, { token, body: { sdp } });
+  }
+
+  getAnswer(liveSessionId: string, token: string, offerId: string): Promise<RtcAnswer> {
+    return this.request('GET', `live/${liveSessionId}/rtc/answer/?offer_id=${encodeURIComponent(offerId)}`, { token });
   }
 
   newPairing(liveSessionId: string, token: string): Promise<Pairing> {
