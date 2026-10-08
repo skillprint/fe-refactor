@@ -83,6 +83,11 @@ export default function AiGuideClient() {
   // ?bio_src=/path.webm reads a same-origin video instead of the camera (repeatable runs).
   const bioSourceQuery = searchParams.get('bio_src');
   const bioSource = bioSourceQuery?.startsWith('/') ? bioSourceQuery : null;
+  // The biometrics features (webcam and Apple Watch) are only offered with
+  // ?biometrics=1 (or true). Without it the nav has no buttons for them, and
+  // ?bio= / ?watch= can't switch them on with nothing on screen to turn them off.
+  const biometricsQuery = searchParams.get('biometrics')?.toLowerCase();
+  const biometricsEnabled = biometricsQuery === '1' || biometricsQuery === 'true';
   // ?watch_api=http://host:port/ pairs the Apple Watch through another marketplace API (e.g. a local one).
   const watchApiQuery = searchParams.get('watch_api');
   const watchApiBase = watchApiQuery && /^https?:\/\//.test(watchApiQuery) ? watchApiQuery : getApiBaseUrl();
@@ -114,11 +119,11 @@ export default function AiGuideClient() {
   const [keyShown, setKeyShown] = useState(false);
   const [gameLoaded, setGameLoaded] = useState(false);
   const [flash, setFlash] = useState(false);
-  const [bioOn, setBioOn] = useState(() => searchParams.get('bio') === '1');
+  const [bioOn, setBioOn] = useState(() => biometricsEnabled && searchParams.get('bio') === '1');
   const [bioExpanded, setBioExpanded] = useState(false);
   const [bioSent, setBioSent] = useState(0);
   const [bioLastSent, setBioLastSent] = useState<Record<string, unknown> | null>(null);
-  const [watchOn, setWatchOn] = useState(() => searchParams.get('watch') === '1');
+  const [watchOn, setWatchOn] = useState(() => biometricsEnabled && searchParams.get('watch') === '1');
   const [watchSent, setWatchSent] = useState(0);
 
   const sessionEndedRef = useRef(false);
@@ -612,24 +617,28 @@ export default function AiGuideClient() {
               <span className="ui-badge__dot" aria-hidden="true" />
               <span>{live.label}</span>
             </span>
-            <button
-              className={bioOn ? 'button button--primary button--sm aa-bio-toggle' : 'button button--secondary button--sm aa-bio-toggle'}
-              type="button"
-              onClick={toggleBiometrics}
-              aria-pressed={bioOn}
-              title={bioOn ? 'Turn biometrics off and release the camera' : 'Read heart rate and more from your camera, and send it with the session'}
-            >
-              <ConsoleIcon name="camera" /><span>Biometrics</span>
-            </button>
-            <button
-              className={watchOn ? 'button button--primary button--sm aa-bio-toggle' : 'button button--secondary button--sm aa-bio-toggle'}
-              type="button"
-              onClick={toggleWatch}
-              aria-pressed={watchOn}
-              title={watchOn ? 'Stop following the Apple Watch' : 'Pair an Apple Watch and send its heart rate with the session'}
-            >
-              <ConsoleIcon name="watch" /><span>Apple Watch</span>
-            </button>
+            {biometricsEnabled && (
+              <>
+                <button
+                  className={bioOn ? 'button button--primary button--sm aa-bio-toggle' : 'button button--secondary button--sm aa-bio-toggle'}
+                  type="button"
+                  onClick={toggleBiometrics}
+                  aria-pressed={bioOn}
+                  title={bioOn ? 'Turn biometrics off and release the camera' : 'Read heart rate and more from your camera, and send it with the session'}
+                >
+                  <ConsoleIcon name="camera" /><span>Biometrics</span>
+                </button>
+                <button
+                  className={watchOn ? 'button button--primary button--sm aa-bio-toggle' : 'button button--secondary button--sm aa-bio-toggle'}
+                  type="button"
+                  onClick={toggleWatch}
+                  aria-pressed={watchOn}
+                  title={watchOn ? 'Stop following the Apple Watch' : 'Pair an Apple Watch and send its heart rate with the session'}
+                >
+                  <ConsoleIcon name="watch" /><span>Apple Watch</span>
+                </button>
+              </>
+            )}
             <button className="icon-button" type="button" onClick={toggleTheme} aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'} title="Toggle colour mode">
               <ConsoleIcon name={isLight ? 'moon' : 'sun'} />
             </button>
@@ -1067,6 +1076,8 @@ export default function AiGuideClient() {
               sessionOpen={sessionStatus === 'Open'}
               readingsSent={watchSent}
               cameraBpm={bioOn ? bio.snapshot?.signals?.heart_rate_bpm ?? null : null}
+              transport={watch.transport}
+              directIssue={watch.directIssue}
               onNewCode={watch.newCode}
               onTurnOff={toggleWatch}
             />
