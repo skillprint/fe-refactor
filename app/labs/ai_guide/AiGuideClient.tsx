@@ -27,6 +27,9 @@ import { useBiometrics } from './biometrics/useBiometrics';
 import { BiometricsDock } from './biometrics/BiometricsDock';
 import { BiometricsPanel } from './biometrics/BiometricsPanel';
 import { BIOMETRIC_BASELINE_EVENT, BIOMETRIC_EVENT } from './biometrics/engine/signals';
+import { useAppleWatch, type WatchSampleListener } from './biometrics/watch/useAppleWatch';
+import { WatchDock } from './biometrics/watch/WatchDock';
+import { watchEvent } from './biometrics/watch/watchFeed';
 
 const getApiKey = () => process.env.NEXT_PUBLIC_API_KEY || 'test-api-key';
 
@@ -80,6 +83,9 @@ export default function AiGuideClient() {
   // ?bio_src=/path.webm reads a same-origin video instead of the camera (repeatable runs).
   const bioSourceQuery = searchParams.get('bio_src');
   const bioSource = bioSourceQuery?.startsWith('/') ? bioSourceQuery : null;
+  // ?watch_api=http://host:port/ pairs the Apple Watch through another marketplace API (e.g. a local one).
+  const watchApiQuery = searchParams.get('watch_api');
+  const watchApiBase = watchApiQuery && /^https?:\/\//.test(watchApiQuery) ? watchApiQuery : getApiBaseUrl();
 
   const [selectedGame, setSelectedGame] = useState(gameQuery || 'hextris');
   const [selectedMood, setSelectedMood] = useState<string>(moodQuery || Mood.FOCUS);
@@ -112,6 +118,8 @@ export default function AiGuideClient() {
   const [bioExpanded, setBioExpanded] = useState(false);
   const [bioSent, setBioSent] = useState(0);
   const [bioLastSent, setBioLastSent] = useState<Record<string, unknown> | null>(null);
+  const [watchOn, setWatchOn] = useState(() => searchParams.get('watch') === '1');
+  const [watchSent, setWatchSent] = useState(0);
 
   const sessionEndedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -121,6 +129,9 @@ export default function AiGuideClient() {
   const sessionStartedRef = useRef(false);
   const sessionFailedRef = useRef(false);
   const bioSentRef = useRef(0);
+  const watchSentRef = useRef(0);
+  // When this run's session clock started (epoch ms), so watch readings from before it stay out.
+  const sessionStartEpochRef = useRef<number | null>(null);
 
   const game = GAMES.find(g => g.slug === selectedGame) || GAMES[0];
   // Canonical catalog slug for the selected game; the ref feeds the message handler closure.
@@ -158,6 +169,27 @@ export default function AiGuideClient() {
     setBioOn(!bioOn);
   };
 
+  // Apple Watch: every new reading becomes a BIOMETRIC event (src "apple_watch")
+  // on the session timeline at the time the watch measured it, next to the
+  // webcam's, so both ride the screenshot uploads into Session.telemetry.
+  const handleWatchSample = useCallback<WatchSampleListener>((sample, state) => {
+    const client = clientRef.current;
+    const startedAt = sessionStartEpochRef.current;
+    if (!client || !sessionStartedRef.current || sessionEndedRef.current || startedAt === null) return;
+    if (sample.t < startedAt) return; // backlog from before play started
+    client.recordEvent(BIOMETRIC_EVENT, watchEvent(sample, state.baselineBpm), sample.t);
+    if (watchSentRef.current === 0) addLog('Apple Watch readings are going out with the session as BIOMETRIC events.', 'success');
+    watchSentRef.current += 1;
+    setWatchSent(watchSentRef.current);
+  }, [addLog]);
+
+  const watch = useAppleWatch(watchOn, watchApiBase, handleWatchSample);
+
+  const toggleWatch = () => {
+    if (watchOn) void watch.end();
+    setWatchOn(!watchOn);
+  };
+
   // Sync state to URL
   useEffect(() => {
     const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
@@ -175,10 +207,15 @@ export default function AiGuideClient() {
       else currentParams.delete('bio');
       changed = true;
     }
+    if ((currentParams.get('watch') === '1') !== watchOn) {
+      if (watchOn) currentParams.set('watch', '1');
+      else currentParams.delete('watch');
+      changed = true;
+    }
     if (changed) {
       router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
     }
-  }, [selectedGame, selectedMood, bioOn, pathname, router, searchParams]);
+  }, [selectedGame, selectedMood, bioOn, watchOn, pathname, router, searchParams]);
 
   // Initialise the SDK and a fresh session id for every run
   useEffect(() => {
@@ -201,6 +238,9 @@ export default function AiGuideClient() {
     setBioSent(0);
     setBioLastSent(null);
     bioSentRef.current = 0;
+    setWatchSent(0);
+    watchSentRef.current = 0;
+    sessionStartEpochRef.current = null;
     sessionEndedRef.current = false;
     processedAdjustmentsRef.current.clear();
     shouldPollRef.current = false;
@@ -359,6 +399,7 @@ export default function AiGuideClient() {
 
       if (isGameStart && !sessionStartedRef.current && !sessionFailedRef.current && clientRef.current && sessionId) {
         sessionStartedRef.current = true;
+        sessionStartEpochRef.current = epochNow();
         setIsSessionStarted(true);
         setStartedAt(Date.now());
         try {
@@ -579,6 +620,15 @@ export default function AiGuideClient() {
               title={bioOn ? 'Turn biometrics off and release the camera' : 'Read heart rate and more from your camera, and send it with the session'}
             >
               <ConsoleIcon name="camera" /><span>Biometrics</span>
+            </button>
+            <button
+              className={watchOn ? 'button button--primary button--sm aa-bio-toggle' : 'button button--secondary button--sm aa-bio-toggle'}
+              type="button"
+              onClick={toggleWatch}
+              aria-pressed={watchOn}
+              title={watchOn ? 'Stop following the Apple Watch' : 'Pair an Apple Watch and send its heart rate with the session'}
+            >
+              <ConsoleIcon name="watch" /><span>Apple Watch</span>
             </button>
             <button className="icon-button" type="button" onClick={toggleTheme} aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'} title="Toggle colour mode">
               <ConsoleIcon name={isLight ? 'moon' : 'sun'} />
@@ -1006,20 +1056,37 @@ export default function AiGuideClient() {
         </div>
       </main>
 
-      {bioOn && (
-        <BiometricsDock
-          snapshot={bio.snapshot}
-          engine={bio.engine}
-          loadError={bio.loadError}
-          sessionOpen={sessionStatus === 'Open'}
-          readingsSent={bioSent}
-          expanded={bioExpanded}
-          onToggleExpanded={() => {
-            setBioExpanded(v => !v);
-            if (!bioExpanded) requestAnimationFrame(() => document.getElementById('biometricsPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-          }}
-          onTurnOff={toggleBiometrics}
-        />
+      {(bioOn || watchOn) && (
+        // Stacked bottom-right: the watch above the camera when both are on.
+        <div className="bio-docks">
+          {watchOn && (
+            <WatchDock
+              state={watch.state}
+              pairing={watch.pairing}
+              setupError={watch.setupError}
+              sessionOpen={sessionStatus === 'Open'}
+              readingsSent={watchSent}
+              cameraBpm={bioOn ? bio.snapshot?.signals?.heart_rate_bpm ?? null : null}
+              onNewCode={watch.newCode}
+              onTurnOff={toggleWatch}
+            />
+          )}
+          {bioOn && (
+            <BiometricsDock
+              snapshot={bio.snapshot}
+              engine={bio.engine}
+              loadError={bio.loadError}
+              sessionOpen={sessionStatus === 'Open'}
+              readingsSent={bioSent}
+              expanded={bioExpanded}
+              onToggleExpanded={() => {
+                setBioExpanded(v => !v);
+                if (!bioExpanded) requestAnimationFrame(() => document.getElementById('biometricsPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+              }}
+              onTurnOff={toggleBiometrics}
+            />
+          )}
+        </div>
       )}
 
       <footer className="aa-foot">
