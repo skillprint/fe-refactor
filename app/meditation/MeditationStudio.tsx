@@ -59,7 +59,7 @@ type GeneratorState = 'checking' | 'online' | 'offline';
 
 export default function MeditationStudio() {
   const { userToken } = useUserSession();
-  const { completeGoogleSignIn } = useAuth();
+  const { completeGoogleSignIn, status: authStatus } = useAuth();
   /** Authoring is for verified skillprint.co staff; the backend decides, the library call tells us. */
   const [access, setAccess] = useState<'checking' | 'author' | 'denied'>('checking');
   const [signInError, setSignInError] = useState<string | null>(null);
@@ -278,10 +278,18 @@ export default function MeditationStudio() {
         {access === 'denied' && (
           <section className="med-card" aria-labelledby="med-gate-heading">
             <h2 id="med-gate-heading">For Skillprint staff</h2>
-            <p className="med-hint">
-              Creating meditations is limited to Skillprint staff. Sign in with your verified skillprint.co Google
-              account to continue.
-            </p>
+            {authStatus === 'social' ? (
+              // Signing in again with the same account would only reload into this screen.
+              <p className="med-hint">
+                You&apos;re signed in, but this account isn&apos;t recognised as Skillprint staff. Use the Google
+                account for your skillprint.co address. If you already did, ask an admin to check your access.
+              </p>
+            ) : (
+              <p className="med-hint">
+                Creating meditations is limited to Skillprint staff. Sign in with your verified skillprint.co Google
+                account to continue.
+              </p>
+            )}
             <div>
               <GoogleLogin
                 onSuccess={async ({ credential }) => {
@@ -294,7 +302,7 @@ export default function MeditationStudio() {
                   }
                 }}
                 onError={() => setSignInError("Google sign-in didn't complete. Try again.")}
-                text="signin_with"
+                text={authStatus === 'social' ? 'continue_with' : 'signin_with'}
                 theme="filled_black"
                 shape="pill"
               />
