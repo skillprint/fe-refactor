@@ -162,6 +162,7 @@ export default function MeditationPlayer({ id }: { id: string }) {
           <div className="med-topbar">
             <Link href="/meditation">← Studio</Link>
             <span>{meditation?.title}</span>
+            <Link href={`/meditation/breathe/?id=${id}`}>Breathe with sensors</Link>
           </div>
 
           <div className="med-controls">
