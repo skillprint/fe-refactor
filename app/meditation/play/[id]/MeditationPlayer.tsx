@@ -140,6 +140,13 @@ export default function MeditationPlayer({ id }: { id: string }) {
           <h1>{meditation.title}</h1>
           {meditation.description && <p>{meditation.description}</p>}
           <p>{meditation.voiceName} · {formatDuration(duration)}</p>
+          {meditation.config?.voice?.attribution && (
+            // Open voices are CC BY: the credit travels with every meditation that uses one.
+            <p style={{ fontSize: 12 }}>
+              Voice: {meditation.config.voice.attribution}
+              {meditation.config.voice.license ? ` · ${meditation.config.voice.license}` : ''}
+            </p>
+          )}
           <button type="button" className="med-begin" onClick={begin} autoFocus>Begin</button>
           <p style={{ fontSize: 13 }}>Headphones recommended · space to pause · f for full screen</p>
         </div>

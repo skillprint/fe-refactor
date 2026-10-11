@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useUserSession } from '../hooks/useUserSession';
 import { googlePicture, signInWithGoogle } from '../../lib/models/portal/googleSignIn';
 import {
-  generator, GENERATOR_URL, GeneratorError, Job, Pacing, RenderResult, Voice, VoiceCatalog, waitForJob,
+  generator, GENERATOR_URL, GeneratorError, Job, Pacing, pickableVoices, RenderResult, Voice, VoiceCatalog, waitForJob,
 } from '../../lib/models/meditation/generator';
 import {
   DEFAULT_VISUAL, Meditation, meditationApi, MeditationApiError, PaletteName, VisualSettings, VisualStyle, visualSettings,
@@ -71,7 +71,7 @@ export default function MeditationStudio() {
   const [title, setTitle] = useState('Evening wind-down');
   const [description, setDescription] = useState('');
   const [script, setScript] = useState(SAMPLE_SCRIPT);
-  const [voiceId, setVoiceId] = useState('ryan');
+  const [voiceId, setVoiceId] = useState('');
   const [language, setLanguage] = useState('English');
   const [tempo, setTempo] = useState(0.92);
   const [pacing, setPacing] = useState<Pacing>(DEFAULT_PACING);
@@ -150,15 +150,15 @@ export default function MeditationStudio() {
     };
   }, [refreshCatalog]);
 
-  const allVoices = catalog ? [...catalog.cloned, ...catalog.presets] : [];
-  const selectedVoice = allVoices.find((v) => v.id === voiceId);
+  const voices = pickableVoices(catalog);
+  const selectedVoice = voices.find((v) => v.id === voiceId);
   const online = generatorState === 'online';
 
-  // A draft can name a voice that has since been deleted from the generator.
+  // No choice yet, or a draft names a voice that was deleted or is now hidden: take the first
+  // offered voice, which is the best meditation voice the generator has.
   useEffect(() => {
-    if (catalog && !selectedVoice && catalog.presets.length) {
-      setVoiceId((catalog.presets.find((v) => v.id === 'ryan') ?? catalog.presets[0]).id);
-    }
+    const first = pickableVoices(catalog).find((v) => v.status === 'READY');
+    if (first && !selectedVoice) setVoiceId(first.id);
   }, [catalog, selectedVoice]);
 
   // ---- library ----
@@ -369,6 +369,12 @@ export default function MeditationStudio() {
                   <h2 id="med-result-heading">Rendered · {formatDuration(duration)}</h2>
                   <span className="med-hint">{rendered.config.voice.name}</span>
                 </div>
+                {rendered.config.voice.attribution && (
+                  <p className="med-hint">
+                    Voice: {rendered.config.voice.attribution}
+                    {rendered.config.voice.license ? ` · ${rendered.config.voice.license}` : ''}
+                  </p>
+                )}
                 <audio ref={audioRef} className="med-audio" src={generator.fileUrl(rendered.audioUrl)} controls
                   onPlay={() => setPreviewPlaying(true)} onPause={() => setPreviewPlaying(false)} />
                 <div className="med-timeline" aria-label="Speech and pause timeline">

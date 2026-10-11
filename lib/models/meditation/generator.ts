@@ -22,12 +22,29 @@ export interface Voice {
   referenceUrl?: string;
   referenceSeconds?: number | null;
   mode?: 'icl' | 'xvector';
+  /** `qwen`: a Qwen3-TTS preset; `library`: a bundled open voice; `upload`: trained from recordings. */
+  source?: 'qwen' | 'library' | 'upload';
+  accent?: string | null;
+  /** Presets that aren't native English speakers: still renderable, left out of the picker. */
+  hidden?: boolean;
+  license?: string;
+  /** Credit the license requires wherever the voice is used. */
+  attribution?: string;
+  sourceUrl?: string;
 }
 
 export interface VoiceCatalog {
   presets: Voice[];
+  /** Openly licensed voices bundled with the generator. Older generators don't send it. */
+  library?: Voice[];
   cloned: Voice[];
   languages: string[];
+}
+
+/** The voices the studio offers, best for meditation first. Hidden presets stay out. */
+export function pickableVoices(catalog: VoiceCatalog | null): Voice[] {
+  if (!catalog) return [];
+  return [...(catalog.library ?? []), ...catalog.cloned, ...catalog.presets.filter((v) => !v.hidden)];
 }
 
 export interface TimelineSegment {
@@ -42,7 +59,7 @@ export interface GeneratorConfig {
   durationSeconds: number;
   language: string;
   tempo: number;
-  voice: { id: string; name: string; kind: VoiceKind };
+  voice: { id: string; name: string; kind: VoiceKind; source?: string; license?: string; attribution?: string };
   segments: TimelineSegment[];
   [key: string]: unknown;
 }
