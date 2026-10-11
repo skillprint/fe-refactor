@@ -65,6 +65,18 @@ interface Props {
   segments?: TimelineSegment[];
   playing?: boolean;
   className?: string;
+  /** Heart rate (bpm): the glow pulses faintly with it. */
+  heartRate?: number | null;
+  /** Written every frame: where the breath is (0..1) and whether it's the in-breath. */
+  breathRef?: { current: BreathState | null };
+  /** Called as each breath completes; may return the next breath's length in seconds. */
+  onBreath?: () => number | void;
+}
+
+export interface BreathState {
+  level: number;
+  inhaling: boolean;
+  cycleSeconds: number;
 }
 
 /**
@@ -72,10 +84,12 @@ interface Props {
  * Motion follows a breathing cycle, and swells gently while the voice is speaking
  * (from the generator's timeline, so it works for any audio host without CORS).
  */
-export default function MeditationVisual({ settings, getTime, segments, playing = true, className }: Props) {
+export default function MeditationVisual({
+  settings, getTime, segments, playing = true, className, heartRate, breathRef, onBreath,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const live = useRef({ settings, getTime, segments, playing });
-  live.current = { settings, getTime, segments, playing };
+  const live = useRef({ settings, getTime, segments, playing, heartRate, breathRef, onBreath });
+  live.current = { settings, getTime, segments, playing, heartRate, breathRef, onBreath };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -99,6 +113,11 @@ export default function MeditationVisual({ settings, getTime, segments, playing 
     observer.observe(canvas);
 
     let clock = 0; // scene time: runs at full speed while playing, drifts slowly when paused
+    // Breaths so far, accumulated so a cycle length that changes mid-session (the biofeedback
+    // pacer, the studio slider) slows or quickens the breath without a jump.
+    let breaths = 0;
+    let cycle = 0;
+    let heartbeats = 0;
     let energy = 0; // eased 0..1, how much the voice is speaking
     let last = performance.now();
     let frame = 0;
@@ -115,7 +134,26 @@ export default function MeditationVisual({ settings, getTime, segments, playing 
       energy += (speaking - energy) * Math.min(1, dt * (speaking ? 2.5 : 0.8));
 
       const palette = PALETTES[s.palette] ?? PALETTES.dusk;
-      const breath = breathLevel(clock, Math.max(4, s.breathSeconds));
+      if (!cycle) cycle = Math.max(4, s.breathSeconds);
+      const before = Math.floor(breaths);
+      breaths += (dt * speed) / cycle;
+      if (Math.floor(breaths) > before) {
+        const next = live.current.onBreath?.();
+        cycle = Math.max(4, typeof next === 'number' ? next : s.breathSeconds);
+      }
+      const breathPhase = breaths - Math.floor(breaths);
+      const breath = 0.5 - 0.5 * Math.cos(breathPhase * Math.PI * 2);
+      if (live.current.breathRef) {
+        live.current.breathRef.current = { level: breath, inhaling: breathPhase < 0.5, cycleSeconds: cycle };
+      }
+      // A soft beat: a quick rise and slow fall once per heartbeat, only when a rate is known.
+      const bpm = live.current.heartRate;
+      let pulse = 0;
+      if (bpm && bpm > 30 && bpm < 200) {
+        heartbeats += (dt * bpm) / 60;
+        const beat = heartbeats - Math.floor(heartbeats);
+        pulse = Math.exp(-beat * 7) * (reduced ? 0.4 : 1);
+      }
       const minSide = Math.min(width, height);
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -128,7 +166,7 @@ export default function MeditationVisual({ settings, getTime, segments, playing 
       // Soft central glow that breathes.
       const glowR = minSide * (0.45 + 0.15 * breath);
       const glow = ctx.createRadialGradient(width / 2, height * 0.45, 0, width / 2, height * 0.45, glowR);
-      glow.addColorStop(0, withAlpha(palette.glow, 0.18 + 0.12 * breath));
+      glow.addColorStop(0, withAlpha(palette.glow, 0.18 + 0.12 * breath + 0.06 * pulse));
       glow.addColorStop(1, withAlpha(palette.glow, 0));
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, width, height);
@@ -144,7 +182,7 @@ export default function MeditationVisual({ settings, getTime, segments, playing 
       }
 
       ctx.globalCompositeOperation = 'screen';
-      if (s.style === 'orb') drawOrb(ctx, width, height, minSide, clock, breath, energy, palette, s.breathSeconds);
+      if (s.style === 'orb') drawOrb(ctx, width, height, minSide, breaths, breath, energy + 0.5 * pulse, palette);
       if (s.style === 'aurora') drawAurora(ctx, width, height, clock, breath, energy, palette);
       ctx.globalCompositeOperation = 'source-over';
       drawWaves(ctx, width, height, clock, breath, energy, palette, s.style === 'waves' ? 1 : 0.45);
@@ -199,17 +237,16 @@ function drawWaves(
 }
 
 function drawOrb(
-  ctx: CanvasRenderingContext2D, width: number, height: number, minSide: number, t: number, breath: number,
-  energy: number, palette: Palette, breathSeconds: number,
+  ctx: CanvasRenderingContext2D, width: number, height: number, minSide: number, breaths: number, breath: number,
+  energy: number, palette: Palette,
 ) {
   const cx = width / 2;
   const cy = height * 0.42;
   const r = minSide * (0.13 + 0.07 * breath) * (1 + 0.04 * energy);
 
   // Rings released once per breath, expanding and fading.
-  const cycle = Math.max(4, breathSeconds);
   for (let n = 0; n < 4; n++) {
-    const age = (((t / cycle - n * 0.25) % 1) + 1) % 1;
+    const age = (((breaths - n * 0.25) % 1) + 1) % 1;
     const ringR = r * (1.1 + age * 2.6);
     ctx.strokeStyle = withAlpha(palette.waves[n % palette.waves.length], 0.35 * (1 - age));
     ctx.lineWidth = 1.5;
