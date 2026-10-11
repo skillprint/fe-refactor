@@ -15,6 +15,9 @@ interface Props {
 }
 
 function voiceMeta(voice: Voice): string {
+  if (voice.source === 'library') {
+    return [voice.gender, voice.description, voice.license].filter(Boolean).join(' · ');
+  }
   if (voice.kind === 'cloned') {
     if (voice.status === 'PROCESSING') return 'Training…';
     if (voice.status === 'FAILED') return voice.error || 'Training failed';
@@ -87,9 +90,15 @@ export default function VoicePanel({ catalog, online, selectedId, onSelect, onCa
           <span className="med-voice-name">{voice.name}</span>
           <br />
           <span className="med-voice-meta">{voiceMeta(voice)}</span>
+          {voice.attribution && (
+            <>
+              <br />
+              <span className="med-voice-meta">{voice.attribution}</span>
+            </>
+          )}
         </span>
       </button>
-      {voice.kind === 'cloned' && (
+      {voice.kind === 'cloned' && voice.source !== 'library' && (
         <button type="button" className="med-btn med-btn--ghost med-btn--small med-btn--danger" onClick={() => removeVoice(voice)}
           aria-label={`Delete ${voice.name}`}>
           ✕
@@ -110,10 +119,12 @@ export default function VoicePanel({ catalog, online, selectedId, onSelect, onCa
 
       {catalog ? (
         <div className="med-voices">
+          {!!catalog.library?.length && <div className="med-voice-group">Open voices for meditation</div>}
+          {catalog.library?.map(renderVoice)}
           {catalog.cloned.length > 0 && <div className="med-voice-group">Your voices</div>}
           {catalog.cloned.map(renderVoice)}
-          <div className="med-voice-group">Open-source voices (Qwen3-TTS)</div>
-          {catalog.presets.map(renderVoice)}
+          <div className="med-voice-group">Built-in voices (Qwen3-TTS)</div>
+          {catalog.presets.filter((v) => !v.hidden).map(renderVoice)}
         </div>
       ) : (
         <p className="med-hint">{online ? 'Loading voices…' : 'Voices load once the generator is running.'}</p>
