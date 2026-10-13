@@ -20,7 +20,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             // `/meditation/play/<id>` is a shareable player: the id is the capability.
             // `/meditation/breathe` needs no account: camera analysis runs on the device and
             // Apple Watch live sessions are created without signing in.
-            const isPublicRoute = pathname === '/' || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/benchmark') || pathname.startsWith('/coach') || pathname.startsWith('/start') || pathname.startsWith('/guide') || pathname.startsWith('/meditation/play') || pathname.startsWith('/meditation/breathe');
+            // `/asu` is the ReMix event station: it signs a guest in on its own.
+            const isPublicRoute = pathname === '/' || pathname.startsWith('/asu') || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/benchmark') || pathname.startsWith('/coach') || pathname.startsWith('/start') || pathname.startsWith('/guide') || pathname.startsWith('/meditation/play') || pathname.startsWith('/meditation/breathe');
             const isEmbedded = typeof window !== 'undefined' && window.self !== window.top;
 
             if (status === 'loggedOut' && !isPublicRoute && !isEmbedded) {

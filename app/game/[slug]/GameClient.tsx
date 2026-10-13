@@ -6,7 +6,7 @@ import { useUserSession } from '../../hooks/useUserSession';
 import PlayStage from '../../../components/GameSession/PlayStage';
 import SessionVeil from '../../../components/GameSession/SessionVeil';
 import PlayBar from '../../../components/GameSession/PlayBar';
-import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome } from '../../../components/GameSession/GameResultDialog';
+import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome, type GameResultDialogProps } from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
@@ -25,9 +25,16 @@ import { sessionAttribution } from '@/lib/emailLinks';
 /** Minimum time between batches of difficulty changes sent to the game. */
 const ADJUSTMENT_COOLDOWN_MS = 30000;
 
+/** How long a session waits for the player's token before starting without one. */
+const TOKEN_WAIT_MS = 8000;
+
 interface GameClientProps {
     slug: string;
     autoPlay?: boolean;
+    /** Where leaving the results goes. Defaults to the games list. */
+    exitHref?: string;
+    /** Options for the results dialog, such as a shared station's footer. */
+    resultOptions?: Pick<GameResultDialogProps, 'exitLabel' | 'primaryAction' | 'renderExtra' | 'hidePortalLinks'>;
 }
 
 interface GameResults {
@@ -58,7 +65,7 @@ async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParamete
     }
 }
 
-export default function GameClient({ slug, autoPlay = false }: GameClientProps) {
+export default function GameClient({ slug, autoPlay = false, exitHref = '/games', resultOptions }: GameClientProps) {
     const router = useRouter();
     const { userToken } = useUserSession();
     type SequenceState = 'loading' | 'ready' | 'playing' | 'calculating' | 'review' | 'badge';
@@ -462,7 +469,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         // Reset game state when actually leaving
         setSequence('playing');
         setGameStartTime(Date.now());
-        router.push('/games');
+        router.push(exitHref);
     };
 
     const handleExitGame = () => {
@@ -496,7 +503,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
 
 
 
-    // Reset state and start the Skillprint session once the slug has resolved to a catalog record
+    // Reset state once the slug has resolved to a catalog record
     useEffect(() => {
         if (!resolvedGame || resolvedGame.forSlug !== decodedSlug) return;
 
@@ -508,6 +515,23 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
         reportedGameStateRef.current = null;
+    }, [resolvedGame, decodedSlug]);
+
+    // A session started before the player's token arrives is recorded for nobody:
+    // it never reaches their profile, and the results can't load it. That happens
+    // when a game URL is opened directly, as a fresh guest does. Wait for the
+    // token, but not forever: a token request that failed mustn't stop play.
+    const [tokenWaitOver, setTokenWaitOver] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => setTokenWaitOver(true), TOKEN_WAIT_MS);
+        return () => clearTimeout(timer);
+    }, []);
+    // Only ever goes from false to true, so it can't start a second session for the same game.
+    const canStartSession = Boolean(userToken) || tokenWaitOver;
+
+    // Start the Skillprint session for the resolved game
+    useEffect(() => {
+        if (!resolvedGame || resolvedGame.forSlug !== decodedSlug || !canStartSession) return;
 
         // Initialize Skillprint Session
         if (!disableSdk) {
@@ -552,7 +576,7 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
         return () => {
             shouldPollRef.current = false;
         };
-    }, [resolvedGame, decodedSlug]);
+    }, [resolvedGame, decodedSlug, canStartSession]);
 
     // Update token if it changes (e.g. loads asynchronously)
     useEffect(() => {
@@ -642,6 +666,8 @@ export default function GameClient({ slug, autoPlay = false }: GameClientProps) 
                     sessionId={skillprintSessionIdRef.current}
                     sessionRecorded={sessionRecorded}
                     unscored={gameResults.unscored}
+                    exitHref={exitHref}
+                    {...resultOptions}
                 />
             )}
 

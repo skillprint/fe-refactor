@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useComputedGameMetrics } from '../../app/hooks/useComputedGameMetrics';
 import { SkillScores, MoodScores } from '../../app/lib/skillprintSdk';
+import type { SessionDetail } from '../../lib/models/portal/SessionDetail';
 import { submitMoodSurvey } from '../../app/api/api';
 import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
 import { titleFromSlug } from '../../lib/skillIcons';
@@ -41,7 +42,7 @@ const OUTCOME_LABELS: Record<SessionOutcome, string> = {
   unknown: 'Session ended',
 };
 
-interface GameResultDialogProps {
+export interface GameResultDialogProps {
   gameTitle: string;
   /** The game's own points; undefined when the game didn't report one. */
   score?: number;
@@ -67,6 +68,15 @@ interface GameResultDialogProps {
   useSyntheticData?: boolean;
   /** Dev only: show the email prompt whatever the session count (SKI-265). */
   forceEmailPrompt?: boolean;
+  /** Where Close and the footer's back link go. Defaults to the games list. */
+  exitHref?: string;
+  exitLabel?: string;
+  /** Replaces the footer's "View profile" link. */
+  primaryAction?: React.ReactNode;
+  /** Extra section under the scores, given the session as the dialog has it. */
+  renderExtra?: (session: SessionDetail | null, isProcessing: boolean) => React.ReactNode;
+  /** Leave out links into the rest of the portal (playbooks, the email prompt), as on a shared station. */
+  hidePortalLinks?: boolean;
 }
 
 export default function GameResultDialog({
@@ -87,7 +97,12 @@ export default function GameResultDialog({
   sessionRecorded = true,
   unscored = false,
   useSyntheticData = false,
-  forceEmailPrompt = false
+  forceEmailPrompt = false,
+  exitHref = '/games',
+  exitLabel = 'Back to games',
+  primaryAction,
+  renderExtra,
+  hidePortalLinks = false
 }: GameResultDialogProps) {
   const { data: session, isProcessing } = useComputedGameMetrics(unscored ? undefined : sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
@@ -217,7 +232,7 @@ export default function GameResultDialog({
           <span className="sp-progress__fill" style={{ width: `${metric.score}%`, opacity: metric.isEstimated ? 0.6 : 1 }}></span>
         </span>
       </div>
-      {metric.playbookSlug && (
+      {metric.playbookSlug && !hidePortalLinks && (
         <Link href={`/playbooks/${metric.playbookSlug}`} className="font-xs text-muted mt-1 hover:text-white">
           View playbook
         </Link>
@@ -242,7 +257,7 @@ export default function GameResultDialog({
               <i className="radius-round"></i>{unscored ? 'Too short to score' : OUTCOME_LABELS[outcome]}
             </span>
             <Link 
-              href="/games"
+              href={exitHref}
               aria-label="Close results" 
               className="game-result__close button button--tertiary button--icon-only button--md layout-grid place-center radius-control surface-transparent padding-none" 
               data-result-close="" 
@@ -402,17 +417,21 @@ export default function GameResultDialog({
             </>
           )}
 
-          <EmailPromptCard force={forceEmailPrompt} />
+          {renderExtra?.(session ?? null, isProcessing)}
+
+          {!hidePortalLinks && <EmailPromptCard force={forceEmailPrompt} />}
 
         </div>
         
         <footer className="popup__footer">
-          <Link href="/games" className="button button--tertiary button--md">Back to games</Link>
+          <Link href={exitHref} className="button button--tertiary button--md">{exitLabel}</Link>
           <div className="game-result__actions layout-flex items-center gap-md">
             <button className="button button--secondary button--md" data-sequence-go="loading" type="button" onClick={onReplay}>Play again</button>
-            <Link className="button button--primary button--md" href="/profile">
-              View profile <svg className="sp-icon ml-2" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
-            </Link>
+            {primaryAction ?? (
+              <Link className="button button--primary button--md" href="/profile">
+                View profile <svg className="sp-icon ml-2" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-arrow-right"></use></svg>
+              </Link>
+            )}
           </div>
         </footer>
       </article>

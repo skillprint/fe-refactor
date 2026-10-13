@@ -1,0 +1,307 @@
+/*
+ * ReMix the Future station (/asu). The portal's own surfaces, type and cards,
+ * with ASU Maroon and Gold as the event accent. No ASU marks: those need a
+ * trademark licence.
+ */
+.asu-station {
+  --asu-maroon: #8c1d40;
+  --asu-gold: #ffc627;
+  --asu-accent: var(--asu-maroon);
+  --asu-accent-soft: color-mix(in srgb, var(--asu-maroon) 8%, transparent);
+  --asu-gutter: clamp(16px, 4vw, 40px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+html:not([data-surface="light"]) .asu-station {
+  --asu-accent: var(--asu-gold);
+  --asu-accent-soft: color-mix(in srgb, var(--asu-gold) 12%, transparent);
+}
+
+.asu-header__inner,
+.asu-main,
+.asu-footer {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: var(--asu-gutter);
+}
+
+/* Header: a maroon band over the portal's panel surface, gold rule under it. */
+.asu-header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  border-top: 6px solid var(--asu-maroon);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: inset 0 2px 0 var(--asu-gold);
+  background: var(--surface-panel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.asu-header__inner {
+  padding-block: 14px;
+}
+
+.asu-brand .brand-logo {
+  height: 28px;
+  width: auto;
+}
+
+.asu-brand .brand-logo--light,
+html[data-surface="light"] .asu-brand .brand-logo--dark {
+  display: none;
+}
+
+html[data-surface="light"] .asu-brand .brand-logo--light {
+  display: block;
+}
+
+.asu-brand__x {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+}
+
+.asu-brand__event {
+  line-height: 1.2;
+}
+
+.asu-brand__event strong {
+  color: var(--asu-accent);
+}
+
+.asu-brand__event span {
+  color: var(--text-muted);
+}
+
+.asu-confirm__text {
+  color: var(--text-muted);
+}
+
+/* Page */
+.asu-main {
+  flex: 1;
+  /* The page fills the screen; its rows must not stretch to fill it too. */
+  align-content: start;
+  gap: 56px;
+  padding-block: 40px 64px;
+}
+
+.asu-hero {
+  gap: 16px;
+  align-content: start;
+}
+
+.asu-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--asu-accent);
+}
+
+.asu-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--asu-gold);
+}
+
+.asu-hero__title {
+  margin: 0;
+  font-size: clamp(2.75rem, 8vw, 5.25rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.asu-hero__title::after {
+  content: "";
+  display: block;
+  width: min(320px, 60%);
+  height: 0.12em;
+  margin-top: 0.16em;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--asu-maroon), var(--asu-gold));
+}
+
+.asu-hero__lede {
+  max-width: 60ch;
+  margin: 0;
+}
+
+.asu-steps {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.asu-step {
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+
+.asu-step__n {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--asu-maroon);
+  color: var(--asu-gold);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.asu-section {
+  gap: 20px;
+  align-content: start;
+}
+
+.asu-section__head {
+  gap: 6px;
+  max-width: 70ch;
+}
+
+.asu-section__head h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+/* Game cards: the portal's own, four across. */
+.asu-games {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.asu-tile-stickers ul {
+  list-style: none;
+}
+
+.asu-tile-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  background: var(--asu-accent-soft);
+}
+
+.asu-tile-sticker img {
+  width: 30px;
+  height: 30px;
+}
+
+/* Sticker wall */
+.asu-sticker-wall {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 28px 16px;
+  padding: 28px 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--surface-raised);
+}
+
+.asu-sticker {
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.asu-sticker img {
+  width: 100%;
+  max-width: 140px;
+  height: auto;
+  aspect-ratio: 1;
+  filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 8px rgba(9, 13, 39, 0.18));
+  transition: transform 0.25s ease;
+}
+
+.asu-sticker:hover img {
+  transform: rotate(-4deg) scale(1.03);
+}
+
+.asu-footer {
+  padding-block: 24px 32px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.asu-footer a {
+  color: var(--asu-accent);
+}
+
+/* Results: the sticker to hand over (inside the dark results dialog). */
+.asu-result-sticker {
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-card);
+}
+
+.asu-result-sticker[data-pick="true"] {
+  border-color: var(--asu-gold);
+  background: color-mix(in srgb, var(--asu-gold) 10%, transparent);
+}
+
+.asu-result-sticker img {
+  width: 112px;
+  height: 112px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asu-sticker img {
+    transition: none;
+  }
+
+  .asu-sticker:hover img {
+    transform: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .asu-games {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .asu-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .asu-games,
+  .asu-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .asu-main {
+    gap: 40px;
+    padding-block: 28px 48px;
+  }
+}
