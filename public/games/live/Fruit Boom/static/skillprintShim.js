@@ -15,6 +15,11 @@
 //   re-applies that ramp every tick, times this multiplier. Higher is calmer.
 // - bombDensity (0-1, default 1): share of spawned bombs that are kept. Slashing
 //   a bomb ends the run; missed fruit (3 allowed) still counts as before.
+//
+// It also reports the game's score to the portal as
+// { type: 'gameState', data: { score, isGameOver } }, the message Hextris sends,
+// so the results show Fruit Boom's points and can tell a finished run from an
+// early exit. The run is over once the sheet shows its Game_Over layer.
 
 const PARAMS = {
     speedModifier: { min: 0.6, max: 1.5 },
@@ -50,12 +55,28 @@ window.addEventListener('message', function (event) {
     }
 });
 
+// Posted on change only: the score moves a few times a second at most.
+let reported = null;
+function reportState(score, isGameOver) {
+    if (window.parent === window) return;
+    if (reported && reported.score === score && reported.isGameOver === isGameOver) return;
+    reported = { score: score, isGameOver: isGameOver };
+    try {
+        window.parent.postMessage({ type: 'gameState', data: { score: score, isGameOver: isGameOver } }, window.location.origin);
+    } catch (e) {
+        // Reporting must never break the game.
+    }
+}
+
 function attach(runtime) {
     const seen = new WeakSet();
 
     runtime.addEventListener('tick', function () {
         if (!runtime.layout || runtime.layout.name !== 'Game') return;
         const vars = runtime.globalVars;
+        const gameOverLayer = runtime.layout.getLayer('Game_Over');
+        reportState(vars.Score, Boolean(gameOverLayer && gameOverLayer.isVisible));
+
         const base = SPAWN_RAMP.find(([score]) => vars.Score >= score)[1];
         vars.Spawn_Time = base * tuning.spawnIntervalMultiplier;
 
