@@ -180,6 +180,8 @@ var DoodleCard = function(card_id, frame){
     __snds.playSound("snd_pickup", "ui");
 
     IsDragging = true;
+    createjs.Tween.removeTweens(card); //a knob may be moving/turning the heap
+    card.alpha = 1;
     target.setChildIndex(card, target.children.length);
     start_x = card.x;
     start_y = card.y;
