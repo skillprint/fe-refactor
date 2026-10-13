@@ -1,0 +1,16 @@
+{
+    "stackVelocity": {
+        "max": 20.0,
+        "min": 2.0,
+        "type": "float",
+        "default": 5.0,
+        "description": "Pixels the moving box travels per frame (30 fps). 5 is the game's default, about 4 s for a box to cross the tower; 20 crosses it in about 1 s. Applies to the box in play and every later box, and is kept when a new game starts."
+    },
+    "perfectRange": {
+        "max": 15.0,
+        "min": 0.0,
+        "type": "float",
+        "default": 1.0,
+        "description": "How far off, in pixels, a drop can land and still count as perfect: the box snaps into place instead of having its overhang cut off, so the tower keeps its width. 1 is the game's default (nearly exact); 0 cuts any misalignment; 15 forgives small misses."
+    }
+}

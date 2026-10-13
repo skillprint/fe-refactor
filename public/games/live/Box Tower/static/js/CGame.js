@@ -177,7 +177,7 @@ function CGame(oData) {
         //console.log(oResult.point); // has x and y..
         if (oResult.result === false) {
             if (_iGameState === STATE_PLAY) {
-                logEvent({event: "LEVEL_FAILED"});
+                logEvent({event: "LEVEL_FAILED", "score": _iScore});
                 s_oGame.gameOver();
             }
             return;
@@ -442,15 +442,17 @@ function CGame(oData) {
 
     this.createNewStack = function (aEdges, oOffset, bCut) {
         var oInfo;
+        // How far the box landed from the one below, in pixels (0 = dead on)
+        var fOffset = Math.round(Math.sqrt(oOffset.x * oOffset.x + oOffset.y * oOffset.y) * 10) / 10;
         if (!bCut) {
-            logEvent({event: "STACK", "perfect": 1});
+            logEvent({event: "STACK", "perfect": 1, "offset": fOffset, "score": _iScore + 1});
             playSound("perfect", 1, false);
             _oCurrentStack.perfectPosition();
             _oCurrentStack.setPosition(_oPrevStack.getPos().x - _oOffset.x, (_oPrevStack.getPos().y - _oOffset.y) - STACK_DEPTH_SIZE);
             _oCurrentStack.updateEdgesPosition();
             oInfo = {x: _oCurrentStack.getPos().x + _oOffset.x - oOffset.x, y: _oCurrentStack.getPos().y - STACK_DEPTH_SIZE + _oOffset.y - oOffset.y, dir: STACKS_START_POSITION[_iStartPos].dir};
         } else {
-            logEvent({event: "STACK", "perfect": 0}); // ToDo: would like to find % overlap
+            logEvent({event: "STACK", "perfect": 0, "offset": fOffset, "score": _iScore + 1});
             playSound("cut", 1, false);
             oInfo = {x: _oCurrentStack.getPos().x - oOffset.x, y: _oCurrentStack.getPos().y - STACK_DEPTH_SIZE - oOffset.y, dir: STACKS_START_POSITION[_iStartPos].dir};
         }
@@ -600,6 +602,9 @@ function CGame(oData) {
     s_oGame = this;
 
     STACK_VELOCITY = oData.stack_velocity;
+    if (window.skillprintReapplyKnobs) {
+        skillprintReapplyKnobs(); // keep Skillprint knob values across new games
+    }
     NUM_LEVEL_FOR_ADS = oData.num_levels_for_ads;
     
 
