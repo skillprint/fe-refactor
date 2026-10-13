@@ -83,7 +83,7 @@ export function HowToPlay({ game, onStart }: HowToPlayProps) {
         <article aria-labelledby="asu-howto-title" aria-modal="true" className="popup popup--dark asu-howto" role="dialog">
           <div className="popup__content scrollbar-violet relative">
             <div className="asu-howto__head layout-grid">
-              <span className="asu-howto__eyebrow">How to play</span>
+              <span className="asu-howto__eyebrow">How to play · About 3 minutes</span>
               <h2 id="asu-howto-title" className="asu-howto__title">{game.name}</h2>
               <p className="asu-howto__goal margin-none font-md leading-lg">{goal}</p>
             </div>
@@ -112,15 +112,11 @@ export function HowToPlay({ game, onStart }: HowToPlayProps) {
                   <span>{controls}</span>
                 </dd>
               </div>
-              <div>
-                <dt className="ui-label">Time</dt>
-                <dd>About 3 minutes</dd>
-              </div>
-              <div>
-                <dt className="ui-label">{game.stickers.length === 1 ? 'Sticker' : 'Stickers'}</dt>
+              <div className="asu-howto__sticker-row">
+                <dt className="ui-label">{game.stickers.length === 1 ? 'Sticker you can earn' : 'Stickers you can earn'}</dt>
                 <dd className="asu-howto__stickers">
                   {game.stickers.map((id) => (
-                    <img key={id} src={STICKERS[id].art} alt={STICKERS[id].name} title={STICKERS[id].name} width={36} height={36} />
+                    <img key={id} src={STICKERS[id].art} alt={STICKERS[id].name} title={STICKERS[id].name} width={64} height={64} />
                   ))}
                 </dd>
               </div>

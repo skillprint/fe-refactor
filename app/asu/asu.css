@@ -493,15 +493,20 @@ html[data-surface="light"] .asu-brand .brand-logo--light {
   height: 22px;
 }
 
+.asu-howto__sticker-row {
+  grid-column: 1 / -1;
+}
+
 .asu-howto__stickers {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 10px;
 }
 
 .asu-howto__stickers img {
-  width: 36px;
-  height: 36px;
+  flex: none;
+  width: 64px;
+  height: 64px;
 }
 
 @media (max-width: 560px) {
