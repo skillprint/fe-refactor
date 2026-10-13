@@ -73,8 +73,8 @@ export interface GameResultDialogProps {
   exitLabel?: string;
   /** Replaces the footer's "View profile" link. */
   primaryAction?: React.ReactNode;
-  /** Extra section, given the session as the dialog has it. */
-  renderExtra?: (session: SessionDetail | null, isProcessing: boolean) => React.ReactNode;
+  /** Extra section, given the session as the dialog has it and whether it was too short to score. */
+  renderExtra?: (session: SessionDetail | null, isProcessing: boolean, unscored: boolean) => React.ReactNode;
   /** Where the extra section goes: first, under the heading, or after the scores (the default). */
   extraPlacement?: 'top' | 'bottom';
   /** Leave out the "How did you feel after playing?" question, as on a shared station. */
@@ -287,7 +287,7 @@ export default function GameResultDialog({
             </div>
           </div>
 
-          {extraPlacement === 'top' && renderExtra?.(session ?? null, isProcessing)}
+          {extraPlacement === 'top' && renderExtra?.(session ?? null, isProcessing, unscored)}
 
           {!unscored && !hideMoodSurvey && (
             <section aria-label="Session feedback" className="game-result__section separator-top layout-grid">
@@ -425,7 +425,7 @@ export default function GameResultDialog({
             </>
           )}
 
-          {extraPlacement === 'bottom' && renderExtra?.(session ?? null, isProcessing)}
+          {extraPlacement === 'bottom' && renderExtra?.(session ?? null, isProcessing, unscored)}
 
           {!hidePortalLinks && <EmailPromptCard force={forceEmailPrompt} />}
 

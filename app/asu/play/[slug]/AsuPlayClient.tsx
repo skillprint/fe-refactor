@@ -33,8 +33,8 @@ export default function AsuPlayClient({ slug }: { slug: string }) {
         extraPlacement: 'top',
         hideMoodSurvey: true,
         primaryAction: <NextVisitorButton variant="primary" />,
-        renderExtra: (session, isProcessing) => (
-          <StickerPanel gameSlug={slug} session={session} isProcessing={isProcessing} />
+        renderExtra: (session, isProcessing, unscored) => (
+          <StickerPanel gameSlug={slug} session={session} isProcessing={isProcessing} unscored={unscored} />
         ),
       }}
     />

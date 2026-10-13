@@ -5,11 +5,14 @@ import type { SessionDetail } from '@/lib/models/portal/SessionDetail';
 import { PORTAL_SKILLS } from '../config/skillsTaxonomy';
 import { titleFromSlug } from '@/lib/skillIcons';
 import { BONUS_GAME_COUNT, STICKERS, pickSticker, recordPlayedGame, stationGame } from '@/lib/asuStation';
+import { MIN_SCORED_SECONDS } from '@/components/GameSession/GameResultDialog';
 
 interface StickerPanelProps {
   gameSlug: string;
   session: SessionDetail | null;
   isProcessing: boolean;
+  /** Under the scoring minimum: no sticker, and it doesn't count toward the bonus. */
+  unscored?: boolean;
 }
 
 const skillName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug(slug);
@@ -19,12 +22,13 @@ const skillName = (slug: string) => PORTAL_SKILLS[slug]?.name || titleFromSlug(s
  * hands over. It leads with the sticker for the skill the visitor scored
  * highest; the game's other stickers are there if they'd rather have one.
  */
-export function StickerPanel({ gameSlug, session, isProcessing }: StickerPanelProps) {
+export function StickerPanel({ gameSlug, session, isProcessing, unscored = false }: StickerPanelProps) {
   const game = stationGame(gameSlug);
   const [playedCount, setPlayedCount] = useState(0);
 
-  // Reaching the results counts as having played this game.
+  // Reaching the results of a scored session counts as having played this game.
   useEffect(() => {
+    if (unscored) return;
     let userId: string | null = null;
     try {
       userId = localStorage.getItem('userId');
@@ -32,9 +36,24 @@ export function StickerPanel({ gameSlug, session, isProcessing }: StickerPanelPr
       // Storage blocked: count this browser as one visitor.
     }
     setPlayedCount(recordPlayedGame(userId, gameSlug).length);
-  }, [gameSlug]);
+  }, [gameSlug, unscored]);
 
   if (!game) return null;
+
+  // Too short to score means nothing was measured, so there's nothing to earn yet.
+  if (unscored) {
+    return (
+      <section aria-labelledby="asu-sticker-title" className="asu-sticker-card asu-sticker-card--none">
+        <div className="asu-sticker-card__copy layout-grid">
+          <span className="asu-sticker-card__eyebrow">No sticker yet</span>
+          <h3 id="asu-sticker-title" className="asu-sticker-card__name">Play a little longer</h3>
+          <p className="asu-sticker-card__text margin-none">
+            Stickers go to games played for at least {MIN_SCORED_SECONDS} seconds, so there&apos;s a score to match them to. Choose Play again to earn one.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   const cognition = session?.cognition ?? [];
   const hasScores = cognition.length > 0;
