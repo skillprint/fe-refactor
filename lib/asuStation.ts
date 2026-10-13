@@ -34,6 +34,9 @@ export const STICKERS: Record<string, StationSticker> = {
 /** Different games a visitor plays before the Leverage Our Place bonus. */
 export const BONUS_GAME_COUNT = 3;
 
+/** Input a game takes, drawn as an icon on the how-to-play screen. */
+export type StationControl = 'arrow-keys' | 'mouse' | 'touch' | 'swipe';
+
 export interface StationGame {
   slug: string;
   name: string;
@@ -49,6 +52,7 @@ export interface StationGame {
     steps: string[];
     /** The input the game takes, e.g. "Arrow keys". */
     controls: string;
+    controlIcons: StationControl[];
   };
 }
 
@@ -69,6 +73,7 @@ export const STATION_GAMES: StationGame[] = [
         'Three or more blocks of the same color touching clear away. Picture where each block will land before it gets there.',
       ],
       controls: 'Left and right arrow keys',
+      controlIcons: ['arrow-keys'],
     },
   },
   {
@@ -85,6 +90,7 @@ export const STATION_GAMES: StationGame[] = [
         'Time each drop so the box lands on the one below. Miss, and the tower falls.',
       ],
       controls: 'Click or tap',
+      controlIcons: ['mouse', 'touch'],
     },
   },
   {
@@ -101,6 +107,7 @@ export const STATION_GAMES: StationGame[] = [
         'Bombs fly up too. Hold back and let them pass.',
       ],
       controls: 'Swipe with the mouse or a finger',
+      controlIcons: ['mouse', 'swipe'],
     },
   },
   {
@@ -116,7 +123,8 @@ export const STATION_GAMES: StationGame[] = [
         'Dodge the rocks coming toward you.',
         'Grab fuel along the way before the tank runs dry.',
       ],
-      controls: 'Mouse or touch',
+      controls: 'Move the mouse or your finger',
+      controlIcons: ['mouse', 'touch'],
     },
   },
 ];

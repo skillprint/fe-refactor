@@ -402,8 +402,9 @@ html[data-surface="light"] .asu-brand .brand-logo--light {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--asu-maroon);
-  color: var(--asu-gold);
+  /* Skillprint's own violet: the steps are the portal's, not the event's. */
+  background: var(--button-primary, var(--mindset-violet-500));
+  color: #fff;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -411,7 +412,7 @@ html[data-surface="light"] .asu-brand .brand-logo--light {
 .asu-howto__facts {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -428,6 +429,68 @@ html[data-surface="light"] .asu-brand .brand-logo--light {
 .asu-howto__facts dd {
   margin: 0;
   font-weight: 600;
+}
+
+/* Controls get the full row: the icons are what a visitor looks for first. */
+.asu-howto__controls {
+  grid-column: 1 / -1;
+}
+
+.asu-howto__controls dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.asu-howto__control-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.asu-howto__or {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.asu-howto__control-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--asu-gold) 14%, transparent);
+  color: var(--asu-gold);
+}
+
+.asu-howto__control-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.asu-howto__keys {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.asu-howto__key {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--asu-gold) 55%, transparent);
+  border-bottom-width: 4px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #fff 8%, transparent);
+  color: var(--asu-gold);
+  font: inherit;
+}
+
+.asu-howto__key .sp-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .asu-howto__stickers {
