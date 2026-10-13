@@ -49,6 +49,14 @@ const getElementForScreenshot = () => {
         return document.body;
     }
 
+    // A game whose canvas is positioned out of the flow leaves the body
+    // shorter than the canvas, often 0px tall, and a capture of the body is
+    // empty ("data:,"). Capture the canvas instead.
+    const canvas = document.getElementsByTagName('canvas')[0];
+    if (canvas && document.body.clientHeight < canvas.clientHeight) {
+        return canvas;
+    }
+
     return document.body;
 }
 
@@ -99,15 +107,77 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(() => {
         takeScreenshot();
     }, 2500);
-})
+});
 
-function logEvent(params) {
-    params.messageType = 'gameEvent';
-    const paramsAsJSON = JSON.stringify(params);
-    if (globalThis.ReactNativeWebView && globalThis.ReactNativeWebView.postMessage) {
-        //   globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
-    } else {
-        //   window.parent.postMessage(paramsAsJSON, "{% TARGET_ORIGIN %}");
+// Legacy telemetry bridge (fe-refactor#45). Games from before the portal call
+// a global logEvent({event, ...fields}); their index.html defines a stub that
+// queues those calls until this script loads. This turns each one into the
+// message GameClient.tsx's 'gameEvent' case reads, the same one Hextris's
+// Skillprint.send posts: {type: 'gameEvent', data: {event, at, ...fields}},
+// with `at` when it happened in epoch ms (performance.timeOrigin +
+// performance.now(), the clock the portal reads too).
+//
+// Only same-origin parents get it, and it never throws into the game.
+(function () {
+    // Legacy names for universal events (the SDK's GameEvent). The original
+    // name is kept in `legacyEvent`.
+    var UNIVERSAL_NAMES = {
+        HINT_USED: 'HINT',
+        LEVEL_PASSED: 'LEVEL_COMPLETE',
+        LEVEL_WON: 'LEVEL_COMPLETE',
+    };
+    // Set by the old transport, or stamped by the portal itself.
+    var TRANSPORT_FIELDS = ['messageType', 'timestamp', 'at'];
+
+    var now = function () {
+        return typeof performance !== 'undefined' && performance.timeOrigin
+            ? performance.timeOrigin + performance.now()
+            : Date.now();
+    };
+
+    // `json` is the event as JSON, which is what the old transport sent:
+    // functions and undefined fields drop out, and it can always be cloned.
+    var toGameEventMessage = function (json, at) {
+        var data = JSON.parse(json);
+        if (!data || typeof data !== 'object' || typeof data.event !== 'string' || !data.event) return null;
+        for (var i = 0; i < TRANSPORT_FIELDS.length; i++) delete data[TRANSPORT_FIELDS[i]];
+        if (Object.prototype.hasOwnProperty.call(UNIVERSAL_NAMES, data.event)) {
+            data.legacyEvent = data.event;
+            data.event = UNIVERSAL_NAMES[data.event];
+        }
+        data.at = typeof at === 'number' && isFinite(at) ? at : now();
+        return { type: 'gameEvent', data: data };
+    };
+
+    var post = function (json, at) {
+        try {
+            if (!window.parent || window.parent === window) return;
+            var message = toGameEventMessage(json, at);
+            if (message) window.parent.postMessage(message, window.location.origin);
+        } catch (e) {
+            // Telemetry must never break the game.
+        }
+    };
+
+    var logEvent = function (params) {
+        var at = now();
+        var json;
+        try {
+            json = JSON.stringify(params);
+        } catch (e) {
+            return;
+        }
+        if (typeof json === 'string') post(json, at);
+    };
+
+    // Calls made before this script loaded, queued by the index.html stub.
+    var pending = globalThis.__skillprintPendingEvents;
+    globalThis.__skillprintPendingEvents = undefined;
+    if (Array.isArray(pending)) {
+        for (var i = 0; i < pending.length; i++) {
+            if (pending[i]) post(pending[i].json, pending[i].at);
+        }
     }
-}
-globalThis.logEvent = logEvent;
+
+    globalThis.logEvent = logEvent;
+})();
