@@ -50,6 +50,11 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'brick-out': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Brick Out/backend/game-scoring-config.json',
+  },
   'bubble-spirit': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,

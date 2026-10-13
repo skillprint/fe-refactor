@@ -1,30 +1,23 @@
 {
-    "maxVelocityLimit": {
-        "max": 3.0,
-        "min": 1.0,
+    "ballSpeed": {
+        "max": 1.6,
+        "min": 0.6,
         "type": "float",
-        "default": 1.5,
-        "description": "Maximum ball speed. Higher values make the game faster and more difficult."
+        "default": 1.0,
+        "description": "Base ball speed multiplier (1.0 = the game's normal speed). Applied to the balls in play and kept through lost balls and new levels. The speed power-ups still move the ball within 0.5x-1.5x of this base. Higher values make the game faster and harder."
     },
-    "minVelocityLimit": {
-        "max": 1.0,
-        "min": 0.2,
+    "bonusDropRate": {
+        "max": 2.0,
+        "min": 0.0,
         "type": "float",
-        "default": 0.5,
-        "description": "Minimum ball speed. Lower values mean the ball can travel more slowly."
-    },
-    "timeBounceBall": {
-        "max": 0.05,
-        "min": 0.005,
-        "type": "float",
-        "default": 0.01,
-        "description": "Time delay for ball bounces. Higher values make physics slightly more relaxed."
+        "default": 1.0,
+        "description": "Multiplies each level's power-up drop chance (0 = no power-ups, 2 = twice as many). Power-ups (larger paddle, multi-ball, fire ball, extra life...) mostly help the player, so lower values make the game harder."
     },
     "maxBallSpawn": {
-        "max": 10,
+        "max": 6,
         "min": 1,
         "type": "integer",
         "default": 4,
-        "description": "Maximum number of balls spawned when collecting a multi-ball power-up."
+        "description": "Most balls in play from the multi-ball power-up (1 = no extra balls). More balls clear bricks faster but split attention."
     }
 }

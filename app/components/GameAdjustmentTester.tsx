@@ -155,21 +155,27 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'brick-out':
-            // Brick out limits ball velocity and multiball spawns
+            // Brick Out: ballSpeed (base ball speed), bonusDropRate (power-up chance), maxBallSpawn (multi-ball cap)
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'MAX_VELOCITY_LIMIT', parameterValue: 0.5 }, { parameterName: 'MIN_VELOCITY_LIMIT', parameterValue: 0.1 }]; // Very Slow
-                case 2: return [{ parameterName: 'MAX_VELOCITY_LIMIT', parameterValue: 1.0 }, { parameterName: 'MIN_VELOCITY_LIMIT', parameterValue: 0.4 }]; // Slower
-                case 3: return [{ parameterName: 'MAX_VELOCITY_LIMIT', parameterValue: 1.5 }, { parameterName: 'MIN_VELOCITY_LIMIT', parameterValue: 0.5 }]; // Default
-                case 4: return [{ parameterName: 'MAX_VELOCITY_LIMIT', parameterValue: 2.5 }, { parameterName: 'MIN_VELOCITY_LIMIT', parameterValue: 1.0 }]; // Fast
-                case 5: return [{ parameterName: 'MAX_VELOCITY_LIMIT', parameterValue: 4.0 }, { parameterName: 'MIN_VELOCITY_LIMIT', parameterValue: 2.0 }]; // Extremely Fast
-                case 6: return [{ parameterName: 'MAX_BALL_SPAWN', parameterValue: 1 }]; // No Multiball allowed
-                case 7: return [{ parameterName: 'MAX_BALL_SPAWN', parameterValue: 4 }]; // Default Multiball cap
-                case 8: return [{ parameterName: 'MAX_BALL_SPAWN', parameterValue: 20 }]; // Crazy Multiball cap
+                case 1: return [{ parameterName: 'ballSpeed', parameterValue: 0.6 }]; // Very slow
+                case 2: return [{ parameterName: 'ballSpeed', parameterValue: 0.8 }]; // Slow
+                case 3: return [{ parameterName: 'ballSpeed', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'ballSpeed', parameterValue: 1.3 }]; // Fast
+                case 5: return [{ parameterName: 'ballSpeed', parameterValue: 1.6 }]; // Very fast
+                case 6: return [{ parameterName: 'bonusDropRate', parameterValue: 0 }]; // No power-ups
+                case 7: return [
+                    { parameterName: 'bonusDropRate', parameterValue: 1 },
+                    { parameterName: 'maxBallSpawn', parameterValue: 4 }
+                ]; // Default power-ups
+                case 8: return [
+                    { parameterName: 'bonusDropRate', parameterValue: 2 },
+                    { parameterName: 'maxBallSpawn', parameterValue: 6 }
+                ]; // Lots of power-ups, big multi-ball
                 case 9: return [
-                    { parameterName: 'MAX_VELOCITY_LIMIT', parameterValue: 5.0 },
-                    { parameterName: 'MIN_VELOCITY_LIMIT', parameterValue: 3.0 },
-                    { parameterName: 'TIME_BOUNCE_BALL', parameterValue: 0.1 }
-                ]; // Impossible mode
+                    { parameterName: 'ballSpeed', parameterValue: 1.6 },
+                    { parameterName: 'bonusDropRate', parameterValue: 0.3 },
+                    { parameterName: 'maxBallSpawn', parameterValue: 1 }
+                ]; // Hard mode
                 default:
                     return [];
             }
