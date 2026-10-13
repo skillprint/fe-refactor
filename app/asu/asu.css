@@ -346,6 +346,107 @@ html[data-surface="light"] .asu-brand .brand-logo--light {
   background: color-mix(in srgb, var(--asu-gold) 18%, transparent);
 }
 
+/* How to play: the step before a station game, in the results' dark dialog. */
+.asu-howto {
+  --asu-gold: #ffc627;
+  --asu-maroon: #8c1d40;
+  max-width: 560px;
+}
+
+.asu-howto__head {
+  gap: 6px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--asu-gold) 30%, transparent);
+}
+
+.asu-howto__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--asu-gold);
+}
+
+.asu-howto__title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.asu-howto__goal {
+  opacity: 0.85;
+}
+
+.asu-howto__steps {
+  list-style: none;
+  margin: 18px 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.asu-howto__step {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 12px;
+  align-items: start;
+  line-height: 1.5;
+}
+
+.asu-howto__n {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--asu-maroon);
+  color: var(--asu-gold);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.asu-howto__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.asu-howto__facts > div {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, #fff 6%, transparent);
+}
+
+.asu-howto__facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.asu-howto__stickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.asu-howto__stickers img {
+  width: 36px;
+  height: 36px;
+}
+
+@media (max-width: 560px) {
+  .asu-howto__facts {
+    grid-template-columns: 1fr;
+  }
+}
+
 @keyframes asu-sticker-in {
   from {
     transform: rotate(-12deg) scale(0.7);

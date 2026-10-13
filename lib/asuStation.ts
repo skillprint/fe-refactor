@@ -43,6 +43,13 @@ export interface StationGame {
   tone: 'pink' | 'mint' | 'green' | 'blue' | 'yellow' | 'purple';
   /** Stickers this game can earn, the default pick first. */
   stickers: string[];
+  /** The how-to-play screen shown before the game loads. */
+  howToPlay: {
+    goal: string;
+    steps: string[];
+    /** The input the game takes, e.g. "Arrow keys". */
+    controls: string;
+  };
 }
 
 /** In the order the host script lists them. */
@@ -54,6 +61,15 @@ export const STATION_GAMES: StationGame[] = [
     hint: 'Played with the arrow keys.',
     tone: 'purple',
     stickers: ['visualization'],
+    howToPlay: {
+      goal: 'Keep the blocks from piling up past the edge of the board.',
+      steps: [
+        'Colored blocks slide in toward the hexagon in the middle.',
+        'Press the left and right arrow keys to turn the hexagon so each block lands where you want it.',
+        'Three or more blocks of the same color touching clear away. Picture where each block will land before it gets there.',
+      ],
+      controls: 'Left and right arrow keys',
+    },
   },
   {
     slug: 'box-tower',
@@ -61,6 +77,15 @@ export const STATION_GAMES: StationGame[] = [
     description: 'Drop each box at the right moment to build the tallest tower.',
     tone: 'yellow',
     stickers: ['reaction-time'],
+    howToPlay: {
+      goal: 'Build the tallest tower you can.',
+      steps: [
+        'A box slides back and forth above the top of the tower.',
+        'Click or tap to drop it.',
+        'Time each drop so the box lands on the one below. Miss, and the tower falls.',
+      ],
+      controls: 'Click or tap',
+    },
   },
   {
     slug: 'fruit-boom',
@@ -68,6 +93,15 @@ export const STATION_GAMES: StationGame[] = [
     description: 'Slice the fruit as it flies and steer clear of the bombs.',
     tone: 'pink',
     stickers: ['play-attention', 'focus', 'response-control', 'keen-eye'],
+    howToPlay: {
+      goal: 'Slice as much fruit as you can without hitting a bomb.',
+      steps: [
+        'Fruit flies up from the bottom of the screen.',
+        'Swipe across a fruit to slice it. Don\'t let any fall.',
+        'Bombs fly up too. Hold back and let them pass.',
+      ],
+      controls: 'Swipe with the mouse or a finger',
+    },
   },
   {
     slug: 'space-trip',
@@ -75,6 +109,15 @@ export const STATION_GAMES: StationGame[] = [
     description: 'Fly through space, dodging rocks and grabbing fuel before the tank runs dry.',
     tone: 'blue',
     stickers: ['keen-eye', 'reaction-time'],
+    howToPlay: {
+      goal: 'Fly as far as you can before your fuel runs out.',
+      steps: [
+        'Hold the pointer where you want your astronaut to fly.',
+        'Dodge the rocks coming toward you.',
+        'Grab fuel along the way before the tank runs dry.',
+      ],
+      controls: 'Mouse or touch',
+    },
   },
 ];
 
