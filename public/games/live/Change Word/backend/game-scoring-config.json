@@ -1,0 +1,59 @@
+{
+  "game_slug": "change-word-0bc38905-8138-43f2-9ff5-a01a5f038782",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "timeMultiplier": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Time allowed per word, as a multiple of each word-length tier's own (30 s for 3-letter words, 40 s for 4, 50 s for 5, 60 s for 6). Applies to the word in play and every later word. Lower values add time pressure.",
+      "adjustment_guide": "The main pressure lever. Lower in steps of about 0.1 while the player finds words with time to spare (many WORD events, few LEVEL_FAILED). Raise after a LEVEL_FAILED with many possibleWords left, or for relax."
+    },
+    "rampMultiplier": {
+      "type": "number",
+      "min": 0.0,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "How fast time per word shrinks after each solved word, as a multiple of each tier's own step (3 s for 3-letter words, 2 s for 4, 1 s for 5-6). 0 keeps the time constant; 2 squeezes twice as fast.",
+      "adjustment_guide": "Lower to 0-0.5 for relax or a struggling player so pressure stops building. Raise for grit once the player keeps up."
+    },
+    "hintsPerStage": {
+      "type": "integer",
+      "min": 0,
+      "max": 10,
+      "default": 5,
+      "description": "Hints of each kind (which letters can change; what they can change to) per word-length tier. Changing it refills or removes the current tier's hints now. Fewer hints make the player rely on their own vocabulary.",
+      "adjustment_guide": "Raise to help a stuck player (several NONWORD or long gaps between WORD events). Lower for focus, grit and verbal training so the player searches unaided."
+    }
+  },
+  "adjustment_instructions": "Change Word: from a starting word, the player makes new words by changing one letter at a time, against a per-word timer. Words come in length tiers (3 to 6 letters; the quick mode moves up a tier after a few solved words), and the time per word shrinks after each solved word. Hint buttons show which letters can change and what they can change to.\nLevers: timeMultiplier is the main pressure lever (lower = less time per word); rampMultiplier sets how fast the time shrinks; hintsPerStage sets how much help is available.\n- relax: timeMultiplier 1.4-2.0, rampMultiplier 0-0.5, hintsPerStage 6-10.\n- focus: timeMultiplier 0.9-1.1, rampMultiplier 1.0, hintsPerStage 2-4.\n- grit: timeMultiplier 0.6-0.8, rampMultiplier 1.3-2.0, hintsPerStage 0-2; ease timeMultiplier up after a LEVEL_FAILED.\n- joy: timeMultiplier 1.1-1.4, rampMultiplier 0.5-1.0, hintsPerStage 5-8 (keep words flowing).\nChange timeMultiplier in steps of about 0.1; give hints back (hintsPerStage) before adding time when a player is stuck.",
+  "skill_adjustment_instructions": "Change Word trains Verbal and Knowledge (vocabulary), with Deduction (systematic letter search) and Timing (the per-word clock).\n- verbal, knowledge: hintsPerStage 0-3 so the player relies on their own vocabulary; timeMultiplier 1.0-1.3 so the limit is knowledge, not speed.\n- deduction: hintsPerStage 0-2 with moderate time (timeMultiplier 0.9-1.2).\n- timing: timeMultiplier 0.6-0.9 and rampMultiplier 1.0-2.0; raise hintsPerStage a little so pressure, not vocabulary gaps, is the challenge.",
+  "notes": "Change Word's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'change-word' keys. Replaces the retired `timer` (one ms value for every tier, applied only at the next tier); the shim still converts it to timeMultiplier.",
+  "sdk_game_parameters": [
+    {
+      "name": "timeMultiplier",
+      "type": "Float",
+      "description": "Time allowed per word, as a multiple of each word-length tier's own (30 s for 3-letter words, 40 s for 4, 50 s for 5, 60 s for 6). Applies to the word in play and every later word. Lower values add time pressure.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "The main pressure lever. Lower in steps of about 0.1 while the player finds words with time to spare (many WORD events, few LEVEL_FAILED). Raise after a LEVEL_FAILED with many possibleWords left, or for relax."
+    },
+    {
+      "name": "rampMultiplier",
+      "type": "Float",
+      "description": "How fast time per word shrinks after each solved word, as a multiple of each tier's own step (3 s for 3-letter words, 2 s for 4, 1 s for 5-6). 0 keeps the time constant; 2 squeezes twice as fast.",
+      "min_value": "0.0",
+      "max_value": "2.0",
+      "adjustment_guide": "Lower to 0-0.5 for relax or a struggling player so pressure stops building. Raise for grit once the player keeps up."
+    },
+    {
+      "name": "hintsPerStage",
+      "type": "Integer",
+      "description": "Hints of each kind (which letters can change; what they can change to) per word-length tier. Changing it refills or removes the current tier's hints now. Fewer hints make the player rely on their own vocabulary.",
+      "min_value": "0",
+      "max_value": "10",
+      "adjustment_guide": "Raise to help a stuck player (several NONWORD or long gaps between WORD events). Lower for focus, grit and verbal training so the player searches unaided."
+    }
+  ]
+}
