@@ -34,7 +34,7 @@ interface GameClientProps {
     /** Where leaving the results goes. Defaults to the games list. */
     exitHref?: string;
     /** Options for the results dialog, such as a shared station's footer. */
-    resultOptions?: Pick<GameResultDialogProps, 'exitLabel' | 'primaryAction' | 'renderExtra' | 'hidePortalLinks'>;
+    resultOptions?: Pick<GameResultDialogProps, 'exitLabel' | 'primaryAction' | 'renderExtra' | 'extraPlacement' | 'hideMoodSurvey' | 'hidePortalLinks'>;
 }
 
 interface GameResults {

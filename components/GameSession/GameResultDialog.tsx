@@ -73,8 +73,12 @@ export interface GameResultDialogProps {
   exitLabel?: string;
   /** Replaces the footer's "View profile" link. */
   primaryAction?: React.ReactNode;
-  /** Extra section under the scores, given the session as the dialog has it. */
+  /** Extra section, given the session as the dialog has it. */
   renderExtra?: (session: SessionDetail | null, isProcessing: boolean) => React.ReactNode;
+  /** Where the extra section goes: first, under the heading, or after the scores (the default). */
+  extraPlacement?: 'top' | 'bottom';
+  /** Leave out the "How did you feel after playing?" question, as on a shared station. */
+  hideMoodSurvey?: boolean;
   /** Leave out links into the rest of the portal (playbooks, the email prompt), as on a shared station. */
   hidePortalLinks?: boolean;
 }
@@ -102,6 +106,8 @@ export default function GameResultDialog({
   exitLabel = 'Back to games',
   primaryAction,
   renderExtra,
+  extraPlacement = 'bottom',
+  hideMoodSurvey = false,
   hidePortalLinks = false
 }: GameResultDialogProps) {
   const { data: session, isProcessing } = useComputedGameMetrics(unscored ? undefined : sessionId, useSyntheticData);
@@ -281,7 +287,9 @@ export default function GameResultDialog({
             </div>
           </div>
 
-          {!unscored && (
+          {extraPlacement === 'top' && renderExtra?.(session ?? null, isProcessing)}
+
+          {!unscored && !hideMoodSurvey && (
             <section aria-label="Session feedback" className="game-result__section separator-top layout-grid">
               <div className="game-result__mood layout-flex flex-col items-start gap-lg w-full">
                 <div className="layout-grid gap-sm min-width-0">
@@ -417,7 +425,7 @@ export default function GameResultDialog({
             </>
           )}
 
-          {renderExtra?.(session ?? null, isProcessing)}
+          {extraPlacement === 'bottom' && renderExtra?.(session ?? null, isProcessing)}
 
           {!hidePortalLinks && <EmailPromptCard force={forceEmailPrompt} />}
 

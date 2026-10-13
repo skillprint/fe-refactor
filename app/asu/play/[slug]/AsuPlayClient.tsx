@@ -21,6 +21,9 @@ export default function AsuPlayClient({ slug }: { slug: string }) {
       resultOptions={{
         exitLabel: 'Pick another game',
         hidePortalLinks: true,
+        // The sticker is what the visitor came for, so it leads; the mood question is skipped at the event.
+        extraPlacement: 'top',
+        hideMoodSurvey: true,
         primaryAction: <NextVisitorButton variant="primary" />,
         renderExtra: (session, isProcessing) => (
           <StickerPanel gameSlug={slug} session={session} isProcessing={isProcessing} />
