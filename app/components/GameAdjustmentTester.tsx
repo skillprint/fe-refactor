@@ -292,17 +292,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'photo-hunt':
-            // default is 30 seconds, 3 misses. Lower seconds is harder.
+            // timeMultiplier scales each puzzle's own 120 s; missPenaltySeconds costs time per wrong tap
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'seconds_on_clock', parameterValue: 120 }, { parameterName: 'tilt_misses', parameterValue: 10 }];
-                case 2: return [{ parameterName: 'seconds_on_clock', parameterValue: 90 }, { parameterName: 'tilt_misses', parameterValue: 8 }];
-                case 3: return [{ parameterName: 'seconds_on_clock', parameterValue: 60 }, { parameterName: 'tilt_misses', parameterValue: 5 }];
-                case 4: return [{ parameterName: 'seconds_on_clock', parameterValue: 45 }, { parameterName: 'tilt_misses', parameterValue: 4 }];
-                case 5: return [{ parameterName: 'seconds_on_clock', parameterValue: 30 }, { parameterName: 'tilt_misses', parameterValue: 3 }]; // Default
-                case 6: return [{ parameterName: 'seconds_on_clock', parameterValue: 20 }, { parameterName: 'tilt_misses', parameterValue: 2 }];
-                case 7: return [{ parameterName: 'seconds_on_clock', parameterValue: 15 }, { parameterName: 'tilt_misses', parameterValue: 1 }];
-                case 8: return [{ parameterName: 'seconds_on_clock', parameterValue: 10 }, { parameterName: 'tilt_misses', parameterValue: 1 }];
-                case 9: return [{ parameterName: 'seconds_on_clock', parameterValue: 5 }, { parameterName: 'tilt_misses', parameterValue: 1 }];
+                case 1: return [{ parameterName: 'timeMultiplier', parameterValue: 2.0 }];
+                case 2: return [{ parameterName: 'timeMultiplier', parameterValue: 1.5 }];
+                case 3: return [{ parameterName: 'timeMultiplier', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'timeMultiplier', parameterValue: 0.75 }];
+                case 5: return [{ parameterName: 'timeMultiplier', parameterValue: 0.5 }];
+                case 6: return [{ parameterName: 'timeMultiplier', parameterValue: 0.25 }]; // 30 s
+                case 7: return [{ parameterName: 'missPenaltySeconds', parameterValue: 0 }]; // Default
+                case 8: return [{ parameterName: 'missPenaltySeconds', parameterValue: 5 }];
+                case 9: return [
+                    { parameterName: 'timeMultiplier', parameterValue: 0.4 },
+                    { parameterName: 'missPenaltySeconds', parameterValue: 5 },
+                    { parameterName: 'tiltMisses', parameterValue: 1 }
+                ]; // Hard mode
                 default:
                     return [];
             }

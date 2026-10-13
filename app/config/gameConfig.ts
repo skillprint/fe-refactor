@@ -161,6 +161,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'photo-hunt': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Photo Hunt/backend/game-scoring-config.json',
+  },
+
   'snake-attack': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
