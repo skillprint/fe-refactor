@@ -10832,6 +10832,26 @@ html .page--portal.nav-collapsed .portal-brand .brand-logo,
   height: calc(100% - var(--play-bar-inset) - var(--play-bar-safe) - var(--play-bar-height));
 }
 
+/* The band the game leaves free under it is the play bar's: a solid portal
+   navy there, so the game's preview art doesn't show through around the bar.
+   Only while the game is on screen; the loading veil keeps the art full-bleed. */
+.page--game-session .play-field::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 1;
+  height: calc(var(--play-bar-inset) + var(--play-bar-safe) + var(--play-bar-height));
+  border-block-start: 1px solid color-mix(in srgb, var(--deep-navy-800) 80%, transparent);
+  background: var(--deep-navy-900);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page--game-session:is([data-sequence="ready"], [data-sequence="playing"], [data-sequence="calculating"], [data-sequence="review"]) .play-field::after {
+  opacity: 1;
+}
+
 
 /* --- Welcome-field carousel (re-scoped for .page--game-session) --- */
 .page--game-session .welcome-field {

@@ -24,6 +24,10 @@ export interface GameTileProps {
   skills?: GameTileSkill[];
   statusBadge?: string;
   tone?: 'pink' | 'mint' | 'green' | 'blue' | 'yellow' | 'purple'; // Matches the tone--* classes
+  /** Link to the game's detail page beside the title. Off where visitors shouldn't leave, as on a shared station. */
+  showInfoLink?: boolean;
+  /** Shown above the Play button. */
+  extra?: React.ReactNode;
 }
 
 export function GameTile({
@@ -36,7 +40,9 @@ export function GameTile({
   duration,
   skills = [],
   statusBadge,
-  tone = 'pink'
+  tone = 'pink',
+  showInfoLink = true,
+  extra
 }: GameTileProps) {
   // Games the design has drawn get its moving pattern card; the rest keep their cover.
   const artFile = patternArtFile(id, title);
@@ -78,9 +84,11 @@ export function GameTile({
             <Link className="no-underline text-default" href={url}>{title}</Link>
           </h3>
           {/* Note: We can route to a real game_detail.html or modal later */}
-          <Link className="game-info" aria-label={`View game details for ${title}`} href={`/game_detail?game=${id}`}>
-            <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-info"></use></svg>
-          </Link>
+          {showInfoLink && (
+            <Link className="game-info" aria-label={`View game details for ${title}`} href={`/game_detail?game=${id}`}>
+              <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-info"></use></svg>
+            </Link>
+          )}
         </div>
         
         <p className="game-description text-muted font-md leading-lg">{description}</p>
@@ -103,6 +111,8 @@ export function GameTile({
           </div>
         )}
         
+        {extra}
+
         <Link className="play-btn button button--primary button--md full-width push-block-end" href={url}>
           <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
           Play<span className="sr-only"> {title}</span>
