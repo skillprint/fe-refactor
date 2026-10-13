@@ -165,6 +165,10 @@ function CCharacterInHole(iX, iY, oParentContainer) {
                 y: _aCharacter[iCharacter].y - HOLE_HEIGHT - 50
             }, 500, createjs.Ease.cubicOut)
             .wait(iTimeWait).call(function () {
+                // Only reached when it wasn't hit: a hit overrides this tween.
+                if (s_oGame) {
+                    skillprintEvent({event: iCharacter === 4 ? "BOMB_AVOIDED" : "ESCAPED", character: iCharacter, timeleft: s_oGame.getTimeLeft()});
+                }
                 _oParent.deleteCharacter(iCharacter);
             });
         _bCellOccupied = true;
@@ -201,11 +205,17 @@ function CCharacterInHole(iX, iY, oParentContainer) {
             if (iCharacter === 4) {
                 playSound("bomb", 1, false);
                 s_oGame.tremble();
-                // Skillprint.TAPbomb();
             } else {
                 playSound("hit", 1, false);
-                // Skillprint.TAPanimal();
             }
+            skillprintEvent({
+                event: iCharacter === 4 ? "BOMB" : "ANIMAL",
+                character: iCharacter,
+                points: iMult * CHARACTER_POINTS[iCharacter],
+                multiplier: iMult,
+                score: s_oGame.getScore(),
+                timeleft: s_oGame.getTimeLeft()
+            });
 
             var szScore = "";
             if (CHARACTER_POINTS[iCharacter] > 0) {
@@ -238,6 +248,9 @@ function CCharacterInHole(iX, iY, oParentContainer) {
                 _aScoreNumShadow[iCharacter].y += 50;
                 _aScoreNumShadow[iCharacter].alpha = 1;
             });
+        } else if (s_oGame) {
+            // A tap on an empty hole, or on a character already hit.
+            skillprintEvent({event: "WHIFF", timeleft: s_oGame.getTimeLeft()});
         }
     };
 

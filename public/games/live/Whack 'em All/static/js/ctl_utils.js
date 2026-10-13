@@ -740,3 +740,13 @@ if (screenfull.enabled) {
     });
 }
 
+// Skillprint: report a gameplay event. The portal's SkillprintLib turns
+// logEvent({event, ...}) into a gameEvent for the session. Telemetry must
+// never break the game, so this never throws.
+function skillprintEvent(oEvent) {
+    try {
+        if (typeof logEvent === "function") {
+            logEvent(oEvent);
+        }
+    } catch (e) {}
+}

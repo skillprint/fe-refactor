@@ -16,6 +16,7 @@ function CGame(oData) {
     var _aCharacterSelected;
 
     var _bUpdate;
+    var _bEndReported;
     var _bOnHitArea = false;
 
     var _oHammer;
@@ -70,7 +71,30 @@ function CGame(oData) {
         _oEndPanel = new CEndPanel();
 
         _bUpdate = true;
+        _bEndReported = false;
+        skillprintEvent({event: "GAME_START", timeleft: this.getTimeLeft()});
         this._selectCharacter();
+    };
+
+    this.getScore = function () {
+        return _iScore;
+    };
+
+    // Seconds left in the round (one decimal).
+    this.getTimeLeft = function () {
+        return Math.max(0, Math.round(_iTimeElapsed / 100) / 10);
+    };
+
+    this.getMultiplier = function () {
+        return _iCurMultScore;
+    };
+
+    this._reportEnd = function (szReason) {
+        if (_bEndReported) {
+            return;
+        }
+        _bEndReported = true;
+        skillprintEvent({event: "GAME_END", reason: szReason, score: _iScore, timeleft: this.getTimeLeft()});
     };
 
     this._createCells = function () {
@@ -204,6 +228,7 @@ function CGame(oData) {
     };
 
     this.onConfirmExit = function () {
+        this._reportEnd("quit");
         this.unload();
         GameEnd = 1;
         $(s_oMain).trigger("show_interlevel_ad");
@@ -212,6 +237,7 @@ function CGame(oData) {
     };
 
     this.gameOver = function () {
+        this._reportEnd("time");
         _oEndPanel.show(_iScore);
         saveItem("whackemall_best_score", s_iBestScore);
     };
