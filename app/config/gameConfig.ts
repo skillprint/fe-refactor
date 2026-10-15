@@ -50,6 +50,11 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'box-tower': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Box Tower/backend/game-scoring-config.json',
+  },
   'brick-out': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,

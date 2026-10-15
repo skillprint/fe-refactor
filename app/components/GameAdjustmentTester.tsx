@@ -69,30 +69,21 @@ export default function GameAdjustmentTester({ iframeRef, slug, onAdjustment }: 
 function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
     switch (slug) {
         case 'box-tower':
-            // Examples of different logic we can map to the 9 keys.
-            // 1-3 modifies velocity, 4-6 modifies perfect range, 7-9 does both.
+            // 1-5 set stackVelocity (px per frame), 6-8 perfectRange (px), 9 both
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Very Slow
-                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Default
-                case 3: return [{ parameterName: 'stackVelocity', parameterValue: 35 }]; // Fast
-                case 4: return [{ parameterName: 'perfectRange', parameterValue: 0.1 }];  // Extremely hard perfects
-                case 5: return [{ parameterName: 'perfectRange', parameterValue: 1 }];    // Default
-                case 6: return [{ parameterName: 'perfectRange', parameterValue: 10 }];   // Easy perfects
-                case 7:
-                    return [
-                        { parameterName: 'stackVelocity', parameterValue: 10 },
-                        { parameterName: 'perfectRange', parameterValue: 5 }
-                    ]; // Slower, forgiving
-                case 8:
-                    return [
-                        { parameterName: 'stackVelocity', parameterValue: 20 },
-                        { parameterName: 'perfectRange', parameterValue: 2 }
-                    ]; // Faster, little more forgiving
+                case 1: return [{ parameterName: 'stackVelocity', parameterValue: 3 }];  // Slow
+                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 5 }];  // Default
+                case 3: return [{ parameterName: 'stackVelocity', parameterValue: 8 }];
+                case 4: return [{ parameterName: 'stackVelocity', parameterValue: 12 }];
+                case 5: return [{ parameterName: 'stackVelocity', parameterValue: 20 }]; // Max
+                case 6: return [{ parameterName: 'perfectRange', parameterValue: 0 }];   // Any misalignment is cut
+                case 7: return [{ parameterName: 'perfectRange', parameterValue: 1 }];   // Default
+                case 8: return [{ parameterName: 'perfectRange', parameterValue: 8 }];   // Forgiving
                 case 9:
                     return [
-                        { parameterName: 'stackVelocity', parameterValue: 40 },
+                        { parameterName: 'stackVelocity', parameterValue: 15 },
                         { parameterName: 'perfectRange', parameterValue: 0 }
-                    ]; // Extremely fast, no forgiving
+                    ]; // Hard mode
                 default:
                     return [];
             }

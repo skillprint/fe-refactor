@@ -6,6 +6,8 @@ LEVEL_START => Player starts the level
 ---------------
 STACK => Each time the player taps a block
 	- perfect: 1 or 0
+	- offset: how far the box landed from the one below, in pixels (0 = dead on)
+	- score: boxes stacked so far, including this one
 	- 2020-08-01T08:34:01.527Z (timestamp)
 ---------------
 LEVEL_QUIT => Player quits the level
@@ -16,5 +18,6 @@ LEVEL_RESTART => Player restarts the level
 ---------------
 LEVEL_FAILED => Player loses
 	- LEVEL_FAILED (event)
+	- score: boxes stacked before the miss
 	- 2020-08-01T08:34:01.527Z (timestamp)
 ---------------
