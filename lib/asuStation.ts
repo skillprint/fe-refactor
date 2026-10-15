@@ -15,6 +15,8 @@ export interface StationSticker {
   name: string;
   animal: string;
   art: string;
+  /** What the sticker is for, in words a kid knows without the skill's name. */
+  meaning: string;
   /** The cognition skill that makes this the best match, or null for a bonus sticker. */
   skill: string | null;
 }
@@ -22,13 +24,13 @@ export interface StationSticker {
 const ART = '/assets/images/badges/asu-remix';
 
 export const STICKERS: Record<string, StationSticker> = {
-  'play-attention': { id: 'play-attention', name: 'Play Attention!', animal: 'Fixated Fennec Fox', art: `${ART}/09-play-attention.svg`, skill: 'attention' },
-  'focus': { id: 'focus', name: 'Focus', animal: 'Fixated Fennec Fox', art: `${ART}/01-focus.svg`, skill: 'attention' },
-  'response-control': { id: 'response-control', name: 'Response Control', animal: 'Cool Chimpanzee', art: `${ART}/02-response-control.svg`, skill: 'attention' },
-  'keen-eye': { id: 'keen-eye', name: 'Keen Eye', animal: 'Watchful Wolf', art: `${ART}/04-keen-eye.svg`, skill: 'perceptual-speed' },
-  'reaction-time': { id: 'reaction-time', name: 'Reaction Time', animal: 'Hurried Hare', art: `${ART}/03-reaction-time.svg`, skill: 'timing' },
-  'visualization': { id: 'visualization', name: 'Visualization', animal: 'Picturing Porpoise', art: `${ART}/05-visualization.svg`, skill: 'visualization' },
-  'leverage-our-place': { id: 'leverage-our-place', name: 'Leverage Our Place', animal: 'Canny Coyote', art: `${ART}/08-leverage-our-place.svg`, skill: null },
+  'play-attention': { id: 'play-attention', name: 'Play Attention!', animal: 'Fixated Fennec Fox', art: `${ART}/09-play-attention.svg`, meaning: 'Staying locked in on the game', skill: 'attention' },
+  'focus': { id: 'focus', name: 'Focus', animal: 'Fixated Fennec Fox', art: `${ART}/01-focus.svg`, meaning: 'Keeping your eyes on the goal', skill: 'attention' },
+  'response-control': { id: 'response-control', name: 'Response Control', animal: 'Cool Chimpanzee', art: `${ART}/02-response-control.svg`, meaning: 'Holding back at the right moment', skill: 'attention' },
+  'keen-eye': { id: 'keen-eye', name: 'Keen Eye', animal: 'Watchful Wolf', art: `${ART}/04-keen-eye.svg`, meaning: 'Spotting things fast', skill: 'perceptual-speed' },
+  'reaction-time': { id: 'reaction-time', name: 'Reaction Time', animal: 'Hurried Hare', art: `${ART}/03-reaction-time.svg`, meaning: 'Moving fast when it counts', skill: 'timing' },
+  'visualization': { id: 'visualization', name: 'Visualization', animal: 'Picturing Porpoise', art: `${ART}/05-visualization.svg`, meaning: 'Picturing it in your head', skill: 'visualization' },
+  'leverage-our-place': { id: 'leverage-our-place', name: 'Leverage Our Place', animal: 'Canny Coyote', art: `${ART}/08-leverage-our-place.svg`, meaning: 'Playing 3 different games', skill: null },
 };
 
 /** Different games a visitor plays before the Leverage Our Place bonus. */
