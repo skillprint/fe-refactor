@@ -1,0 +1,16 @@
+{
+    "maxPieceCells": {
+        "max": 9,
+        "min": 3,
+        "type": "integer",
+        "default": 9,
+        "description": "Largest piece dealt, in cells. 3 deals only 1-3 cell pieces (singles, dominoes, 3-bars, small Ls); 4 adds the 2x2 square and 4-long bars; 5 adds the 5-long bars and big Ls (6-8 behave as 5); 9 adds the 3x3 block (the game's default, every shape). Takes effect on the next pieces dealt."
+    },
+    "piecesToPlace": {
+        "max": 3,
+        "min": 1,
+        "type": "integer",
+        "default": 3,
+        "description": "Pieces placed before the tray refills its empty slots (the tray holds three). 1 refills after every placement, so there are always three pieces to choose from; 3 (the game's default) means using up the whole tray first, including awkward pieces. Applies immediately. Higher is harder."
+    }
+}

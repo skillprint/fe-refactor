@@ -266,6 +266,15 @@ function CBoard(iX,iY,oParentContainer){
             
             oPiece.unload();
             _aCurPieces[iIndex] = null;
+
+            //one event per placement; LINE_CLEARED follows if it completes lines
+            var iTrayLeft = 0;
+            for(var t=0;t<_aCurPieces.length;t++){
+                if(_aCurPieces[t] !== null){
+                    iTrayLeft++;
+                }
+            }
+            logEvent({event: "PIECE_PLACED", cells: oInfos.num_cell, tray_left: iTrayLeft, score: s_oGame.getScore()});
             
             
             //CHECK CELL CLEARING
