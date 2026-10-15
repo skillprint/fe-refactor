@@ -12,7 +12,8 @@ export function StationHeader() {
         <Link href="/asu/" className="asu-brand layout-flex items-center gap-lg no-underline text-default" aria-label="Skillprint at ReMix the Future 2026, station home">
           <img className="brand-logo brand-logo--dark" src="/assets/logos/skillprint-logo-customer-dark.svg" alt="Skillprint" />
           <img className="brand-logo brand-logo--light" src="/assets/logos/skillprint-logo-customer-light.svg" alt="Skillprint" />
-          <span aria-hidden="true" className="asu-brand__x">×</span>
+          {/* A rule, not a "×": an × in a header reads as a close button. */}
+          <span aria-hidden="true" className="asu-brand__divider"></span>
           <span className="asu-brand__event layout-grid">
             <strong>ReMix the Future 2026</strong>
             <span className="font-xs">MIX Center, Mesa · Oct 15–18</span>
