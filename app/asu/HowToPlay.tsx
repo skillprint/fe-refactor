@@ -114,10 +114,18 @@ export function HowToPlay({ game, onStart }: HowToPlayProps) {
               </div>
               <div className="asu-howto__sticker-row">
                 <dt className="ui-label">{game.stickers.length === 1 ? 'Sticker you can earn' : 'Stickers you can earn'}</dt>
-                <dd className="asu-howto__stickers">
-                  {game.stickers.map((id) => (
-                    <img key={id} src={STICKERS[id].art} alt={STICKERS[id].name} title={STICKERS[id].name} width={64} height={64} />
-                  ))}
+                <dd>
+                  <ul className="asu-howto__stickers">
+                    {game.stickers.map((id) => (
+                      <li key={id} className="asu-howto__sticker">
+                        <img src={STICKERS[id].art} alt="" width={96} height={96} />
+                        <span className="asu-howto__sticker-copy">
+                          <strong>{STICKERS[id].name}</strong>
+                          <span>{STICKERS[id].meaning}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </dd>
               </div>
             </dl>

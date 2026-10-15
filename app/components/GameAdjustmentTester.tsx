@@ -69,30 +69,21 @@ export default function GameAdjustmentTester({ iframeRef, slug, onAdjustment }: 
 function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
     switch (slug) {
         case 'box-tower':
-            // Examples of different logic we can map to the 9 keys.
-            // 1-3 modifies velocity, 4-6 modifies perfect range, 7-9 does both.
+            // 1-5 set stackVelocity (px per frame), 6-8 perfectRange (px), 9 both
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Very Slow
-                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 5 }]; // Default
-                case 3: return [{ parameterName: 'stackVelocity', parameterValue: 35 }]; // Fast
-                case 4: return [{ parameterName: 'perfectRange', parameterValue: 0.1 }];  // Extremely hard perfects
-                case 5: return [{ parameterName: 'perfectRange', parameterValue: 1 }];    // Default
-                case 6: return [{ parameterName: 'perfectRange', parameterValue: 10 }];   // Easy perfects
-                case 7:
-                    return [
-                        { parameterName: 'stackVelocity', parameterValue: 10 },
-                        { parameterName: 'perfectRange', parameterValue: 5 }
-                    ]; // Slower, forgiving
-                case 8:
-                    return [
-                        { parameterName: 'stackVelocity', parameterValue: 20 },
-                        { parameterName: 'perfectRange', parameterValue: 2 }
-                    ]; // Faster, little more forgiving
+                case 1: return [{ parameterName: 'stackVelocity', parameterValue: 3 }];  // Slow
+                case 2: return [{ parameterName: 'stackVelocity', parameterValue: 5 }];  // Default
+                case 3: return [{ parameterName: 'stackVelocity', parameterValue: 8 }];
+                case 4: return [{ parameterName: 'stackVelocity', parameterValue: 12 }];
+                case 5: return [{ parameterName: 'stackVelocity', parameterValue: 20 }]; // Max
+                case 6: return [{ parameterName: 'perfectRange', parameterValue: 0 }];   // Any misalignment is cut
+                case 7: return [{ parameterName: 'perfectRange', parameterValue: 1 }];   // Default
+                case 8: return [{ parameterName: 'perfectRange', parameterValue: 8 }];   // Forgiving
                 case 9:
                     return [
-                        { parameterName: 'stackVelocity', parameterValue: 40 },
+                        { parameterName: 'stackVelocity', parameterValue: 15 },
                         { parameterName: 'perfectRange', parameterValue: 0 }
-                    ]; // Extremely fast, no forgiving
+                    ]; // Hard mode
                 default:
                     return [];
             }
@@ -292,17 +283,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'photo-hunt':
-            // default is 30 seconds, 3 misses. Lower seconds is harder.
+            // timeMultiplier scales each puzzle's own 120 s; missPenaltySeconds costs time per wrong tap
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'seconds_on_clock', parameterValue: 120 }, { parameterName: 'tilt_misses', parameterValue: 10 }];
-                case 2: return [{ parameterName: 'seconds_on_clock', parameterValue: 90 }, { parameterName: 'tilt_misses', parameterValue: 8 }];
-                case 3: return [{ parameterName: 'seconds_on_clock', parameterValue: 60 }, { parameterName: 'tilt_misses', parameterValue: 5 }];
-                case 4: return [{ parameterName: 'seconds_on_clock', parameterValue: 45 }, { parameterName: 'tilt_misses', parameterValue: 4 }];
-                case 5: return [{ parameterName: 'seconds_on_clock', parameterValue: 30 }, { parameterName: 'tilt_misses', parameterValue: 3 }]; // Default
-                case 6: return [{ parameterName: 'seconds_on_clock', parameterValue: 20 }, { parameterName: 'tilt_misses', parameterValue: 2 }];
-                case 7: return [{ parameterName: 'seconds_on_clock', parameterValue: 15 }, { parameterName: 'tilt_misses', parameterValue: 1 }];
-                case 8: return [{ parameterName: 'seconds_on_clock', parameterValue: 10 }, { parameterName: 'tilt_misses', parameterValue: 1 }];
-                case 9: return [{ parameterName: 'seconds_on_clock', parameterValue: 5 }, { parameterName: 'tilt_misses', parameterValue: 1 }];
+                case 1: return [{ parameterName: 'timeMultiplier', parameterValue: 2.0 }];
+                case 2: return [{ parameterName: 'timeMultiplier', parameterValue: 1.5 }];
+                case 3: return [{ parameterName: 'timeMultiplier', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'timeMultiplier', parameterValue: 0.75 }];
+                case 5: return [{ parameterName: 'timeMultiplier', parameterValue: 0.5 }];
+                case 6: return [{ parameterName: 'timeMultiplier', parameterValue: 0.25 }]; // 30 s
+                case 7: return [{ parameterName: 'missPenaltySeconds', parameterValue: 0 }]; // Default
+                case 8: return [{ parameterName: 'missPenaltySeconds', parameterValue: 5 }];
+                case 9: return [
+                    { parameterName: 'timeMultiplier', parameterValue: 0.4 },
+                    { parameterName: 'missPenaltySeconds', parameterValue: 5 },
+                    { parameterName: 'tiltMisses', parameterValue: 1 }
+                ]; // Hard mode
                 default:
                     return [];
             }

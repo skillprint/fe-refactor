@@ -50,6 +50,11 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'box-tower': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Box Tower/backend/game-scoring-config.json',
+  },
   'brick-out': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -165,6 +170,12 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'gray',
       size: 'md'
     }
+  },
+
+  'photo-hunt': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Photo Hunt/backend/game-scoring-config.json',
   },
 
   'snake-attack': {
@@ -856,9 +867,12 @@ export const gameDetails: Record<string, GameDetails> = {
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
-// `match-doodle-2-6697ba5a-…` and `sumagi-2-dbdafb8b-…` are the same games.
+// `match-doodle-2-6697ba5a-…`, `sumagi-2-dbdafb8b-…`, `fruit-sorting-2-778da931-…`
+// and `sweet-memory-2-6b558e2a-…` are the same games.
 gameDetails['match-doodle-2'] = gameDetails['match-doodle'];
 gameDetails['sumagi-2'] = gameDetails['sumagi'];
+gameDetails['fruit-sorting-2'] = gameDetails['fruit-sorting'];
+gameDetails['sweet-memory-2'] = gameDetails['sweet-memory'];
 
 export function getGameConfig(gameSlug: string): GameConfig {
   // Canonical base slug: lowercase, legacy UUID suffix stripped (SKI-180).

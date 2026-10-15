@@ -1,0 +1,59 @@
+{
+  "game_slug": "photo-hunt-a9cba04f-8ccb-41e8-9569-af32e6bb2653",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "timeMultiplier": {
+      "type": "number",
+      "min": 0.25,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Time per puzzle as a multiple of the puzzle's own (120 s for every puzzle today, so 0.25-2.0 means 30 s to 4 min). Applies to the puzzle in play, whose time left keeps the same fraction of the clock, and to every later puzzle. Lower values add time pressure.",
+      "adjustment_guide": "The main pressure lever. Lower in steps of about 0.1 while the player finds all 7 differences with time to spare (LEVEL_COMPLETE with a large time). Raise after a LEVEL_FAILED, or for relax."
+    },
+    "missPenaltySeconds": {
+      "type": "number",
+      "min": 0.0,
+      "max": 10.0,
+      "default": 0.0,
+      "description": "Seconds taken off the clock by each wrong tap (0 = no penalty, the game's default). Makes tapping at random costly, so the player has to compare the photos before tapping.",
+      "adjustment_guide": "Raise (2-5) for focus and attention training, or when many TAP condition=false events show the player guessing. Keep at 0 for relax, joy and young or struggling players."
+    },
+    "tiltMisses": {
+      "type": "integer",
+      "min": 1,
+      "max": 10,
+      "default": 3,
+      "description": "Wrong taps allowed within one second before the game locks taps for a second (\"TILT!\"); the lockout fires on the (tiltMisses + 1)th quick miss. Lower values punish rapid random tapping sooner.",
+      "adjustment_guide": "Lower (1-2) together with missPenaltySeconds to stop tap-spamming (TILT events). Raise (5-10) for relax so a flurry of taps is never punished."
+    }
+  },
+  "adjustment_instructions": "Photo Hunt: two nearly identical photos side by side; the player taps the 7 places where they differ, against a countdown (120 s per puzzle at timeMultiplier 1). A wrong tap does nothing unless missPenaltySeconds > 0; a quick burst of wrong taps locks tapping for a second (TILT). A puzzle ends when all 7 are found (LEVEL_COMPLETE) or time runs out (LEVEL_FAILED).\nLevers: timeMultiplier is the main pressure lever (lower = less time per puzzle); missPenaltySeconds makes guessing cost time; tiltMisses sets how soon tap-spamming is locked out.\n- relax: timeMultiplier 1.5-2.0, missPenaltySeconds 0, tiltMisses 5-10.\n- focus: timeMultiplier 0.8-1.0, missPenaltySeconds 2-3, tiltMisses 2-3.\n- grit: timeMultiplier 0.4-0.6, missPenaltySeconds 3-5, tiltMisses 1-2; ease timeMultiplier up after a LEVEL_FAILED.\n- joy: timeMultiplier 1.2-1.5, missPenaltySeconds 0-1, tiltMisses 3-5 (every puzzle finishable).\nChange timeMultiplier in steps of about 0.1. Lower missPenaltySeconds before adding time when a player keeps failing with many misses.",
+  "skill_adjustment_instructions": "Photo Hunt trains Attention and Perceptual Speed (scanning two photos for small differences), with Pattern Matching (comparing corresponding regions) and Visualization.\n- attention: missPenaltySeconds 2-5 and tiltMisses 1-2, so careful comparison beats random tapping; timeMultiplier 0.8-1.0.\n- perceptual speed: timeMultiplier 0.4-0.7 so the scan has to be fast; missPenaltySeconds 1-2.\n- pattern matching, visualization: moderate time (timeMultiplier 0.8-1.2) with missPenaltySeconds 1-3, so accuracy matters more than speed.",
+  "notes": "Photo Hunt's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'photo-hunt' keys. Replaces seconds_on_clock (never read: every puzzle sets its own time; the shim converts it to timeMultiplier) and tilt_seconds (retired; the tilt window stays 1 s). tilt_misses is renamed tiltMisses (alias kept).",
+  "sdk_game_parameters": [
+    {
+      "name": "timeMultiplier",
+      "type": "Float",
+      "description": "Time per puzzle as a multiple of the puzzle's own (120 s for every puzzle today, so 0.25-2.0 means 30 s to 4 min). Applies to the puzzle in play, whose time left keeps the same fraction of the clock, and to every later puzzle. Lower values add time pressure.",
+      "min_value": "0.25",
+      "max_value": "2.0",
+      "adjustment_guide": "The main pressure lever. Lower in steps of about 0.1 while the player finds all 7 differences with time to spare (LEVEL_COMPLETE with a large time). Raise after a LEVEL_FAILED, or for relax."
+    },
+    {
+      "name": "missPenaltySeconds",
+      "type": "Float",
+      "description": "Seconds taken off the clock by each wrong tap (0 = no penalty, the game's default). Makes tapping at random costly, so the player has to compare the photos before tapping.",
+      "min_value": "0.0",
+      "max_value": "10.0",
+      "adjustment_guide": "Raise (2-5) for focus and attention training, or when many TAP condition=false events show the player guessing. Keep at 0 for relax, joy and young or struggling players."
+    },
+    {
+      "name": "tiltMisses",
+      "type": "Integer",
+      "description": "Wrong taps allowed within one second before the game locks taps for a second (\"TILT!\"); the lockout fires on the (tiltMisses + 1)th quick miss. Lower values punish rapid random tapping sooner.",
+      "min_value": "1",
+      "max_value": "10",
+      "adjustment_guide": "Lower (1-2) together with missPenaltySeconds to stop tap-spamming (TILT events). Raise (5-10) for relax so a flurry of taps is never punished."
+    }
+  ]
+}

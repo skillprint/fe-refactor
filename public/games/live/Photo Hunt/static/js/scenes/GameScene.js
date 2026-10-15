@@ -120,7 +120,8 @@ var GameScene = function () {
 
     frame.visible=true;
 
-    GameTimer = new BlitTimer({"seconds_on_clock": puzzle.time, "callback_update": me.doTimerUpdate, "callback_outoftime": me.doOutOfTime});
+    //Skillprint `timeMultiplier` knob scales the puzzle's own time
+    GameTimer = new BlitTimer({"seconds_on_clock": puzzle.time * me.doGetTimeMultiplier(), "callback_update": me.doTimerUpdate, "callback_outoftime": me.doOutOfTime});
     GameTimer.doFirstUpdate();
    
     //images
@@ -219,7 +220,15 @@ var GameScene = function () {
       trace("doMiss()");
       if(!IsPlaying || IsTilt){return;}
     __snds.playSound("wrong", "ui");
-    spLogEvent({event: "TAP", condition:false, difficulty:0, level: GameManager.level, guess: me.score_found, time: me.time_left});
+    let penalty = me.doGetMissPenalty();
+    let miss = {event: "TAP", condition:false, difficulty:0, level: GameManager.level, guess: me.score_found, time: me.time_left};
+    if(penalty > 0){ miss.penalty_ms = penalty * 1000; }
+    spLogEvent(miss);
+
+    //Skillprint `missPenaltySeconds` knob: a wrong tap costs time
+    if(penalty > 0 && GameTimer && GameTimer.is_active && !GameTimer.is_paused){
+      GameTimer.start_time -= penalty * 1000;
+    }
 
 
     var now = performance.now();
@@ -239,6 +248,7 @@ var GameScene = function () {
   this.doTilt = function(){
     trace("doTilt");
     IsTilt = true;
+    spLogEvent({event: "TILT", level: GameManager.level, guess: me.score_found, time: me.time_left});
     __utils.doText(frame.ready.txt, oLANG.tilt);
     frame.ready.alpha = 1;
     frame.ready.visible=true;
@@ -371,6 +381,7 @@ var GameScene = function () {
     GameManager.result = null;
      __snds.playSound("music_game_loop", "music", -1, .5);
     GameTimer.doStart();
+    me.doRescaleTimer(); //a knob may have changed while the puzzle loaded
 
     createjs.Tween.get(frame.ready, {override: true}).to({alpha: 0}, 500).call(()=>{frame.ready.visible=false;});
     stage.activeTweens.push(frame.ready);
@@ -378,6 +389,43 @@ var GameScene = function () {
     GameManager.display_time = "0";
 
 
+  }
+
+  //---------------------------
+  // Skillprint difficulty knobs
+  //---------------------------
+
+  this.doGetTimeMultiplier = function(){
+    let m = Number(oCONFIG.timeMultiplier);
+    return (isFinite(m) && m > 0) ? m : 1;
+  }
+
+  this.doGetMissPenalty = function(){
+    let p = Number(oCONFIG.missPenaltySeconds);
+    return (isFinite(p) && p > 0) ? p : 0;
+  }
+
+  //`timeMultiplier` knob: resize the clock of the puzzle in play. The time
+  //left scales with it, so the bar keeps its fill and nothing jumps.
+  this.doRescaleTimer = function(){
+    if(!GameTimer || typeof puzzle === 'undefined' || GameManager.result){ return; }
+    let total = puzzle.time * me.doGetTimeMultiplier() * 1000;
+    let t = GameTimer;
+    if(total == t.game_time){ return; }
+    let left = total;
+    if(t.is_active){
+      let ref = t.is_paused ? t.pause_time : performance.now();
+      left = Math.max(0, t.start_time + t.game_time - ref) * total / t.game_time;
+      t.start_time = ref + left - total;
+    }
+    t.game_time = total;
+    t.time_left = left;
+    t.percent_left = left / total;
+
+    let secs = Math.ceil(left * 0.001);
+    let m = Math.floor(secs / 60);
+    let ss = secs - (m * 60);
+    me.doTimerUpdate(left, t.percent_left, {m: m.toString(), ss: (ss < 10 ? "0" : "") + ss});
   }
 
   this.doTimerUpdate =  function(time_left, percent_left, display_time){

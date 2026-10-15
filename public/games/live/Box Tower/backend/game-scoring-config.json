@@ -1,0 +1,43 @@
+{
+  "game_slug": "box-tower-befd1b5c-b07f-4463-8137-fadfdb6fc8de",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "stackVelocity": {
+      "type": "number",
+      "min": 2.0,
+      "max": 20.0,
+      "default": 5.0,
+      "description": "Pixels the moving box travels per frame (30 fps). 5 is the game's default, about 4 s for a box to cross the tower; 20 crosses it in about 1 s. Applies to the box in play and every later box, and is kept when a new game starts.",
+      "adjustment_guide": "The main pressure lever. Raise in steps of 1-2 while the player stacks steadily (many STACK events with small offset, perfect=1 runs). Lower after a LEVEL_FAILED with a low score, or when offsets grow and the tower narrows quickly."
+    },
+    "perfectRange": {
+      "type": "number",
+      "min": 0.0,
+      "max": 15.0,
+      "default": 1.0,
+      "description": "How far off, in pixels, a drop can land and still count as perfect: the box snaps into place instead of having its overhang cut off, so the tower keeps its width. 1 is the game's default (nearly exact); 0 cuts any misalignment; 15 forgives small misses.",
+      "adjustment_guide": "Raise (5-15) for relax, joy or a struggling player so near-misses don't shrink the tower. Keep 0-1 for focus, grit and timing training, where precision matters."
+    }
+  },
+  "adjustment_instructions": "Box Tower: a box slides back and forth diagonally above the tower; the player taps to drop it. Any part that overhangs the box below is cut off, so the next box is smaller; a drop within perfectRange snaps into place and keeps its size. Missing the tower entirely ends the game. The game itself never speeds up.\nLevers: stackVelocity is the main pressure lever (faster box = tighter timing); perfectRange sets how forgiving placement is (higher = near-misses count as perfect).\n- relax: stackVelocity 3-4, perfectRange 6-15.\n- focus: stackVelocity 5-8, perfectRange 0-2.\n- grit: stackVelocity 10-16, perfectRange 0-1; ease stackVelocity down after a LEVEL_FAILED with a low score.\n- joy: stackVelocity 4-6, perfectRange 4-8 (frequent perfects, tall towers).\nChange stackVelocity in steps of 1-2. Raise perfectRange before slowing the box when a player keeps losing width.",
+  "skill_adjustment_instructions": "Box Tower trains Timing (dropping the moving box at the right moment), with Perceptual Speed and Attention (tracking the box) and Spatial (judging alignment in the isometric view).\n- timing: perfectRange 0-1 so precision decides the outcome; stackVelocity 6-12.\n- perceptual speed: stackVelocity 10-18, with perfectRange 2-4 so speed, not pixel precision, is the challenge.\n- attention: moderate speed (stackVelocity 5-8) and perfectRange 0-2, so long runs need sustained focus.\n- spatial: slower boxes (stackVelocity 3-5) and perfectRange 0-1, so judging the alignment matters more than reacting.",
+  "notes": "Box Tower's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'box-tower' keys. Names are unchanged; the shim now clamps and coerces values, and CGame re-applies them on a new game (it used to reset stackVelocity to 5).",
+  "sdk_game_parameters": [
+    {
+      "name": "stackVelocity",
+      "type": "Float",
+      "description": "Pixels the moving box travels per frame (30 fps). 5 is the game's default, about 4 s for a box to cross the tower; 20 crosses it in about 1 s. Applies to the box in play and every later box, and is kept when a new game starts.",
+      "min_value": "2.0",
+      "max_value": "20.0",
+      "adjustment_guide": "The main pressure lever. Raise in steps of 1-2 while the player stacks steadily (many STACK events with small offset, perfect=1 runs). Lower after a LEVEL_FAILED with a low score, or when offsets grow and the tower narrows quickly."
+    },
+    {
+      "name": "perfectRange",
+      "type": "Float",
+      "description": "How far off, in pixels, a drop can land and still count as perfect: the box snaps into place instead of having its overhang cut off, so the tower keeps its width. 1 is the game's default (nearly exact); 0 cuts any misalignment; 15 forgives small misses.",
+      "min_value": "0.0",
+      "max_value": "15.0",
+      "adjustment_guide": "Raise (5-15) for relax, joy or a struggling player so near-misses don't shrink the tower. Keep 0-1 for focus, grit and timing training, where precision matters."
+    }
+  ]
+}

@@ -11,9 +11,9 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
         case '2048':
             return ['Starting Tile Density'];
         case 'brick-out':
-            return ['Ball Speed Limit', 'Multiball Maximums'];
+            return ['Ball Speed', 'Power-Up Frequency', 'Multiball Limit'];
         case 'change-word':
-            return ['Level Time Limits'];
+            return ['Time Per Word', 'Time Pressure Ramp', 'Hints Per Stage'];
         case 'fruit-sorting':
             return ['Clock Duration'];
         case 'gems-of-hanoi':
@@ -25,7 +25,7 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
         case 'mahjong-deluxe':
             return ['Bonus Time Awarded', 'Hint Score Penalty'];
         case 'match-doodle':
-            return ['Object Pairs Per Level'];
+            return ['Card Pairs', 'Pile Density', 'Card Tilt'];
         case 'photo-hunt':
             return ['Clock Duration', 'Miss Allowances'];
         case 'snake-attack':
