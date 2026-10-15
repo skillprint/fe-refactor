@@ -27,7 +27,7 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
         case 'match-doodle':
             return ['Card Pairs', 'Pile Density', 'Card Tilt'];
         case 'photo-hunt':
-            return ['Clock Duration', 'Miss Allowances'];
+            return ['Time Per Puzzle', 'Miss Penalty', 'Tap-Spam Lockout'];
         case 'snake-attack':
             return ['Snake Speed', 'Rotation Sensitivity'];
         case 'space-adventure-pinball':
