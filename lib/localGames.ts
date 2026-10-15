@@ -42,6 +42,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     // Legacy catalog records whose base slug carries a `-2` (SKI-180). Remove with the map in SKI-168.
     'match-doodle-2': 'Match Doodle',
     'sumagi-2': 'Sumagi',
+    'fruit-sorting-2': 'Fruit Sorting',
+    'sweet-memory-2': 'Sweet Memory',
     'sweet-memory': 'Sweet Memory',
     'ultimate-sudoku': 'Ultimate Sudoku',
     'whack-em-all': "Whack 'em All",
