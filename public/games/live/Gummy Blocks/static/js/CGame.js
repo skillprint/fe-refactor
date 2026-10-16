@@ -80,6 +80,10 @@ function CGame(){
         _bUpdate = true;
     };
     
+    this.getScore = function(){
+        return _iScore;
+    };
+
     this.refreshScore = function(iAmount){
         _iScore += iAmount;
         _oInterface.refreshScore(_iScore);

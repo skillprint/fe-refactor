@@ -12,7 +12,10 @@
 //                      to choose from; 3 means using up the whole tray first.
 //                      Higher values make the game harder.
 // 3. "scoreMultiplier" - Multiplier for scoring (default: 1.0)
-//                        Lower values make it harder to achieve high scores
+//                        Lower values make it harder to achieve high scores.
+//                        Not a difficulty knob, and it rescales the score the
+//                        portal reports, so backend/game-scoring-config.json
+//                        doesn't offer it to the model.
 //
 // "boardRows", "boardCols" and "gameSpeed" are accepted and ignored: the board
 // arrays and artwork are built once for 10x10, so resizing mid-game breaks the
@@ -26,10 +29,13 @@
 
 window.adjustGame = function (obj) {
     if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
-        const { parameterName, parameterValue } = obj;
+        const parameterName = obj.parameterName;
+        // Numbers may arrive as strings ("2"); anything else is rejected
+        const parameterValue = (typeof obj.parameterValue === 'string' && obj.parameterValue.trim() !== '')
+            ? Number(obj.parameterValue) : obj.parameterValue;
 
         // Validate that the value is a number
-        if (typeof parameterValue !== 'number' || isNaN(parameterValue)) {
+        if (typeof parameterValue !== 'number' || !isFinite(parameterValue)) {
             console.warn('Invalid parameter value for', parameterName, ':', parameterValue);
             return;
         }

@@ -19,7 +19,7 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
         case 'gems-of-hanoi':
             return ['Maximum Complexity Tier'];
         case 'gummy-blocks':
-            return ['Pieces Granted Per Turn', 'Grid Size Dimensions'];
+            return ['Largest Piece Size', 'Tray Refill Pace'];
         case 'katana-fruits':
             return ['Fruit Spawn Frequency', 'Object Trajectory Speed'];
         case 'mahjong-deluxe':
@@ -27,7 +27,7 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
         case 'match-doodle':
             return ['Card Pairs', 'Pile Density', 'Card Tilt'];
         case 'photo-hunt':
-            return ['Clock Duration', 'Miss Allowances'];
+            return ['Time Per Puzzle', 'Miss Penalty', 'Tap-Spam Lockout'];
         case 'snake-attack':
             return ['Snake Speed', 'Rotation Sensitivity'];
         case 'space-adventure-pinball':

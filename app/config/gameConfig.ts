@@ -115,6 +115,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'gummy-blocks': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Gummy Blocks/backend/game-scoring-config.json',
+  },
+
   'hextris': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
