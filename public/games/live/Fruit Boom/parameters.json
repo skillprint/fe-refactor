@@ -1,0 +1,23 @@
+{
+    "speedModifier": {
+        "max": 1.5,
+        "min": 0.6,
+        "type": "float",
+        "default": 1.0,
+        "description": "Game clock speed. Fruit flight, gravity and the spawn timer all scale with it: 0.6 is slow motion, 1.5 is 50% faster. Applies immediately and holds across restarts."
+    },
+    "spawnIntervalMultiplier": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Time between launches, as a multiple of the game's own ramp (a fruit every 4 s at the start, down to every 0.4 s from 80 points). Higher is calmer: 2 doubles the gap, 0.5 halves it. Applies immediately."
+    },
+    "bombDensity": {
+        "max": 1.0,
+        "min": 0.0,
+        "type": "float",
+        "default": 1.0,
+        "description": "Share of spawned bombs that are kept (1 = the game's default; 0 = no bombs). Slashing a bomb ends the run. Removed bombs are logged as BOMB_REMOVED with their SPAWN id, since the game logs SPAWN before the shim removes them. Applies to new spawns."
+    }
+}
