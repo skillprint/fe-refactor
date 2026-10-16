@@ -30,6 +30,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Clock Duration', 'Miss Allowances'];
         case 'snake-attack':
             return ['Snake Speed', 'Rotation Sensitivity'];
+        case 'space-trip':
+            return ['Game Speed', 'Fuel Burn Rate', 'Meteor Density'];
         case 'space-adventure-pinball':
             return ['Available Balls', 'Flipper Strength'];
         case 'sumagi':
