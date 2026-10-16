@@ -23,6 +23,11 @@ NOT_SLASHED => Everytime entity falls without slashed
 	- GREEN_APPLE/RED_APPLE/BANANA/COCONUT/DARK_COCONUT/LEMON/ORANGE/PEAR/STRAWBERRY/WATERMELON/BOMB (entity)
 	- 0 (score)
 ---------------
+BOMB_REMOVED => The Skillprint bombDensity knob removed a bomb right after it spawned (logged by skillprintShim.js, not the event sheet). The bomb's SPAWN was already logged; it was never on screen.
+	- BOMB_REMOVED (event)
+	- 0 (id) - the same id as its SPAWN
+	- 0 (score)
+---------------
 GAME_PAUSE => Player click on pause button
 	- GAME_PAUSE (event)
 ---------------

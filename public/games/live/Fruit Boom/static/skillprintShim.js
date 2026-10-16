@@ -14,7 +14,9 @@
 //   the score (4s, then 2s at 10, 1s at 15, 0.5s at 30, 0.4s at 80). The shim
 //   re-applies that ramp every tick, times this multiplier. Higher is calmer.
 // - bombDensity (0-1, default 1): share of spawned bombs that are kept. Slashing
-//   a bomb ends the run; missed fruit (3 allowed) still counts as before.
+//   a bomb ends the run; missed fruit (3 allowed) still counts as before. The
+//   sheet has already logged SPAWN for a bomb this removes, so the shim logs
+//   BOMB_REMOVED with the same id: that bomb was never on screen.
 //
 // It also reports the game's score to the portal as
 // { type: 'gameState', data: { score, isGameOver } }, the message Hextris sends,
@@ -38,7 +40,14 @@ window.adjustGame = function (obj) {
         const { parameterName, parameterValue } = obj;
         const range = PARAMS[parameterName];
         const value = Number(parameterValue);
-        if (!range || !Number.isFinite(value)) return;
+        if (!range) {
+            console.warn('[skillprintShim - Fruit Boom] Unknown parameter ' + parameterName);
+            return;
+        }
+        if (!Number.isFinite(value)) {
+            console.warn('[skillprintShim - Fruit Boom] Ignoring non-numeric ' + parameterName + ': ' + parameterValue);
+            return;
+        }
 
         const clamped = Math.min(range.max, Math.max(range.min, value));
         if (parameterName === "speedModifier") {
@@ -46,6 +55,7 @@ window.adjustGame = function (obj) {
         } else {
             tuning[parameterName] = clamped;
         }
+        console.log('[skillprintShim - Fruit Boom] ' + parameterName + ' = ' + clamped);
     }
 }
 
@@ -86,7 +96,13 @@ function attach(runtime) {
             if (seen.has(fruit)) continue;
             seen.add(fruit);
             if (fruit.animationFrame === BOMB_FRAME && Math.random() >= tuning.bombDensity) {
+                const id = fruit.instVars.ID;
                 fruit.destroy();
+                try {
+                    window.logEvent({ event: 'BOMB_REMOVED', id: id, score: vars.Score });
+                } catch (e) {
+                    // Telemetry must never break the game.
+                }
             }
         }
     });

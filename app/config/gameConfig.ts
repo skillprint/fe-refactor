@@ -100,6 +100,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'fruit-boom': {
     exitButtonPosition: 'bottom-right',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Fruit Boom/backend/game-scoring-config.json',
     customExitButton: {
       color: 'green',
       size: 'lg'
