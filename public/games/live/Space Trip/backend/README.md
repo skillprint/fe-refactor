@@ -1,0 +1,7 @@
+# Space Trip: backend configuration
+
+`game-scoring-config.json` is Space Trip's `GameScoringConfig` (marketplace `api_backend/scoring/models.py`): `parameter_definitions`, `adjustment_instructions` and `skill_adjustment_instructions`, plus `sdk_game_parameters`.
+
+- **Game record first.** Nothing in marketplace's code or migrations creates a Space Trip `Game`. `game_slug` here (`space-trip-ce24666e-…`) is the slug from the games fixture and the portal's cover image. Check the record and its real slug in production (Django admin → Games), and create it if it's missing. The portal's catalog only lists games the backend knows, and `app/hooks/useGamesBySkill.ts` injects a local Space Trip entry for the skill/mood lists.
+- **Auto-provisioning:** once the record exists, the game page fetches this file (`parameterManifest` for `space-trip` in `app/config/gameConfig.ts`) and sends `sdk_game_parameters` as `gameParameters` on session create. `games/views.py::_merge_game_parameters` creates the config on first play and **adds** new parameter names. It never removes or overwrites existing ones. The AI Guide doesn't send a manifest; it uses whatever config the backend already has.
+- **Do once in Django admin** (Scoring → Game Scoring Configs → `space-trip-…`): paste `adjustment_instructions` and `skill_adjustment_instructions` from the JSON (the merge doesn't set them). Alternatively, `PATCH /scoring/api/games/<slug>/scoring-config/` with the same fields.

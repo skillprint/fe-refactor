@@ -315,6 +315,25 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'space-trip':
+            // speedModifier (game clock), fuelBurnMultiplier, meteoriteDensity
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'speedModifier', parameterValue: 0.6 }]; // Slow motion
+                case 2: return [{ parameterName: 'speedModifier', parameterValue: 1.0 }]; // Default
+                case 3: return [{ parameterName: 'speedModifier', parameterValue: 1.5 }]; // Fastest
+                case 4: return [{ parameterName: 'fuelBurnMultiplier', parameterValue: 0.5 }]; // Fuel lasts twice as long
+                case 5: return [{ parameterName: 'fuelBurnMultiplier', parameterValue: 1.0 }]; // Default
+                case 6: return [{ parameterName: 'fuelBurnMultiplier', parameterValue: 2.0 }]; // Fuel lasts half as long
+                case 7: return [{ parameterName: 'meteoriteDensity', parameterValue: 0.25 }];
+                case 8: return [{ parameterName: 'meteoriteDensity', parameterValue: 1.0 }]; // Default
+                case 9: return [
+                    { parameterName: 'speedModifier', parameterValue: 1.4 },
+                    { parameterName: 'fuelBurnMultiplier', parameterValue: 1.6 },
+                    { parameterName: 'meteoriteDensity', parameterValue: 1.0 }
+                ]; // Hard mode
+                default:
+                    return [];
+            }
         case 'space-adventure-pinball':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'NUM_BALL', parameterValue: 10 }, { parameterName: 'FLIPPER_STRENGTH', parameterValue: 25 }];
