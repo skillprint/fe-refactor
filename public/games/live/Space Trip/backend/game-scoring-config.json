@@ -1,0 +1,59 @@
+{
+  "game_slug": "space-trip-ce24666e-4467-4a25-8658-0f86a0fdcb20",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "speedModifier": {
+      "type": "number",
+      "min": 0.6,
+      "max": 1.5,
+      "default": 1.0,
+      "description": "Game clock speed. Obstacles, spawns, fuel burn and the astronaut's own movement all scale with it: 0.6 is slow motion, 1.5 is 50% faster. Applies immediately and holds across restarts.",
+      "adjustment_guide": "The main pressure lever. Raise in steps of about 0.1 while the player survives long runs (high LEVEL_COMPLETE distance, few HIT). Lower after early HITs, or for relax."
+    },
+    "fuelBurnMultiplier": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "How fast the jetpack burns fuel, per second of game time. At 1 a full tank lasts about a minute; 2 halves that, 0.5 doubles it. Fuel boosters along the way refill the tank. Applies immediately.",
+      "adjustment_guide": "Raise (1.3-2) to make collecting fuel urgent, for planning and focus. Lower (0.5-0.8) for relax or when runs end by running dry rather than by HIT."
+    },
+    "meteoriteDensity": {
+      "type": "number",
+      "min": 0.25,
+      "max": 1.0,
+      "default": 1.0,
+      "description": "Share of spawned meteorites that are kept (1 = the game's default; it can't go higher). Planets and satellites are unaffected. Fewer meteorites leave more open space. Applies to new spawns.",
+      "adjustment_guide": "Lower (0.25-0.6) for relax, joy or a struggling player (many HIT by asteroid). Keep at 1 for grit and attention training."
+    }
+  },
+  "adjustment_instructions": "Space Trip: the player steers an astronaut with a jetpack by holding the pointer where they want to fly. Meteorites, planets and satellites come toward them; one hit ends the run. The jetpack burns fuel continuously, and fuel boosters along the way refill it; coins appear in shapes to collect. The run also ends when the tank runs dry. The goal is distance.\nLevers: speedModifier is the main pressure lever (everything moves faster, including the astronaut); fuelBurnMultiplier sets how urgently the player must detour for fuel; meteoriteDensity thins out the meteorites (1 is the game's maximum).\n- relax: speedModifier 0.6-0.8, fuelBurnMultiplier 0.5-0.8, meteoriteDensity 0.25-0.5.\n- focus: speedModifier 0.9-1.1, fuelBurnMultiplier 1.0-1.3, meteoriteDensity 0.75-1.\n- grit: speedModifier 1.2-1.5, fuelBurnMultiplier 1.3-2, meteoriteDensity 1; ease speedModifier down after early HITs.\n- joy: speedModifier 0.9-1.0, fuelBurnMultiplier 0.7-1.0, meteoriteDensity 0.5-0.75 (long runs, lots of coins).\nChange speedModifier in steps of about 0.1. When runs end by running dry, lower fuelBurnMultiplier; when they end by HIT, lower meteoriteDensity or speedModifier.",
+  "skill_adjustment_instructions": "Space Trip trains Action and Timing (steering through gaps), Attention (tracking several moving objects) and Planning (detouring for fuel and coins without flying into obstacles), with Perceptual Speed at higher speeds.\n- action, timing: speedModifier 1.1-1.4 with meteoriteDensity 0.75-1, so steering precision decides the run.\n- attention: meteoriteDensity 1 and speedModifier 0.9-1.2, so many objects must be tracked at once.\n- planning: fuelBurnMultiplier 1.3-2 with moderate speed (0.9-1.1), so every fuel booster is a decision.\n- perceptual speed: speedModifier 1.3-1.5, meteoriteDensity 0.5-0.75, so the challenge is reacting fast, not threading dense fields.",
+  "notes": "Space Trip's difficulty knobs (Jeremy's shim on _shared/skillprintC3.js), matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'space-trip' keys. game_slug is the slug from the games fixture; confirm the production Game record before relying on it.",
+  "sdk_game_parameters": [
+    {
+      "name": "speedModifier",
+      "type": "Float",
+      "description": "Game clock speed. Obstacles, spawns, fuel burn and the astronaut's own movement all scale with it: 0.6 is slow motion, 1.5 is 50% faster. Applies immediately and holds across restarts.",
+      "min_value": "0.6",
+      "max_value": "1.5",
+      "adjustment_guide": "The main pressure lever. Raise in steps of about 0.1 while the player survives long runs (high LEVEL_COMPLETE distance, few HIT). Lower after early HITs, or for relax."
+    },
+    {
+      "name": "fuelBurnMultiplier",
+      "type": "Float",
+      "description": "How fast the jetpack burns fuel, per second of game time. At 1 a full tank lasts about a minute; 2 halves that, 0.5 doubles it. Fuel boosters along the way refill the tank. Applies immediately.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "Raise (1.3-2) to make collecting fuel urgent, for planning and focus. Lower (0.5-0.8) for relax or when runs end by running dry rather than by HIT."
+    },
+    {
+      "name": "meteoriteDensity",
+      "type": "Float",
+      "description": "Share of spawned meteorites that are kept (1 = the game's default; it can't go higher). Planets and satellites are unaffected. Fewer meteorites leave more open space. Applies to new spawns.",
+      "min_value": "0.25",
+      "max_value": "1.0",
+      "adjustment_guide": "Lower (0.25-0.6) for relax, joy or a struggling player (many HIT by asteroid). Keep at 1 for grit and attention training."
+    }
+  ]
+}
