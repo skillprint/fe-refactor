@@ -7,6 +7,7 @@ import { submitMoodSurvey } from '../../app/api/api';
 import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
 import { titleFromSlug } from '../../lib/skillIcons';
 import EmailPromptCard from '../../app/components/EmailPromptCard';
+import ScoreComparison, { ComparableMetric } from './ScoreDistribution';
 
 interface ResultMetric {
   name: string;
@@ -223,6 +224,18 @@ export default function GameResultDialog({
 
   const resolvedTargetMood = session?.mood?.targetMood ? displayName(session.mood.targetMood) : targetMood;
 
+  // "How you compare": the measured, non-estimated scores this session produced,
+  // skills first (highest first, as sorted above) then the moods. A score needs a
+  // slug to look up its population, so the SDK-only fallback has nothing to compare.
+  const comparableMetrics: ComparableMetric[] = [
+    ...skillsData
+      .filter((s) => s.slug && !s.isEstimated && s.isExercisedByGame !== false && s.score > 0)
+      .map((s) => ({ pillar: 'cognition' as const, slug: s.slug!, name: s.name, score: s.score, band: s.band })),
+    ...moodsData
+      .filter((m) => m.slug && !m.isEstimated && m.score > 0)
+      .map((m) => ({ pillar: 'mood' as const, slug: m.slug!, name: m.name, score: m.score, band: m.band })),
+  ];
+
   const renderMetric = (metric: ResultMetric, index: number, kind: 'Skill' | 'Mood') => (
     <div key={`${kind}-${metric.slug || metric.name}-${index}`} aria-label={`${kind} score: ${metric.name}`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={metric.score} className="game-result__metric layout-grid" data-score={metric.score} data-band={metric.band} data-estimated={metric.isEstimated ? 'true' : undefined} role="progressbar">
       <span className="ui-label game-result__metric-name layout-block">{metric.name}</span>
@@ -422,6 +435,8 @@ export default function GameResultDialog({
                 </div>
                 {moodsData.length === 0 && renderEmpty(isProcessing ? 'Reading the mood this session moved.' : 'No mood scores were recorded for this session.')}
               </section>
+
+              <ScoreComparison metrics={comparableMetrics} useSyntheticData={useSyntheticData} />
             </>
           )}
 

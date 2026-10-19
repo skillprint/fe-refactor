@@ -4772,6 +4772,119 @@ html:is([data-theme="light"], [data-surface="light"]) :is(.page--ontology-wheel,
   color: var(--band);
 }
 
+/* ---------------------------------------------------------------------------
+   How you compare · one score against every player's level (ScoreComparison)
+   -------------------------------------------------------------------------- */
+
+.page--game-session .score-dist {
+  --band: var(--panel-navy-300);
+  padding: var(--space-14);
+  gap: var(--space-12);
+  border: 1px solid var(--result-line);
+  border-radius: var(--radius-compact);
+  background: var(--result-fill);
+}
+
+.page--game-session .score-dist[data-band="green"] { --band: var(--core-green-500); }
+.page--game-session .score-dist[data-band="blue"]  { --band: var(--personality-blue-500); }
+.page--game-session .score-dist[data-band="amber"] { --band: var(--skills-orange-500); }
+.page--game-session .score-dist[data-band="red"]   { --band: var(--skills-pink-500); }
+
+.page--game-session .score-dist__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.page--game-session .score-dist__chip-score {
+  margin-left: var(--space-6);
+  font-family: var(--font-mono);
+  opacity: 0.64;
+}
+
+.page--game-session .score-dist__chart {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Ten columns on one baseline; the top band is headroom for the "You" flag. */
+.page--game-session .score-dist__bars {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 104px;
+  padding-top: var(--space-20);
+  border-bottom: 1px solid var(--result-line);
+}
+
+.page--game-session .score-dist__bin {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.page--game-session .score-dist__bar {
+  display: block;
+  width: 100%;
+  max-width: 24px;
+  border-radius: 4px 4px 0 0;
+  background: color-mix(in srgb, var(--geistface-grey-200) 24%, transparent);
+  transition: height 320ms ease;
+}
+
+.page--game-session .score-dist__bin[data-you] .score-dist__bar {
+  background: var(--band);
+}
+
+.page--game-session .score-dist__you {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--app-text-xs-font-size);
+  line-height: 1;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.page--game-session .score-dist__you::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  margin: 3px auto 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+}
+
+.page--game-session .score-dist__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  font-family: var(--font-mono);
+  opacity: 0.56;
+}
+
+.page--game-session .score-dist__headline {
+  font-size: var(--app-text-md-font-size);
+  line-height: var(--app-text-md-line-height);
+  font-weight: var(--weight-semibold);
+}
+
+.page--game-session .score-dist__sentence {
+  opacity: 0.72;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page--game-session .score-dist__bar { transition: none; }
+}
+
+
 .page--game-session .game-result__mood {
   padding: var(--space-14);
   border: 1px solid var(--result-line);
