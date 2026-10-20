@@ -10,7 +10,8 @@ import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome, type GameResultDi
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
 import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
 import React from 'react';
-import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
+import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter, epochNow } from '../../lib/skillprintSdk';
+import { applyScoreUpdate, applySnapshot, reportedGameOver, reportedScore, stampState, toJsonState, MAX_GAME_STATE_BYTES, type GameState } from '../../lib/gameState';
 import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
@@ -44,12 +45,6 @@ interface GameResults {
     outcome: SessionOutcome;
     /** Under MIN_SCORED_SECONDS: shown without skill or mood scores. */
     unscored?: boolean;
-}
-
-/** What the game last told the shell about itself, from `gameState` / `GAME_SCORE_UPDATE`. */
-interface ReportedGameState {
-    score?: number;
-    isGameOver?: boolean;
 }
 
 async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParameter[] | undefined> {
@@ -93,8 +88,12 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     const [latestAdjustment, setLatestAdjustment] = useState<Adjustment | null>(null);
     const processedAdjustmentsRef = useRef<Set<string>>(new Set());
     const lastAdjustmentTimeRef = useRef<number>(0);
-    // Null until the game reports its state; most games never do.
-    const reportedGameStateRef = useRef<ReportedGameState | null>(null);
+    // The game's latest state (lib/gameState), null until it reports one. It goes
+    // to the backend with every screenshot, and the results read its score.
+    const reportedGameStateRef = useRef<GameState | null>(null);
+    // When that state was taken, in epoch ms.
+    const reportedAtRef = useRef<number | null>(null);
+    const stateDropWarnedRef = useRef(false);
     // Player inputs in the game frame since the last upload. Null when the frame
     // can't be listened to, so the backend treats the count as unknown, not as idle.
     const inputCountRef = useRef<number | null>(null);
@@ -237,8 +236,10 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                 setIsGamePaused(false);
                 break;
             case 'gameState':
+                recordGameStateSnapshot(data);
+                break;
             case 'GAME_SCORE_UPDATE':
-                recordReportedGameState(data);
+                recordScoreUpdate(data);
                 break;
             case 'gameEvent':
                 recordGameEvent(data);
@@ -267,11 +268,37 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         skillprintClientRef.current?.postScreenshots(...args).catch(() => {});
     };
 
-    const recordReportedGameState = (data: any) => {
-        const next: ReportedGameState = { ...reportedGameStateRef.current };
-        if (typeof data?.score === 'number') next.score = data.score;
-        if (typeof data?.isGameOver === 'boolean') next.isGameOver = data.isGameOver;
-        reportedGameStateRef.current = next;
+    const warnStateDropped = () => {
+        if (stateDropWarnedRef.current) return;
+        stateDropWarnedRef.current = true;
+        console.warn(`Game state dropped: it must be a JSON object under ${MAX_GAME_STATE_BYTES} bytes. Only its score is kept.`);
+    };
+
+    // A full snapshot from the game replaces its last one (lib/gameState).
+    // False if it couldn't be kept, in which case only its score is.
+    const recordGameStateSnapshot = (data: any, at: number = epochNow()): boolean => {
+        const snapshot = toJsonState(data);
+        if (!snapshot) {
+            warnStateDropped();
+            reportedGameStateRef.current = applyScoreUpdate(reportedGameStateRef.current, data);
+            return false;
+        }
+        reportedGameStateRef.current = applySnapshot(reportedGameStateRef.current, snapshot);
+        reportedAtRef.current = at;
+        return true;
+    };
+
+    const recordScoreUpdate = (data: any) => {
+        reportedGameStateRef.current = applyScoreUpdate(reportedGameStateRef.current, data);
+        if (reportedAtRef.current === null) reportedAtRef.current = epochNow();
+    };
+
+    /** The latest state as uploaded, stamped with where and when it was taken. */
+    const stateForUpload = (source: 'frame' | 'latest') => {
+        const timeline = skillprintClientRef.current?.timeline;
+        const at = reportedAtRef.current;
+        const offsetMs = at !== null && timeline?.isStarted ? timeline.offsetMs(at) : null;
+        return stampState(reportedGameStateRef.current, { source, offsetMs });
     };
 
     const handleScreenshot = async (event: MessageEvent) => {
@@ -286,10 +313,13 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                     const fetchedResponse = await fetch(base64String);
                     const blob = await fetchedResponse.blob();
 
-                    // Each chunk carries the game's latest state, so the session keeps a score
-                    // even if the final upload never arrives.
+                    // Each frame carries the game's state: the one taken with it, if the game
+                    // provides `window.skillprintGameState`, else its latest report. That also
+                    // keeps the session's score if the final upload never arrives.
                     const capturedAt = typeof base64Data.capturedAt === 'number' ? base64Data.capturedAt : null;
-                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount(), capturedAt);
+                    const withFrame = base64Data.gameState != null
+                        && recordGameStateSnapshot(base64Data.gameState, capturedAt ?? epochNow());
+                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, stateForUpload(withFrame ? 'frame' : 'latest'), takeInputCount(), capturedAt);
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
@@ -410,7 +440,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
 
         // Only the game knows its score; never invent one.
         const results: GameResults = {
-            score: typeof data?.score === 'number' ? data.score : reportedGameStateRef.current?.score,
+            score: typeof data?.score === 'number' ? data.score : reportedScore(reportedGameStateRef.current),
             time: playTime,
             outcome: 'complete',
             unscored: playTime < MIN_SCORED_SECONDS,
@@ -420,10 +450,10 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         stopIframe();
 
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-            const finalState = typeof results.score === 'number'
-                ? { ...reportedGameStateRef.current, score: results.score, isGameOver: true }
-                : reportedGameStateRef.current;
-            uploadScreenshots(skillprintSessionIdRef.current, [], true, finalState, takeInputCount());
+            if (typeof results.score === 'number') {
+                reportedGameStateRef.current = { ...reportedGameStateRef.current, score: results.score, isGameOver: true };
+            }
+            uploadScreenshots(skillprintSessionIdRef.current, [], true, stateForUpload('latest'), takeInputCount());
         }
 
         // Navigate to review page with sessionId
@@ -458,6 +488,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         setAdjustmentsApplied(0);
         adjustmentsCountRef.current = 0;
         reportedGameStateRef.current = null;
+        reportedAtRef.current = null;
 
         // Reload the iframe to restart the game
         if (iframeRef.current) {
@@ -483,9 +514,9 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             // Only a game that says it's over counts as complete.
             const reported = reportedGameStateRef.current;
             const exitResults: GameResults = {
-                score: reported?.score,
+                score: reportedScore(reported),
                 time: currentTime,
-                outcome: reported?.isGameOver ? 'complete' : reported ? 'exited' : 'unknown',
+                outcome: reportedGameOver(reported) ? 'complete' : reported ? 'exited' : 'unknown',
                 unscored: currentTime < MIN_SCORED_SECONDS,
             };
 
@@ -493,7 +524,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             shouldPollRef.current = false;
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
-                uploadScreenshots(skillprintSessionIdRef.current, [], true, reported, takeInputCount());
+                uploadScreenshots(skillprintSessionIdRef.current, [], true, stateForUpload('latest'), takeInputCount());
             }
 
             setGameResults(exitResults);
@@ -515,6 +546,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
         reportedGameStateRef.current = null;
+        reportedAtRef.current = null;
     }, [resolvedGame, decodedSlug]);
 
     // A session started before the player's token arrives is recorded for nobody:

@@ -61,6 +61,19 @@
   const MAX_WIDTH = 640;
   const scratch = document.createElement('canvas');
 
+  // window.skillprintGameState(), if the game (or its shim) defines it: the
+  // state at the moment of the screenshot (public/games/GAME_STATE.md).
+  function readGameState() {
+    if (typeof window.skillprintGameState !== 'function') return undefined;
+    try {
+      const state = window.skillprintGameState();
+      return state === undefined ? undefined : JSON.parse(JSON.stringify(state));
+    } catch (e) {
+      console.warn('[skillprint] skillprintGameState failed', e);
+      return undefined;
+    }
+  }
+
   function shoot() {
     const src = document.querySelector('canvas');
     if (document.hidden || !src || !src.width) return;
@@ -70,7 +83,8 @@
     try {
       const capturedAt = epochNow();
       scratch.getContext('2d').drawImage(src, 0, 0, scratch.width, scratch.height);
-      window.parent.postMessage({ type: 'screenshot', dataUrl: scratch.toDataURL('image/jpeg', 0.72), capturedAt: capturedAt }, '*');
+      const gameState = readGameState();
+      window.parent.postMessage({ type: 'screenshot', dataUrl: scratch.toDataURL('image/jpeg', 0.72), capturedAt: capturedAt, gameState: gameState }, '*');
     } catch (e) {
       console.warn('[skillprint] screenshot failed', e);
     }
