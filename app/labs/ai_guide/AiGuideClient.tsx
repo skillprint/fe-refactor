@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { mapSlugToGamePath } from '@/lib/localGames';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores, epochNow } from '../../lib/skillprintSdk';
 import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
+import { applyScoreUpdate, applySnapshot, stampState, toJsonState, type GameState } from '../../lib/gameState';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { resolveCatalogGame } from '@/lib/gameSlug';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
@@ -138,6 +139,10 @@ export default function AiGuideClient() {
   const watchSentRef = useRef(0);
   // When this run's session clock started (epoch ms), so watch readings from before it stay out.
   const sessionStartEpochRef = useRef<number | null>(null);
+  // The game's latest state (lib/gameState) and when it was taken (epoch ms). It
+  // goes to the backend with every frame, as on the game page.
+  const gameStateRef = useRef<GameState | null>(null);
+  const gameStateAtRef = useRef<number | null>(null);
 
   const game = GAMES.find(g => g.slug === selectedGame) || GAMES[0];
   // Canonical catalog slug for the selected game; the ref feeds the message handler closure.
@@ -247,6 +252,8 @@ export default function AiGuideClient() {
     setWatchSent(0);
     watchSentRef.current = 0;
     sessionStartEpochRef.current = null;
+    gameStateRef.current = null;
+    gameStateAtRef.current = null;
     sessionEndedRef.current = false;
     processedAdjustmentsRef.current.clear();
     shouldPollRef.current = false;
@@ -367,6 +374,28 @@ export default function AiGuideClient() {
   };
 
   // Messages from the game frame
+  // A full snapshot replaces the last one; false if it couldn't be kept.
+  const recordGameState = (data: unknown, at: number): boolean => {
+    const snapshot = toJsonState(data);
+    if (!snapshot) {
+      gameStateRef.current = applyScoreUpdate(gameStateRef.current, data);
+      return false;
+    }
+    gameStateRef.current = applySnapshot(gameStateRef.current, snapshot);
+    gameStateAtRef.current = at;
+    return true;
+  };
+
+  /** The latest state as uploaded, stamped with where and when it was taken. */
+  const stateForUpload = (source: 'frame' | 'latest') => {
+    const timeline = clientRef.current?.timeline;
+    const at = gameStateAtRef.current;
+    return stampState(gameStateRef.current, {
+      source,
+      offsetMs: at !== null && timeline?.isStarted ? timeline.offsetMs(at) : null,
+    });
+  };
+
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
@@ -412,6 +441,10 @@ export default function AiGuideClient() {
         }
       }
 
+      // The game's own state, as GameClient handles it.
+      if (type === 'gameState') recordGameState(eventData?.data, epochNow());
+      if (type === 'GAME_SCORE_UPDATE') gameStateRef.current = applyScoreUpdate(gameStateRef.current, eventData?.data);
+
       if (type === 'screenshot' && clientRef.current && sessionId && sessionStartedRef.current) {
         if (sessionEndedRef.current) return;
         try {
@@ -423,12 +456,16 @@ export default function AiGuideClient() {
           // Stamped on arrival, so the events logged up to this frame (biometric
           // readings among them) ride with it and later ones wait for the next.
           const capturedAt = epochNow();
+          // The state taken with this frame, if the game provides one (lib/gameState).
+          const frameState = eventData.gameState ?? eventData.data?.gameState;
+          const withFrame = frameState != null
+            && recordGameState(frameState, typeof eventData.capturedAt === 'number' ? eventData.capturedAt : capturedAt);
           setFramesCaptured(n => n + 1);
           clientRef.current.setLastScreenshotDataURI(base64String);
           const res = await fetch(base64String);
           const blob = await res.blob();
           // A failed upload (e.g. the session already closed) is logged by the client.
-          clientRef.current.postScreenshots(sessionId, [blob], false, null, null, capturedAt).catch(() => {});
+          clientRef.current.postScreenshots(sessionId, [blob], false, stateForUpload(withFrame ? 'frame' : 'latest'), null, capturedAt).catch(() => {});
         } catch (e) {
           console.error('Failed to process screenshot', e);
         }
@@ -458,7 +495,7 @@ export default function AiGuideClient() {
     addLog('Ending the session: sending the final batch.', 'success');
     if (clientRef.current && sessionId) {
       try {
-        await clientRef.current.postScreenshots(sessionId, [], true);
+        await clientRef.current.postScreenshots(sessionId, [], true, stateForUpload('latest'));
       } catch (e) {
         console.error('Failed to post final screenshot chunk', e);
         addLog('The final batch could not be sent.', 'error');

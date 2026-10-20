@@ -73,3 +73,46 @@ var Skillprint = {
     }, 100);
   }
 };
+
+// Hextris's full state, sent with every screenshot (window.skillprintGameState,
+// public/games/GAME_STATE.md) and every 500 ms as a gameState message
+// (js/update.js), as data for scoring and for training game-playing models.
+// - rotation: how many sixths the hex has turned (MainHex.position, 0-5).
+// - stacks: for each side of the hex (sides turn with it), the colours stacked
+//   on it, nearest the hex first.
+// - falling: each block still falling: its screen lane (0-5, as
+//   Block.fallingLane), the side it would land on at the current rotation,
+//   its colour, and its distance out, from 1 (just spawned) to 0 (at the hex).
+// - combo: whether a combo is running, so the next clear multiplies.
+window.skillprintGameState = function () {
+  var hex = typeof MainHex !== "undefined" ? MainHex : null;
+  var sides = hex ? hex.sides : 6;
+  var rotation = hex ? ((hex.position % sides) + sides) % sides : 0;
+  var startDist = typeof settings !== "undefined" ? settings.startDist * settings.scale : 1;
+  var stacks = hex && hex.blocks
+    ? hex.blocks.map(function (side) { return side.map(function (b) { return Skillprint.colorName(b.color); }); })
+    : [];
+  var falling = (typeof blocks !== "undefined" ? blocks : [])
+    .filter(function (b) { return !b.settled && !b.removed; })
+    .map(function (b) {
+      return {
+        lane: b.fallingLane,
+        side: (sides - b.fallingLane + rotation) % sides,
+        color: Skillprint.colorName(b.color),
+        distance: Math.round(Math.max(0, b.distFromHex / startDist) * 1000) / 1000
+      };
+    });
+  var state = typeof gameState !== "undefined" ? gameState : 0;
+  return {
+    score: typeof score !== "undefined" ? score : 0,
+    difficulty: typeof waveone !== "undefined" ? waveone.difficulty : 0,
+    gameState: state,
+    isGameOver: state === 2,
+    rotation: rotation,
+    stacks: stacks,
+    falling: falling,
+    blocksOnScreen: falling.length,
+    lockedBlocks: stacks.reduce(function (n, side) { return n + side.length; }, 0),
+    combo: !!(hex && typeof settings !== "undefined" && hex.ct - hex.lastCombo < settings.comboTime)
+  };
+};
