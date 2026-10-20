@@ -417,7 +417,7 @@ export default function AiGuideClient() {
       } else if (
         type === 'skillprint_keydown' ||
         type === 'skillprint_mousedown' ||
-        (type === 'gameEvent' && (eventData?.event === 'LEVEL_START' || eventData?.event === 'LEVEL_RESTART'))
+        (type === 'gameEvent' && ['LEVEL_START', 'LEVEL_RESTART'].includes(eventData?.data?.event ?? eventData?.event))
       ) {
         isGameStart = true;
       }
@@ -441,9 +441,13 @@ export default function AiGuideClient() {
         }
       }
 
-      // The game's own state, as GameClient handles it.
+      // The game's own state and events, as GameClient handles them.
       if (type === 'gameState') recordGameState(eventData?.data, epochNow());
       if (type === 'GAME_SCORE_UPDATE') gameStateRef.current = applyScoreUpdate(gameStateRef.current, eventData?.data);
+      if (type === 'gameEvent' && clientRef.current && sessionStartedRef.current && !sessionEndedRef.current) {
+        const { event: name, at, ...rest } = eventData?.data ?? {};
+        if (typeof name === 'string' && name) clientRef.current.recordEvent(name, rest, typeof at === 'number' ? at : undefined);
+      }
 
       if (type === 'screenshot' && clientRef.current && sessionId && sessionStartedRef.current) {
         if (sessionEndedRef.current) return;
