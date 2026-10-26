@@ -121,6 +121,11 @@ export const gameConfigs: Record<string, GameConfig> = {
     parameterManifest: '/games/live/Gummy Blocks/backend/game-scoring-config.json',
   },
 
+  'trails-webar': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Trails/backend/game-scoring-config.json',
+  },
   'hextris': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
@@ -424,6 +429,16 @@ export const gameDetails: Record<string, GameDetails> = {
     estimatedTime: '5-15 minutes',
     skills: ['Pattern Recognition', 'Strategic Thinking', 'Visual Memory'],
     instructions: 'Swap adjacent tiles to create matches of 3 or more. Clear objectives to complete each level.'
+  },
+  'trails-webar': {
+    name: 'Trails',
+    description: 'Connect trails of nodes in a 360° world; an endless mode adapts each wave to your mood',
+    image: '/games/live/Trails/trails.png',
+    category: 'Attention',
+    difficulty: 'Medium',
+    estimatedTime: '2-6 minutes',
+    skills: ['Visual Search', 'Sustained Attention', 'Cognitive Flexibility', 'Spatial Reasoning'],
+    instructions: 'Find the nodes in order and hold your gaze (or the pointer) on each one to connect it. On a phone, turn to look around; on desktop, aim with the mouse and rotate with the arrow keys. Pick Relax or Focus on the Mood Run card for an endless run that tunes every wave to you.'
   },
   'hextris': {
     name: 'Hextris',
@@ -927,6 +942,7 @@ export const knownGameSlugs = [
   'gems-of-hanoi',
   'gummy-blocks',
   'hextris',
+  'trails-webar',
   'hiding-master',
   'i-love-hue',
   'impossible-10',

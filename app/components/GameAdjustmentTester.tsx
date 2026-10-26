@@ -721,6 +721,22 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'trails-webar':
+            // Mirrors the game's README: 1-2 node count, 3 orbit, 4-6 symbol set, 7-8 guidance, 9 extreme.
+            // nodeDimension also accepts the index 0-3 (numbers, letters, alternating, emojis), which is what the backend sends.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'totalNodesCount', parameterValue: 5 }];   // Fewer nodes (easy)
+                case 2: return [{ parameterName: 'totalNodesCount', parameterValue: 15 }];  // More nodes
+                case 3: return [{ parameterName: 'rotateNodesAroundUser', parameterValue: 1 }, { parameterName: 'rotationSpeed', parameterValue: 8.0 }]; // Orbiting nodes
+                case 4: return [{ parameterName: 'nodeDimension', parameterValue: 'letters' }];
+                case 5: return [{ parameterName: 'nodeDimension', parameterValue: 'emojis' }];
+                case 6: return [{ parameterName: 'nodeDimension', parameterValue: 'alternating' }];
+                case 7: return [{ parameterName: 'arrowHelpfulness', parameterValue: 1 }];  // Arrow only
+                case 8: return [{ parameterName: 'arrowHelpfulness', parameterValue: 0 }];  // No guidance
+                case 9: return [{ parameterName: 'totalNodesCount', parameterValue: 25 }, { parameterName: 'rotateNodesAroundUser', parameterValue: 1 }, { parameterName: 'rotationSpeed', parameterValue: 15.0 }, { parameterName: 'arrowHelpfulness', parameterValue: 0 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

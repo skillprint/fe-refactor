@@ -59,7 +59,9 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'typing-speed': 'Typing Speed',
     'guided-breathing': 'Guided Breathing',
     'procedural-maze': 'Procedural Maze',
-    'order-rush': 'Order Rush'
+    'order-rush': 'Order Rush',
+    // Unity WebGL build from the trails_webar repo (TMT -> Build WebGL (Release)).
+    'trails-webar': 'Trails'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

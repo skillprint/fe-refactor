@@ -1,0 +1,37 @@
+{
+    "totalNodesCount": {
+        "max": 25,
+        "min": 5,
+        "type": "integer",
+        "default": 10,
+        "description": "The total number of trail nodes generated on the game field (per wave in the endless mode). Range: 5 to 25."
+    },
+    "rotateNodesAroundUser": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 0,
+        "description": "Whether the trail nodes rotate slowly around the player camera to increase visual search difficulty. 0 for false, 1 for true."
+    },
+    "rotationSpeed": {
+        "max": 20.0,
+        "min": 1.0,
+        "type": "float",
+        "default": 5.0,
+        "description": "Rotation speed in degrees per second if rotateNodesAroundUser is active. Range: 1.0 to 20.0."
+    },
+    "nodeDimension": {
+        "max": 3,
+        "min": 0,
+        "type": "integer",
+        "default": 0,
+        "description": "The sequencing symbols and combination pattern, as an index: 0 numbers (1,2,3...), 1 letters (A,B,C...), 2 alternating numbers and letters (1,A,2,B...), 3 emojis. The names 'numbers', 'letters', 'alternating' and 'emojis' are also accepted."
+    },
+    "arrowHelpfulness": {
+        "max": 2,
+        "min": 0,
+        "type": "integer",
+        "default": 2,
+        "description": "Level of directional guidance. 0 for None (hard reticle only), 1 for Medium (off-screen directional arrow pointer), 2 for High (arrow pointer + on-screen target highlight circle)."
+    }
+}
