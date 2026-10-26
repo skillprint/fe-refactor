@@ -4,6 +4,9 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import PortalLayout from '@/components/PortalLayout';
+import ShareSheet from '@/components/ShareSheet';
+import { gameEmbedPath, gameSharePayload } from '@/lib/share';
+import { siteUrl } from '@/lib/siteUrl';
 import { PortalPageLayout, PortalPageMain, PortalPageRail, PortalSection } from '@/components/LayoutGrid';
 import { PortalSectionTitle, PortalSectionHint } from '@/components/Typography';
 import { GameTile, GameTileSkill } from '@/components/GameTile';
@@ -98,6 +101,7 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const [boardPeriod, setBoardPeriod] = useState<LeaderboardPeriod>('all');
   const leaderboard = useLibraryGameLeaderboard(canonicalSlug, boardPeriod, synthetic);
   const { recommendedGames } = useRecommendedGames(10);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const scores = useMemo(() => profileDimensionMap(profile), [profile]);
 
@@ -274,7 +278,20 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
                     <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
                     <span data-gd-play-label="">Play {game.name}</span>
                   </Link>
+                  <button type="button" className="gd-share button button--secondary button--lg no-grow" data-gd-share="" onClick={() => setShareOpen(true)}>
+                    <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-share"></use></svg>
+                    Share
+                  </button>
                 </div>
+                {shareOpen && (
+                  <ShareSheet
+                    open={shareOpen}
+                    onClose={() => setShareOpen(false)}
+                    heading={`Share ${game.name}`}
+                    payload={gameSharePayload(siteUrl(), { ...game, skills: skillCards }, game.screenshot || game.thumbnail)}
+                    embedUrl={`${siteUrl()}${gameEmbedPath(game.baseSlug)}`}
+                  />
+                )}
               </div>
             </div>
           </PortalSection>
