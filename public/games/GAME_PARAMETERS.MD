@@ -845,3 +845,41 @@ Original diner-style time-management game (own art/branding, not affiliated with
 - `7`: `{'tableCount': 8}` (Full dining room)
 - `8`: `{'sessionLengthSec': 300}` (Longer shift)
 - `9`: `{'customerSpawnIntervalMs': 1600, 'patienceSec': 12, 'difficultyMultiplier': 1.5}` (Impossible mode)
+
+---
+
+### Trails WebAR
+Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
+
+**Parameters**
+- `totalNodesCount` (Integer, 5-25): Nodes in the trail (per wave in the endless mode). Default 10.
+- `rotateNodesAroundUser` (Integer 0/1 or Boolean): Nodes slowly orbit the player. Default 0.
+- `rotationSpeed` (Float, 1-20): Orbit speed in degrees per second when rotation is on. Default 5.
+- `nodeDimension` (Integer 0-3, or String): 0 `numbers`, 1 `letters`, 2 `alternating` (1-A-2-B), 3 `emojis`. Default 0.
+- `arrowHelpfulness` (Integer, 0-2): 0 none, 1 off-screen arrow, 2 arrow plus on-screen highlight. Default 2.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "totalNodesCount",
+  "parameterValue": 8
+}
+```
+
+```json
+{
+  "parameterName": "nodeDimension",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ totalNodesCount: 5 }` (Fewer nodes)
+- `2`: `{ totalNodesCount: 15 }` (More nodes)
+- `3`: `{ rotateNodesAroundUser: 1, rotationSpeed: 8 }` (Orbiting nodes)
+- `4`: `{ nodeDimension: "letters" }`
+- `5`: `{ nodeDimension: "emojis" }`
+- `6`: `{ nodeDimension: "alternating" }`
+- `7`: `{ arrowHelpfulness: 1 }` (Arrow only)
+- `8`: `{ arrowHelpfulness: 0 }` (No guidance)
+- `9`: `{ totalNodesCount: 25, rotateNodesAroundUser: 1, rotationSpeed: 15, arrowHelpfulness: 0 }` (Extreme)
