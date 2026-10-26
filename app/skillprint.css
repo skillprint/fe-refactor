@@ -7447,6 +7447,90 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
 }
 
 /* --------------------------------------------------------------------------
+   Game detail · leaderboard
+   The top players by the game's own score, one row each; the viewer's row
+   is tinted and the top three ranks read darker than the rest.
+   -------------------------------------------------------------------------- */
+
+.page--portal-game-detail .gd-board {
+  gap: var(--space-16);
+}
+
+.page--portal-game-detail .gd-board__list {
+  list-style: none;
+  display: grid;
+}
+
+.page--portal-game-detail .gd-board__row {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto auto;
+  gap: var(--space-12);
+  align-items: center;
+  padding: var(--space-8) var(--space-12);
+  border-block-end: 1px solid var(--surface-border);
+}
+
+.page--portal-game-detail .gd-board__row:last-child {
+  border-block-end: 0;
+}
+
+.page--portal-game-detail .gd-board__row[data-own="true"] {
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--gd-tone) 14%, transparent);
+  font-weight: var(--weight-semibold);
+}
+
+.page--portal-game-detail .gd-board__rank {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  color: var(--ui-muted);
+}
+
+.page--portal-game-detail .gd-board__row[data-podium="true"] .gd-board__rank {
+  color: inherit;
+}
+
+.page--portal-game-detail .gd-board__rank .sp-icon {
+  color: var(--gd-tone);
+}
+
+.page--portal-game-detail .gd-board__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page--portal-game-detail .gd-board__when {
+  font-size: var(--app-text-xs-font-size);
+  line-height: var(--app-text-xs-line-height);
+  white-space: nowrap;
+}
+
+.page--portal-game-detail .gd-board__score {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.page--portal-game-detail :is(.gd-board__empty, .gd-board__standing) {
+  max-width: var(--measure-md);
+}
+
+@media (max-width: 480px) {
+  .page--portal-game-detail .gd-board__row {
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  }
+
+  .page--portal-game-detail .gd-board__when {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Skill breakdown
    -------------------------------------------------------------------------- */
 

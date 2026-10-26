@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import PortalLayout from '@/components/PortalLayout';
@@ -10,6 +10,7 @@ import { GameTile, GameTileSkill } from '@/components/GameTile';
 import { SkillCard, SkillCardProps } from '@/components/SkillCard';
 import { GameDetailRecord } from '@/components/GameDetailRecord';
 import { GameDetailBadge } from '@/components/GameDetailBadge';
+import { GameDetailLeaderboard } from '@/components/GameDetailLeaderboard';
 import { IconInfoCardWithDescription } from '@/components/IconInfoCardWithDescription';
 import { GameRail } from '@/components/GameRail';
 import BuckyballLoading from '@/app/components/BuckyballLoading';
@@ -23,6 +24,8 @@ import { allTaxonomySkills, findTaxonomySkill } from '@/lib/models/portal/Taxono
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
 import { useLibraryGameBadges } from '@/lib/models/portal/useLibraryGameBadges';
+import { useLibraryGameLeaderboard } from '@/lib/models/portal/useLibraryGameLeaderboard';
+import type { LeaderboardPeriod } from '@/lib/models/portal/LibraryGameLeaderboard';
 import type { LibraryGame } from '@/lib/models/portal/LibraryGame';
 import type { TaxonomySkillsResponse } from '@/lib/models/portal/TaxonomySkills';
 import { useRecommendedGames } from '@/app/hooks/useRecommendedGames';
@@ -92,6 +95,8 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const { data: taxonomy } = useTaxonomySkills();
   const { data: profile } = useProfileAggregate();
   const { data: gameBadges } = useLibraryGameBadges(canonicalSlug, synthetic);
+  const [boardPeriod, setBoardPeriod] = useState<LeaderboardPeriod>('all');
+  const leaderboard = useLibraryGameLeaderboard(canonicalSlug, boardPeriod, synthetic);
   const { recommendedGames } = useRecommendedGames(10);
 
   const scores = useMemo(() => profileDimensionMap(profile), [profile]);
@@ -148,6 +153,10 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   // The badges this game works toward and how far the player is (SKI-182);
   // empty until the endpoint answers, so the card only renders with data.
   const badges = gameBadges?.badges ?? [];
+  // The leaderboard is secondary to the page: a backend without the board
+  // (404) or one that fails to answer hides the section rather than
+  // showing an error in the middle of the game.
+  const showLeaderboard = !leaderboard.notFound && !leaderboard.error && (leaderboard.isLoading || !!leaderboard.data);
 
   if (notFound) {
     return (
@@ -288,6 +297,17 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
                 ))}
               </div>
             </PortalSection>
+          )}
+
+          {/* Leaderboard */}
+          {showLeaderboard && (
+            <GameDetailLeaderboard
+              gameTitle={game.name}
+              board={leaderboard.data}
+              isLoading={leaderboard.isLoading}
+              period={boardPeriod}
+              onPeriodChange={setBoardPeriod}
+            />
           )}
 
           {/* Adapts to You */}
