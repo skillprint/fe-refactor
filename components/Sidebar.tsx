@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useLogoMotion } from './useLogoMotion';
+import ShareSiteButton from './ShareSiteButton';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -112,6 +113,7 @@ export default function Sidebar() {
         <div className="sp-side-nav__group portal-sidebar__utilities">
           <Link title="Profile" href="/profile" className={`sp-side-nav__link ${pathname.startsWith('/profile') ? 'is-active' : ''}`} aria-current={pathname.startsWith('/profile') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-user"></use></svg><span className="sp-side-nav__label">Profile</span></Link>
           <Link title="Settings" className={`sp-side-nav__link ${pathname.startsWith('/settings') ? 'is-active' : ''}`} href="/settings" aria-current={pathname.startsWith('/settings') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-settings"></use></svg><span className="sp-side-nav__label">Settings</span></Link>
+          <ShareSiteButton className="sp-side-nav__link sp-side-nav__link--button" />
         </div>
       </div>
     </aside>

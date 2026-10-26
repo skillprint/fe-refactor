@@ -11,6 +11,7 @@ import { AuthGuard } from "./components/AuthGuard";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Suspense } from "react";
 import PortalSprite from "@/components/PortalSprite";
+import { siteUrl } from "@/lib/siteUrl";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -29,11 +30,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Absolute URLs for every share card and preview image (see lib/siteUrl.ts).
+  metadataBase: new URL(siteUrl()),
   title: {
     template: "Skillprint Portal · %s",
     default: "Skillprint Portal · Home",
   },
   description: "The Skillprint Games Portal home — continue a game, pick a recommendation, and read the playbook driving them.",
+  openGraph: {
+    siteName: 'Skillprint',
+    type: 'website',
+    title: 'Skillprint',
+    description: 'Short games that read your mood, cognition and personality. Play a few minutes and see your Skillprint.',
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default function RootLayout({
