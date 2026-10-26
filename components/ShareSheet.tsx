@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import {
   siBluesky,
@@ -145,7 +146,9 @@ export default function ShareSheet({ open, onClose, payload, heading, embedUrl }
     }
   };
 
-  return (
+  // Rendered on the body: the backdrop is position: fixed, and a transformed
+  // ancestor (the portal shell on small screens) would otherwise pin it.
+  return createPortal(
     <div className="popup-backdrop inset-none place-center is-open" onClick={onClose} data-share-sheet>
       <article
         aria-labelledby="shareSheetTitle"
@@ -244,6 +247,7 @@ export default function ShareSheet({ open, onClose, payload, heading, embedUrl }
           )}
         </div>
       </article>
-    </div>
+    </div>,
+    document.body,
   );
 }
