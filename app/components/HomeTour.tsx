@@ -80,6 +80,14 @@ export default function HomeTour() {
     const targetRef = useRef<HTMLElement | null>(null);
     const spotRef = useRef<HTMLDivElement>(null);
 
+    // Set once the visitor has closed the tour on this page load. The
+    // auto-start below re-runs whenever its callbacks are recreated, which
+    // happens every time the tour opens or closes, and it decides from the
+    // cookie alone. If that cookie cannot be read back for any reason, the
+    // tour reopens 300ms after every Skip, with no way out. This ref makes a
+    // dismissal final for the session regardless of what the cookie says.
+    const dismissedRef = useRef(false);
+
     const GAP = 12;
     const EDGE = 16;
     const PAD = 8;
@@ -98,6 +106,7 @@ export default function HomeTour() {
         const content = document.querySelector('.portal-content') as HTMLElement;
         if (content) content.style.removeProperty('--home-tour-dock');
         
+        dismissedRef.current = true;
         if (!silent) markFTUECompleted();
     }, [isOpen, markFTUECompleted]);
 
@@ -274,7 +283,7 @@ export default function HomeTour() {
         }
 
         const completed = getCookie(COOKIE_NAME);
-        if (!force && completed) return;
+        if (!force && (completed || dismissedRef.current)) return;
 
         if (document.body.classList.contains('nav-open')) {
             const closeBtn = document.querySelector('[data-portal-nav-close]') as HTMLElement;
@@ -307,7 +316,7 @@ export default function HomeTour() {
         let timeoutId: NodeJS.Timeout;
         if (pathname === '/') {
             const completed = getCookie(COOKIE_NAME);
-            if (!completed) {
+            if (!completed && !dismissedRef.current) {
                 // Short delay for mount
                 timeoutId = setTimeout(() => startTour(false), 300);
             }
