@@ -1,3 +1,6 @@
+import { PORTAL_SKILLS } from '../app/config/skillsTaxonomy';
+import { SnapshotEntry, encodeSnapshot, snapshotSharePath } from './skillprintSnapshot';
+
 /**
  * Social sharing: what gets shared and where.
  *
@@ -129,6 +132,21 @@ export function badgeSharePayload(origin: string, badge: ShareableBadge, game?: 
     title: `${badge.name} badge on Skillprint`,
     text: `I earned the ${badge.name} badge${animal}${where} on Skillprint. Short games, a real read on your skills and mood.`,
     image: `${origin}/api/og/badge/?slug=${encodeURIComponent(badge.slug)}`,
+  };
+}
+
+/** A player's Skillprint snapshot: their top scores, carried in the link. */
+export function snapshotSharePayload(origin: string, entries: SnapshotEntry[]): SharePayload {
+  const top = entries
+    .slice(0, 3)
+    .map((e) => `${PORTAL_SKILLS[e.slug]?.name || e.slug} ${e.score}`)
+    .join(', ');
+  const encoded = encodeURIComponent(encodeSnapshot(entries));
+  return {
+    url: `${origin}${snapshotSharePath(entries)}`,
+    title: 'My Skillprint',
+    text: `My Skillprint: ${top}. Short games, a real read on your mood, cognition and personality. What's yours?`,
+    image: `${origin}/api/og/snapshot/?s=${encoded}`,
   };
 }
 
