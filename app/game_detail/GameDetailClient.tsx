@@ -83,6 +83,24 @@ function BackToGames() {
   );
 }
 
+/**
+ * The page before its record arrives. Also the route's loading.tsx, so a click
+ * on a game's info link swaps to this at once instead of waiting on the server.
+ */
+export function GameDetailLoading() {
+  return (
+    <PortalLayout pageClass="page--portal-game-detail">
+      <div className="portal-head">
+        <BackToGames />
+        <div className="portal-head__row"><h1>Game</h1></div>
+      </div>
+      <div className="flex justify-center items-center py-20">
+        <BuckyballLoading />
+      </div>
+    </PortalLayout>
+  );
+}
+
 export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const decodedSlug = decodeURIComponent(slug || '');
   // Dev only: `?synthetic=1` renders the mock record (a player with history)
@@ -179,22 +197,17 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   }
 
   if (isLoading || !game) {
+    if (!error) return <GameDetailLoading />;
     return (
       <PortalLayout pageClass="page--portal-game-detail">
         <div className="portal-head">
           <BackToGames />
           <div className="portal-head__row"><h1>Game</h1></div>
         </div>
-        {error ? (
-          <div className="portal-blank">
-            <p className="portal-blank__title">We could not load this game</p>
-            <p className="portal-blank__note">Please try again in a moment.</p>
-          </div>
-        ) : (
-          <div className="flex justify-center items-center py-20">
-            <BuckyballLoading />
-          </div>
-        )}
+        <div className="portal-blank">
+          <p className="portal-blank__title">We could not load this game</p>
+          <p className="portal-blank__note">Please try again in a moment.</p>
+        </div>
       </PortalLayout>
     );
   }

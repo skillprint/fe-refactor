@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
-import GameDetailClient from './GameDetailClient';
+import GameDetailClient, { GameDetailLoading } from './GameDetailClient';
 import { fetchLibraryGame } from '@/lib/models/portal/serverLibraryGame';
 import { gameSharePath } from '@/lib/share';
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ searchParams }: GameDetailPageProps): P
 export default async function GameDetailPage({ searchParams }: GameDetailPageProps) {
   const { game } = await searchParams;
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<GameDetailLoading />}>
       <GameDetailClient slug={game || ''} />
     </Suspense>
   );
