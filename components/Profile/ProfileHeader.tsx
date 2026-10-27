@@ -9,13 +9,14 @@ import { siteUrl } from '@/lib/siteUrl';
 import type { SnapshotEntry } from '@/lib/skillprintSnapshot';
 
 export interface ProfileHeaderProps {
-  /** The player's top scores; Share shows once at least one skill is measured. */
+  /** Every skill the player has a score for; Share shows once at least one is measured. */
   snapshot?: SnapshotEntry[];
 }
 
 export default function ProfileHeader({ snapshot = [] }: ProfileHeaderProps) {
   const [shareOpen, setShareOpen] = useState(false);
   const canShare = snapshot.length > 0;
+  const payload = snapshotSharePayload(siteUrl(), snapshot);
 
   const actions = (
     <>
@@ -53,7 +54,8 @@ export default function ProfileHeader({ snapshot = [] }: ProfileHeaderProps) {
           open={shareOpen}
           onClose={() => setShareOpen(false)}
           heading="Share your Skillprint"
-          payload={snapshotSharePayload(siteUrl(), snapshot)}
+          payload={payload}
+          imageFile={payload.image ? { url: payload.image, filename: 'my-skillprint.png' } : undefined}
         />
       )}
     </>

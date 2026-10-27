@@ -16789,3 +16789,64 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
   height: 100%;
   border-radius: inherit;
 }
+
+/* The Skillprint wheel on a shared snapshot: the profile wheel's drawing, its panel's colours. */
+.snapshot-share {
+  width: min(34rem, 100%);
+}
+.snapshot-wheel {
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  background: var(--panel-navy-950, #171a38);
+  color-scheme: dark;
+  --sw-ink: var(--geistface-grey-200, #e3e5eb);
+  --sw-muted: var(--geistface-grey-400, #aab0bd);
+  --sw-line: color-mix(in srgb, var(--deep-navy-25, #fff) 12%, transparent);
+}
+.snapshot-wheel .pp-skills-wheel__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.snapshot-wheel .sw-label { font-size: 22px; }
+.snapshot-wheel .sw-label__score { font-size: 20px; }
+.snapshot-wheel .sw-centre__title { font-size: 20px; }
+.snapshot-wheel .sw-centre__copy { font-size: 13px; }
+.snapshot-wheel__key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-6) var(--space-14, 0.875rem);
+  padding-bottom: var(--space-6);
+  font-size: 0.75rem;
+  color: var(--geistface-grey-400, #aab0bd);
+}
+.snapshot-wheel__key span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+.snapshot-wheel__key i {
+  width: 1rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--item);
+}
+.snapshot-wheel__key [data-dimension="mood"] { --item: var(--mood-500); }
+.snapshot-wheel__key [data-dimension="cognition"] { --item: var(--cognition-500); }
+.snapshot-wheel__key [data-dimension="personality"] { --item: var(--personality-500); }
+.snapshot-wheel__hint {
+  flex-basis: 100%;
+  justify-content: center;
+}
+.snapshot-share__subhead {
+  opacity: 0.8;
+  text-align: start;
+}
+.share-sheet__image > .button {
+  flex: 1;
+  justify-content: center;
+}

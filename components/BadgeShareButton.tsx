@@ -21,6 +21,7 @@ export interface BadgeShareButtonProps {
 export default function BadgeShareButton({ badge, gameSlug, gameName, className = '' }: BadgeShareButtonProps) {
   const [open, setOpen] = useState(false);
   const game = gameSlug ? { baseSlug: baseSlug(gameSlug), name: gameName || '' } : null;
+  const payload = badgeSharePayload(siteUrl(), badge, game);
   return (
     <>
       <button
@@ -38,7 +39,8 @@ export default function BadgeShareButton({ badge, gameSlug, gameName, className 
           open={open}
           onClose={() => setOpen(false)}
           heading={`Share your ${badge.name} badge`}
-          payload={badgeSharePayload(siteUrl(), badge, game)}
+          payload={payload}
+          imageFile={payload.image ? { url: payload.image, filename: `${badge.slug}-badge.png` } : undefined}
         />
       )}
     </>

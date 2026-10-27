@@ -2,7 +2,8 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { PILLAR_COLOURS, PILLAR_LABELS, encodeSnapshot, parseSnapshot, snapshotSharePath } from '@/lib/skillprintSnapshot';
+import { PILLAR_COLOURS, PILLAR_LABELS, SNAPSHOT_SIZE, encodeSnapshot, parseSnapshot, snapshotScores, snapshotSharePath } from '@/lib/skillprintSnapshot';
+import SkillsWheelFigure from '@/components/SkillsWheelFigure';
 
 interface SnapshotPageProps {
   searchParams: Promise<{ s?: string }>;
@@ -33,9 +34,10 @@ export async function generateMetadata(props: SnapshotPageProps): Promise<Metada
 }
 
 /**
- * A shared Skillprint snapshot (`/snapshot/?s=attention.81,focus.74`).
- * Public: the visitor sees the scores the player chose to share, and the
- * way in to play. It names no one; the post that carried the link does.
+ * A shared Skillprint snapshot (`/snapshot/?s=attention.81,focus.74,...`).
+ * Public: the visitor sees the player's Skillprint wheel and strongest
+ * skills, and the way in to play. It names no one; the post that carried
+ * the link does.
  */
 export default async function SnapshotPage(props: SnapshotPageProps) {
   const skills = await load(props);
@@ -51,11 +53,14 @@ export default async function SnapshotPage(props: SnapshotPageProps) {
 
         <div className="layout-grid gap-sm">
           <h1 className="snapshot-share__title margin-none" id="snapshotTitle">A Skillprint</h1>
-          <p className="badge-share__lede margin-none text-muted">The strongest skills a player&apos;s games have measured, out of 100.</p>
+          <p className="badge-share__lede margin-none text-muted">Every skill a player&apos;s games have measured, out of 100.</p>
         </div>
 
-        <ul className="snapshot-share__list margin-none padding-none" aria-label="Top skills">
-          {skills.map((k) => (
+        <SkillsWheelFigure scores={snapshotScores(skills)} />
+
+        <h2 className="ui-label snapshot-share__subhead margin-none">Strongest</h2>
+        <ul className="snapshot-share__list margin-none padding-none" aria-label="Strongest skills">
+          {skills.slice(0, SNAPSHOT_SIZE).map((k) => (
             <li key={k.slug} className="snapshot-share__row">
               <div className="snapshot-share__label layout-flex items-center justify-between gap-md">
                 <span className="layout-inline-flex items-center gap-sm min-width-0">
