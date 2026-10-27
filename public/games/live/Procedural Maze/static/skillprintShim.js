@@ -20,3 +20,9 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true);
+
+// Score for the Skillprint shell: mazes solved this visit. The run is
+// endless (a solved maze starts the next), so it is never over.
+window.SKILLPRINT_STATE = function () {
+    return { score: window.__mazeState.solved, isGameOver: false };
+};

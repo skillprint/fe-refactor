@@ -7,7 +7,7 @@ const state = { wordDifficulty: 1, timeLimitSec: 60 };
 window.__typingState = state;
 const $ = (id) => document.getElementById(id);
 const wordsEl = $('words'), input = $('input'), msg = $('msg'), playBtn = $('play-btn');
-let running = false, started = false, words = [], idx = 0, correctWords = 0, typedWords = 0, correctChars = 0, timeLeft = state.timeLimitSec, tick = null;
+let running = false, started = false, finished = false, words = [], idx = 0, correctWords = 0, typedWords = 0, correctChars = 0, timeLeft = state.timeLimitSec, tick = null;
 let best = Number(localStorage.getItem('typingBest') || 0);
 const elapsedMin = () => Math.max(1, state.timeLimitSec - timeLeft) / 60;
 const wpm = () => started ? Math.round((correctChars / 5) / elapsedMin()) : 0;
@@ -15,7 +15,7 @@ const accuracy = () => typedWords ? Math.round(100 * correctWords / typedWords) 
 Object.defineProperties(state, {
   running: { get: () => running, enumerable: true }, timeLeftSec: { get: () => timeLeft, enumerable: true },
   wpm: { get: () => wpm(), enumerable: true }, accuracy: { get: () => accuracy(), enumerable: true },
-  typedWords: { get: () => typedWords, enumerable: true },
+  typedWords: { get: () => typedWords, enumerable: true }, finished: { get: () => finished, enumerable: true },
 });
 function hud() { $('hud-time').textContent = timeLeft + 's'; $('hud-wpm').textContent = wpm(); $('hud-acc').textContent = accuracy() + '%'; $('hud-best').textContent = best; }
 function generate() {
@@ -41,7 +41,7 @@ input.addEventListener('input', () => {
   if (input.value.endsWith(' ')) commit();
 });
 function finish() {
-  running = false; clearInterval(tick); input.disabled = true;
+  running = false; finished = true; clearInterval(tick); input.disabled = true;
   const w = wpm();
   if (w > best) { best = w; localStorage.setItem('typingBest', best); }
   hud(); msg.textContent = `Time! ${w} WPM · ${accuracy()}% accuracy (${correctWords}/${typedWords} words)`;
@@ -49,7 +49,7 @@ function finish() {
 }
 function start() {
   if (running) return;
-  running = true; started = false; correctWords = typedWords = correctChars = 0; timeLeft = state.timeLimitSec;
+  running = true; started = false; finished = false; correctWords = typedWords = correctChars = 0; timeLeft = state.timeLimitSec;
   generate(); wordsEl.scrollTop = 0; input.disabled = false; input.value = ''; input.focus();
   playBtn.classList.add('hidden'); msg.textContent = 'Go! The timer starts on your first keystroke.'; hud();
 }

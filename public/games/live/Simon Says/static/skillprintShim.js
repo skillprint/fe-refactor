@@ -39,3 +39,10 @@ window.addEventListener('keydown', function (event) {
 window.addEventListener('pointerdown', function () {
     window.parent.postMessage({ type: 'skillprint_mousedown' }, '*');
 }, true);
+
+// Score for the Skillprint shell: the level reached, the figure the game
+// keeps as its high score; over from the wrong tile until the next start.
+window.SKILLPRINT_STATE = function () {
+    const s = window.__simonState;
+    return { score: s.level, isGameOver: s.gameOver };
+};

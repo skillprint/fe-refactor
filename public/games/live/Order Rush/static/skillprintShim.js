@@ -24,3 +24,10 @@ window.addEventListener('keydown', function (event) {
     window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
   }
 }, true);
+
+// Score for the Skillprint shell: the shift's points, as the HUD shows them;
+// over when the last guest has stormed out.
+window.SKILLPRINT_STATE = function () {
+    const s = window.__orderRushState;
+    return { score: s.score, isGameOver: s.phase === 'gameover' };
+};

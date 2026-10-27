@@ -21,3 +21,10 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true);
+
+// Score for the Skillprint shell: accuracy so far (0–100), the figure the
+// game itself keeps as its best; over once every trial has run.
+window.SKILLPRINT_STATE = function () {
+    const s = window.__nbackState;
+    return { score: s.accuracy, isGameOver: !s.running && s.trial > 0 && s.trial >= s.trialCount };
+};

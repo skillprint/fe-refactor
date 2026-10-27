@@ -19,3 +19,10 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true);
+
+// Score for the Skillprint shell: words per minute as the HUD shows them;
+// over when the clock has run out.
+window.SKILLPRINT_STATE = function () {
+    const s = window.__typingState;
+    return { score: s.wpm, isGameOver: s.finished };
+};

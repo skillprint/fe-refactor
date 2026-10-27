@@ -22,3 +22,10 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true);
+
+// No score for the Skillprint shell yet: the game's figure is an average in
+// milliseconds, where lower is better, and the leaderboards rank higher
+// scores first. Only whether the round of attempts has finished.
+window.SKILLPRINT_STATE = function () {
+    return { isGameOver: window.__reactionState.phase === 'summary' };
+};
