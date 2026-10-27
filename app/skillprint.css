@@ -2417,6 +2417,14 @@ html[data-surface="light"] .sp-side-nav {
   stroke-linejoin: round;
 }
 
+/* A link's icon while its navigation is on the way: same box, a spinning ring. */
+.sp-icon--pending {
+  border: var(--space-2) solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: button-spin var(--duration-slowest) linear infinite;
+}
+
 
 .sp-icon--3xs { --icon-size: var(--icon-size-3xs); --icon-stroke: var(--icon-stroke-10); }
 .sp-icon--2xs { --icon-size: var(--icon-size-2xs); --icon-stroke: var(--icon-stroke-12); }
