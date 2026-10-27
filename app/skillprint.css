@@ -16633,3 +16633,74 @@ html:is([data-theme="light"], [data-surface="light"]) .page--adaptive-assist .aa
   cursor: pointer;
   text-align: left;
 }
+
+/* Share on an earned badge (profile grid, game page rail). */
+/* Aligns like the badge's own text: centred in a card, flush in a wide row. */
+.sp-badge__share {
+  justify-self: auto;
+  margin-top: var(--space-8);
+  gap: var(--space-4);
+}
+.sp-badge--row .sp-badge__share {
+  grid-column: 1 / -1;
+}
+
+/* A shared badge's public page (/badge/<slug>/). */
+.badge-share {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--space-30) 16px;
+}
+.badge-share__card {
+  width: min(30rem, 100%);
+  padding: var(--space-32);
+  justify-items: center;
+  text-align: center;
+}
+.badge-share__brand {
+  color: inherit;
+  text-decoration: none;
+}
+.badge-share__brand:hover {
+  text-decoration: none;
+}
+.badge-share .sp-badge__copy {
+  width: 100%;
+}
+/* The xl badge leaves room beside the name for controls this page has none of. */
+.badge-share .sp-badge__name {
+  max-width: none;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+.badge-share__lede {
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  max-width: 40ch;
+}
+.badge-share__fact {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  max-width: 44ch;
+}
+.badge-share__game {
+  width: 100%;
+  padding: var(--space-12) var(--space-14, 0.875rem);
+  border-radius: var(--radius-lg, 0.75rem);
+  border: 1px solid var(--surface-border);
+  text-align: start;
+}
+.badge-share__game-art {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-md, 0.5rem);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.badge-share__actions {
+  justify-content: center;
+}
+.badge-share__note {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
