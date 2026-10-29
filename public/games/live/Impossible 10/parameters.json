@@ -1,0 +1,16 @@
+{
+    "spawnSpread": {
+        "max": 6,
+        "min": 2,
+        "type": "integer",
+        "default": 4,
+        "description": "How many different numbers a new block can show. The game's own (4) deals one of the four values up to the highest it unlocks (maxBlock, 3 at the start, rising as bigger blocks are made). 2 deals only the top two, 6 the top six (never below 1), uniformly. Fewer different numbers mean more neighbours match. Applies to blocks spawned from now on."
+    },
+    "startBoardSpread": {
+        "max": 6,
+        "min": 2,
+        "type": "integer",
+        "default": 3,
+        "description": "Highest number on the starting board. The board's values run from 1 to this, with 1 twice as likely as each of the others (the game's own board is 1-3). Lower values give an easy start with many matches; higher values a mixed, harder start. Applies from the next game start or restart."
+    }
+}
