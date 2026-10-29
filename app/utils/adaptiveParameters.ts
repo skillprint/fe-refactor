@@ -18,6 +18,9 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Clock Duration'];
         case 'gems-of-hanoi':
             return ['Maximum Complexity Tier'];
+        case 'flapcat-steampunk':
+        case 'flapcat-steampunk-2':
+            return ['Scroll Speed', 'Gap Size', 'Gap Height Variation'];
         case 'gummy-blocks':
             return ['Largest Piece Size', 'Tray Refill Pace'];
         case 'katana-fruits':

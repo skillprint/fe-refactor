@@ -1,0 +1,23 @@
+{
+    "wallSpeed": {
+        "max": 1.6,
+        "min": 0.6,
+        "type": "float",
+        "default": 1.0,
+        "description": "Wall scroll speed as a multiple of the game's 300 px/s. Wall pairs keep their spacing, so faster walls also come more often. Applies to the walls on screen immediately. Higher values leave less time to line up with each opening."
+    },
+    "gapSize": {
+        "max": 320,
+        "min": 140,
+        "type": "integer",
+        "default": 200,
+        "description": "Height of the opening between each pair of walls, in px (the game's own is 200; the cat is about 105 px tall). Applies to wall pairs spawned from now on. Smaller openings demand more precise flying."
+    },
+    "gapVariation": {
+        "max": 1.5,
+        "min": 0.0,
+        "type": "float",
+        "default": 1.0,
+        "description": "How far the opening moves up and down from one wall pair to the next, as a multiple of the game's own (about 90-120 px either way). 0 keeps every opening at the same height. Higher values demand bigger climbs and dives between walls."
+    }
+}
