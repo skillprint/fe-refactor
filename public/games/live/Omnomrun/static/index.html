@@ -9,6 +9,7 @@
     <link rel="manifest" href="manifest.json">
     <style></style>
     <title>Om Nom Run</title>
+    <script src="skillprintShim.js"></script>
 
     <!-- ---------------- API Snippet ---------------- -->
     <script>
@@ -31,7 +32,7 @@
             firstJS = document.getElementsByTagName('script')[0];
             fgJS.src = url + encodeURIComponent(document.location.href);
             firstJS.parentNode.insertBefore(fgJS, firstJS);
-        })(document, '/html5games/gameapi/v1.js?e=');         
+        })(document, 'html5games/gameapi/v1.min.js?e=');         
     </script>
 
     <!-- ---------------- API Snippet end ------------- -->
