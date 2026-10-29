@@ -18,6 +18,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Clock Duration'];
         case 'gems-of-hanoi':
             return ['Maximum Complexity Tier'];
+        case 'i-love-hue':
+            return ['Shuffled Tiles', 'Color Contrast'];
         case 'gummy-blocks':
             return ['Largest Piece Size', 'Tray Refill Pace'];
         case 'katana-fruits':

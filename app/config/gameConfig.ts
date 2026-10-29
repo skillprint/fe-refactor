@@ -138,6 +138,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'i-love-hue': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/I Love Hue/backend/game-scoring-config.json',
     customExitButton: {
       color: 'purple',
       size: 'md'
