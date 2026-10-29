@@ -61,12 +61,28 @@ const getElementForScreenshot = () => {
 }
 
 
+// A game can describe its state at the moment of each screenshot by defining
+// window.skillprintGameState = () => ({ ... }) (public/games/GAME_STATE.md).
+// The portal sends it with the frame, so state and image match exactly. It
+// must survive JSON (no functions or cycles), or it's left out.
+const readSkillprintGameState = () => {
+    if (typeof window.skillprintGameState !== 'function') return undefined;
+    try {
+        const state = window.skillprintGameState();
+        return state === undefined ? undefined : JSON.parse(JSON.stringify(state));
+    } catch (e) {
+        console.warn('[skillprint] skillprintGameState failed', e);
+        return undefined;
+    }
+};
+
 const takeScreenshot = async () => {
     // When the frame was taken, in epoch ms (the parent page's clock reads the
     // same). Rasterising takes a while, so the parent can't time it on arrival.
     const capturedAt = typeof performance !== 'undefined' && performance.timeOrigin
         ? performance.timeOrigin + performance.now()
         : Date.now();
+    const gameState = readSkillprintGameState();
     const skillprintScreenshotSlement = getElementForScreenshot();
     // console.log(skillprintScreenshotSlement);
 
@@ -95,7 +111,7 @@ const takeScreenshot = async () => {
             addToLocalStorage('screenshot', dataUrl);
         }
 
-        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt }, "*");
+        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt, gameState }, "*");
     })
 }
 

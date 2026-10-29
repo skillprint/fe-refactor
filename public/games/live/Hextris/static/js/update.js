@@ -73,15 +73,9 @@ function update(dt) {
 	if (Date.now() - window.lastStateTime > 500) {
 		window.lastStateTime = Date.now();
 		try {
-			var state = {
-				score: typeof score !== 'undefined' ? score : 0,
-				difficulty: typeof waveone !== 'undefined' ? waveone.difficulty : 0,
-				blocksOnScreen: typeof blocks !== 'undefined' ? blocks.length : 0,
-				lockedBlocks: typeof MainHex !== 'undefined' && MainHex.blocks ? MainHex.blocks.reduce(function (acc, val) { return acc + val.length; }, 0) : 0,
-				gameState: typeof gameState !== 'undefined' ? gameState : 0,
-				// Read by the portal shell to tell a finished game from an early exit.
-				isGameOver: typeof gameState !== 'undefined' && gameState === 2
-			};
+			// The full state (skillprint.js); the portal shell also reads its score
+			// and isGameOver, to tell a finished game from an early exit.
+			var state = window.skillprintGameState();
 			if (window.parent) {
 				window.parent.postMessage({ type: 'gameState', data: state }, '*');
 			}
