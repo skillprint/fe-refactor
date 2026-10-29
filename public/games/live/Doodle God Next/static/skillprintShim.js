@@ -13,67 +13,21 @@
     };
 })();
 
+// Doodle God Next has no difficulty knobs. The game logic is compiled into
+// main.wasm, and the JS around it (main.js, src/*.js) exposes nothing about
+// hints or progression: the hint recharge time and the starting hints are in
+// the game's own data (e.g. commodity_hint1_reload_time_freeorblitz), read
+// only inside the wasm. The one global the wasm reads back, window.AdsTimeout,
+// times ads, which is not a difficulty lever. So every adjustment is
+// reported and ignored. (The shim used to accept hintCooldownTime,
+// startingHints, adsFrequencyMinutes and debugMode; the first two set
+// variables nothing read, and debugMode loaded stats.js from a third-party
+// site.)
 window.adjustGame = function (obj) {
-    if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
-        const { parameterName, parameterValue } = obj;
-        console.log(`[skillprintShim - Doodle God Next] Adjusting parameter ${parameterName} to ${parameterValue}`);
-
-        if (parameterName === "hintCooldownTime") {
-            window.hintCooldownTime = parameterValue;
-            if (window.DGConfig) {
-                window.DGConfig.hintCooldownTime = parameterValue;
-            }
-        } else if (parameterName === "startingHints") {
-            window.startingHints = parameterValue;
-            if (window.DGConfig) {
-                window.DGConfig.startingHints = parameterValue;
-            }
-        } else if (parameterName === "adsFrequencyMinutes") {
-            window.adsFrequencyMinutes = parameterValue;
-            // Set AdsTimeout in milliseconds (e.g. 5 minutes = 300,000 ms)
-            window.AdsTimeout = parameterValue * 60 * 1000;
-            if (window.DGConfig && window.DGConfig.gamePush && window.DGConfig.gamePush.ads) {
-                window.DGConfig.gamePush.ads.timeout = parameterValue * 60;
-            }
-        } else if (parameterName === "debugMode") {
-            const enabled = (parameterValue === 1);
-            window.RENDER_DEBUG_GUI = enabled;
-            if (window.DGConfig) {
-                window.DGConfig.debug = enabled;
-            }
-            console.log(`[skillprintShim - Doodle God Next] Debug mode set to: ${enabled}`);
-            
-            // Proactively load Stats.js if debug mode is enabled and stats not present
-            if (enabled && !document.querySelector('.stats-js')) {
-                var script = document.createElement('script');
-                script.onload = function () {
-                    if (typeof Stats !== 'undefined') {
-                        var stats = new Stats();
-                        stats.dom.classList.add('stats-js');
-                        stats.dom.style.width = 'fit-content';
-                        stats.dom.style.height = 'fit-content';
-                        stats.dom.style.position = 'fixed';
-                        stats.dom.style.top = '10px';
-                        stats.dom.style.left = '10px';
-                        stats.dom.style.zIndex = '99999';
-                        document.body.appendChild(stats.dom);
-                        requestAnimationFrame(function loop() {
-                            stats.update();
-                            requestAnimationFrame(loop);
-                        });
-                    }
-                };
-                script.src = 'https://mrdoob.github.io/stats.js/build/stats.min.js';
-                document.head.appendChild(script);
-            } else if (!enabled) {
-                const statsDom = document.querySelector('.stats-js');
-                if (statsDom) {
-                    statsDom.remove();
-                }
-            }
-        }
+    if (typeof obj === 'object' && obj && obj.hasOwnProperty('parameterName')) {
+        console.warn('[skillprintShim] Doodle God Next has no adjustable parameters; ignored', obj.parameterName, obj.parameterValue);
     }
-}
+};
 
 window.addEventListener('message', function (event) {
     if (event.data && event.data.type === 'ADJUST_GAME') {
