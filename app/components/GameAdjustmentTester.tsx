@@ -189,6 +189,29 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'flapcat-steampunk':
+        case 'flapcat-steampunk-2':
+            // Flapcat: wallSpeed (scroll pace), gapSize (opening in px), gapVariation (how far openings move)
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'gapVariation', parameterValue: 0 }]; // Openings all at one height
+                case 2: return [{ parameterName: 'wallSpeed', parameterValue: 0.7 }]; // Slow
+                case 3: return [{ parameterName: 'wallSpeed', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'wallSpeed', parameterValue: 1.3 }]; // Fast
+                case 5: return [{ parameterName: 'wallSpeed', parameterValue: 1.6 }]; // Very fast
+                case 6: return [{ parameterName: 'gapSize', parameterValue: 280 }]; // Wide openings
+                case 7: return [
+                    { parameterName: 'gapSize', parameterValue: 200 },
+                    { parameterName: 'gapVariation', parameterValue: 1 }
+                ]; // Default openings
+                case 8: return [{ parameterName: 'gapSize', parameterValue: 150 }]; // Narrow openings
+                case 9: return [
+                    { parameterName: 'wallSpeed', parameterValue: 1.4 },
+                    { parameterName: 'gapSize', parameterValue: 150 },
+                    { parameterName: 'gapVariation', parameterValue: 1.5 }
+                ]; // Hard mode
+                default:
+                    return [];
+            }
         case 'fruit-sorting':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'seconds_on_clock', parameterValue: 120 }];
@@ -215,29 +238,6 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 case 7: return [{ parameterName: 'levels', parameterValue: 7 }];
                 case 8: return [{ parameterName: 'levels', parameterValue: 8 }]; // Default max
                 case 9: return [{ parameterName: 'levels', parameterValue: 9 }]; // All disks
-                default:
-                    return [];
-            }
-        case 'flapcat-steampunk':
-        case 'flapcat-steampunk-2':
-            // Flapcat: wallSpeed (scroll pace), gapSize (opening in px), gapVariation (how far openings move)
-            switch (keyNumber) {
-                case 1: return [{ parameterName: 'gapVariation', parameterValue: 0 }]; // Openings all at one height
-                case 2: return [{ parameterName: 'wallSpeed', parameterValue: 0.7 }]; // Slow
-                case 3: return [{ parameterName: 'wallSpeed', parameterValue: 1.0 }]; // Default
-                case 4: return [{ parameterName: 'wallSpeed', parameterValue: 1.3 }]; // Fast
-                case 5: return [{ parameterName: 'wallSpeed', parameterValue: 1.6 }]; // Very fast
-                case 6: return [{ parameterName: 'gapSize', parameterValue: 280 }]; // Wide openings
-                case 7: return [
-                    { parameterName: 'gapSize', parameterValue: 200 },
-                    { parameterName: 'gapVariation', parameterValue: 1 }
-                ]; // Default openings
-                case 8: return [{ parameterName: 'gapSize', parameterValue: 150 }]; // Narrow openings
-                case 9: return [
-                    { parameterName: 'wallSpeed', parameterValue: 1.4 },
-                    { parameterName: 'gapSize', parameterValue: 150 },
-                    { parameterName: 'gapVariation', parameterValue: 1.5 }
-                ]; // Hard mode
                 default:
                     return [];
             }
