@@ -883,3 +883,35 @@ Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbe
 - `7`: `{ arrowHelpfulness: 1 }` (Arrow only)
 - `8`: `{ arrowHelpfulness: 0 }` (No guidance)
 - `9`: `{ totalNodesCount: 25, rotateNodesAroundUser: 1, rotationSpeed: 15, arrowHelpfulness: 0 }` (Extreme)
+
+---
+
+### Battle Drones
+Simon Willison's Command & Conquer-style RTS ([github.com/simonw/battledrones](https://github.com/simonw/battledrones), Apache-2.0), built for the portal by `scripts/battle-drones/build.sh`. Mine scrap with harvesters, build a base, train ground and air drones and infantry, and destroy the enemy HQ and any Goliath it has. The knobs live in the build's `src/skillprint/bridge.ts`. The AI ones overwrite fields of the commander's Easy/Normal/Hard table (`src/sim/ai/commander.ts`) for the levels in play, from the enemy's next decision pass; the rest keep the difficulty the player picked. None apply to online duels, and Last Stand's waves only follow `gameSpeed`.
+
+**Parameters**
+- `gameSpeed` (Number, 0.6–1.25): multiplier on the battle's tempo, on top of the player's own 1×/1.5×/2× speed chip. Lower is easier. Default 1.
+- `aiReactionSec` (Number, 1–4): seconds between the enemy commander's decision passes. Easy plays 3.5, Normal 2, Hard 1.2. Higher is easier. Default 2.
+- `aiAttackThreshold` (Number, 0.8–1.6): army size the enemy waits for before an assault, as a multiple of its strategy's threshold. Easy plays 1.35, Normal 1, Hard 0.9. Higher is easier. Default 1.
+- `aiExtraHarvesters` (Integer, -1–1): harvesters the enemy keeps beyond its strategy's count. Easy plays -1, Hard +1. Higher is harder, and shows only over minutes. Default 0.
+- `aiHarass` (Integer 0/1): 1 lets the enemy raid the player's harvesters while it builds up (Easy plays 0). Default 1.
+
+The AI's income multiplier is deliberately not a knob: the sim keeps it in the world, and a battle record stores only its last value, so changing it mid-match would break replays.
+
+**Score and events**: the game has no score of its own. The bridge reports a battle score: 10 per enemy unit destroyed, 25 per enemy building, 1 per 10 scrap mined or salvaged, and +500 for a win. The after-action report shows it with a "See your Skillprint results" button that posts `GAME_COMPLETE`. The universal events are `GAME_START`, `LEVEL_START` (when the clock starts), `GAME_PAUSE`/`GAME_RESUME`, `GENERIC_POSITIVE` (an enemy building destroyed), `GENERIC_NEGATIVE` (a building lost), `LEVEL_COMPLETE`/`LEVEL_FAILED` and `GAME_END`.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "aiReactionSec",
+  "parameterValue": 3.5
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**. Keys 1–3 are the game's squad hotkeys, so they are not mapped.
+- `4`: `{ gameSpeed: 0.75, aiReactionSec: 3.5, aiAttackThreshold: 1.35, aiExtraHarvesters: -1, aiHarass: 0 }` (Relax, the Easy row)
+- `5`: `{ gameSpeed: 1, aiReactionSec: 2, aiAttackThreshold: 1, aiExtraHarvesters: 0, aiHarass: 1 }` (Default, the Normal row)
+- `6`: `{ gameSpeed: 1.15, aiReactionSec: 1.2, aiAttackThreshold: 0.9, aiExtraHarvesters: 1, aiHarass: 1 }` (Grit, the Hard row)
+- `7`: `{ gameSpeed: 0.6 }` (Slow tempo)
+- `8`: `{ gameSpeed: 1.25 }` (Fast tempo)
+- `9`: `{ gameSpeed: 1.25, aiReactionSec: 1, aiAttackThreshold: 0.8, aiExtraHarvesters: 1, aiHarass: 1 }` (Brutal)

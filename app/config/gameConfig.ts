@@ -336,6 +336,16 @@ export const gameConfigs: Record<string, GameConfig> = {
       color: 'purple',
       size: 'md'
     }
+  },
+
+  'battle-drones': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Battle Drones/backend/game-scoring-config.json',
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
   }
 };
 
@@ -879,6 +889,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Multitasking', 'Prioritization', 'Divided Attention', 'Working Memory'],
     instructions: 'Tap a waiting guest, then an empty table to seat them. Tap a seated table once they\'ve decided to take their order. Tap the kitchen counter to grab a finished dish, then tap the matching table to serve it. Tap a dirty table to clear it. Keep every guest happy before their patience runs out!'
   },
+  'battle-drones': {
+    name: 'Battle Drones',
+    description: 'A Command & Conquer-style RTS: mine scrap, build a base and send ground and air drones to destroy the enemy HQ',
+    image: '/games/live/Battle Drones/battle-drones.jpg',
+    category: 'Strategy',
+    difficulty: 'Hard',
+    estimatedTime: '8-15 minutes',
+    skills: ['Strategic Planning', 'Task Switching', 'Spatial Reasoning', 'Divided Attention'],
+    instructions: 'Pick an opener, then build from the bar at the bottom: harvesters mine scrap, which pays for buildings and units. Tap a unit (or drag a box) to select, then tap the map to move or attack. Air units need anti-air to stop them, and ground units need ground weapons. Destroy the enemy HQ, and any Goliath it has, to win. Open the menu (☰) for the controls.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -973,4 +993,5 @@ export const knownGameSlugs = [
   'reaction-time',
   'solitaire',
   'order-rush',
+  'battle-drones',
 ];
