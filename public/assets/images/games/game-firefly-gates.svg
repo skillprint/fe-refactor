@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Firefly Gates</title>
+  <desc>Skillprint game card: a swarm of fireflies flying toward two glowing gates, times three and plus twelve, in a misty night forest</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1433"/>
+      <stop offset="0.65" stop-color="#123447"/>
+      <stop offset="1" stop-color="#0e2a33"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#fff6b0"/>
+      <stop offset="0.35" stop-color="#e8e46a" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#d7e85a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="380" height="210" fill="url(#sky)"/>
+  <g fill="#0f2633">
+    <path d="M0 150 L18 96 L36 150Z M30 150 L52 80 L74 150Z M300 150 L322 84 L344 150Z M336 150 L358 98 L380 150Z"/>
+  </g>
+  <g fill="#0a1c27">
+    <path d="M-10 170 L14 108 L38 170Z M350 170 L372 112 L394 170Z"/>
+  </g>
+  <path d="M150 210 L182 120 H198 L230 210Z" fill="#1b4a52" opacity="0.6"/>
+  <ellipse cx="190" cy="150" rx="210" ry="22" fill="#9fc6cf" opacity="0.08"/>
+  <g>
+    <rect x="112" y="64" width="10" height="70" rx="3" fill="#2b3a55"/>
+    <rect x="186" y="64" width="8" height="70" rx="3" fill="#2b3a55"/>
+    <rect x="258" y="64" width="10" height="70" rx="3" fill="#2b3a55"/>
+    <rect x="122" y="70" width="64" height="44" rx="6" fill="#f2c14e" opacity="0.22"/>
+    <rect x="194" y="70" width="64" height="44" rx="6" fill="#5fe08a" opacity="0.22"/>
+    <rect x="122" y="70" width="64" height="44" rx="6" fill="none" stroke="#f2c14e" stroke-width="2"/>
+    <rect x="194" y="70" width="64" height="44" rx="6" fill="none" stroke="#5fe08a" stroke-width="2"/>
+    <g font-family="'Outfit', 'DM Sans', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="24" text-anchor="middle">
+      <text x="154" y="101" fill="#ffe08a">×3</text>
+      <text x="226" y="101" fill="#a8f5c0">+12</text>
+    </g>
+  </g>
+  <g filter="url(#soft)">
+    <circle cx="176" cy="168" r="9" fill="url(#glow)"/><circle cx="196" cy="160" r="11" fill="url(#glow)"/><circle cx="212" cy="172" r="8" fill="url(#glow)"/>
+    <circle cx="186" cy="182" r="8" fill="url(#glow)"/><circle cx="204" cy="186" r="7" fill="url(#glow)"/><circle cx="166" cy="180" r="6" fill="url(#glow)"/>
+  </g>
+  <g fill="#fffbd6">
+    <circle cx="176" cy="168" r="2"/><circle cx="196" cy="160" r="2.4"/><circle cx="212" cy="172" r="1.8"/><circle cx="186" cy="182" r="1.8"/><circle cx="204" cy="186" r="1.6"/><circle cx="166" cy="180" r="1.4"/>
+    <circle cx="60" cy="40" r="1.2" opacity="0.6"/><circle cx="330" cy="30" r="1.2" opacity="0.6"/><circle cx="290" cy="56" r="1" opacity="0.5"/><circle cx="96" cy="22" r="1" opacity="0.5"/>
+  </g>
+  <text x="190" y="152" font-family="'Outfit', 'DM Sans', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="15" text-anchor="middle" fill="#fff6c8">24</text>
+</svg>
