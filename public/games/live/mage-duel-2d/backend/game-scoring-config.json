@@ -1,0 +1,107 @@
+{
+  "game_slug": "mage-duel",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "heroDamage": {
+      "type": "integer",
+      "min": 2,
+      "max": 25,
+      "default": 4,
+      "description": "Damage each correct spell does to the warlord (100 HP): 4 = 25 spells to win, 10 = 10, 25 = 4. Lower values make the duel longer and harder. Applies to the next spell that lands.",
+      "adjustment_guide": "The main 'how long must the player keep it up' lever. Raise (8-15) after a LEVEL_FAILED or for relax; keep 4-6 for focus and grit. Change by 2-4 at a time."
+    },
+    "enemyDamage": {
+      "type": "integer",
+      "min": 2,
+      "max": 40,
+      "default": 15,
+      "description": "Damage each enemy strike does to the hero (100 HP): 15 = 7 strikes to lose, 8 = 13, 25 = 4. Higher values punish slow typing harder. Applies to the next strike.",
+      "adjustment_guide": "Lower (5-10) for relax or after repeated LEVEL_FAILED; raise (20-30) for grit once the player wins with HP to spare."
+    },
+    "enemyAttackRateMs": {
+      "type": "integer",
+      "min": 1500,
+      "max": 15000,
+      "default": 5000,
+      "description": "Milliseconds between enemy strikes. Lower values add time pressure. In a duel the attack timer restarts with the new period at once.",
+      "adjustment_guide": "The time-pressure lever. 8000-12000 for relax, 4000-6000 for focus, 2500-4000 for grit. Change by about 1000 at a time."
+    },
+    "healAmount": {
+      "type": "integer",
+      "min": 0,
+      "max": 50,
+      "default": 20,
+      "description": "HP restored when the player casts a 'heal' word (1 in 11 words, 1 in 7 sentences). 0 turns healing off. Applies to the next heal.",
+      "adjustment_guide": "Raise (30-50) to forgive mistakes; lower (0-10) for grit."
+    },
+    "showHelper": {
+      "type": "integer",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "description": "1 shows the translation to type under each prompt (a copy-typing task); 0 hides it, so the player must recall the translation (vocabulary recall). Applies to the word on screen at once.",
+      "adjustment_guide": "Keep 1 for new players, relax and speed training; set 0 for memory or verbal challenge once the player casts with few TYPO events. Turn it back on if the player stalls (long SPELL_CAST ms or many TYPO)."
+    },
+    "useSentences": {
+      "type": "integer",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "description": "1 asks for whole short sentences instead of single words (about 3 times as many letters per spell); 0 single words. Applies from the next word.",
+      "adjustment_guide": "Set 1 for focus and grit once single words are easy (SPELL_CAST ms under ~2500); pair it with a slower enemyAttackRateMs (+2000) or higher heroDamage so a duel stays winnable."
+    }
+  },
+  "adjustment_instructions": "Mage Duel is a typing duel for language practice: the player picks a region (Spanish, French, German or Italian) and types the translation of each English spell word as it appears; a correct spell damages the warlord (or heals the hero, for heal words) while the warlord strikes the hero on a timer. Events: LEVEL_START (with the knob values), SPELL_CAST (prompt, answer, heal, typos, ms to cast), TYPO, PLAYER_HIT, LEVEL_COMPLETE / LEVEL_FAILED (accuracy, spellsCast, typos, seconds, heroHP, enemyHP).\nLevers: heroDamage sets how many spells win a duel (lower = longer, harder); enemyDamage and enemyAttackRateMs set the time pressure (higher damage / lower interval = harder); healAmount sets how forgiving heal words are; showHelper 0 hides the answer (recall instead of copying); useSentences 1 asks for sentences (more typing per spell).\n- relax: heroDamage 10-15, enemyDamage 5-10, enemyAttackRateMs 8000-12000, healAmount 30-50, showHelper 1, useSentences 0.\n- focus: heroDamage 5-8, enemyDamage 10-15, enemyAttackRateMs 4000-6000, healAmount 20, showHelper 1 (0 once the player rarely makes a TYPO), useSentences 0-1.\n- grit: heroDamage 4-5, enemyDamage 20-30, enemyAttackRateMs 2500-4000, healAmount 0-10, showHelper 0 once comfortable, useSentences 1.\n- joy: heroDamage 10-20, enemyDamage 8-12, enemyAttackRateMs 6000-9000, healAmount 30, showHelper 1, useSentences 0, so wins come quickly.\nA LEVEL_FAILED with few SPELL_CASTs means too much pressure: raise enemyAttackRateMs by 1000-2000 or heroDamage by 2-4, and turn showHelper back on. A LEVEL_COMPLETE with heroHP above 70 means it is too easy: tighten one lever at a time.",
+  "skill_adjustment_instructions": "Mage Duel trains Verbal skills and Memory (recalling translations), and Perceptual Speed (typing under time pressure).\n- verbal, memory: showHelper 0 with gentle pressure (enemyAttackRateMs 7000-10000, enemyDamage 8-12) so the challenge is recall, not speed; useSentences 1 once single words are recalled reliably.\n- perceptual-speed: showHelper 1 (copy-typing), enemyAttackRateMs 2500-4000 and useSentences 0-1, so the challenge is speed.",
+  "notes": "Mage Duel's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'mage-duel' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "heroDamage",
+      "type": "Integer",
+      "description": "Damage each correct spell does to the warlord (100 HP): 4 = 25 spells to win, 10 = 10, 25 = 4. Lower values make the duel longer and harder. Applies to the next spell that lands.",
+      "min_value": "2",
+      "max_value": "25",
+      "adjustment_guide": "The main 'how long must the player keep it up' lever. Raise (8-15) after a LEVEL_FAILED or for relax; keep 4-6 for focus and grit. Change by 2-4 at a time."
+    },
+    {
+      "name": "enemyDamage",
+      "type": "Integer",
+      "description": "Damage each enemy strike does to the hero (100 HP): 15 = 7 strikes to lose, 8 = 13, 25 = 4. Higher values punish slow typing harder. Applies to the next strike.",
+      "min_value": "2",
+      "max_value": "40",
+      "adjustment_guide": "Lower (5-10) for relax or after repeated LEVEL_FAILED; raise (20-30) for grit once the player wins with HP to spare."
+    },
+    {
+      "name": "enemyAttackRateMs",
+      "type": "Integer",
+      "description": "Milliseconds between enemy strikes. Lower values add time pressure. In a duel the attack timer restarts with the new period at once.",
+      "min_value": "1500",
+      "max_value": "15000",
+      "adjustment_guide": "The time-pressure lever. 8000-12000 for relax, 4000-6000 for focus, 2500-4000 for grit. Change by about 1000 at a time."
+    },
+    {
+      "name": "healAmount",
+      "type": "Integer",
+      "description": "HP restored when the player casts a 'heal' word (1 in 11 words, 1 in 7 sentences). 0 turns healing off. Applies to the next heal.",
+      "min_value": "0",
+      "max_value": "50",
+      "adjustment_guide": "Raise (30-50) to forgive mistakes; lower (0-10) for grit."
+    },
+    {
+      "name": "showHelper",
+      "type": "Integer",
+      "description": "1 shows the translation to type under each prompt (a copy-typing task); 0 hides it, so the player must recall the translation (vocabulary recall). Applies to the word on screen at once.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Keep 1 for new players, relax and speed training; set 0 for memory or verbal challenge once the player casts with few TYPO events. Turn it back on if the player stalls (long SPELL_CAST ms or many TYPO)."
+    },
+    {
+      "name": "useSentences",
+      "type": "Integer",
+      "description": "1 asks for whole short sentences instead of single words (about 3 times as many letters per spell); 0 single words. Applies from the next word.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Set 1 for focus and grit once single words are easy (SPELL_CAST ms under ~2500); pair it with a slower enemyAttackRateMs (+2000) or higher heroDamage so a duel stays winnable."
+    }
+  ]
+}

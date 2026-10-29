@@ -1,35 +1,20 @@
-# Doodle God Next Skillprint Integration
+# Doodle God Next
 
-This game has been integrated with the Skillprint SDK.
+Portal slug `doodle-god-next`. An Emscripten build: the game logic is in `static/main.wasm`, with `static/main.js` (Emscripten glue) and `static/src/*.js` (platform, ads, saves, analytics). Screenshots go to the portal through `static/doodleGodScreenshot.js`; gameplay events through `static/skillprintShim.js`, which forwards the game's own analytics calls (`window.DGWebAnalytics`) as `gameEvent` messages (see `docs/engine-game-events.md`).
 
-## Game Adjustments testing
+## No difficulty knobs
 
-The game parameters can be actively adjusted and tested using the keys `1` through `9`. When pressing a key, the `GameAdjustmentTester` will cycle sequentially through the parameters defined in `parameters.json`.
+`parameters.json` is empty and `window.adjustGame` only logs a `console.warn` for any parameter. Nothing in the JS reaches the game's difficulty:
 
-Since Doodle God Next has 4 adjustable parameters, pressing a key will trigger them as follows based on their sequential order in `parameters.json`:
+- Hints: the recharge time and the hints a player starts with live in the game's own data, read only inside the wasm (e.g. the `commodity_hint1_reload_time_freeorblitz` setting named in `main.wasm`). `main.js` and `src/*.js` contain no hint, commodity or remote-config hook, so there is no global to set.
+- The only global the wasm reads back is `window.AdsTimeout` (set to 0 in `src/game_config.js`), which times ads. Ad frequency is not a difficulty lever, so it is not offered.
 
-1. `hintCooldownTime`
-2. `startingHints`
-3. `adsFrequencyMinutes`
-4. `debugMode`
+Removed from the shim: `hintCooldownTime` and `startingHints` (they set `window.*` and `DGConfig` fields nothing reads), `adsFrequencyMinutes` (the half-wired `AdsTimeout` above) and `debugMode` (it loaded `stats.min.js` from mrdoob.github.io, a third-party script, into the game).
 
-Pressing the same key multiple times will cycle through increasing parameter values based on the min/max ranges. The adjustment is applied via the `skillprintShim.js` script inside the iframe and displayed on the client using the `GameAdjustmentBanner`.
+A difficulty lever would need a change in the C++ source and a rebuild of `main.wasm`, for example a JS-readable hint recharge time.
 
-## Key mappings for testing
+Tested in headless Chrome: posting `ADJUST_GAME` for each of the four old names logs a warning and changes nothing (`AdsTimeout` stays 0, `RENDER_DEBUG_GUI` and `DGConfig.debug` stay false, no stats.js script); the game still loads and its analytics are still forwarded.
 
-- **Key 1**: Set hint cooldown to 60.0 seconds (hard/slow hints).
-- **Key 2**: Set hint cooldown to 15.0 seconds (default).
-- **Key 3**: Set hint cooldown to 5.0 seconds (easy/fast hints).
-- **Key 4**: Set starting hints to 1 (hard).
-- **Key 5**: Set starting hints to 5 (default).
-- **Key 6**: Set starting hints to 15 (easy).
-- **Key 7**: Set ads interval to 10.0 minutes, disable debug mode (relaxed).
-- **Key 8**: Set ads interval to 5.0 minutes, disable debug mode (default).
-- **Key 9**: Set ads interval to 1.0 minute, enable debug mode (high frequency/arousal, show stats panel).
+## Keys 1-9 (GameAdjustmentTester)
 
-## Parameters
-
-* **hintCooldownTime**: Time in seconds before hint recharges.
-* **startingHints**: Initial hints given to the player.
-* **adsFrequencyMinutes**: Frequency of ad interruptions.
-* **debugMode**: Toggles debug overlay / Stats panel.
+The `doodle-god-next` case sends nothing for any key.

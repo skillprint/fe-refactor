@@ -14,6 +14,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Ball Speed', 'Power-Up Frequency', 'Multiball Limit'];
         case 'change-word':
             return ['Time Per Word', 'Time Pressure Ramp', 'Hints Per Stage'];
+        case 'cut-the-rope':
+            return ['Gravity', 'Rope Stretch'];
         case 'fruit-sorting':
             return ['Clock Duration'];
         case 'gems-of-hanoi':
@@ -24,6 +26,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Fruit Spawn Frequency', 'Object Trajectory Speed'];
         case 'mahjong-deluxe':
             return ['Bonus Time Awarded', 'Hint Score Penalty'];
+        case 'mage-duel':
+            return ['Spell Power', 'Enemy Hit Strength', 'Enemy Attack Interval', 'Heal Strength', 'Translation Helper', 'Full Sentences'];
         case 'match-doodle':
             return ['Card Pairs', 'Pile Density', 'Card Tilt'];
         case 'photo-hunt':
