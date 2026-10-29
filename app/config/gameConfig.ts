@@ -342,6 +342,24 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: '/games/live/Mountain Appreciator/backend/game-scoring-config.json',
+  },
+
+  'equilibrium': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Equilibrium/backend/game-scoring-config.json',
+  },
+
+  'firefly-gates': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Firefly Gates/backend/game-scoring-config.json',
+  },
+
+  'elixir': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Elixir/backend/game-scoring-config.json',
   }
 };
 
@@ -895,6 +913,36 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Visual Search', 'Sustained Attention', 'Pattern Matching', 'Spatial Reasoning'],
     instructions: 'Drag to walk around the two mountains; scroll or pinch to lean in. Click a difference on either mountain: a forest, a tarn, an eagle, a comet. Wrong clicks cost daylight. Hold Space (or the Blink button) to flick between the twins, though the sun moves faster while you do. When the light goes, keep one twin for your range, then walk on to the next pair or finish.'
   },
+  'equilibrium': {
+    name: 'Equilibrium',
+    description: 'A Calder mobile, out of balance: hang the weights so every arm rests level',
+    image: '/games/live/Equilibrium/cover.jpg',
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-10 minutes',
+    skills: ['Mental Arithmetic', 'Multiplication', 'Deduction', 'Planning'],
+    instructions: 'Each beam pivots at its middle, so weight × distance must match on both sides, and a beam hanging from a hook weighs everything below it. Drag a weight from the shelf onto a hook, or tap a weight and then a hook; tap a hung weight to take it back. Hang every loose weight before the candle burns down. When the beams are held, press Release (Space) to test your answer.'
+  },
+  'firefly-gates': {
+    name: 'Firefly Gates',
+    description: 'Lead a swarm of fireflies through gates that add, subtract, multiply and divide them, and gather enough light to wake the beacon',
+    image: '/games/live/Firefly Gates/cover.jpg',
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Mental Arithmetic', 'Number Sense', 'Processing Speed', 'Quick Decisions'],
+    instructions: 'Steer with the mouse, a finger, or ← → (a tap hops one gate). Fly through the gate in each row that leaves you more fireflies — the bigger number isn\'t always the better sum — and dodge the moths. Bring at least the beacon\'s number to light it.'
+  },
+  'elixir': {
+    name: 'Elixir',
+    description: 'An alchemist\'s recipes in fractions, percents and ratios: pour each layer by eye to a line nobody drew',
+    image: '/games/live/Elixir/cover.jpg',
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Fractions', 'Proportional Reasoning', 'Estimation', 'Timing'],
+    instructions: 'Hold anywhere (or Space) to pour and release to stop; there\'s no draining. Work out where each layer should end, whether ⅜ of the flask, 65 %, 90 of 240 drops or 2 : 3, then press Enter for the next ingredient and to serve. The true lines appear in gold; Perfect is within 1 %.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -990,4 +1038,7 @@ export const knownGameSlugs = [
   'solitaire',
   'order-rush',
   'mountain-appreciator',
+  'equilibrium',
+  'firefly-gates',
+  'elixir',
 ];
