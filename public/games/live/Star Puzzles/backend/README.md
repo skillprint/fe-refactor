@@ -1,0 +1,7 @@
+# Star Puzzles: backend configuration
+
+`game-scoring-config.json` is Star Puzzles' `GameScoringConfig` (marketplace `api_backend/scoring/models.py`): `parameter_definitions`, `adjustment_instructions` and `skill_adjustment_instructions`, plus `sdk_game_parameters`.
+
+- **Auto-provisioning:** the portal fetches this file (`parameterManifest` for `star-puzzles` in `app/config/gameConfig.ts`) and sends `sdk_game_parameters` as `gameParameters` on session create. `games/views.py::_merge_game_parameters` creates the config on first play and **adds** new parameter names. It never removes or overwrites existing ones. Auto-provisioned entries default to `min`; for `puzzleDifficulty` that is -1 (off, the game's own order), but for `snapRadius` it is 15 (the strictest), so paste the defaults below.
+- **Do once in Django admin** (Scoring → Game Scoring Configs → `star-puzzles-c2b7b115-b851-419e-8052-cad293bac997`): paste `parameter_definitions`, `adjustment_instructions` and `skill_adjustment_instructions` from the JSON. Admin values win; auto-provisioning never overwrites them. Alternatively, `PATCH /scoring/api/games/<slug>/scoring-config/` with the same fields.
+- The game's catalog record needs its moods and skills ticked, or session create rejects the requested mood. The ontology rates Star Puzzles Relax (mood) and Planning, Deduction, Visualization (skills); the instructions also cover focus, grit and joy.

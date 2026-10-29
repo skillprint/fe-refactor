@@ -201,6 +201,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'star-puzzles': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Star Puzzles/backend/game-scoring-config.json',
+  },
+
   'ultimate-sudoku': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,

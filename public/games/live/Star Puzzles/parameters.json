@@ -1,0 +1,23 @@
+{
+    "puzzleDifficulty": {
+        "max": 1.0,
+        "min": -1.0,
+        "type": "float",
+        "default": -1.0,
+        "description": "Which puzzle each round serves, by edge count (lines to draw: 4-16 over the 60 puzzles). -1 (default; any negative value) keeps the game's own order, round N = puzzle N (4 lines in round 1, 11-16 in rounds 40-60). 0-1 is a quantile of edge count: each round serves one of the 10 puzzles nearest that rank, cycling as rounds advance (0: 4-9 lines, 0.25: 10-11, 0.5: 11-12, 0.75: 12-13, 1: 13-16). More lines are harder. Takes effect from the next puzzle; the puzzle in play and its retries do not change."
+    },
+    "snapRadius": {
+        "max": 45,
+        "min": 15,
+        "type": "integer",
+        "default": 30,
+        "description": "How close, in game units, the pointer must pass to a star for the line to connect (a star's white disc has a radius of 16). 30 is the game's own value. 15 means the pointer has to cross the star itself, so drawing needs precision; 45 is forgiving, but sweeping past a neighbouring star that has an open line from the current one can then capture it. Applies immediately."
+    },
+    "startHint": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 0,
+        "description": "1 rings in yellow the two stars a solution has to start from (the stars with an odd number of lines); in the 20 puzzles where every star has an even number of lines any star works, so none is ringed. 0 (default) shows no hint. Applies to the puzzle in play and every later one."
+    }
+}

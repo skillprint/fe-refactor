@@ -32,6 +32,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Snake Speed', 'Rotation Sensitivity'];
         case 'space-adventure-pinball':
             return ['Available Balls', 'Flipper Strength'];
+        case 'star-puzzles':
+            return ['Puzzle Difficulty', 'Star Snap Radius', 'Start Hint'];
         case 'sumagi':
             return ['Clock Duration', 'Level Progression Rate'];
         case 'sweet-memory':
