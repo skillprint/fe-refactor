@@ -1,3 +1,14 @@
+// Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+// the message GameClient records and uploads with the next screenshot (as Hextris's
+// skillprint.js does). `at` is when it happened, in epoch ms.
+const emitEvent = (event, data) => {
+  try {
+    if (window.parent === window) return;
+    const at = performance.timeOrigin + performance.now();
+    window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+  } catch (e) { /* telemetry must never break the game */ }
+};
+
 const state = { inhaleSec: 4, holdSec: 4, exhaleSec: 6, sessionLengthMin: 2 };
 window.__breathState = state;
 const $ = (id) => document.getElementById(id);
@@ -21,6 +32,7 @@ function cycle() {
   runPhase('Breathe in', state.inhaleSec, 1.9, () => {
     const exhale = () => runPhase('Breathe out', state.exhaleSec, 1, () => {
       cycles++; hud();
+      emitEvent('BREATH_CYCLE', { cycle: cycles, inhaleSec: state.inhaleSec, holdSec: state.holdSec, exhaleSec: state.exhaleSec });
       if (elapsed >= state.sessionLengthMin * 60) finish(); else cycle();
     });
     state.holdSec > 0 ? runPhase('Hold', state.holdSec, 1.9, exhale) : exhale();
@@ -31,12 +43,14 @@ function finish() {
   phaseEl.textContent = 'Done'; countEl.textContent = '';
   circle.style.transition = 'transform 2s ease'; circle.style.transform = 'scale(1)';
   msg.textContent = `Session complete — ${cycles} breaths in ${fmt(elapsed)}. Well done.`;
+  emitEvent('LEVEL_COMPLETE', { cycles, elapsedSec: elapsed, sessionLengthMin: state.sessionLengthMin });
   playBtn.textContent = '🔄'; playBtn.classList.remove('hidden');
 }
 function start() {
   if (running) return;
   running = true; cycles = 0; elapsed = 0; startAt = Date.now(); playBtn.classList.add('hidden');
   msg.textContent = 'Relax your shoulders and follow the circle.';
+  emitEvent('LEVEL_START', { inhaleSec: state.inhaleSec, holdSec: state.holdSec, exhaleSec: state.exhaleSec, sessionLengthMin: state.sessionLengthMin });
   tick = setInterval(() => { elapsed = Math.round((Date.now() - startAt) / 1000); hud(); }, 1000);
   hud(); cycle();
 }

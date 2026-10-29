@@ -1,3 +1,14 @@
+// Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+// the message GameClient records and uploads with the next screenshot (as Hextris's
+// skillprint.js does). `at` is when it happened, in epoch ms.
+const emitEvent = (event, data) => {
+  try {
+    if (window.parent === window) return;
+    const at = performance.timeOrigin + performance.now();
+    window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+  } catch (e) { /* telemetry must never break the game */ }
+};
+
 const TIERS = {
   1: 'the and for you are was with this that from they have more will what when make like time just know take into year your good some them see other than then now look only come its over also back after use two how our work first well way even new want because any these give day most'.split(' '),
   2: 'people through before should around another between country however without example against himself program question company problem business although service important remember children history language develop understand together interest process research government possible general different information sometimes national'.split(' '),
@@ -9,6 +20,7 @@ const $ = (id) => document.getElementById(id);
 const wordsEl = $('words'), input = $('input'), msg = $('msg'), playBtn = $('play-btn');
 let running = false, started = false, words = [], idx = 0, correctWords = 0, typedWords = 0, correctChars = 0, timeLeft = state.timeLimitSec, tick = null;
 let best = Number(localStorage.getItem('typingBest') || 0);
+let lastWordAt = 0; // when the previous word was committed (or the first keystroke)
 const elapsedMin = () => Math.max(1, state.timeLimitSec - timeLeft) / 60;
 const wpm = () => started ? Math.round((correctChars / 5) / elapsedMin()) : 0;
 const accuracy = () => typedWords ? Math.round(100 * correctWords / typedWords) : 100;
@@ -31,12 +43,16 @@ function commit() {
   const span = wordsEl.children[idx], target = words[idx];
   typedWords++;
   if (typed === target) { correctWords++; correctChars += target.length + 1; span.classList.add('good'); } else span.classList.add('bad');
+  const now = performance.now();
+  emitEvent('WORD_TYPED', { index: typedWords - 1, target, typed, correct: typed === target, ms: Math.round(now - lastWordAt) });
+  lastWordAt = now;
   span.classList.remove('current'); idx++;
   if (idx >= words.length) { generate(); wordsEl.scrollTop = 0; } else { wordsEl.children[idx].classList.add('current'); scrollCurrent(); }
   hud();
 }
 input.addEventListener('input', () => {
   if (!running) return;
+  if (!started) { lastWordAt = performance.now(); emitEvent('LEVEL_START', { wordDifficulty: state.wordDifficulty, timeLimitSec: state.timeLimitSec }); }
   if (!started) { started = true; tick = setInterval(() => { timeLeft--; hud(); if (timeLeft <= 0) finish(); }, 1000); }
   if (input.value.endsWith(' ')) commit();
 });
@@ -45,6 +61,7 @@ function finish() {
   const w = wpm();
   if (w > best) { best = w; localStorage.setItem('typingBest', best); }
   hud(); msg.textContent = `Time! ${w} WPM · ${accuracy()}% accuracy (${correctWords}/${typedWords} words)`;
+  emitEvent('LEVEL_COMPLETE', { wpm: w, accuracy: accuracy(), typedWords, correctWords, timeLimitSec: state.timeLimitSec });
   playBtn.textContent = '🔄'; playBtn.classList.remove('hidden');
 }
 function start() {
