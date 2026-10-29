@@ -1,0 +1,61 @@
+===============
+Flanker Task Event List
+===============
+
+Cognitive-validation task (not a consumer game) implementing the classic
+Eriksen arrow-flanker paradigm. Players see a row of 5 arrows and must
+respond to the direction of the MIDDLE arrow only, ignoring the 4
+flanking arrows, which either point the same way (congruent) or the
+opposite way (incongruent) as the target. Two large tap zones (left
+half / right half of the lower screen) collect responses.
+
+8 practice trials with feedback are run first (untimed-ish, 4s deadline),
+followed by 40 main trials with no feedback and a 1.7s response deadline.
+Both blocks are balanced 50/50 congruent-incongruent and 50/50
+left-right, order randomized per session.
+
+Primary outcome measure: the "flanker effect" = mean correct RT on
+incongruent trials minus mean correct RT on congruent trials. Larger
+values indicate more interference from the irrelevant flankers (weaker
+selective attention / response inhibition).
+
+LEVEL_START => Player taps Start
+	- LEVEL_START (event)
+	- flanker (task)
+
+---------------
+TRIAL_START => A trial's stimulus is about to appear
+	- TRIAL_START (event)
+	- practice/main (phase)
+	- 0,1,2... (trialIndex, 0-based within phase)
+	- congruent/incongruent (congruency)
+	- left/right (direction, the direction of the MIDDLE/target arrow)
+
+---------------
+TRIAL_END => Player responded, or the response deadline elapsed
+	- TRIAL_END (event)
+	- practice/main (phase)
+	- 0,1,2... (trialIndex)
+	- congruent/incongruent (congruency)
+	- left/right (direction)
+	- left/right/null (response -- null on timeout)
+	- true/false (correct)
+	- true/false (timedOut)
+	- 000 (rt, ms from stimulus onset to response; null on timeout)
+
+---------------
+LEVEL_COMPLETE => Player finished all 40 main trials
+	- LEVEL_COMPLETE (event)
+	- 40 (nTrials, main-block trials only)
+	- 00.0 (overallAccuracy, percent)
+	- 00.0 (congruentAccuracy, percent)
+	- 00.0 (incongruentAccuracy, percent)
+	- 000.0 (congruentMeanRT, ms, correct trials only)
+	- 000.0 (incongruentMeanRT, ms, correct trials only)
+	- 00.0 (flankerEffectRT, ms = incongruentMeanRT - congruentMeanRT)
+
+---------------
+LEVEL_QUIT => App backgrounded / player left mid-task (best-effort)
+	- LEVEL_QUIT (event)
+	- practice/main/unknown (phase)
+	- 0,1,2... (trialIndex, number of main-block trials completed so far)

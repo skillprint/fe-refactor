@@ -56,6 +56,7 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'reaction-time': 'Reaction Time',
     'dual-n-back': 'Dual N-Back',
     'stroop-test': 'Stroop Test',
+    'flanker-task': 'Flanker Task',
     'typing-speed': 'Typing Speed',
     'guided-breathing': 'Guided Breathing',
     'procedural-maze': 'Procedural Maze',

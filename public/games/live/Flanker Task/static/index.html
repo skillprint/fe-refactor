@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>
+// Queues logEvent calls until ../../SkillprintLib/skillprintScreenshot.js loads
+// and posts them, and every later call, to the portal (fe-refactor#45).
+function logEvent(params) {
+  try {
+    var queue = globalThis.__skillprintPendingEvents = globalThis.__skillprintPendingEvents || [];
+    if (queue.length < 200) queue.push({ json: JSON.stringify(params), at: performance.timeOrigin + performance.now() });
+  } catch (e) {}
+}
+globalThis.logEvent = logEvent;
+</script>
+  <meta charset="utf-8" />
+  <title>Flanker Task</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <section id="start-screen" class="screen">
+    <h1>Arrow Task</h1>
+    <p class="instructions">
+      A row of arrows will appear on the screen.<br /><br />
+      Respond to the direction of the <strong>MIDDLE</strong> arrow only —
+      ignore the arrows around it.<br /><br />
+      Tap the <strong>left</strong> side of the screen if the middle arrow
+      points left, or the <strong>right</strong> side if it points right.
+      <br /><br />
+      Respond as quickly and as accurately as you can.
+    </p>
+    <button id="start-button" class="primary-button">Start</button>
+  </section>
+
+  <section id="task-screen" class="screen hidden">
+    <div id="message-overlay" class="overlay hidden">
+      <p id="message-text"></p>
+      <p class="tap-hint">Tap anywhere to continue</p>
+    </div>
+
+    <div id="stimulus-area">
+      <div id="fixation" class="hidden">+</div>
+      <div id="stimulus" class="hidden"></div>
+      <div id="feedback" class="hidden"></div>
+    </div>
+
+    <div id="response-zones">
+      <div id="zone-left" class="response-zone">
+        <span class="zone-arrow">&#10094;</span>
+        <span class="zone-label">LEFT</span>
+      </div>
+      <div id="zone-right" class="response-zone">
+        <span class="zone-arrow">&#10095;</span>
+        <span class="zone-label">RIGHT</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="results-screen" class="screen hidden">
+    <h1>Done!</h1>
+    <div id="results-summary"></div>
+    <button id="restart-button" class="primary-button">Restart</button>
+  </section>
+
+  <script src="../../SkillprintLib/html2canvas.min.js"></script>
+  <script src="../../SkillprintLib/skillprintScreenshot.js"></script>
+  <script src="skillprint.js"></script>
+  <script src="skillprintShim.js"></script>
+  <script src="js/flanker.js"></script>
+</body>
+</html>
