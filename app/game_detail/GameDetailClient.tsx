@@ -418,7 +418,7 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
             skills={skillPills.slice(0, 3)}
           />
 
-          <GameDetailBadge badges={badges} gameTitle={game.name} gameImage={gameImage(game)} />
+          <GameDetailBadge badges={badges} gameTitle={game.name} gameImage={gameImage(game)} gameSlug={game.baseSlug} />
         </PortalPageRail>
       </PortalPageLayout>
     </PortalLayout>

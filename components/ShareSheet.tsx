@@ -25,6 +25,12 @@ export interface ShareSheetProps {
   heading?: string;
   /** When set, the sheet offers an iframe snippet for this URL. */
   embedUrl?: string;
+  /**
+   * A picture of the thing (a preview card), offered as "Save image" and, on
+   * a phone that shares files, "Share image": the way into networks that
+   * take pictures rather than links (Instagram, TikTok).
+   */
+  imageFile?: { url: string; filename: string };
 }
 
 const SNAP_SDK_SRC = 'https://sdk.snapkit.com/js/v1/create.js';
@@ -86,14 +92,22 @@ async function copyText(text: string, done: string) {
  * to a network, or take an iframe snippet. One component for a game and for
  * the site; the payload decides.
  */
-export default function ShareSheet({ open, onClose, payload, heading, embedUrl }: ShareSheetProps) {
+export default function ShareSheet({ open, onClose, payload, heading, embedUrl, imageFile }: ShareSheetProps) {
   const [canNativeShare, setCanNativeShare] = useState(false);
+  const [canShareFiles, setCanShareFiles] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   const linkRef = useRef<HTMLInputElement>(null);
   const snapRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+    try {
+      const probe = new File([''], 'probe.png', { type: 'image/png' });
+      setCanShareFiles(typeof navigator !== 'undefined' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [probe] }));
+    } catch {
+      setCanShareFiles(false);
+    }
   }, []);
 
   // Escape closes; the page behind does not scroll.
@@ -146,6 +160,46 @@ export default function ShareSheet({ open, onClose, payload, heading, embedUrl }
     }
   };
 
+  const fetchImage = async (): Promise<File> => {
+    const res = await fetch(imageFile!.url);
+    if (!res.ok) throw new Error(`image ${res.status}`);
+    const blob = await res.blob();
+    return new File([blob], imageFile!.filename, { type: blob.type || 'image/png' });
+  };
+
+  const saveImage = async () => {
+    if (!imageFile) return;
+    setImageBusy(true);
+    try {
+      const file = await fetchImage();
+      const href = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = imageFile.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(href), 1000);
+    } catch {
+      toast.error('Could not save the image. Try again in a moment.');
+    } finally {
+      setImageBusy(false);
+    }
+  };
+
+  const shareImage = async () => {
+    if (!imageFile) return;
+    setImageBusy(true);
+    try {
+      const file = await fetchImage();
+      await navigator.share({ files: [file], title: payload.title, text: `${payload.text} ${payload.url}` });
+    } catch (err) {
+      if ((err as Error)?.name !== 'AbortError') toast.error('Could not share the image. Save it instead.');
+    } finally {
+      setImageBusy(false);
+    }
+  };
+
   // Rendered on the body: the backdrop is position: fixed, and a transformed
   // ancestor (the portal shell on small screens) would otherwise pin it.
   return createPortal(
@@ -194,6 +248,21 @@ export default function ShareSheet({ open, onClose, payload, heading, embedUrl }
             </button>
           )}
 
+          {imageFile && (
+            <div className="share-sheet__image layout-flex gap-md">
+              <button type="button" className="button button--secondary button--md" onClick={saveImage} disabled={imageBusy} data-share-save-image="">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-download"></use></svg>
+                Save image
+              </button>
+              {canShareFiles && (
+                <button type="button" className="button button--secondary button--md" onClick={shareImage} disabled={imageBusy} data-share-image="">
+                  <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-upload"></use></svg>
+                  Share image
+                </button>
+              )}
+            </div>
+          )}
+
           <p className="ui-label share-sheet__label">Share to</p>
           <div className="share-sheet__grid" role="list">
             {SHARE_TARGETS.map((target) => (
@@ -214,7 +283,7 @@ export default function ShareSheet({ open, onClose, payload, heading, embedUrl }
             ))}
           </div>
           <p className="share-sheet__note margin-none">
-            {COPY_LINK_NETWORKS.join(', ')} take links by paste: copy the link above and drop it in a caption, bio or message.
+            {COPY_LINK_NETWORKS.join(', ')} take links by paste: copy the link above and drop it in a caption, bio or message.{imageFile ? ' For a post, save the image and upload it.' : ''}
             {canNativeShare ? ' On a phone, "Share with another app" lists them too.' : ''}
           </p>
 

@@ -1,3 +1,6 @@
+import { PORTAL_SKILLS } from '../app/config/skillsTaxonomy';
+import { SnapshotEntry, encodeSnapshot, snapshotSharePath } from './skillprintSnapshot';
+
 /**
  * Social sharing: what gets shared and where.
  *
@@ -102,6 +105,48 @@ export function siteSharePayload(origin: string): SharePayload {
     title: 'Skillprint',
     text: 'Skillprint turns short games into a read on your mood, cognition and personality. Play a few minutes and see your Skillprint.',
     image: `${origin}/opengraph-image/`,
+  };
+}
+
+/** The minimum a badge needs to be shared. */
+export interface ShareableBadge {
+  slug: string;
+  name: string;
+  animalName?: string | null;
+}
+
+/**
+ * The public page for a badge. `game` names the game it was earned in, so the
+ * page can say so and offer that game; the page checks it against the library.
+ */
+export function badgeSharePath(slug: string, gameBaseSlug?: string | null): string {
+  const base = `/badge/${encodeURIComponent(slug)}/`;
+  return gameBaseSlug ? `${base}?game=${encodeURIComponent(gameBaseSlug)}` : base;
+}
+
+export function badgeSharePayload(origin: string, badge: ShareableBadge, game?: { baseSlug: string; name: string } | null): SharePayload {
+  const animal = badge.animalName ? ` (the ${badge.animalName})` : '';
+  const where = game?.name ? ` playing ${game.name}` : '';
+  return {
+    url: `${origin}${badgeSharePath(badge.slug, game?.baseSlug)}`,
+    title: `${badge.name} badge on Skillprint`,
+    text: `I earned the ${badge.name} badge${animal}${where} on Skillprint. Short games, a real read on your skills and mood.`,
+    image: `${origin}/api/og/badge/?slug=${encodeURIComponent(badge.slug)}`,
+  };
+}
+
+/** A player's Skillprint snapshot: their top scores, carried in the link. */
+export function snapshotSharePayload(origin: string, entries: SnapshotEntry[]): SharePayload {
+  const top = entries
+    .slice(0, 3)
+    .map((e) => `${PORTAL_SKILLS[e.slug]?.name || e.slug} ${e.score}`)
+    .join(', ');
+  const encoded = encodeURIComponent(encodeSnapshot(entries));
+  return {
+    url: `${origin}${snapshotSharePath(entries)}`,
+    title: 'My Skillprint',
+    text: `My Skillprint: ${top}. Short games, a real read on your mood, cognition and personality. What's yours?`,
+    image: `${origin}/api/og/snapshot/?s=${encoded}`,
   };
 }
 

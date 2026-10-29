@@ -21,6 +21,7 @@ import ProfilePerformanceTrends from '@/components/Profile/ProfilePerformanceTre
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
 import type { SkillBaselineMap } from '@/components/Profile/ProfileSkillBreakdown';
+import { snapshotFromProfile } from '@/lib/skillprintSnapshot';
 
 function formatSecondsToDuration(sec: number): string {
   if (!sec || isNaN(sec)) return '0m 0s';
@@ -41,6 +42,8 @@ function ProfilePageContent() {
   // Portal aggregate (SKI-131): per-dimension score, lifetime baseline and delta.
   const { data: profileAggregate } = useProfileAggregate();
   const aggregateDimensions = React.useMemo(() => profileDimensionMap(profileAggregate), [profileAggregate]);
+  // The top scores a shared snapshot carries (the profile header's Share).
+  const snapshot = React.useMemo(() => snapshotFromProfile(profileAggregate), [profileAggregate]);
 
   const {
     goalSkills,
@@ -172,7 +175,7 @@ function ProfilePageContent() {
   return (
     <PortalLayout 
       pageClass="page--portal-profile"
-      header={<ProfileHeader />}
+      header={<ProfileHeader snapshot={snapshot} />}
       rail={
         <ProfileRail
           skillsCount={skillsCount}

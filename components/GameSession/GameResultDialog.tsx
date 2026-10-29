@@ -8,6 +8,11 @@ import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
 import { titleFromSlug } from '../../lib/skillIcons';
 import EmailPromptCard from '../../app/components/EmailPromptCard';
 import ScoreComparison, { ComparableMetric } from './ScoreDistribution';
+import ShareSheet from '../ShareSheet';
+import { gameSharePayload } from '../../lib/share';
+import { siteUrl } from '../../lib/siteUrl';
+import { baseSlug } from '../../lib/gameSlug';
+import { getGameDetails } from '../../app/config/gameConfig';
 
 interface ResultMetric {
   name: string;
@@ -114,6 +119,7 @@ export default function GameResultDialog({
   const { data: session, isProcessing } = useComputedGameMetrics(unscored ? undefined : sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [surveyError, setSurveyError] = useState<string | null>(null);
   // SKI-140: skills the game did not exercise stay behind a toggle by default.
   const [showAllSkills, setShowAllSkills] = useState(false);
@@ -265,6 +271,21 @@ export default function GameResultDialog({
       <span>{message}</span>
     </p>
   );
+
+  // Share the game, not the session: the link is the game's page (with its
+  // preview card), and the post leads with the player's points when the game
+  // reported any. A shared station or an embed keeps to the session.
+  const shareSlug = baseSlug(gameSlug || '');
+  const shareable = Boolean(shareSlug) && !hidePortalLinks;
+  const sharePayload = () => {
+    const origin = siteUrl();
+    const art = getGameDetails(shareSlug)?.image;
+    const payload = gameSharePayload(origin, { baseSlug: shareSlug, name: gameTitle }, art ? new URL(art, `${origin}/`).toString() : null);
+    if (typeof score === 'number' && score > 0) {
+      payload.text = `I scored ${score.toLocaleString('en-US')} in ${gameTitle} on Skillprint. Think you can beat it? A few minutes of play gets you a read on your skills and mood.`;
+    }
+    return payload;
+  };
 
   return (
     <div className="popup-backdrop inset-none place-center is-open" id="resultPopup">
@@ -449,6 +470,12 @@ export default function GameResultDialog({
         <footer className="popup__footer">
           <Link href={exitHref} className="button button--tertiary button--md">{exitLabel}</Link>
           <div className="game-result__actions layout-flex items-center gap-md">
+            {shareable && (
+              <button className="button button--secondary button--md" type="button" onClick={() => setShareOpen(true)} aria-label={`Share ${gameTitle}`} data-result-share="">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-share"></use></svg>
+                Share
+              </button>
+            )}
             <button className="button button--secondary button--md" data-sequence-go="loading" type="button" onClick={onReplay}>Play again</button>
             {primaryAction ?? (
               <Link className="button button--primary button--md" href="/profile">
@@ -458,6 +485,14 @@ export default function GameResultDialog({
           </div>
         </footer>
       </article>
+      {shareable && shareOpen && (
+        <ShareSheet
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          heading={`Share ${gameTitle}`}
+          payload={sharePayload()}
+        />
+      )}
     </div>
   );
 }
