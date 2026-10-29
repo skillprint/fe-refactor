@@ -24,6 +24,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Fruit Spawn Frequency', 'Object Trajectory Speed'];
         case 'mahjong-deluxe':
             return ['Bonus Time Awarded', 'Hint Score Penalty'];
+        case 'mage-duel':
+            return ['Spell Power', 'Enemy Hit Strength', 'Enemy Attack Interval', 'Heal Strength', 'Translation Helper', 'Full Sentences'];
         case 'match-doodle':
             return ['Card Pairs', 'Pile Density', 'Card Tilt'];
         case 'photo-hunt':

@@ -256,6 +256,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'mage-duel': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/mage-duel-2d/backend/game-scoring-config.json',
+  },
+
   'simon-says': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,

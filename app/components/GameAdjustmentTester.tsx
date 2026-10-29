@@ -386,17 +386,25 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
-        case 'mage-duel-2d':
+        case 'mage-duel':
+            // Mage Duel: heroDamage (spells to win), enemyDamage + enemyAttackRateMs (time pressure), healAmount, showHelper (translation shown), useSentences
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'heroDamage', parameterValue: 10 }];
-                case 2: return [{ parameterName: 'heroDamage', parameterValue: 50 }];
-                case 3: return [{ parameterName: 'enemyDamage', parameterValue: 5 }];
-                case 4: return [{ parameterName: 'enemyDamage', parameterValue: 40 }];
-                case 5: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 8000 }];
-                case 6: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 3000 }];
-                case 7: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 1000 }];
-                case 8: return [{ parameterName: 'healAmount', parameterValue: 10 }];
-                case 9: return [{ parameterName: 'healAmount', parameterValue: 60 }];
+                case 1: return [{ parameterName: 'heroDamage', parameterValue: 10 }]; // heroDamage 10 (10 spells win; default 4 = 25)
+                case 2: return [{ parameterName: 'enemyDamage', parameterValue: 25 }]; // enemyDamage 25 (harder strikes; default 15)
+                case 3: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 9000 }]; // enemyAttackRateMs 9000 (slower strikes)
+                case 4: return [{ parameterName: 'enemyAttackRateMs', parameterValue: 3000 }]; // enemyAttackRateMs 3000 (faster strikes)
+                case 5: return [{ parameterName: 'healAmount', parameterValue: 40 }]; // healAmount 40 (stronger heals; default 20)
+                case 6: return [{ parameterName: 'showHelper', parameterValue: 0 }]; // showHelper 0 (hide the translation)
+                case 7: return [{ parameterName: 'useSentences', parameterValue: 1 }]; // useSentences 1 (sentences)
+                case 8: return [{ parameterName: 'showHelper', parameterValue: 1 }, { parameterName: 'useSentences', parameterValue: 0 }]; // helper back, single words
+                case 9: return [ // all defaults
+                    { parameterName: 'heroDamage', parameterValue: 4 },
+                    { parameterName: 'enemyDamage', parameterValue: 15 },
+                    { parameterName: 'enemyAttackRateMs', parameterValue: 5000 },
+                    { parameterName: 'healAmount', parameterValue: 20 },
+                    { parameterName: 'showHelper', parameterValue: 1 },
+                    { parameterName: 'useSentences', parameterValue: 0 }
+                ];
                 default:
                     return [];
             }

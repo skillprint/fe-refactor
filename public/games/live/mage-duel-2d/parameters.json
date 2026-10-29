@@ -1,0 +1,44 @@
+{
+    "heroDamage": {
+        "max": 25,
+        "min": 2,
+        "type": "integer",
+        "default": 4,
+        "description": "Damage each correct spell does to the warlord (100 HP): 4 = 25 spells to win, 10 = 10, 25 = 4. Lower values make the duel longer and harder. Applies to the next spell that lands."
+    },
+    "enemyDamage": {
+        "max": 40,
+        "min": 2,
+        "type": "integer",
+        "default": 15,
+        "description": "Damage each enemy strike does to the hero (100 HP): 15 = 7 strikes to lose, 8 = 13, 25 = 4. Higher values punish slow typing harder. Applies to the next strike."
+    },
+    "enemyAttackRateMs": {
+        "max": 15000,
+        "min": 1500,
+        "type": "integer",
+        "default": 5000,
+        "description": "Milliseconds between enemy strikes. Lower values add time pressure. In a duel the attack timer restarts with the new period at once."
+    },
+    "healAmount": {
+        "max": 50,
+        "min": 0,
+        "type": "integer",
+        "default": 20,
+        "description": "HP restored when the player casts a 'heal' word (1 in 11 words, 1 in 7 sentences). 0 turns healing off. Applies to the next heal."
+    },
+    "showHelper": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 1,
+        "description": "1 shows the translation to type under each prompt (a copy-typing task); 0 hides it, so the player must recall the translation (vocabulary recall). Applies to the word on screen at once."
+    },
+    "useSentences": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 0,
+        "description": "1 asks for whole short sentences instead of single words (about 3 times as many letters per spell); 0 single words. Applies from the next word."
+    }
+}

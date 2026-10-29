@@ -163,7 +163,10 @@ function startGame() {
     enemyEl.style.backgroundImage = "url('assets/enemy.png')";
 
     nextWord();
-    
+
+    // The last duel's end left the box disabled; "Repeat Mission" needs it back.
+    inputWordEl.disabled = false;
+
     // Add input listener
     inputWordEl.addEventListener('input', checkInput);
     inputWordEl.focus();
@@ -171,48 +174,7 @@ function startGame() {
     // Start Enemy Attack Loop
     startEnemyAttacks();
 
-    // Register Skillprint Adjustments if available
-    setTimeout(() => {
-        const adjustmentConfig = {
-            '1': { parameterName: 'heroDamage', description: 'Decrease Hero Damage', value: 10 },
-            '2': { parameterName: 'heroDamage', description: 'Increase Hero Damage', value: 50 },
-            '3': { parameterName: 'enemyDamage', description: 'Decrease Enemy Damage', value: 5 },
-            '4': { parameterName: 'enemyDamage', description: 'Increase Enemy Damage', value: 40 },
-            '5': { parameterName: 'enemyAttackRateMs', description: 'Slower Enemy Attacks', value: 8000 },
-            '6': { parameterName: 'enemyAttackRateMs', description: 'Faster Enemy Attacks', value: 3000 },
-            '7': { parameterName: 'enemyAttackRateMs', description: 'Insane Enemy Attacks', value: 1000 },
-            '8': { parameterName: 'healAmount', description: 'Decrease Heal Amount', value: 10 },
-            '9': { parameterName: 'healAmount', description: 'Increase Heal Amount', value: 60 }
-        };
-
-        if (window.Skillprint && typeof window.Skillprint.registerAdjustments === 'function') {
-            window.Skillprint.registerAdjustments(adjustmentConfig);
-        } else {
-            // Fallback for manual testing when Skillprint isn't attached
-            window.addEventListener('keydown', (e) => {
-                if (document.activeElement === inputWordEl) return; // Don't trigger when typing
-                if (adjustmentConfig[e.key]) {
-                    window.adjustGame(adjustmentConfig[e.key]);
-                }
-            });
-        }
-    }, 100);
-
-    // Fallback global adjust command
-    window.adjustGame = function(obj) {
-        if (typeof obj === 'object' && obj.hasOwnProperty('parameterName')) {
-            const { parameterName, parameterValue } = obj;
-            if (window.GAME_CONFIG[parameterName] !== undefined) {
-                window.GAME_CONFIG[parameterName] = parameterValue;
-                console.log(`Adjusted ${parameterName} to ${parameterValue}`);
-                
-                // Restart timer if rate changes
-                if (parameterName === 'enemyAttackRateMs') {
-                    startEnemyAttacks();
-                }
-            }
-        }
-    }
+    // Difficulty knobs (window.adjustGame) live in skillprintShim.js.
 }
 
 function startEnemyAttacks() {
