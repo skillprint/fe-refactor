@@ -1,0 +1,59 @@
+{
+  "game_slug": "garden-match-f883d184-cb16-434c-a866-6eaff7bd05b2",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "moveBudgetMultiplier": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Scales each level's move budget (27-45 moves in the game's own levels; never below 1). Changes the level in play at once, never leaving fewer than one move, and every level started or restarted after. Fewer moves make the goals harder to reach.",
+      "adjustment_guide": "The main difficulty lever. Raise (1.3-2) after LEVEL_FAILED or LEVEL_RESTART; lower (0.6-0.8) for grit once the player completes levels with moves to spare. Change by about 0.2 at a time."
+    },
+    "targetMultiplier": {
+      "type": "number",
+      "min": 0.5,
+      "max": 1.5,
+      "default": 1.0,
+      "description": "Scales how many of each goal fruit a level asks for (three goals of 7-25 each in the game's own levels; never below 1). Applies from the next level started or restarted. Higher values make levels longer and harder.",
+      "adjustment_guide": "Lower (0.5-0.8) for relax or quick wins; raise (1.2-1.5) for grit and focus once the player completes levels comfortably. Pair a raise with a slightly larger moveBudgetMultiplier to keep levels winnable."
+    },
+    "colorCount": {
+      "type": "integer",
+      "min": 4,
+      "max": 6,
+      "default": 6,
+      "description": "Most fruit colours on the board (the game uses 5 on levels 1-2 and 6 after; a level's own count is kept when it is lower, so 6 is the game as shipped). Fewer colours mean more matches and cascades, so the board is easier to read and goals fill faster. A goal fruit whose colour is cut is swapped for a colour still in play. Applies from the next level started or restarted.",
+      "adjustment_guide": "Lower (4) for relax, joy or a struggling player; 5 for a gentle step; 6 for focus, grit and perception training."
+    }
+  },
+  "adjustment_instructions": "Garden Match is a match-3 puzzle: the player swaps two neighbouring fruits to line up three or more of one kind; matched fruits clear and new ones fall in, sometimes cascading. Each level has a move budget and three goals (collect a number of three particular fruits). The level is won when all three goals reach zero and lost when the moves run out. Events: LEVEL_START, SWIPE (match_success, moves = moves left), LEVEL_COMPLETE, LEVEL_FAILED, LEVEL_RESTART.\nLevers: moveBudgetMultiplier sets the move budget (lower = harder; changes the level in play too); targetMultiplier sets how many fruits each goal asks for (higher = harder; next level or restart); colorCount sets how many fruit colours fall (fewer = easier, more cascades; next level or restart).\n- relax: moveBudgetMultiplier 1.3-2, targetMultiplier 0.5-0.8, colorCount 4-5.\n- focus: moveBudgetMultiplier 0.9-1.1, targetMultiplier 1.0-1.2, colorCount 6.\n- grit: moveBudgetMultiplier 0.6-0.8, targetMultiplier 1.2-1.5, colorCount 6; give moves back after a LEVEL_FAILED.\n- joy: moveBudgetMultiplier 1.2-1.5, targetMultiplier 0.7-1.0, colorCount 4-5, so cascades come often and levels end in wins.\nRepeated LEVEL_FAILED or LEVEL_RESTART on one level means it is too hard: raise moveBudgetMultiplier by 0.2 first, then lower targetMultiplier. A high share of SWIPE events with match_success false means the player is not finding matches: lower colorCount.",
+  "skill_adjustment_instructions": "Garden Match trains Perception (spotting a possible match among similar fruits), Planning (choosing swaps that set up cascades and feed the goal fruits) and Attention.\n- perception, attention: colorCount 6 with moveBudgetMultiplier 1.0-1.3, so the challenge is finding matches rather than running out of moves.\n- planning: moveBudgetMultiplier 0.6-0.8 with targetMultiplier 1.0-1.3, so each swap has to advance a goal.",
+  "notes": "Garden Match's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'garden-match' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "moveBudgetMultiplier",
+      "type": "Float",
+      "description": "Scales each level's move budget (27-45 moves in the game's own levels; never below 1). Changes the level in play at once, never leaving fewer than one move, and every level started or restarted after. Fewer moves make the goals harder to reach.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "The main difficulty lever. Raise (1.3-2) after LEVEL_FAILED or LEVEL_RESTART; lower (0.6-0.8) for grit once the player completes levels with moves to spare. Change by about 0.2 at a time."
+    },
+    {
+      "name": "targetMultiplier",
+      "type": "Float",
+      "description": "Scales how many of each goal fruit a level asks for (three goals of 7-25 each in the game's own levels; never below 1). Applies from the next level started or restarted. Higher values make levels longer and harder.",
+      "min_value": "0.5",
+      "max_value": "1.5",
+      "adjustment_guide": "Lower (0.5-0.8) for relax or quick wins; raise (1.2-1.5) for grit and focus once the player completes levels comfortably. Pair a raise with a slightly larger moveBudgetMultiplier to keep levels winnable."
+    },
+    {
+      "name": "colorCount",
+      "type": "Integer",
+      "description": "Most fruit colours on the board (the game uses 5 on levels 1-2 and 6 after; a level's own count is kept when it is lower, so 6 is the game as shipped). Fewer colours mean more matches and cascades, so the board is easier to read and goals fill faster. A goal fruit whose colour is cut is swapped for a colour still in play. Applies from the next level started or restarted.",
+      "min_value": "4",
+      "max_value": "6",
+      "adjustment_guide": "Lower (4) for relax, joy or a struggling player; 5 for a gentle step; 6 for focus, grit and perception training."
+    }
+  ]
+}

@@ -16,6 +16,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Time Per Word', 'Time Pressure Ramp', 'Hints Per Stage'];
         case 'fruit-sorting':
             return ['Clock Duration'];
+        case 'garden-match':
+            return ['Move Budget', 'Goal Size', 'Fruit Colors'];
         case 'gems-of-hanoi':
             return ['Maximum Complexity Tier'];
         case 'gummy-blocks':

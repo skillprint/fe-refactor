@@ -203,6 +203,25 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'garden-match':
+            // Garden Match: moveBudgetMultiplier (moves; changes the level in play), targetMultiplier (goal counts), colorCount (fruit colours, 4-6). Goals and colours apply from the next level or restart.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'moveBudgetMultiplier', parameterValue: 2 }]; // moveBudgetMultiplier 2 (twice the moves)
+                case 2: return [{ parameterName: 'moveBudgetMultiplier', parameterValue: 1 }]; // moveBudgetMultiplier 1 (default)
+                case 3: return [{ parameterName: 'moveBudgetMultiplier', parameterValue: 0.6 }]; // moveBudgetMultiplier 0.6 (fewer moves)
+                case 4: return [{ parameterName: 'targetMultiplier', parameterValue: 0.5 }]; // targetMultiplier 0.5 (half the goals)
+                case 5: return [{ parameterName: 'targetMultiplier', parameterValue: 1 }]; // targetMultiplier 1 (default)
+                case 6: return [{ parameterName: 'targetMultiplier', parameterValue: 1.5 }]; // targetMultiplier 1.5 (more goals)
+                case 7: return [{ parameterName: 'colorCount', parameterValue: 4 }]; // colorCount 4 (fewest colours)
+                case 8: return [{ parameterName: 'colorCount', parameterValue: 6 }]; // colorCount 6 (default)
+                case 9: return [
+                    { parameterName: 'moveBudgetMultiplier', parameterValue: 0.6 },
+                    { parameterName: 'targetMultiplier', parameterValue: 1.5 },
+                    { parameterName: 'colorCount', parameterValue: 6 }
+                ]; // Hard mode
+                default:
+                    return [];
+            }
         case 'gems-of-hanoi':
             // 'levels' sets the cap on unlocked levels out of 8 total
             switch (keyNumber) {

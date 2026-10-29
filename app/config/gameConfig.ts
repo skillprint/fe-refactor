@@ -109,6 +109,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'garden-match': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Garden Match/backend/game-scoring-config.json',
     customExitButton: {
       color: 'green',
       size: 'md'
