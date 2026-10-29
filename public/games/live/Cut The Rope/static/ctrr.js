@@ -6082,7 +6082,7 @@ class game_Bungee extends physics_ConstraintSystem {
 			}
 		}
 		let _g1 = 0;
-		let _g2 = this.relaxationTimes;
+		let _g2 = typeof window != "undefined" && window.__skillprintRopeIterations > 0 ? window.__skillprintRopeIterations : this.relaxationTimes; // Skillprint ropeElasticity knob (skillprintShim.js)
 		while(_g1 < _g2) {
 			++_g1;
 			let _g = 0;
@@ -13482,6 +13482,7 @@ class game_World extends O {
 			}
 		}
 		let yImpulse = game_Bubble.BUBBLE_IMPULSE_Y * (this.gravityButton != null && !this.gravityNormal ? -1 : 1);
+		if(typeof window != "undefined" && window.__skillprintGravityScale > 0) yImpulse *= window.__skillprintGravityScale; // Skillprint gravity knob: bubbles still float
 		let rd = game_Bubble.BUBBLE_IMPULSE_RD;
 		let applyStarImpulse = function(cp) {
 			cp.applyImpulse(new core_Vector(-cp.v.x / rd,-cp.v.y / rd + yImpulse),dt);
@@ -31391,8 +31392,9 @@ class physics_ConstraintPoint extends physics_MaterialPoint {
 		let currentGravity = physics_Gravity.current;
 		if(!this.disableGravity) {
 			if(currentGravity.y != 0 || currentGravity.x != 0) {
-				totalForce.x = currentGravity.x;
-				totalForce.y = currentGravity.y;
+				let gScale = typeof window != "undefined" && window.__skillprintGravityScale > 0 ? window.__skillprintGravityScale : 1; // Skillprint gravity knob (skillprintShim.js)
+				totalForce.x = currentGravity.x * gScale;
+				totalForce.y = currentGravity.y * gScale;
 			} else {
 				totalForce.x = this.gravity.x * this.invWeight;
 				totalForce.y = this.gravity.y * this.invWeight;

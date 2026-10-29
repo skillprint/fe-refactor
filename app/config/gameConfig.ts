@@ -231,6 +231,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'cut-the-rope': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Cut The Rope/backend/game-scoring-config.json',
     customExitButton: {
       color: 'red',
       size: 'md'

@@ -1,30 +1,16 @@
 {
     "gravity": {
-        "max": 3.0,
-        "min": 0.2,
-        "type": "float",
-        "default": 1.0,
-        "description": "Scaling factor for physical gravity. Higher values make game physics faster and heavier."
-    },
-    "ropeElasticity": {
         "max": 2.0,
         "min": 0.5,
         "type": "float",
         "default": 1.0,
-        "description": "Elasticity and bounce coefficient of ropes. Lower values make ropes stiffer."
+        "description": "Scales gravity on the candy and ropes (soap bubbles' lift scales with it, so bubbles still float). 2 = the candy falls twice as far in the same time and swings about 1.4x faster, so cuts must be timed more tightly; 0.5 = slow, floaty motion with more time to react. Air-cushion puffs keep their strength, so they push relatively harder at low gravity. Applies at once, in the level in play."
     },
-    "scoreMultiplier": {
-        "max": 5,
-        "min": 1,
-        "type": "integer",
-        "default": 1,
-        "description": "Multiplier applied to points scored when collecting stars."
-    },
-    "timeLimitSeconds": {
-        "max": 120,
-        "min": 10,
-        "type": "integer",
-        "default": 45,
-        "description": "Time limit in seconds to complete the active level. Lower values increase difficulty."
+    "ropeElasticity": {
+        "max": 2.0,
+        "min": 1.0,
+        "type": "float",
+        "default": 1.0,
+        "description": "How much ropes stretch and bounce. 1 = as shipped (a hanging candy stretches its rope under 1%); each +0.25 halves the rope solver's passes: 1.5 stretches about 3% at rest and 12% when the candy drops onto the rope, 2 about 10% and 34%. Stretchy ropes let the candy sag and bounce, so swings are harder to predict. Applies at once, in the level in play."
     }
 }

@@ -465,25 +465,17 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
             // Doodle God Next: no difficulty knobs (hint timing lives inside main.wasm), so no key sends anything
             return [];
         case 'cut-the-rope':
+            // Cut The Rope: gravity (how fast the candy falls and swings), ropeElasticity (how much ropes stretch and bounce)
             switch (keyNumber) {
-                case 1: return [{ parameterName: 'gravity', parameterValue: 0.5 }]; // Low gravity
-                case 2: return [{ parameterName: 'gravity', parameterValue: 1.0 }]; // Default
-                case 3: return [{ parameterName: 'gravity', parameterValue: 2.0 }]; // High gravity
-                case 4: return [{ parameterName: 'ropeElasticity', parameterValue: 0.5 }]; // Stiff ropes
-                case 5: return [{ parameterName: 'ropeElasticity', parameterValue: 1.0 }]; // Default
-                case 6: return [{ parameterName: 'ropeElasticity', parameterValue: 1.8 }]; // Elastic ropes
-                case 7: return [
-                    { parameterName: 'scoreMultiplier', parameterValue: 1 },
-                    { parameterName: 'timeLimitSeconds', parameterValue: 90 }
-                ];
-                case 8: return [
-                    { parameterName: 'scoreMultiplier', parameterValue: 2 },
-                    { parameterName: 'timeLimitSeconds', parameterValue: 45 }
-                ];
-                case 9: return [
-                    { parameterName: 'scoreMultiplier', parameterValue: 5 },
-                    { parameterName: 'timeLimitSeconds', parameterValue: 15 }
-                ];
+                case 1: return [{ parameterName: 'gravity', parameterValue: 0.5 }]; // gravity 0.5 (floaty, more time)
+                case 2: return [{ parameterName: 'gravity', parameterValue: 0.75 }]; // gravity 0.75
+                case 3: return [{ parameterName: 'gravity', parameterValue: 1 }]; // gravity 1 (default)
+                case 4: return [{ parameterName: 'gravity', parameterValue: 1.5 }]; // gravity 1.5
+                case 5: return [{ parameterName: 'gravity', parameterValue: 2 }]; // gravity 2 (heavy, tight timing)
+                case 6: return [{ parameterName: 'ropeElasticity', parameterValue: 1 }]; // ropeElasticity 1 (default, stiff)
+                case 7: return [{ parameterName: 'ropeElasticity', parameterValue: 1.5 }]; // ropeElasticity 1.5
+                case 8: return [{ parameterName: 'ropeElasticity', parameterValue: 2 }]; // ropeElasticity 2 (stretchy, bouncy)
+                case 9: return [{ parameterName: 'gravity', parameterValue: 1 }, { parameterName: 'ropeElasticity', parameterValue: 1 }]; // both defaults
                 default:
                     return [];
             }

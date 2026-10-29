@@ -1,0 +1,43 @@
+{
+  "game_slug": "cut-the-rope",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "gravity": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Scales gravity on the candy and ropes (soap bubbles' lift scales with it, so bubbles still float). 2 = the candy falls twice as far in the same time and swings about 1.4x faster, so cuts must be timed more tightly; 0.5 = slow, floaty motion with more time to react. Air-cushion puffs keep their strength, so they push relatively harder at low gravity. Applies at once, in the level in play.",
+      "adjustment_guide": "The timing lever. Lower (0.6-0.8) for relax or after repeated LEVEL_FAILED on a level; raise (1.3-2) for grit or timing practice once levels are completed with 3 stars. Change by about 0.25 at a time."
+    },
+    "ropeElasticity": {
+      "type": "number",
+      "min": 1.0,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "How much ropes stretch and bounce. 1 = as shipped (a hanging candy stretches its rope under 1%); each +0.25 halves the rope solver's passes: 1.5 stretches about 3% at rest and 12% when the candy drops onto the rope, 2 about 10% and 34%. Stretchy ropes let the candy sag and bounce, so swings are harder to predict. Applies at once, in the level in play.",
+      "adjustment_guide": "Keep 1 for relax, new players and planning practice (predictable swings). Raise (1.5-2) for grit, or for joy if the player enjoys the bounce; back to 1 after repeated LEVEL_FAILED."
+    }
+  },
+  "adjustment_instructions": "Cut The Rope is a physics puzzle: the candy hangs from ropes, the player swipes to cut them, and the candy must swing or fall into Om Nom's mouth, ideally collecting the level's three stars on the way; later levels add bubbles (lift the candy), air cushions, spikes and more. Events: LEVEL_START (season, box, level), ROPE_CUT (ropes, seconds), STAR_COLLECTED (stars, seconds), LEVEL_COMPLETE (stars, score, seconds), LEVEL_FAILED (stars, seconds).\nLevers: gravity sets how fast everything falls and swings (higher = tighter timing, harder; lower = more time); ropeElasticity sets how much ropes stretch and bounce (higher = less predictable, harder). Neither changes a level's layout.\n- relax: gravity 0.6-0.8, ropeElasticity 1.\n- focus: gravity 1-1.3, ropeElasticity 1-1.25.\n- grit: gravity 1.5-2, ropeElasticity 1.5-2.\n- joy: gravity 0.8-1, ropeElasticity 1.25-1.5 (bouncy, forgiving).\nRepeated LEVEL_FAILED on one level (same box and level) means it is too hard: lower gravity by 0.25 and set ropeElasticity back to 1. LEVEL_COMPLETE with 3 stars in a few seconds means it is too easy: raise gravity by 0.25.",
+  "skill_adjustment_instructions": "Cut The Rope trains Timing and Precision (when and where to cut), and Spatial reasoning and Planning (predicting swings and the order of cuts).\n- timing, precision: gravity 1.3-2 with ropeElasticity 1, so the challenge is the moment of the cut.\n- spatial, planning: gravity 0.7-1 with ropeElasticity 1, so swings are slow and predictable and the challenge is working out the order of cuts; raise ropeElasticity to 1.25-1.5 to make prediction harder once the player plans well.",
+  "notes": "Cut The Rope's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'cut-the-rope' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "gravity",
+      "type": "Float",
+      "description": "Scales gravity on the candy and ropes (soap bubbles' lift scales with it, so bubbles still float). 2 = the candy falls twice as far in the same time and swings about 1.4x faster, so cuts must be timed more tightly; 0.5 = slow, floaty motion with more time to react. Air-cushion puffs keep their strength, so they push relatively harder at low gravity. Applies at once, in the level in play.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "The timing lever. Lower (0.6-0.8) for relax or after repeated LEVEL_FAILED on a level; raise (1.3-2) for grit or timing practice once levels are completed with 3 stars. Change by about 0.25 at a time."
+    },
+    {
+      "name": "ropeElasticity",
+      "type": "Float",
+      "description": "How much ropes stretch and bounce. 1 = as shipped (a hanging candy stretches its rope under 1%); each +0.25 halves the rope solver's passes: 1.5 stretches about 3% at rest and 12% when the candy drops onto the rope, 2 about 10% and 34%. Stretchy ropes let the candy sag and bounce, so swings are harder to predict. Applies at once, in the level in play.",
+      "min_value": "1.0",
+      "max_value": "2.0",
+      "adjustment_guide": "Keep 1 for relax, new players and planning practice (predictable swings). Raise (1.5-2) for grit, or for joy if the player enjoys the bounce; back to 1 after repeated LEVEL_FAILED."
+    }
+  ]
+}
