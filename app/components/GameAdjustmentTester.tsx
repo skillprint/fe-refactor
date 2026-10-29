@@ -170,6 +170,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'bubble-spirit':
+            // Bubble Spirit: shotLimitScale (shots on limited levels), specialBubbleRate (bombs/rainbows), aimGuide (aiming line on/off)
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'shotLimitScale', parameterValue: 2 }]; // shotLimitScale 2 (twice the shots)
+                case 2: return [{ parameterName: 'shotLimitScale', parameterValue: 1.5 }]; // shotLimitScale 1.5
+                case 3: return [{ parameterName: 'shotLimitScale', parameterValue: 1 }]; // shotLimitScale 1 (default)
+                case 4: return [{ parameterName: 'shotLimitScale', parameterValue: 0.6 }]; // shotLimitScale 0.6 (fewer shots)
+                case 5: return [{ parameterName: 'specialBubbleRate', parameterValue: 0 }]; // specialBubbleRate 0 (no specials)
+                case 6: return [{ parameterName: 'specialBubbleRate', parameterValue: 1 }]; // specialBubbleRate 1 (default)
+                case 7: return [{ parameterName: 'specialBubbleRate', parameterValue: 2 }]; // specialBubbleRate 2 (twice the specials)
+                case 8: return [{ parameterName: 'aimGuide', parameterValue: 0 }]; // aimGuide 0 (no aiming line)
+                case 9: return [{ parameterName: 'aimGuide', parameterValue: 1 }]; // aimGuide 1 (aiming line back on)
+                default:
+                    return [];
+            }
         case 'change-word':
             // Change Word: timeMultiplier (time per word), rampMultiplier (how fast it shrinks), hintsPerStage
             switch (keyNumber) {

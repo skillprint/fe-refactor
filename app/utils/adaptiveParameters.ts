@@ -12,6 +12,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Starting Tile Density'];
         case 'brick-out':
             return ['Ball Speed', 'Power-Up Frequency', 'Multiball Limit'];
+        case 'bubble-spirit':
+            return ['Shot Limit', 'Special Bubble Frequency', 'Aiming Guide'];
         case 'change-word':
             return ['Time Per Word', 'Time Pressure Ramp', 'Hints Per Stage'];
         case 'fruit-sorting':
