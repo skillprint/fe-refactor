@@ -63,7 +63,9 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     // Built from github.com/simonw/battledrones (Apache-2.0) by scripts/battle-drones/build.sh.
     'battle-drones': 'Battle Drones',
     // Unity WebGL build from the trails_webar repo (TMT -> Build WebGL (Release)).
-    'trails-webar': 'Trails'
+    'trails-webar': 'Trails',
+    // Three.js game from game-builder (games/mountain-appreciator).
+    'mountain-appreciator': 'Mountain Appreciator'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

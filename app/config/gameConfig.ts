@@ -338,6 +338,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'mountain-appreciator': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Mountain Appreciator/backend/game-scoring-config.json',
+  },
+
   'battle-drones': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
@@ -889,6 +895,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Multitasking', 'Prioritization', 'Divided Attention', 'Working Memory'],
     instructions: 'Tap a waiting guest, then an empty table to seat them. Tap a seated table once they\'ve decided to take their order. Tap the kitchen counter to grab a finished dish, then tap the matching table to serve it. Tap a dirty table to clear it. Keep every guest happy before their patience runs out!'
   },
+  'mountain-appreciator': {
+    name: 'Mountain Appreciator',
+    description: 'Two twin mountains, nearly identical. Find what makes each one itself before the light goes',
+    image: '/games/live/Mountain Appreciator/cover.jpg',
+    category: 'Attention',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Visual Search', 'Sustained Attention', 'Pattern Matching', 'Spatial Reasoning'],
+    instructions: 'Drag to walk around the two mountains; scroll or pinch to lean in. Click a difference on either mountain: a forest, a tarn, an eagle, a comet. Wrong clicks cost daylight. Hold Space (or the Blink button) to flick between the twins, though the sun moves faster while you do. When the light goes, keep one twin for your range, then walk on to the next pair or finish.'
+  },
   'battle-drones': {
     name: 'Battle Drones',
     description: 'A Command & Conquer-style RTS: mine scrap, build a base and send ground and air drones to destroy the enemy HQ',
@@ -993,5 +1009,6 @@ export const knownGameSlugs = [
   'reaction-time',
   'solitaire',
   'order-rush',
+  'mountain-appreciator',
   'battle-drones',
 ];

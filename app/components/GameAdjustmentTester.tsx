@@ -749,6 +749,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'mountain-appreciator':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next pair.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'daylightScale', parameterValue: 1.6 }, { parameterName: 'missPenaltySec', parameterValue: 3 }, { parameterName: 'blinkSunRate', parameterValue: 2 }, { parameterName: 'hitTolerance', parameterValue: 1.35 }]; // Relax
+                case 2: return [{ parameterName: 'daylightScale', parameterValue: 1.3 }, { parameterName: 'missPenaltySec', parameterValue: 5 }, { parameterName: 'hitTolerance', parameterValue: 1.15 }]; // Gentle
+                case 3: return [{ parameterName: 'daylightScale', parameterValue: 1.0 }, { parameterName: 'missPenaltySec', parameterValue: 7 }, { parameterName: 'blinkSunRate', parameterValue: 4 }, { parameterName: 'hitTolerance', parameterValue: 1.0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'daylightScale', parameterValue: 0.8 }, { parameterName: 'missPenaltySec', parameterValue: 10 }]; // Brisk
+                case 5: return [{ parameterName: 'daylightScale', parameterValue: 0.65 }, { parameterName: 'missPenaltySec', parameterValue: 13 }, { parameterName: 'blinkSunRate', parameterValue: 7 }, { parameterName: 'hitTolerance', parameterValue: 0.8 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next pair
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }];  // Harder next pair
+                case 8: return [{ parameterName: 'hitTolerance', parameterValue: 0.6 }]; // Precise clicks only
+                case 9: return [{ parameterName: 'daylightScale', parameterValue: 0.5 }, { parameterName: 'missPenaltySec', parameterValue: 20 }, { parameterName: 'blinkSunRate', parameterValue: 8 }, { parameterName: 'hitTolerance', parameterValue: 0.6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
