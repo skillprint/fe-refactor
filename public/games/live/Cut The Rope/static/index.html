@@ -18,14 +18,16 @@
 		<script src="./skillprintShim.js"></script>
 		<script src="./cutTheRopeScreenshot.js"></script>
 		<script>
+		// ctrr.js calls logEvent({event, ...}) at level start, star, rope cut, win and
+		// loss. Posted as {type: 'gameEvent', data: {event, at, ...}}, the message
+		// GameClient records; `at` is when it happened, in epoch ms. (This replaces
+		// the old transport, a JSON string the portal ignored.)
 		function logEvent(params) {
-			params.messageType = 'gameEvent';
-			const paramsAsJSON = JSON.stringify(params);
-			if (globalThis.ReactNativeWebView) {
-				globalThis.ReactNativeWebView.postMessage(paramsAsJSON);
-			} else {
-				window.parent.postMessage(paramsAsJSON, "*");
-			}
+			try {
+				if (window.parent === window) return;
+				const data = Object.assign({}, params, { at: performance.timeOrigin + performance.now() });
+				window.parent.postMessage({ type: 'gameEvent', data }, window.location.origin);
+			} catch (e) { /* telemetry must never break the game */ }
 		}
 		globalThis.logEvent = logEvent;
 		</script>

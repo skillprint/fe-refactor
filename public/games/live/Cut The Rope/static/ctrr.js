@@ -10805,6 +10805,7 @@ class game_World extends O {
 		}
 		this.tummyTeasers = 0;
 		this.starsCollected = 0;
+		if(typeof logEvent == "function") logEvent({ event: "LEVEL_START", season: Progress.season, box: Progress.box, level: Progress.level });
 		this.candyBubble = null;
 		this.candyBubbleL = null;
 		this.candyBubbleR = null;
@@ -11460,6 +11461,7 @@ class game_World extends O {
 			this.popCandyBubble(this.candyBubble,false);
 		}
 		this.calculateScore();
+		if(typeof logEvent == "function") logEvent({ event: "LEVEL_COMPLETE", season: Progress.season, box: Progress.box, level: Progress.level, stars: this.starsCollected, score: this.score, seconds: Math.round(this.roundTime * 10) / 10 });
 		this.releaseAllRopes(false);
 		this.cancelAllDelayedCalls();
 		let id = Sound.SOUND_ELECTRIC;
@@ -11483,6 +11485,7 @@ class game_World extends O {
 			return;
 		}
 		this.omnom.playFail();
+		if(typeof logEvent == "function") logEvent({ event: "LEVEL_FAILED", season: Progress.season, box: Progress.box, level: Progress.level, stars: this.starsCollected, seconds: Math.round(this.roundTime * 10) / 10 });
 		Sound.play(Sound.SOUND_MONSTER_SAD);
 		if(this.isMagnetActive) {
 			this.magnetEffect.destroy();
@@ -12186,6 +12189,7 @@ class game_World extends O {
 				}
 			}
 			if(ropeCuts > 0) {
+				if(typeof logEvent == "function") logEvent({ event: "ROPE_CUT", ropes: ropeCuts, seconds: Math.round(this.roundTime * 10) / 10 });
 				this.freezeCamera = false;
 				if(this.ropesCutAtOnce > 0 && this.ropesAtOnceTimer > 0) {
 					this.ropesCutAtOnce += ropeCuts;
@@ -12934,6 +12938,7 @@ class game_World extends O {
 					if(hits) {
 						this.candy.playBlinkStar();
 						this.starsCollected++;
+						if(typeof logEvent == "function") logEvent({ event: "STAR_COLLECTED", stars: this.starsCollected, seconds: Math.round(this.roundTime * 10) / 10 });
 						this.ls.onStarCollected(this.starsCollected);
 						let starDisappear = new gfx_sprite_Sprite(null,Tex.star,F.OBJ_STAR_DISAPPEAR_0000);
 						starDisappear.set_x(star.x);

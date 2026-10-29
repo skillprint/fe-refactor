@@ -1,3 +1,14 @@
+// Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+// the message GameClient records and uploads with the next screenshot (as Hextris's
+// skillprint.js does). `at` is when it happened, in epoch ms.
+const emitEvent = (event, data) => {
+  try {
+    if (window.parent === window) return;
+    const at = performance.timeOrigin + performance.now();
+    window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+  } catch (e) { /* telemetry must never break the game */ }
+};
+
 // Dictionaries of magical translation words by target language
 const coreWords = [
     { target: "FIRE", prompt: "Fire" },
@@ -61,6 +72,7 @@ let currentLang = 'es'; // default
 let useSentences = false;
 let showHelper = true;
 
+let wordShownAt = 0, wordTypos = 0; // for SPELL_CAST
 let stats = {
     spellsCast: 0,
     typos: 0,
@@ -140,6 +152,7 @@ function startGame() {
         typos: 0,
         startTime: Date.now()
     };
+    emitEvent('LEVEL_START', { language: currentLang, sentences: useSentences, helper: showHelper, ...window.GAME_CONFIG });
 
     mainMenuEl.style.display = 'none';
     sceneEl.style.display = 'block';
@@ -235,6 +248,7 @@ function nextWord() {
     }
 
     inputWordEl.value = '';
+    wordShownAt = performance.now(); wordTypos = 0;
     
     // Animate pop-in
     targetWordEl.style.transform = 'scale(0.8)';
@@ -248,6 +262,10 @@ function checkInput(e) {
     if (input === target) {
         // Success
         stats.spellsCast++;
+        emitEvent('SPELL_CAST', {
+            prompt: currentWordObj.prompt, answer: currentTargetTranslation, heal: currentWordObj.target.includes("HEAL"),
+            typos: wordTypos, ms: Math.round(performance.now() - wordShownAt),
+        });
         heroAttack(currentWordObj.target.includes("HEAL"));
     } else if (target.startsWith(input)) {
         // Still matching, do nothing
@@ -255,7 +273,8 @@ function checkInput(e) {
     } else {
         // Typing error, visual feedback
         if (!inputWordEl.classList.contains('error-shake')) {
-            stats.typos++;
+            stats.typos++; wordTypos++;
+            emitEvent('TYPO', { prompt: currentWordObj.prompt, answer: currentTargetTranslation, typed: input });
             inputWordEl.classList.add('error-shake');
             setTimeout(() => inputWordEl.classList.remove('error-shake'), 400); // remove after animation
         }
@@ -367,6 +386,7 @@ function enemyAttack() {
         showNotification("DAMAGE!", "damage");
         
         heroHP = Math.max(0, heroHP - window.GAME_CONFIG.enemyDamage);
+        emitEvent('PLAYER_HIT', { damage: window.GAME_CONFIG.enemyDamage, heroHP, enemyHP });
         updateHPUI();
         
         // Shake screen slightly
@@ -397,6 +417,9 @@ function triggerEndGame(isVictory) {
     if (stats.spellsCast + stats.typos > 0) {
         accuracy = Math.max(0, Math.round((stats.spellsCast / (stats.spellsCast + stats.typos)) * 100));
     }
+    emitEvent(isVictory ? 'LEVEL_COMPLETE' : 'LEVEL_FAILED', {
+        accuracy, spellsCast: stats.spellsCast, typos: stats.typos, seconds: timeElapsedSec, heroHP, enemyHP,
+    });
 
     setTimeout(() => {
         reviewTitleEl.textContent = isVictory ? "VICTORY!" : "DEFEAT...";

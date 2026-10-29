@@ -10,6 +10,7 @@
  *   game → parent   { type: 'skillprint_keydown', key }         keys 1–9 (portal tester)
  *   game → parent   { type: 'GAME_COMPLETE', data: {...} }
  *   game → parent   { type: 'GAME_SCORE_UPDATE', data: {...} }
+ *   game → parent   { type: 'gameEvent', data: { event, at, ... } }   discrete gameplay events
  *   game → parent   { type: 'REGISTER_ADJUSTMENTS', mappings }  on load
  *
  * The game also exposes window.adjustGame(obj) and window.SKILLPRINT_PARAMETERS
@@ -141,6 +142,10 @@ export function initSkillprint(hooks) {
     },
     sendComplete(data) {
       post({ type: 'GAME_COMPLETE', data });
+    },
+    /** A discrete gameplay event; `at` is when it happened, in epoch ms (the shell's clock). */
+    sendEvent(event, data) {
+      post({ type: 'gameEvent', data: { ...data, event, at: performance.timeOrigin + performance.now() } });
     },
     get screenshotCount() { return state.shots; },
   };

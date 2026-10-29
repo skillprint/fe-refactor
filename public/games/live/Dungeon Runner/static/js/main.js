@@ -200,6 +200,7 @@ class Game {
     this.firing = false;
     this.runStart = performance.now();
     this.state = 'playing';
+    this.skillprint.sendEvent('LEVEL_START', { weaponType: PARAMS.weaponType });
     this.showOverlay(null);
     this.lastFrame = performance.now();
   }
@@ -208,6 +209,7 @@ class Game {
     if (this.state !== 'playing') return;
     this.state = 'paused';
     this.firing = false;
+    this.skillprint.sendEvent('GAME_PAUSE', { distance: Math.floor(this.player.distance) });
     this.audio.suspend();
     this.showOverlay('pause');
   }
@@ -216,6 +218,7 @@ class Game {
     if (this.state !== 'paused') return;
     this.state = 'playing';
     this.pausedByParent = false;
+    this.skillprint.sendEvent('GAME_RESUME', { distance: Math.floor(this.player.distance) });
     this.audio.resume();
     this.showOverlay(null);
     this.lastFrame = performance.now();
@@ -235,6 +238,10 @@ class Game {
     this.$('st-hits').textContent = p.hitsTaken;
     this.$('st-time').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
     this.showOverlay('gameover');
+    this.skillprint.sendEvent('LEVEL_FAILED', {
+      score: Math.floor(this.score), distance: Math.floor(p.distance), kills: this.kills, accuracy: acc,
+      hitsTaken: p.hitsTaken, seconds: secs, deathCause: p.deathCause || null,
+    });
     this.skillprint.sendComplete({
       score: Math.floor(this.score),
       level: Math.max(1, Math.floor(p.distance / 200) + 1),
@@ -254,6 +261,7 @@ class Game {
     if (this.state !== 'playing') return;
     if (!this.player.takeDamage(amount, cause)) return;
     this.audio.playerHurt();
+    this.skillprint.sendEvent('PLAYER_HIT', { cause, amount, health: this.player.health, distance: Math.floor(this.player.distance) });
     this.hud.damageFlash = 1;
     this.shake = Math.max(this.shake, 1);
     this.combo = 0; this.comboT = 0;
@@ -266,6 +274,7 @@ class Game {
     this.comboT = 3;
     this.combo = Math.min(9, this.combo + 1);
     const pts = SCORE.KILL * Math.max(1, this.combo);
+    this.skillprint.sendEvent('ENEMY_KILLED', { enemyType: e.type, combo: this.combo, distance: Math.floor(this.player.distance) });
     this.score += pts;
     const pt = this.project(e.x, e.size / 2, e.z);
     if (pt) this.hud.popup(`+${pts}`, pt.x, pt.y, e.type === ENEMY.ARCHER ? '#7ef0b0' : '#ffb070');
@@ -275,6 +284,7 @@ class Game {
   onPickup(kind) {
     this.audio.pickup(kind);
     this.hud.pickupFlash = 1;
+    this.skillprint.sendEvent('PICKUP', { kind, distance: Math.floor(this.player.distance) });
     if (kind === PICKUP.HEALTH) { this.player.heal(25); this.hud.popup('+25 HP', this.aim.x, this.aim.y - 40, '#ff6a6a'); this.score += SCORE.PICKUP; }
     else if (kind === PICKUP.AMMO) { this.weapons.addAmmo(); this.hud.popup('AMMO', this.aim.x, this.aim.y - 40, '#ffd27a'); this.score += SCORE.PICKUP; }
     else { this.gold += SCORE.GOLD; this.score += SCORE.GOLD; this.hud.popup(`+${SCORE.GOLD}`, this.aim.x, this.aim.y - 40, '#d9a441'); }
