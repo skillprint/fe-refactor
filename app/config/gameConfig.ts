@@ -171,6 +171,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'mine-rusher': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Mine Rusher/backend/game-scoring-config.json',
     customExitButton: {
       color: 'gray',
       size: 'md'

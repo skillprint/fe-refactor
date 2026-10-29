@@ -26,6 +26,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Bonus Time Awarded', 'Hint Score Penalty'];
         case 'match-doodle':
             return ['Card Pairs', 'Pile Density', 'Card Tilt'];
+        case 'mine-rusher':
+            return ['Rolling Speed', 'Speed-Up Per Tap'];
         case 'photo-hunt':
             return ['Time Per Puzzle', 'Miss Penalty', 'Tap-Spam Lockout'];
         case 'snake-attack':
