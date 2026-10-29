@@ -171,12 +171,14 @@ export function survey(seed, archId, night = false) {
   return { gen, ctx, ext, camAz, sunAz, frame };
 }
 
-export function buildRound({ level, seed, archId, night = false }) {
+// `rung` picks the difficulty plan (how many differences, how subtle, how many
+// hidden); it is the pair's level unless Skillprint has shifted it.
+export function buildRound({ level, rung = level, seed, archId, night = false }) {
   const t0 = performance.now();
   const { gen, ctx, ext, camAz, sunAz, frame } = survey(seed, archId, night);
   const { A, H, snowline, treeline, biomeId, biome } = ctx;
 
-  const diffs = chooseDifferences(ctx, level);
+  const diffs = chooseDifferences(ctx, rung);
 
   const fields = [gen.field.clone(), gen.field.clone()];
   for (const d of diffs) if (d.def.terrain) for (const t of [0, 1]) d.def.terrain(fields[t], d.site, t === d.has, ctx);
@@ -234,7 +236,7 @@ export function buildRound({ level, seed, archId, night = false }) {
   const elevation = Math.round(H * 28 + 600);
 
   return {
-    level, seed, archId, biomeId, H, snowline, treeline, ext, camAz, sunAz, frame, night, moon: ctx.moon, fields, groups, updates, diffs, names,
+    level, rung, seed, archId, biomeId, H, snowline, treeline, ext, camAz, sunAz, frame, night, moon: ctx.moon, fields, groups, updates, diffs, names,
     elevation, label: gen.arch.label, ms: Math.round(performance.now() - t0),
   };
 }

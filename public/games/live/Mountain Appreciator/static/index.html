@@ -138,6 +138,7 @@
   .keep-row { display: flex; flex-wrap: wrap; gap: 8px; }
   .keep-row .btn { flex: 1 1 200px; justify-content: center; font-style: italic; }
   #quip { margin: 14px 0 12px; font-size: 16px; font-style: italic; line-height: 1.4; text-wrap: pretty; }
+  .end-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
   #veil { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 60%, #2a3150 0%, #121626 70%); opacity: 0; pointer-events: none; transition: opacity 0.6s; }
   #veil.on { opacity: 1; pointer-events: auto; }
@@ -245,7 +246,7 @@
     <div class="keep-row"><button class="btn" id="keep0" type="button"></button><button class="btn" id="keep1" type="button"></button></div>
   </div>
   <p id="quip" hidden></p>
-  <button id="next" class="btn primary" type="button" hidden>Next pair</button>
+  <div class="end-row"><button id="next" class="btn primary" type="button" hidden>Next pair</button><button id="finish" class="btn ghost" type="button" hidden>Finish</button></div>
 </section>
 
 <div id="veil" class="on"><p id="veil-text">Surveying the range…</p></div>
