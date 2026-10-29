@@ -1,0 +1,91 @@
+{
+  "game_slug": "elixir",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "pourRate": {
+      "type": "number",
+      "min": 0.4,
+      "max": 2,
+      "default": 1,
+      "description": "How fast the liquid rises while the tap is held: the empty flask fills in 6 s divided by this (6 s at 1.0, 15 s at 0.4, 3 s at 2.0). Higher values make stopping on the mark harder.",
+      "adjustment_guide": "relax 0.5-0.7, focus 0.9-1.1, grit 1.4-1.7, awe 0.6-0.8. Applies at once, mid-pour included. Move by at most 0.3 at a time."
+    },
+    "tolerance": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "default": 1,
+      "description": "Scales the grade bands for each layer: Perfect within 1 %, Fine within 3 %, Fair within 6 % of the flask at 1.0. Higher values are more forgiving and make potions easier.",
+      "adjustment_guide": "relax 1.4-1.7, focus 0.9-1.1, grit 0.6-0.8, awe 1.2-1.4. Applies at the next serve. Move by at most 0.25 at a time."
+    },
+    "gradations": {
+      "type": "integer",
+      "min": 0,
+      "max": 10,
+      "default": 0,
+      "description": "Faint tick marks on the front of the flask at every 1/n (0 none, 2 halves, 4 quarters, 10 tenths). More ticks give the eye more to measure against and make potions easier.",
+      "adjustment_guide": "relax 4 or 5, focus 0-2, grit 0, awe 2-4. Applies at once. Prefer 0, 2, 4, 5 or 10, which line up with the recipes; step down one notch at a time."
+    },
+    "brewTimeScale": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.5,
+      "default": 1,
+      "description": "Multiplies the hourglass for each potion: 15 s plus 9 s per layer at 1.0 (24 s for one layer, 42 s for three). When it runs out the potion is served as it stands. Higher values give more time and make potions easier.",
+      "adjustment_guide": "relax 1.8-2.4, focus 0.9-1.1, grit 0.55-0.75, awe 1.5-2.0. Applies at once; the sand left grows or shrinks in proportion. Move by at most 0.3 at a time."
+    },
+    "levelOffset": {
+      "type": "integer",
+      "min": -3,
+      "max": 3,
+      "default": 0,
+      "description": "Shifts the rung the next recipe is written for, relative to how many potions the player has served. Rungs climb from one easy fraction, through decimals, percents, two and three layers, flasks measured in drops and millilitres, to ratios. Higher values make the next recipe harder.",
+      "adjustment_guide": "relax -2 to -1, focus 0, grit +1 to +2, awe -1 to 0. Takes effect with the next potion, never mid-potion. Change it by one step per potion."
+    }
+  },
+  "adjustment_instructions": "You are adjusting parameters for Elixir, a 3D proportional-reasoning game set at an alchemist's candlelit bench.\nEach potion is a recipe of one to three layers written as fractions, decimals, percents, ratios or amounts in a flask of stated capacity (\"Moonwater — fill to 3/8 of the flask\", \"another 25%\", \"This flask holds 240 drops: 90 drops\", \"2 : 3, 3/4 of the flask in all\", \"3 parts to Emberwine's 2\"). The flask is a straight glass cylinder marked only at empty and full (plus optional faint ticks), so the player must turn each measure into a height and pour to it by eye: hold to pour, release to stop, no draining. Enter moves to the next ingredient, then serves. On serving, each layer is graded against the exact line (Perfect within 1 %, Fine 3 %, Fair 6 % of the flask at tolerance 1.0, else Spoiled) and gold lines show where it should have ended. An hourglass runs per potion; when it empties the potion is served as it stands.\n\nEach frame is stamped top left with the potion number, rung and score, the recipe text, the current layer and the flask's level (the target is never shown before serving), and the hourglass. Events: LEVEL_START (potion, rung, layers with their text and exact targets, capacity, hourglassSec), POUR_START / POUR_STOP (one per pour gesture, taps under 250 ms apart merged, with level, amount poured and ms), MATCH for each layer graded Perfect or Fine and UNMATCH for Fair or Spoiled (target, level, errorPct, grade, layerMs, msToServe), LEVEL_COMPLETE on serving (grades, points, streak) and LEVEL_FAILED when the hourglass ran out.\n\nFive parameters are exposed:\n- pourRate (number, 0.4-2.0): how fast the liquid rises; the flask fills in 6 s divided by this. Higher makes stopping on the line harder. Applies at once.\n- tolerance (number, 0.5-2.0): scales the grade bands. Higher is more forgiving. Applies at the next serve.\n- gradations (integer, 0-10): faint ticks at every 1/n of the flask (0 none). More ticks give the eye something to measure against. Applies at once.\n- brewTimeScale (number, 0.5-2.5): multiplies the hourglass (15 s plus 9 s per layer). Higher gives more time. Applies at once, in proportion.\n- levelOffset (integer, -3 to 3): shifts the rung of the NEXT recipe: one easy fraction (1), fifths/decimals/percents (2), two layers (3), drops (4), ratios (5), three mixed layers (6), ratios over part of the flask and millilitres (7), litres with ratios on a middle pour (8-9). Higher is harder. Never takes effect mid-potion.\n\nGiven the player's current flow state, skill metrics, and target mood,\noutput parameter values that guide the player toward the target mood:\n- For 'relax': pourRate ~0.6, tolerance ~1.5, gradations 4, brewTimeScale ~2.1, levelOffset -1 to -2 — an unhurried pour, quarter marks to lean on, forgiving grades, simple recipes\n- For 'focus': pourRate ~1.0, tolerance ~1.0, gradations 0-2, brewTimeScale ~1.0, levelOffset 0 — the game as designed: work the measure out, then pour it cleanly\n- For 'grit': pourRate ~1.5, tolerance ~0.7, gradations 0, brewTimeScale ~0.65, levelOffset +1 to +2 — a fast tap, tight grades, no ticks, short sand and harder recipes\n- For 'awe': pourRate ~0.7, tolerance ~1.3, gradations 2-4, brewTimeScale ~1.8, levelOffset -1 to 0 — time to watch the layers rise and glow and the shelf fill under the moon; never rushed\n\nConsider the player's current performance: if flow score is low and cognitive load is high, the recipe is likely too hard — ease off (raise brewTimeScale first, then add gradations, then lower levelOffset for the next potion). If errors are consistently in one direction (all positive: overshooting) the pour may be too fast for their reactions: lower pourRate before changing tolerance. If errors are large but layerMs is short, the player is guessing rather than computing: raise brewTimeScale and lower levelOffset rather than tolerance. If arousal is low and attention is dropping, the player may be bored — increase challenge (remove gradations, then raise levelOffset by one once a potion is served with every layer Perfect or Fine, then tighten tolerance).\n\nAlways adjust gradually from the current parameter values to avoid jarring transitions: at most 0.3 on pourRate, 0.25 on tolerance, one notch on gradations (0, 2, 4, 5, 10), 0.3 on brewTimeScale and one step on levelOffset at a time.",
+  "skill_adjustment_instructions": "Elixir trains proportional reasoning and number sense (math): converting fractions, decimals, percents, ratios and capacities to a single position on a line, and adding them; mental visualization of that position on an unmarked cylinder; and timing the release of a continuous pour. Read the recipe and the level from the stamp at the top left of each frame; MATCH and UNMATCH events carry each layer's exact target, the level reached and the signed error.\n\nPer-skill levers (primary first):\n- math: raise levelOffset (decimals and percents, then capacities, then ratios and multi-step recipes) while keeping pourRate at or below 1.0 and gradations at 0, so the error comes from the arithmetic, not the hand; ease off with levelOffset if layers on ratio or capacity recipes go Spoiled while simple fractions stay Fine.\n- visualization: set gradations to 0 and tolerance toward 0.7-0.8 so the player must place the line by eye; ease off by adding 2 or 4 gradations.\n- timing: raise pourRate toward 1.4-1.8 with levelOffset at 0 or below, so the same measures must be stopped on more sharply; lower it if errors are consistently positive by more than 3 %.\n\nMove one or two parameters per adjustment, by the same small steps as the mood guidance, and change levelOffset only between potions.",
+  "notes": "Generated by backend/export-config.mjs from static/src/params.js, the list the game also hands to skillprint-js-sdk. Keys 1-9 in GameAdjustmentTester and static/iframeTest.html send the presets listed in GAME_PARAMETERS.MD.",
+  "sdk_game_parameters": [
+    {
+      "name": "pourRate",
+      "type": "Float",
+      "description": "How fast the liquid rises while the tap is held: the empty flask fills in 6 s divided by this (6 s at 1.0, 15 s at 0.4, 3 s at 2.0). Higher values make stopping on the mark harder.",
+      "adjustment_guide": "relax 0.5-0.7, focus 0.9-1.1, grit 1.4-1.7, awe 0.6-0.8. Applies at once, mid-pour included. Move by at most 0.3 at a time.",
+      "min_value": "0.4",
+      "max_value": "2"
+    },
+    {
+      "name": "tolerance",
+      "type": "Float",
+      "description": "Scales the grade bands for each layer: Perfect within 1 %, Fine within 3 %, Fair within 6 % of the flask at 1.0. Higher values are more forgiving and make potions easier.",
+      "adjustment_guide": "relax 1.4-1.7, focus 0.9-1.1, grit 0.6-0.8, awe 1.2-1.4. Applies at the next serve. Move by at most 0.25 at a time.",
+      "min_value": "0.5",
+      "max_value": "2"
+    },
+    {
+      "name": "gradations",
+      "type": "Integer",
+      "description": "Faint tick marks on the front of the flask at every 1/n (0 none, 2 halves, 4 quarters, 10 tenths). More ticks give the eye more to measure against and make potions easier.",
+      "adjustment_guide": "relax 4 or 5, focus 0-2, grit 0, awe 2-4. Applies at once. Prefer 0, 2, 4, 5 or 10, which line up with the recipes; step down one notch at a time.",
+      "min_value": "0",
+      "max_value": "10"
+    },
+    {
+      "name": "brewTimeScale",
+      "type": "Float",
+      "description": "Multiplies the hourglass for each potion: 15 s plus 9 s per layer at 1.0 (24 s for one layer, 42 s for three). When it runs out the potion is served as it stands. Higher values give more time and make potions easier.",
+      "adjustment_guide": "relax 1.8-2.4, focus 0.9-1.1, grit 0.55-0.75, awe 1.5-2.0. Applies at once; the sand left grows or shrinks in proportion. Move by at most 0.3 at a time.",
+      "min_value": "0.5",
+      "max_value": "2.5"
+    },
+    {
+      "name": "levelOffset",
+      "type": "Integer",
+      "description": "Shifts the rung the next recipe is written for, relative to how many potions the player has served. Rungs climb from one easy fraction, through decimals, percents, two and three layers, flasks measured in drops and millilitres, to ratios. Higher values make the next recipe harder.",
+      "adjustment_guide": "relax -2 to -1, focus 0, grit +1 to +2, awe -1 to 0. Takes effect with the next potion, never mid-potion. Change it by one step per potion.",
+      "min_value": "-3",
+      "max_value": "3"
+    }
+  ]
+}

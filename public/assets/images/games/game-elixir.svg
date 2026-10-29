@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Elixir</title>
+  <desc>Skillprint game card: a tall glass flask with three glowing layers of potion by candlelight, a moon in the window behind</desc>
+  <defs>
+    <radialGradient id="candle">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="0.3" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+  <rect width="380" height="210" fill="#1c1424"/>
+  <circle cx="300" cy="62" r="44" fill="#251c33"/>
+  <circle cx="300" cy="62" r="40" fill="#2b2140"/>
+  <circle cx="312" cy="52" r="15" fill="#e9e3cf"/>
+  <rect y="176" width="380" height="34" fill="#2e1f1a"/>
+  <rect y="174" width="380" height="4" fill="#4a3226"/>
+  <circle cx="92" cy="118" r="64" fill="url(#candle)"/>
+  <rect x="86" y="134" width="12" height="42" rx="2" fill="#efe2c4"/>
+  <path d="M92 112 C98 122 98 130 92 134 C86 130 86 122 92 112Z" fill="#ffcf6b"/>
+  <rect x="166" y="160" width="48" height="16" rx="3" fill="#a07a3c"/>
+  <path d="M174 34 H206 V40 H202 V156 Q202 164 194 164 H186 Q178 164 178 156 V40 H174Z" fill="#cfd8e6" opacity="0.14"/>
+  <rect x="180" y="131.5" width="20" height="30.5" fill="#79a9ff"/>
+  <rect x="180" y="85.75" width="20" height="45.75" fill="#f19a45"/>
+  <rect x="180" y="70.5" width="20" height="15.25" fill="#a77bff"/>
+  <rect x="180" y="131.5" width="20" height="30.5" fill="#cfe0ff" opacity="0.18"/>
+  <ellipse cx="190" cy="70.5" rx="10" ry="1.6" fill="#e5d6ff"/>
+  <path d="M174 34 H206 V40 H202 V156 Q202 164 194 164 H186 Q178 164 178 156 V40 H174Z" fill="url(#glass)" stroke="#dfe7f2" stroke-opacity="0.7" stroke-width="1.4"/>
+  <path d="M206 85.75 H216" stroke="#f2c46d" stroke-width="2" stroke-linecap="round"/>
+  <text x="222" y="90" font-family="'Cormorant Garamond', Georgia, serif" font-size="15" font-style="italic" fill="#f2c46d">⅝</text>
+  <g fill="#f6e7c4" opacity="0.6"><circle cx="188" cy="146" r="1.4"/><circle cx="193" cy="112" r="1.1"/><circle cx="186" cy="98" r="1"/></g>
+</svg>

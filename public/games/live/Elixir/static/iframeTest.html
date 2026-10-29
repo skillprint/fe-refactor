@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Elixir — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'elixir',
+      params: [
+        {name:'pourRate',default:1},
+        {name:'tolerance',default:1},
+        {name:'gradations',default:0},
+        {name:'brewTimeScale',default:1},
+        {name:'levelOffset',default:0},
+      ],
+      presets: {
+        1:{pourRate:0.6,tolerance:1.6,gradations:4,brewTimeScale:2.2},
+        2:{pourRate:0.8,tolerance:1.3,gradations:2},
+        3:{pourRate:1,tolerance:1,gradations:0,brewTimeScale:1,levelOffset:0},
+        4:{brewTimeScale:0.7,pourRate:1.3},
+        5:{pourRate:1.6,tolerance:0.7,gradations:0,brewTimeScale:0.6},
+        6:{levelOffset:-2},
+        7:{levelOffset:2},
+        8:{gradations:10},
+        9:{pourRate:2,tolerance:0.5,gradations:0,brewTimeScale:0.5,levelOffset:3},
+      },
+      readState: (w) => ({ ...w.__elixirState, tuning: w.__elixirTuning }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>
