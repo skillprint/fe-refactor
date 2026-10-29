@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import Link, { useLinkStatus } from 'next/link';
 import { TraitSkillPill } from './TraitSkillPill';
 import { PatternArt, patternArtFile } from './PatternArt';
 import { DEFAULT_GAME_IMAGE } from '@/lib/playbookUtils';
@@ -28,6 +28,13 @@ export interface GameTileProps {
   showInfoLink?: boolean;
   /** Shown above the Play button. */
   extra?: React.ReactNode;
+}
+
+/** A link's icon, which turns to a spinner the moment the link is clicked. */
+function LinkIcon({ icon }: { icon: string }) {
+  const { pending } = useLinkStatus();
+  if (pending) return <span className="sp-icon sp-icon--pending" aria-hidden="true" />;
+  return <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href={`#${icon}`}></use></svg>;
 }
 
 export function GameTile({
@@ -83,10 +90,9 @@ export function GameTile({
           <h3>
             <Link className="no-underline text-default" href={url}>{title}</Link>
           </h3>
-          {/* Note: We can route to a real game_detail.html or modal later */}
           {showInfoLink && (
             <Link className="game-info" aria-label={`View game details for ${title}`} href={`/game_detail?game=${id}`}>
-              <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-info"></use></svg>
+              <LinkIcon icon="ti-info" />
             </Link>
           )}
         </div>
@@ -114,7 +120,7 @@ export function GameTile({
         {extra}
 
         <Link className="play-btn button button--primary button--md full-width push-block-end" href={url}>
-          <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-play"></use></svg>
+          <LinkIcon icon="ti-play" />
           Play<span className="sr-only"> {title}</span>
         </Link>
       </div>

@@ -22,7 +22,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             // Apple Watch live sessions are created without signing in.
             // `/asu` is the ReMix event station: it signs a guest in on its own.
             // `/embed` runs a game inside another site, as a guest; `/badge/<slug>` is a shared badge.
-            const isPublicRoute = pathname === '/' || pathname.startsWith('/asu') || pathname.startsWith('/embed') || pathname.startsWith('/badge/') || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/benchmark') || pathname.startsWith('/coach') || pathname.startsWith('/start') || pathname.startsWith('/guide') || pathname.startsWith('/meditation/play') || pathname.startsWith('/meditation/breathe');
+            // `/bot/<player id>` is an LLM Island bot's profile, public like a badge.
+            const isPublicRoute = pathname === '/' || pathname.startsWith('/asu') || pathname.startsWith('/embed') || pathname.startsWith('/badge/') || pathname.startsWith('/bot/') || pathname.startsWith('/test-embed') || pathname.startsWith('/test-mageduel') || pathname.startsWith('/profile/embed') || pathname.startsWith('/benchmark') || pathname.startsWith('/coach') || pathname.startsWith('/start') || pathname.startsWith('/guide') || pathname.startsWith('/meditation/play') || pathname.startsWith('/meditation/breathe');
             const isEmbedded = typeof window !== 'undefined' && window.self !== window.top;
 
             if (status === 'loggedOut' && !isPublicRoute && !isEmbedded) {

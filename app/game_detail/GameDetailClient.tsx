@@ -37,6 +37,9 @@ import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { getGameConfig, getGameDetails } from '@/app/config/gameConfig';
 import { baseSlug } from '@/lib/gameSlug';
 import { DEFAULT_GAME_IMAGE, formatEstimatedDuration } from '@/lib/playbookUtils';
+import { useIslandCoach } from '@/app/hooks/useIslandCoach';
+import { useUserSession } from '@/app/hooks/useUserSession';
+import PreGameCoachCard from '@/components/GameSession/PreGameCoachCard';
 
 interface GameDetailClientProps {
   /** The `?game=` value: any slug form; the library detail resolves it. */
@@ -83,6 +86,24 @@ function BackToGames() {
   );
 }
 
+/**
+ * The page before its record arrives. Also the route's loading.tsx, so a click
+ * on a game's info link swaps to this at once instead of waiting on the server.
+ */
+export function GameDetailLoading() {
+  return (
+    <PortalLayout pageClass="page--portal-game-detail">
+      <div className="portal-head">
+        <BackToGames />
+        <div className="portal-head__row"><h1>Game</h1></div>
+      </div>
+      <div className="flex justify-center items-center py-20">
+        <BuckyballLoading />
+      </div>
+    </PortalLayout>
+  );
+}
+
 export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const decodedSlug = decodeURIComponent(slug || '');
   // Dev only: `?synthetic=1` renders the mock record (a player with history)
@@ -102,8 +123,35 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const leaderboard = useLibraryGameLeaderboard(canonicalSlug, boardPeriod, synthetic);
   const { recommendedGames } = useRecommendedGames(10);
   const [shareOpen, setShareOpen] = useState(false);
+  const { userId } = useUserSession();
 
   const scores = useMemo(() => profileDimensionMap(profile), [profile]);
+
+  const playerExperience = useMemo(() => {
+    const profileSkills: Record<string, number> = {};
+    Object.values(scores).forEach((stat) => {
+      if (typeof stat.score === 'number') profileSkills[stat.slug] = stat.score;
+    });
+    return {
+      userId,
+      sessionsPlayed: personal?.sessionsPlayed ?? 0,
+      bestScore: personal?.bestScore ?? null,
+      lastScore: personal?.lastScore ?? null,
+      lastFlow: personal?.lastFlowScore ?? null,
+      targetMood: game?.moods?.[0]?.name || 'Focus',
+      profileSkills,
+    };
+  }, [userId, personal, scores, game]);
+
+  const {
+    coachFeatureEnabled,
+    tipsEnabled,
+    setTipsEnabled,
+    selectedCoachId,
+    setSelectedCoachId,
+    briefing,
+    isLoadingBriefing,
+  } = useIslandCoach(game?.baseSlug || baseSlug(decodedSlug), playerExperience);
 
   // Skills the game exercises (cognition) and moods it targets, each with the
   // pillar, description and icon the taxonomy gives it and the player's own
@@ -179,22 +227,17 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   }
 
   if (isLoading || !game) {
+    if (!error) return <GameDetailLoading />;
     return (
       <PortalLayout pageClass="page--portal-game-detail">
         <div className="portal-head">
           <BackToGames />
           <div className="portal-head__row"><h1>Game</h1></div>
         </div>
-        {error ? (
-          <div className="portal-blank">
-            <p className="portal-blank__title">We could not load this game</p>
-            <p className="portal-blank__note">Please try again in a moment.</p>
-          </div>
-        ) : (
-          <div className="flex justify-center items-center py-20">
-            <BuckyballLoading />
-          </div>
-        )}
+        <div className="portal-blank">
+          <p className="portal-blank__title">We could not load this game</p>
+          <p className="portal-blank__note">Please try again in a moment.</p>
+        </div>
       </PortalLayout>
     );
   }
@@ -295,6 +338,21 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
               </div>
             </div>
           </PortalSection>
+
+          {/* AI Coach & LLM Island Playbook Briefing */}
+          {coachFeatureEnabled && (
+            <PortalSection ariaLabelledBy="gdCoachBriefing">
+              <PreGameCoachCard
+                briefing={briefing}
+                isLoading={isLoadingBriefing}
+                tipsEnabled={tipsEnabled}
+                onToggleTips={setTipsEnabled}
+                selectedCoachId={selectedCoachId}
+                onSelectCoach={setSelectedCoachId}
+                variant="detail"
+              />
+            </PortalSection>
+          )}
 
           {/* Skills */}
           {skillCards.length > 0 && (

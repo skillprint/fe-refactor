@@ -21,6 +21,12 @@ import { hasLocalGameDir, mapSlugToGamePath } from '@/lib/localGames';
 import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
 import { titleFromSlug } from '@/lib/skillIcons';
 import { sessionAttribution } from '@/lib/emailLinks';
+import { useIslandCoach } from '../../hooks/useIslandCoach';
+import { useLibraryPersonalStats } from '@/lib/models/portal/useLibraryPersonalStats';
+import { useLibraryGameLeaderboard } from '@/lib/models/portal/useLibraryGameLeaderboard';
+import { extractLeaderboardBaseline } from '@/lib/highScores';
+import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
+import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
 
 /** Minimum time between batches of difficulty changes sent to the game. */
 const ADJUSTMENT_COOLDOWN_MS = 30000;
@@ -67,7 +73,7 @@ async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParamete
 
 export default function GameClient({ slug, autoPlay = false, exitHref = '/games', resultOptions }: GameClientProps) {
     const router = useRouter();
-    const { userToken } = useUserSession();
+    const { userId, userToken } = useUserSession();
     type SequenceState = 'loading' | 'ready' | 'playing' | 'calculating' | 'review' | 'badge';
     const [sequence, setSequence] = useState<SequenceState>('loading');
     const [isGamePaused, setIsGamePaused] = useState(false);
@@ -120,6 +126,147 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
 
     // Get game configuration
     const gameConfig = getGameConfig(unifiedSlug);
+
+    // Fetch player's past record, leaderboards, and profile aggregate
+    const { data: personalStats, refetch: refetchPersonalStats } = useLibraryPersonalStats(resolvedGame?.serverSlug || unifiedSlug);
+    const { data: allTimeBoard, refetch: refetchAllTimeBoard } = useLibraryGameLeaderboard(resolvedGame?.serverSlug || unifiedSlug, 'all');
+    const { data: weeklyBoard, refetch: refetchWeeklyBoard } = useLibraryGameLeaderboard(resolvedGame?.serverSlug || unifiedSlug, 'week');
+    const { data: profileAggregate } = useProfileAggregate();
+
+    const preSessionBaselineRef = useRef<{
+        personalAllTime: number | null;
+        personalWeek: number | null;
+        leaderAllTime: number | null;
+        leaderWeek: number | null;
+    }>({
+        personalAllTime: null,
+        personalWeek: null,
+        leaderAllTime: null,
+        leaderWeek: null,
+    });
+
+    // Capture the baseline scores while loading/playing before the session ends
+    useEffect(() => {
+        if (sequence !== 'loading' && sequence !== 'ready' && sequence !== 'playing') return;
+        const currentSid = skillprintSessionIdRef.current;
+        const allBaseline = extractLeaderboardBaseline(allTimeBoard, currentSid);
+        const weekBaseline = extractLeaderboardBaseline(weeklyBoard, currentSid);
+
+        const nextPersonalAll =
+            personalStats?.bestScore ??
+            allBaseline.personalBest ??
+            preSessionBaselineRef.current.personalAllTime;
+        const nextPersonalWeek =
+            weekBaseline.personalBest ??
+            preSessionBaselineRef.current.personalWeek;
+        const nextLeaderAll =
+            allBaseline.leaderTopScore ??
+            preSessionBaselineRef.current.leaderAllTime;
+        const nextLeaderWeek =
+            weekBaseline.leaderTopScore ??
+            preSessionBaselineRef.current.leaderWeek;
+
+        preSessionBaselineRef.current = {
+            personalAllTime: nextPersonalAll,
+            personalWeek: nextPersonalWeek,
+            leaderAllTime: nextLeaderAll,
+            leaderWeek: nextLeaderWeek,
+        };
+    }, [sequence, personalStats, allTimeBoard, weeklyBoard]);
+
+    const playerExperience = React.useMemo(() => {
+        const dims = profileDimensionMap(profileAggregate);
+        const profileSkills: Record<string, number> = {};
+        Object.values(dims).forEach((stat) => {
+            if (typeof stat.score === 'number') profileSkills[stat.slug] = stat.score;
+        });
+        return {
+            userId,
+            sessionsPlayed: personalStats?.sessionsPlayed ?? 0,
+            bestScore: personalStats?.bestScore ?? null,
+            lastScore: personalStats?.lastScore ?? null,
+            lastFlow: personalStats?.lastFlowScore ?? null,
+            targetMood: sessionMood,
+            profileSkills,
+        };
+    }, [userId, personalStats, profileAggregate, sessionMood]);
+
+    const {
+        coachFeatureEnabled,
+        tipsEnabled,
+        setTipsEnabled,
+        selectedCoachId,
+        setSelectedCoachId,
+        briefing,
+        isLoadingBriefing,
+        activeWhisper,
+        whisperHistory,
+        isAskingCoach,
+        requestWhisper,
+        dismissWhisper,
+    } = useIslandCoach(unifiedSlug, playerExperience);
+
+    const lastWhisperAtRef = useRef<number>(0);
+
+    // 1. Opening cue whisper ~4.5s after play starts
+    useEffect(() => {
+        if (sequence !== 'playing' || !coachFeatureEnabled || !tipsEnabled) return;
+        const timer = setTimeout(() => {
+            lastWhisperAtRef.current = Date.now();
+            requestWhisper({
+                trigger: 'opening',
+                elapsedSeconds: Math.floor((Date.now() - gameStartTime) / 1000),
+                bestScore: personalStats?.bestScore ?? null,
+            });
+        }, 4500);
+        return () => clearTimeout(timer);
+    }, [sequence, coachFeatureEnabled, tipsEnabled, gameStartTime, personalStats?.bestScore, requestWhisper]);
+
+    // 2. Live difficulty adjustment whisper
+    useEffect(() => {
+        if (sequence !== 'playing' || !coachFeatureEnabled || !tipsEnabled || !latestAdjustment) return;
+        const now = Date.now();
+        if (now - lastWhisperAtRef.current < 15000) return;
+        lastWhisperAtRef.current = now;
+        requestWhisper({
+            trigger: 'adjustment',
+            adjustmentName: latestAdjustment.parameterName,
+            adjustmentValue: latestAdjustment.parameterValue,
+            score: reportedGameStateRef.current?.score ?? null,
+            elapsedSeconds: Math.floor((now - gameStartTime) / 1000),
+        });
+    }, [latestAdjustment, sequence, coachFeatureEnabled, tipsEnabled, gameStartTime, requestWhisper]);
+
+    // 3. Periodic milestone / cadence whisper
+    useEffect(() => {
+        if (sequence !== 'playing' || !coachFeatureEnabled || !tipsEnabled) return;
+        const interval = setInterval(() => {
+            const now = Date.now();
+            if (now - lastWhisperAtRef.current < 25000) return;
+            const currentScore = reportedGameStateRef.current?.score ?? null;
+            const bestScore = personalStats?.bestScore ?? null;
+            const elapsed = Math.floor((now - gameStartTime) / 1000);
+            if (currentScore !== null && bestScore && currentScore >= bestScore * 0.5) {
+                lastWhisperAtRef.current = now;
+                requestWhisper({
+                    trigger: 'milestone',
+                    score: currentScore,
+                    bestScore,
+                    elapsedSeconds: elapsed,
+                });
+            } else if (elapsed >= 20) {
+                lastWhisperAtRef.current = now;
+                requestWhisper({
+                    trigger: 'cadence',
+                    score: currentScore,
+                    bestScore,
+                    inputCount: inputCountRef.current ?? 0,
+                    elapsedSeconds: elapsed,
+                });
+            }
+        }, 18000);
+        return () => clearInterval(interval);
+    }, [sequence, coachFeatureEnabled, tipsEnabled, gameStartTime, personalStats?.bestScore, requestWhisper]);
 
     useEffect(() => {
         let isMounted = true;
@@ -452,6 +599,20 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     };
 
     const handlePlayAgain = () => {
+        if (typeof gameResults?.score === 'number' && gameResults.score > 0) {
+            const s = gameResults.score;
+            const prev = preSessionBaselineRef.current;
+            preSessionBaselineRef.current = {
+                personalAllTime: prev.personalAllTime !== null ? Math.max(prev.personalAllTime, s) : s,
+                personalWeek: prev.personalWeek !== null ? Math.max(prev.personalWeek, s) : s,
+                leaderAllTime: prev.leaderAllTime !== null ? Math.max(prev.leaderAllTime, s) : prev.leaderAllTime,
+                leaderWeek: prev.leaderWeek !== null ? Math.max(prev.leaderWeek, s) : prev.leaderWeek,
+            };
+        }
+        refetchPersonalStats();
+        refetchAllTimeBoard();
+        refetchWeeklyBoard();
+
         setSequence('loading');
         setGameStartTime(Date.now());
         setGameResults(null);
@@ -515,6 +676,12 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         processedAdjustmentsRef.current.clear();
         lastAdjustmentTimeRef.current = 0;
         reportedGameStateRef.current = null;
+        preSessionBaselineRef.current = {
+            personalAllTime: null,
+            personalWeek: null,
+            leaderAllTime: null,
+            leaderWeek: null,
+        };
     }, [resolvedGame, decodedSlug]);
 
     // A session started before the player's token arrives is recorded for nobody:
@@ -638,7 +805,16 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             </div>
 
             {sequence === 'ready' && (
-                <PlayStage gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug} onPlay={() => handleTogglePlay()} />
+                <PlayStage
+                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
+                    onPlay={() => handleTogglePlay()}
+                    briefing={coachFeatureEnabled ? briefing : null}
+                    isLoadingBriefing={coachFeatureEnabled ? isLoadingBriefing : false}
+                    tipsEnabled={tipsEnabled}
+                    onToggleTips={coachFeatureEnabled ? setTipsEnabled : undefined}
+                    selectedCoachId={selectedCoachId}
+                    onSelectCoach={coachFeatureEnabled ? setSelectedCoachId : undefined}
+                />
             )}
 
             {sequence === 'loading' && (
@@ -653,6 +829,12 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                 <GameResultDialog
                     gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
                     score={gameResults.score}
+                    highScore={preSessionBaselineRef.current.personalAllTime ?? undefined}
+                    weeklyHighScore={preSessionBaselineRef.current.personalWeek}
+                    leaderboardAllTimeHigh={preSessionBaselineRef.current.leaderAllTime}
+                    leaderboardWeeklyHigh={preSessionBaselineRef.current.leaderWeek}
+                    postAllTimeBoard={allTimeBoard}
+                    postWeeklyBoard={weeklyBoard}
                     outcome={gameResults.outcome}
                     duration={gameResults.time || 0}
                     adjustmentsCount={adjustmentsApplied}
@@ -663,10 +845,15 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                     moodScores={lastSessionResponse?.moodScores}
                     gameSlug={resolvedGame?.serverSlug || decodedSlug}
                     userToken={userToken}
+                    userId={userId}
                     sessionId={skillprintSessionIdRef.current}
                     sessionRecorded={sessionRecorded}
                     unscored={gameResults.unscored}
                     exitHref={exitHref}
+                    coachFeatureEnabled={coachFeatureEnabled}
+                    coach={briefing?.selectedCoach || null}
+                    availableCoaches={briefing?.availableCoaches || []}
+                    deliveredTip={activeWhisper || whisperHistory[0] || briefing?.tips?.[0] || null}
                     {...resultOptions}
                 />
             )}
@@ -680,6 +867,27 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                     adjustmentName={latestAdjustment?.parameterName}
                     adjustmentValue={latestAdjustment?.parameterValue}
                     adjustmentCreateDate={latestAdjustment?.createDate}
+                    coach={coachFeatureEnabled ? (briefing?.selectedCoach || null) : null}
+                    availableCoaches={coachFeatureEnabled ? (briefing?.availableCoaches || []) : []}
+                    selectedCoachId={selectedCoachId}
+                    onSelectCoach={coachFeatureEnabled ? setSelectedCoachId : undefined}
+                    tipsEnabled={tipsEnabled}
+                    onToggleTips={coachFeatureEnabled ? setTipsEnabled : undefined}
+                    activeWhisper={coachFeatureEnabled ? activeWhisper : null}
+                    whisperHistory={coachFeatureEnabled ? whisperHistory : []}
+                    isAskingCoach={isAskingCoach}
+                    onAskCoach={coachFeatureEnabled ? (question) => {
+                        lastWhisperAtRef.current = Date.now();
+                        requestWhisper({
+                            trigger: 'ask',
+                            question,
+                            score: reportedGameStateRef.current?.score ?? null,
+                            bestScore: personalStats?.bestScore ?? null,
+                            elapsedSeconds: Math.floor((Date.now() - gameStartTime) / 1000),
+                        });
+                    } : undefined}
+                    onDismissWhisper={coachFeatureEnabled ? dismissWhisper : undefined}
+                    onRefocusGame={() => iframeRef.current?.focus()}
                 />
             )}
 

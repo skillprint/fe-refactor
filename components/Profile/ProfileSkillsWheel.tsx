@@ -252,7 +252,7 @@ export default function ProfileSkillsWheel({
     <div className="pp-skills-wheel sp-panel" data-skills-who="You">
       <div className="pp-skills-wheel__body">
         <div className="min-width-0">
-          <h2 className="pp-print__who" id="ppSkillsWheelTitle-first">Your skills</h2>
+          <h2 className="pp-print__who" id="ppSkillsWheelTitle-first">{who}</h2>
           <span className="pp-print__caption">
             {measuredCount === 0
               ? 'Nothing is scored yet. Each skill is a spoke that darkens and thickens as games measure it.'
@@ -268,7 +268,7 @@ export default function ProfileSkillsWheel({
             viewBox={viewBoxStr}
             style={{ aspectRatio: aspectRatioStr }}
             role="img"
-            aria-label={`${who}'s ${total} skills, grouped by dimension`}
+            aria-label={`${who}: ${total} skills, grouped by dimension`}
           >
             <g className="sw-rings" aria-hidden="true">
               {[0.34, 0.67, 1].map((f) => (

@@ -5,14 +5,26 @@ import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useLogoMotion } from './useLogoMotion';
 import ShareSiteButton from './ShareSiteButton';
+import { NotificationsNavItem } from './NotificationsWidget';
+import { useNotificationsFeatureFlag } from '../lib/notifications';
+import { useGymTrackerFeatureFlag } from '../app/hooks/useGymTracker';
+import { useNutritionFeatureFlag } from '../app/hooks/useNutritionTracker';
+import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '../lib/models/portal/useFriendsAndPrivacy';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeSkillSection, setActiveSkillSection] = useState('mood');
+  const [activeNutritionSection, setActiveNutritionSection] = useState('diary');
+  const { notificationsFeatureEnabled } = useNotificationsFeatureFlag();
+  const { gymTrackerEnabled } = useGymTrackerFeatureFlag();
+  const { nutritionFeatureEnabled } = useNutritionFeatureFlag();
+  const { friendsFeatureEnabled } = useFriendsFeatureFlag();
+  const { incomingRequests } = useFriendsAndPrivacy();
   const pathname = usePathname();
   const brandRef = useRef<HTMLAnchorElement>(null);
   useLogoMotion(brandRef);
   const isSkillsPage = pathname === '/skills' || pathname === '/skills/';
+  const isNutritionPage = pathname === '/nutrition' || pathname.startsWith('/nutrition/');
 
   useEffect(() => {
     document.body.classList.remove('nav-open');
@@ -27,6 +39,25 @@ export default function Sidebar() {
       }
     } catch (e) {}
   }, []);
+
+  useEffect(() => {
+    if (!isNutritionPage) return;
+    const syncSection = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) setActiveNutritionSection(hash);
+    };
+    const handleCustom = (e: Event) => {
+      const custom = e as CustomEvent<string>;
+      if (custom.detail) setActiveNutritionSection(custom.detail);
+    };
+    syncSection();
+    window.addEventListener('hashchange', syncSection);
+    window.addEventListener('skillprint-nutrition-tab-change', handleCustom);
+    return () => {
+      window.removeEventListener('hashchange', syncSection);
+      window.removeEventListener('skillprint-nutrition-tab-change', handleCustom);
+    };
+  }, [isNutritionPage]);
 
   useEffect(() => {
     if (!isSkillsPage) return;
@@ -90,6 +121,32 @@ export default function Sidebar() {
           <Link title="Home" className={`sp-side-nav__link ${pathname === '/' ? 'is-active' : ''}`} href="/" aria-current={pathname === '/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-home"></use></svg><span className="sp-side-nav__label">Home</span></Link>
           <Link title="Games" className={`sp-side-nav__link ${pathname === '/games' || pathname === '/games/' ? 'is-active' : ''}`} href="/games" aria-current={pathname === '/games' || pathname === '/games/' ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-gamepad"></use></svg><span className="sp-side-nav__label">Games</span></Link>
           <Link title="Skills" className={`sp-side-nav__link ${isSkillsPage ? 'is-active' : ''}`} href="/skills" aria-current={isSkillsPage ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chart"></use></svg><span className="sp-side-nav__label">Skills</span></Link>
+          {gymTrackerEnabled && (
+            <Link title="Gym Tracker" className={`sp-side-nav__link ${pathname.startsWith('/gym') ? 'is-active' : ''}`} href="/gym" aria-current={pathname.startsWith('/gym') ? 'page' : undefined} data-gym-nav-link><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-dumbbell"></use></svg><span className="sp-side-nav__label">Gym Tracker</span></Link>
+          )}
+          {nutritionFeatureEnabled && (
+            <Link title="Nutrition" className={`sp-side-nav__link ${isNutritionPage ? 'is-active' : ''}`} href="/nutrition" aria-current={isNutritionPage ? 'page' : undefined} data-nutrition-nav-link><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-nutrition"></use></svg><span className="sp-side-nav__label">Nutrition</span></Link>
+          )}
+          {nutritionFeatureEnabled && isNutritionPage && (
+            <div className="portal-subnav" data-nutrition-subnav>
+              <a title="Diary" onClick={() => setActiveNutritionSection('diary')} className={`portal-subnav__link ${activeNutritionSection === 'diary' ? 'is-active' : ''}`} href="#diary">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-calendar"></use></svg>
+                <span className="portal-subnav__label">Daily Diary</span>
+              </a>
+              <a title="Trends" onClick={() => setActiveNutritionSection('trends')} className={`portal-subnav__link ${activeNutritionSection === 'trends' ? 'is-active' : ''}`} href="#trends">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-trending"></use></svg>
+                <span className="portal-subnav__label">Trends</span>
+              </a>
+              <a title="Exercises & Exertion" onClick={() => setActiveNutritionSection('exercises')} className={`portal-subnav__link ${activeNutritionSection === 'exercises' ? 'is-active' : ''}`} href="#exercises">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-flame"></use></svg>
+                <span className="portal-subnav__label">Exertion</span>
+              </a>
+              <a title="Nutrition DB" onClick={() => setActiveNutritionSection('database')} className={`portal-subnav__link ${activeNutritionSection === 'database' ? 'is-active' : ''}`} href="#database">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-database"></use></svg>
+                <span className="portal-subnav__label">Nutrition DB</span>
+              </a>
+            </div>
+          )}
           
           {isSkillsPage && (
             <div className="portal-subnav" data-skills-subnav>
@@ -111,6 +168,29 @@ export default function Sidebar() {
       </nav>
       <div className="portal-sidebar__foot">
         <div className="sp-side-nav__group portal-sidebar__utilities">
+          {notificationsFeatureEnabled && (
+            <NotificationsNavItem className="sp-side-nav__link sp-side-nav__link--button" />
+          )}
+          {friendsFeatureEnabled && (
+            <Link title="Friends" href="/friends" className={`sp-side-nav__link ${pathname.startsWith('/friends') ? 'is-active' : ''}`} aria-current={pathname.startsWith('/friends') ? 'page' : undefined} data-friends-nav-link>
+              <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-users"></use></svg>
+              <span className="sp-side-nav__label">Friends</span>
+              {incomingRequests.length > 0 && (
+                <span
+                  className="ui-badge ui-badge--sm"
+                  style={{
+                    marginLeft: 'auto',
+                    background: 'var(--accent-primary, #5d6bff)',
+                    color: '#fff',
+                    fontSize: '0.68rem',
+                    padding: '0 0.38rem',
+                  }}
+                >
+                  {incomingRequests.length}
+                </span>
+              )}
+            </Link>
+          )}
           <Link title="Profile" href="/profile" className={`sp-side-nav__link ${pathname.startsWith('/profile') ? 'is-active' : ''}`} aria-current={pathname.startsWith('/profile') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-user"></use></svg><span className="sp-side-nav__label">Profile</span></Link>
           <Link title="Settings" className={`sp-side-nav__link ${pathname.startsWith('/settings') ? 'is-active' : ''}`} href="/settings" aria-current={pathname.startsWith('/settings') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-settings"></use></svg><span className="sp-side-nav__label">Settings</span></Link>
           <ShareSiteButton className="sp-side-nav__link sp-side-nav__link--button" />

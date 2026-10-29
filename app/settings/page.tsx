@@ -11,10 +11,13 @@ import { useEmailAddress } from '../../lib/models/portal/useEmailAddress';
 import { useUserSession } from '../hooks/useUserSession';
 import EmailCapture from '../components/EmailCapture';
 import EmailSchedule from '../components/EmailSchedule';
+import PrivacySettingsMatrix from '../../components/Friends/PrivacySettingsMatrix';
+import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '../../lib/models/portal/useFriendsAndPrivacy';
 
 export default function SettingsPage() {
     const { status, userProfile, logout } = useAuth();
     const { theme, setTheme } = useTheme();
+    const { friendsFeatureEnabled } = useFriendsFeatureFlag();
     // Only 'light' renders light. The default 'skillprint' theme strips the
     // theme attributes, which leaves the portal's base (dark navy) palette.
     const isLight = theme === 'light';
@@ -91,6 +94,13 @@ export default function SettingsPage() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Friends & Profile Privacy Controls (only shown when enabled in /settings/toggles) */}
+                    {friendsFeatureEnabled && (
+                        <Suspense fallback={null}>
+                            <FriendsPrivacySettingsSection />
+                        </Suspense>
+                    )}
 
                     {/* Email (SKI-234). In its own component under Suspense: it reads
                         the player session, which reads the URL, and a static page may
@@ -323,5 +333,41 @@ function EmailToggles({ prefs }: { prefs: Prefs }) {
                 </div>
             )}
         </>
+    );
+}
+
+function FriendsPrivacySettingsSection() {
+    const {
+        friendCode,
+        allowFriendRequests,
+        privacyGroups,
+        friendOverridesMap,
+        friends,
+        isUsingMockFallback,
+        updateGroupScope,
+        applyPrivacyPreset,
+        setAllowFriendRequests,
+        regenerateFriendCode,
+        setFriendOverride,
+        resetFriendOverrides,
+    } = useFriendsAndPrivacy();
+
+    return (
+        <div className="pp-setting pp-setting--stack separator-bottom" id="privacy">
+            <PrivacySettingsMatrix
+                friendCode={friendCode}
+                allowFriendRequests={allowFriendRequests}
+                privacyGroups={privacyGroups}
+                friends={friends}
+                friendOverridesMap={friendOverridesMap}
+                isUsingMockFallback={isUsingMockFallback}
+                onUpdateGroupScope={updateGroupScope}
+                onApplyPreset={applyPrivacyPreset}
+                onToggleAllowRequests={setAllowFriendRequests}
+                onRegenerateCode={regenerateFriendCode}
+                onSetFriendOverride={setFriendOverride}
+                onResetFriendOverrides={resetFriendOverrides}
+            />
+        </div>
     );
 }

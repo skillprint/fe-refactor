@@ -1,10 +1,21 @@
 import React from 'react';
 import Link from 'next/link';
 import PortalHead from '@/components/PortalHead';
+import { useFriendsFeatureFlag } from '@/lib/models/portal/useFriendsAndPrivacy';
 
 export default function ProfileHeader() {
+  const { friendsFeatureEnabled } = useFriendsFeatureFlag();
+
   const actions = (
     <>
+      {friendsFeatureEnabled && (
+        <Link href="/friends" className="button button--secondary button--md">
+          <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
+            <use href="#ti-users"></use>
+          </svg>
+          Friends
+        </Link>
+      )}
       <Link href="/skills" className="button button--secondary button--md">
         Skills
       </Link>
