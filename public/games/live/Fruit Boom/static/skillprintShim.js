@@ -62,7 +62,11 @@ function reportState(score, isGameOver) {
     if (reported && reported.score === score && reported.isGameOver === isGameOver) return;
     reported = { score: score, isGameOver: isGameOver };
     try {
-        window.parent.postMessage({ type: 'gameState', data: { score: score, isGameOver: isGameOver } }, window.location.origin);
+        // The portal that framed the game; another origin when it's on the games CDN.
+        const parentOrigin = (location.ancestorOrigins && location.ancestorOrigins[0])
+            || (document.referrer && new URL(document.referrer).origin)
+            || window.location.origin;
+        window.parent.postMessage({ type: 'gameState', data: { score: score, isGameOver: isGameOver } }, parentOrigin);
     } catch (e) {
         // Reporting must never break the game.
     }

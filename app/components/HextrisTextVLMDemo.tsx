@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { mapSlugToGamePath } from '@/lib/localGames';
+import { isGameMessageOrigin } from '@/lib/gameAssets';
 
 type VLMStatus = 'idle' | 'capturing' | 'processing' | 'ready';
 type InferenceMode = 'vision' | 'text';
@@ -67,7 +68,7 @@ export default function HextrisTextVLMDemo() {
 
     // Handle incoming messages from the Hextris iframe
     const handleGameMessage = async (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        if (!isGameMessageOrigin(event.origin)) return;
 
         const { type, data } = event.data;
 

@@ -18,6 +18,7 @@ import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
 import { hasLocalGameDir, mapSlugToGamePath } from '@/lib/localGames';
+import { isGameMessageOrigin } from '@/lib/gameAssets';
 import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
 import { titleFromSlug } from '@/lib/skillIcons';
 import { sessionAttribution } from '@/lib/emailLinks';
@@ -349,9 +350,9 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                 frameWindow.addEventListener(type, count, { capture: true, passive: true });
             }
             inputCountRef.current = 0;
-        } catch (e) {
-            // A cross-origin frame can't be listened to; leave the count unknown.
-            console.warn('Player inputs not counted', e);
+        } catch {
+            // A frame on the games CDN can't be listened to. Its screenshot script
+            // counts the inputs itself and sends them with each screenshot.
         }
     };
 
@@ -363,8 +364,8 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     };
 
     const handleGameMessage = (event: MessageEvent) => {
-        // Only accept messages from our game domain
-        if (event.origin !== window.location.origin) return;
+        // Only messages from this page's own game frame
+        if (!isGameMessageOrigin(event.origin) || event.source !== iframeRef.current?.contentWindow) return;
 
         const { type, data } = event.data;
 
@@ -436,7 +437,10 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                     // Each chunk carries the game's latest state, so the session keeps a score
                     // even if the final upload never arrives.
                     const capturedAt = typeof base64Data.capturedAt === 'number' ? base64Data.capturedAt : null;
-                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, takeInputCount(), capturedAt);
+                    // A cross-origin frame counts its own inputs since its last screenshot.
+                    const reportedInputs = typeof base64Data.inputCount === 'number' ? base64Data.inputCount : null;
+                    const inputCount = inputCountRef.current !== null ? takeInputCount() : reportedInputs;
+                    uploadScreenshots(skillprintSessionIdRef.current, [blob], false, reportedGameStateRef.current, inputCount, capturedAt);
                 }
             } catch (e) {
                 console.error('Failed to process screenshot', e);
@@ -794,6 +798,9 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                         className="play-field__game border-0 z-10"
                         title={`${decodedSlug} Game`}
                         allowFullScreen
+                        // A click on the Play button doesn't count as activation inside a
+                        // cross-origin frame, so its sound needs autoplay delegated.
+                        allow="autoplay; fullscreen; gamepad"
                         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                         onLoad={handleIframeLoad}
                         style={{
