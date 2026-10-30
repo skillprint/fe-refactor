@@ -14,7 +14,15 @@ import GameResultDialog, { SessionOutcome } from '../../../components/GameSessio
 function DevGameResultContent() {
   const searchParams = useSearchParams();
   const synthetic = searchParams.get('synthetic') === '1';
-  const highScore = searchParams.get('best') === '0' ? 0 : 3421;
+  const bestParam = searchParams.get('best');
+  const highScore = bestParam === '0' ? 0 : bestParam ? Number(bestParam) : 3421;
+  const weeklyBestParam = searchParams.get('weeklyBest');
+  const weeklyHighScore = weeklyBestParam ? Number(weeklyBestParam) : null;
+  const leaderAllParam = searchParams.get('leaderAll');
+  const leaderboardAllTimeHigh = leaderAllParam ? Number(leaderAllParam) : null;
+  const leaderWeekParam = searchParams.get('leaderWeek');
+  const leaderboardWeeklyHigh = leaderWeekParam ? Number(leaderWeekParam) : null;
+  const skipHighScorePopup = searchParams.get('skipPopup') === '1';
   const forceEmailPrompt = searchParams.get('emailPrompt') === '1';
   const outcomeParam = searchParams.get('outcome');
   const outcome: SessionOutcome = outcomeParam === 'exited' || outcomeParam === 'unknown' ? outcomeParam : 'complete';
@@ -23,8 +31,13 @@ function DevGameResultContent() {
       <Suspense fallback={<div>Loading...</div>}>
         <GameResultDialog
           gameTitle="Hextris"
+          gameSlug="hextris"
           score={4120}
           highScore={highScore}
+          weeklyHighScore={weeklyHighScore}
+          leaderboardAllTimeHigh={leaderboardAllTimeHigh}
+          leaderboardWeeklyHigh={leaderboardWeeklyHigh}
+          skipHighScorePopup={skipHighScorePopup}
           outcome={outcome}
           duration={372}
           adjustmentsCount={2}

@@ -5,11 +5,15 @@
  * never read org data, only the caller's own GeneratedGame.
  */
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { cookies } from 'next/headers';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
 import { GameParameter } from '@/lib/models/GameParameter';
 
 export async function GET(req: Request, { params }: { params: Promise<{ gameId: string }> }) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const cookieStore = await cookies();
         const userId = cookieStore.get('user_id')?.value;

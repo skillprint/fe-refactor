@@ -2,12 +2,19 @@ import React from 'react';
 import Link from 'next/link';
 import { DEFAULT_GAME_IMAGE, showDefaultGameImageOnError } from '@/lib/playbookUtils';
 import EmailRailLink from '../../app/components/EmailRailLink';
+import ProfileFriendsRailCard from './ProfileFriendsRailCard';
+import PrivacyGateCard from '../Friends/PrivacyGateCard';
 
 interface ProfileRailProps {
   skillsCount: number;
   totalSkills: number;
   daysPlayed: number;
   sessions?: any[];
+  coachFeatureEnabled?: boolean;
+  friendsFeatureEnabled?: boolean;
+  hideActivitySummary?: boolean;
+  hideSessionHistory?: boolean;
+  previewViewerLabel?: string;
 }
 
 /** Monday-based weekday index (0 = Monday) of a local date. */
@@ -21,7 +28,17 @@ const startOfWeek = (now: Date) => {
   return start;
 };
 
-export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sessions = [] }: ProfileRailProps) {
+export default function ProfileRail({
+  skillsCount,
+  totalSkills,
+  daysPlayed,
+  sessions = [],
+  coachFeatureEnabled = false,
+  friendsFeatureEnabled = false,
+  hideActivitySummary = false,
+  hideSessionHistory = false,
+  previewViewerLabel = 'this viewer',
+}: ProfileRailProps) {
   const completePct = Math.round((skillsCount / totalSkills) * 100) || 0;
   const recentSessions = sessions.slice(0, 5);
 
@@ -73,65 +90,97 @@ export default function ProfileRail({ skillsCount, totalSkills, daysPlayed, sess
         <EmailRailLink />
       </article>
 
-      <article className="rail-card sp-card" aria-labelledby="summaryTitle">
-        <div className="rail-card__head">
-          <span className="rail-card__label" id="summaryTitle">This week</span>
-        </div>
-        <div className="layout-grid gap-sm">
-          <div className="layout-flex items-center justify-between gap-md font-sm">
-            <span className="text-muted">Skillprint complete</span>
-            <span className="weight-semibold" data-state-text="completePct">{completePct}%</span>
+      {hideActivitySummary ? (
+        <PrivacyGateCard
+          groupingKey="activitySummary"
+          ownerName={previewViewerLabel}
+          gateReason="private"
+          relationship="none"
+          isOwnPreview={true}
+          compact={true}
+        />
+      ) : (
+        <article className="rail-card sp-card" aria-labelledby="summaryTitle">
+          <div className="rail-card__head">
+            <span className="rail-card__label" id="summaryTitle">This week</span>
           </div>
-          <div className="rail-meter" data-meter={completePct} style={{ '--meter-fill': `${completePct}%` } as React.CSSProperties}><i></i></div>
-        </div>
-        <div className="layout-flex items-center justify-between gap-md separator-top font-sm">
-          <span className="text-muted" data-state-text="streakLabel">{streakLabel}</span>
-          <div className="pp-streak-days layout-flex gap-sm" data-pp-streak aria-label={streakLabel}>
-            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, index) => {
-              const isActive = weekDays.has(index);
-              const className = `day layout-grid place-center border-subtle radius-round ${isActive ? 'done text-deep' : ''}`;
-              return (
-                <span key={index} className={className.trim()}>{label}</span>
-              );
-            })}
+          <div className="layout-grid gap-sm">
+            <div className="layout-flex items-center justify-between gap-md font-sm">
+              <span className="text-muted">Skillprint complete</span>
+              <span className="weight-semibold" data-state-text="completePct">{completePct}%</span>
+            </div>
+            <div className="rail-meter" data-meter={completePct} style={{ '--meter-fill': `${completePct}%` } as React.CSSProperties}><i></i></div>
           </div>
-        </div>
-      </article>
+          <div className="layout-flex items-center justify-between gap-md separator-top font-sm">
+            <span className="text-muted" data-state-text="streakLabel">{streakLabel}</span>
+            <div className="pp-streak-days layout-flex gap-sm" data-pp-streak aria-label={streakLabel}>
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, index) => {
+                const isActive = weekDays.has(index);
+                const className = `day layout-grid place-center border-subtle radius-round ${isActive ? 'done text-deep' : ''}`;
+                return (
+                  <span key={index} className={className.trim()}>{label}</span>
+                );
+              })}
+            </div>
+          </div>
+        </article>
+      )}
 
-      <article className="rail-card sp-card" id="recent-sessions" aria-labelledby="railRecent">
-        <div className="rail-card__head">
-          <span className="rail-card__label" id="railRecent">Recent sessions</span>
-          {recentSessions.length > 0 && (
-            <span className="ui-badge ui-badge--sm" data-state-text="recentBadge">
-              {recentSessions.length < 5 ? `Last ${recentSessions.length}` : 'Last 5'}
-            </span>
+      {friendsFeatureEnabled && <ProfileFriendsRailCard />}
+
+      {hideSessionHistory ? (
+        <PrivacyGateCard
+          groupingKey="sessionHistory"
+          ownerName={previewViewerLabel}
+          gateReason="private"
+          relationship="none"
+          isOwnPreview={true}
+          compact={true}
+        />
+      ) : (
+        <article className="rail-card sp-card" id="recent-sessions" aria-labelledby="railRecent">
+          <div className="rail-card__head">
+            <span className="rail-card__label" id="railRecent">Recent sessions</span>
+            {recentSessions.length > 0 && (
+              <span className="ui-badge ui-badge--sm" data-state-text="recentBadge">
+                {recentSessions.length < 5 ? `Last ${recentSessions.length}` : 'Last 5'}
+              </span>
+            )}
+          </div>
+          <ul className="rail-list" data-pp-session-list="">
+            {recentSessions.map((session, i) => (
+              <li key={session.id || i}>
+                <Link className="rail-list__link" href={`/game/${session.gameSlug || session.id}`}>
+                  <img className="rail-thumb" alt="" src={session.gameImage || DEFAULT_GAME_IMAGE} onError={showDefaultGameImageOnError} />
+                  <span className="rail-list__name">{session.gameName}</span>
+                  <span className="rail-list__value">{session.score}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="empty-state text-center" data-pp-session-empty="" hidden={recentSessions.length > 0}>
+            <svg className="sp-icon sp-icon--xl sp-icon--muted" aria-hidden="true" viewBox="0 0 24 24">
+              <use href="#ti-gamepad"></use>
+            </svg>
+            <p className="margin-none text-muted font-sm">No sessions recorded yet.</p>
+            <p className="margin-none font-xs text-subtle">Start playing to see your history.</p>
+          </div>
+          <Link className="portal-section__link font-sm" href="#sessions">
+            All sessions 
+            <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <use href="#ti-chevron-right"></use>
+            </svg>
+          </Link>
+          {coachFeatureEnabled && (
+            <Link className="portal-section__link font-sm" href="#lessons">
+              Shared lessons &amp; AI playbooks
+              <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
+                <use href="#ti-chevron-right"></use>
+              </svg>
+            </Link>
           )}
-        </div>
-        <ul className="rail-list" data-pp-session-list="">
-          {recentSessions.map((session, i) => (
-            <li key={session.id || i}>
-              <Link className="rail-list__link" href={`/game/${session.gameSlug || session.id}`}>
-                <img className="rail-thumb" alt="" src={session.gameImage || DEFAULT_GAME_IMAGE} onError={showDefaultGameImageOnError} />
-                <span className="rail-list__name">{session.gameName}</span>
-                <span className="rail-list__value">{session.score}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <div className="empty-state text-center" data-pp-session-empty="" hidden={recentSessions.length > 0}>
-          <svg className="sp-icon sp-icon--xl sp-icon--muted" aria-hidden="true" viewBox="0 0 24 24">
-            <use href="#ti-gamepad"></use>
-          </svg>
-          <p className="margin-none text-muted font-sm">No sessions recorded yet.</p>
-          <p className="margin-none font-xs text-subtle">Start playing to see your history.</p>
-        </div>
-        <Link className="portal-section__link font-sm" href="#sessions">
-          All sessions 
-          <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
-            <use href="#ti-chevron-right"></use>
-          </svg>
-        </Link>
-      </article>
+        </article>
+      )}
     </>
   );
 }

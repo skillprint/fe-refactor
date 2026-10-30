@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 
 const MODULES = [
   { type: 'hero', name: 'Hero Section', desc: 'Prominent banner introducing Skillprint with action buttons' },
@@ -41,6 +42,9 @@ const VALID_JUMPER_IDS = [
 ];
 
 export async function POST(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { message, history = [], currentConfig = {} } = await req.json();
 

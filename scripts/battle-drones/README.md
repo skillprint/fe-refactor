@@ -25,7 +25,9 @@ folder would keep serving an old build inside the portal.
     tick, so `src/sim` is untouched. The sim hash, replays and online-duel
     pairing are all upstream's.
   - **Screenshots:** every 2.5 s, the WebGL view, its label layer and a status
-    strip (the DOM HUD can't be drawn).
+    strip (the DOM HUD can't be drawn). Each one carries `inputCount`, the
+    inputs since the last one: the portal can't count them for a frame
+    served from the games CDN.
   - **Game state:** `gameState` posts the battle score and `isGameOver`.
   - **Events:** the universal `gameEvent`s, from `GAME_START` to `GAME_END`.
   - **Pause:** follows the portal's `GAME_PAUSE`/`GAME_RESUME`.

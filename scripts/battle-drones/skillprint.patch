@@ -77,10 +77,10 @@ index 9302931..3f8e25e 100644
   * The sound duel (SOUND-DUEL.md "Getting into a duel"): its lobby and
 diff --git a/src/skillprint/bridge.ts b/src/skillprint/bridge.ts
 new file mode 100644
-index 0000000..135aaf6
+index 0000000..bc93346
 --- /dev/null
 +++ b/src/skillprint/bridge.ts
-@@ -0,0 +1,441 @@
+@@ -0,0 +1,448 @@
 +/**
 + * The Skillprint bridge: what lets the Skillprint portal host this game in
 + * an iframe (skillprint-rewrite, public/games/live/Battle Drones). It speaks
@@ -89,7 +89,7 @@ index 0000000..135aaf6
 + *
 + *   parent → game  { type: 'ADJUST_GAME', data: { parameterName, parameterValue } } (or an array)
 + *   parent → game  { type: 'GAME_PAUSE' } / { type: 'GAME_RESUME' }
-+ *   game → parent  { type: 'screenshot', dataUrl, capturedAt }        every SHOT_EVERY_MS of a match
++ *   game → parent  { type: 'screenshot', dataUrl, capturedAt, inputCount } every SHOT_EVERY_MS of a match
 + *   game → parent  { type: 'gameState', data: { score, isGameOver… } } when it changes
 + *   game → parent  { type: 'gameEvent', data: { event, at, … } }      the universal telemetry events
 + *   game → parent  { type: 'GAME_COMPLETE', data: { score… } }        the report's "See your results"
@@ -207,6 +207,8 @@ index 0000000..135aaf6
 +let pausedByPortal = false;
 +let base: Pick<FactionStats, "buildingsKilled" | "buildingsLost"> | null = null;
 +let shotCanvas: HTMLCanvasElement | null = null;
++/** Player inputs since the last screenshot: a portal on another origin (the games CDN) can't count them itself. */
++let inputs = 0;
 +
 +function clampParam(name: string, value: unknown): number | null {
 +  const def = PARAMS[name];
@@ -334,7 +336,9 @@ index 0000000..135aaf6
 +    ctx.fillText(text, 8, h - 11);
 +  }
 +  try {
-+    post({ type: "screenshot", dataUrl: c.toDataURL("image/jpeg", 0.72), capturedAt: epochNow() });
++    const inputCount = inputs;
++    inputs = 0;
++    post({ type: "screenshot", dataUrl: c.toDataURL("image/jpeg", 0.72), capturedAt: epochNow(), inputCount });
 +  } catch (e) {
 +    console.warn("[Skillprint] screenshot failed", e);
 +  }
@@ -501,6 +505,9 @@ index 0000000..135aaf6
 +  window.addEventListener("message", onMessage);
 +  // the AI Guide opens its session on the first input; keys 1–9 are the portal's preset tester
 +  window.addEventListener("pointerdown", () => post({ type: "skillprint_mousedown" }), { capture: true, passive: true });
++  // (the same inputs the portal counts on a same-origin frame, GameClient.tsx countPlayerInputs)
++  for (const type of ["keydown", "pointerdown", "pointermove", "touchstart", "wheel"])
++    window.addEventListener(type, () => (inputs += 1), { capture: true, passive: true });
 +  window.addEventListener(
 +    "keydown",
 +    (e) => {

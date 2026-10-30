@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { GameParameter } from '@/lib/models/GameParameter';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ parameterId: string }> }) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { parameterId } = await params;
         if (!parameterId) {
@@ -32,6 +36,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ paramete
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ parameterId: string }> }) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { parameterId } = await params;
         if (!parameterId) {

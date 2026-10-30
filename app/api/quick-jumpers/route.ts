@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { cookies } from 'next/headers';
 import { QuickJumper } from '@/lib/models/QuickJumper';
 import { User } from '@/lib/models/User';
@@ -36,6 +37,9 @@ function getUserId(req: Request, cookieStore: any): string {
 }
 
 export async function GET(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     const cookieStore = await cookies();
     const userId = getUserId(req, cookieStore);
 
@@ -72,6 +76,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     const cookieStore = await cookies();
     const userId = getUserId(req, cookieStore);
 
@@ -133,6 +140,9 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     const cookieStore = await cookies();
     const userId = getUserId(req, cookieStore);
     

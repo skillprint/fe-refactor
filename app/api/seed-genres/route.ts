@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { Genre } from '@/lib/models/Genre';
 
 export async function GET() {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const genres = [
             {

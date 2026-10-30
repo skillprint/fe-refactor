@@ -1,4 +1,4 @@
-import{F as S,z as E,v as O,A as F,l as H,C as D,w as G,i as B,T as j}from"./main-K8rJgvNQ.js";import{s as J}from"./setup-CUDgL0M9.js";import"./three-D2xzxzpt.js";const q=`
+import{F as S,z as E,v as O,A as F,l as H,C as D,w as G,i as B,T as j}from"./main-CWjB6Fev.js";import{s as J}from"./setup-w5L9BVu-.js";import"./three-D2xzxzpt.js";const q=`
 #replay-panel[hidden] { display: none; }
 #replay-panel { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 40; width: min(760px, calc(100vw - 32px));
   font: 13px/1.35 system-ui, sans-serif; color: #e8eef5; pointer-events: none; }

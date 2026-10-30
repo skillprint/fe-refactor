@@ -2,13 +2,13 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { useUserSession } from '../../../app/hooks/useUserSession';
-import { MetricLeaderboard, generateMockMetricLeaderboard } from './MetricLeaderboard';
+import { MetricLeaderboard, generateMockMetricLeaderboard, normalizeMetricLeaderboard } from './MetricLeaderboard';
 
 import { BASE_URL as API_BASE_URL } from '../../../app/api/api';
 const BASE_URL = `${API_BASE_URL}api/portal`;
 
 export function useMetricLeaderboard(pillar: string, dimension: string, useSyntheticData: boolean = false) {
-    const { userToken } = useUserSession();
+    const { userId, userToken } = useUserSession();
     const [data, setData] = useState<MetricLeaderboard | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -17,7 +17,7 @@ export function useMetricLeaderboard(pillar: string, dimension: string, useSynth
         if (useSyntheticData) {
             setIsLoading(true);
             setTimeout(() => {
-                setData(generateMockMetricLeaderboard());
+                setData(generateMockMetricLeaderboard({ playerId: userId }));
                 setIsLoading(false);
             }, 500); // Simulate network delay
             return;
@@ -44,8 +44,9 @@ export function useMetricLeaderboard(pillar: string, dimension: string, useSynth
             }
 
             const json = await response.json();
-            setData(json);
-            return json;
+            const normalized = normalizeMetricLeaderboard(json, { playerId: userId });
+            setData(normalized);
+            return normalized;
         } catch (err: any) {
             console.error('Failed to fetch useMetricLeaderboard:', err);
             setError(err);
@@ -53,7 +54,7 @@ export function useMetricLeaderboard(pillar: string, dimension: string, useSynth
         } finally {
             setIsLoading(false);
         }
-    }, [userToken, useSyntheticData, pillar, dimension]);
+    }, [userId, userToken, useSyntheticData, pillar, dimension]);
 
     useEffect(() => {
         if (useSyntheticData || userToken) {

@@ -1,4 +1,5 @@
 import { baseSlug } from '@/lib/gameSlug';
+import { gameAssetUrl } from '@/lib/gameAssets';
 
 /**
  * The games this frontend ships a build for, keyed by base slug, and where
@@ -95,9 +96,9 @@ export const mapSlugToGamePath = (slug: string) => {
     const unifiedSlug = baseSlug(slug);
 
     const inactiveDir = INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug];
-    if (inactiveDir) return `/games/inactive/${inactiveDir}/static/index.html`;
+    if (inactiveDir) return gameAssetUrl(`inactive/${inactiveDir}/static/index.html`);
 
     const dir = SLUG_TO_DIR_MAP[unifiedSlug];
-    if (dir) return `/games/live/${dir}/static/index.html`;
-    return `/games/live/${slug}/static/index.html`;
+    if (dir) return gameAssetUrl(`live/${dir}/static/index.html`);
+    return gameAssetUrl(`live/${slug}/static/index.html`);
 };

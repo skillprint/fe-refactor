@@ -37,6 +37,9 @@ import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
 import { getGameConfig, getGameDetails } from '@/app/config/gameConfig';
 import { baseSlug } from '@/lib/gameSlug';
 import { DEFAULT_GAME_IMAGE, formatEstimatedDuration } from '@/lib/playbookUtils';
+import { useIslandCoach } from '@/app/hooks/useIslandCoach';
+import { useUserSession } from '@/app/hooks/useUserSession';
+import PreGameCoachCard from '@/components/GameSession/PreGameCoachCard';
 
 interface GameDetailClientProps {
   /** The `?game=` value: any slug form; the library detail resolves it. */
@@ -120,8 +123,35 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
   const leaderboard = useLibraryGameLeaderboard(canonicalSlug, boardPeriod, synthetic);
   const { recommendedGames } = useRecommendedGames(10);
   const [shareOpen, setShareOpen] = useState(false);
+  const { userId } = useUserSession();
 
   const scores = useMemo(() => profileDimensionMap(profile), [profile]);
+
+  const playerExperience = useMemo(() => {
+    const profileSkills: Record<string, number> = {};
+    Object.values(scores).forEach((stat) => {
+      if (typeof stat.score === 'number') profileSkills[stat.slug] = stat.score;
+    });
+    return {
+      userId,
+      sessionsPlayed: personal?.sessionsPlayed ?? 0,
+      bestScore: personal?.bestScore ?? null,
+      lastScore: personal?.lastScore ?? null,
+      lastFlow: personal?.lastFlowScore ?? null,
+      targetMood: game?.moods?.[0]?.name || 'Focus',
+      profileSkills,
+    };
+  }, [userId, personal, scores, game]);
+
+  const {
+    coachFeatureEnabled,
+    tipsEnabled,
+    setTipsEnabled,
+    selectedCoachId,
+    setSelectedCoachId,
+    briefing,
+    isLoadingBriefing,
+  } = useIslandCoach(game?.baseSlug || baseSlug(decodedSlug), playerExperience);
 
   // Skills the game exercises (cognition) and moods it targets, each with the
   // pillar, description and icon the taxonomy gives it and the player's own
@@ -309,6 +339,21 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
             </div>
           </PortalSection>
 
+          {/* AI Coach & LLM Island Playbook Briefing */}
+          {coachFeatureEnabled && (
+            <PortalSection ariaLabelledBy="gdCoachBriefing">
+              <PreGameCoachCard
+                briefing={briefing}
+                isLoading={isLoadingBriefing}
+                tipsEnabled={tipsEnabled}
+                onToggleTips={setTipsEnabled}
+                selectedCoachId={selectedCoachId}
+                onSelectCoach={setSelectedCoachId}
+                variant="detail"
+              />
+            </PortalSection>
+          )}
+
           {/* Skills */}
           {skillCards.length > 0 && (
             <PortalSection ariaLabelledBy="gdSkills">
@@ -418,7 +463,7 @@ export default function GameDetailClient({ slug }: GameDetailClientProps) {
             skills={skillPills.slice(0, 3)}
           />
 
-          <GameDetailBadge badges={badges} gameTitle={game.name} gameImage={gameImage(game)} />
+          <GameDetailBadge badges={badges} gameTitle={game.name} gameImage={gameImage(game)} gameSlug={game.baseSlug} />
         </PortalPageRail>
       </PortalPageLayout>
     </PortalLayout>

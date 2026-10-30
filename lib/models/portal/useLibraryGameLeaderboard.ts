@@ -6,8 +6,22 @@ import {
   LeaderboardPeriod,
   LibraryGameLeaderboard,
   generateMockLibraryGameLeaderboard,
+  normalizeLeaderboardBoard,
 } from './LibraryGameLeaderboard';
 import { PortalApiError, portalFetch } from './portalFetch';
+
+function readCachedViewerName(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return (
+      window.localStorage.getItem('userFirstName') ||
+      window.localStorage.getItem('skillprint_display_name') ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
 
 /**
  * The top players on one game by its own score, and where the viewer stands
@@ -21,15 +35,19 @@ export function useLibraryGameLeaderboard(
   useSyntheticData: boolean = false,
   limit: number = 10,
 ) {
-  const { userToken } = useUserSession();
+  const { userId, userToken } = useUserSession();
   const [data, setData] = useState<LibraryGameLeaderboard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   const fetchData = useCallback(async () => {
+    const viewer = {
+      name: readCachedViewerName(),
+      playerId: userId,
+    };
     if (useSyntheticData) {
-      setData(generateMockLibraryGameLeaderboard(period));
+      setData(generateMockLibraryGameLeaderboard(period, viewer));
       setIsLoading(false);
       return null;
     }
@@ -44,8 +62,9 @@ export function useLibraryGameLeaderboard(
         `/library/games/${encodeURIComponent(slug)}/leaderboard/?${query}`,
         userToken,
       );
-      setData(json);
-      return json;
+      const normalized = normalizeLeaderboardBoard(json, viewer);
+      setData(normalized);
+      return normalized;
     } catch (err: any) {
       setData(null);
       if (err instanceof PortalApiError && err.status === 404) {
@@ -58,7 +77,7 @@ export function useLibraryGameLeaderboard(
     } finally {
       setIsLoading(false);
     }
-  }, [userToken, useSyntheticData, slug, period, limit]);
+  }, [userId, userToken, useSyntheticData, slug, period, limit]);
 
   useEffect(() => {
     if (useSyntheticData || (userToken && slug)) fetchData();

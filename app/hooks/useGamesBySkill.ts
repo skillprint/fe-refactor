@@ -4,6 +4,7 @@ import { baseSlug } from '@/lib/gameSlug';
 import { useEffect, useState } from 'react';
 import { getSkills, getMoods, getCatalogItemsBySkill, getCatalogItemsByMood } from '../api/api';
 import { hasLocalGameDir } from '@/lib/localGames';
+import { gameAssetUrl } from '@/lib/gameAssets';
 
 /**
  * Hook that calls the api for skills and moods and then calls and filters games by skill and mood
@@ -49,7 +50,7 @@ export function useGamesBySkill() {
                     slug: 'space-trip',
                     name: 'Space Trip',
                     description: 'Explore space in this adventure',
-                    image: '/games/live/Space Trip/icons/icon-256.png',
+                    image: gameAssetUrl('live/Space Trip/icons/icon-256.png'),
                     skills: [{ slug: 'pattern-matching', name: 'Pattern Matching', dimension: 'cognition' }],
                     moods: [{ slug: 'focus', name: 'Focus', dimension: 'mood' }]
                 };

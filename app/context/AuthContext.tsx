@@ -59,15 +59,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const firstName = urlParams.get('first_name');
             const profileImage = urlParams.get('profile_image');
 
-            if (urlUserId) {
-                const newStatus = isEmbedded ? 'partner' : 'social';
-                setStatus(newStatus);
+            // A partner's iframe hands its player over in the URL. A top-level
+            // page ignores the id: anyone could send a link that signs the
+            // reader in as someone else (useUserSession applies the same rule).
+            if (urlUserId && isEmbedded) {
+                setStatus('partner');
                 setUserProfile({
                     firstName: firstName || '',
                     picture: profileImage || undefined
                 });
 
-                safeStorage.setItem('auth_status', newStatus);
+                safeStorage.setItem('auth_status', 'partner');
                 safeStorage.setItem('user_id', urlUserId);
                 safeStorage.setItem('userId', urlUserId);
 

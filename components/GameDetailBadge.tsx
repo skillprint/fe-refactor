@@ -4,12 +4,15 @@ import React from 'react';
 import { FallbackImage } from './FallbackImage';
 import type { GameBadge } from '@/lib/models/portal/LibraryGameBadges';
 import { getBadgeArt } from '@/lib/badgeArt';
+import BadgeShareButton from './BadgeShareButton';
 
 export interface GameDetailBadgeProps {
   /** The badges playing this game works toward, with the player's standing (SKI-182). */
   badges: GameBadge[];
   gameTitle: string;
   gameImage?: string;
+  /** The game's slug, so a shared badge names the game it was earned in. */
+  gameSlug?: string;
 }
 
 function earnedLabel(iso: string | null): string {
@@ -24,7 +27,7 @@ function earnedLabel(iso: string | null): string {
  * the player's mastery is toward the unlock threshold. Renders nothing for a
  * game whose skills carry no active badge.
  */
-export function GameDetailBadge({ badges, gameTitle, gameImage = '' }: GameDetailBadgeProps) {
+export function GameDetailBadge({ badges, gameTitle, gameImage = '', gameSlug }: GameDetailBadgeProps) {
   if (badges.length === 0) return null;
   const earnedCount = badges.filter((b) => b.unlocked).length;
 
@@ -102,6 +105,9 @@ export function GameDetailBadge({ badges, gameTitle, gameImage = '' }: GameDetai
                     {badge.unlocked ? earnedLabel(badge.earnedAt) : 'Not earned yet'}
                   </span>
                 </span>
+                {badge.unlocked && (
+                  <BadgeShareButton badge={badge} gameSlug={gameSlug} gameName={gameTitle} />
+                )}
               </figcaption>
             </figure>
           );
