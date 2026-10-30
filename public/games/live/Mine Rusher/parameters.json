@@ -1,0 +1,16 @@
+{
+    "speedMultiplier": {
+        "max": 1.8,
+        "min": 0.6,
+        "type": "float",
+        "default": 1.0,
+        "description": "How fast the path scrolls and the ball rolls, as a multiple of the game's own (131 px/s down, 252 px/s sideways). Both scale together, so the ball still follows the zigzag path. Applies immediately, mid-run included. Higher values leave less time to tap at each turn."
+    },
+    "speedRampPerTap": {
+        "max": 3.0,
+        "min": 0.0,
+        "type": "float",
+        "default": 0.0,
+        "description": "Speed-up per tap, in percent of the starting speed. The game's own speed never changes during a run (0); with 1, each tap (turn) adds 1%, so a run speeds up as it goes, up to 2.5x the game's own speed. Each run starts again at speedMultiplier; a change applies to the taps that follow."
+    }
+}

@@ -282,6 +282,24 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'mine-rusher':
+            // Mine Rusher: speedMultiplier (scroll/roll pace), speedRampPerTap (% faster per tap; 0 = constant speed)
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'speedMultiplier', parameterValue: 0.7 }]; // Slow
+                case 2: return [{ parameterName: 'speedMultiplier', parameterValue: 0.85 }];
+                case 3: return [{ parameterName: 'speedMultiplier', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'speedMultiplier', parameterValue: 1.3 }]; // Fast
+                case 5: return [{ parameterName: 'speedMultiplier', parameterValue: 1.6 }]; // Very fast
+                case 6: return [{ parameterName: 'speedRampPerTap', parameterValue: 0 }]; // Default: constant speed
+                case 7: return [{ parameterName: 'speedRampPerTap', parameterValue: 1 }]; // Gentle speed-up
+                case 8: return [{ parameterName: 'speedRampPerTap', parameterValue: 2.5 }]; // Steep speed-up
+                case 9: return [
+                    { parameterName: 'speedMultiplier', parameterValue: 1.3 },
+                    { parameterName: 'speedRampPerTap', parameterValue: 2 }
+                ]; // Hard mode
+                default:
+                    return [];
+            }
         case 'photo-hunt':
             // timeMultiplier scales each puzzle's own 120 s; missPenaltySeconds costs time per wrong tap
             switch (keyNumber) {
