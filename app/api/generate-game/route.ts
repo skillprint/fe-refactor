@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
@@ -13,6 +14,9 @@ import jwt from 'jsonwebtoken';
 import { prepareLibraries } from './lib-generator';
 
 export async function POST(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         let { targetMode, targetValue, optionalPrompt, existingCode, artStyleId, genreId, libraries = [], modelProvider = 'gemini', modelName, parameters = [], editGameId } = await req.json();
 

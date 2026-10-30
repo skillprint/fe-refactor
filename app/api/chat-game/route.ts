@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { ArtStyle } from '@/lib/models/ArtStyle';
 import { Genre } from '@/lib/models/Genre';
 
@@ -10,6 +11,9 @@ const SKILLS = [
 ];
 
 export async function POST(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { message, history = [], currentConfig = {} } = await req.json();
 
