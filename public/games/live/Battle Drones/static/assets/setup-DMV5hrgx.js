@@ -1,0 +1,1 @@
+import{E as i,x as n,G as p,H as c}from"./main-CdjQvIGw.js";function f(o){const s=i(o.map,{seed:o.seed,objectives:!0,...o.mutators.length?{mutators:o.mutators}:{},...o.survival?{survival:o.survival}:{},...o.op?{op:o.op}:{}});for(const t of n(s)){const e=o.openers[t];e&&p(s,t,e);const a=o.income?.[t];a!==void 0&&(s.factions[t].incomeMult=a)}return c(s),s}export{f as s};

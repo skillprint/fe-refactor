@@ -916,3 +916,34 @@ Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbe
 - `7`: `{ arrowHelpfulness: 1 }` (Arrow only)
 - `8`: `{ arrowHelpfulness: 0 }` (No guidance)
 - `9`: `{ totalNodesCount: 25, rotateNodesAroundUser: 1, rotationSpeed: 15, arrowHelpfulness: 0 }` (Extreme)
+
+---
+
+### Battle Drones
+Real-time strategy against an AI commander (slug `battle-drones`, folder `live/Battle Drones`, built from kachergis/battledrones). The enemy commander's knobs and both incomes apply mid-match (income changes go into the battle record, so replays stay exact); `aiDifficulty` picks the next match's commander. Values set in a session survive the page reloading for a rematch. Full manifest: `live/Battle Drones/backend/game-scoring-config.json`.
+
+**Parameters**
+- `aiIncomeMult` (Float, 0.5-1.6): The enemy's income. Higher is harder. Default 1 (Easy 0.75, Hard 1.3).
+- `aiReactionSec` (Float, 0.8-5): Seconds between the enemy commander's decisions. Higher is easier. Default 2.
+- `aiAssaultMult` (Float, 0.6-2): How big an army the enemy masses before attacking. Higher means fewer, later attacks (easier). Default 1.
+- `playerIncomeMult` (Float, 0.5-1.6): The player's income. Higher is easier. Default 1.
+- `aiDifficulty` (Integer, 0-2): The next match's commander: 0 Easy, 1 Normal, 2 Hard. Default 1.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "aiAssaultMult",
+  "parameterValue": 1.4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)** (keys 1-3 also select squads in the game)
+- `1`: `{ aiIncomeMult: 0.6, aiReactionSec: 4.5, aiAssaultMult: 1.8, playerIncomeMult: 1.4 }` (Relax)
+- `2`: `{ aiIncomeMult: 0.8, aiReactionSec: 3.5, aiAssaultMult: 1.35, playerIncomeMult: 1.15 }` (Gentle)
+- `3`: `{ aiIncomeMult: 1, aiReactionSec: 2, aiAssaultMult: 1, playerIncomeMult: 1 }` (Default)
+- `4`: `{ aiIncomeMult: 1.15, aiReactionSec: 1.5, aiAssaultMult: 0.9 }` (Brisk)
+- `5`: `{ aiIncomeMult: 1.35, aiReactionSec: 1.1, aiAssaultMult: 0.75, playerIncomeMult: 0.85 }` (Grit)
+- `6`: `{ aiDifficulty: 0 }` (Next match: Easy)
+- `7`: `{ aiDifficulty: 2 }` (Next match: Hard)
+- `8`: `{ playerIncomeMult: 0.6 }` (Lean economy)
+- `9`: `{ aiIncomeMult: 1.6, aiReactionSec: 0.8, aiAssaultMult: 0.6, playerIncomeMult: 0.5 }` (Extreme)

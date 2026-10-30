@@ -342,6 +342,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: '/games/live/Mountain Appreciator/backend/game-scoring-config.json',
+  },
+
+  'battle-drones': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Battle Drones/backend/game-scoring-config.json',
   }
 };
 
@@ -895,6 +901,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Visual Search', 'Sustained Attention', 'Pattern Matching', 'Spatial Reasoning'],
     instructions: 'Drag to walk around the two mountains; scroll or pinch to lean in. Click a difference on either mountain: a forest, a tarn, an eagle, a comet. Wrong clicks cost daylight. Hold Space (or the Blink button) to flick between the twins, though the sun moves faster while you do. When the light goes, keep one twin for your range, then walk on to the next pair or finish.'
   },
+  'battle-drones': {
+    name: 'Battle Drones',
+    description: 'Command an army of flying and ground drones: harvest scrap, build a base, and destroy the enemy HQ',
+    image: '/games/live/Battle Drones/cover.jpg',
+    category: 'Strategy',
+    difficulty: 'Hard',
+    estimatedTime: '5-15 minutes',
+    skills: ['Planning', 'Multitasking', 'Resource Management', 'Spatial Reasoning'],
+    instructions: 'Pick an opener, then build: harvesters gather scrap, buildings unlock units, and Uplink relays pay extra while you hold them. Tap units to select them (drag to box-select) and tap the map to move or attack. Defend your HQ and destroy the enemy\'s. When the match ends, tap Finish to see your results.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -990,4 +1006,5 @@ export const knownGameSlugs = [
   'solitaire',
   'order-rush',
   'mountain-appreciator',
+  'battle-drones',
 ];

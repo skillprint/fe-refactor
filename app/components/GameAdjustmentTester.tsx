@@ -752,6 +752,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'battle-drones':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. aiDifficulty applies from the next match.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'aiIncomeMult', parameterValue: 0.6 }, { parameterName: 'aiReactionSec', parameterValue: 4.5 }, { parameterName: 'aiAssaultMult', parameterValue: 1.8 }, { parameterName: 'playerIncomeMult', parameterValue: 1.4 }]; // Relax
+                case 2: return [{ parameterName: 'aiIncomeMult', parameterValue: 0.8 }, { parameterName: 'aiReactionSec', parameterValue: 3.5 }, { parameterName: 'aiAssaultMult', parameterValue: 1.35 }, { parameterName: 'playerIncomeMult', parameterValue: 1.15 }]; // Gentle
+                case 3: return [{ parameterName: 'aiIncomeMult', parameterValue: 1 }, { parameterName: 'aiReactionSec', parameterValue: 2 }, { parameterName: 'aiAssaultMult', parameterValue: 1 }, { parameterName: 'playerIncomeMult', parameterValue: 1 }]; // Default
+                case 4: return [{ parameterName: 'aiIncomeMult', parameterValue: 1.15 }, { parameterName: 'aiReactionSec', parameterValue: 1.5 }, { parameterName: 'aiAssaultMult', parameterValue: 0.9 }]; // Brisk
+                case 5: return [{ parameterName: 'aiIncomeMult', parameterValue: 1.35 }, { parameterName: 'aiReactionSec', parameterValue: 1.1 }, { parameterName: 'aiAssaultMult', parameterValue: 0.75 }, { parameterName: 'playerIncomeMult', parameterValue: 0.85 }]; // Grit
+                case 6: return [{ parameterName: 'aiDifficulty', parameterValue: 0 }]; // Next match: Easy
+                case 7: return [{ parameterName: 'aiDifficulty', parameterValue: 2 }]; // Next match: Hard
+                case 8: return [{ parameterName: 'playerIncomeMult', parameterValue: 0.6 }]; // Lean economy
+                case 9: return [{ parameterName: 'aiIncomeMult', parameterValue: 1.6 }, { parameterName: 'aiReactionSec', parameterValue: 0.8 }, { parameterName: 'aiAssaultMult', parameterValue: 0.6 }, { parameterName: 'playerIncomeMult', parameterValue: 0.5 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
