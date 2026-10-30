@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { mapSlugToGamePath } from '@/lib/localGames';
+import { isGameMessageOrigin } from '@/lib/gameAssets';
 
 type VLMStatus = 'idle' | 'capturing' | 'processing' | 'ready';
 
@@ -57,8 +58,8 @@ export default function HextrisVLMDemo() {
     }, [vlmStatus, targetMood]); // Re-bind if target mood changes so the closure uses the latest mood
 
     const handleGameMessage = async (event: MessageEvent) => {
-        // Only accept messages from our domain
-        if (event.origin !== window.location.origin) return;
+        // Only messages from the game frame, here or on the games CDN
+        if (!isGameMessageOrigin(event.origin)) return;
 
         const { type, data } = event.data;
 

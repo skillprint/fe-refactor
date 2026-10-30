@@ -20,31 +20,35 @@ const shouldLogDataUrl = () => {
     return logDataUrl === 'true' || true;
 }
 
+// The game's folder (live/<folder>/static/index.html), matched by name so the
+// same check works on the portal's /games/live/ and on the games CDN.
+const getGameFolder = () => {
+    const segments = decodeURIComponent(window.location.pathname).split('/');
+    const staticAt = segments.lastIndexOf('static');
+    return staticAt > 0 ? segments[staticAt - 1] : null;
+}
+
 const getElementForScreenshot = () => {
     const urlPath = window.location.pathname;
 
-    console.log(urlPath);
-
-    // console.log(urlPath);
-    const canvasPathNames = [
-        '/games/live/Garden%20Match/static/index.html',
-        '/games/live/Box%20Tower/static/index.html',
-        '/games/live/Change%20Word/static/index.html',
-        '/games/live/Flapcat%20Steampunk/static/index.html',
-        // '/games/live/Fruit%20Boom/static/index.html',
-        '/games/live/Fruit%20Sorting/static/index.html',
-        '/games/live/Gummy%20Blocks/static/index.html',
-        '/games/live/Impossible%2010/static/index.html',
-        '/games/live/Mahjong%20Deluxe/static/index.html',
-        '/games/live/Space%20Trip/static/index.html',
-        '/games/live/Brick%20Out/static/index.html',
+    const canvasGameFolders = [
+        'Garden Match',
+        'Box Tower',
+        'Change Word',
+        'Flapcat Steampunk',
+        // 'Fruit Boom',
+        'Fruit Sorting',
+        'Gummy Blocks',
+        'Impossible 10',
+        'Mahjong Deluxe',
+        'Space Trip',
+        'Brick Out',
     ];
-    const bodyPathNames = ['/games/live/SkillprintLib/skillprint.html', '/games/live/SkillprintLib/skillprint.html'];
 
-    if (canvasPathNames.includes(urlPath)) {
+    if (canvasGameFolders.includes(getGameFolder())) {
         // console.log("using canvas");
         return document.getElementsByTagName('canvas')[0];
-    } else if (bodyPathNames.includes(urlPath)) {
+    } else if (urlPath.endsWith('/SkillprintLib/skillprint.html')) {
         // console.log("using body");
         return document.body;
     }
@@ -60,6 +64,13 @@ const getElementForScreenshot = () => {
     return document.body;
 }
 
+// Player inputs since the last screenshot. The portal can't listen to a frame
+// on the games CDN, so each screenshot carries the count (NEW-30). Capture
+// phase sees every event before a game can stop it.
+let skillprintInputCount = 0;
+['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel'].forEach((type) => {
+    window.addEventListener(type, () => { skillprintInputCount += 1; }, { capture: true, passive: true });
+});
 
 const takeScreenshot = async () => {
     // When the frame was taken, in epoch ms (the parent page's clock reads the
@@ -67,6 +78,8 @@ const takeScreenshot = async () => {
     const capturedAt = typeof performance !== 'undefined' && performance.timeOrigin
         ? performance.timeOrigin + performance.now()
         : Date.now();
+    const inputCount = skillprintInputCount;
+    skillprintInputCount = 0;
     const skillprintScreenshotSlement = getElementForScreenshot();
     // console.log(skillprintScreenshotSlement);
 
@@ -95,7 +108,7 @@ const takeScreenshot = async () => {
             addToLocalStorage('screenshot', dataUrl);
         }
 
-        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt }, "*");
+        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt, inputCount }, "*");
     })
 }
 
@@ -117,8 +130,19 @@ document.addEventListener('DOMContentLoaded', function () {
 // with `at` when it happened in epoch ms (performance.timeOrigin +
 // performance.now(), the clock the portal reads too).
 //
-// Only same-origin parents get it, and it never throws into the game.
+// Only the page that framed the game gets it, and it never throws into the game.
 (function () {
+    // That page's origin: the portal's, which differs from the game's when the
+    // game is on the games CDN. ancestorOrigins has it where the browser
+    // supports it; the referrer carries it otherwise.
+    var parentOrigin = function () {
+        try {
+            if (location.ancestorOrigins && location.ancestorOrigins.length) return location.ancestorOrigins[0];
+            if (document.referrer) return new URL(document.referrer).origin;
+        } catch (e) {}
+        return window.location.origin;
+    };
+
     // Legacy names for universal events (the SDK's GameEvent). The original
     // name is kept in `legacyEvent`.
     var UNIVERSAL_NAMES = {
@@ -153,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             if (!window.parent || window.parent === window) return;
             var message = toGameEventMessage(json, at);
-            if (message) window.parent.postMessage(message, window.location.origin);
+            if (message) window.parent.postMessage(message, parentOrigin());
         } catch (e) {
             // Telemetry must never break the game.
         }

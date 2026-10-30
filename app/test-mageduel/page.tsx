@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { gameAssetUrl } from '@/lib/gameAssets';
 import FloatingExitButton from '../components/FloatingExitButton';
 import { SkillprintClient, Mood, Adjustment } from '../lib/skillprintSdk';
 import GameAdjustmentTester from '../components/GameAdjustmentTester';
@@ -210,7 +211,7 @@ export default function TestMageDuelPage() {
             <Suspense fallback={<div className="flex h-screen w-full items-center justify-center text-gray-500">Loading Mage Duel...</div>}>
                 <iframe
                     ref={iframeRef}
-                    src="/games/live/mage-duel-2d/static/index.html"
+                    src={gameAssetUrl('live/mage-duel-2d/static/index.html')}
                     className="w-full h-full min-h-screen border-0"
                     title="Mage Duel Sandbox"
                     allowFullScreen

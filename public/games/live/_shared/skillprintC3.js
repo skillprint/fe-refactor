@@ -60,6 +60,12 @@
   const SCREENSHOT_MS = 2000;
   const MAX_WIDTH = 640;
   const scratch = document.createElement('canvas');
+  // Player inputs since the last screenshot, sent with it: the portal can't
+  // listen to a frame on the games CDN (NEW-30).
+  let inputs = 0;
+  ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel'].forEach(function (type) {
+    window.addEventListener(type, function () { inputs += 1; }, { capture: true, passive: true });
+  });
 
   function shoot() {
     const src = document.querySelector('canvas');
@@ -69,8 +75,10 @@
     scratch.height = Math.round(src.height * scale);
     try {
       const capturedAt = epochNow();
+      const inputCount = inputs;
+      inputs = 0;
       scratch.getContext('2d').drawImage(src, 0, 0, scratch.width, scratch.height);
-      window.parent.postMessage({ type: 'screenshot', dataUrl: scratch.toDataURL('image/jpeg', 0.72), capturedAt: capturedAt }, '*');
+      window.parent.postMessage({ type: 'screenshot', dataUrl: scratch.toDataURL('image/jpeg', 0.72), capturedAt: capturedAt, inputCount: inputCount }, '*');
     } catch (e) {
       console.warn('[skillprint] screenshot failed', e);
     }
@@ -96,6 +104,15 @@
   // session time from `at`. Never throws into the game.
   const UNIVERSAL_NAMES = { HINT_USED: 'HINT', LEVEL_PASSED: 'LEVEL_COMPLETE', LEVEL_WON: 'LEVEL_COMPLETE' };
   const TRANSPORT_FIELDS = ['messageType', 'timestamp', 'at'];
+  // Events go only to the page that framed the game: the portal, whose origin
+  // differs from the game's on the games CDN.
+  function parentOrigin() {
+    try {
+      if (location.ancestorOrigins && location.ancestorOrigins.length) return location.ancestorOrigins[0];
+      if (document.referrer) return new URL(document.referrer).origin;
+    } catch (e) {}
+    return window.location.origin;
+  }
   function logEvent(params) {
     try {
       const at = epochNow();
@@ -109,7 +126,7 @@
         data.event = UNIVERSAL_NAMES[data.event];
       }
       data.at = at;
-      window.parent.postMessage({ type: 'gameEvent', data: data }, window.location.origin);
+      window.parent.postMessage({ type: 'gameEvent', data: data }, parentOrigin());
     } catch (e) {
       // Telemetry must never break the game.
     }

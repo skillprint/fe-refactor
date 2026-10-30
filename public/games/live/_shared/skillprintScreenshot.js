@@ -5,6 +5,12 @@
   if (window.parent === window) return;
   const INTERVAL_MS = 2000;
   let busy = false;
+  // Player inputs since the last screenshot, sent with it: the portal can't
+  // listen to a frame on the games CDN (NEW-30).
+  let inputs = 0;
+  ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel'].forEach((type) => {
+    window.addEventListener(type, () => { inputs += 1; }, { capture: true, passive: true });
+  });
   function load() {
     return new Promise((res, rej) => {
       if (window.html2canvas) return res();
@@ -16,6 +22,8 @@
   async function shoot() {
     if (busy || document.hidden || !window.html2canvas) return;
     busy = true;
+    const inputCount = inputs;
+    inputs = 0;
     try {
       const c = await html2canvas(document.body, {
         logging: false,
@@ -24,7 +32,7 @@
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
       });
-      window.parent.postMessage({ type: 'screenshot', dataUrl: c.toDataURL('image/jpeg', 0.72) }, '*');
+      window.parent.postMessage({ type: 'screenshot', dataUrl: c.toDataURL('image/jpeg', 0.72), inputCount }, '*');
     } catch (e) { console.warn('[skillprint] screenshot failed', e); }
     finally { busy = false; }
   }
