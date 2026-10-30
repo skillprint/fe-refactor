@@ -329,6 +329,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'star-puzzles':
+            // Star Puzzles: puzzleDifficulty (puzzles by edge count, -1 = game's order), snapRadius (how close to pass a star), startHint (ring the start stars)
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'puzzleDifficulty', parameterValue: 0 }]; // puzzleDifficulty 0 (fewest lines, 4-9)
+                case 2: return [{ parameterName: 'puzzleDifficulty', parameterValue: 0.5 }]; // puzzleDifficulty 0.5 (11-12 lines)
+                case 3: return [{ parameterName: 'puzzleDifficulty', parameterValue: 1 }]; // puzzleDifficulty 1 (most lines, 13-16)
+                case 4: return [{ parameterName: 'puzzleDifficulty', parameterValue: -1 }]; // puzzleDifficulty -1 (game's own order, default)
+                case 5: return [{ parameterName: 'snapRadius', parameterValue: 15 }]; // snapRadius 15 (pointer must cross the star)
+                case 6: return [{ parameterName: 'snapRadius', parameterValue: 30 }]; // snapRadius 30 (default)
+                case 7: return [{ parameterName: 'snapRadius', parameterValue: 45 }]; // snapRadius 45 (forgiving)
+                case 8: return [{ parameterName: 'startHint', parameterValue: 1 }]; // startHint 1 (ring the start stars)
+                case 9: return [{ parameterName: 'startHint', parameterValue: 0 }]; // startHint 0 (no hint, default)
+                default:
+                    return [];
+            }
         case 'sumagi':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'second_on_clock', parameterValue: [120, 150, 180] }, { parameterName: 'rounds_per_difficulty_level', parameterValue: 2 }];

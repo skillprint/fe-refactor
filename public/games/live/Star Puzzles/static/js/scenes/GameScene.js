@@ -127,6 +127,7 @@ var GameScene = function () {
       dot.addEventListener("mousedown", me.doStartSequence);
       dot.can_connect = true;
     }
+    if (window.skillprintOnLevel) { try { window.skillprintOnLevel(dots, puzzle); } catch (e) {} } // Skillprint hook (startHint): hands this level's dots to skillprintShim.js so it can mark the start dots.
 
     IsSolved = false;
     IsFailed = false;
@@ -238,7 +239,7 @@ var GameScene = function () {
     var connection_ok = false;
     let dot = dots[i];
     let d = __utils.doGetDistance(mouse_x, mouse_y, dot.x, dot.y);
-    if(d < 30){
+    if(d < (window.skillprintSnapRadius || 30)){ // Skillprint hook (snapRadius): skillprintShim.js sets the capture radius; 30 is the original value.
       connection_ok = me.doTryConnection(active_line.pt1, dot);
     }
 

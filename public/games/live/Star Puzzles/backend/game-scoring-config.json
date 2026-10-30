@@ -1,0 +1,59 @@
+{
+  "game_slug": "star-puzzles-c2b7b115-b851-419e-8052-cad293bac997",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "puzzleDifficulty": {
+      "type": "number",
+      "min": -1.0,
+      "max": 1.0,
+      "default": -1.0,
+      "description": "Which puzzle each round serves, by edge count (lines to draw: 4-16 over the 60 puzzles). -1 (default; any negative value) keeps the game's own order, round N = puzzle N (4 lines in round 1, 11-16 in rounds 40-60). 0-1 is a quantile of edge count: each round serves one of the 10 puzzles nearest that rank, cycling as rounds advance (0: 4-9 lines, 0.25: 10-11, 0.5: 11-12, 0.75: 12-13, 1: 13-16). More lines are harder. Takes effect from the next puzzle; the puzzle in play and its retries do not change.",
+      "adjustment_guide": "The main difficulty lever. Start around 0.3-0.5 once it is used; raise by about 0.25 after several TRY_SOLVED on the first or second try, lower by 0.25 after repeated TRY_FAILED or TRY_ABANDON on one round. -1 returns to the game's own order."
+    },
+    "snapRadius": {
+      "type": "integer",
+      "min": 15,
+      "max": 45,
+      "default": 30,
+      "description": "How close, in game units, the pointer must pass to a star for the line to connect (a star's white disc has a radius of 16). 30 is the game's own value. 15 means the pointer has to cross the star itself, so drawing needs precision; 45 is forgiving, but sweeping past a neighbouring star that has an open line from the current one can then capture it. Applies immediately.",
+      "adjustment_guide": "A motor-precision lever, separate from the puzzle logic. Keep 30-45 for relax and for players whose TRY_FAILED come quickly after TRY_START (slips rather than wrong plans); lower to 20-25 for focus. Change by about 5 at a time."
+    },
+    "startHint": {
+      "type": "integer",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "description": "1 rings in yellow the two stars a solution has to start from (the stars with an odd number of lines); in the 20 puzzles where every star has an even number of lines any star works, so none is ringed. 0 (default) shows no hint. Applies to the puzzle in play and every later one.",
+      "adjustment_guide": "Turn on (1) after repeated TRY_FAILED on one round or for relax; keep off (0) for planning and deduction practice, since finding the start is the key insight."
+    }
+  },
+  "adjustment_instructions": "Star Puzzles is a one-stroke puzzle: each round shows a figure of stars joined by lines, and the player drags from star to star to draw over every line exactly once without lifting the pointer. A round has unlimited tries and no timer. Events: LEVEL_START (level = round), TRY_START (vertex = start star, connections = its open lines), TRY_FAILED (stuck before all lines are drawn), TRY_SOLVED, TRY_ABANDON (restart or home mid-try), LEVEL_QUIT. When puzzleDifficulty is 0-1, `level` is the round number, not the puzzle's position in the game's list.\nLevers: puzzleDifficulty picks puzzles by edge count (-1 = the game's own order; 0 = fewest lines, 1 = most; higher = harder); snapRadius sets how close the pointer must pass to a star (lower = harder, more precise drawing); startHint 1 rings the stars a solution must start from (easier).\n- relax: puzzleDifficulty 0-0.3, snapRadius 35-45, startHint 1.\n- focus: puzzleDifficulty 0.4-0.7, snapRadius 20-30, startHint 0.\n- grit: puzzleDifficulty 0.75-1, snapRadius 15-25, startHint 0; turn startHint on after three or more TRY_FAILED in one round.\n- joy: puzzleDifficulty 0.2-0.5, snapRadius 35-40, startHint 0, so rounds are solved often but still need a little thought.\nSeveral TRY_FAILED or TRY_ABANDON in one round mean it is too hard: turn startHint on first, then lower puzzleDifficulty by 0.25. TRY_SOLVED on the first try several rounds running means it is too easy: raise puzzleDifficulty by 0.25.",
+  "skill_adjustment_instructions": "Star Puzzles trains Planning (choosing an order that uses every line), Deduction (working out that a one-stroke path has to start at a star with an odd number of lines) and Visualization (tracing the path ahead in the figure).\n- planning: puzzleDifficulty 0.5-1 with startHint 0, so long figures must be planned before drawing.\n- deduction: startHint 0 at any puzzleDifficulty; turn it on only after repeated TRY_FAILED, as a worked example.\n- visualization: puzzleDifficulty 0.5-1 with snapRadius 30-45, so the challenge is the figure, not the drawing precision.",
+  "notes": "Star Puzzles' difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'star-puzzles' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "puzzleDifficulty",
+      "type": "Float",
+      "description": "Which puzzle each round serves, by edge count (lines to draw: 4-16 over the 60 puzzles). -1 (default; any negative value) keeps the game's own order, round N = puzzle N (4 lines in round 1, 11-16 in rounds 40-60). 0-1 is a quantile of edge count: each round serves one of the 10 puzzles nearest that rank, cycling as rounds advance (0: 4-9 lines, 0.25: 10-11, 0.5: 11-12, 0.75: 12-13, 1: 13-16). More lines are harder. Takes effect from the next puzzle; the puzzle in play and its retries do not change.",
+      "min_value": "-1.0",
+      "max_value": "1.0",
+      "adjustment_guide": "The main difficulty lever. Start around 0.3-0.5 once it is used; raise by about 0.25 after several TRY_SOLVED on the first or second try, lower by 0.25 after repeated TRY_FAILED or TRY_ABANDON on one round. -1 returns to the game's own order."
+    },
+    {
+      "name": "snapRadius",
+      "type": "Integer",
+      "description": "How close, in game units, the pointer must pass to a star for the line to connect (a star's white disc has a radius of 16). 30 is the game's own value. 15 means the pointer has to cross the star itself, so drawing needs precision; 45 is forgiving, but sweeping past a neighbouring star that has an open line from the current one can then capture it. Applies immediately.",
+      "min_value": "15",
+      "max_value": "45",
+      "adjustment_guide": "A motor-precision lever, separate from the puzzle logic. Keep 30-45 for relax and for players whose TRY_FAILED come quickly after TRY_START (slips rather than wrong plans); lower to 20-25 for focus. Change by about 5 at a time."
+    },
+    {
+      "name": "startHint",
+      "type": "Integer",
+      "description": "1 rings in yellow the two stars a solution has to start from (the stars with an odd number of lines); in the 20 puzzles where every star has an even number of lines any star works, so none is ringed. 0 (default) shows no hint. Applies to the puzzle in play and every later one.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Turn on (1) after repeated TRY_FAILED on one round or for relax; keep off (0) for planning and deduction practice, since finding the start is the key insight."
+    }
+  ]
+}
