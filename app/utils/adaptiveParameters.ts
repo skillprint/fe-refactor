@@ -20,6 +20,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Maximum Complexity Tier'];
         case 'gummy-blocks':
             return ['Largest Piece Size', 'Tray Refill Pace'];
+        case 'impossible-10':
+            return ['New Block Variety', 'Starting Board Variety'];
         case 'katana-fruits':
             return ['Fruit Spawn Frequency', 'Object Trajectory Speed'];
         case 'mahjong-deluxe':

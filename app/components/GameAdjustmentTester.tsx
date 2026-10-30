@@ -233,6 +233,24 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'impossible-10':
+            // Impossible 10: spawnSpread (how many different numbers new blocks show), startBoardSpread (highest number on the starting board; next restart)
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'spawnSpread', parameterValue: 2 }]; // Top two numbers only
+                case 2: return [{ parameterName: 'spawnSpread', parameterValue: 3 }];
+                case 3: return [{ parameterName: 'spawnSpread', parameterValue: 4 }]; // Default
+                case 4: return [{ parameterName: 'spawnSpread', parameterValue: 5 }];
+                case 5: return [{ parameterName: 'spawnSpread', parameterValue: 6 }]; // Widest mix
+                case 6: return [{ parameterName: 'startBoardSpread', parameterValue: 2 }]; // Easy start: 1s and 2s
+                case 7: return [{ parameterName: 'startBoardSpread', parameterValue: 3 }]; // Default
+                case 8: return [{ parameterName: 'startBoardSpread', parameterValue: 5 }]; // Mixed start
+                case 9: return [
+                    { parameterName: 'spawnSpread', parameterValue: 6 },
+                    { parameterName: 'startBoardSpread', parameterValue: 6 }
+                ]; // Hard mode
+                default:
+                    return [];
+            }
         case 'katana-fruits':
             // OCCURENCE_FRUIT is in ms. Lower is faster.
             switch (keyNumber) {

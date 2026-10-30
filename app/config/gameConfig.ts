@@ -147,6 +147,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'impossible-10': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Impossible 10/backend/game-scoring-config.json',
     customExitButton: {
       color: 'red',
       size: 'lg'

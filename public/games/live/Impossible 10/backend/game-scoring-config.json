@@ -1,0 +1,43 @@
+{
+  "game_slug": "impossible-10-9a3114bb-a36a-46b4-bbe6-059bd7921b3d",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "spawnSpread": {
+      "type": "integer",
+      "min": 2,
+      "max": 6,
+      "default": 4,
+      "description": "How many different numbers a new block can show. The game's own (4) deals one of the four values up to the highest it unlocks (maxBlock, 3 at the start, rising as bigger blocks are made). 2 deals only the top two, 6 the top six (never below 1), uniformly. Fewer different numbers mean more neighbours match. Applies to blocks spawned from now on.",
+      "adjustment_guide": "The main difficulty lever. Lower (2-3) for relax and joy or a player who keeps running out of moves; raise (5-6) for grit and planning once the player reaches high numbers reliably. Change by 1 at a time."
+    },
+    "startBoardSpread": {
+      "type": "integer",
+      "min": 2,
+      "max": 6,
+      "default": 3,
+      "description": "Highest number on the starting board. The board's values run from 1 to this, with 1 twice as likely as each of the others (the game's own board is 1-3). Lower values give an easy start with many matches; higher values a mixed, harder start. Applies from the next game start or restart.",
+      "adjustment_guide": "Sets how hard the opening is. 2 for an easy, match-rich start; 4-6 for grit, or to make groups harder to spot. Takes effect on the next restart."
+    }
+  },
+  "adjustment_instructions": "Impossible 10 is a merge puzzle on a 5x5 board of numbered blocks: tapping a group of touching blocks with the same number merges them into one block one higher; new blocks drop in from the top. The goal is a 10 (LEVEL_COMPLETE); the game ends when no two neighbours match (LEVEL_FAILED).\nLevers: spawnSpread sets how many different numbers new blocks can show (fewer = more matches = easier); startBoardSpread sets the highest number on the starting board (lower = easier opening; applies on the next restart).\n- relax: spawnSpread 2-3, startBoardSpread 2-3.\n- focus: spawnSpread 4, startBoardSpread 3 (the game's own balance).\n- grit: spawnSpread 5-6, startBoardSpread 4-6; lower spawnSpread by 1 after repeated quick LEVEL_FAILED events.\n- joy: spawnSpread 2-3, startBoardSpread 3, so merges come often and the numbers climb toward 10.\nChange one lever at a time, by 1. Several LEVEL_FAILED events with low MERGE block values mean the game is too hard; LEVEL_COMPLETE soon after a start means it is too easy.",
+  "skill_adjustment_instructions": "Impossible 10 trains Planning and Problem Solving (setting up merges that lead to bigger ones) and Pattern Recognition (spotting groups of matching numbers).\n- planning, problem-solving: spawnSpread 5-6 with startBoardSpread 3-4, so the player has to set up chains in advance.\n- pattern-recognition: startBoardSpread 4-5 with spawnSpread 4, so groups are harder to spot.\nEase spawnSpread back by 1 when runs keep ending early.",
+  "notes": "Impossible 10's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'impossible-10' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "spawnSpread",
+      "type": "Integer",
+      "description": "How many different numbers a new block can show. The game's own (4) deals one of the four values up to the highest it unlocks (maxBlock, 3 at the start, rising as bigger blocks are made). 2 deals only the top two, 6 the top six (never below 1), uniformly. Fewer different numbers mean more neighbours match. Applies to blocks spawned from now on.",
+      "min_value": "2",
+      "max_value": "6",
+      "adjustment_guide": "The main difficulty lever. Lower (2-3) for relax and joy or a player who keeps running out of moves; raise (5-6) for grit and planning once the player reaches high numbers reliably. Change by 1 at a time."
+    },
+    {
+      "name": "startBoardSpread",
+      "type": "Integer",
+      "description": "Highest number on the starting board. The board's values run from 1 to this, with 1 twice as likely as each of the others (the game's own board is 1-3). Lower values give an easy start with many matches; higher values a mixed, harder start. Applies from the next game start or restart.",
+      "min_value": "2",
+      "max_value": "6",
+      "adjustment_guide": "Sets how hard the opening is. 2 for an easy, match-rich start; 4-6 for grit, or to make groups harder to spot. Takes effect on the next restart."
+    }
+  ]
+}
