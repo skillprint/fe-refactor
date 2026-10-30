@@ -1,0 +1,59 @@
+{
+  "game_slug": "bubble-spirit-d1e8e962-1243-4e94-a9f4-351dec27ae8a",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "shotLimitScale": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Scales the shot limit of the levels that have one (36 of 50, 25-100 shots; never below 5). Levels without a limit stay unlimited. In a level in play, the shots left change by the same amount as the limit (never below 1). Fewer shots make the goal harder to reach.",
+      "adjustment_guide": "The main difficulty lever on limited levels. Raise (1.3-2) after LEVEL_RESTART or a failed level; lower (0.6-0.8) for grit once the player passes levels with shots to spare. Change by about 0.2 at a time."
+    },
+    "specialBubbleRate": {
+      "type": "number",
+      "min": 0.0,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Scales each level's chance that the next bubble is a special one (bomb or rainbow; 0-25% in most levels, capped at 100%). Specials clear bubbles in bulk, so lower values make the game harder and more about aiming. Applies to the next bubble drawn.",
+      "adjustment_guide": "Raise (1.5-2) for joy or to help a struggling player; lower (0-0.5) for focus and grit, so progress comes from matching colours."
+    },
+    "aimGuide": {
+      "type": "integer",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "description": "1 shows the dotted aiming line and its wall-bounce preview while the player drags; 0 hides them, so the player has to judge angles and bank shots unaided. Applies immediately.",
+      "adjustment_guide": "Keep at 1 for relax and for new players. Set 0 for grit or to train spatial judgement, once the player passes levels comfortably with it on; turn it back on after repeated failures."
+    }
+  },
+  "adjustment_instructions": "Bubble Spirit is a bubble shooter: the player aims a cannon at the bottom and fires coloured bubbles into a stack at the top; three or more of one colour pop, and bubbles cut off from the top fall. Levels have one of three goals (pop a number of bubbles, free the top row, or collect gems), and 36 of the 50 levels limit the number of shots. Special bubbles (bombs, rainbow) clear bubbles in bulk. Events: LEVEL_START, LEVEL_PASSED, LEVEL_RESTART, LEVEL_QUIT, GAME_PAUSE, GAME_RESUME.\nLevers: shotLimitScale sets how many shots a limited level allows (lower = harder; no effect on unlimited levels); specialBubbleRate sets how often helpful special bubbles appear (lower = harder); aimGuide turns the aiming line on (1) or off (0, harder).\n- relax: shotLimitScale 1.3-2, specialBubbleRate 1.2-1.5, aimGuide 1.\n- focus: shotLimitScale 0.9-1.1, specialBubbleRate 0.5-0.8, aimGuide 1.\n- grit: shotLimitScale 0.6-0.8, specialBubbleRate 0-0.5, aimGuide 0 once the player is comfortable; give shots back after a LEVEL_RESTART.\n- joy: shotLimitScale 1.2-1.5, specialBubbleRate 1.5-2, aimGuide 1.\nRepeated LEVEL_RESTART on one level means it is too hard: raise shotLimitScale by 0.2 or turn aimGuide back on.",
+  "skill_adjustment_instructions": "Bubble Spirit trains Spatial reasoning (angles and wall bank shots), Planning (choosing shots that drop large clusters) and Attention/Perception (spotting colour groups).\n- spatial: aimGuide 0 with generous shots (shotLimitScale 1.2-1.5), so the player practises judging angles.\n- planning: shotLimitScale 0.7-0.9 with specialBubbleRate 0-0.5, so every shot must count.\n- attention, perception: specialBubbleRate 0.5-1 and aimGuide 1, so the challenge is finding the right group.",
+  "notes": "Bubble Spirit's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'bubble-spirit' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "shotLimitScale",
+      "type": "Float",
+      "description": "Scales the shot limit of the levels that have one (36 of 50, 25-100 shots; never below 5). Levels without a limit stay unlimited. In a level in play, the shots left change by the same amount as the limit (never below 1). Fewer shots make the goal harder to reach.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "The main difficulty lever on limited levels. Raise (1.3-2) after LEVEL_RESTART or a failed level; lower (0.6-0.8) for grit once the player passes levels with shots to spare. Change by about 0.2 at a time."
+    },
+    {
+      "name": "specialBubbleRate",
+      "type": "Float",
+      "description": "Scales each level's chance that the next bubble is a special one (bomb or rainbow; 0-25% in most levels, capped at 100%). Specials clear bubbles in bulk, so lower values make the game harder and more about aiming. Applies to the next bubble drawn.",
+      "min_value": "0.0",
+      "max_value": "2.0",
+      "adjustment_guide": "Raise (1.5-2) for joy or to help a struggling player; lower (0-0.5) for focus and grit, so progress comes from matching colours."
+    },
+    {
+      "name": "aimGuide",
+      "type": "Integer",
+      "description": "1 shows the dotted aiming line and its wall-bounce preview while the player drags; 0 hides them, so the player has to judge angles and bank shots unaided. Applies immediately.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Keep at 1 for relax and for new players. Set 0 for grit or to train spatial judgement, once the player passes levels comfortably with it on; turn it back on after repeated failures."
+    }
+  ]
+}

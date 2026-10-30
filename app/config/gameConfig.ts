@@ -63,6 +63,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'bubble-spirit': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Bubble Spirit/backend/game-scoring-config.json',
     customExitButton: {
       color: 'blue',
       size: 'md'

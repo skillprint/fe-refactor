@@ -1,0 +1,23 @@
+{
+    "shotLimitScale": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scales the shot limit of the levels that have one (36 of 50, 25-100 shots; never below 5). Levels without a limit stay unlimited. In a level in play, the shots left change by the same amount as the limit (never below 1). Fewer shots make the goal harder to reach."
+    },
+    "specialBubbleRate": {
+        "max": 2.0,
+        "min": 0.0,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scales each level's chance that the next bubble is a special one (bomb or rainbow; 0-25% in most levels, capped at 100%). Specials clear bubbles in bulk, so lower values make the game harder and more about aiming. Applies to the next bubble drawn."
+    },
+    "aimGuide": {
+        "max": 1,
+        "min": 0,
+        "type": "integer",
+        "default": 1,
+        "description": "1 shows the dotted aiming line and its wall-bounce preview while the player drags; 0 hides them, so the player has to judge angles and bank shots unaided. Applies immediately."
+    }
+}
