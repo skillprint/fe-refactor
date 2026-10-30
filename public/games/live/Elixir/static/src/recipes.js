@@ -329,13 +329,14 @@ function fits(targets) {
 
 /**
  * A potion for this rung. Every target is between 5 % and 95 % of the flask,
- * and each layer at least 8 % above the last when poured exactly.
+ * and each layer at least 8 % above the last when poured exactly. The
+ * workshop's six ingredients name the layers; the measures don't depend on them.
  */
-export function makeRecipe(rung, seed) {
+export function makeRecipe(rung, seed, ingredients = INGREDIENTS) {
   const r = Math.max(1, Math.min(9, Math.round(rung)));
   const rng = new Rng(seed);
   for (let attempt = 0; attempt < 400; attempt++) {
-    const ings = rng.shuffle(INGREDIENTS.slice());
+    const ings = rng.shuffle(ingredients.slice());
     const names = ings.map((g) => g.name);
     const built = BUILD[r](rng, names);
     if (!built || built.layers.some((L) => !L.measure)) continue;

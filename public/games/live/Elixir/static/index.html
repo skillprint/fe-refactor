@@ -63,6 +63,7 @@
   #title h1 { font-weight: 500; font-size: clamp(64px, 9vw, 128px); line-height: 0.85; letter-spacing: -0.01em; margin: 12px 0 14px; text-shadow: 0 2px 34px rgba(255, 170, 80, 0.25); }
   #title h1 em { display: block; font-size: 0.32em; font-weight: 500; letter-spacing: 0.02em; color: var(--gold); margin-top: 10px; }
   #title .lede { font-size: clamp(19px, 1.7vw, 23px); font-weight: 500; line-height: 1.35; margin: 0 0 24px; max-width: 30ch; text-shadow: 0 1px 14px rgba(10, 8, 6, 0.7); }
+  #title .title-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   #title .how { list-style: none; padding: 14px 18px; margin: 24px 0 14px; border-radius: 14px; display: grid; gap: 7px; font-size: 16.5px; color: var(--ink-soft); line-height: 1.35; }
   #title .how b { color: var(--ink); font-weight: 700; }
   #standing { color: var(--ink-faint); }
@@ -109,6 +110,29 @@
   #result-list .detail { grid-column: 1 / -1; color: var(--ink-faint); font: 11.5px var(--mono); letter-spacing: 0.03em; margin: 1px 0 3px 1.1em; }
   #result-score { padding-top: 8px; border-top: 1px solid var(--hairline); font-variant-numeric: tabular-nums; }
   .end-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 11px; }
+
+  /* The tutorial: a coach card beside the stage, and a ring on what it's talking about. */
+  #coach { position: fixed; z-index: 6; right: max(14px, calc(12px + var(--safe-r))); top: calc(84px + var(--safe-t)); width: min(370px, 30vw); box-sizing: border-box; padding: 12px 16px 14px; border-radius: 16px; border: 1px solid rgba(242, 196, 109, 0.35); background: rgba(20, 15, 12, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35); }
+  body.tall #coach, body:not(.wide) #coach { top: auto; left: max(14px, calc(12px + var(--safe-l))); width: auto; }
+  .coach-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  #coach-kicker { color: var(--gold); }
+  #skip { font-size: 13px; padding: 4px 10px; font-weight: 600; }
+  #skip kbd { font-size: 9px; padding: 2px 4px; }
+  #coach h3 { margin: 6px 0 2px; font-size: 24px; font-weight: 600; font-style: italic; line-height: 1.1; }
+  #coach-text { margin: 4px 0 0; font-size: 17.5px; line-height: 1.35; color: var(--ink); text-wrap: pretty; }
+  #coach-text b { color: var(--gold); font-weight: 700; }
+  #coach-note { margin: 8px 0 0; color: var(--ink-soft); text-transform: none; letter-spacing: 0.02em; font-size: 12px; line-height: 1.45; }
+  #coach-note:empty { display: none; }
+  #coach-next { margin-top: 10px; }
+  #pointer { position: fixed; z-index: 5; left: 0; top: 0; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 18px rgba(242, 196, 109, 0.8), inset 0 0 12px rgba(242, 196, 109, 0.5); pointer-events: none; animation: ping 1.4s ease-in-out infinite; }
+  #pointer.wide { width: 120px; height: 34px; margin: -17px 0 0 -60px; border-radius: 18px; }
+  @keyframes ping { 50% { transform: scale(1.18); opacity: 0.6; } }
+  @media (max-width: 700px) {
+    #coach h3 { font-size: 19px; }
+    #coach-text { font-size: 15px; }
+    #coach-note { font-size: 11px; }
+    #skip kbd { display: none; }
+  }
 
   #summary { position: fixed; z-index: 7; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 32px)); padding: 22px 24px; border-radius: 18px; background: var(--glass-hi); text-align: center; }
   #summary h2 { margin: 6px 0 8px; font-size: 34px; font-weight: 600; font-style: italic; }
@@ -202,7 +226,7 @@
   <p class="eyebrow">An apothecary of measures</p>
   <h1>Elixir<em>pour to the line nobody drew</em></h1>
   <p class="lede">The alchemist writes in fractions, percents and ratios. The flask is marked only empty and full. Pour each layer to the exact measure.</p>
-  <button id="begin" class="btn primary" type="button">Begin <kbd>Enter</kbd></button>
+  <div class="title-row"><button id="begin" class="btn primary" type="button">Begin <kbd>Enter</kbd></button><button id="howto" class="btn" type="button" hidden>How to play</button></div>
   <ul class="how glass">
     <li><b>Hold</b> anywhere, or Space, to pour. <b>Release</b> to stop; tap to nudge. There’s no draining.</li>
     <li>Work out where each layer should end: <b>⅜</b> of the flask, <b>65%</b>, <b>90 of 240 drops</b>, <b>2 : 3</b>.</li>
@@ -211,6 +235,15 @@
   </ul>
   <p class="mono" id="standing"></p>
 </section>
+
+<section id="coach" hidden aria-live="polite">
+  <div class="coach-head"><p class="mono" id="coach-kicker">Tutorial · step 1 of 4</p><button id="skip" class="btn ghost" type="button">Skip tutorial <kbd>Esc</kbd></button></div>
+  <h3 id="coach-title"></h3>
+  <p id="coach-text"></p>
+  <p id="coach-note" class="mono"></p>
+  <button id="coach-next" class="btn primary" type="button" hidden><span id="coach-next-label">Next</span> <kbd>Enter</kbd></button>
+</section>
+<div id="pointer" hidden></div>
 
 <section id="summary" hidden>
   <p class="eyebrow">The shop is closed</p>

@@ -1,9 +1,10 @@
 # Elixir
 
 A Three.js game about measuring by eye. An alchemist's recipes come in
-fractions, decimals, percents, ratios and drops; the flask is a straight glass
-cylinder marked only at empty and full. Work out where each layer should end,
-then hold to pour and let go on the line nobody drew.
+fractions, decimals, percents, ratios and drops; the vessel is straight glass
+marked only at empty and full. Work out where each layer should end, then hold
+to pour and let go on the line nobody drew. Every potion is brewed in another
+workshop, with its own room, vessel, tap, ingredients and recipe card.
 
 ## How it plays
 
@@ -15,12 +16,65 @@ then hold to pour and let go on the line nobody drew.
   **Fine** 3 %, **Fair** 6 %, else **Spoiled** (all scaled by `tolerance`).
 - An **hourglass** runs per potion, 15 s plus 9 s per layer. When it empties the
   potion is served as it stands; layers not begun are Spoiled.
-- Served potions are corked, carried up to the moonlit sill and kept there
-  between visits (the last 15, in `localStorage`).
+- Served potions are corked, carried to the room's shelf in their own vessel's
+  shape, and kept between visits (the last 15, in `localStorage`); each room's
+  shelf shows as many as fit.
+- The first play opens with a tutorial (below); after that the title offers
+  **How to play** to run it again.
 
 Scoring per layer: Perfect 100, Fine 60, Fair 25, Spoiled 0, plus up to 40 for
 closeness (so 0.4 % beats 0.9 %). Sand left adds up to 30 %. Consecutive potions
 with every layer Fine or better build a streak worth up to ×1.5.
+
+## Workshops
+
+The title and potion 1 are the candlelit alcove. After that a shuffle bag picks
+the room: every workshop shows before any repeats, and never the same twice
+running. `static/src/workshops.js` holds them as data; `rooms.js` builds each
+room, seeded per potion so shelf contents and plant and crystal placement vary.
+
+| Workshop | Vessel | Tap | Card | Particles | Ingredients |
+| --- | --- | --- | --- | --- | --- |
+| Candlelit alcove: stone, a round moon window, candles | tall flask | brass tap, glass reservoir, valve wheel | parchment on an easel | dust in the moonbeam | Moonwater, Emberwine, Nightshade, Verdigris, Sunmilk, Rose Dew |
+| Tower observatory: an arched star window with a ringed planet, a brass telescope, an armillary sphere, globe lamps | test tube with a flat foot | glass pipette in a ring stand; the bulb squeezes | chalk on a framed slate | twinkling specks | Starlight, Nebula Ink, Comet Tail, Solar Wind, Meteor Red, Aurora |
+| Greenhouse at dawn: glass walls on a sunrise, hanging and potted plants, light shafts | wide beaker | wooden spigot from an oak cask; its key turns | botanical card with ferns | pollen | Fern Dew, Marigold, Lavender, Rosehip, Bluebell, Elderflower |
+| Crystal cavern: rock walls, glowing crystal clusters, a rock ledge | hexagonal column | a hanging crystal that glows as it pours | chalk on stone | sparkles | Quartz Milk, Amethyst, Malachite, Garnet, Sapphire, Amber Sap |
+| Winter cottage: board walls, a frosted window on falling snow, a fireplace, drying herbs | square apothecary bottle with a neck | copper pot still; a gauge needle climbs | botanical card with holly | embers from the hearth | Frostmint, Mulled Wine, Hearth Honey, Snowberry, Pine Resin, Sugarplum |
+| Caravan tent: striped canvas, pierced lanterns, a kilim, dunes at dusk through the flap | triangular prism | long-spouted brass ewer on a gimbal; it tips | scroll on rollers | drifting sand | Saffron, Pomegranate, Desert Mint, Indigo, Damask Rose, Oasis Blue |
+
+Every vessel is a right prism or cylinder with a flat bottom and straight walls
+from its base line to above `MAX_LEVEL` (1.12), so the level stays linear in
+volume. Full is the etched ring inside the straight part; ticks (`gradations`) sit
+on the face turned to the camera. Phone portrait frames only the vessel and the
+spout's tip, which gives 2.1–2.8 px per 1 % of the flask at 390×760 (the square
+bottle lowest, for its neck) and 3.3–4.5 px on a 1440×900 desktop.
+
+One light rig (hemisphere, key, three points) is re-aimed per room, so the light
+count, and with it every compiled shader, stays the same; a room swap happens in a
+short fade while the next vessel grows on the stand. Only the vessel is
+transmissive.
+
+## Tutorial
+
+The first play runs it after Begin; **How to play** on the title replays it.
+Four steps in the alcove, each advancing when the player does the thing:
+
+1. **Pour** to a dotted ghost line at ½; it moves on once a pour stops within 3 %.
+   Over that, the coach shows by how much and pours a fresh flask: no penalty.
+2. **By eye**: Emberwine up to ¾, then Check. The gold line appears with the error
+   and the grades are explained.
+3. **Recipes come in many forms**: a flask that holds 200 drops; pour 50 (¼).
+4. **Serve**: the last layer, the hourglass explained, Serve; then potion 1.
+
+A coach card (right on wide screens, above the stage's foot on narrow ones, never
+over the vessel, tap or recipe) carries each instruction and its button, and a ring
+marks what it talks about (projected from the 3D target every frame). **Skip
+tutorial** and Esc skip it. No hourglass, score or rung progress during it; it pours
+at a fixed slow rate and grades at tolerance 1 whatever `ADJUST_GAME` says, and
+hides ticks. Frames are stamped `Tutorial · step n of 4`. Events: `TUTORIAL_START`,
+`TUTORIAL_STEP` {step, name, ms}, `TUTORIAL_COMPLETE` {ms, mistakes} or
+`TUTORIAL_SKIP` {step}; potion 1's `LEVEL_START` follows. Finishing or skipping
+sets the flag in `localStorage`.
 
 ## The math
 
@@ -45,11 +99,13 @@ Rungs (potions served + 1 + `levelOffset`, at least 1):
 7. ratios of two or three over part of the flask; flasks in drops or millilitres
 8–9. litres and millilitres together; ratios matched to a middle pour
 
-`static/src/recipes.js` builds them with exact fractions and never imports three.js.
-Every target lies between 5 % and 95 % of the flask and each layer sits at least
-8 % above the last. A throwaway node check parsed 36,000 generated recipes (every
-rung) back from their plain text with an independent reader and matched every target
-exactly; rerun one like it after changing the generator.
+`static/src/recipes.js` builds them with exact fractions and never imports three.js;
+each workshop's six ingredient names are passed in, and the measures don't depend
+on them. Every target lies between 5 % and 95 % of the flask and each layer sits at
+least 8 % above the last. A throwaway node check parsed 18,000 generated recipes
+per workshop (every rung) back from their plain text with an independent reader and
+matched every target exactly, and confirmed the original names give byte-identical
+recipes to the generator before workshops; rerun one like it after changing it.
 
 ## In the Skillprint portal
 
@@ -75,13 +131,13 @@ are vendored in `static/vendor`, copied from Mountain Appreciator.
   and applies the backend's adjustments through registered modifiers.
 - Otherwise it reports nothing.
 
-Events: `GAME_START`, `LEVEL_START` (potion, rung, title, intro, layers with text,
-mode and exact target, capacity, hourglassSec), `POUR_START` / `POUR_STOP` (one per
+Events: `GAME_START`, `LEVEL_START` (potion, rung, workshop, vessel, title, intro,
+layers with text, mode and exact target, capacity, hourglassSec), `POUR_START` / `POUR_STOP` (one per
 pour gesture, taps under 250 ms apart merged; level, amount poured, ms), `MATCH`
 per layer graded Perfect or Fine and `UNMATCH` per layer Fair or Spoiled (target,
 level, errorPct, grade, layerMs, msToServe), `LEVEL_COMPLETE` on serving or
 `LEVEL_FAILED` when the sand ran out (grades, points, streak, score),
-`GAME_PAUSE` / `GAME_RESUME`, `GAME_END`.
+`GAME_PAUSE` / `GAME_RESUME`, `GAME_END`, and the tutorial's four (above).
 
 ### Tuning
 
@@ -114,17 +170,26 @@ gradations 4, brewTimeScale 2.2}` · 2 Gentle `{0.8, 1.3, gradations 2}` · 3 De
 `start()`, `state()`, `step(ms)`, `render(frames)` (advance and draw by hand, for
 a tab whose frames are throttled), `pour(ms)`, `pourTo(level)`, `target()` (the
 current layer's exact line), `next()`, `serve()`, `nextPotion()`, `finish()`,
-`newPotion(rung)` and `solve(error)`. `window.__elixirState` and
+`newPotion(rung)`, `solve(error)`, `workshop(id, rung, vessel?)` (move to a
+workshop at once, optionally with another vessel), `frame()` (camera framing and
+pixels per 1 %), `tutorial()`, `tutorialStep()`, `tutorialWait()` (finish a
+feedback beat in simulated time) and `tutorialSkip()`. `window.__elixirState` and
 `window.__elixirTuning` hold the last reported state and the parameters in force.
 
 ## Files
 
 - `static/src/main.js` — rules, flow, HUD, input, the Skillprint reporting
 - `static/src/recipes.js` — recipe generator, exact targets, grading (no three.js)
-- `static/src/world.js` — the alcove: renderer and bloom, window and sky, candles, shelves, camera fit
-- `static/src/flask.js` — flask, layered liquid, tap, pour, bubbles, marks, gold lines, bottling
-- `static/src/card.js` — the parchment recipe card, with stacked fractions
-- `static/src/textures.js` — stone, wood, parchment and label textures, painted at load
+- `static/src/workshops.js` — the six workshops and six vessels, as data
+- `static/src/rooms.js` — each workshop's room, its skies and props, and the card stands
+- `static/src/world.js` — renderer and bloom, the light rig, room swaps and fades, the shelf of served potions, camera fit
+- `static/src/vessels.js` — prism geometry: glass, liquid, surface, rings, ticks, cork, stand
+- `static/src/taps.js` — the six spouts
+- `static/src/flask.js` — the apparatus: vessel, layered liquid, pour, bubbles, marks, gold lines, bottling
+- `static/src/materials.js` — liquid and flame shaders, GPU-animated particles
+- `static/src/card.js` — the recipe card in four stocks, with stacked fractions
+- `static/src/tutorial.js` — the tutorial's practice recipes and words
+- `static/src/textures.js` — stone, wood, rock, boards, canvas, rug, slate, card and label textures, painted at load
 - `static/src/sound.js` — the pour (its pitch rises as the flask fills), glass, bells; synthesised
 - `static/src/look.js` — liquid and grade colours
 - `static/src/params.js`, `static/src/skillprint.js` — tuning and the SDK link
