@@ -721,6 +721,18 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'battle-drones':
+            // 1-3 are the game's squad hotkeys, so they stay unmapped. 4-6 are the AI's Easy, Normal and Hard rungs.
+            switch (keyNumber) {
+                case 4: return [{ parameterName: 'gameSpeed', parameterValue: 0.75 }, { parameterName: 'aiReactionSec', parameterValue: 3.5 }, { parameterName: 'aiAttackThreshold', parameterValue: 1.35 }, { parameterName: 'aiExtraHarvesters', parameterValue: -1 }, { parameterName: 'aiHarass', parameterValue: 0 }]; // Relax
+                case 5: return [{ parameterName: 'gameSpeed', parameterValue: 1 }, { parameterName: 'aiReactionSec', parameterValue: 2 }, { parameterName: 'aiAttackThreshold', parameterValue: 1 }, { parameterName: 'aiExtraHarvesters', parameterValue: 0 }, { parameterName: 'aiHarass', parameterValue: 1 }]; // Default
+                case 6: return [{ parameterName: 'gameSpeed', parameterValue: 1.15 }, { parameterName: 'aiReactionSec', parameterValue: 1.2 }, { parameterName: 'aiAttackThreshold', parameterValue: 0.9 }, { parameterName: 'aiExtraHarvesters', parameterValue: 1 }, { parameterName: 'aiHarass', parameterValue: 1 }]; // Grit
+                case 7: return [{ parameterName: 'gameSpeed', parameterValue: 0.6 }]; // Slow tempo
+                case 8: return [{ parameterName: 'gameSpeed', parameterValue: 1.25 }]; // Fast tempo
+                case 9: return [{ parameterName: 'gameSpeed', parameterValue: 1.25 }, { parameterName: 'aiReactionSec', parameterValue: 1 }, { parameterName: 'aiAttackThreshold', parameterValue: 0.8 }, { parameterName: 'aiExtraHarvesters', parameterValue: 1 }, { parameterName: 'aiHarass', parameterValue: 1 }]; // Brutal
+                default:
+                    return [];
+            }
         case 'trails-webar':
             // Mirrors the game's README: 1-2 node count, 3 orbit, 4-6 symbol set, 7-8 guidance, 9 extreme.
             // nodeDimension also accepts the index 0-3 (numbers, letters, alternating, emojis), which is what the backend sends.

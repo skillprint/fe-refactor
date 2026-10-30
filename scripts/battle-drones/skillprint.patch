@@ -1,0 +1,545 @@
+diff --git a/src/game/GameScene.ts b/src/game/GameScene.ts
+index bbe2bfd..70d3e50 100644
+--- a/src/game/GameScene.ts
++++ b/src/game/GameScene.ts
+@@ -16,6 +16,7 @@ import { restoreWorld } from "./restore";
+ import { GestureRecognizer, isHoldRelease, strandedPointers, type GesturePointer } from "./gestures";
+ import { announce } from "./announce";
+ import { gameMode, matchOptions, unchartedMatch } from "./mode";
++import * as skillprint from "../skillprint/bridge";
+ import { music } from "./music";
+ import { BattleMood } from "./score";
+ import { voices, type VoiceHooks } from "./voices";
+@@ -582,6 +583,17 @@ export class GameScene {
+     };
+ 
+     feed?.attach(this);
++    // the Skillprint portal, when it frames the page: tuning, screenshots, score (src/skillprint/bridge.ts)
++    skillprint.attach({
++      world: () => this.world,
++      pov: () => (gameMode.spectator ? null : PLAYER),
++      ais: () => [...this.ais.values()],
++      canvases: () => [this.stage.renderer.domElement, this.stage.screen.canvas],
++      started: () => !this.holdStart,
++      paused: () => this.ctrl.paused,
++      togglePause: () => this.hud.togglePause(),
++      simSeconds: () => this.simSeconds
++    });
+     this.stage.precompile();
+     this.lastFrame = performance.now();
+     this.raf = requestAnimationFrame(this.frame);
+@@ -827,7 +839,8 @@ export class GameScene {
+     const frozen = this.ctrl.paused && !this.feed?.live;
+     if (!frozen && !this.ended && !this.holdStart) {
+       // game speed (1–4×; a duel's slack trim), at most AWARE.maxTicksPerFrame ticks per frame
+-      const plan = planTicks(this.acc, delta, this.interactive ? this.feed?.speed?.() ?? 1 : this.aware.value);
++      // (a match played here: times the Skillprint tempo, 1 unless the portal set one)
++      const plan = planTicks(this.acc, delta, this.interactive ? this.feed?.speed?.() ?? 1 : this.aware.value * (this.feed ? 1 : skillprint.tempo()));
+       this.acc = plan.acc;
+       for (let i = 0; i < plan.ticks; i++) {
+         // decided mid-frame: the winning tick's events were handled once, don't replay them
+@@ -881,6 +894,7 @@ export class GameScene {
+       v.top.flush();
+       this.stage.render();
+       this.drawScreen();
++      skillprint.frame(performance.now());
+     }
+     this.hud.update(delta);
+     if (this.ctrl.tip) {
+@@ -1838,6 +1852,7 @@ export class GameScene {
+   /** Tear the match down (not needed between matches: a rematch reloads the page). */
+   destroy(): void {
+     cancelAnimationFrame(this.raf);
++    skillprint.detach();
+     for (const f of this.teardown) f();
+     this.fx.destroy();
+     this.entities.destroy();
+diff --git a/src/main.ts b/src/main.ts
+index 9302931..3f8e25e 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -26,6 +26,7 @@ import type { VersusFeed } from "./versus/feed";
+ import type * as FfaLobby from "./ffa/lobby";
+ import type { FfaFeed } from "./ffa/feed";
+ import { aiStrategy } from "./game/meta";
++import { initSkillprint } from "./skillprint/bridge";
+ 
+ document.addEventListener("contextmenu", (e) => e.preventDefault());
+ 
+@@ -95,6 +96,8 @@ resetAudioSession();
+ fullscreen.restoreOnGesture();
+ // a new build: the menu offers to reload into it (ui/update.ts)
+ appUpdate.watch();
++// framed by the Skillprint portal: its iframe contract (src/skillprint/bridge.ts)
++initSkillprint();
+ 
+ /**
+  * The sound duel (SOUND-DUEL.md "Getting into a duel"): its lobby and
+diff --git a/src/skillprint/bridge.ts b/src/skillprint/bridge.ts
+new file mode 100644
+index 0000000..bc93346
+--- /dev/null
++++ b/src/skillprint/bridge.ts
+@@ -0,0 +1,448 @@
++/**
++ * The Skillprint bridge: what lets the Skillprint portal host this game in
++ * an iframe (skillprint-rewrite, public/games/live/Battle Drones). It speaks
++ * the portal's iframe contract (app/game/[slug]/GameClient.tsx there) and
++ * does nothing at all when the page isn't framed.
++ *
++ *   parent → game  { type: 'ADJUST_GAME', data: { parameterName, parameterValue } } (or an array)
++ *   parent → game  { type: 'GAME_PAUSE' } / { type: 'GAME_RESUME' }
++ *   game → parent  { type: 'screenshot', dataUrl, capturedAt, inputCount } every SHOT_EVERY_MS of a match
++ *   game → parent  { type: 'gameState', data: { score, isGameOver… } } when it changes
++ *   game → parent  { type: 'gameEvent', data: { event, at, … } }      the universal telemetry events
++ *   game → parent  { type: 'GAME_COMPLETE', data: { score… } }        the report's "See your results"
++ *   game → parent  { type: 'skillprint_mousedown' } / { type: 'skillprint_keydown', key }
++ *
++ * The tuning knobs never touch the sim (src/sim): the AI's are written into
++ * the commander's DIFFICULTY table, which tickAi reads afresh every tick, and
++ * the tempo scales how many ticks a frame plays. The AI's decisions are its
++ * commands, which the recorder keeps, so a tuned match still replays exactly
++ * and the sim hash stays upstream's. The AI's income is deliberately not a
++ * knob: tickAi writes it into the world, and a record keeps only its last value.
++ */
++import { DIFFICULTY, type AiState, type Difficulty } from "../sim/ai/commander";
++import type { Faction, FactionStats, World } from "../sim/types";
++import { addReportSection, type ReportContext } from "../ui/report";
++
++export interface ParamDef {
++  type: "integer" | "number";
++  min: number;
++  max: number;
++  default: number;
++  description: string;
++}
++
++/** The knobs ADJUST_GAME can turn, by wire name (the backend's parameter_definitions). */
++export const PARAMS: Record<string, ParamDef> = {
++  gameSpeed: {
++    type: "number", min: 0.6, max: 1.25, default: 1,
++    description: "Multiplier on the battle's tempo, on top of the player's own 1x/1.5x/2x speed chip. Lower values give the player more time to think between enemy moves and decreased difficulty."
++  },
++  aiReactionSec: {
++    type: "number", min: 1, max: 4, default: 2,
++    description: "Seconds between the enemy commander's decision passes (building, producing, attacking, retreating). Easy plays 3.5, Normal 2, Hard 1.2. Higher values mean a slower-reacting enemy and decreased difficulty."
++  },
++  aiAttackThreshold: {
++    type: "number", min: 0.8, max: 1.6, default: 1,
++    description: "How big an army the enemy waits for before it launches an assault, as a multiple of its strategy's own threshold. Easy plays 1.35, Normal 1, Hard 0.9. Higher values mean fewer, later attacks and decreased difficulty."
++  },
++  aiExtraHarvesters: {
++    type: "integer", min: -1, max: 1, default: 0,
++    description: "Harvesters the enemy keeps beyond its strategy's count. Easy plays -1, Normal 0, Hard +1. Higher values mean a richer enemy economy, bigger armies and increased difficulty."
++  },
++  aiHarass: {
++    type: "integer", min: 0, max: 1, default: 1,
++    description: "1 lets the enemy send small raiding parties at the player's harvesters while it builds up; 0 stops the raids (Easy plays 0). 1 is harder: the player has to defend the economy while building."
++  }
++};
++
++/** Which DIFFICULTY field each AI knob writes. */
++const AI_FIELD = {
++  aiReactionSec: "interval",
++  aiAttackThreshold: "assaultMult",
++  aiExtraHarvesters: "extraHarvesters",
++  aiHarass: "harass"
++} as const;
++type AiKnob = keyof typeof AI_FIELD;
++
++/** What the scene lends the bridge for one match (GameScene's constructor). */
++export interface SceneLink {
++  world(): World;
++  /** The side the player commands (null: an AI-vs-AI watch, scored for nobody). */
++  pov(): Faction | null;
++  /** Every commander playing on this page (none in a duel, a replay or Last Stand). */
++  ais(): AiState[];
++  /** The 3D view and the 2D label layer drawn over it, in that order. */
++  canvases(): HTMLCanvasElement[];
++  /** The clock is running: the opener is picked (or there was none to pick). */
++  started(): boolean;
++  paused(): boolean;
++  togglePause(): void;
++  simSeconds(): number;
++}
++
++const SHOT_EVERY_MS = 2500;
++const SHOT_WIDTH = 640;
++const STATE_EVERY_MS = 250;
++const TUNING_KEY = "battledrones.skillprint.tuning";
++
++const framed = (() => {
++  try {
++    return window.parent !== window;
++  } catch {
++    return true;
++  }
++})();
++
++function post(msg: unknown): void {
++  if (!framed) return;
++  try {
++    window.parent.postMessage(msg, "*");
++  } catch {
++    // (a closed parent)
++  }
++}
++
++/** When something happened, in epoch ms: the same clock in this frame and the portal. */
++const epochNow = (): number => performance.timeOrigin + performance.now();
++
++function sendEvent(event: string, data: Record<string, unknown> = {}): void {
++  post({ type: "gameEvent", data: { event, at: epochNow(), ...data } });
++}
++
++/** The knob values set so far (the rest stay at what the player's difficulty plays). */
++const tuning: Record<string, number> = {};
++/** DIFFICULTY as it shipped, for whatever a knob overwrote. */
++const shipped = new Map<Difficulty, Record<string, unknown>>();
++
++let link: SceneLink | null = null;
++let lastShot = 0;
++let lastState = 0;
++let stateKey = "";
++let startedSent = false;
++let decidedSent = false;
++let wasPaused = false;
++let pausedByPortal = false;
++let base: Pick<FactionStats, "buildingsKilled" | "buildingsLost"> | null = null;
++let shotCanvas: HTMLCanvasElement | null = null;
++/** Player inputs since the last screenshot: a portal on another origin (the games CDN) can't count them itself. */
++let inputs = 0;
++
++function clampParam(name: string, value: unknown): number | null {
++  const def = PARAMS[name];
++  const n = Number(value);
++  if (!def || !Number.isFinite(n)) return null;
++  const v = Math.min(def.max, Math.max(def.min, n));
++  return def.type === "integer" ? Math.round(v) : v;
++}
++
++/** Write the AI knobs into DIFFICULTY for every level a commander on this page plays. */
++function applyAiTuning(): void {
++  if (!link) return;
++  const levels = new Set(link.ais().map((a) => a.difficulty));
++  for (const d of levels) {
++    const row = DIFFICULTY[d] as unknown as Record<string, unknown>;
++    if (!shipped.has(d)) shipped.set(d, { ...row });
++    for (const knob of Object.keys(AI_FIELD) as AiKnob[]) {
++      if (!(knob in tuning)) continue;
++      const field = AI_FIELD[knob];
++      row[field] = field === "harass" ? tuning[knob]! >= 1 : tuning[knob];
++    }
++  }
++}
++
++function restoreDifficulty(): void {
++  for (const [d, row] of shipped) Object.assign(DIFFICULTY[d], row);
++  shipped.clear();
++}
++
++function adjust(raw: unknown): void {
++  if (!raw || typeof raw !== "object") return;
++  const o = raw as Record<string, unknown>;
++  const name = (o.parameterName ?? o.name) as string | undefined;
++  if (typeof name !== "string") return;
++  const v = clampParam(name, o.parameterValue ?? o.value ?? o.newValue);
++  if (v === null) {
++    console.warn(`[Skillprint] ignored adjustment ${name}=${String(o.parameterValue)}`);
++    return;
++  }
++  tuning[name] = v;
++  applyAiTuning();
++  console.log(`[Skillprint] ${name} = ${v}`);
++  post({ type: "ADJUSTMENT_MADE", parameterName: name, parameterValue: v });
++}
++
++/** The tempo the scene multiplies its game speed by (1 unless the portal set one). */
++export function tempo(): number {
++  return tuning.gameSpeed ?? 1;
++}
++
++/**
++ * The battle score the portal records: Battle Drones keeps no score of its
++ * own, so this is the after-action report's own numbers, weighted (enemy
++ * units and buildings destroyed, scrap mined) plus a bonus for the win.
++ */
++export function battleScore(w: World, side: Faction): number {
++  const s = w.factions[side]?.stats;
++  if (!s) return 0;
++  const won = w.winner === side ? 500 : 0;
++  return s.unitsKilled * 10 + s.buildingsKilled * 25 + Math.floor((s.scrapHarvested + s.scrapSalvaged) / 10) + won;
++}
++
++function outcomeOf(w: World, side: Faction): "won" | "lost" | "draw" | null {
++  if (!w.winner) return null;
++  return w.winner === "draw" ? "draw" : w.winner === side ? "won" : "lost";
++}
++
++function stateOf(l: SceneLink): Record<string, unknown> | null {
++  const side = l.pov();
++  if (!side) return null;
++  const w = l.world();
++  const f = w.factions[side];
++  if (!f) return null;
++  const outcome = outcomeOf(w, side);
++  return {
++    score: battleScore(w, side),
++    isGameOver: outcome !== null,
++    outcome,
++    scrap: Math.floor(f.scrap),
++    unitsKilled: f.stats.unitsKilled,
++    unitsLost: f.stats.unitsLost,
++    buildingsKilled: f.stats.buildingsKilled,
++    buildingsLost: f.stats.buildingsLost,
++    matchSeconds: Math.round(l.simSeconds())
++  };
++}
++
++function fmtClock(secs: number): string {
++  const s = Math.max(0, Math.floor(secs));
++  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
++}
++
++/**
++ * The frame as the portal sees it: the 3D view, its label layer, and a strip
++ * with the numbers the DOM HUD shows (it isn't on a canvas, so it can't be
++ * drawn). Read straight after the scene renders, before the browser presents
++ * the frame, so the WebGL canvas needs no preserveDrawingBuffer.
++ */
++function screenshot(l: SceneLink): void {
++  const [gl, ...over] = l.canvases();
++  if (!gl || !gl.width || !gl.height) return;
++  const w = SHOT_WIDTH;
++  const h = Math.round((gl.height / gl.width) * w) || 360;
++  shotCanvas ??= document.createElement("canvas");
++  const c = shotCanvas;
++  if (c.width !== w || c.height !== h) {
++    c.width = w;
++    c.height = h;
++  }
++  const ctx = c.getContext("2d");
++  if (!ctx) return;
++  ctx.drawImage(gl, 0, 0, w, h);
++  for (const o of over) if (o.width && o.height) ctx.drawImage(o, 0, 0, w, h);
++  const side = l.pov();
++  const world = l.world();
++  if (side && world.factions[side]) {
++    const f = world.factions[side];
++    const army = [...world.units.values()].filter((u) => u.faction === side && u.kind !== "harvester").length;
++    const text = `${fmtClock(l.simSeconds())}  ·  Scrap ${Math.floor(f.scrap)}  ·  Army ${army}  ·  Kills ${f.stats.unitsKilled}  ·  Losses ${f.stats.unitsLost}`;
++    ctx.fillStyle = "rgba(7, 10, 16, 0.72)";
++    ctx.fillRect(0, h - 22, w, 22);
++    ctx.fillStyle = "#e8f0ff";
++    ctx.font = "600 12px system-ui, sans-serif";
++    ctx.textBaseline = "middle";
++    ctx.fillText(text, 8, h - 11);
++  }
++  try {
++    const inputCount = inputs;
++    inputs = 0;
++    post({ type: "screenshot", dataUrl: c.toDataURL("image/jpeg", 0.72), capturedAt: epochNow(), inputCount });
++  } catch (e) {
++    console.warn("[Skillprint] screenshot failed", e);
++  }
++}
++
++/** A match is on: the scene's constructor. */
++export function attach(l: SceneLink): void {
++  link = l;
++  lastShot = 0;
++  stateKey = "";
++  startedSent = false;
++  decidedSent = false;
++  wasPaused = false;
++  base = null;
++  applyAiTuning();
++  sendEvent("GAME_START");
++}
++
++/** Every rendered frame of a match, after the 3D view and its labels are drawn. */
++export function frame(now: number): void {
++  const l = link;
++  if (!l || !framed) return;
++  const w = l.world();
++  const side = l.pov();
++
++  if (!startedSent && l.started()) {
++    startedSent = true;
++    sendEvent("LEVEL_START", { map: w.mapId });
++  }
++  const paused = l.paused();
++  if (paused !== wasPaused) {
++    wasPaused = paused;
++    sendEvent(paused ? "GAME_PAUSE" : "GAME_RESUME");
++  }
++  // an enemy building down is the match's clearest progress, one of ours its clearest setback
++  const f = side ? w.factions[side] : null;
++  if (f) {
++    if (base) {
++      if (f.stats.buildingsKilled > base.buildingsKilled) sendEvent("GENERIC_POSITIVE", { what: "enemy-building-destroyed", total: f.stats.buildingsKilled });
++      if (f.stats.buildingsLost > base.buildingsLost) sendEvent("GENERIC_NEGATIVE", { what: "building-lost", total: f.stats.buildingsLost });
++    }
++    base = { buildingsKilled: f.stats.buildingsKilled, buildingsLost: f.stats.buildingsLost };
++  }
++  if (side && w.winner && !decidedSent) {
++    decidedSent = true;
++    const outcome = outcomeOf(w, side);
++    const score = battleScore(w, side);
++    sendEvent(outcome === "won" ? "LEVEL_COMPLETE" : "LEVEL_FAILED", { outcome, score, matchSeconds: Math.round(l.simSeconds()) });
++    sendEvent("GAME_END", { outcome, score });
++  }
++
++  if (now - lastState >= STATE_EVERY_MS) {
++    lastState = now;
++    const state = stateOf(l);
++    const key = state ? JSON.stringify(state) : "";
++    if (state && key !== stateKey) {
++      stateKey = key;
++      post({ type: "gameState", data: state });
++    }
++  }
++  if (!paused && !document.hidden && now - lastShot >= SHOT_EVERY_MS) {
++    lastShot = now;
++    screenshot(l);
++  }
++}
++
++/** The match is gone (the scene's destroy). */
++export function detach(): void {
++  link = null;
++  restoreDifficulty();
++}
++
++// ---------------------------------------------------------------- the page --
++
++function onMessage(e: MessageEvent): void {
++  const m = e.data as { type?: string; data?: unknown } | null;
++  if (!m || typeof m !== "object") return;
++  if (m.type === "ADJUST_GAME") {
++    const payload = m.data && typeof m.data === "object" ? m.data : m;
++    if (Array.isArray(payload)) payload.forEach(adjust);
++    else adjust(payload);
++  } else if (m.type === "GAME_PAUSE") {
++    if (link && !link.paused() && link.started() && !link.world().winner) {
++      pausedByPortal = true;
++      link.togglePause();
++    }
++  } else if (m.type === "GAME_RESUME") {
++    // (only a pause the portal made: the player's own pause menu stays up)
++    if (link && pausedByPortal && link.paused()) link.togglePause();
++    pausedByPortal = false;
++  }
++}
++
++/**
++ * The report's Skillprint block: the battle score the portal records, and a
++ * way out to the portal's results (Rematch and Menu keep playing here).
++ */
++function reportSection(): void {
++  addReportSection({
++    id: "skillprint",
++    order: 4,
++    col: "left",
++    render(ctx: ReportContext) {
++      if (ctx.spectator) return null;
++      const score = battleScore(ctx.world, ctx.pov);
++      return `<div class="sp-skillprint" style="margin:6px 0 10px;padding:10px 12px;border-radius:10px;background:rgba(123,97,255,.16);border:1px solid rgba(160,140,255,.45)">
++        <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8">Skillprint battle score</div>
++        <div style="font-size:28px;font-weight:800;line-height:1.2">${score.toLocaleString()}</div>
++        <div style="font-size:12px;opacity:.75">10 per unit destroyed · 25 per building · 1 per 10 scrap · +500 for the win</div>
++        <button id="sp-results" class="cta" style="margin-top:8px">See your Skillprint results</button>
++      </div>`;
++    },
++    mount(el: HTMLElement, ctx: ReportContext) {
++      el.querySelector<HTMLButtonElement>("#sp-results")?.addEventListener("click", () => {
++        const side = ctx.pov;
++        const f = ctx.world.factions[side];
++        post({
++          type: "GAME_COMPLETE",
++          data: {
++            score: battleScore(ctx.world, side),
++            outcome: outcomeOf(ctx.world, side),
++            matchSeconds: ctx.secs,
++            ...(f ? { stats: { ...f.stats } } : {})
++          }
++        });
++      });
++    }
++  });
++}
++
++/**
++ * The tuning survives the game's own reloads (Rematch and Menu reload the
++ * page): kept on the way out, taken back only by a reload, so a fresh load
++ * of the frame (a new portal session) starts from the player's difficulty.
++ */
++function carryTuning(): void {
++  try {
++    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
++    const kept = sessionStorage.getItem(TUNING_KEY);
++    sessionStorage.removeItem(TUNING_KEY);
++    if (kept && nav?.type === "reload") {
++      const o = JSON.parse(kept) as Record<string, unknown>;
++      for (const [k, v] of Object.entries(o)) {
++        const n = clampParam(k, v);
++        if (n !== null) tuning[k] = n;
++      }
++    }
++  } catch {
++    // (storage blocked: every load starts untuned)
++  }
++  window.addEventListener("pagehide", () => {
++    try {
++      if (Object.keys(tuning).length) sessionStorage.setItem(TUNING_KEY, JSON.stringify(tuning));
++    } catch {
++      // (storage blocked)
++    }
++  });
++}
++
++/** Once, at boot (main.ts). */
++export function initSkillprint(): void {
++  if (!framed) return;
++  carryTuning();
++  window.addEventListener("message", onMessage);
++  // the AI Guide opens its session on the first input; keys 1–9 are the portal's preset tester
++  window.addEventListener("pointerdown", () => post({ type: "skillprint_mousedown" }), { capture: true, passive: true });
++  // (the same inputs the portal counts on a same-origin frame, GameClient.tsx countPlayerInputs)
++  for (const type of ["keydown", "pointerdown", "pointermove", "touchstart", "wheel"])
++    window.addEventListener(type, () => (inputs += 1), { capture: true, passive: true });
++  window.addEventListener(
++    "keydown",
++    (e) => {
++      if (/^[1-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) post({ type: "skillprint_keydown", key: e.key });
++    },
++    true
++  );
++  reportSection();
++  (window as unknown as { SKILLPRINT_PARAMETERS: Record<string, ParamDef> }).SKILLPRINT_PARAMETERS = PARAMS;
++  (window as unknown as { adjustGame: (o: unknown) => void }).adjustGame = adjust;
++  // for the harness (iframeTest.html) and tests: what is tuned, and what each commander now plays
++  (window as unknown as { __battleDronesSkillprint: unknown }).__battleDronesSkillprint = {
++    tuning,
++    state: () => (link ? stateOf(link) : null),
++    ai: () =>
++      (link?.ais() ?? []).map((a) => {
++        const d = DIFFICULTY[a.difficulty];
++        return { difficulty: a.difficulty, lastDecisionTick: a.lastDecisionTick, interval: d.interval, assaultMult: d.assaultMult, extraHarvesters: d.extraHarvesters, harass: d.harass };
++      })
++  };
++}
+diff --git a/src/ui/fullscreen.ts b/src/ui/fullscreen.ts
+index 84cb1e5..77ca211 100644
+--- a/src/ui/fullscreen.ts
++++ b/src/ui/fullscreen.ts
+@@ -107,6 +107,9 @@ export class Fullscreen {
+   /** Ask for full screen (call inside a user gesture); quietly does nothing where unsupported or declined. */
+   async enter(): Promise<void> {
+     const { doc } = this.env();
++    // (framed, as the Skillprint portal does, src/skillprint/bridge.ts: the host page owns the
++    // screen, and a request its permissions policy never answers would hold the Play tap forever)
++    if (typeof window !== "undefined" && window.parent !== window) return;
+     if (doc.fullscreenElement || !doc.documentElement.requestFullscreen) return;
+     this.pending = true;
+     try {

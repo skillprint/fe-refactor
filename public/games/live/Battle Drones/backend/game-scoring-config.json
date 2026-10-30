@@ -1,0 +1,91 @@
+{
+  "game_slug": "battle-drones",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "gameSpeed": {
+      "type": "number",
+      "min": 0.6,
+      "max": 1.25,
+      "default": 1.0,
+      "description": "Multiplier on the battle's tempo, on top of the player's own 1x/1.5x/2x speed chip. Lower values give the player more time to think between enemy moves and decreased difficulty.",
+      "adjustment_guide": "The fastest-acting lever: it changes the pace from the next frame. Lower it first when the player is overwhelmed (several things under attack at once, units idling, buildings lost). Raise it only once the player keeps the base and army busy."
+    },
+    "aiReactionSec": {
+      "type": "number",
+      "min": 1.0,
+      "max": 4.0,
+      "default": 2.0,
+      "description": "Seconds between the enemy commander's decision passes (building, producing, attacking, retreating). Easy plays 3.5, Normal 2, Hard 1.2. Higher values mean a slower-reacting enemy and decreased difficulty.",
+      "adjustment_guide": "The main lever on how hard the enemy plays. It applies from the enemy's next decision pass. Move it in steps of about 0.5."
+    },
+    "aiAttackThreshold": {
+      "type": "number",
+      "min": 0.8,
+      "max": 1.6,
+      "default": 1.0,
+      "description": "How big an army the enemy waits for before it launches an assault, as a multiple of its strategy's own threshold. Easy plays 1.35, Normal 1, Hard 0.9. Higher values mean fewer, later attacks and decreased difficulty.",
+      "adjustment_guide": "Raise it to give a struggling player breathing room between waves, and lower it to bring the pressure sooner. It decides when the next wave leaves, not a wave already on its way."
+    },
+    "aiExtraHarvesters": {
+      "type": "integer",
+      "min": -1,
+      "max": 1,
+      "default": 0,
+      "description": "Harvesters the enemy keeps beyond its strategy's count. Easy plays -1, Normal 0, Hard +1. Higher values mean a richer enemy economy, bigger armies and increased difficulty.",
+      "adjustment_guide": "A slow lever: its effect builds over minutes as the enemy's income grows or shrinks. Set it early in a match for the target mood. Don't use it to react to a moment."
+    },
+    "aiHarass": {
+      "type": "integer",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "description": "1 lets the enemy send small raiding parties at the player's harvesters while it builds up; 0 stops the raids (Easy plays 0). 1 is harder: the player has to defend the economy while building.",
+      "adjustment_guide": "Turn it off (0) for relax, or for a player whose harvesters keep dying. Turn it on (1) to add multitasking pressure for focus and grit."
+    }
+  },
+  "adjustment_instructions": "You are adjusting parameters for Battle Drones, a Command & Conquer-style real-time strategy game.\nThe player mines scrap with harvesters, builds a base (Fab Plant, Airpad, turrets, SAM sites and more),\ntrains ground and air drones and infantry, and sends them against an AI commander. A side is beaten\nwhen its HQ and every Goliath mech are destroyed. Ground units need anti-air (Flak Crawlers, SAM\nsites, Raptors) to stop drones, and air units need ground weapons. Screenshots show the 3D battlefield\nwith a status strip: match clock, scrap, army size, kills and losses.\n\nParameters:\n- gameSpeed (number, 0.6-1.25): multiplier on the battle's tempo, on top of the player's own speed\n  chip. Lower values give more time to think and decreased difficulty.\n- aiReactionSec (number, 1.0-4.0): seconds between the enemy commander's decision passes. Easy plays\n  3.5, Normal 2, Hard 1.2. Higher values mean a slower enemy and decreased difficulty.\n- aiAttackThreshold (number, 0.8-1.6): how big an army the enemy waits for before an assault, as a\n  multiple of its strategy's threshold. Easy plays 1.35, Normal 1, Hard 0.9. Higher values mean fewer,\n  later waves and decreased difficulty.\n- aiExtraHarvesters (integer, -1 to 1): harvesters the enemy keeps beyond its strategy's count. Easy\n  plays -1, Normal 0, Hard +1. Higher values mean a richer enemy and increased difficulty.\n- aiHarass (integer, 0 or 1): 1 lets the enemy raid the player's harvesters during its build-up, and\n  0 stops the raids. 1 is harder.\n\nGiven the player's current flow state, skill metrics, and target mood,\noutput parameter values that guide the player toward the target mood:\n- For 'relax': gameSpeed ~0.75, aiReactionSec ~3.5, aiAttackThreshold ~1.35, aiExtraHarvesters -1,\n  aiHarass 0. The enemy builds slowly, attacks late and never raids, so the player can build a base\n  at their own pace.\n- For 'focus': gameSpeed ~1.0, aiReactionSec ~2.0, aiAttackThreshold ~1.0, aiExtraHarvesters 0,\n  aiHarass 1. A steady match that rewards keeping the economy, production and army all moving.\n- For 'grit': gameSpeed ~1.15-1.25, aiReactionSec ~1.2, aiAttackThreshold ~0.9, aiExtraHarvesters 1,\n  aiHarass 1. Early, frequent waves and raids on the economy, so the player must defend and expand\n  at the same time.\n- joy: like focus, with aiAttackThreshold ~1.15 and aiHarass 0, so fights are frequent but the\n  player's economy is left alone and big plays pay off.\n- awe, curiosity, creativity, collaborate, empathy: not a strong fit for this game; behave like focus.\n\nConsider the player's current performance: if flow score is low and cognitive load is high, the\ngame is likely too hard. Signs are buildings lost, losses well ahead of kills, scrap piling up\nunspent, or units idling. Ease off first with gameSpeed (it acts at once), then raise aiReactionSec\nand aiAttackThreshold, then set aiHarass to 0. If arousal is low and attention is dropping, the player\nmay be bored: the army is far ahead and no fights have happened recently. Increase the challenge by\nlowering aiAttackThreshold and aiReactionSec first, then raise gameSpeed.\n\nAlways adjust gradually from the current parameter values to avoid jarring transitions. Note that the\nAI levers apply from the enemy's next decision pass and never undo a wave that is already attacking,\nand aiExtraHarvesters takes minutes to show in the enemy's army, so set it for the mood early rather\nthan chasing moments with it. None of these levers apply to online duels with another person, and\nLast Stand's waves only follow gameSpeed.",
+  "skill_adjustment_instructions": "Battle Drones trains strategic planning (what to build next, in what order), task switching\n(between the economy, production, defence and the attack), spatial reasoning (map control, flanking,\nwhere to place buildings) and divided attention (watching several fronts and the minimap at once).\nRead the status strip on each screenshot (clock, scrap, army, kills, losses) and look at how much of\nthe battlefield the player is acting on.\n\nPer-skill levers (primary first):\n- planning: raise aiExtraHarvesters to 1 and keep aiAttackThreshold ~1.0-1.1, so the enemy grows a\n  strong economy that the player must out-plan rather than out-click. Keep gameSpeed ~0.9-1.0 so\n  there is time to plan.\n- task-switching: set aiHarass to 1 and lower aiAttackThreshold to ~0.9, so raids on the economy\n  and waves at the base demand attention in turn. Ease off with gameSpeed when buildings start\n  falling.\n- attention: lower aiReactionSec to ~1.2-1.5 and set aiHarass to 1, so threats come from several\n  directions; keep gameSpeed ~1.0.\n- spatial: keep aiAttackThreshold ~1.0 and aiReactionSec ~2.0, and judge progress by map control\n  (Uplinks held, forward Depots) rather than by kills; slow gameSpeed slightly (~0.9) so the player\n  can position units.\n- other skills: behave like focus mood guidance.",
+  "notes": "Battle Drones is Simon Willison's open-source RTS (github.com/simonw/battledrones, Apache-2.0), built for the portal by scripts/battle-drones/build.sh. The parameters are the knobs in its src/skillprint/bridge.ts (PARAMS), which writes the AI ones into the commander's DIFFICULTY table (src/sim/ai/commander.ts, read by tickAi every tick) and scales the scene's game speed by gameSpeed. The relax/focus/grit values are that table's Easy/Normal/Hard rows. The AI's income multiplier is deliberately not exposed: the sim stores it in the world, and a battle record keeps only its last value, so tuning it would break replays.",
+  "sdk_game_parameters": [
+    {
+      "name": "gameSpeed",
+      "type": "Float",
+      "description": "Multiplier on the battle's tempo, on top of the player's own 1x/1.5x/2x speed chip. Lower values give the player more time to think between enemy moves and decreased difficulty.",
+      "min_value": "0.6",
+      "max_value": "1.25",
+      "adjustment_guide": "The fastest-acting lever: it changes the pace from the next frame. Lower it first when the player is overwhelmed (several things under attack at once, units idling, buildings lost). Raise it only once the player keeps the base and army busy."
+    },
+    {
+      "name": "aiReactionSec",
+      "type": "Float",
+      "description": "Seconds between the enemy commander's decision passes (building, producing, attacking, retreating). Easy plays 3.5, Normal 2, Hard 1.2. Higher values mean a slower-reacting enemy and decreased difficulty.",
+      "min_value": "1.0",
+      "max_value": "4.0",
+      "adjustment_guide": "The main lever on how hard the enemy plays. It applies from the enemy's next decision pass. Move it in steps of about 0.5."
+    },
+    {
+      "name": "aiAttackThreshold",
+      "type": "Float",
+      "description": "How big an army the enemy waits for before it launches an assault, as a multiple of its strategy's own threshold. Easy plays 1.35, Normal 1, Hard 0.9. Higher values mean fewer, later attacks and decreased difficulty.",
+      "min_value": "0.8",
+      "max_value": "1.6",
+      "adjustment_guide": "Raise it to give a struggling player breathing room between waves, and lower it to bring the pressure sooner. It decides when the next wave leaves, not a wave already on its way."
+    },
+    {
+      "name": "aiExtraHarvesters",
+      "type": "Integer",
+      "description": "Harvesters the enemy keeps beyond its strategy's count. Easy plays -1, Normal 0, Hard +1. Higher values mean a richer enemy economy, bigger armies and increased difficulty.",
+      "min_value": "-1",
+      "max_value": "1",
+      "adjustment_guide": "A slow lever: its effect builds over minutes as the enemy's income grows or shrinks. Set it early in a match for the target mood. Don't use it to react to a moment."
+    },
+    {
+      "name": "aiHarass",
+      "type": "Integer",
+      "description": "1 lets the enemy send small raiding parties at the player's harvesters while it builds up; 0 stops the raids (Easy plays 0). 1 is harder: the player has to defend the economy while building.",
+      "min_value": "0",
+      "max_value": "1",
+      "adjustment_guide": "Turn it off (0) for relax, or for a player whose harvesters keep dying. Turn it on (1) to add multitasking pressure for focus and grit."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Battle Drones — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay; fullscreen"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    // Keys 1-3 are the game's squad hotkeys, so the presets sit on 4-9.
+    window.HARNESS = {
+      slug: 'battle-drones',
+      params: [
+        {name:'gameSpeed',default:1},
+        {name:'aiReactionSec',default:2},
+        {name:'aiAttackThreshold',default:1},
+        {name:'aiExtraHarvesters',default:0},
+        {name:'aiHarass',default:1},
+      ],
+      presets: {
+        4:{gameSpeed:0.75,aiReactionSec:3.5,aiAttackThreshold:1.35,aiExtraHarvesters:-1,aiHarass:0},
+        5:{gameSpeed:1,aiReactionSec:2,aiAttackThreshold:1,aiExtraHarvesters:0,aiHarass:1},
+        6:{gameSpeed:1.15,aiReactionSec:1.2,aiAttackThreshold:0.9,aiExtraHarvesters:1,aiHarass:1},
+        7:{gameSpeed:0.6},
+        8:{gameSpeed:1.25},
+        9:{gameSpeed:1.25,aiReactionSec:1,aiAttackThreshold:0.8,aiExtraHarvesters:1,aiHarass:1},
+      },
+      readState: (w) => {
+        const sp = w.__battleDronesSkillprint;
+        return sp ? { ...(sp.state() || { match: 'none yet' }), tuning: JSON.stringify(sp.tuning) } : null;
+      },
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

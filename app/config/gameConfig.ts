@@ -343,6 +343,16 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Mountain Appreciator/backend/game-scoring-config.json'),
+  },
+
+  'battle-drones': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Battle Drones/backend/game-scoring-config.json'),
+    customExitButton: {
+      color: 'purple',
+      size: 'md'
+    }
   }
 };
 
@@ -896,6 +906,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Visual Search', 'Sustained Attention', 'Pattern Matching', 'Spatial Reasoning'],
     instructions: 'Drag to walk around the two mountains; scroll or pinch to lean in. Click a difference on either mountain: a forest, a tarn, an eagle, a comet. Wrong clicks cost daylight. Hold Space (or the Blink button) to flick between the twins, though the sun moves faster while you do. When the light goes, keep one twin for your range, then walk on to the next pair or finish.'
   },
+  'battle-drones': {
+    name: 'Battle Drones',
+    description: 'A Command & Conquer-style RTS: mine scrap, build a base and send ground and air drones to destroy the enemy HQ',
+    image: gameAssetUrl('live/Battle%20Drones/battle-drones.jpg'),
+    category: 'Strategy',
+    difficulty: 'Hard',
+    estimatedTime: '8-15 minutes',
+    skills: ['Strategic Planning', 'Task Switching', 'Spatial Reasoning', 'Divided Attention'],
+    instructions: 'Pick an opener, then build from the bar at the bottom: harvesters mine scrap, which pays for buildings and units. Tap a unit (or drag a box) to select, then tap the map to move or attack. Air units need anti-air to stop them, and ground units need ground weapons. Destroy the enemy HQ, and any Goliath it has, to win. Open the menu (☰) for the controls.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -991,4 +1011,5 @@ export const knownGameSlugs = [
   'solitaire',
   'order-rush',
   'mountain-appreciator',
+  'battle-drones',
 ];
