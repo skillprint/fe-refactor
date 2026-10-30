@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useLogoMotion } from './useLogoMotion';
@@ -11,6 +11,31 @@ import { useGymTrackerFeatureFlag } from '../app/hooks/useGymTracker';
 import { useNutritionFeatureFlag } from '../app/hooks/useNutritionTracker';
 import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '../lib/models/portal/useFriendsAndPrivacy';
 
+/**
+ * The pending-request count on the Friends link. It has its own Suspense
+ * boundary because useFriendsAndPrivacy reads useSearchParams (through
+ * useUserSession), which otherwise fails the prerender of every static page
+ * that renders the sidebar.
+ */
+function FriendRequestsBadge() {
+  const { incomingRequests } = useFriendsAndPrivacy();
+  if (incomingRequests.length === 0) return null;
+  return (
+    <span
+      className="ui-badge ui-badge--sm"
+      style={{
+        marginLeft: 'auto',
+        background: 'var(--accent-primary, #5d6bff)',
+        color: '#fff',
+        fontSize: '0.68rem',
+        padding: '0 0.38rem',
+      }}
+    >
+      {incomingRequests.length}
+    </span>
+  );
+}
+
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeSkillSection, setActiveSkillSection] = useState('mood');
@@ -19,7 +44,6 @@ export default function Sidebar() {
   const { gymTrackerEnabled } = useGymTrackerFeatureFlag();
   const { nutritionFeatureEnabled } = useNutritionFeatureFlag();
   const { friendsFeatureEnabled } = useFriendsFeatureFlag();
-  const { incomingRequests } = useFriendsAndPrivacy();
   const pathname = usePathname();
   const brandRef = useRef<HTMLAnchorElement>(null);
   useLogoMotion(brandRef);
@@ -175,20 +199,9 @@ export default function Sidebar() {
             <Link title="Friends" href="/friends" className={`sp-side-nav__link ${pathname.startsWith('/friends') ? 'is-active' : ''}`} aria-current={pathname.startsWith('/friends') ? 'page' : undefined} data-friends-nav-link>
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-users"></use></svg>
               <span className="sp-side-nav__label">Friends</span>
-              {incomingRequests.length > 0 && (
-                <span
-                  className="ui-badge ui-badge--sm"
-                  style={{
-                    marginLeft: 'auto',
-                    background: 'var(--accent-primary, #5d6bff)',
-                    color: '#fff',
-                    fontSize: '0.68rem',
-                    padding: '0 0.38rem',
-                  }}
-                >
-                  {incomingRequests.length}
-                </span>
-              )}
+              <Suspense fallback={null}>
+                <FriendRequestsBadge />
+              </Suspense>
             </Link>
           )}
           <Link title="Profile" href="/profile" className={`sp-side-nav__link ${pathname.startsWith('/profile') ? 'is-active' : ''}`} aria-current={pathname.startsWith('/profile') ? 'page' : undefined}><svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-user"></use></svg><span className="sp-side-nav__label">Profile</span></Link>
