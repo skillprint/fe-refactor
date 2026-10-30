@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Support Desk</title>
+<link rel="stylesheet" href="desk.css">
+</head>
+<body>
+<div id="desk" class="desk" data-phase="idle">
+  <header class="hud">
+    <div class="hud__brand">Support Desk <span class="hud__domain" id="hud-domain">—</span></div>
+    <div class="hud__stats">
+      <span>Score<b id="hud-score">0</b></span>
+      <span>Tickets<b id="hud-tickets">0/3</b></span>
+      <span>Shift<b id="hud-clock">00:00</b></span>
+      <button id="voice-toggle" class="btn btn--ghost btn--sm" type="button" title="Hear the customer">Voice: off</button>
+    </div>
+  </header>
+
+  <main class="desk__main">
+    <aside class="col col--left">
+      <section class="panel">
+        <h2>Queue</h2>
+        <ul id="queue" class="queue"></ul>
+      </section>
+      <section class="panel panel--policy">
+        <h2>Policy <span id="policy-badge" class="badge" hidden>updated</span></h2>
+        <div id="policy" class="policy"><p class="hint">Open a ticket to see the policy that applies.</p></div>
+      </section>
+    </aside>
+
+    <section class="col col--center">
+      <div id="ticket-tabs" class="tabs"></div>
+      <div id="ticket-head" class="ticket-head"><span class="meta">No ticket open</span></div>
+      <div id="transcript" class="transcript" aria-live="polite"></div>
+      <form id="composer" class="composer" autocomplete="off">
+        <textarea id="reply" rows="2" placeholder="Type your reply. Enter sends, Shift+Enter adds a line." disabled></textarea>
+        <div class="composer__row">
+          <button type="button" id="btn-hold" class="btn btn--ghost" disabled>Hold</button>
+          <button type="button" id="btn-escalate" class="btn btn--ghost" disabled>Escalate</button>
+          <span class="spacer"></span>
+          <button type="button" id="btn-close" class="btn btn--warn" disabled>Close ticket</button>
+          <button type="submit" id="btn-send" class="btn btn--primary" disabled>Send</button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="col col--right">
+      <section class="panel">
+        <h2>Tools</h2>
+        <div id="tools" class="tools"><p class="tools__empty">Tools appear with the ticket.</p></div>
+      </section>
+      <section class="panel">
+        <h2>Customer</h2>
+        <div id="customer" class="customer"><p class="customer__empty">—</p></div>
+      </section>
+    </aside>
+  </main>
+
+  <div id="overlay" class="overlay">
+    <div class="overlay__card">
+      <h1>Support Desk</h1>
+      <p>You are the agent on shift. Customers arrive in the queue with a problem, a mood, and sometimes a wrong idea about what they are owed. Read the policy, use the tools, keep them calm, and resolve each ticket.</p>
+      <p>When you close a ticket you will say how sure you are that it is resolved. Being right about that counts as much as being right.</p>
+      <div class="row">
+        <button id="btn-start" class="btn btn--primary" type="button">Start shift</button>
+        <label class="hint"><input type="checkbox" id="start-voice"> hear the customers (downloads a small voice model once)</label>
+      </div>
+      <p class="hint" id="overlay-note"></p>
+    </div>
+  </div>
+
+  <dialog id="close-dialog">
+    <form method="dialog" class="dialog__body" id="close-form">
+      <h3>Close this ticket</h3>
+      <div class="radios" id="close-resolution">
+        <label><input type="radio" name="resolution" value="resolved" checked><span>Resolved</span></label>
+        <label><input type="radio" name="resolution" value="escalated"><span>Escalated</span></label>
+        <label><input type="radio" name="resolution" value="abandoned"><span>Could not resolve</span></label>
+      </div>
+      <label>How sure are you that this ticket is resolved according to policy?
+        <input type="range" id="close-confidence" min="0" max="100" value="70">
+        <span class="confidence__value"><span id="close-confidence-value">70</span>%</span>
+        <span class="hint">You are scored on calibration: 90% on tickets that were not resolved costs more than an honest 50%.</span>
+      </label>
+      <label>One line for the record (optional)
+        <input type="text" id="close-summary" maxlength="200" placeholder="What you did and why">
+      </label>
+      <div class="dialog__actions">
+        <button type="button" class="btn btn--ghost" id="close-cancel">Back</button>
+        <button type="submit" class="btn btn--primary" id="close-confirm">Close ticket</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="tool-dialog">
+    <form method="dialog" class="dialog__body" id="tool-form">
+      <h3 id="tool-title">Tool</h3>
+      <p class="hint" id="tool-desc"></p>
+      <div id="tool-fields"></div>
+      <div class="dialog__actions">
+        <button type="button" class="btn btn--ghost" id="tool-cancel">Cancel</button>
+        <button type="submit" class="btn btn--primary">Run</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="summary" class="summary" hidden></div>
+  <div id="toast" class="toast" role="status"></div>
+</div>
+
+<script src="../../SkillprintLib/html2canvas.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

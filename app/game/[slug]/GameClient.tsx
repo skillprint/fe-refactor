@@ -326,6 +326,10 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         window.addEventListener('message', onWindowMessage);
         countPlayerInputs();
 
+        // A game that calls the API itself (Support Desk's engine) learns where it
+        // is from this page instead of guessing from the hostname.
+        iframeRef.current?.contentWindow?.postMessage({ type: 'SKILLPRINT_CONFIG', data: { apiBase: getApiBaseUrl() } }, '*');
+
         if (autoPlay) {
             if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({ type: 'GAME_RESUME' }, '*');
@@ -800,7 +804,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                         allowFullScreen
                         // A click on the Play button doesn't count as activation inside a
                         // cross-origin frame, so its sound needs autoplay delegated.
-                        allow="autoplay; fullscreen; gamepad"
+                        allow="autoplay; fullscreen; gamepad; microphone"
                         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                         onLoad={handleIframeLoad}
                         style={{

@@ -64,7 +64,9 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     // Unity WebGL build from the trails_webar repo (TMT -> Build WebGL (Release)).
     'trails-webar': 'Trails',
     // Three.js game from game-builder (games/mountain-appreciator).
-    'mountain-appreciator': 'Mountain Appreciator'
+    'mountain-appreciator': 'Mountain Appreciator',
+    // The customer-support simulation (tau2-engine behind supportsim; ?mock=1 plays without it).
+    'support-desk': 'Support Desk',
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

@@ -343,6 +343,11 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Mountain Appreciator/backend/game-scoring-config.json'),
+  },
+  'support-desk': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Support Desk/backend/game-scoring-config.json'),
   }
 };
 
@@ -896,6 +901,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Visual Search', 'Sustained Attention', 'Pattern Matching', 'Spatial Reasoning'],
     instructions: 'Drag to walk around the two mountains; scroll or pinch to lean in. Click a difference on either mountain: a forest, a tarn, an eagle, a comet. Wrong clicks cost daylight. Hold Space (or the Blink button) to flick between the twins, though the sun moves faster while you do. When the light goes, keep one twin for your range, then walk on to the next pair or finish.'
   },
+  'support-desk': {
+    name: 'Support Desk',
+    description: 'A shift on a help desk. Customers arrive with a problem, a mood and sometimes a wrong idea of what they are owed. Keep to policy, keep them calm, and say how sure you are.',
+    image: gameAssetUrl('live/Support Desk/cover.svg'),
+    category: 'Social',
+    difficulty: 'Medium',
+    estimatedTime: '6-12 minutes',
+    skills: ['Emotional Intelligence', 'Theory of Mind', 'Policy Adherence', 'Calibration', 'Task Switching'],
+    instructions: 'Read the policy for the ticket, then talk to the customer in the chat. Use the tools on the right to look things up and act on the account; some actions are against policy, however hard the customer pushes. Watch the mood badge: a customer who is angry needs to be heard before they will accept an answer. When you are done, close the ticket and set the slider to how sure you are that it is resolved. You are scored on being right about that, not on being confident. With more than one ticket open, switch between them with the tabs and keep their names and order numbers straight.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -991,4 +1006,5 @@ export const knownGameSlugs = [
   'solitaire',
   'order-rush',
   'mountain-appreciator',
+  'support-desk',
 ];
