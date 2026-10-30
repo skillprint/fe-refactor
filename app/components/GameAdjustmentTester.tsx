@@ -752,6 +752,51 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'equilibrium':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next mobile.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'liveTilt', parameterValue: true }, { parameterName: 'hintLevel', parameterValue: 2 }, { parameterName: 'candleScale', parameterValue: 2.2 }, { parameterName: 'maxWeight', parameterValue: 8 }]; // Relax
+                case 2: return [{ parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'candleScale', parameterValue: 1.6 }]; // Gentle
+                case 3: return [{ parameterName: 'levelOffset', parameterValue: 0 }, { parameterName: 'maxWeight', parameterValue: 9 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'liveTilt', parameterValue: true }, { parameterName: 'candleScale', parameterValue: 1.0 }]; // Default
+                case 4: return [{ parameterName: 'candleScale', parameterValue: 0.75 }]; // Brisk
+                case 5: return [{ parameterName: 'liveTilt', parameterValue: false }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'candleScale', parameterValue: 0.7 }, { parameterName: 'maxWeight', parameterValue: 12 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next mobile
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next mobile
+                case 8: return [{ parameterName: 'maxWeight', parameterValue: 15 }]; // Heavier weights
+                case 9: return [{ parameterName: 'liveTilt', parameterValue: false }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'candleScale', parameterValue: 0.5 }, { parameterName: 'maxWeight', parameterValue: 15 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'firefly-gates':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. runSpeed and hazardDensity apply at once; the rest from the next stage.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'runSpeed', parameterValue: 0.7 }, { parameterName: 'gateTrickiness', parameterValue: 0.2 }, { parameterName: 'beaconStrictness', parameterValue: 0.7 }, { parameterName: 'hazardDensity', parameterValue: 0.3 }]; // Relax
+                case 2: return [{ parameterName: 'runSpeed', parameterValue: 0.85 }, { parameterName: 'beaconStrictness', parameterValue: 0.8 }]; // Gentle
+                case 3: return [{ parameterName: 'runSpeed', parameterValue: 1.0 }, { parameterName: 'gateTrickiness', parameterValue: 0.5 }, { parameterName: 'numberScale', parameterValue: 1.0 }, { parameterName: 'beaconStrictness', parameterValue: 0.9 }, { parameterName: 'hazardDensity', parameterValue: 1.0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'runSpeed', parameterValue: 1.3 }]; // Faster
+                case 5: return [{ parameterName: 'runSpeed', parameterValue: 1.4 }, { parameterName: 'gateTrickiness', parameterValue: 0.85 }, { parameterName: 'beaconStrictness', parameterValue: 0.97 }, { parameterName: 'hazardDensity', parameterValue: 1.5 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next stage
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next stage
+                case 8: return [{ parameterName: 'numberScale', parameterValue: 2.5 }]; // Bigger numbers
+                case 9: return [{ parameterName: 'runSpeed', parameterValue: 1.8 }, { parameterName: 'gateTrickiness', parameterValue: 1.0 }, { parameterName: 'numberScale', parameterValue: 3.0 }, { parameterName: 'beaconStrictness', parameterValue: 1.0 }, { parameterName: 'hazardDensity', parameterValue: 2.0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'elixir':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next potion.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'pourRate', parameterValue: 0.6 }, { parameterName: 'tolerance', parameterValue: 1.6 }, { parameterName: 'gradations', parameterValue: 4 }, { parameterName: 'brewTimeScale', parameterValue: 2.2 }]; // Relax
+                case 2: return [{ parameterName: 'pourRate', parameterValue: 0.8 }, { parameterName: 'tolerance', parameterValue: 1.3 }, { parameterName: 'gradations', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'pourRate', parameterValue: 1.0 }, { parameterName: 'tolerance', parameterValue: 1.0 }, { parameterName: 'gradations', parameterValue: 0 }, { parameterName: 'brewTimeScale', parameterValue: 1.0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'brewTimeScale', parameterValue: 0.7 }, { parameterName: 'pourRate', parameterValue: 1.3 }]; // Brisk
+                case 5: return [{ parameterName: 'pourRate', parameterValue: 1.6 }, { parameterName: 'tolerance', parameterValue: 0.7 }, { parameterName: 'gradations', parameterValue: 0 }, { parameterName: 'brewTimeScale', parameterValue: 0.6 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next potion
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next potion
+                case 8: return [{ parameterName: 'gradations', parameterValue: 10 }]; // Tenths marked
+                case 9: return [{ parameterName: 'pourRate', parameterValue: 2.0 }, { parameterName: 'tolerance', parameterValue: 0.5 }, { parameterName: 'gradations', parameterValue: 0 }, { parameterName: 'brewTimeScale', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

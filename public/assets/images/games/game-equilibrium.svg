@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Equilibrium</title>
+  <desc>Skillprint game card: a red, yellow and blue hanging mobile in balance, its shadow on a white gallery wall</desc>
+  <defs>
+    <g id="mobile">
+      <path d="M190 0 V40 M130 40 V72 M230 40 V80 M190 80 V102 M250 80 V96" stroke-width="1.6" fill="none"/>
+      <path d="M104 44 Q106 40 112 40 H268 Q274 40 276 36" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M180 84 Q182 80 188 80 H272 Q278 80 280 76" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <rect width="380" height="210" fill="#f3eee4"/>
+  <rect y="186" width="380" height="24" fill="#e7dfd1"/>
+  <g transform="translate(16 12)" opacity="0.5">
+    <use href="#mobile" stroke="#cfc4b1"/>
+    <circle cx="130" cy="92" r="21" fill="#cfc4b1"/>
+    <path d="M190 102 C206 104 210 128 190 136 C170 128 174 104 190 102Z" fill="#cfc4b1"/>
+    <circle cx="250" cy="114" r="18" fill="#cfc4b1"/>
+  </g>
+  <use href="#mobile" stroke="#1b1b1b"/>
+  <circle cx="130" cy="92" r="21" fill="#c8322a"/>
+  <path d="M190 102 C206 104 210 128 190 136 C170 128 174 104 190 102Z" fill="#f2b632"/>
+  <circle cx="250" cy="114" r="18" fill="#1f4fa3"/>
+  <circle cx="190" cy="40" r="3" fill="#1b1b1b"/>
+  <circle cx="230" cy="80" r="2.6" fill="#1b1b1b"/>
+  <g font-family="'Outfit', 'DM Sans', 'Helvetica Neue', Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#ffffff">
+    <text x="130" y="100" font-size="22">6</text>
+    <text x="190" y="127" font-size="17" fill="#1b1b1b">3</text>
+    <text x="250" y="121" font-size="19">6</text>
+  </g>
+</svg>

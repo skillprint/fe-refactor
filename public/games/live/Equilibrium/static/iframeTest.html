@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Equilibrium — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'equilibrium',
+      params: [
+        {name:'levelOffset',default:0},
+        {name:'maxWeight',default:9},
+        {name:'hintLevel',default:0},
+        {name:'liveTilt',default:true},
+        {name:'candleScale',default:1},
+      ],
+      presets: {
+        1:{liveTilt:true,hintLevel:2,candleScale:2.2,maxWeight:8},
+        2:{hintLevel:1,candleScale:1.6},
+        3:{levelOffset:0,maxWeight:9,hintLevel:0,liveTilt:true,candleScale:1},
+        4:{candleScale:0.75},
+        5:{liveTilt:false,hintLevel:0,candleScale:0.7,maxWeight:12},
+        6:{levelOffset:-2},
+        7:{levelOffset:2},
+        8:{maxWeight:15},
+        9:{liveTilt:false,hintLevel:0,candleScale:0.5,maxWeight:15,levelOffset:3},
+      },
+      readState: (w) => ({ ...w.__equilibriumState, tuning: w.__equilibriumTuning }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>
