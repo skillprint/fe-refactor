@@ -22,3 +22,9 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true);
+
+// No score for the Skillprint shell: a breathing session is not a contest.
+// Only whether the session ran to its end.
+window.SKILLPRINT_STATE = function () {
+    return { isGameOver: window.__breathState.phase === 'done' };
+};

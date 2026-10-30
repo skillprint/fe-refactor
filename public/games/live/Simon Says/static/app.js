@@ -15,6 +15,7 @@ let gameSeq = [];
 let userSeq = [];
 let started = false;
 let level = 0;
+let over = false; // from the wrong tile until the next start
 let highScore = localStorage.getItem('simonHighScore') || 0;
 let isShowingSequence = false;
 
@@ -29,6 +30,7 @@ Object.defineProperties(state, {
   level: { get: () => level, enumerable: true },
   highScore: { get: () => Number(highScore), enumerable: true },
   started: { get: () => started, enumerable: true },
+  gameOver: { get: () => over, enumerable: true },
 });
 
 // Difficulty slider maps to three independent timings
@@ -164,6 +166,7 @@ function startGame() {
   if (started) return;
 
   started = true;
+  over = false;
   level = 0;
   gameSeq = [];
   userSeq = [];
@@ -276,6 +279,7 @@ function showLevelUpFeedback() {
 }
 
 function gameOver() {
+  over = true;
   let gameOverText = `🎯 Game Over! You reached level <strong>${level}</strong>`;
 
   if (level > highScore) {
