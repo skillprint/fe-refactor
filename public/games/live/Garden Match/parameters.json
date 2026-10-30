@@ -1,0 +1,23 @@
+{
+    "moveBudgetMultiplier": {
+        "max": 2.0,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scales each level's move budget (27-45 moves in the game's own levels; never below 1). Changes the level in play at once, never leaving fewer than one move, and every level started or restarted after. Fewer moves make the goals harder to reach."
+    },
+    "targetMultiplier": {
+        "max": 1.5,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scales how many of each goal fruit a level asks for (three goals of 7-25 each in the game's own levels; never below 1). Applies from the next level started or restarted. Higher values make levels longer and harder."
+    },
+    "colorCount": {
+        "max": 6,
+        "min": 4,
+        "type": "integer",
+        "default": 6,
+        "description": "Most fruit colours on the board (the game uses 5 on levels 1-2 and 6 after; a level's own count is kept when it is lower, so 6 is the game as shipped). Fewer colours mean more matches and cascades, so the board is easier to read and goals fill faster. A goal fruit whose colour is cut is swapped for a colour still in play. Applies from the next level started or restarted."
+    }
+}
