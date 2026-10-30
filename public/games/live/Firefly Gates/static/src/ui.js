@@ -33,12 +33,48 @@ export class UI {
     $('bar').hidden = !on;
   }
 
-  setStage({ stage, rung, name, need, rows }) {
-    $('stage-no').textContent = `Stage ${stage} · rung ${rung}`;
+  setStage({ eyebrow, name, need, rows }) {
+    $('stage-no').textContent = eyebrow;
     $('stage-name').textContent = name;
-    $('need').textContent = need.toLocaleString();
+    this.need(need);
     $('pips').innerHTML = Array.from({ length: rows }, () => '<i></i>').join('');
     $('beaconcard').classList.remove('lit', 'cold');
+  }
+
+  need(n) { $('need').textContent = typeof n === 'number' ? n.toLocaleString() : n; }
+
+  /** The light between realms: a in 0..1; warm after a lit beacon, dusk otherwise. */
+  flash(a, warm = true) {
+    const el = $('flash');
+    el.hidden = a <= 0.002;
+    el.style.opacity = a.toFixed(3);
+    el.classList.toggle('dusk', !warm);
+  }
+
+  howTo(on) { $('howto').hidden = !on; }
+
+  /** The tutorial's card: one instruction at a time, a sum or two, a hint. */
+  coach({ step, of, text, sums = '', hint = '', say = false }) {
+    $('coach').hidden = false;
+    $('coach-step').textContent = `Tutorial · step ${step} of ${of}`;
+    $('coach-text').innerHTML = text;
+    $('coach-text').classList.toggle('say', say);
+    $('coach-sums').innerHTML = sums;
+    $('coach-hint').textContent = hint;
+  }
+
+  coachOff() {
+    $('coach').hidden = true;
+    $('pointer').hidden = true;
+  }
+
+  /** Point at something in the scene, at screen position (x, y): a ring round it or an arrow above. */
+  pointer(x, y, kind = 'ring') {
+    const el = $('pointer');
+    if (x == null) { el.hidden = true; return; }
+    el.hidden = false;
+    el.className = kind;
+    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
   }
 
   setScore(score) { $('score').textContent = `Score ${score.toLocaleString()}`; }

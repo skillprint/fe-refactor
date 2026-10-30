@@ -26,7 +26,7 @@ function texture(canvas) {
  * A gate's panel: an arch of coloured light with the operation in it.
  * Two-step operations ("×2 −5") get a line each.
  */
-export function gateTexture(text, color, aspect) {
+export function gateTexture(text, color, aspect, backing = 0) {
   const W = 512, H = Math.round(W / aspect);
   const c = document.createElement('canvas');
   c.width = W;
@@ -42,6 +42,12 @@ export function gateTexture(text, color, aspect) {
     g.closePath();
   };
 
+  // Over bright ground a dark backing keeps the figures legible.
+  if (backing) {
+    arch();
+    g.fillStyle = `rgba(6, 10, 18, ${backing})`;
+    g.fill();
+  }
   // A veil of the gate's colour, brightest under the arch.
   arch();
   const fill = g.createLinearGradient(0, 0, 0, H);
@@ -106,6 +112,14 @@ export class NumberSprite {
     this.base = scale;
     this.sprite.scale.set(scale * this.aspect, scale, 1);
     this.text = null;
+    this.shadeAlpha = 0;
+  }
+
+  /** A dark halo behind the figures, for realms bright enough to wash them out. */
+  set shade(a) {
+    if (a === this.shadeAlpha) return;
+    this.shadeAlpha = a;
+    this.text = null;
   }
 
   set(text, glow = this.glow, ink = '#fffaf0') {
@@ -122,6 +136,12 @@ export class NumberSprite {
     g.font = `700 ${size}px ${SERIF}`;
     g.textAlign = 'center';
     g.textBaseline = 'middle';
+    if (this.shadeAlpha) {
+      g.shadowColor = `rgba(3, 6, 12, ${this.shadeAlpha})`;
+      g.shadowBlur = 26;
+      g.fillStyle = `rgba(3, 6, 12, ${this.shadeAlpha * 0.8})`;
+      g.fillText(text, c.width / 2, c.height * 0.54);
+    }
     g.shadowColor = glow;
     g.shadowBlur = 30;
     g.fillStyle = ink;

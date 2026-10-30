@@ -8,7 +8,7 @@ import { NumberSprite } from './labels.js';
 import { Rng, clamp, damp } from './rng.js';
 
 const CAP = 900;
-const UP = '#9dffb0', DOWN = '#ff7a5c', WARM = '#ffe28a';
+const UP = '#9dffb0', DOWN = '#ff7a5c';
 
 /** How many to draw for a swarm of n: every one while small, then fewer per extra. */
 export function shown(n) { return n <= 120 ? n : Math.min(CAP, Math.round(120 + 26 * Math.sqrt(n - 120))); }
@@ -17,7 +17,7 @@ export function shown(n) { return n <= 120 ? n : Math.min(CAP, Math.round(120 + 
 export function radiusFor(n) { return clamp(0.42 + 0.075 * Math.sqrt(shown(n)), 0.5, 2.6); }
 
 export class Swarm {
-  constructor(scene) {
+  constructor(scene, mirror) {
     const rng = new Rng(9);
     this.pos = new Float32Array(CAP * 3);
     const seed = new Float32Array(CAP), birth = new Float32Array(CAP).fill(-99);
@@ -45,14 +45,21 @@ export class Swarm {
     this.points = new THREE.Points(geo, fireflyMaterial({ size: 0.36 }));
     this.points.frustumCulled = false;
     scene.add(this.points);
+    // The swarm's reflection, for realms of still water.
+    this.twin = new THREE.Points(geo, this.points.material);
+    this.twin.frustumCulled = false;
+    this.twin.renderOrder = -2;
+    this.twin.visible = false;
+    mirror.add(this.twin);
+    this.warm = '#ffe28a';
 
     this.light = new THREE.PointLight('#ffd27a', 0, 24, 1.4);
     scene.add(this.light);
 
-    this.label = new NumberSprite({ scale: 1.05, glow: WARM });
+    this.label = new NumberSprite({ scale: 1.05, glow: this.warm });
     scene.add(this.label.sprite);
     this.labelPop = 0;
-    this.labelHue = WARM;
+    this.labelHue = this.warm;
     this.floaters = Array.from({ length: 4 }, () => {
       const f = new NumberSprite({ scale: 0.7, size: 140 });
       f.sprite.visible = false;
@@ -75,6 +82,19 @@ export class Swarm {
     this.showLabel = true;
   }
 
+  /** The realm's fireflies: their colour, their light, how their count is drawn. */
+  dress(spec, { mirrored = false, shade = 0 } = {}) {
+    const u = this.points.material.uniforms;
+    u.uColor.value.set(...spec.color);
+    u.uCore.value.set(...spec.core);
+    this.light.color.set(spec.light);
+    this.warm = spec.numeral;
+    this.labelHue = this.warm;
+    this.label.shade = shade;
+    for (const fl of this.floaters) fl.f.shade = shade;
+    this.twin.visible = mirrored;
+  }
+
   /** Start a fresh swarm of n, all of it at the centre. */
   reset(n) {
     this.count = n;
@@ -85,8 +105,8 @@ export class Swarm {
     this.radius = radiusFor(n);
     this.mode = 'swarm';
     this.points.material.uniforms.uAlpha.value = 1;
-    this.labelHue = WARM;
-    this.label.set(String(n), WARM);
+    this.labelHue = this.warm;
+    this.label.set(String(n), this.warm);
   }
 
   /**
@@ -200,7 +220,7 @@ export class Swarm {
     this.labelPop = Math.max(0, this.labelPop - dt * 2.2);
     const s = 1.05 * (1 + 0.32 * Math.sin(Math.min(1, this.labelPop) * Math.PI) * this.labelPop);
     this.label.sprite.scale.set(s * this.label.aspect, s, 1);
-    if (this.labelPop === 0 && this.labelHue !== WARM) this.labelHue = WARM;
+    if (this.labelPop === 0 && this.labelHue !== this.warm) this.labelHue = this.warm;
     this.label.set(String(this.count), this.labelHue);
     // Under the swarm, nearer the camera: above it, the number would sit on the gates ahead.
     this.label.sprite.position.set(center.x, Math.max(0.45, center.y - this.radius * 0.62 - 0.5), center.z + 0.9);
