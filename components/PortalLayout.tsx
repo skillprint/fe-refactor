@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import TimezoneSync from '../app/components/TimezoneSync';
@@ -17,12 +17,7 @@ export default function PortalLayout({ children, pageClass, header, rail }: Port
   return (
     <div className={`portal-app ${pageClass || ''}`.trim()} data-portal-shell>
       <TimezoneSync />
-      {/* Its data hooks read useSearchParams (via useUserSession), which
-          fails the prerender of every static page that uses this layout
-          unless it sits under a Suspense boundary. */}
-      <Suspense fallback={null}>
-        <NotificationsSync />
-      </Suspense>
+      <NotificationsSync />
       <Sidebar />
       <button onClick={() => document.body.classList.remove('nav-open')} className="portal-scrim" type="button" aria-label="Close navigation" data-portal-nav-close></button>
       <div className="portal-main">

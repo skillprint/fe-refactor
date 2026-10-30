@@ -11,13 +11,10 @@ import { useGymTrackerFeatureFlag } from '../app/hooks/useGymTracker';
 import { useNutritionFeatureFlag } from '../app/hooks/useNutritionTracker';
 import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '../lib/models/portal/useFriendsAndPrivacy';
 
-/**
- * The pending-request count on the Friends link. It has its own Suspense
- * boundary because useFriendsAndPrivacy reads useSearchParams (through
- * useUserSession), which otherwise fails the prerender of every static page
- * that renders the sidebar.
- */
-function FriendRequestsBadge() {
+// useFriendsAndPrivacy reads the session through useUserSession, which reads
+// the URL; a static page may only do that inside Suspense, so the count sits
+// in its own component rather than holding up the whole sidebar.
+function FriendRequestCount() {
   const { incomingRequests } = useFriendsAndPrivacy();
   if (incomingRequests.length === 0) return null;
   return (
@@ -200,7 +197,7 @@ export default function Sidebar() {
               <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-users"></use></svg>
               <span className="sp-side-nav__label">Friends</span>
               <Suspense fallback={null}>
-                <FriendRequestsBadge />
+                <FriendRequestCount />
               </Suspense>
             </Link>
           )}
