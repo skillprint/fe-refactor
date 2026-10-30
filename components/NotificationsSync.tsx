@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useHomeSummary } from '@/lib/models/portal/useHomeSummary';
 import { useProfileBadges } from '@/lib/models/portal/useProfileBadges';
@@ -18,7 +18,7 @@ import {
  * backend so notifications are evaluated and persisted server-side once per
  * milestone, badge, assignment, deadline, skill trend, streak, or account prompt.
  */
-export default function NotificationsSync() {
+function NotificationsSyncInner() {
   const { notificationsFeatureEnabled } = useNotificationsFeatureFlag();
   const { status } = useAuth();
   const { data: homeSummary } = useHomeSummary();
@@ -61,4 +61,14 @@ export default function NotificationsSync() {
   ]);
 
   return null;
+}
+
+export default function NotificationsSync() {
+  // The data hooks go through useUserSession, which reads the URL; a static
+  // page may only do that inside Suspense.
+  return (
+    <Suspense fallback={null}>
+      <NotificationsSyncInner />
+    </Suspense>
+  );
 }
