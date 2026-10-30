@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { gameAssetUrl } from '@/lib/gameAssets';
 
 interface Badge {
     id: string;
@@ -24,7 +25,7 @@ const mockBadges: Badge[] = [
         date: '2023-12-01',
         color: 'from-yellow-400 to-orange-500',
         gameTitle: '2048',
-        gameImage: '/games/live/2048/screenshot.png',
+        gameImage: gameAssetUrl('live/2048/screenshot.png'),
         longDescription: 'You took your first step into the world of cognitive training by playing your very first game. This badge marks the beginning of your journey!'
     },
     {
@@ -35,7 +36,7 @@ const mockBadges: Badge[] = [
         date: '2023-12-05',
         color: 'from-blue-400 to-indigo-500',
         gameTitle: 'Memory Match',
-        gameImage: '/games/live/Alchemy/icon_144.png',
+        gameImage: gameAssetUrl('live/Alchemy/icon_144.png'),
         longDescription: 'Your memory skills are getting sharper! You reached level 10 in Memory Match, showing great retention and focus.'
     },
     {
@@ -46,7 +47,7 @@ const mockBadges: Badge[] = [
         date: '2023-12-10',
         color: 'from-red-400 to-pink-500',
         gameTitle: 'Speed Racer',
-        gameImage: '/games/live/Bubble Spirit/bubble-spirit.png',
+        gameImage: gameAssetUrl('live/Bubble Spirit/bubble-spirit.png'),
         longDescription: 'Lightning fast! You completed a round of Speed Racer in under 30 seconds. Your reaction time is impressive.'
     },
     {
@@ -57,7 +58,7 @@ const mockBadges: Badge[] = [
         date: '2023-12-15',
         color: 'from-green-400 to-emerald-500',
         gameTitle: 'Daily Challenge',
-        gameImage: '/games/live/hextris/icon_144.png',
+        gameImage: gameAssetUrl('live/hextris/icon_144.png'),
         longDescription: 'Consistency is key to improvement. You have played for 7 consecutive days, building a strong habit of mental fitness.'
     }
 ];

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, CSSProperties } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { mapSlugToGamePath } from '@/lib/localGames';
+import { isGameMessageOrigin } from '@/lib/gameAssets';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores, epochNow } from '../../lib/skillprintSdk';
 import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
@@ -369,7 +370,7 @@ export default function AiGuideClient() {
   // Messages from the game frame
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
+      if (!isGameMessageOrigin(event.origin)) return;
 
       let eventData = event.data;
       if (typeof eventData === 'string') {
@@ -800,7 +801,7 @@ export default function AiGuideClient() {
                   </div>
 
                   <div className="aa-stage__frame aa-stage__frame--phone">
-                    <iframe ref={iframeRef} onLoad={handleIframeLoad} src={gamePath} title={`${game.name} game`} allowFullScreen />
+                    <iframe ref={iframeRef} onLoad={handleIframeLoad} src={gamePath} title={`${game.name} game`} allowFullScreen allow="autoplay; fullscreen; gamepad" />
                     {isSessionEnded && (
                       <div className="aa-stage__veil" data-state={isSessionClosedOnBackend ? 'closed' : 'closing'}>
                         <div className="aa-stage__ready">

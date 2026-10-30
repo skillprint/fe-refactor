@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import type { CoachPersonaSummary, CoachTipItem } from '@/lib/coachBridge';
+import CoachWhisperPill from './CoachWhisperPill';
 
 interface PlayBarProps {
   gameTitle: string;
@@ -9,6 +11,19 @@ interface PlayBarProps {
   adjustmentName?: string;
   adjustmentValue?: any;
   adjustmentCreateDate?: string;
+  // Coach whisper props
+  coach?: CoachPersonaSummary | null;
+  availableCoaches?: CoachPersonaSummary[];
+  selectedCoachId?: string;
+  onSelectCoach?: (id: string) => void;
+  tipsEnabled?: boolean;
+  onToggleTips?: (enabled: boolean) => void;
+  activeWhisper?: CoachTipItem | null;
+  whisperHistory?: CoachTipItem[];
+  isAskingCoach?: boolean;
+  onAskCoach?: (question: string) => void;
+  onDismissWhisper?: () => void;
+  onRefocusGame?: () => void;
 }
 
 export default function PlayBar({
@@ -19,7 +34,19 @@ export default function PlayBar({
   targetMood,
   adjustmentName,
   adjustmentValue,
-  adjustmentCreateDate
+  adjustmentCreateDate,
+  coach,
+  availableCoaches,
+  selectedCoachId,
+  onSelectCoach,
+  tipsEnabled = true,
+  onToggleTips,
+  activeWhisper = null,
+  whisperHistory = [],
+  isAskingCoach = false,
+  onAskCoach,
+  onDismissWhisper,
+  onRefocusGame,
 }: PlayBarProps) {
   const [showNotification, setShowNotification] = useState(false);
 
@@ -102,6 +129,26 @@ export default function PlayBar({
             </span>
           </span>
         </div>
+      )}
+
+      {onAskCoach && onToggleTips && onDismissWhisper && (
+        <>
+          <span aria-hidden="true" className="play-bar__sep"></span>
+          <CoachWhisperPill
+            coach={coach}
+            availableCoaches={availableCoaches}
+            selectedCoachId={selectedCoachId}
+            onSelectCoach={onSelectCoach}
+            tipsEnabled={tipsEnabled}
+            onToggleTips={onToggleTips}
+            activeWhisper={activeWhisper}
+            whisperHistory={whisperHistory}
+            isAsking={isAskingCoach}
+            onAskCoach={onAskCoach}
+            onDismissWhisper={onDismissWhisper}
+            onRefocusGame={onRefocusGame}
+          />
+        </>
       )}
     </div>
   );

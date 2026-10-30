@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useComputedGameMetrics } from '../../app/hooks/useComputedGameMetrics';
 import { SkillScores, MoodScores } from '../../app/lib/skillprintSdk';
 import type { SessionDetail } from '../../lib/models/portal/SessionDetail';
+import type { LibraryGameLeaderboard } from '../../lib/models/portal/LibraryGameLeaderboard';
 import { submitMoodSurvey } from '../../app/api/api';
 import { PORTAL_SKILLS } from '../../app/config/skillsTaxonomy';
 import { titleFromSlug } from '../../lib/skillIcons';
 import EmailPromptCard from '../../app/components/EmailPromptCard';
 import ScoreComparison, { ComparableMetric } from './ScoreDistribution';
+import ShareSheet from '../ShareSheet';
+import { gameSharePayload } from '../../lib/share';
+import { siteUrl } from '../../lib/siteUrl';
+import { baseSlug } from '../../lib/gameSlug';
+import { getGameDetails } from '../../app/config/gameConfig';
+import type { CoachPersonaSummary, CoachTipItem } from '../../lib/coachBridge';
+import PostGameLessonCard from './PostGameLessonCard';
+import HighScoreAwardPopup from './HighScoreAwardPopup';
+import {
+  evaluateHighScoreAchievement,
+  getStoredGameHighScores,
+  recordStoredGameScore,
+} from '../../lib/highScores';
+import {
+  createLeaderboardRankNotification,
+  createPersonalBestNotification,
+  pushPortalNotificationOnce,
+} from '../../lib/notifications';
 
 interface ResultMetric {
   name: string;
@@ -82,6 +101,24 @@ export interface GameResultDialogProps {
   hideMoodSurvey?: boolean;
   /** Leave out links into the rest of the portal (playbooks, the email prompt), as on a shared station. */
   hidePortalLinks?: boolean;
+  /** Optional player & AI coach context for post-game lesson sharing and tip attribution. */
+  coachFeatureEnabled?: boolean;
+  userId?: string | null;
+  coach?: CoachPersonaSummary | null;
+  availableCoaches?: CoachPersonaSummary[];
+  deliveredTip?: CoachTipItem | null;
+  /** Previous weekly personal best score before this session. */
+  weeklyHighScore?: number | null;
+  /** Previous #1 all-time leaderboard score before this session. */
+  leaderboardAllTimeHigh?: number | null;
+  /** Previous #1 weekly leaderboard score before this session. */
+  leaderboardWeeklyHigh?: number | null;
+  /** Optional post-session all-time leaderboard. */
+  postAllTimeBoard?: LibraryGameLeaderboard | null;
+  /** Optional post-session weekly leaderboard. */
+  postWeeklyBoard?: LibraryGameLeaderboard | null;
+  /** Optional flag to skip the celebratory high score popup. */
+  skipHighScorePopup?: boolean;
 }
 
 export default function GameResultDialog({
@@ -109,14 +146,31 @@ export default function GameResultDialog({
   renderExtra,
   extraPlacement = 'bottom',
   hideMoodSurvey = false,
-  hidePortalLinks = false
+  hidePortalLinks = false,
+  coachFeatureEnabled = false,
+  userId,
+  coach,
+  availableCoaches,
+  deliveredTip,
+  weeklyHighScore = null,
+  leaderboardAllTimeHigh = null,
+  leaderboardWeeklyHigh = null,
+  postAllTimeBoard = null,
+  postWeeklyBoard = null,
+  skipHighScorePopup = false,
 }: GameResultDialogProps) {
   const { data: session, isProcessing } = useComputedGameMetrics(unscored ? undefined : sessionId, useSyntheticData);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
   const [surveySubmitted, setSurveySubmitted] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [surveyError, setSurveyError] = useState<string | null>(null);
   // SKI-140: skills the game did not exercise stay behind a toggle by default.
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [highScoreDismissed, setHighScoreDismissed] = useState(false);
+
+  useEffect(() => {
+    setHighScoreDismissed(false);
+  }, [sessionId, score]);
 
   // Guests may answer too (the backend stores user=null), so only the game is required.
   // A failure is shown, never swallowed: a lost answer has to be visible.
@@ -158,12 +212,110 @@ export default function GameResultDialog({
     return 'red';
   };
 
+  const canonicalGameKey = baseSlug(gameSlug || gameTitle || '');
+
+  // Read any locally stored baseline for this game (excluding the current session)
+  // before recording the new score. Only used for real sessions with a sessionId
+  // so dev preview routes like `/dev/game-result/?best=0` remain deterministic.
+  const storedBaseline = useMemo(() => {
+    if (!sessionId || !canonicalGameKey) {
+      return { allTimeBest: null, weeklyBest: null };
+    }
+    return getStoredGameHighScores(canonicalGameKey, sessionId);
+  }, [canonicalGameKey, sessionId]);
+
+  useEffect(() => {
+    if (sessionId && canonicalGameKey && typeof score === 'number' && score > 0) {
+      recordStoredGameScore(canonicalGameKey, score, sessionId);
+    }
+  }, [canonicalGameKey, sessionId, score]);
+
   // The backend knows the player's earlier scores in this game; null means none of
   // them had a score, so this one is the first to compare against.
-  const previousBest = session?.previousBestScore ?? (highScore > 0 ? highScore : null);
+  const previousBest =
+    session?.previousBestScore ??
+    (highScore > 0 ? highScore : null) ??
+    storedBaseline.allTimeBest;
+  const previousWeeklyBest = weeklyHighScore ?? storedBaseline.weeklyBest;
   const hasScore = typeof score === 'number';
   const scoreDiff = hasScore && previousBest !== null ? score - previousBest : 0;
   const isNewBest = hasScore && previousBest !== null && score > previousBest;
+
+  useEffect(() => {
+    if (!canonicalGameKey || typeof score !== 'number' || score <= 0) return;
+    if (isNewBest || session?.isPersonalBest) {
+      pushPortalNotificationOnce(
+        createPersonalBestNotification({
+          gameSlug: canonicalGameKey,
+          gameTitle,
+          score,
+          previousBest,
+          sessionId,
+        }),
+      );
+    }
+    if (postWeeklyBoard?.you && postWeeklyBoard.you.rank <= 3) {
+      pushPortalNotificationOnce(
+        createLeaderboardRankNotification({
+          gameSlug: canonicalGameKey,
+          gameTitle,
+          rank: postWeeklyBoard.you.rank,
+          score: postWeeklyBoard.you.score,
+          period: 'week',
+          totalPlayers: postWeeklyBoard.totalPlayers,
+        }),
+      );
+    } else if (postAllTimeBoard?.you && postAllTimeBoard.you.rank <= 3) {
+      pushPortalNotificationOnce(
+        createLeaderboardRankNotification({
+          gameSlug: canonicalGameKey,
+          gameTitle,
+          rank: postAllTimeBoard.you.rank,
+          score: postAllTimeBoard.you.score,
+          period: 'all',
+          totalPlayers: postAllTimeBoard.totalPlayers,
+        }),
+      );
+    }
+  }, [
+    canonicalGameKey,
+    gameTitle,
+    score,
+    isNewBest,
+    session?.isPersonalBest,
+    previousBest,
+    sessionId,
+    postWeeklyBoard,
+    postAllTimeBoard,
+  ]);
+
+  const highScoreAchievement = useMemo(
+    () =>
+      evaluateHighScoreAchievement({
+        gameTitle,
+        score,
+        sessionId,
+        previousPersonalAllTime: previousBest,
+        sessionIsPersonalBest: session?.isPersonalBest,
+        previousPersonalWeek: previousWeeklyBest,
+        previousLeaderAllTime: leaderboardAllTimeHigh,
+        previousLeaderWeek: leaderboardWeeklyHigh,
+        postAllTimeBoard,
+        postWeeklyBoard,
+      }),
+    [
+      gameTitle,
+      score,
+      sessionId,
+      previousBest,
+      session?.isPersonalBest,
+      previousWeeklyBest,
+      leaderboardAllTimeHigh,
+      leaderboardWeeklyHigh,
+      postAllTimeBoard,
+      postWeeklyBoard,
+    ],
+  );
 
   // Skill scores (SKI-132). The session endpoint is the source of truth: when a
   // game emitted no cognition scores the backend substitutes estimates flagged
@@ -266,6 +418,35 @@ export default function GameResultDialog({
     </p>
   );
 
+  // Share the game, not the session: the link is the game's page (with its
+  // preview card), and the post leads with the player's points when the game
+  // reported any. A shared station or an embed keeps to the session.
+  const shareSlug = baseSlug(gameSlug || gameTitle || '');
+  const shareable = Boolean(shareSlug) && !hidePortalLinks;
+  const sharePayload = () => {
+    const origin = siteUrl();
+    const art = getGameDetails(shareSlug)?.image;
+    const payload = gameSharePayload(origin, { baseSlug: shareSlug, name: gameTitle }, art ? new URL(art, `${origin}/`).toString() : null);
+    if (highScoreAchievement) {
+      payload.text = highScoreAchievement.shareText;
+    } else if (typeof score === 'number' && score > 0) {
+      payload.text = `I scored ${score.toLocaleString('en-US')} in ${gameTitle} on Skillprint. Think you can beat it? A few minutes of play gets you a read on your skills and mood.`;
+    }
+    return payload;
+  };
+
+  if (highScoreAchievement && !highScoreDismissed && !skipHighScorePopup) {
+    return (
+      <HighScoreAwardPopup
+        achievement={highScoreAchievement}
+        gameTitle={gameTitle}
+        gameSlug={gameSlug || shareSlug}
+        hidePortalLinks={hidePortalLinks}
+        onContinue={() => setHighScoreDismissed(true)}
+      />
+    );
+  }
+
   return (
     <div className="popup-backdrop inset-none place-center is-open" id="resultPopup">
       <article aria-labelledby="resultTitle" aria-modal="true" className="popup popup--dark game-result" id="resultDialog" role="dialog">
@@ -352,13 +533,17 @@ export default function GameResultDialog({
 
           <div className="game-result__overview layout-grid gap-lg">
             <div className="game-result__score layout-grid radius-card padding-xl">
-              <div className="layout-flex items-center justify-between gap-lg">
+              <div className="layout-flex items-center justify-between gap-lg wrap">
                 <span className="ui-label">Game score</span>
-                {isNewBest && (
+                {highScoreAchievement ? (
+                  <span className="game-result__best ui-badge ui-badge--pill ui-badge--leading" data-result-best-badge="">
+                    <i className="ui-badge__dot"></i>{highScoreAchievement.primary.label}
+                  </span>
+                ) : isNewBest ? (
                   <span className="game-result__best ui-badge ui-badge--pill ui-badge--leading">
                     <i className="ui-badge__dot"></i>New personal best
                   </span>
-                )}
+                ) : null}
               </div>
               <strong className="game-result__score-value layout-block">{hasScore ? score.toLocaleString() : '—'}</strong>
               {/* SKI-140: the number is the game's own points, not a mark out of
@@ -366,9 +551,11 @@ export default function GameResultDialog({
               <span className="game-result__score-note layout-block font-sm">
                 {!hasScore
                   ? `${gameTitle} doesn't report a score to Skillprint.${unscored ? '' : ' Your skill scores below come from how you played.'}`
-                  : previousBest !== null
-                    ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${previousBest.toLocaleString()}`
-                    : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
+                  : highScoreAchievement && scoreDiff <= 0
+                    ? highScoreAchievement.summary
+                    : previousBest !== null
+                      ? `${scoreDiff > 0 ? '+' : ''}${scoreDiff.toLocaleString()} on your previous best of ${previousBest.toLocaleString()}`
+                      : `Points scored in ${gameTitle}, on the game's own scale rather than out of 100. Your next session is measured against it.`}
               </span>
             </div>
             
@@ -442,6 +629,20 @@ export default function GameResultDialog({
 
           {extraPlacement === 'bottom' && renderExtra?.(session ?? null, isProcessing, unscored)}
 
+          {!hidePortalLinks && coachFeatureEnabled && (
+            <PostGameLessonCard
+              userId={userId}
+              gameSlug={shareSlug || gameSlug || 'hextris'}
+              gameTitle={gameTitle}
+              score={score}
+              scoreDelta={hasScore && previousBest !== null ? scoreDiff : null}
+              targetMood={resolvedTargetMood}
+              coach={coach}
+              availableCoaches={availableCoaches}
+              deliveredTip={deliveredTip}
+            />
+          )}
+
           {!hidePortalLinks && <EmailPromptCard force={forceEmailPrompt} />}
 
         </div>
@@ -449,6 +650,12 @@ export default function GameResultDialog({
         <footer className="popup__footer">
           <Link href={exitHref} className="button button--tertiary button--md">{exitLabel}</Link>
           <div className="game-result__actions layout-flex items-center gap-md">
+            {shareable && (
+              <button className="button button--secondary button--md" type="button" onClick={() => setShareOpen(true)} aria-label={`Share ${gameTitle}`} data-result-share="">
+                <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-share"></use></svg>
+                Share
+              </button>
+            )}
             <button className="button button--secondary button--md" data-sequence-go="loading" type="button" onClick={onReplay}>Play again</button>
             {primaryAction ?? (
               <Link className="button button--primary button--md" href="/profile">
@@ -458,6 +665,14 @@ export default function GameResultDialog({
           </div>
         </footer>
       </article>
+      {shareable && shareOpen && (
+        <ShareSheet
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          heading={`Share ${gameTitle}`}
+          payload={sharePayload()}
+        />
+      )}
     </div>
   );
 }

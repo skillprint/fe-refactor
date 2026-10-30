@@ -1,5 +1,6 @@
 import { baseSlug } from '@/lib/gameSlug';
 import { inactiveGames } from './inactiveGames';
+import { gameAssetUrl } from '@/lib/gameAssets';
 
 export interface GameConfig {
   exitButtonPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -53,12 +54,12 @@ export const gameConfigs: Record<string, GameConfig> = {
   'box-tower': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Box Tower/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Box Tower/backend/game-scoring-config.json'),
   },
   'brick-out': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Brick Out/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Brick Out/backend/game-scoring-config.json'),
   },
   'bubble-spirit': {
     exitButtonPosition: 'top-right',
@@ -72,7 +73,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'change-word': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Change Word/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Change Word/backend/game-scoring-config.json'),
     customExitButton: {
       color: 'green',
       size: 'sm'
@@ -118,13 +119,13 @@ export const gameConfigs: Record<string, GameConfig> = {
   'gummy-blocks': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Gummy Blocks/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Gummy Blocks/backend/game-scoring-config.json'),
   },
 
   'trails-webar': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Trails/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Trails/backend/game-scoring-config.json'),
   },
   'hextris': {
     exitButtonPosition: 'bottom-left',
@@ -165,7 +166,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'match-doodle': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Match Doodle/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Match Doodle/backend/game-scoring-config.json'),
   },
 
   'mine-rusher': {
@@ -180,7 +181,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'photo-hunt': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Photo Hunt/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Photo Hunt/backend/game-scoring-config.json'),
   },
 
   'snake-attack': {
@@ -249,7 +250,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'dungeon-runner': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Dungeon Runner/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Dungeon Runner/backend/game-scoring-config.json'),
     customExitButton: {
       color: 'red',
       size: 'md'
@@ -331,7 +332,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'order-rush': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Order Rush/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Order Rush/backend/game-scoring-config.json'),
     customExitButton: {
       color: 'purple',
       size: 'md'
@@ -341,25 +342,25 @@ export const gameConfigs: Record<string, GameConfig> = {
   'mountain-appreciator': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Mountain Appreciator/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Mountain Appreciator/backend/game-scoring-config.json'),
   },
 
   'equilibrium': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Equilibrium/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Equilibrium/backend/game-scoring-config.json'),
   },
 
   'firefly-gates': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Firefly Gates/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Firefly Gates/backend/game-scoring-config.json'),
   },
 
   'elixir': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: '/games/live/Elixir/backend/game-scoring-config.json',
+    parameterManifest: gameAssetUrl('live/Elixir/backend/game-scoring-config.json'),
   }
 };
 
@@ -398,7 +399,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'bubble-spirit': {
     name: 'Bubble Spirit',
     description: 'Pop bubbles in this puzzle game',
-    image: '/games/live/Bubble%20Spirit/static/html5games/images/logo.png',
+    image: gameAssetUrl('live/Bubble%20Spirit/static/html5games/images/logo.png'),
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '5-10 minutes',
@@ -408,7 +409,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'change-word': {
     name: 'Change Word',
     description: 'Transform words letter by letter',
-    image: '/games/live/Change%20Word/change-word.png',
+    image: gameAssetUrl('live/Change%20Word/change-word.png'),
     category: 'Word Game',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -457,7 +458,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'trails-webar': {
     name: 'Trails',
     description: 'Connect trails of nodes in a 360° world; an endless mode adapts each wave to your mood',
-    image: '/games/live/Trails/trails.png',
+    image: gameAssetUrl('live/Trails/trails.png'),
     category: 'Attention',
     difficulty: 'Medium',
     estimatedTime: '2-6 minutes',
@@ -477,7 +478,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'i-love-hue': {
     name: 'I Love Hue',
     description: 'Arrange colors in perfect harmony',
-    image: '/games/live/I%20Love%20Hue/i-love-hue.png',
+    image: gameAssetUrl('live/I%20Love%20Hue/i-love-hue.png'),
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-20 minutes',
@@ -526,7 +527,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'space-trip': {
     name: 'Space Trip',
     description: 'Explore space in this adventure',
-    image: '/games/live/Space%20Trip/icons/icon-256.png',
+    image: gameAssetUrl('live/Space%20Trip/icons/icon-256.png'),
     category: 'Adventure',
     difficulty: 'Medium',
     estimatedTime: '10-25 minutes',
@@ -576,7 +577,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'flapcat-steampunk-2': {
     name: 'Flapcat Steampunk 2',
     description: 'More steampunk flying adventures',
-    image: '/games/live/Flapcat%20Steampunk%202/screenshot.png',
+    image: gameAssetUrl('live/Flapcat%20Steampunk%202/screenshot.png'),
     category: 'Arcade',
     difficulty: 'Hard',
     estimatedTime: '2-5 minutes',
@@ -586,7 +587,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'fruit-sorting': {
     name: 'Fruit Sorting',
     description: 'Sort the fruits into the right baskets',
-    image: '/games/live/Fruit%20Sorting/icon_144.png',
+    image: gameAssetUrl('live/Fruit%20Sorting/icon_144.png'),
     category: 'Puzzle',
     difficulty: 'Easy',
     estimatedTime: '3-5 minutes',
@@ -666,7 +667,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'stacks-tower': {
     name: 'Stacks Tower',
     description: 'Stack blocks to build a tower',
-    image: '/games/live/Stacks%20Tower/screenshot.png',
+    image: gameAssetUrl('live/Stacks%20Tower/screenshot.png'),
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -716,7 +717,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'infinite-runner-3d': {
   //   name: 'Infinite Runner 3D',
   //   description: 'Run and jump in this 3D infinite runner',
-  //   image: '/games/live/Infinite%20Runner%203D/icon_144.png',
+  //   image: gameAssetUrl('live/Infinite%20Runner%203D/icon_144.png'),
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -726,7 +727,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'flappy-bird-1': {
   //   name: 'Flappy Bird',
   //   description: 'Flappy Bird',
-  //   image: '/games/live/Flappy%20Bird/icon_144.png',
+  //   image: gameAssetUrl('live/Flappy%20Bird/icon_144.png'),
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -736,7 +737,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // '  ': {
   //   name: 'Last War Frontline',
   //   description: 'Last War Frontline',
-  //   image: '/games/live/Last%20War%20Frontline/icon_144.png',
+  //   image: gameAssetUrl('live/Last%20War%20Frontline/icon_144.png'),
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -746,7 +747,7 @@ export const gameDetails: Record<string, GameDetails> = {
   // 'fruit-ninja': {
   //   name: 'Fruit Ninja',
   //   description: 'Fruit Ninja',
-  //   image: '/games/live/Fruit%20Ninja/icon_144.png',
+  //   image: gameAssetUrl('live/Fruit%20Ninja/icon_144.png'),
   //   category: 'Arcade',
   //   difficulty: 'Medium',
   //   estimatedTime: '2-5 minutes',
@@ -756,7 +757,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'mage-duel': {
     name: 'Mage Duel',
     description: 'Duel a dark warlord by casting spells: type each word\'s translation before he strikes.',
-    image: '/games/live/mage-duel-2d/static/assets/hero.png',
+    image: gameAssetUrl('live/mage-duel-2d/static/assets/hero.png'),
     category: 'Language',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -776,7 +777,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'plastoblasto': {
     name: 'Plastoblasto',
     description: 'Plastoblasto',
-    image: '/games/live/Plastoblasto/icon_144.png',
+    image: gameAssetUrl('live/Plastoblasto/icon_144.png'),
     category: 'Arcade',
     difficulty: 'Medium',
     estimatedTime: '2-5 minutes',
@@ -786,7 +787,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'doodle-god-next': {
     name: 'Doodle God Next',
     description: 'Combine basic elements like fire, water, earth, and air to create new elements and build a whole universe!',
-    image: '/games/live/Doodle%20God%20Next/static/data/splash/god.png',
+    image: gameAssetUrl('live/Doodle%20God%20Next/static/data/splash/god.png'),
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '10-30 minutes',
@@ -796,7 +797,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'cut-the-rope': {
     name: 'Cut The Rope',
     description: 'Cut the ropes to feed candy to the little monster Om Nom in this physics-based puzzle game!',
-    image: '/games/live/Cut%20The%20Rope/static/res/img/icon.png',
+    image: gameAssetUrl('live/Cut%20The%20Rope/static/res/img/icon.png'),
     category: 'Puzzle',
     difficulty: 'Medium',
     estimatedTime: '5-15 minutes',
@@ -806,7 +807,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'omnomrun': {
     name: 'Om Nom Run',
     description: 'Run, jump, slide, and dodge obstacles through the streets of Nomville with Om Nom!',
-    image: '/games/live/Omnomrun/static/logo.png',
+    image: gameAssetUrl('live/Omnomrun/static/logo.png'),
     category: 'Runner',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -906,7 +907,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'mountain-appreciator': {
     name: 'Mountain Appreciator',
     description: 'Two twin mountains, nearly identical. Find what makes each one itself before the light goes',
-    image: '/games/live/Mountain Appreciator/cover.jpg',
+    image: gameAssetUrl('live/Mountain Appreciator/cover.jpg'),
     category: 'Attention',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -916,7 +917,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'equilibrium': {
     name: 'Equilibrium',
     description: 'A Calder mobile, out of balance: hang the weights so every arm rests level',
-    image: '/games/live/Equilibrium/cover.jpg',
+    image: gameAssetUrl('live/Equilibrium/cover.jpg'),
     category: 'Math',
     difficulty: 'Medium',
     estimatedTime: '3-10 minutes',
@@ -926,7 +927,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'firefly-gates': {
     name: 'Firefly Gates',
     description: 'Lead a swarm of fireflies through gates that add, subtract, multiply and divide them, and gather enough light to wake the beacon',
-    image: '/games/live/Firefly Gates/cover.jpg',
+    image: gameAssetUrl('live/Firefly%20Gates/cover.jpg'),
     category: 'Math',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
@@ -936,7 +937,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'elixir': {
     name: 'Elixir',
     description: 'An alchemist\'s recipes in fractions, percents and ratios: pour each layer by eye to a line nobody drew',
-    image: '/games/live/Elixir/cover.jpg',
+    image: gameAssetUrl('live/Elixir/cover.jpg'),
     category: 'Math',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',

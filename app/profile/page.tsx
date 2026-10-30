@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import PortalLayout from '@/components/PortalLayout';
 import { PortalSection } from '@/components/LayoutGrid';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
@@ -8,6 +10,10 @@ import ProfileRail from '@/components/Profile/ProfileRail';
 import ProfileGoals from '@/components/Profile/ProfileGoals';
 import ProfileBadges from '@/components/Profile/ProfileBadges';
 import ProfileSessions from '@/components/Profile/ProfileSessions';
+import ProfileLessons from '@/components/Profile/ProfileLessons';
+import PrivacyGateCard from '@/components/Friends/PrivacyGateCard';
+import { useUserSession } from '../hooks/useUserSession';
+import { useIslandCoachFeatureFlag } from '../hooks/useIslandCoach';
 import { useHomeRecentSessions } from '@/lib/models/portal/useHomeRecentSessions';
 import { usePaginatedSession } from '@/lib/models/portal/usePaginatedSession';
 import { useUserProfile } from '../hooks/useUserProfile';
@@ -20,7 +26,23 @@ import ProfileSkillsSection from '@/components/Profile/ProfileSkillsSection';
 import ProfilePerformanceTrends from '@/components/Profile/ProfilePerformanceTrends';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
+import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '@/lib/models/portal/useFriendsAndPrivacy';
 import type { SkillBaselineMap } from '@/components/Profile/ProfileSkillBreakdown';
+
+const MOOD_DIMENSION_SLUGS = new Set([
+  'flow',
+  'focus-mood',
+  'relax',
+  'joy',
+  'creativity',
+  'curiosity',
+  'patience',
+  'confidence',
+  'energy',
+  'empathy',
+  'calm',
+  'excitement',
+]);
 
 function formatSecondsToDuration(sec: number): string {
   if (!sec || isNaN(sec)) return '0m 0s';
@@ -31,6 +53,9 @@ function formatSecondsToDuration(sec: number): string {
 }
 
 function ProfilePageContent() {
+  const { userId } = useUserSession();
+  const { coachFeatureEnabled } = useIslandCoachFeatureFlag();
+  const { friendsFeatureEnabled } = useFriendsFeatureFlag();
   // Recent sessions come from the same endpoint Home uses (useHomeRecentSessions),
   // so the two pages can never show a different "recent sessions" list again.
   const { data: recentSessions } = useHomeRecentSessions();
@@ -169,6 +194,48 @@ function ProfilePageContent() {
   const railSessions = (recentSessions ?? []).map(mapSessionSummary);
   const mappedSessions = sessions.map(mapSessionSummary);
 
+  const searchParams = useSearchParams();
+  const initialPreview = searchParams.get('previewAs') || 'self';
+  const [previewAs, setPreviewAs] = useState<string>(initialPreview);
+  const { friends, evaluateViewerAccessToMyProfile } = useFriendsAndPrivacy();
+
+  useEffect(() => {
+    const param = searchParams.get('previewAs');
+    if (param) setPreviewAs(param);
+  }, [searchParams]);
+
+  const isPreviewingOther = friendsFeatureEnabled && previewAs !== 'self';
+  const previewEvaluation = React.useMemo(() => {
+    return evaluateViewerAccessToMyProfile(
+      (friendsFeatureEnabled ? previewAs : 'self') as 'self' | 'public' | 'friends' | string
+    );
+  }, [friendsFeatureEnabled, previewAs, evaluateViewerAccessToMyProfile]);
+
+  const previewAccess = previewEvaluation.visibleGroups;
+  const previewGateReasons = previewEvaluation.gateReasons;
+  const previewRelationship = previewAs === 'public' ? 'none' : previewAs === 'self' ? 'self' : 'friend';
+
+  const previewViewerLabel = React.useMemo(() => {
+    if (previewAs === 'public') return 'a Public Visitor';
+    if (previewAs === 'friends') return 'a Connected Friend';
+    const match = friends.find((f) => f.userId === previewAs);
+    return match ? match.displayName : 'this viewer';
+  }, [previewAs, friends]);
+
+  const gatedUserScores = React.useMemo(() => {
+    if (!isPreviewingOther) return userScores;
+    const filtered: Record<string, number> = {};
+    Object.entries(userScores).forEach(([slug, val]) => {
+      const isMood = MOOD_DIMENSION_SLUGS.has(slug);
+      if (isMood && previewAccess.moodSignals) {
+        filtered[slug] = val;
+      } else if (!isMood && previewAccess.cognitionPersonality) {
+        filtered[slug] = val;
+      }
+    });
+    return filtered;
+  }, [isPreviewingOther, userScores, previewAccess]);
+
   return (
     <PortalLayout 
       pageClass="page--portal-profile"
@@ -179,40 +246,206 @@ function ProfilePageContent() {
           totalSkills={28}
           daysPlayed={daysPlayed}
           sessions={railSessions}
+          coachFeatureEnabled={coachFeatureEnabled}
+          friendsFeatureEnabled={friendsFeatureEnabled}
+          hideActivitySummary={isPreviewingOther && !previewAccess.activitySummary}
+          hideSessionHistory={isPreviewingOther && !previewAccess.sessionHistory}
+          previewViewerLabel={previewViewerLabel}
         />
       }
     >
+      {/* Privacy Audience Preview Bar */}
+      {friendsFeatureEnabled && (
+        <div
+          className="sp-card border-subtle radius-md layout-flex items-center justify-between gap-md wrap"
+          style={{
+            padding: '0.65rem 1rem',
+            marginBottom: '1rem',
+            background: isPreviewingOther
+              ? 'color-mix(in srgb, var(--accent-primary, #5d6bff) 12%, var(--surface-raised, #141824))'
+              : undefined,
+          }}
+          data-profile-privacy-preview-bar=""
+        >
+          <div className="layout-flex items-center gap-sm wrap">
+            <svg className="sp-icon sp-icon--sm" aria-hidden="true" viewBox="0 0 24 24">
+              <use href="#ti-shield"></use>
+            </svg>
+            <label htmlFor="profile-preview-select" className="font-xs weight-semibold">
+              View My Profile As:
+            </label>
+            <select
+              id="profile-preview-select"
+              value={previewAs}
+              onChange={(e) => setPreviewAs(e.target.value)}
+              className="font-xs"
+              style={{
+                padding: '0.3rem 0.6rem',
+                borderRadius: 'var(--radius-sm, 6px)',
+                border: '1px solid var(--border-subtle, rgba(255,255,255,0.16))',
+                background: 'var(--surface-default, #0f1320)',
+                color: 'inherit',
+              }}
+            >
+              <option value="self">Yourself (Full Access)</option>
+              <option value="friends">Any Connected Friend (Default Friend Rules)</option>
+              <option value="public">Public Visitor (Non-Friend)</option>
+              {friends.length > 0 && (
+                <optgroup label="Specific Friends (Tests Custom Overrides)">
+                  {friends.map((f) => (
+                    <option key={f.userId} value={f.userId}>
+                      Friend: {f.displayName}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+            {isPreviewingOther && (
+              <span className="font-xs text-muted">
+                Showing what <strong>{previewViewerLabel}</strong> is allowed to see.
+              </span>
+            )}
+          </div>
+          <div className="layout-flex items-center gap-xs">
+            {isPreviewingOther && (
+              <button
+                type="button"
+                className="button button--tertiary button--sm"
+                onClick={() => setPreviewAs('self')}
+              >
+                Exit Preview
+              </button>
+            )}
+            <Link href="/settings#privacy" className="button button--secondary button--sm">
+              Privacy Settings
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* GROUPINGS 2 & 3: COGNITION/PERSONALITY & MOOD SIGNALS */}
       <PortalSection ariaLabelledBy="profile-skills-breakdown">
-        <ProfileSkillsSection scores={userScores} baselines={skillBaselines} />
+        {previewAccess.cognitionPersonality || previewAccess.moodSignals ? (
+          <div className="layout-grid gap-md">
+            <ProfileSkillsSection scores={gatedUserScores} baselines={skillBaselines} />
+            {isPreviewingOther && !previewAccess.moodSignals && (
+              <PrivacyGateCard
+                groupingKey="moodSignals"
+                ownerName={previewViewerLabel}
+                gateReason={previewGateReasons.moodSignals}
+                relationship={previewRelationship}
+                isOwnPreview={true}
+                compact={true}
+              />
+            )}
+            {isPreviewingOther && !previewAccess.cognitionPersonality && (
+              <PrivacyGateCard
+                groupingKey="cognitionPersonality"
+                ownerName={previewViewerLabel}
+                gateReason={previewGateReasons.cognitionPersonality}
+                relationship={previewRelationship}
+                isOwnPreview={true}
+                compact={true}
+              />
+            )}
+          </div>
+        ) : (
+          <div className="layout-grid gap-md">
+            <PrivacyGateCard
+              groupingKey="cognitionPersonality"
+              ownerName={previewViewerLabel}
+              gateReason={previewGateReasons.cognitionPersonality}
+              relationship={previewRelationship}
+              isOwnPreview={true}
+            />
+            <PrivacyGateCard
+              groupingKey="moodSignals"
+              ownerName={previewViewerLabel}
+              gateReason={previewGateReasons.moodSignals}
+              relationship={previewRelationship}
+              isOwnPreview={true}
+              compact={true}
+            />
+          </div>
+        )}
       </PortalSection>
 
-      <ProfilePerformanceTrends />
+      {previewAccess.cognitionPersonality && <ProfilePerformanceTrends />}
 
-      <ProfileGameInsights 
-        uniqueGames={uniqueGames}
-        selectedGames={selectedGames}
-        setSelectedGames={setSelectedGames}
-        isMetricsLoading={isMetricsLoading}
-        metricsData={metricsData}
-        parsedChartData={parsedChartData}
-        formatSecondsToDuration={formatSecondsToDuration}
-      />
+      {/* GROUPING 4: PER-GAME STATS */}
+      {previewAccess.gameStats ? (
+        <ProfileGameInsights 
+          uniqueGames={uniqueGames}
+          selectedGames={selectedGames}
+          setSelectedGames={setSelectedGames}
+          isMetricsLoading={isMetricsLoading}
+          metricsData={metricsData}
+          parsedChartData={parsedChartData}
+          formatSecondsToDuration={formatSecondsToDuration}
+        />
+      ) : (
+        <PortalSection ariaLabelledBy="gated-game-stats">
+          <PrivacyGateCard
+            groupingKey="gameStats"
+            ownerName={previewViewerLabel}
+            gateReason={previewGateReasons.gameStats}
+            relationship={previewRelationship}
+            isOwnPreview={true}
+          />
+        </PortalSection>
+      )}
 
-      <ProfileGoals 
-        goalSkills={goalSkills}
-        goalMoods={goalMoods}
-        isGoalsLoading={isGoalsLoading}
-        isSavingSkills={isSavingSkills}
-        isSavingMoods={isSavingMoods}
-        saveSkills={saveSkills}
-        saveMoods={saveMoods}
-        availableSkills={AVAILABLE_SKILLS}
-        availableMoods={AVAILABLE_MOODS}
-      />
+      {/* GROUPING 6: BADGES, GOALS & LESSONS */}
+      {previewAccess.badgesGoalsLessons ? (
+        <>
+          <ProfileGoals 
+            goalSkills={goalSkills}
+            goalMoods={goalMoods}
+            isGoalsLoading={isGoalsLoading}
+            isSavingSkills={isSavingSkills}
+            isSavingMoods={isSavingMoods}
+            saveSkills={saveSkills}
+            saveMoods={saveMoods}
+            availableSkills={AVAILABLE_SKILLS}
+            availableMoods={AVAILABLE_MOODS}
+          />
 
-      <ProfileBadges />
+          <ProfileBadges />
 
-      <ProfileSessions sessions={mappedSessions} totalCount={profileAggregate?.totals?.sessions} />
+          {coachFeatureEnabled && (
+            <ProfileLessons
+              userId={userId}
+              userName={(profileAggregate as any)?.user?.firstName || 'Player'}
+              uniqueGames={uniqueGames}
+            />
+          )}
+        </>
+      ) : (
+        <PortalSection ariaLabelledBy="gated-badges-goals">
+          <PrivacyGateCard
+            groupingKey="badgesGoalsLessons"
+            ownerName={previewViewerLabel}
+            gateReason={previewGateReasons.badgesGoalsLessons}
+            relationship={previewRelationship}
+            isOwnPreview={true}
+          />
+        </PortalSection>
+      )}
+
+      {/* GROUPING 5: SESSION HISTORY */}
+      {previewAccess.sessionHistory ? (
+        <ProfileSessions sessions={mappedSessions} totalCount={profileAggregate?.totals?.sessions} />
+      ) : (
+        <PortalSection ariaLabelledBy="gated-session-history">
+          <PrivacyGateCard
+            groupingKey="sessionHistory"
+            ownerName={previewViewerLabel}
+            gateReason={previewGateReasons.sessionHistory}
+            relationship={previewRelationship}
+            isOwnPreview={true}
+          />
+        </PortalSection>
+      )}
     </PortalLayout>
   );
 }

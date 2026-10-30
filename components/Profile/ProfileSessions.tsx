@@ -16,9 +16,11 @@ interface ProfileSessionsProps {
   sessions: Session[];
   /** Lifetime session count from the profile aggregate; falls back to the fetched page length. */
   totalCount?: number;
+  /** Whose sessions these are, when it is not the viewer's own profile (a bot's page). */
+  ownerName?: string;
 }
 
-export default function ProfileSessions({ sessions, totalCount }: ProfileSessionsProps) {
+export default function ProfileSessions({ sessions, totalCount, ownerName }: ProfileSessionsProps) {
   const playedCount = totalCount ?? sessions.length;
   const formatDate = (dateValue: string | number) => {
     try {
@@ -43,15 +45,17 @@ export default function ProfileSessions({ sessions, totalCount }: ProfileSession
         <div className="section-head-copy">
           <h2>Game sessions</h2>
           <p className="margin-none text-muted">
-            Every session you have finished, newest first, with the score it returned and the skill it was measured against.
+            Every session {ownerName ? `${ownerName} has` : 'you have'} finished, newest first, with the score it returned and the skill it was measured against.
           </p>
         </div>
-        <Link className="button button--tertiary button--sm" href="/games">
-          Play a game 
-          <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
-            <use href="#ti-arrow-right"></use>
-          </svg>
-        </Link>
+        {!ownerName && (
+          <Link className="button button--tertiary button--sm" href="/games">
+            Play a game 
+            <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <use href="#ti-arrow-right"></use>
+            </svg>
+          </Link>
+        )}
       </div>
 
       <div className="pp-sessions sp-panel">
@@ -59,7 +63,7 @@ export default function ProfileSessions({ sessions, totalCount }: ProfileSession
           <div className="min-width-0">
             <h3>All sessions</h3>
             <p className="margin-none text-muted font-sm">
-              {sessions.length === 0 ? "No sessions yet." : "Your complete play history."}
+              {sessions.length === 0 ? "No sessions yet." : ownerName ? `${ownerName}'s play history.` : "Your complete play history."}
             </p>
           </div>
           <span className="pp-played radius-full layout-inline-flex items-center gap-sm font-xs weight-semibold no-grow">

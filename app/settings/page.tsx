@@ -1,46 +1,27 @@
 'use client';
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState } from 'react';
 import PortalLayout from '../../components/PortalLayout';
 import PortalHead from '../../components/PortalHead';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
-import { getCookie, deleteCookie } from '../utils/cookieUtils';
+import { deleteCookie } from '../utils/cookieUtils';
 import { useNotificationPreferences } from '../../lib/models/portal/useNotificationPreferences';
 import { useEmailAddress } from '../../lib/models/portal/useEmailAddress';
 import { useUserSession } from '../hooks/useUserSession';
 import EmailCapture from '../components/EmailCapture';
 import EmailSchedule from '../components/EmailSchedule';
+import PrivacySettingsMatrix from '../../components/Friends/PrivacySettingsMatrix';
+import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '../../lib/models/portal/useFriendsAndPrivacy';
 
 export default function SettingsPage() {
     const { status, userProfile, logout } = useAuth();
     const { theme, setTheme } = useTheme();
+    const { friendsFeatureEnabled } = useFriendsFeatureFlag();
     // Only 'light' renders light. The default 'skillprint' theme strips the
     // theme attributes, which leaves the portal's base (dark navy) palette.
     const isLight = theme === 'light';
-    const [userId, setUserId] = useState<string>('');
-    const [apiKey, setApiKey] = useState<string>('');
-    const [showApiKey, setShowApiKey] = useState(false);
     const [showTourResetAlert, setShowTourResetAlert] = useState(false);
-
-    useEffect(() => {
-        // Fetch user ID
-        if (typeof window !== 'undefined') {
-            const storedUserId = localStorage.getItem('user_id') || getCookie('user_id') || '';
-            setUserId(storedUserId);
-            
-            const storedApiKey = getCookie('api_key') || process.env.NEXT_PUBLIC_API_KEY || '';
-            setApiKey(storedApiKey);
-        }
-    }, []);
-
-    const handleCopy = async (text: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-        }
-    };
 
     const handleResetTour = () => {
         deleteCookie('ftue_completed');
@@ -91,6 +72,13 @@ export default function SettingsPage() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Friends & Profile Privacy Controls (only shown when enabled in /settings/toggles) */}
+                    {friendsFeatureEnabled && (
+                        <Suspense fallback={null}>
+                            <FriendsPrivacySettingsSection />
+                        </Suspense>
+                    )}
 
                     {/* Email (SKI-234). In its own component under Suspense: it reads
                         the player session, which reads the URL, and a static page may
@@ -161,7 +149,6 @@ export default function SettingsPage() {
                         <div>
                             <h2 className="text--danger">Sign out</h2>
                             <p className="margin-none text-muted font-sm">Signs this browser out. Your Skillprint and your history are kept.</p>
-                            <p className="pp-credential__note pp-token" role="status">ID: {userId || 'none'}  Token: stored in this browser</p>
                         </div>
                         <button 
                             className="button button--danger button--md" 
@@ -323,5 +310,41 @@ function EmailToggles({ prefs }: { prefs: Prefs }) {
                 </div>
             )}
         </>
+    );
+}
+
+function FriendsPrivacySettingsSection() {
+    const {
+        friendCode,
+        allowFriendRequests,
+        privacyGroups,
+        friendOverridesMap,
+        friends,
+        isUsingMockFallback,
+        updateGroupScope,
+        applyPrivacyPreset,
+        setAllowFriendRequests,
+        regenerateFriendCode,
+        setFriendOverride,
+        resetFriendOverrides,
+    } = useFriendsAndPrivacy();
+
+    return (
+        <div className="pp-setting pp-setting--stack separator-bottom" id="privacy">
+            <PrivacySettingsMatrix
+                friendCode={friendCode}
+                allowFriendRequests={allowFriendRequests}
+                privacyGroups={privacyGroups}
+                friends={friends}
+                friendOverridesMap={friendOverridesMap}
+                isUsingMockFallback={isUsingMockFallback}
+                onUpdateGroupScope={updateGroupScope}
+                onApplyPreset={applyPrivacyPreset}
+                onToggleAllowRequests={setAllowFriendRequests}
+                onRegenerateCode={regenerateFriendCode}
+                onSetFriendOverride={setFriendOverride}
+                onResetFriendOverrides={resetFriendOverrides}
+            />
+        </div>
     );
 }

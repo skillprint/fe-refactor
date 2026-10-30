@@ -7,6 +7,7 @@ import { useProfileBadges } from '../../lib/models/portal/useProfileBadges';
 import { getBadgeArt } from '../../lib/badgeArt';
 import { getGameDetails } from '../../app/config/gameConfig';
 import { baseSlug } from '@/lib/gameSlug';
+import BadgeShareButton from '../BadgeShareButton';
 
 function formatRelativeDate(dateString: string): string {
   if (!dateString) return '';
@@ -105,6 +106,11 @@ export default function ProfileBadges() {
                   {badge.animalFunFact && (
                     <p className="sp-badge__reason margin-none text-muted font-xs">{badge.animalFunFact}</p>
                   )}
+                  <BadgeShareButton
+                    badge={badge}
+                    gameSlug={badge.gameSlug}
+                    gameName={badge.gameName || localGame?.name}
+                  />
                 </figcaption>
               </figure>
             </article>

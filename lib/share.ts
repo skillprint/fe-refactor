@@ -105,6 +105,33 @@ export function siteSharePayload(origin: string): SharePayload {
   };
 }
 
+/** The minimum a badge needs to be shared. */
+export interface ShareableBadge {
+  slug: string;
+  name: string;
+  animalName?: string | null;
+}
+
+/**
+ * The public page for a badge. `game` names the game it was earned in, so the
+ * page can say so and offer that game; the page checks it against the library.
+ */
+export function badgeSharePath(slug: string, gameBaseSlug?: string | null): string {
+  const base = `/badge/${encodeURIComponent(slug)}/`;
+  return gameBaseSlug ? `${base}?game=${encodeURIComponent(gameBaseSlug)}` : base;
+}
+
+export function badgeSharePayload(origin: string, badge: ShareableBadge, game?: { baseSlug: string; name: string } | null): SharePayload {
+  const animal = badge.animalName ? ` (the ${badge.animalName})` : '';
+  const where = game?.name ? ` playing ${game.name}` : '';
+  return {
+    url: `${origin}${badgeSharePath(badge.slug, game?.baseSlug)}`,
+    title: `${badge.name} badge on Skillprint`,
+    text: `I earned the ${badge.name} badge${animal}${where} on Skillprint. Short games, a real read on your skills and mood.`,
+    image: `${origin}/api/og/badge/?slug=${encodeURIComponent(badge.slug)}`,
+  };
+}
+
 /** The iframe snippet someone pastes into their own page. */
 export function embedSnippet(embedUrl: string, title: string, width = 480, height = 720): string {
   return `<iframe src="${embedUrl}" title="${title.replace(/"/g, '&quot;')}" width="${width}" height="${height}" style="border:0;border-radius:16px;max-width:100%" allow="fullscreen; autoplay" allowfullscreen loading="lazy"></iframe>`;

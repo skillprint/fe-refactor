@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { cookies } from 'next/headers';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
 import jwt from 'jsonwebtoken';
 
 export async function GET(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     const cookieStore = await cookies();
     let userId = cookieStore.get('user_id')?.value;
 

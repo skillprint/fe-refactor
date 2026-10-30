@@ -38,8 +38,11 @@ export function useUserSession() {
             const queryUserId = searchParams.get('userId');
             let currentUserId: string | null = null;
 
-            // 1. Check Query String
-            if (queryUserId) {
+            // 1. Check Query String. Only a partner's iframe hands its player
+            // over this way. A top-level page ignores the id: holding a
+            // player's id is holding their account, so a shared link would
+            // otherwise sign the reader in as whoever's id it carries.
+            if (queryUserId && window.self !== window.top) {
                 currentUserId = queryUserId;
                 localStorage.setItem('userId', queryUserId);
                 setUserId(currentUserId);
