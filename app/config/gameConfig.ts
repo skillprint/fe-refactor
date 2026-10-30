@@ -788,7 +788,7 @@ export const gameDetails: Record<string, GameDetails> = {
   'omnomrun': {
     name: 'Om Nom Run',
     description: 'Run, jump, slide, and dodge obstacles through the streets of Nomville with Om Nom!',
-    image: '/games/live/Omnomrun/static/logo.png',
+    image: '/games/live/Omnomrun/static/img/logo.png',
     category: 'Runner',
     difficulty: 'Medium',
     estimatedTime: '3-8 minutes',
