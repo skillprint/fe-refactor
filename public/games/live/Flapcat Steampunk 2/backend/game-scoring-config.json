@@ -1,0 +1,59 @@
+{
+  "game_slug": "flapcat-steampunk-2",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "wallSpeed": {
+      "type": "number",
+      "min": 0.6,
+      "max": 1.6,
+      "default": 1.0,
+      "description": "Wall scroll speed as a multiple of the game's 300 px/s. Wall pairs keep their spacing, so faster walls also come more often. Applies to the walls on screen immediately. Higher values leave less time to line up with each opening.",
+      "adjustment_guide": "The main pace lever. Raise in steps of about 0.1 while the player clears several walls in a row; lower after quick crashes, or for relax."
+    },
+    "gapSize": {
+      "type": "integer",
+      "min": 140,
+      "max": 320,
+      "default": 200,
+      "description": "Height of the opening between each pair of walls, in px (the game's own is 200; the cat is about 105 px tall). Applies to wall pairs spawned from now on. Smaller openings demand more precise flying.",
+      "adjustment_guide": "The main precision lever. Widen (240-320) for relax or a struggling player; narrow (150-180) for focus and grit once the player passes walls reliably. Change by about 20 px at a time."
+    },
+    "gapVariation": {
+      "type": "number",
+      "min": 0.0,
+      "max": 1.5,
+      "default": 1.0,
+      "description": "How far the opening moves up and down from one wall pair to the next, as a multiple of the game's own (about 90-120 px either way). 0 keeps every opening at the same height. Higher values demand bigger climbs and dives between walls.",
+      "adjustment_guide": "Lower (0-0.5) for relax, so the player can settle into a rhythm. Raise (1.2-1.5) for grit and to train timing and anticipation."
+    }
+  },
+  "adjustment_instructions": "Flapcat Steampunk 2 is a one-button flyer: the cat flies up while the player holds a touch or the mouse and falls when they let go. Pairs of walls scroll in from the right with an opening between them; flying through an opening scores a point, and touching a wall or leaving the screen ends the run; the score resets and a new run starts.\nLevers: wallSpeed sets the pace (higher = less time to line up); gapSize sets how precise each pass must be (smaller = harder); gapVariation sets how far the cat must climb or dive between walls (higher = harder).\n- relax: wallSpeed 0.6-0.8, gapSize 260-320, gapVariation 0-0.5.\n- focus: wallSpeed 0.9-1.1, gapSize 170-200, gapVariation 0.8-1.0.\n- grit: wallSpeed 1.2-1.6, gapSize 140-170, gapVariation 1.2-1.5; ease gapSize back by 20 after several quick crashes.\n- joy: wallSpeed 0.9-1.1, gapSize 220-260, gapVariation 0.8-1.0, so the player strings together long runs.\nChange one lever at a time, in small steps (wallSpeed about 0.1, gapSize about 20); a run that ends within a few walls means the game is too hard.",
+  "skill_adjustment_instructions": "Flapcat Steampunk 2 trains Timing and Action (holding and releasing at the right moment), Perceptual Speed (reading the next opening early) and Attention (sustained concentration through long runs).\n- timing, action: narrow gapSize (150-180) at moderate wallSpeed (0.9-1.1), raising gapVariation to 1.2-1.5 as runs lengthen.\n- perceptual-speed: raise wallSpeed gradually (1.1-1.5) with gapSize 200-240 so the challenge is reacting in time, not precision.\n- attention: steady settings (wallSpeed 1.0, gapSize 180-200, gapVariation 1.0) held for long runs; avoid sudden changes.",
+  "notes": "Flapcat Steampunk 2's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'flapcat-steampunk-2' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "wallSpeed",
+      "type": "Float",
+      "description": "Wall scroll speed as a multiple of the game's 300 px/s. Wall pairs keep their spacing, so faster walls also come more often. Applies to the walls on screen immediately. Higher values leave less time to line up with each opening.",
+      "min_value": "0.6",
+      "max_value": "1.6",
+      "adjustment_guide": "The main pace lever. Raise in steps of about 0.1 while the player clears several walls in a row; lower after quick crashes, or for relax."
+    },
+    {
+      "name": "gapSize",
+      "type": "Integer",
+      "description": "Height of the opening between each pair of walls, in px (the game's own is 200; the cat is about 105 px tall). Applies to wall pairs spawned from now on. Smaller openings demand more precise flying.",
+      "min_value": "140",
+      "max_value": "320",
+      "adjustment_guide": "The main precision lever. Widen (240-320) for relax or a struggling player; narrow (150-180) for focus and grit once the player passes walls reliably. Change by about 20 px at a time."
+    },
+    {
+      "name": "gapVariation",
+      "type": "Float",
+      "description": "How far the opening moves up and down from one wall pair to the next, as a multiple of the game's own (about 90-120 px either way). 0 keeps every opening at the same height. Higher values demand bigger climbs and dives between walls.",
+      "min_value": "0.0",
+      "max_value": "1.5",
+      "adjustment_guide": "Lower (0-0.5) for relax, so the player can settle into a rhythm. Raise (1.2-1.5) for grit and to train timing and anticipation."
+    }
+  ]
+}

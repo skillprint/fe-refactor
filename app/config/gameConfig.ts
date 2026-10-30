@@ -91,6 +91,17 @@ export const gameConfigs: Record<string, GameConfig> = {
   'flapcat-steampunk': {
     exitButtonPosition: 'top-left',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Flapcat Steampunk/backend/game-scoring-config.json',
+    customExitButton: {
+      color: 'gray',
+      size: 'md'
+    }
+  },
+
+  'flapcat-steampunk-2': {
+    exitButtonPosition: 'top-left',
+    hideBottomTabs: true,
+    parameterManifest: '/games/live/Flapcat Steampunk 2/backend/game-scoring-config.json',
     customExitButton: {
       color: 'gray',
       size: 'md'
