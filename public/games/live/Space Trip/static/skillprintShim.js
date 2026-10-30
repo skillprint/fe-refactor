@@ -34,7 +34,14 @@ window.adjustGame = function (obj) {
         const { parameterName, parameterValue } = obj;
         const range = PARAMS[parameterName];
         const value = Number(parameterValue);
-        if (!range || !Number.isFinite(value)) return;
+        if (!range) {
+            console.warn('[skillprintShim - Space Trip] Unknown parameter ' + parameterName);
+            return;
+        }
+        if (!Number.isFinite(value)) {
+            console.warn('[skillprintShim - Space Trip] Ignoring non-numeric ' + parameterName + ': ' + parameterValue);
+            return;
+        }
 
         const clamped = Math.min(range.max, Math.max(range.min, value));
         if (parameterName === "speedModifier") {
@@ -42,6 +49,7 @@ window.adjustGame = function (obj) {
         } else {
             tuning[parameterName] = clamped;
         }
+        console.log('[skillprintShim - Space Trip] ' + parameterName + ' = ' + clamped);
     }
 }
 

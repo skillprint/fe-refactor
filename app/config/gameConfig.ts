@@ -195,6 +195,7 @@ export const gameConfigs: Record<string, GameConfig> = {
   'space-trip': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
+    parameterManifest: '/games/live/Space Trip/backend/game-scoring-config.json',
     customExitButton: {
       color: 'blue',
       size: 'lg'
