@@ -10,7 +10,7 @@ import {
   LibraryGame_20260505,
   PersonalGameStats_20260505,
   CommunityGameStats_20260505
-} from '../models/models_20260505';
+} from './models_20260505';
 
 export const MODEL_FIELDS_20260505: Record<string, string[]> = {
   'HomeJustPlayed_20260505': ['duration_seconds', 'target_score'],
