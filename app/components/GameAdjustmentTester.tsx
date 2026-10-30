@@ -189,6 +189,25 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'fruit-boom':
+            // speedModifier (game clock), spawnIntervalMultiplier (higher = calmer), bombDensity
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'speedModifier', parameterValue: 0.6 }]; // Slow motion
+                case 2: return [{ parameterName: 'speedModifier', parameterValue: 1.0 }]; // Default
+                case 3: return [{ parameterName: 'speedModifier', parameterValue: 1.5 }]; // Fastest
+                case 4: return [{ parameterName: 'spawnIntervalMultiplier', parameterValue: 2.0 }]; // Half as many launches
+                case 5: return [{ parameterName: 'spawnIntervalMultiplier', parameterValue: 1.0 }]; // Default
+                case 6: return [{ parameterName: 'spawnIntervalMultiplier', parameterValue: 0.5 }]; // Twice as many
+                case 7: return [{ parameterName: 'bombDensity', parameterValue: 0 }]; // No bombs
+                case 8: return [{ parameterName: 'bombDensity', parameterValue: 1.0 }]; // Default
+                case 9: return [
+                    { parameterName: 'speedModifier', parameterValue: 1.4 },
+                    { parameterName: 'spawnIntervalMultiplier', parameterValue: 0.6 },
+                    { parameterName: 'bombDensity', parameterValue: 1.0 }
+                ]; // Hard mode
+                default:
+                    return [];
+            }
         case 'fruit-sorting':
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'seconds_on_clock', parameterValue: 120 }];

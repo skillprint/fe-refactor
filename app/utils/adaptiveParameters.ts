@@ -14,6 +14,8 @@ export const getAdaptiveParametersForGame = (slug: string): string[] => {
             return ['Ball Speed', 'Power-Up Frequency', 'Multiball Limit'];
         case 'change-word':
             return ['Time Per Word', 'Time Pressure Ramp', 'Hints Per Stage'];
+        case 'fruit-boom':
+            return ['Game Speed', 'Fruit Frequency', 'Bomb Density'];
         case 'fruit-sorting':
             return ['Clock Duration'];
         case 'gems-of-hanoi':

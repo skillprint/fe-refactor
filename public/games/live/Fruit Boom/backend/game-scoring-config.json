@@ -1,0 +1,59 @@
+{
+  "game_slug": "fruit-boom-cfc9640c-477d-437b-9d2f-54f972163c09",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "speedModifier": {
+      "type": "number",
+      "min": 0.6,
+      "max": 1.5,
+      "default": 1.0,
+      "description": "Game clock speed. Fruit flight, gravity and the spawn timer all scale with it: 0.6 is slow motion, 1.5 is 50% faster. Applies immediately and holds across restarts.",
+      "adjustment_guide": "The main pressure lever. Raise in steps of about 0.1 while the player slices nearly everything (many SLASHED, few NOT_SLASHED). Lower after LEVEL_FAILED or a run of NOT_SLASHED."
+    },
+    "spawnIntervalMultiplier": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Time between launches, as a multiple of the game's own ramp (a fruit every 4 s at the start, down to every 0.4 s from 80 points). Higher is calmer: 2 doubles the gap, 0.5 halves it. Applies immediately.",
+      "adjustment_guide": "Lower (0.5-0.8) for grit and perceptual speed, so more fruit is in the air at once. Raise (1.3-2) for relax or when NOT_SLASHED piles up."
+    },
+    "bombDensity": {
+      "type": "number",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 1.0,
+      "description": "Share of spawned bombs that are kept (1 = the game's default; 0 = no bombs). Slashing a bomb ends the run. Removed bombs are logged as BOMB_REMOVED with their SPAWN id, since the game logs SPAWN before the shim removes them. Applies to new spawns.",
+      "adjustment_guide": "Lower (0-0.4) for relax, joy and young players. Keep at 1 for attention and response-control training, where holding back from bombs is the point."
+    }
+  },
+  "adjustment_instructions": "Fruit Boom: fruit and bombs are launched up from the bottom of the screen; the player swipes to slice fruit. Slicing a bomb ends the run, and so does letting three fruit fall unsliced. The timed mode also ends a run after 1:30. Launches come faster as the score rises (every 4 s at first, every 0.4 s from 80 points).\nLevers: speedModifier is the main pressure lever (everything moves faster); spawnIntervalMultiplier sets how crowded the screen gets (lower = more fruit at once); bombDensity sets how many bombs appear (1 is the game's maximum).\n- relax: speedModifier 0.6-0.8, spawnIntervalMultiplier 1.4-2, bombDensity 0-0.3.\n- focus: speedModifier 0.9-1.1, spawnIntervalMultiplier 0.9-1.1, bombDensity 0.6-1.\n- grit: speedModifier 1.2-1.5, spawnIntervalMultiplier 0.5-0.8, bombDensity 1; ease speedModifier down after a LEVEL_FAILED.\n- joy: speedModifier 0.9-1.0, spawnIntervalMultiplier 0.8-1.2, bombDensity 0.2-0.5 (lots of slicing, few bombs).\nChange speedModifier in steps of about 0.1. When fruit is missed, raise spawnIntervalMultiplier first; when runs end on a bomb, lower bombDensity.",
+  "skill_adjustment_instructions": "Fruit Boom trains Action and Perceptual Speed (spotting and slicing fast-moving fruit), with Attention and response control (telling bombs from fruit and holding back).\n- action, perceptual speed: speedModifier 1.1-1.4 and spawnIntervalMultiplier 0.6-0.9, so many targets move fast.\n- attention: bombDensity 1 with moderate speed (0.9-1.1), so every swipe needs a check for bombs.\n- timing: speedModifier 1.2-1.5 with spawnIntervalMultiplier 1.0-1.3, so the challenge is catching each fruit at the top of its arc, not crowding.",
+  "notes": "Fruit Boom's difficulty knobs (Jeremy's shim on _shared/skillprintC3.js), matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'fruit-boom' keys. Replaces the Fruit Ninja config that marketplace migration 0009 seeds for every 'fruit-' slug (fruitSpawnRate, bombSpawnChance, pointsPerFruit, gameSpeedMultiplier): the game reads none of them. game_slug is the fixture slug; confirm the production Game record.",
+  "sdk_game_parameters": [
+    {
+      "name": "speedModifier",
+      "type": "Float",
+      "description": "Game clock speed. Fruit flight, gravity and the spawn timer all scale with it: 0.6 is slow motion, 1.5 is 50% faster. Applies immediately and holds across restarts.",
+      "min_value": "0.6",
+      "max_value": "1.5",
+      "adjustment_guide": "The main pressure lever. Raise in steps of about 0.1 while the player slices nearly everything (many SLASHED, few NOT_SLASHED). Lower after LEVEL_FAILED or a run of NOT_SLASHED."
+    },
+    {
+      "name": "spawnIntervalMultiplier",
+      "type": "Float",
+      "description": "Time between launches, as a multiple of the game's own ramp (a fruit every 4 s at the start, down to every 0.4 s from 80 points). Higher is calmer: 2 doubles the gap, 0.5 halves it. Applies immediately.",
+      "min_value": "0.5",
+      "max_value": "2.0",
+      "adjustment_guide": "Lower (0.5-0.8) for grit and perceptual speed, so more fruit is in the air at once. Raise (1.3-2) for relax or when NOT_SLASHED piles up."
+    },
+    {
+      "name": "bombDensity",
+      "type": "Float",
+      "description": "Share of spawned bombs that are kept (1 = the game's default; 0 = no bombs). Slashing a bomb ends the run. Removed bombs are logged as BOMB_REMOVED with their SPAWN id, since the game logs SPAWN before the shim removes them. Applies to new spawns.",
+      "min_value": "0.0",
+      "max_value": "1.0",
+      "adjustment_guide": "Lower (0-0.4) for relax, joy and young players. Keep at 1 for attention and response-control training, where holding back from bombs is the point."
+    }
+  ]
+}
