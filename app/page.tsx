@@ -29,6 +29,8 @@ import { MockDataTag } from '@/components/MockDataTag';
 import HomeSkillprintWheel from '@/components/HomeSkillprintWheel';
 import { useHomeSummary } from '@/lib/models/portal/useHomeSummary';
 import { useHomeRecentSessions } from '@/lib/models/portal/useHomeRecentSessions';
+import { useHomeHighlights } from '@/lib/models/portal/useHomeHighlights';
+import { HomeHighlights } from '@/components/HomeHighlights';
 import { useNextGameRecommendation } from '@/lib/models/portal/useNextGameRecommendation';
 import type { HomeRecentSession } from '@/lib/models/portal/HomeRecentSessions';
 
@@ -357,6 +359,8 @@ function HomeContent() {
 
   const { data: homeSummary } = useHomeSummary();
   const { data: recentSessions } = useHomeRecentSessions();
+  // Dev only: `?synthetic=1` renders the mock rail without a backend.
+  const highlights = useHomeHighlights(searchParams.get('synthetic') === '1');
   const { data: nextGameRecs } = useNextGameRecommendation();
 
   let count = homeSummary?.totalSessions ?? 0;
@@ -528,6 +532,10 @@ function HomeContent() {
                 />
               )}
             </PortalSection>
+
+            {/* Top scores this week: hidden until the backend serves the
+                highlights (404 today) and while the window is empty. */}
+            {highlights.data && <HomeHighlights highlights={highlights.data} />}
 
             {/* New Games */}
             <PortalSection ariaLabelledBy="newTitle">

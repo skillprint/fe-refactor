@@ -40,9 +40,19 @@ export const getCookieDomain = (): string => {
 // Get a cookie value by name
 export const getCookie = (name: string): string | null => {
   if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  // The same name can be present more than once: a cookie scoped to
+  // .skillprint.co (set on production) is also sent to
+  // portal.staging.skillprint.co, next to the .staging.skillprint.co copy.
+  // The old reader required exactly one match and returned null otherwise,
+  // which made every write look like it had failed. Take the first match.
+  const prefix = `${name}=`;
+  for (const part of document.cookie.split(';')) {
+    const trimmed = part.trim();
+    if (trimmed.startsWith(prefix)) {
+      const value = trimmed.slice(prefix.length);
+      if (value) return value;
+    }
+  }
   return null;
 };
 
@@ -58,8 +68,22 @@ export const setCookie = (name: string, value: string, days = 365) => {
 // Delete a cookie
 export const deleteCookie = (name: string) => {
   if (typeof document === 'undefined') return;
+  const expired = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+  // Clear the host-only cookie and every domain scope this host receives, so
+  // a copy set from another subdomain (production's .skillprint.co while on
+  // staging) cannot outlive the delete and keep reading as "still set".
+  const scopes = new Set<string>(['']);
   const domainAttr = getCookieDomain();
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${domainAttr}`;
+  if (domainAttr) {
+    scopes.add(domainAttr);
+    const parts = window.location.hostname.split('.');
+    for (let i = 1; i < parts.length - 1; i++) {
+      scopes.add(`; domain=.${parts.slice(i).join('.')}`);
+    }
+  }
+  scopes.forEach((scope) => {
+    document.cookie = `${expired}${scope}`;
+  });
 };
 
 // Dynamically resolve the API base URL depending on the current environment and hostname.

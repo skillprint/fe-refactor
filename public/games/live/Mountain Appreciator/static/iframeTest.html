@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Mountain Appreciator — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'mountain-appreciator',
+      params: [
+        {name:'daylightScale',default:1},
+        {name:'missPenaltySec',default:7},
+        {name:'blinkSunRate',default:4},
+        {name:'hitTolerance',default:1},
+        {name:'levelOffset',default:0},
+      ],
+      presets: {
+        1:{daylightScale:1.6,missPenaltySec:3,blinkSunRate:2,hitTolerance:1.35},
+        2:{daylightScale:1.3,missPenaltySec:5,hitTolerance:1.15},
+        3:{daylightScale:1,missPenaltySec:7,blinkSunRate:4,hitTolerance:1,levelOffset:0},
+        4:{daylightScale:0.8,missPenaltySec:10},
+        5:{daylightScale:0.65,missPenaltySec:13,blinkSunRate:7,hitTolerance:0.8},
+        6:{levelOffset:-2},
+        7:{levelOffset:2},
+        8:{hitTolerance:0.6},
+        9:{daylightScale:0.5,missPenaltySec:20,blinkSunRate:8,hitTolerance:0.6,levelOffset:3},
+      },
+      readState: (w) => ({ ...w.__mountainState, tuning: w.__mountainTuning }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

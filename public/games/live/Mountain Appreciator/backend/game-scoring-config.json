@@ -1,0 +1,91 @@
+{
+  "game_slug": "mountain-appreciator",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "daylightScale": {
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "default": 1,
+      "description": "How long the light lasts on a pair, as a multiple of 40 s plus 22 s per difference (100 s for three differences at 1.0). Higher values give more time and make the pair easier.",
+      "adjustment_guide": "relax 1.4-1.7, focus 0.9-1.1, grit 0.6-0.75, awe 1.3-1.6. Applies at once; the sun keeps its place in the sky, so the time left grows or shrinks in proportion. Move by at most 0.25 at a time."
+    },
+    "missPenaltySec": {
+      "type": "number",
+      "min": 0,
+      "max": 20,
+      "default": 7,
+      "description": "Seconds of daylight a wrong click on the mountain costs. Higher values punish guessing and make the pair harder.",
+      "adjustment_guide": "relax 2-4, focus 6-8, grit 11-15, awe 2-4. Applies to the next wrong click. Raise it when the player clicks around at random; lower it when misses come in bursts of frustration."
+    },
+    "blinkSunRate": {
+      "type": "number",
+      "min": 1,
+      "max": 8,
+      "default": 4,
+      "description": "How many times faster the sun moves while the player holds Blink to flick between the twins. Higher values make the comparison aid costlier and the pair harder.",
+      "adjustment_guide": "relax 1.5-2.5, focus 3.5-4.5, grit 6-8, awe 2-3. Applies at once, including mid-blink."
+    },
+    "hitTolerance": {
+      "type": "number",
+      "min": 0.6,
+      "max": 1.6,
+      "default": 1,
+      "description": "Scales how close a click must land to a difference to count: both its radius on the mountain and its smallest size on screen. Higher values are more forgiving and make the pair easier.",
+      "adjustment_guide": "relax 1.25-1.45, focus 0.95-1.05, grit 0.7-0.85, awe 1.15-1.3. Applies to the next click. Raise it when near-miss clicks keep landing just beside a difference."
+    },
+    "levelOffset": {
+      "type": "integer",
+      "min": -3,
+      "max": 3,
+      "default": 0,
+      "description": "Shifts the difficulty rung the next pair is built on, relative to how many pairs the player has walked. Each rung up brings more differences (3 at rung 1, one more every two rungs, up to 7), subtler ones, and more hidden round the back of the mountain. Higher values make the next pair harder.",
+      "adjustment_guide": "relax -2 to -1, focus 0, grit +1 to +2, awe -1 to 0. Takes effect when the next pair is built, never mid-pair. Change it by one step per pair."
+    }
+  },
+  "adjustment_instructions": "You are adjusting parameters for Mountain Appreciator, a 3D spot-the-difference game played on a pair of procedurally generated twin mountains.\nThe player orbits and zooms a shared camera around two side-by-side copies of one mountain and clicks the differences between them (trees, water, sky, wildlife, rock and ice, weather, traces of people). Each pair ends when every difference is found, when the light runs out at sunset (or sunrise on night pairs), or when the player lets the sun set early. Wrong clicks on the mountain cost daylight; holding Blink flicks between the twins but speeds up the sun.\n\nEach frame is stamped top left with the pair number, score, \"Found N of M\" and the time left until dusk or dawn. Gold rings mark found differences, red dashed rings the ones missed at the end of a pair. Events: LEVEL_START (pair, rung, differences, hidden, night, noSunset), MATCH (each find, with daylightLeft), UNMATCH (a wrong click and its penaltySec), SKY_CLICK (a harmless click on empty sky), BLINK (ms held), LEVEL_COMPLETE (all found), LEVEL_FAILED (the light ran out) and LEVEL_QUIT (the player let it go), each with found, differences and points.\n\nFive parameters are exposed:\n- daylightScale (number, 0.5-2.0): multiplies the pair's daylight, 40 s plus 22 s per difference at 1.0. Higher is easier. Applies at once, stretching or shrinking the time left in proportion.\n- missPenaltySec (number, 0-20): daylight lost per wrong click on the mountain. Higher is harder.\n- blinkSunRate (number, 1-8): how many times faster the sun moves while Blink is held. Higher makes the comparison aid costlier.\n- hitTolerance (number, 0.6-1.6): how close a click must land to a difference. Higher is more forgiving.\n- levelOffset (integer, -3 to 3): shifts the difficulty rung of the NEXT pair: more differences (3 at rung 1, up to 7), subtler ones, and more hidden round the back of the mountain. Higher is harder. Never takes effect mid-pair.\n\nGiven the player's current flow state, skill metrics, and target mood,\noutput parameter values that guide the player toward the target mood:\n- For 'relax': daylightScale ~1.5, missPenaltySec ~3, blinkSunRate ~2, hitTolerance ~1.3, levelOffset -1 to -2 — a long golden hour, forgiving clicks, few and obvious differences\n- For 'focus': daylightScale ~1.0, missPenaltySec ~7, blinkSunRate ~4, hitTolerance ~1.0, levelOffset 0 — the game as designed: steady pressure that rewards careful looking\n- For 'grit': daylightScale ~0.65, missPenaltySec ~13, blinkSunRate ~7, hitTolerance ~0.8, levelOffset +1 to +2 — short light, costly guesses, more and subtler differences, some hidden behind the mountain\n- For 'awe': daylightScale ~1.4, missPenaltySec ~3, blinkSunRate ~2.5, hitTolerance ~1.2, levelOffset -1 to 0 — time to orbit and take in the whole mountain and sky; enough differences to keep the player exploring, never rushed\n\nConsider the player's current performance: if flow score is low and cognitive\nload is high, the game is likely too hard — ease off (raise daylightScale first, then hitTolerance, then lower missPenaltySec; lower levelOffset for the next pair if a pair ended with two or more missed). If UNMATCH events come in bursts, the player is guessing: raise hitTolerance only if the clicks land close to differences, otherwise raise missPenaltySec slightly. If arousal is low and attention is dropping, the player may be bored — increase challenge (lower daylightScale, then raise levelOffset by one for the next pair once a pair ends with every difference found and daylight to spare).\n\nAlways adjust gradually from the current parameter values to avoid jarring transitions: at most 0.25 on daylightScale, 3 s on missPenaltySec, 1.5 on blinkSunRate, 0.15 on hitTolerance and one step on levelOffset at a time. When LEVEL_START says noSunset is true the player chose to play without a clock: daylightScale, missPenaltySec and blinkSunRate have no effect, so adjust hitTolerance and levelOffset only.",
+  "skill_adjustment_instructions": "Mountain Appreciator trains sustained visual attention, comparison of two near-identical scenes (pattern matching), spatial reasoning about a 3D form seen from moving viewpoints, and perceptual speed. Read \"Found N of M\", the score and the time left from the stamp at the top left of each frame; MATCH events carry the kind, tier (1 obvious to 3 subtle) and whether the difference was hidden round the back.\n\nPer-skill levers (primary first):\n- attention: lower daylightScale and raise missPenaltySec so the player must keep scanning rather than click around; ease off if a pair ends with half or more missed.\n- pattern-matching: raise levelOffset (more and subtler differences) and blinkSunRate (less reliance on the blink comparator, more side-by-side comparison).\n- spatial: raise levelOffset, which hides more differences round the back of the mountain and makes the player orbit to find them; keep hitTolerance at 1.0 or above so precision isn't the bottleneck.\n- perceptual-speed: lower daylightScale toward 0.6-0.8 while holding levelOffset at 0, so the same differences must be found faster.\n\nMove one or two parameters per adjustment, by the same small steps as the mood guidance, and change levelOffset only between pairs.",
+  "notes": "Generated by backend/export-config.mjs from static/src/params.js, the list the game also hands to skillprint-js-sdk. Keys 1-9 in GameAdjustmentTester and static/iframeTest.html send the presets listed in GAME_PARAMETERS.MD.",
+  "sdk_game_parameters": [
+    {
+      "name": "daylightScale",
+      "type": "Float",
+      "description": "How long the light lasts on a pair, as a multiple of 40 s plus 22 s per difference (100 s for three differences at 1.0). Higher values give more time and make the pair easier.",
+      "adjustment_guide": "relax 1.4-1.7, focus 0.9-1.1, grit 0.6-0.75, awe 1.3-1.6. Applies at once; the sun keeps its place in the sky, so the time left grows or shrinks in proportion. Move by at most 0.25 at a time.",
+      "min_value": "0.5",
+      "max_value": "2"
+    },
+    {
+      "name": "missPenaltySec",
+      "type": "Float",
+      "description": "Seconds of daylight a wrong click on the mountain costs. Higher values punish guessing and make the pair harder.",
+      "adjustment_guide": "relax 2-4, focus 6-8, grit 11-15, awe 2-4. Applies to the next wrong click. Raise it when the player clicks around at random; lower it when misses come in bursts of frustration.",
+      "min_value": "0",
+      "max_value": "20"
+    },
+    {
+      "name": "blinkSunRate",
+      "type": "Float",
+      "description": "How many times faster the sun moves while the player holds Blink to flick between the twins. Higher values make the comparison aid costlier and the pair harder.",
+      "adjustment_guide": "relax 1.5-2.5, focus 3.5-4.5, grit 6-8, awe 2-3. Applies at once, including mid-blink.",
+      "min_value": "1",
+      "max_value": "8"
+    },
+    {
+      "name": "hitTolerance",
+      "type": "Float",
+      "description": "Scales how close a click must land to a difference to count: both its radius on the mountain and its smallest size on screen. Higher values are more forgiving and make the pair easier.",
+      "adjustment_guide": "relax 1.25-1.45, focus 0.95-1.05, grit 0.7-0.85, awe 1.15-1.3. Applies to the next click. Raise it when near-miss clicks keep landing just beside a difference.",
+      "min_value": "0.6",
+      "max_value": "1.6"
+    },
+    {
+      "name": "levelOffset",
+      "type": "Integer",
+      "description": "Shifts the difficulty rung the next pair is built on, relative to how many pairs the player has walked. Each rung up brings more differences (3 at rung 1, one more every two rungs, up to 7), subtler ones, and more hidden round the back of the mountain. Higher values make the next pair harder.",
+      "adjustment_guide": "relax -2 to -1, focus 0, grit +1 to +2, awe -1 to 0. Takes effect when the next pair is built, never mid-pair. Change it by one step per pair.",
+      "min_value": "-3",
+      "max_value": "3"
+    }
+  ]
+}

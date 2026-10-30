@@ -2417,6 +2417,14 @@ html[data-surface="light"] .sp-side-nav {
   stroke-linejoin: round;
 }
 
+/* A link's icon while its navigation is on the way: same box, a spinning ring. */
+.sp-icon--pending {
+  border: var(--space-2) solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: button-spin var(--duration-slowest) linear infinite;
+}
+
 
 .sp-icon--3xs { --icon-size: var(--icon-size-3xs); --icon-stroke: var(--icon-stroke-10); }
 .sp-icon--2xs { --icon-size: var(--icon-size-2xs); --icon-stroke: var(--icon-stroke-12); }
@@ -7444,6 +7452,44 @@ html:is([data-theme="light"], [data-surface="light"]) .page--portal-profile [dat
 
 .page--portal .gd-record__empty {
   border-style: dashed;
+}
+
+/* --------------------------------------------------------------------------
+   Home · top scores rail
+   The figures a highlighted tile carries above its Play button: top score,
+   the viewer's best, plays. Two columns, label then value.
+   -------------------------------------------------------------------------- */
+
+.page--portal .game-highlight {
+  display: grid;
+  gap: var(--space-4);
+  font-size: var(--app-text-sm-font-size);
+  line-height: var(--app-text-sm-line-height);
+}
+
+.page--portal .game-highlight__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+
+.page--portal .game-highlight__row dt {
+  flex: none;
+}
+
+.page--portal .game-highlight__row dd {
+  min-width: 0;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.page--portal .game-highlight__yours {
+  color: var(--core-green-500);
+  font-weight: var(--weight-semibold);
+}
+
+.page--portal .media-badge[data-status="your top score"] {
+  --badge-accent: var(--core-green-500);
 }
 
 /* --------------------------------------------------------------------------

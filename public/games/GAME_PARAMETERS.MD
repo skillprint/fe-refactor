@@ -848,6 +848,39 @@ Original diner-style time-management game (own art/branding, not affiliated with
 
 ---
 
+### Mountain Appreciator
+Three.js spot-the-difference game on pairs of procedurally generated twin mountains (slug `mountain-appreciator`, folder `live/Mountain Appreciator`). The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `daylightScale` (Number, 0.5–2.0): multiplies the pair's daylight (40 s + 22 s per difference). Applies at once; the time left stretches in proportion. Default 1.0.
+- `missPenaltySec` (Number, 0–20): daylight lost per wrong click on the mountain. Default 7.
+- `blinkSunRate` (Number, 1–8): how much faster the sun moves while Blink is held. Default 4.
+- `hitTolerance` (Number, 0.6–1.6): scales how close a click must land to a difference. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the difficulty rung of the next pair (more, subtler and hidden differences). Applies when the next pair is built. Default 0.
+
+The daylight parameters do nothing while the player has ticked "No sunset"; LEVEL_START events carry `noSunset`.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "daylightScale",
+  "parameterValue": 1.4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ daylightScale: 1.6, missPenaltySec: 3, blinkSunRate: 2, hitTolerance: 1.35 }` (Relax)
+- `2`: `{ daylightScale: 1.3, missPenaltySec: 5, hitTolerance: 1.15 }` (Gentle)
+- `3`: `{ daylightScale: 1.0, missPenaltySec: 7, blinkSunRate: 4, hitTolerance: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ daylightScale: 0.8, missPenaltySec: 10 }` (Brisk)
+- `5`: `{ daylightScale: 0.65, missPenaltySec: 13, blinkSunRate: 7, hitTolerance: 0.8 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next pair)
+- `7`: `{ levelOffset: 2 }` (Harder next pair)
+- `8`: `{ hitTolerance: 0.6 }` (Precise clicks only)
+- `9`: `{ daylightScale: 0.5, missPenaltySec: 20, blinkSunRate: 8, hitTolerance: 0.6, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 
