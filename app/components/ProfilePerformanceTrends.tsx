@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import DynamicChart from '../visualize/components/DynamicChart';
-import { generateSyntheticData, DataPoint } from '../visualize/utils/syntheticData';
+import DynamicChart from './DynamicChart';
+import { generateSyntheticData, DataPoint } from '../utils/syntheticData';
 
 const PILLAR_DIMENSIONS = {
   Mood: ['relax', 'grit', 'focus', 'collaborate', 'empathy', 'creativity', 'joy', 'curiosity', 'awe'],

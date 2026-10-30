@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { getCookie } from '@/app/utils/cookieUtils';
 import {
   createWelcomeNotification,
+  evaluatePlatformNotifications,
   formatNotificationBadgeCount,
   formatNotificationsAriaLabel,
   NewNotificationInput,
@@ -71,28 +71,10 @@ export function useNotificationsFeatureFlag() {
   return { notificationsFeatureEnabled, setNotificationsFeatureEnabled };
 }
 
-/* ── Client Identity & Local Cache Helpers ─────────────────────────────── */
-
-function getClientAuthContext(): { userId: string; userToken: string | null } {
-  if (typeof window === 'undefined') {
-    return { userId: 'default', userToken: null };
-  }
-  const userId =
-    window.localStorage.getItem('user_id') || getCookie('user_id') || 'default';
-  const userToken =
-    window.localStorage.getItem('user_token') || getCookie('user_token') || null;
-  return { userId, userToken };
-}
-
-function buildAuthHeaders(userToken?: string | null): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (userToken) {
-    headers['Authorization'] = `Token ${userToken}`;
-  }
-  return headers;
-}
+/* ── Local Inbox ────────────────────────────────────────────────────────
+ * The inbox lives in this browser's localStorage. It used to be mirrored to
+ * an in-memory store behind a Next.js API route, which the static build
+ * can't have; a backend inbox is future work. */
 
 export function readSeenNotificationIds(): Set<string> {
   if (typeof window === 'undefined') return new Set();
@@ -156,62 +138,25 @@ export function writeStoredNotifications(
   window.dispatchEvent(new CustomEvent(NOTIFICATIONS_CHANGE_EVENT, { detail: items }));
 }
 
-function applyBackendInboxResponse(data: any): PortalNotification[] | null {
-  if (data && Array.isArray(data.notifications)) {
-    writeStoredNotifications(data.notifications, data.seenIds);
-    return data.notifications as PortalNotification[];
-  }
-  return null;
-}
+/* ── Notification Operations ───────────────────────────────────────────── */
 
-/* ── Backend-Backed Notification Operations ────────────────────────────── */
-
-export async function fetchBackendNotifications(forceUpstream = false): Promise<PortalNotification[]> {
-  if (typeof window === 'undefined') return readStoredNotifications();
-  const { userId, userToken } = getClientAuthContext();
-  try {
-    const qs = new URLSearchParams({ userId });
-    if (forceUpstream) qs.set('force', '1');
-    const res = await fetch(`/api/notifications?${qs.toString()}`, {
-      headers: buildAuthHeaders(userToken),
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const json = await res.json();
-      const synced = applyBackendInboxResponse(json);
-      if (synced) return synced;
-    }
-  } catch {
-    // Fall back to local cache when offline
-  }
-  return readStoredNotifications();
-}
-
-export async function syncPlatformNotificationsToBackend(
-  payload: PlatformSyncPayload,
-): Promise<PortalNotification[]> {
+/**
+ * Evaluates the platform data (milestones, badges, assignments, deadlines,
+ * skill trends, streaks, account prompts) and adds each notification whose
+ * deterministic id this browser hasn't emitted before. Returns the new ones.
+ */
+export function syncPlatformNotifications(payload: PlatformSyncPayload): PortalNotification[] {
   if (typeof window === 'undefined') return [];
-  const { userId, userToken } = getClientAuthContext();
-  try {
-    const res = await fetch('/api/notifications', {
-      method: 'POST',
-      headers: buildAuthHeaders(userToken),
-      body: JSON.stringify({
-        action: 'sync',
-        userId,
-        userToken,
-        payload,
-      }),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      const synced = applyBackendInboxResponse(json);
-      if (synced) return synced;
-    }
-  } catch {
-    // ignore network failure
+  const seen = readSeenNotificationIds();
+  const current = readStoredNotifications();
+  const added = evaluatePlatformNotifications(payload).filter(
+    (item) => !seen.has(item.id) && !current.some((existing) => existing.id === item.id),
+  );
+  if (added.length > 0) {
+    // Each one goes on top in turn, so the last evaluated ends up first.
+    writeStoredNotifications([...added].reverse().concat(current), added.map((item) => item.id));
   }
-  return readStoredNotifications();
+  return added;
 }
 
 export function pushPortalNotification(input: NewNotificationInput): PortalNotification {
@@ -233,29 +178,12 @@ export function pushPortalNotification(input: NewNotificationInput): PortalNotif
   const updated = [nextItem, ...current.filter((item) => item.id !== nextItem.id)];
   writeStoredNotifications(updated);
 
-  if (typeof window !== 'undefined') {
-    const { userId, userToken } = getClientAuthContext();
-    fetch('/api/notifications', {
-      method: 'POST',
-      headers: buildAuthHeaders(userToken),
-      body: JSON.stringify({
-        action: 'create',
-        userId,
-        notification: nextItem,
-        once: false,
-      }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => applyBackendInboxResponse(json))
-      .catch(() => {});
-  }
-
   return nextItem;
 }
 
 /**
  * Emits a notification from an automatic data source only if its deterministic
- * `id` has never been emitted before, persisting to the backend `/api/notifications`.
+ * `id` has never been emitted before in this browser.
  */
 export function pushPortalNotificationOnce(item: PortalNotification): boolean {
   if (typeof window === 'undefined') return false;
@@ -266,21 +194,6 @@ export function pushPortalNotificationOnce(item: PortalNotification): boolean {
   }
   recordSeenNotificationIds([item.id]);
   writeStoredNotifications([item, ...current]);
-
-  const { userId, userToken } = getClientAuthContext();
-  fetch('/api/notifications', {
-    method: 'POST',
-    headers: buildAuthHeaders(userToken),
-    body: JSON.stringify({
-      action: 'create',
-      userId,
-      notification: item,
-      once: true,
-    }),
-  })
-    .then((res) => (res.ok ? res.json() : null))
-    .then((json) => applyBackendInboxResponse(json))
-    .catch(() => {});
 
   return true;
 }
@@ -293,23 +206,6 @@ export function pushWelcomeNotification(): PortalNotification {
   recordSeenNotificationIds([welcome.id]);
   writeStoredNotifications([welcome, ...current]);
 
-  if (typeof window !== 'undefined') {
-    const { userId, userToken } = getClientAuthContext();
-    fetch('/api/notifications', {
-      method: 'POST',
-      headers: buildAuthHeaders(userToken),
-      body: JSON.stringify({
-        action: 'create',
-        userId,
-        notification: welcome,
-        once: false,
-      }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => applyBackendInboxResponse(json))
-      .catch(() => {});
-  }
-
   return welcome;
 }
 
@@ -320,11 +216,6 @@ export function useNotifications() {
   useEffect(() => {
     setNotifications(readStoredNotifications());
     setHydrated(true);
-
-    // Hydrate from backend inbox
-    fetchBackendNotifications().then((serverItems) => {
-      setNotifications(serverItems);
-    });
 
     const handleSync = () => {
       setNotifications(readStoredNotifications());
@@ -370,26 +261,6 @@ export function useNotifications() {
     recordSeenNotificationIds(created.map((item) => item.id));
     writeStoredNotifications([...created, ...current]);
 
-    if (typeof window !== 'undefined') {
-      const { userId, userToken } = getClientAuthContext();
-      Promise.all(
-        [...created].reverse().map((notification) =>
-          fetch('/api/notifications', {
-            method: 'POST',
-            headers: buildAuthHeaders(userToken),
-            body: JSON.stringify({
-              action: 'create',
-              userId,
-              notification,
-              once: false,
-            }),
-          }),
-        ),
-      )
-        .then(() => fetchBackendNotifications())
-        .catch(() => {});
-    }
-
     return created;
   }, []);
 
@@ -397,70 +268,22 @@ export function useNotifications() {
     const current = readStoredNotifications();
     const updated = current.map((item) => (item.id === id ? { ...item, read: true } : item));
     writeStoredNotifications(updated);
-
-    if (typeof window !== 'undefined') {
-      const { userId, userToken } = getClientAuthContext();
-      fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: buildAuthHeaders(userToken),
-        body: JSON.stringify({ action: 'mark_read', userId, id }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => applyBackendInboxResponse(json))
-        .catch(() => {});
-    }
   }, []);
 
   const markAllAsRead = useCallback(() => {
     const current = readStoredNotifications();
     const updated = current.map((item) => (item.read ? item : { ...item, read: true }));
     writeStoredNotifications(updated);
-
-    if (typeof window !== 'undefined') {
-      const { userId, userToken } = getClientAuthContext();
-      fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: buildAuthHeaders(userToken),
-        body: JSON.stringify({ action: 'mark_all_read', userId }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => applyBackendInboxResponse(json))
-        .catch(() => {});
-    }
   }, []);
 
   const dismissNotification = useCallback((id: string) => {
     const current = readStoredNotifications();
     const updated = current.filter((item) => item.id !== id);
     writeStoredNotifications(updated);
-
-    if (typeof window !== 'undefined') {
-      const { userId, userToken } = getClientAuthContext();
-      const qs = new URLSearchParams({ userId, id });
-      fetch(`/api/notifications?${qs.toString()}`, {
-        method: 'DELETE',
-        headers: buildAuthHeaders(userToken),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => applyBackendInboxResponse(json))
-        .catch(() => {});
-    }
   }, []);
 
   const clearAll = useCallback(() => {
     writeStoredNotifications([]);
-
-    if (typeof window !== 'undefined') {
-      const { userId, userToken } = getClientAuthContext();
-      const qs = new URLSearchParams({ userId, all: 'true' });
-      fetch(`/api/notifications?${qs.toString()}`, {
-        method: 'DELETE',
-        headers: buildAuthHeaders(userToken),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json) => applyBackendInboxResponse(json))
-        .catch(() => {});
-    }
   }, []);
 
   const unreadCount = notifications.filter((item) => !item.read).length;
