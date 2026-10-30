@@ -51,6 +51,12 @@ export class Skillprint {
 
     if (this.embedded) {
       window.addEventListener('message', (e) => this.receive(e));
+      // Player inputs since the last frame, sent with it: the portal can't
+      // listen inside a frame served from the games CDN.
+      this.inputs = 0;
+      for (const type of ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel']) {
+        window.addEventListener(type, () => { this.inputs += 1; }, { capture: true, passive: true });
+      }
       // Keys 1-9 belong to Skillprint's adjustment tester in the portal.
       window.addEventListener('keydown', (e) => {
         if (/^[1-9]$/.test(e.key)) window.parent.postMessage({ type: 'skillprint_keydown', key: e.key }, '*');
@@ -160,11 +166,13 @@ export class Skillprint {
       this.snapshot.height = h;
       this.snapshot.getContext('2d').drawImage(work, 0, 0);
       if (this.embedded) {
+        const inputCount = this.inputs;
+        this.inputs = 0;
         // toBlob encodes off the main thread; toDataURL stalls a frame or three.
         const blob = await new Promise((r) => work.toBlob(r, 'image/jpeg', 0.8));
         if (!blob) return;
         const dataUrl = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
-        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt: epochMs(now) }, '*');
+        window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt: epochMs(now), inputCount }, '*');
       }
     } finally {
       this.composing = false;
