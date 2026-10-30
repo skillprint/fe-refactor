@@ -88,3 +88,58 @@ window.addEventListener('keydown', function (event) {
         window.parent.postMessage({ type: 'skillprint_keydown', key: event.key }, '*');
     }
 }, true); // Use capture phase to intercept before the game calls preventDefault()
+
+// Gameplay events. The game (main.wasm) reports its own analytics through
+// window.DGWebAnalytics (src/web_analytics.js): analyticsEvent(provider, name,
+// param), extendEvent(name, param), tutorialProgress(provider, progress) and
+// analyticsVideoCountEvent(provider, name, param). Each call is also posted to
+// the portal as {type: 'gameEvent', data: {event, at, ...}}: `event` is the
+// game's name in UPPER_SNAKE_CASE, `param` its raw parameter, `value` that
+// parameter as a number when it is one, and `params` the parameter parsed when
+// it is a JSON object. The game's Dev2Dev extended events (D2D_EXTENDED_EVENT)
+// carry their real name in params.eventId (e.g. new_collection_progress_reward),
+// which becomes the event name. The game's own analytics are untouched.
+(function forwardAnalytics() {
+    const api = window.DGWebAnalytics;
+    if (!api || typeof api.analyticsEvent !== 'function') {
+        setTimeout(forwardAnalytics, 200);
+        return;
+    }
+    if (api.__skillprintForwarded) return;
+    api.__skillprintForwarded = true;
+
+    const eventName = (name) => String(name || 'EVENT').trim().replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').toUpperCase() || 'EVENT';
+    const post = (event, fields) => {
+        try {
+            if (window.parent === window) return;
+            const data = Object.assign({}, fields, { event, at: performance.timeOrigin + performance.now() });
+            window.parent.postMessage({ type: 'gameEvent', data }, window.location.origin);
+        } catch (e) { /* telemetry must never break the game */ }
+    };
+    const withParam = (provider, param) => {
+        const fields = { provider: provider == null ? '' : String(provider), param: param == null ? '' : String(param) };
+        if (fields.param !== '' && Number.isFinite(Number(fields.param))) fields.value = Number(fields.param);
+        if (fields.param.trim().startsWith('{')) {
+            try { const parsed = JSON.parse(fields.param); if (parsed && typeof parsed === 'object') fields.params = parsed; } catch (e) { /* not JSON */ }
+        }
+        return fields;
+    };
+    const named = (name, fields) => {
+        const id = fields.params && typeof fields.params.eventId === 'string' ? fields.params.eventId : '';
+        return [eventName(id || name), fields];
+    };
+    const wrap = (method, toEvent) => {
+        const original = api[method];
+        if (typeof original !== 'function') return;
+        api[method] = function () {
+            try { const [event, fields] = toEvent(arguments); post(event, fields); } catch (e) { /* ignore */ }
+            return original.apply(this, arguments);
+        };
+    };
+    // analyticsEvent and analyticsVideoCountEvent also accept (name, param) without a provider.
+    const shift = (a) => a.length === 2 ? ['', a[0], a[1]] : [a[0], a[1], a[2]];
+    wrap('analyticsEvent', (a) => { const [p, n, v] = shift(a); return named(n, withParam(p, v)); });
+    wrap('analyticsVideoCountEvent', (a) => { const [p, n, v] = shift(a); return ['AD_VIDEO', Object.assign(withParam(p, v), { name: String(n || '') })]; });
+    wrap('extendEvent', (a) => named(a[0], withParam('', a[1])));
+    wrap('tutorialProgress', (a) => ['TUTORIAL_PROGRESS', withParam(a[0], a[1])]);
+})();
