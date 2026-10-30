@@ -1,11 +1,11 @@
 'use client';
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState } from 'react';
 import PortalLayout from '../../components/PortalLayout';
 import PortalHead from '../../components/PortalHead';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../components/ThemeProvider';
-import { getCookie, deleteCookie } from '../utils/cookieUtils';
+import { deleteCookie } from '../utils/cookieUtils';
 import { useNotificationPreferences } from '../../lib/models/portal/useNotificationPreferences';
 import { useEmailAddress } from '../../lib/models/portal/useEmailAddress';
 import { useUserSession } from '../hooks/useUserSession';
@@ -21,29 +21,7 @@ export default function SettingsPage() {
     // Only 'light' renders light. The default 'skillprint' theme strips the
     // theme attributes, which leaves the portal's base (dark navy) palette.
     const isLight = theme === 'light';
-    const [userId, setUserId] = useState<string>('');
-    const [apiKey, setApiKey] = useState<string>('');
-    const [showApiKey, setShowApiKey] = useState(false);
     const [showTourResetAlert, setShowTourResetAlert] = useState(false);
-
-    useEffect(() => {
-        // Fetch user ID
-        if (typeof window !== 'undefined') {
-            const storedUserId = localStorage.getItem('user_id') || getCookie('user_id') || '';
-            setUserId(storedUserId);
-            
-            const storedApiKey = getCookie('api_key') || process.env.NEXT_PUBLIC_API_KEY || '';
-            setApiKey(storedApiKey);
-        }
-    }, []);
-
-    const handleCopy = async (text: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-        }
-    };
 
     const handleResetTour = () => {
         deleteCookie('ftue_completed');
@@ -171,7 +149,6 @@ export default function SettingsPage() {
                         <div>
                             <h2 className="text--danger">Sign out</h2>
                             <p className="margin-none text-muted font-sm">Signs this browser out. Your Skillprint and your history are kept.</p>
-                            <p className="pp-credential__note pp-token" role="status">ID: {userId || 'none'}  Token: stored in this browser</p>
                         </div>
                         <button 
                             className="button button--danger button--md" 

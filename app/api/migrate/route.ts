@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { Umzug, SequelizeStorage } from 'umzug';
 import { sequelize } from '@/lib/db';
 import * as initialSchema from '@/migrations/00-initial-schema';
@@ -26,6 +27,9 @@ import * as seedConsumerPlaybooks from '@/migrations/21-seed-consumer-playbooks'
 
 
 export async function GET() {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const umzug = new Umzug({
             migrations: [

@@ -93,10 +93,11 @@ function EmbedProfileContent() {
         return;
       }
 
-      const apiKey = apiKeyParam || process.env.NEXT_PUBLIC_API_KEY || '';
-
-      if (!userTokenParam && !userIdParam) {
-        setError(new Error('Missing authentication parameters. Please provide either "userToken" or "userId" in the URL query parameters.'));
+      // A user id is only honoured with the partner's own key. Falling back to
+      // the portal's bundled key let `?userId=` alone open any portal player's
+      // profile (and create a player for any unknown id).
+      if (!userTokenParam && !(userIdParam && apiKeyParam)) {
+        setError(new Error('Missing authentication parameters. Please provide either "userToken", or "userId" with the partner\'s "apiKey", in the URL query parameters.'));
         setIsLoading(false);
         return;
       }
@@ -104,8 +105,8 @@ function EmbedProfileContent() {
       try {
         // 1. Resolve a Knox token: either passed directly, or minted for the partner's user id.
         let token = userTokenParam;
-        if (!token && userIdParam) {
-          const client = new SkillprintClient({ apiKey, baseUrl: getApiBaseUrl() });
+        if (!token && userIdParam && apiKeyParam) {
+          const client = new SkillprintClient({ apiKey: apiKeyParam, baseUrl: getApiBaseUrl() });
           token = await client.createOrGetUserToken(userIdParam);
         }
         if (!token) {

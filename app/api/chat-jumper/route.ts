@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 
 const MODELS: Record<string, string[]> = {
   'Session': ['duration', 'score', 'telemetry_events'],
@@ -15,6 +16,9 @@ const MODELS: Record<string, string[]> = {
 const CHARTS = ['Bar', 'Line', 'Area', 'BarLine', 'Pie', 'Scatter', 'RangeBand', 'Radar', 'DailyBreakdown'];
 
 export async function POST(req: Request) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { message, history = [], currentConfig = {} } = await req.json();
 

@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import { devOnlyRoute } from '@/lib/devOnlyRoute';
 import { GameParameter } from '@/lib/models/GameParameter';
 import { GeneratedGame } from '@/lib/models/GeneratedGame';
 
 export async function GET(req: Request, { params }: { params: Promise<{ gameId: string }> }) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { gameId } = await params;
         if (!gameId) {
@@ -22,6 +26,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ gameId: 
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ gameId: string }> }) {
+    const blocked = devOnlyRoute();
+    if (blocked) return blocked;
+
     try {
         const { gameId } = await params;
         if (!gameId) {
