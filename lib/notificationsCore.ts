@@ -447,8 +447,8 @@ export function createCoachLessonNotification(params: {
 
 /**
  * Evaluates a platform data snapshot and returns all deterministic notifications
- * that apply to the player's current state. Used on the backend (`/api/notifications`)
- * to generate notifications from live portal data.
+ * that apply to the player's current state. `syncPlatformNotifications`
+ * (lib/notifications) runs it on live portal data in the browser.
  */
 export function evaluatePlatformNotifications(payload: PlatformSyncPayload): PortalNotification[] {
   const generated: PortalNotification[] = [];

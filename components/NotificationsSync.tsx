@@ -9,14 +9,14 @@ import { useInsight } from '@/lib/models/portal/useInsight';
 import { useProfileTrends } from '@/lib/models/portal/useProfileTrends';
 import { useEmailAddress } from '@/lib/models/portal/useEmailAddress';
 import {
-  syncPlatformNotificationsToBackend,
+  syncPlatformNotifications,
   useNotificationsFeatureFlag,
 } from '@/lib/notifications';
 
 /**
- * Observes platform data hooks and syncs them with the `/api/notifications`
- * backend so notifications are evaluated and persisted server-side once per
- * milestone, badge, assignment, deadline, skill trend, streak, or account prompt.
+ * Observes platform data hooks and turns them into inbox notifications, once
+ * per milestone, badge, assignment, deadline, skill trend, streak, or account
+ * prompt. The inbox is this browser's localStorage (lib/notifications).
  */
 function NotificationsSyncInner() {
   const { notificationsFeatureEnabled } = useNotificationsFeatureFlag();
@@ -40,7 +40,7 @@ function NotificationsSyncInner() {
       return;
     }
 
-    syncPlatformNotificationsToBackend({
+    syncPlatformNotifications({
       homeSummary,
       badges: badgesData?.badges ?? null,
       assignedPlaybooks: assignedPlaybooks ?? null,

@@ -109,7 +109,9 @@ export function useGymTrackerData() {
   const [unitSystem, setUnitSystemState] = useState<'lbs' | 'kg'>('lbs');
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
-  // Hydrate from localStorage first, then merge with /api/gym
+  // Everything lives in this browser's localStorage. It used to be mirrored to
+  // an in-memory store behind a Next.js API route (one store shared by every
+  // visitor), which the static build can't have; a backend is future work.
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -130,24 +132,6 @@ export function useGymTrackerData() {
     setCustomExercises(localCustom);
     setMeasurements(localMeasurements);
     setIsLoaded(true);
-
-    // Sync with Next.js API route
-    fetch('/api/gym')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!data) return;
-        if (Array.isArray(data.workouts) && localWorkouts.length === 0) {
-          setWorkouts(data.workouts);
-          writeJson(STORAGE_WORKOUTS, data.workouts);
-        }
-        if (Array.isArray(data.routines) && localRoutines.length === 0) {
-          setRoutines(data.routines);
-          writeJson(STORAGE_ROUTINES, data.routines);
-        }
-      })
-      .catch(() => {
-        // Offline / localStorage fallback is already active
-      });
   }, []);
 
   const allExercises = useMemo<GymExercise[]>(() => {
@@ -278,15 +262,6 @@ export function useGymTrackerData() {
           return next;
         });
       }
-      try {
-        await fetch('/api/gym', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'save_workout', workout }),
-        });
-      } catch {
-        // Persisted in localStorage
-      }
     },
     []
   );
@@ -297,13 +272,6 @@ export function useGymTrackerData() {
       writeJson(STORAGE_WORKOUTS, next);
       return next;
     });
-    try {
-      await fetch(`/api/gym?kind=workout&id=${encodeURIComponent(workoutId)}`, {
-        method: 'DELETE',
-      });
-    } catch {
-      // Persisted in localStorage
-    }
   }, []);
 
   const saveRoutine = useCallback(async (routine: WorkoutRoutine) => {
@@ -315,15 +283,6 @@ export function useGymTrackerData() {
       writeJson(STORAGE_ROUTINES, next);
       return next;
     });
-    try {
-      await fetch('/api/gym', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_routine', routine }),
-      });
-    } catch {
-      // Persisted in localStorage
-    }
   }, []);
 
   const deleteRoutine = useCallback(async (routineId: string) => {
@@ -332,13 +291,6 @@ export function useGymTrackerData() {
       writeJson(STORAGE_ROUTINES, next);
       return next;
     });
-    try {
-      await fetch(`/api/gym?kind=routine&id=${encodeURIComponent(routineId)}`, {
-        method: 'DELETE',
-      });
-    } catch {
-      // Persisted in localStorage
-    }
   }, []);
 
   const addCustomExercise = useCallback(async (exercise: GymExercise) => {
@@ -348,15 +300,6 @@ export function useGymTrackerData() {
       writeJson(STORAGE_CUSTOM_EXERCISES, next);
       return next;
     });
-    try {
-      await fetch('/api/gym', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_custom_exercise', exercise: tagged }),
-      });
-    } catch {
-      // Persisted in localStorage
-    }
     return tagged;
   }, []);
 
@@ -368,15 +311,6 @@ export function useGymTrackerData() {
       writeJson(STORAGE_MEASUREMENTS, next);
       return next;
     });
-    try {
-      await fetch('/api/gym', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_measurement', measurement }),
-      });
-    } catch {
-      // Persisted in localStorage
-    }
   }, []);
 
   return {
