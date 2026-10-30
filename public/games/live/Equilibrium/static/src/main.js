@@ -2,16 +2,19 @@
 // This file is the loop, the rules of a mobile from first hang to last
 // chime, the pointer, and the HUD.
 
+import * as THREE from 'three';
 import { Stage } from './stage.js';
 import { Mobile, U } from './mobile.js';
 import { Sound } from './sound.js';
 import { generate, solution, solved, balanced, clamp, TOP_RUNG } from './puzzle.js';
 import { placard } from './labels.js';
+import { ExhibitBag, exhibitById, EXHIBITS } from './exhibits.js';
+import { lessonsFor } from './tutorial.js';
 import { tuning, onParameter } from './params.js';
 import { Skillprint, GameEvent } from './skillprint.js';
 
 const KEY = 'equilibrium/v1';
-const defaults = { best: 0, balanced: 0, muted: false };
+const defaults = { best: 0, balanced: 0, muted: false, tutored: false };
 function load() {
   try { return { ...defaults, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { ...defaults }; }
 }
@@ -33,6 +36,14 @@ const sound = new Sound();
 sound.muted = store.muted;
 const skillprint = new Skillprint({ canvas, describe });
 skillprint.onPause = setPaused;
+
+const exhibits = new ExhibitBag();
+// The wall stands a little behind the mobile, a touch further for a big one,
+// so the shadows stay close to what casts them. A turning mobile keeps this
+// much clear of it.
+const wallFor = (m) => clamp(1.8 + 0.08 * m.spinRadius, 1.8, 2.6);
+const WALL_CLEAR = 0.35;
+const room = (m) => wallFor(m) - WALL_CLEAR;
 
 const RELEASE_LOOK = 1.7; // seconds the player watches a released mobile before the verdict
 const RELEASE_HOLD = 3.3; // …and before the clamp comes back
@@ -61,9 +72,14 @@ const S = {
   lastMoveAt: 0,
   card: false,
   hinted: 0,
+  forceExhibit: null, // tests: the exhibit the next mobile hangs in
+  tutorial: null, // while How to play runs: its lessons, where it is, and how it's going
+  taught: false, // How to play ran this session
 };
 
 const puzzle = () => S.mobile?.puzzle;
+// On a phone the mobile is drawn small; its distance marks and hints are drawn larger.
+const labelScale = () => (Math.min(innerWidth, innerHeight) < 560 ? 1.55 : 1);
 const trayLeft = () => (S.place ? S.place.filter((p) => !p).length : 0);
 const levelCount = () => (S.mobile ? S.mobile.measures.filter(balanced).length : 0);
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -72,15 +88,24 @@ const clock = (sec) => { const s = Math.max(0, Math.ceil(sec)); return `${Math.f
 // ---------------------------------------------------------------------------
 // Framing
 
+// The action bar sits at the bottom; the plinth's label stays above it.
+const BAR_ROOM = (phone) => (phone ? 90 : 104);
+
 function pads() {
   const phone = innerWidth < 700;
+  if (S.tutorial) {
+    // Keep the mobile and its plinth clear of the coach's card.
+    const c = $('coach');
+    if (phone || stage.portrait) return { top: 10 + (c.offsetHeight || 150) + 12, bottom: BAR_ROOM(phone), left: 10, right: 10 };
+    return { top: 30, bottom: BAR_ROOM(phone), left: (c.offsetWidth || 340) + 44, right: 30 };
+  }
   if (S.mode === 'title' || S.mode === 'boot') {
     return stage.portrait || phone
       ? { top: 30, bottom: Math.min(innerHeight * 0.48, 330), left: 18, right: 18 }
       : { top: 50, bottom: 50, left: Math.min(innerWidth * 0.46, 560), right: 40 };
   }
   const top = phone ? 70 : 84;
-  const bottom = S.card ? Math.min(innerHeight * 0.45, ($('end').offsetHeight || 220) + 34) : phone ? 66 : 76;
+  const bottom = S.card ? Math.min(innerHeight * 0.45, ($('end').offsetHeight || 220) + 34) : BAR_ROOM(phone);
   return { top, bottom, left: phone ? 10 : 30, right: phone ? 10 : 30 };
 }
 
@@ -95,18 +120,24 @@ function refit(immediate = false) {
 
 function boot() {
   const demo = generate({ rung: 7, maxWeight: 9, seed: (Math.random() * 2 ** 31) | 0, wide: !stage.portrait });
-  const m = new Mobile(demo, { place: solution(demo) });
-  m.drift = 0.65;
+  const calder = exhibitById('calder');
+  const m = new Mobile(demo, { place: solution(demo), exhibit: calder, env: () => stage.envMap(), labels: labelScale() });
+  // It drifts both ways, so its longer side sets how far before reaching the wall.
+  m.drift = Math.min(0.65, Math.asin(Math.min(1, room(m) / m.spinRadius)));
   stage.scene.add(m.rig);
+  stage.setExhibit(calder, true);
+  stage.setDepth(wallFor(m), true);
   S.mobile = m;
   S.mode = 'title';
   refit(true);
   $('title').hidden = false;
+  $('howto').hidden = !store.tutored;
   $('best').textContent = store.balanced ? `Best show ${store.best} · ${plural(store.balanced, 'mobile')} balanced so far` : '';
   requestAnimationFrame(() => $('veil').classList.remove('on'));
 }
 
-function begin() {
+/** Leaves the title. First play, or `tutorial`, starts with How to play. */
+function begin({ tutorial = !store.tutored } = {}) {
   if (S.mode !== 'title') return;
   sound.start();
   skillprint.begin();
@@ -116,7 +147,8 @@ function begin() {
   $('hud').hidden = false;
   $('actions').hidden = false;
   $('quit').hidden = !skillprint.reporting;
-  newMobile();
+  if (tutorial) startTutorial();
+  else newMobile();
 }
 
 // ---------------------------------------------------------------------------
@@ -131,22 +163,26 @@ function newMobile() {
     old.leave();
     S.leaving.push(old);
   }
-  const m = new Mobile(p, { held: !tuning.liveTilt, hintLevel: tuning.hintLevel });
+  const ex = S.forceExhibit ? exhibitById(S.forceExhibit) : exhibits.next();
+  S.forceExhibit = null;
+  const m = new Mobile(p, { held: !tuning.liveTilt, hintLevel: tuning.hintLevel, exhibit: ex, env: () => stage.envMap(), labels: labelScale() });
   stage.scene.add(m.rig);
   m.enter();
+  stage.setExhibit(ex);
+  stage.setDepth(Math.max(wallFor(m), ...S.leaving.map(wallFor)));
   S.mobile = m;
   S.place = m.place.slice();
   S.number += 1;
   S.mode = 'descend';
   S.selected = -1;
   stage.dim = 0;
-  stage.setShelf(m.shelfY, -m.trayHalf, m.trayHalf);
+  stage.setPlinth(m.shelfY, m.trayHalf);
   const loose = p.weights.filter((w) => w.loose).length;
   stage.setPlacard(placard([
-    `Mobile No. ${S.number}`,
-    'painted steel and wire',
+    ex.name,
+    ex.medium,
     `${plural(p.beams.length, 'beam')}, ${plural(p.weights.length, 'weight')} (${loose} loose)`,
-    `rung ${p.rung} · weights to ${p.maxWeight}`,
+    `No. ${S.number} · rung ${p.rung} · weights to ${p.maxWeight}`,
   ]), m.placardAt.x, m.placardAt.y);
   refit();
   console.info(`[equilibrium] mobile ${S.number} (rung ${p.rung}): ${p.beams.length} beams, ${p.weights.length} weights, loose ${p.weights.filter((w) => w.loose).map((w) => w.w).join(', ')}`);
@@ -169,12 +205,13 @@ function startPlay() {
   skillprint.event(GameEvent.LEVEL_START, {
     mobile: S.number, rung: p.rung, beams: p.beams.length, trayWeights: loose, weights: p.weights.length,
     reach: p.beams[0].reach, maxWeight: p.maxWeight, liveTilt: tuning.liveTilt, hintLevel: tuning.hintLevel, candleSec: Math.round(S.duration),
+    exhibit: S.mobile.exhibit.id,
   });
-  if (S.number === 1) {
+  if (S.number === 1 && !S.taught) {
     note(tuning.liveTilt
       ? 'Weight × distance must match on both sides. The numbers above a beam are distances.'
       : 'The beams are held level. Work out where everything goes, then press <b>Release</b>.', 6500);
-  } else if (S.number === 2 && tuning.liveTilt) {
+  } else if (S.number === 2 && tuning.liveTilt && !S.taught) {
     note('Drag, or tap a weight and then a hook. Tap a hung weight to take it down.', 5000);
   }
   report();
@@ -190,11 +227,13 @@ function hangAt(id, hook) {
   const w = m.weights[id].w;
   sound.hang(w);
   const now = performance.now();
-  skillprint.event('HANG', {
-    mobile: S.number, weight: w, beam: hook.beam, distance: Math.abs(hook.d), side: hook.d < 0 ? 'left' : 'right',
-    torque: w * Math.abs(hook.d), from: before ? `beam ${before.beam} at ${Math.abs(before.d)}` : 'shelf', msSinceLast: Math.round(now - S.lastMoveAt),
-  });
-  moved(now);
+  if (!S.tutorial) {
+    skillprint.event('HANG', {
+      mobile: S.number, weight: w, beam: hook.beam, distance: Math.abs(hook.d), side: hook.d < 0 ? 'left' : 'right',
+      torque: w * Math.abs(hook.d), from: before ? `beam ${before.beam} at ${Math.abs(before.d)}` : 'shelf', msSinceLast: Math.round(now - S.lastMoveAt),
+    });
+  }
+  moved(now, { id, at: S.place[id] });
 }
 
 function shelve(id, from) {
@@ -204,8 +243,8 @@ function shelve(id, from) {
   m.setPlace(S.place);
   sound.shelve();
   const now = performance.now();
-  if (from) skillprint.event('UNHANG', { mobile: S.number, weight: m.weights[id].w, beam: from.beam, distance: Math.abs(from.d), msSinceLast: Math.round(now - S.lastMoveAt) });
-  moved(now);
+  if (from && !S.tutorial) skillprint.event('UNHANG', { mobile: S.number, weight: m.weights[id].w, beam: from.beam, distance: Math.abs(from.d), msSinceLast: Math.round(now - S.lastMoveAt) });
+  moved(now, { id, from });
 }
 
 function clearAll() {
@@ -217,7 +256,13 @@ function clearAll() {
   deselect();
 }
 
-function moved(now) {
+function moved(now, move) {
+  if (S.tutorial) {
+    report();
+    hud();
+    lessonMoved(move);
+    return;
+  }
   S.moves += 1;
   S.lastMoveAt = now;
   const m = S.mobile;
@@ -246,6 +291,11 @@ function release() {
 
 function verdict() {
   const m = S.mobile;
+  if (S.tutorial) {
+    S.mode = 'play';
+    if (solved(m.puzzle, S.place)) lessonDone();
+    return;
+  }
   const ok = solved(m.puzzle, S.place);
   const off = m.crooked();
   skillprint.event('RELEASE', { mobile: S.number, balanced: ok, offBeams: off, releases: S.releases });
@@ -271,7 +321,7 @@ function celebrate() {
   S.mode = 'solved';
   S.solveIn = 0;
   m.setHeld(false);
-  m.spin();
+  m.spin(room(m));
   sound.solved();
   const loose = p.weights.filter((w) => w.loose).length;
   const left = Math.max(0, 1 - S.elapsed / S.duration);
@@ -363,7 +413,12 @@ function next() {
 // Leaving: the portal shows its results; the SDK closes its session.
 function finish() {
   if (S.mode === 'done' || S.mode === 'title' || S.mode === 'boot') return;
-  if (S.mode === 'play' || S.mode === 'releasing' || S.mode === 'descend') {
+  if (S.tutorial) {
+    skillprint.event('TUTORIAL_SKIP', { step: S.tutorial.i + 1 });
+    S.tutorial = null;
+    $('coach').hidden = true;
+    $('coach-point').hidden = true;
+  } else if (S.mode === 'play' || S.mode === 'releasing' || S.mode === 'descend') {
     skillprint.event(GameEvent.LEVEL_QUIT, { mobile: S.number, trayLeft: trayLeft(), moves: S.moves, score: S.score });
   }
   S.mode = 'done';
@@ -402,10 +457,156 @@ function setPaused(on) {
 }
 
 // ---------------------------------------------------------------------------
+// How to play: scripted mobiles, one idea each, learnt by doing. No candle,
+// no score, no rung; a wrong move gets the arithmetic, never a penalty.
+
+function startTutorial() {
+  S.tutorial = { lessons: lessonsFor(tuning.liveTilt), i: -1, startedAt: performance.now(), stepAt: 0, mistakes: 0, waiting: false };
+  skillprint.event('TUTORIAL_START', { steps: S.tutorial.lessons.length, liveTilt: tuning.liveTilt });
+  $('coach').hidden = false;
+  nextLesson();
+}
+
+function nextLesson() {
+  const T = S.tutorial;
+  // The held lesson follows the game's setting at the moment it comes up.
+  const done = T.lessons.slice(0, T.i + 1);
+  T.lessons = [...done, ...lessonsFor(tuning.liveTilt).filter((l) => !done.includes(l))];
+  T.i += 1;
+  if (T.i >= T.lessons.length) return endTutorial(true);
+  const L = T.lessons[T.i];
+  if (L.reuse) {
+    S.mobile.setHints(L.hint);
+    S.mobile.setHeld(Boolean(L.held));
+  } else {
+    lessonMobile(L, T.i === 0);
+  }
+  T.stepAt = performance.now();
+  T.waiting = false;
+  coachSay(L.text);
+  report();
+  hud();
+}
+
+// A lesson's mobile: the first comes down like any other; later ones take
+// its place at once, with anything new flying in.
+function lessonMobile(L, first) {
+  const p = L.puzzle();
+  const ex = exhibitById('calder');
+  const old = S.mobile;
+  cancelDrag();
+  deselect();
+  const m = new Mobile(p, { held: Boolean(L.held), hintLevel: L.hint, exhibit: ex, env: () => stage.envMap(), labels: labelScale() });
+  stage.scene.add(m.rig);
+  if (first) {
+    old.drift = 0;
+    old.leave();
+    S.leaving.push(old);
+    m.enter();
+    S.mode = 'descend';
+  } else {
+    old.dispose();
+    S.mode = 'play';
+  }
+  for (const id of L.fly ?? []) {
+    const v = m.weights[id];
+    v.pos.y += 2.4;
+    v.flying = true;
+  }
+  stage.setExhibit(ex);
+  stage.setDepth(Math.max(wallFor(m), ...S.leaving.map(wallFor)));
+  S.mobile = m;
+  S.place = m.place.slice();
+  stage.setPlinth(m.shelfY, m.trayHalf);
+  stage.setPlacard(placard(['How to play', 'painted steel and wire', `${plural(p.beams.length, 'beam')}, ${plural(p.weights.length, 'weight')}`, `lesson ${S.tutorial.i + 1} of ${S.tutorial.lessons.length}`]), m.placardAt.x, m.placardAt.y);
+}
+
+function lessonMoved(move) {
+  const T = S.tutorial;
+  if (!T || T.waiting || !move) return;
+  const L = T.lessons[T.i];
+  if (L.done(S.place)) return lessonDone();
+  if (!move.at || !L.why) return;
+  const why = L.why({ id: move.id, w: S.mobile.weights[move.id].w, at: move.at });
+  if (!why) return;
+  T.mistakes += 1;
+  coachSay(L.text, why.text);
+  // A weight that belongs to a later lesson goes back to the plinth by itself.
+  if (why.back) {
+    setTimeout(() => {
+      if (S.tutorial === T && S.place[move.id] && drag?.id !== move.id) shelve(move.id, S.place[move.id]);
+    }, 1400);
+  }
+}
+
+function lessonDone() {
+  const T = S.tutorial;
+  const L = T.lessons[T.i];
+  T.waiting = true;
+  skillprint.event('TUTORIAL_STEP', { step: T.i + 1, name: L.name, ms: Math.round(performance.now() - T.stepAt) });
+  sound.level();
+  deselect();
+  S.mobile.showHooks(false);
+  coachSay(L.praise, '', true);
+  setTimeout(() => { if (S.tutorial === T) nextLesson(); }, 1700);
+}
+
+function endTutorial(completed) {
+  const T = S.tutorial;
+  if (!T) return;
+  S.tutorial = null;
+  S.taught = true;
+  store.tutored = true;
+  save();
+  skillprint.event(completed ? 'TUTORIAL_COMPLETE' : 'TUTORIAL_SKIP', completed
+    ? { ms: Math.round(performance.now() - T.startedAt), mistakes: T.mistakes }
+    : { step: T.i + 1 });
+  $('coach').hidden = true;
+  $('coach-point').hidden = true;
+  cancelDrag();
+  deselect();
+  if (S.mode !== 'done') newMobile();
+}
+
+function skipTutorial() { if (S.tutorial) endTutorial(false); }
+
+function coachSay(html, why = '', praised = false) {
+  const T = S.tutorial;
+  $('coach-step').textContent = `How to play · ${T.i + 1} of ${T.lessons.length}`;
+  $('coach-text').innerHTML = html;
+  $('coach').classList.toggle('praised', praised);
+  $('coach-why').innerHTML = why;
+  $('coach-why').hidden = !why;
+  refit();
+}
+
+// The ring over whatever the lesson wants touched: a weight, or Release.
+function pointAt() {
+  const el = $('coach-point');
+  const T = S.tutorial;
+  const L = T && !T.waiting && S.mode === 'play' && !S.paused ? T.lessons[T.i] : null;
+  let at = null;
+  if (L?.point === 'release') {
+    const r = $('release').getBoundingClientRect();
+    if (r.width) at = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  } else if (L && typeof L.point === 'number' && S.selected !== L.point && drag?.id !== L.point) {
+    const v = S.mobile.weights[L.point];
+    at = stage.toScreen(S.mobile.rig.localToWorld(new THREE.Vector3(v.pos.x + v.shape.nx, v.pos.y + v.shape.ny, v.pos.z)));
+  }
+  el.hidden = !at;
+  if (at) el.style.transform = `translate(${Math.round(at.x)}px, ${Math.round(at.y)}px)`;
+}
+
+// ---------------------------------------------------------------------------
 // What the portal keeps, and what the scorer reads off each frame
 
 function report() {
   const p = puzzle();
+  const T = S.tutorial;
+  if (T) {
+    skillprint.state({ score: S.score, isGameOver: false, mode: 'tutorial', tutorialStep: T.i + 1, tutorialSteps: T.lessons.length, balanced: S.balanced });
+    return;
+  }
   const playing = S.mode !== 'title' && S.mode !== 'boot';
   skillprint.state({
     score: S.score, isGameOver: false, mobile: playing ? S.number : 0, balanced: S.balanced, rung: playing ? p?.rung : null,
@@ -416,6 +617,11 @@ function report() {
 function describe() {
   const p = puzzle();
   if (!p || S.mode === 'title' || S.mode === 'boot') return ['Equilibrium · title screen'];
+  const T = S.tutorial;
+  if (T) {
+    const tray = S.mobile.weights.filter((v) => !S.place[v.id]).map((v) => v.w);
+    return [`Tutorial · step ${T.i + 1} of ${T.lessons.length}`, `${tray.length ? `Tray: ${tray.join(', ')}` : 'Tray empty'} · no candle, no score`, `Beams level ${levelCount()} of ${p.beams.length}`];
+  }
   const lines = [`Mobile ${S.number} · rung ${p.rung} · score ${S.score}`];
   const tray = S.mobile.weights.filter((v) => !S.place[v.id]).map((v) => v.w).sort((a, b) => a - b);
   const left = (S.duration - S.elapsed) || 0;
@@ -440,6 +646,16 @@ function note(html, ms = 3200) {
 function hud() {
   const p = puzzle();
   if (!p || S.mode === 'title') return;
+  const T = S.tutorial;
+  // The coach's card says where the tutorial is; the HUD waits for the real thing.
+  $('hud').hidden = Boolean(T);
+  $('reset').hidden = Boolean(T);
+  if (T) {
+    const rel = $('release');
+    rel.hidden = !S.mobile.held;
+    rel.disabled = S.mode !== 'play' || trayLeft() > 0;
+    return;
+  }
   $('plate-no').textContent = `Mobile ${S.number} · rung ${p.rung}`;
   const left = trayLeft();
   const m = S.mobile;
@@ -624,9 +840,10 @@ onParameter((name, value) => {
     S.elapsed *= next / S.duration;
     S.duration = next;
   } else if (name === 'hintLevel') {
-    if (m && S.mode !== 'title') m.setHints(value);
+    // The tutorial's mobiles keep their own hints and tilt until it's over.
+    if (m && S.mode !== 'title' && !S.tutorial) m.setHints(value);
   } else if (name === 'liveTilt') {
-    if (m && (S.mode === 'play' || S.mode === 'descend')) {
+    if (m && !S.tutorial && (S.mode === 'play' || S.mode === 'descend')) {
       m.setHeld(!value);
       if (S.mode === 'play') S.solveIn = value && solved(m.puzzle, S.place) ? 0.75 : 0;
     }
@@ -639,8 +856,10 @@ onParameter((name, value) => {
 // Loop
 
 function step(dt) {
-  if (S.mode === 'descend' && !S.mobile.moving) startPlay();
-  if (S.mode === 'play' && !S.paused) {
+  if (S.mode === 'descend' && !S.mobile.moving) {
+    if (S.tutorial) { S.mode = 'play'; hud(); } else startPlay();
+  }
+  if (S.mode === 'play' && !S.paused && !S.tutorial) {
     S.elapsed += dt;
     if (S.solveIn > 0) {
       S.solveIn -= dt;
@@ -648,7 +867,7 @@ function step(dt) {
     }
     if (S.mode === 'play' && S.elapsed >= S.duration) lose();
   } else if (S.mode === 'releasing' && !S.paused) {
-    S.elapsed += dt;
+    if (!S.tutorial) S.elapsed += dt;
     const before = S.releaseT;
     S.releaseT += dt;
     if (before < RELEASE_LOOK && S.releaseT >= RELEASE_LOOK) verdict();
@@ -663,14 +882,24 @@ function step(dt) {
   const warmGoal = S.mode === 'play' || S.mode === 'releasing' ? clamp((frac - 0.7) / 0.3, 0, 1) : 0;
   stage.warmth += (warmGoal - stage.warmth) * (1 - Math.exp(-dt * 2));
   for (const m of S.leaving) m.update(dt);
-  S.leaving = S.leaving.filter((m) => {
-    if (m.moving) return true;
-    m.dispose();
-    return false;
-  });
+  if (S.leaving.length) {
+    S.leaving = S.leaving.filter((m) => {
+      if (m.moving) return true;
+      m.dispose();
+      return false;
+    });
+    // With the old mobile gone, the wall can come in to suit the new one.
+    if (!S.leaving.length) stage.setDepth(wallFor(S.mobile));
+  }
   S.mobile?.update(dt);
   stage.update(dt);
   if (S.mode !== 'title' && S.mode !== 'boot') candle();
+}
+
+function render(now) {
+  stage.render();
+  skillprint.frame(now);
+  pointAt();
 }
 
 let last = performance.now();
@@ -678,15 +907,16 @@ function loop(now) {
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
   last = now;
   step(dt);
-  stage.render();
-  skillprint.frame(now);
+  render(now);
   requestAnimationFrame(loop);
 }
 
 // ---------------------------------------------------------------------------
 // Buttons and keys
 
-$('begin').addEventListener('click', begin);
+$('begin').addEventListener('click', () => begin());
+$('howto').addEventListener('click', () => begin({ tutorial: true }));
+$('coach-skip').addEventListener('click', () => skipTutorial());
 $('release').addEventListener('click', release);
 $('reset').addEventListener('click', clearAll);
 $('next').addEventListener('click', next);
@@ -723,6 +953,7 @@ window.addEventListener('keydown', (e) => {
     muteBtn.click();
   } else if (e.key === 'Escape') {
     deselect();
+    skipTutorial();
   }
 });
 
@@ -733,7 +964,10 @@ window.addEventListener('blur', () => cancelDrag());
 // Test hooks: `let` bindings in a module aren't window properties.
 
 window.__equilibriumControls = {
-  start: begin,
+  start: (o) => begin(o),
+  tutorial: () => begin({ tutorial: true }),
+  tutorialStep: () => (S.tutorial ? { step: S.tutorial.i + 1, of: S.tutorial.lessons.length, name: S.tutorial.lessons[S.tutorial.i]?.name, waiting: S.tutorial.waiting, mistakes: S.tutorial.mistakes, coach: $('coach-text').textContent, why: $('coach-why').hidden ? '' : $('coach-why').textContent, point: $('coach-point').hidden ? null : $('coach-point').style.transform } : null),
+  skipTutorial: () => skipTutorial(),
   state: () => ({
     mode: S.mode, mobile: S.number, balanced: S.balanced, score: S.score, rung: puzzle()?.rung, held: S.mobile?.held,
     elapsed: +S.elapsed.toFixed(2), duration: +S.duration.toFixed(2), moves: S.moves, releases: S.releases, failed: S.failed,
@@ -754,15 +988,38 @@ window.__equilibriumControls = {
   clear: clearAll,
   // The same path an ADJUST_GAME message takes.
   adjust: (name, value) => skillprint.adjust(name, value),
+  // The exhibit the next mobile hangs in (an id from exhibits.js), and the list.
+  exhibit: (id) => { S.forceExhibit = id; },
+  exhibits: () => EXHIBITS.map((e) => e.id),
+  spin: () => S.mobile?.spin(room(S.mobile)),
+  // The live mobile, for tests that measure it.
+  mobile: () => S.mobile,
+  // For the cover picture: the mobile alone, filling the frame.
+  cover() {
+    stage.hidePlinth();
+    stage.frame(S.mobile.mobileBox, { top: 50, bottom: 40, left: 70, right: 70 }, true);
+  },
+  // How far the lowest hanging weight is above the loose ones on the plinth.
+  plinthGap() {
+    const m = S.mobile;
+    const hung = m.weights.filter((v) => v.state === 'hook');
+    const lowest = Math.min(...hung.map((v) => v.pos.y - v.shape.h));
+    const top = m.shelfY + Math.max(0, ...m.weights.filter((v) => !v.pinned).map((v) => v.shape.h));
+    return +(lowest - top).toFixed(3);
+  },
+  // How close the back of the mobile comes to the wall right now.
+  clearance() {
+    const box = new THREE.Box3().setFromObject(S.mobile.rig);
+    return { back: +box.min.z.toFixed(3), wall: +stage.wall.position.z.toFixed(3), gap: +(box.min.z - stage.wall.position.z).toFixed(3), spinRadius: +S.mobile.spinRadius.toFixed(2), exhibit: S.mobile.exhibit.id };
+  },
   jump(rung) {
     S.balanced = Math.max(0, rung - 1 - tuning.levelOffset);
     if (S.mode === 'end') next();
-    else if (S.mode === 'play' || S.mode === 'descend') { S.mode = 'end'; next(); }
+    else if (['play', 'descend', 'solved', 'lost'].includes(S.mode)) { S.mode = 'end'; next(); }
   },
   step(ms) {
     for (let t = 0; t < ms; t += 1000 / 60) step(1 / 60);
-    stage.render();
-    skillprint.frame(performance.now());
+    render(performance.now());
   },
   // Screen positions, for driving the pointer in tests.
   screen() {

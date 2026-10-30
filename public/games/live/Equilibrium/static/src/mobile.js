@@ -1,15 +1,18 @@
-// The mobile itself: beams, hooks, wires and painted weights laid out from a
+// The mobile itself: beams, hooks, wires and finished weights laid out from a
 // puzzle, swaying under a little physics, plus the row of loose weights on
-// the shelf. Everything lives in rig-local space (z = 0 is the mobile's
-// plane); the rig only ever moves up and down and turns about its wire.
+// the plinth. Everything lives in rig-local space (z = 0 is the mobile's
+// plane); the rig only ever moves up and down and turns about its wire. What
+// it's made of comes from the exhibit (exhibits.js); its materials belong to
+// it and go when it does.
 
 import * as THREE from 'three';
 import { measure, freeHooks, makeRng, clamp } from './puzzle.js';
 import { numeral, tick, pill } from './labels.js';
+import { legiblePalette } from './exhibits.js';
 
 export const U = 0.8; // world units between neighbouring hooks
 const BAR = 0.026;
-const MAX_TILT = 0.28;
+const MAX_TILT = 0.2;
 const TILT_K = 22, TILT_C = 3.4; // an underdamped spring: a beam overshoots and settles
 const G = 9.8;
 const SWING_C = 1.25;
@@ -18,17 +21,12 @@ const LABEL_Y = 0.15;
 
 export const radiusFor = (w) => 0.23 + 0.04 * Math.sqrt(w);
 const R_MAX = radiusFor(15);
-const HANG_DEPTH = 0.5 + 2.35 * R_MAX; // the lowest a weight on a hook can reach
+// Every outline is scaled to fit within these, in units of its radius.
+const MAX_W = 2.25, MAX_H = 2.4;
+const HANG_DEPTH = 0.5 + MAX_H * R_MAX; // the lowest a weight on a hook can reach
 const KID_GAP = 0.34;
-
-// Calder's colours. Ink is the colour of the number painted on each.
-const PAINT = [
-  { body: '#c8322a', ink: '#fbf6ec' },
-  { body: '#1f4fa3', ink: '#fbf6ec' },
-  { body: '#f2b632', ink: '#1d1b18' },
-  { body: '#1c1b19', ink: '#fbf6ec' },
-];
-const SHAPES = ['disc', 'drop', 'half', 'tri'];
+// What the swing of a hanging weight or sub-beam can add to the mobile's reach.
+const SWING_ROOM = 0.45;
 
 const frac = (x) => x - Math.floor(x);
 // Each hook's wire length, fixed per beam and distance: odd and even hooks
@@ -37,73 +35,224 @@ const frac = (x) => x - Math.floor(x);
 const wireFor = (beam, d) => (Math.abs(d) % 2 ? 0.17 : 0.4) + 0.1 * frac(Math.sin(beam * 12.9898 + d * 78.233 + 0.5) * 43758.5453);
 const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
-const steel = new THREE.MeshStandardMaterial({ color: '#191816', roughness: 0.42, metalness: 0.35 });
 const brass = new THREE.MeshStandardMaterial({ color: '#c79a4a', roughness: 0.32, metalness: 0.85 });
-const accent = new THREE.MeshBasicMaterial({ color: '#e8743b', toneMapped: false });
 const warning = new THREE.MeshBasicMaterial({ color: '#d2352b', toneMapped: false, transparent: true });
 const hidden = new THREE.MeshBasicMaterial({ visible: false });
 
 // ---------------------------------------------------------------------------
-// Weights
+// Outlines. Each returns points in units of the weight's radius, anywhere in
+// the plane; weightShape() scales, hangs and extrudes it. `v` in [0, 1) is the
+// weight's own variant, so no two leaves or pebbles need be alike. A few say
+// where their number goes (`focus`); the rest put it at the centroid.
 
-const shapeCache = new Map();
+const ring = (cx, cy, rx, ry, n = 64, from = 0) => Array.from({ length: n }, (_, i) => {
+  const a = from + (i / n) * Math.PI * 2;
+  return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)];
+});
+const fromShape = (s) => s.getPoints(18).map((p) => [p.x, p.y]);
 
-/** A weight's outline hangs from (0, 0) and extends down; numbers sit at ny. */
-function shapeFor(kind, w) {
-  const key = `${kind}:${w}`;
-  if (shapeCache.has(key)) return shapeCache.get(key);
-  const r = radiusFor(w);
-  const s = new THREE.Shape();
-  let h, ny, nh, width;
-  if (kind === 'disc') {
-    s.absarc(0, -r, r, 0, Math.PI * 2, false);
-    h = 2 * r; ny = -r; nh = 1.2 * r; width = 2 * r;
-  } else if (kind === 'drop') {
-    s.moveTo(0, 0);
-    s.bezierCurveTo(0.22 * r, -0.22 * r, r, -0.68 * r, r, -1.32 * r);
-    s.absarc(0, -1.32 * r, r, 0, Math.PI, true);
-    s.bezierCurveTo(-r, -0.68 * r, -0.22 * r, -0.22 * r, 0, 0);
-    h = 2.32 * r; ny = -1.36 * r; nh = 1.12 * r; width = 2 * r;
-  } else if (kind === 'half') {
-    const R = r;
-    s.moveTo(-R, 0);
-    s.lineTo(R, 0);
-    s.absarc(0, 0, R, 0, Math.PI, true);
-    h = R; ny = -0.44 * r; nh = 0.8 * r; width = 2 * R;
-  } else {
-    const a = new THREE.Vector2(-1.04 * r, 0), b = new THREE.Vector2(1.04 * r, 0), c = new THREE.Vector2(0, -1.9 * r);
-    const k = 0.2 * r;
-    const toward = (p, q) => p.clone().add(q.clone().sub(p).setLength(k));
-    const start = toward(a, b);
-    s.moveTo(start.x, start.y);
-    for (const [p, q, n] of [[b, a, c], [c, b, a], [a, c, b]]) {
-      const inn = toward(p, q), out = toward(p, n);
-      s.lineTo(inn.x, inn.y);
-      s.quadraticCurveTo(p.x, p.y, out.x, out.y);
+function roundedPoly(corners, k) {
+  const out = [];
+  const n = corners.length;
+  for (let i = 0; i < n; i++) {
+    const p = corners[i], a = corners[(i + n - 1) % n], b = corners[(i + 1) % n];
+    const toward = (q) => { const dx = q[0] - p[0], dy = q[1] - p[1], l = Math.hypot(dx, dy); return [p[0] + dx / l * k, p[1] + dy / l * k]; };
+    const s = toward(a), e = toward(b);
+    for (let j = 0; j <= 6; j++) {
+      const t = j / 6, u = 1 - t;
+      out.push([u * u * s[0] + 2 * u * t * p[0] + t * t * e[0], u * u * s[1] + 2 * u * t * p[1] + t * t * e[1]]);
     }
-    h = 1.9 * r; ny = -0.6 * r; nh = 0.86 * r; width = 2.08 * r;
   }
-  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.034, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.009, bevelSegments: 3, curveSegments: 48 });
-  geo.translate(0, 0, -0.017);
-  const out = { geo, h, ny, nh, width, r };
-  shapeCache.set(key, out);
   return out;
+}
+
+const OUTLINES = {
+  disc: () => ({ pts: ring(0, 0, 1, 1), nh: 1.2 }),
+  drop: () => {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0);
+    s.bezierCurveTo(0.22, -0.22, 1, -0.68, 1, -1.32);
+    s.absarc(0, -1.32, 1, 0, Math.PI, true);
+    s.bezierCurveTo(-1, -0.68, -0.22, -0.22, 0, 0);
+    return { pts: fromShape(s), nh: 1.12 };
+  },
+  half: () => {
+    const s = new THREE.Shape();
+    s.moveTo(-1, 0);
+    s.lineTo(1, 0);
+    s.absarc(0, 0, 1, 0, Math.PI, true);
+    return { pts: fromShape(s), nh: 0.8 };
+  },
+  tri: () => ({ pts: roundedPoly([[-1.04, 0], [0, -1.9], [1.04, 0]], 0.2), nh: 0.86 }),
+  // Hangs from its stem; the tip curls to one side or the other.
+  leaf: (v) => {
+    const tip = v < 0.5 ? -1 : 1, curl = 0.2 + 0.3 * frac(v * 7.3), fat = 0.88 + 0.14 * frac(v * 3.1);
+    const right = [], left = [];
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40;
+      const hw = fat * Math.sin(Math.PI * Math.pow(t, 0.72)) * (1 - 0.12 * t);
+      const c = tip * curl * t * t * t;
+      right.push([c + hw, -2.5 * t]);
+      left.push([c - hw, -2.5 * t]);
+    }
+    return { pts: [...right, ...left.reverse().slice(1, -1)], nh: 1.0 };
+  },
+  petal: (v) => {
+    const fat = 0.95 + 0.12 * v;
+    const right = [], left = [];
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40;
+      const hw = fat * Math.sqrt(Math.max(0, Math.sin(Math.PI * Math.pow(t, 0.8)))) * (1 - 0.15 * t);
+      right.push([hw, -2.2 * t]);
+      left.push([-hw, -2.2 * t]);
+    }
+    return { pts: [...right, ...left.reverse().slice(1, -1)], nh: 1.05 };
+  },
+  // A river stone: no two the same.
+  pebble: (v) => {
+    const a = v * 6.283, b = frac(v * 13.7) * 6.283, c = frac(v * 29.3) * 6.283, sx = 1.04 + 0.14 * frac(v * 5.9);
+    const pts = Array.from({ length: 64 }, (_, i) => {
+      const th = (i / 64) * Math.PI * 2;
+      const rho = 1 + 0.09 * Math.sin(2 * th + a) + 0.06 * Math.sin(3 * th + b) + 0.035 * Math.sin(5 * th + c);
+      return [sx * rho * Math.cos(th), (1.9 - sx) * rho * Math.sin(th)];
+    });
+    return { pts, nh: 1.1 };
+  },
+  star: () => ({
+    pts: roundedPoly(Array.from({ length: 10 }, (_, k) => {
+      const a = Math.PI / 2 + (k * Math.PI) / 5, R = k % 2 ? 0.74 : 1.32;
+      return [R * Math.cos(a), R * Math.sin(a)];
+    }), 0.08),
+    nh: 0.92,
+  }),
+  // A moon with a round bite out of one shoulder: the outer circle the long
+  // way round, then back along the bite's edge where it lies inside.
+  moon: (v) => {
+    const side = v < 0.5 ? 1 : -1;
+    const R = 1.18, bx = side * 0.72 * R, by = 0.52 * R, br = 0.66 * R;
+    const d = Math.hypot(bx, by), tb = Math.atan2(by, bx);
+    const delta = Math.acos((R * R + d * d - br * br) / (2 * R * d));
+    const pts = [];
+    for (let i = 0; i <= 90; i++) {
+      const a = tb + delta + (i / 90) * (Math.PI * 2 - 2 * delta);
+      pts.push([R * Math.cos(a), R * Math.sin(a)]);
+    }
+    const at = (p) => Math.atan2(p[1] - by, p[0] - bx);
+    const from = at(pts[pts.length - 1]), to = at(pts[0]);
+    // Of the two ways round the bite, take the one that passes nearest the middle.
+    let span = to - from;
+    span -= Math.PI * 2 * Math.round(span / (Math.PI * 2));
+    const alt = span > 0 ? span - Math.PI * 2 : span + Math.PI * 2;
+    const mid = (sp) => { const a = from + sp / 2; return Math.hypot(bx + br * Math.cos(a), by + br * Math.sin(a)); };
+    const sweep = mid(span) < mid(alt) ? span : alt;
+    for (let i = 1; i < 40; i++) {
+      const a = from + (i / 40) * sweep;
+      pts.push([bx + br * Math.cos(a), by + br * Math.sin(a)]);
+    }
+    // The number sits in the full side, away from the bite.
+    return { pts, nh: 0.94, focus: [(-bx / d) * 0.32 * R, (-by / d) * 0.32 * R] };
+  },
+  square: () => ({ pts: roundedPoly([[-0.9, 0.9], [0.9, 0.9], [0.9, -0.9], [-0.9, -0.9]], 0.2), nh: 1.1 }),
+  diamond: () => ({ pts: roundedPoly([[0, 1.25], [1.25, 0], [0, -1.25], [-1.25, 0]], 0.18), nh: 0.98 }),
+  // A paper lantern: a rounded barrel.
+  lantern: () => ({
+    pts: Array.from({ length: 72 }, (_, i) => {
+      const a = (i / 72) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+      return [0.9 * Math.sign(c) * Math.pow(Math.abs(c), 0.62), 1.15 * Math.sign(s) * Math.pow(Math.abs(s), 0.62)];
+    }),
+    nh: 1.12,
+  }),
+  // Swims left or right; its number sits in the body, clear of the tail.
+  fish: (v) => {
+    const f = v < 0.5 ? 1 : -1;
+    const body = [];
+    for (let i = 0; i <= 30; i++) {
+      const a = (i / 30) * 2.7;
+      body.push([0.2 + 0.95 * Math.cos(a), 0.6 * Math.sin(a)]);
+    }
+    const tail = [[-1.25, 0.55], [-0.98, 0], [-1.25, -0.55]];
+    const under = body.map(([x, y]) => [x, -y]).reverse();
+    return { pts: [...body, ...tail, ...under].map(([x, y]) => [f * x, y]), nh: 0.9, focus: [0.2 * f, 0] };
+  },
+};
+
+export const SHAPE_KINDS = Object.keys(OUTLINES);
+
+// How a finish is cut from sheet: paper is thin, glass thick and soft-edged.
+const PROFILES = {
+  paper: { depth: 0.014, bevelThickness: 0.004, bevelSize: 0.004 },
+  glass: { depth: 0.05, bevelThickness: 0.016, bevelSize: 0.014 },
+  sheet: { depth: 0.034, bevelThickness: 0.01, bevelSize: 0.009 },
+};
+
+/**
+ * A weight's outline, scaled to radius r and hung from (0, 0): the point on
+ * its top edge straight above its centroid, so it hangs the way it would.
+ * Numbers go at `nx, ny` with height `nh`; `width` is twice its furthest reach.
+ */
+function weightShape(kind, w, v, finish) {
+  const r = radiusFor(w);
+  const o = OUTLINES[kind](v);
+  let pts = o.pts;
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const k = Math.min(1, MAX_W / (Math.max(...xs) - Math.min(...xs)), MAX_H / (Math.max(...ys) - Math.min(...ys))) * r;
+  pts = pts.map(([x, y]) => [x * k, y * k]);
+  // Area centroid, then the top edge above it.
+  let A = 0, cx = 0, cy = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const [x0, y0] = pts[i], [x1, y1] = pts[(i + 1) % pts.length];
+    const c = x0 * y1 - x1 * y0;
+    A += c; cx += (x0 + x1) * c; cy += (y0 + y1) * c;
+  }
+  cx /= 3 * A; cy /= 3 * A;
+  let top = -Infinity;
+  for (let i = 0; i < pts.length; i++) {
+    const [x0, y0] = pts[i], [x1, y1] = pts[(i + 1) % pts.length];
+    if ((x0 - cx) * (x1 - cx) > 0 || x0 === x1) continue;
+    top = Math.max(top, y0 + ((cx - x0) / (x1 - x0)) * (y1 - y0));
+  }
+  pts = pts.map(([x, y]) => new THREE.Vector2(x - cx, y - top));
+  const focus = o.focus ? [o.focus[0] * k - cx, o.focus[1] * k - top] : [0, cy - top];
+  const prof = PROFILES[finish === 'paper' ? 'paper' : finish === 'glass' ? 'glass' : 'sheet'];
+  const geo = new THREE.ExtrudeGeometry(new THREE.Shape(pts), { ...prof, bevelEnabled: true, bevelSegments: 3, curveSegments: 12 });
+  geo.translate(0, 0, -prof.depth / 2);
+  const reach = Math.max(...pts.map((p) => Math.abs(p.x)));
+  return {
+    geo, r,
+    h: -Math.min(...pts.map((p) => p.y)),
+    nx: focus[0], ny: focus[1],
+    nh: o.nh * k,
+    width: 2 * reach,
+    face: prof.depth / 2 + prof.bevelThickness + 0.0015,
+  };
+}
+
+// A weight's body, finished the exhibit's way. Metal reflects a soft studio;
+// paper glows a little from within; glass is frosted and lets light through.
+function bodyMaterial(finish, color, env) {
+  if (finish === 'metal') return new THREE.MeshStandardMaterial({ color, metalness: 0.62, roughness: 0.42, envMap: env(), envMapIntensity: 0.65 });
+  if (finish === 'paper') return new THREE.MeshStandardMaterial({ color, roughness: 0.92, emissive: color, emissiveIntensity: 0.3 });
+  // Pale glass lets less through, or it would vanish against a pale wall.
+  if (finish === 'glass') return new THREE.MeshPhysicalMaterial({ color, roughness: 0.38, transmission: new THREE.Color(color).getHSL({}).l > 0.75 ? 0.45 : 0.82, thickness: 0.14, ior: 1.5, attenuationColor: color, attenuationDistance: 0.18, specularIntensity: 0.8, sheen: 0.4, sheenRoughness: 0.6, sheenColor: '#ffffff' });
+  if (finish === 'matte') return new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0 });
+  return new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.06 });
 }
 
 const numeralGeo = new THREE.PlaneGeometry(2, 1);
 
 class WeightView {
-  constructor(def, paint, kind) {
+  constructor(def, paint, kind, variant, look) {
     this.def = def;
     this.id = def.id;
     this.w = def.w;
     this.pinned = !def.loose;
-    const sh = (this.shape = shapeFor(kind, def.w));
+    this.kind = kind;
+    const sh = (this.shape = weightShape(kind, def.w, variant, look.finish));
     this.group = new THREE.Group();
     this.inner = new THREE.Group();
     this.group.add(this.inner);
 
-    this.paint = new THREE.MeshStandardMaterial({ color: paint.body, roughness: 0.5, metalness: 0.06 });
+    this.paint = bodyMaterial(look.finish, paint.body, look.env);
     const body = new THREE.Mesh(sh.geo, this.paint);
     body.castShadow = body.receiveShadow = true;
     this.inner.add(body);
@@ -112,21 +261,21 @@ class WeightView {
     for (const back of [false, true]) {
       const n = new THREE.Mesh(numeralGeo, ink);
       n.scale.set(sh.nh * 2, sh.nh, 1);
-      n.position.set(0, sh.ny, back ? -0.0285 : 0.0285);
+      n.position.set(sh.nx, sh.ny, back ? -sh.face : sh.face);
       if (back) n.rotation.y = Math.PI;
       this.inner.add(n);
     }
 
-    // Pinned weights are riveted in brass; loose ones hang from a steel clip.
+    // Pinned weights are riveted in brass; loose ones hang from a wire clip.
     const top = this.pinned
       ? new THREE.Mesh(new THREE.SphereGeometry(0.034, 16, 12), brass)
-      : new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.0065, 8, 20), steel);
+      : new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.0065, 8, 20), look.wire);
     top.position.y = this.pinned ? -0.008 : 0.018;
     top.castShadow = true;
     this.inner.add(top);
 
-    const hit = new THREE.Mesh(new THREE.CircleGeometry(Math.max(sh.width * 0.62, 0.28), 20), hidden);
-    hit.position.y = -sh.h / 2;
+    const hit = new THREE.Mesh(new THREE.CircleGeometry(Math.max(sh.width * 0.55, sh.h * 0.55, 0.28), 20), hidden);
+    hit.position.set(sh.nx, -sh.h / 2, 0);
     hit.userData.weight = def.id;
     this.hit = hit;
     this.inner.add(hit);
@@ -146,43 +295,62 @@ class WeightView {
 // Beams
 
 class BeamView {
-  constructor(def) {
+  constructor(def, look) {
     this.def = def;
     this.id = def.id;
     this.half = (def.reach + 0.32) * U;
     const g = (this.group = new THREE.Group());
+    const bar = BAR * look.bar;
 
-    const rod = new THREE.Mesh(new THREE.CylinderGeometry(BAR, BAR, this.half * 2, 10), steel);
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(bar, bar, this.half * 2, 12), look.beam);
     rod.rotation.z = Math.PI / 2;
     rod.castShadow = true;
     g.add(rod);
 
-    // Turned-up ends, and the loop the beam hangs by.
+    // The ends: turned up in a curl, a ball, or simply rounded off.
     for (const side of [-1, 1]) {
-      const curl = new THREE.Mesh(new THREE.TorusGeometry(0.062, BAR * 0.92, 8, 24, Math.PI * 1.15), steel);
-      curl.position.set(side * this.half, 0.062, 0);
-      curl.rotation.z = -Math.PI / 2;
-      curl.scale.x = side;
-      curl.castShadow = true;
-      g.add(curl);
+      let end;
+      if (look.ends === 'curl') {
+        end = new THREE.Mesh(new THREE.TorusGeometry(0.062, bar * 0.92, 8, 24, Math.PI * 1.15), look.beam);
+        end.position.set(side * this.half, 0.062, 0);
+        end.rotation.z = -Math.PI / 2;
+        end.scale.x = side;
+      } else {
+        end = new THREE.Mesh(new THREE.SphereGeometry(look.ends === 'ball' ? bar * 2.4 : bar * 1.02, 16, 12), look.beam);
+        end.position.x = side * this.half;
+      }
+      end.castShadow = true;
+      g.add(end);
     }
-    const loop = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.008, 8, 20), steel);
-    loop.position.y = 0.05;
+    // Bamboo has nodes between its hooks.
+    if (look.nodes) {
+      const node = new THREE.CylinderGeometry(bar * 1.22, bar * 1.22, 0.035, 12);
+      for (let d = -def.reach; d < def.reach; d++) {
+        const n = new THREE.Mesh(node, look.beam);
+        n.rotation.z = Math.PI / 2;
+        n.position.x = (d + 0.5) * U;
+        n.castShadow = true;
+        g.add(n);
+      }
+    }
+    const loop = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.008, 8, 20), look.wire);
+    loop.position.y = 0.05 + bar - BAR;
     loop.castShadow = true;
     g.add(loop);
 
     // Hooks under the beam, and their distances above it.
     this.hooks = new Map();
     const hookGeo = new THREE.TorusGeometry(0.022, 0.0055, 6, 16);
-    const tickGeo = new THREE.PlaneGeometry(0.25, 0.25);
+    const tickGeo = new THREE.PlaneGeometry(0.25 * look.labels, 0.25 * look.labels);
+    const tickY = LABEL_Y + (bar - BAR) + 0.12 * (look.labels - 1);
     for (let d = -def.reach; d <= def.reach; d++) {
       if (!d) continue;
-      const hook = new THREE.Mesh(hookGeo, steel);
-      hook.position.set(d * U, -HOOK_DROP + 0.02, 0);
+      const hook = new THREE.Mesh(hookGeo, look.wire);
+      hook.position.set(d * U, -HOOK_DROP + 0.02 - (bar - BAR), 0);
       g.add(hook);
       this.hooks.set(d, hook);
-      const t = new THREE.Mesh(tickGeo, new THREE.MeshBasicMaterial({ map: tick(String(Math.abs(d))), transparent: true, depthWrite: false }));
-      t.position.set(d * U, LABEL_Y, 0.004);
+      const t = new THREE.Mesh(tickGeo, new THREE.MeshBasicMaterial({ map: tick(String(Math.abs(d)), look.tick), transparent: true, depthWrite: false }));
+      t.position.set(d * U, tickY, 0.004);
       g.add(t);
     }
 
@@ -195,7 +363,7 @@ class BeamView {
     // Each arm's weight × distance, when the hints go that far.
     this.arms = [-1, 1].map((side) => {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
-      m.position.set(side * (this.half - 0.1), LABEL_Y + 0.36, 0.006);
+      m.position.set(side * (this.half - 0.1), tickY + 0.21 + 0.15 * look.labels, 0.006);
       m.visible = false;
       m.userData.text = '';
       g.add(m);
@@ -226,7 +394,7 @@ class BeamView {
 const wireGeo = new THREE.CylinderGeometry(0.0042, 0.0042, 1, 5, 1, true).translate(0, 0.5, 0);
 const UP = new THREE.Vector3(0, 1, 0);
 class Wire {
-  constructor(parent, material = steel) {
+  constructor(parent, material) {
     this.mesh = new THREE.Mesh(wireGeo, material);
     this.mesh.castShadow = true;
     parent.add(this.mesh);
@@ -263,33 +431,54 @@ function pendulum(node, H, L, dt, breeze) {
 export class Mobile {
   /**
    * @param {object} puzzle from puzzle.generate
-   * @param {{held?: boolean, hintLevel?: number, place?: Array}} o
+   * @param {{held?: boolean, hintLevel?: number, place?: Array, exhibit: object, env: () => THREE.Texture}} o
+   *   exhibit from exhibits.js; env makes the reflection map metal finishes need
    */
-  constructor(puzzle, { held = false, hintLevel = 0, place = null } = {}) {
+  constructor(puzzle, { held = false, hintLevel = 0, place = null, exhibit, env, labels = 1 }) {
     this.puzzle = puzzle;
+    this.exhibit = exhibit;
     this.rig = new THREE.Group();
     this.held = held;
     this.hintLevel = hintLevel;
-    this.beams = puzzle.beams.map((d) => new BeamView(d));
+
+    const ex = exhibit;
+    const look = (this.look = {
+      beam: new THREE.MeshStandardMaterial({ color: ex.beam.color, roughness: ex.beam.roughness, metalness: ex.beam.metalness, ...(ex.beam.env ? { envMap: env(), envMapIntensity: 0.9 } : {}) }),
+      wire: new THREE.MeshStandardMaterial({ color: ex.beam.wire, roughness: 0.5, metalness: ex.beam.metalness * 0.5 }),
+      accent: new THREE.MeshBasicMaterial({ color: ex.accent, toneMapped: false }),
+      bar: ex.beam.bar,
+      ends: ex.ends,
+      nodes: Boolean(ex.beam.nodes),
+      tick: ex.tick,
+      labels, // distance marks and hint pills grow on a small screen
+      finish: ex.finish,
+      env,
+    });
+
+    this.beams = puzzle.beams.map((d) => new BeamView(d, look));
     for (const b of this.beams) this.rig.add(b.group);
     this.order = [...this.beams].sort((a, b) => a.def.depth - b.def.depth);
 
     const rng = makeRng(puzzle.seed ^ 0x5bd1e995);
-    const kinds = rng.shuffle([...SHAPES]);
+    const palette = legiblePalette(ex);
     let last = -1;
-    this.weights = puzzle.weights.map((def, i) => {
-      // Neighbouring weights never share a colour.
-      let p = rng.int(0, PAINT.length - 1);
-      if (p === last) p = (p + 1 + rng.int(0, PAINT.length - 2)) % PAINT.length;
+    this.weights = puzzle.weights.map((def) => {
+      // Neighbouring weights never share a colour. A scripted weight (the
+      // tutorial's) can fix its own paint and outline.
+      const n = palette.length;
+      let p = rng.int(0, n - 1);
+      if (p === last) p = (p + 1 + rng.int(0, n - 2)) % n;
+      const kind = rng.pick(ex.shapes), variant = rng.next();
+      if (def.look) p = def.look.paint % n;
       last = p;
-      const v = new WeightView(def, PAINT[p], kinds[(i + rng.int(0, 1)) % kinds.length]);
+      const v = new WeightView(def, palette[p], def.look?.kind ?? kind, def.look?.variant ?? variant, look);
       this.rig.add(v.group);
       return v;
     });
     this.wires = {
-      root: new Wire(this.rig),
-      kids: this.beams.map((b) => (b.def.parent == null ? null : new Wire(this.rig))),
-      weights: this.weights.map(() => new Wire(this.rig)),
+      root: new Wire(this.rig, look.wire),
+      kids: this.beams.map((b) => (b.def.parent == null ? null : new Wire(this.rig, look.wire))),
+      weights: this.weights.map(() => new Wire(this.rig, look.wire)),
     };
     this.sums = this.beams.map((b) => {
       if (b.def.parent == null) return null;
@@ -300,10 +489,10 @@ export class Mobile {
       return m;
     });
 
-    this.target = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 8, 28), accent);
+    this.target = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 8, 28), look.accent);
     this.target.visible = false;
     this.rig.add(this.target);
-    this.preview = new Wire(this.rig, accent);
+    this.preview = new Wire(this.rig, look.accent);
     this.preview.mesh.visible = false;
     this.preview.mesh.castShadow = false;
 
@@ -321,43 +510,57 @@ export class Mobile {
     this.setHints(hintLevel);
   }
 
-  // Lays the mobile out level: how long each sub-beam's wire is so nothing
+  // Lays the mobile out: how long each sub-beam's wire is so nothing
   // collides, and the box it all fits in. Weights could go on any hook, so
-  // every hook gets room for the biggest one.
+  // every hook gets room for the biggest one; and any beam can tilt, which
+  // drops one end, and everything hanging from it, a little lower.
   layout() {
+    const lean = Math.sin(MAX_TILT);
+    // A beam reaches as far as its end, or a wide weight on its last hook.
     const ext = (b) => {
-      let minX = -b.half - 0.08, maxX = b.half + 0.08, depth = HANG_DEPTH;
+      const reach = Math.max(b.half, b.def.reach * U + (MAX_W / 2) * R_MAX) + 0.08;
+      let minX = -reach, maxX = reach, depth = HANG_DEPTH + 0.75 * lean * b.def.reach * U;
       const laid = [];
       for (const k of b.def.kids) {
         const kid = this.beams[k];
         const e = ext(kid);
         const x = kid.def.hook * U;
-        let L = HANG_DEPTH + KID_GAP + 0.3;
+        // Room below the parent's weights, and for parent and child tilting
+        // toward each other at the child's far end.
+        let L = HANG_DEPTH + KID_GAP + 0.3 + lean * (1.1 * kid.half + 0.5 * Math.abs(x));
         for (const o of laid) {
-          if (x + e.minX < o.maxX + 0.15 && x + e.maxX > o.minX - 0.15) L = Math.max(L, o.L + o.depth + KID_GAP + 0.3);
+          // Sub-mobiles that would hang side by side, or nearly, hang one below the other.
+          // (o.depth already allows for its own hook dropping; this one's may rise.)
+          if (x + e.minX < o.maxX + 0.6 && x + e.maxX > o.minX - 0.6) L = Math.max(L, o.L + o.depth + KID_GAP + 0.3 + lean * (kid.half + Math.abs(x)));
         }
         kid.wireLen = L;
-        laid.push({ minX: x + e.minX, maxX: x + e.maxX, L, depth: e.depth });
+        laid.push({ minX: x + e.minX, maxX: x + e.maxX, L, depth: e.depth + lean * Math.abs(x) });
         minX = Math.min(minX, x + e.minX);
         maxX = Math.max(maxX, x + e.maxX);
-        depth = Math.max(depth, L + e.depth);
+        depth = Math.max(depth, L + e.depth + lean * Math.abs(x));
       }
       return { minX, maxX, depth };
     };
     const e = (this.extent = ext(this.beams[0]));
-    // A tilted top beam lifts one end and lowers everything on the other.
-    const tilt = Math.sin(MAX_TILT) * this.beams[0].half;
+    // Turning on its wire, the mobile sweeps a cylinder this wide: the wall
+    // has to stand behind it. Long wires swing further.
+    const longest = Math.max(0, ...this.beams.map((b) => b.wireLen));
+    this.reachLeft = -e.minX + SWING_ROOM + 0.12 * longest;
+    this.reachRight = e.maxX + SWING_ROOM + 0.12 * longest;
+    this.spinRadius = Math.max(this.reachLeft, this.reachRight);
+    const tilt = lean * this.beams[0].half;
     const loose = this.weights.filter((v) => !v.pinned);
     const trayWidth = loose.reduce((s, v) => s + v.shape.width + 0.2, -0.2);
-    // The shelf sits below the lowest anything can swing, with room for the
-    // tallest loose weight standing on it.
+    // The plinth's top sits below the lowest anything can swing, with room
+    // for the tallest loose weight standing on it.
     const tallest = Math.max(0, ...loose.map((v) => v.shape.h));
-    this.shelfY = -e.depth - tilt * 0.8 - 0.22 - tallest;
+    this.shelfY = -e.depth - 0.22 - tallest;
     this.trayHalf = Math.max(1.2, trayWidth / 2 + 0.35);
     const minX = Math.min(e.minX, -this.trayHalf), maxX = Math.max(e.maxX, this.trayHalf);
-    this.placardAt = { x: Math.max(maxX - 0.55, this.trayHalf - 0.55), y: this.shelfY - 0.42 };
+    // The label goes on the plinth's face, to the right, just under its top.
+    this.placardAt = { x: this.trayHalf - 0.76, y: this.shelfY - 0.42 };
     this.box = { minX, maxX, minY: this.shelfY - 0.72, maxY: 0.62 + tilt };
-    this.mobileBox = { minX: e.minX, maxX: e.maxX, minY: -e.depth, maxY: 0.62 };
+    this.mobileBox = { minX: e.minX, maxX: e.maxX, minY: -e.depth + 0.75 * lean * this.beams[0].def.reach * U, maxY: 0.62 };
   }
 
   setPlace(place) {
@@ -397,11 +600,11 @@ export class Mobile {
     };
     this.beams.forEach((b, i) => {
       const m = this.measures[i];
-      if (this.sums[i]) show(this.sums[i], this.hintLevel >= 1 ? `Σ ${m.mass}` : '', {}, 0.34);
+      if (this.sums[i]) show(this.sums[i], this.hintLevel >= 1 ? `Σ ${m.mass}` : '', {}, 0.34 * this.look.labels);
       const even = m.left === m.right;
       [m.left, m.right].forEach((v, s) => {
         const heavy = !even && (s === 0 ? m.left > m.right : m.right > m.left);
-        show(b.arms[s], this.hintLevel >= 2 ? String(v) : '', { fg: even ? '#2f6b45' : heavy ? '#b3271f' : '#4a463f' }, 0.32);
+        show(b.arms[s], this.hintLevel >= 2 ? String(v) : '', { fg: even ? '#2f6b45' : heavy ? '#b3271f' : '#4a463f' }, 0.32 * this.look.labels);
       });
     });
   }
@@ -419,16 +622,38 @@ export class Mobile {
   /** The beam ids that aren't level, heavy side first. */
   crooked() { return this.measures.map((m, i) => (m.net !== 0 ? i : -1)).filter((i) => i >= 0); }
 
-  spin() { this.spinT = 0; }
+  /**
+   * How far the mobile may turn on its wire with the wall `room` behind it.
+   * Turning one way swings the right side back, the other way the left, so
+   * a turn goes the way the shorter side swings back. A whole turn only when
+   * nothing reaches the wall at all.
+   */
+  turnLimit(room) {
+    if (this.spinRadius < room) return { full: true, dir: 1, max: Math.PI * 2 };
+    const right = this.reachRight <= this.reachLeft;
+    const reach = right ? this.reachRight : this.reachLeft;
+    return { full: false, dir: right ? 1 : -1, max: Math.asin(Math.min(1, room / reach)) };
+  }
+
+  /** The balanced mobile turns on its wire: as far as `room` allows, and back. */
+  spin(room) {
+    this.spinPlan = this.turnLimit(room);
+    this.spinT = 0;
+  }
 
   // A new mobile drops in from above; a finished one rises away.
   enter() {
     this.drop = { from: 6 + this.extent.depth, to: 0, t: 0, dur: 1.3, ease: (x) => 1 - Math.pow(1 - x, 3) * Math.cos(x * 2.2) };
     this.rig.position.y = this.drop.from;
-    // The loose weights slide along the shelf from the right as it comes down.
+    // The loose weights slide along the plinth from the right as it comes down.
     this.weights.filter((v) => v.state === 'tray').forEach((v, i) => { v.pos.x += 3.5 + i * 0.5; v.pos.y -= this.drop.from; });
   }
-  leave() { this.drop = { from: this.rig.position.y, to: 9 + this.extent.depth, t: 0, dur: 1.1, ease: (x) => x * x * x }; }
+  leave() {
+    // A mobile on its way out stops turning and eases square to the room.
+    this.spinT = -1;
+    this.drift = 0;
+    this.drop = { from: this.rig.position.y, to: 9 + this.extent.depth, t: 0, dur: 1.1, ease: (x) => x * x * x };
+  }
   get moving() { return Boolean(this.drop); }
 
   /** Weight under a ray, or -1. */
@@ -478,11 +703,11 @@ export class Mobile {
 
   /** Lights up the free hooks while a weight is in hand. */
   showHooks(on, skip = -1) {
-    for (const b of this.beams) for (const hook of b.hooks.values()) { hook.material = steel; hook.scale.setScalar(1); }
+    for (const b of this.beams) for (const hook of b.hooks.values()) { hook.material = this.look.wire; hook.scale.setScalar(1); }
     if (!on) return;
     for (const h of freeHooks(this.puzzle, this.place, skip)) {
       const hook = this.beams[h.beam].hooks.get(h.d);
-      hook.material = accent;
+      hook.material = this.look.accent;
       hook.scale.setScalar(2.4);
     }
   }
@@ -491,7 +716,7 @@ export class Mobile {
 
   select(id) { for (const v of this.weights) v.selected = v.id === id; }
 
-  // Trays: the loose weights waiting on the shelf, smallest first.
+  // The loose weights waiting on the plinth, smallest first.
   traySlots() {
     const waiting = this.weights.filter((v) => v.state === 'tray').sort((a, b) => a.w - b.w || a.id - b.id);
     const width = waiting.reduce((s, v) => s + v.shape.width + 0.2, -0.2);
@@ -521,14 +746,16 @@ export class Mobile {
       if (d.t >= 1) { this.rig.position.y = d.to; this.drop = null; }
     }
     if (this.spinT >= 0) {
+      const plan = this.spinPlan;
       this.spinT += dt;
-      const k = Math.min(1, this.spinT / 7.5);
-      this.yaw = Math.PI * 2 * easeInOut(k);
-      if (k >= 1) this.spinT = -1;
-    } else if (this.drift) {
-      this.yaw = this.drift * Math.sin(t * 0.17);
+      const k = Math.min(1, this.spinT / (plan.full ? 7.5 : 6));
+      this.yaw = plan.full ? Math.PI * 2 * easeInOut(k) : plan.dir * plan.max * Math.sin(Math.PI * easeInOut(k));
+      if (k >= 1) { this.spinT = -1; if (plan.full) this.yaw -= Math.PI * 2; }
     } else {
-      this.yaw = 0.03 * Math.sin(t * 0.23);
+      // Drifting side to side on the title, barely turning otherwise; eased,
+      // so a mobile that stops drifting doesn't snap round.
+      const goal = this.drift ? this.drift * Math.sin(t * 0.17) : 0.03 * Math.sin(t * 0.23);
+      this.yaw += (goal - this.yaw) * (snap ? 1 : 1 - Math.exp(-dt * 2.5));
     }
     this.rig.rotation.y = this.yaw;
 
@@ -598,7 +825,7 @@ export class Mobile {
         wire.mesh.visible = false;
         if (v.state === 'tray') {
           const slot = slots.get(v.id);
-          // The shelf doesn't travel with the mobile.
+          // The plinth doesn't travel with the mobile.
           slot.y -= this.rig.position.y;
           v.lift += ((v.selected ? 0.2 + 0.03 * Math.sin(t * 5) : 0) - v.lift) * k;
           slot.y += v.lift;
@@ -639,12 +866,13 @@ export class Mobile {
 
   dispose() {
     this.rig.removeFromParent();
-    const shared = new Set([wireGeo, numeralGeo, ...[...shapeCache.values()].map((s) => s.geo)]);
-    const kept = new Set([steel, brass, accent, warning, hidden]);
+    const shared = new Set([wireGeo, numeralGeo]);
+    const kept = new Set([brass, warning, hidden]);
     this.rig.traverse((o) => {
       if (o.geometry && !shared.has(o.geometry)) o.geometry.dispose();
       if (o.material && !kept.has(o.material)) o.material.dispose();
     });
+    for (const m of [this.look.beam, this.look.wire, this.look.accent]) m.dispose();
   }
 }
 

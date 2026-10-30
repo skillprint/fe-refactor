@@ -38,8 +38,9 @@
   #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
   #scene.grab { cursor: grab; }
   #scene.grabbing { cursor: grabbing; }
-  /* The edges of the room fall into shadow. */
-  #vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 85% 80% at 50% 42%, transparent 55%, rgba(60, 48, 30, 0.16) 100%); }
+  /* The edges of the room fall into shadow, tinted by the exhibit. */
+  @property --vig { syntax: '<color>'; inherits: true; initial-value: rgba(60, 48, 30, 0.16); }
+  #vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 85% 80% at 50% 42%, transparent 55%, var(--vig) 100%); transition: --vig 1.4s; }
 
   .paper { background: var(--paper); backdrop-filter: blur(10px) saturate(1.1); -webkit-backdrop-filter: blur(10px) saturate(1.1); border: 1px solid var(--hairline); }
   .eyebrow { font: 600 11px/1.2 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); margin: 0; }
@@ -90,6 +91,18 @@
   #note p { margin: 0; font: 420 16px/1.35 var(--display); }
   #note p b { font-weight: 600; }
 
+  /* How to play: the coach's card, and a ring over what to touch. */
+  #coach { position: fixed; z-index: 4; left: max(18px, calc(14px + var(--safe-l))); top: calc(18px + var(--safe-t)); width: min(340px, 30vw); box-sizing: border-box; padding: 13px 16px 12px; border-radius: 14px; background: var(--paper-hi); box-shadow: 0 12px 34px rgba(60, 48, 30, 0.14); }
+  #coach-text { margin: 6px 0 0; font: 400 16.5px/1.42 var(--display); text-wrap: pretty; }
+  #coach-text b { font-weight: 600; }
+  #coach.praised #coach-text { color: #2f6b45; }
+  #coach-why { margin: 10px 0 0; padding: 8px 11px; border-radius: 10px; border-left: 3px solid var(--accent); background: rgba(232, 116, 59, 0.09); font: 400 15px/1.38 var(--display); text-wrap: pretty; }
+  #coach-why b { font-weight: 600; }
+  #coach .row { margin-top: 10px; justify-content: flex-end; }
+  #coach-skip { font-size: 13.5px; padding: 6px 10px; }
+  #coach-point { position: fixed; z-index: 4; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--accent); box-shadow: 0 0 0 7px rgba(232, 116, 59, 0.16); box-sizing: border-box; pointer-events: none; animation: ping 1.3s ease-in-out infinite; }
+  @keyframes ping { 0%, 100% { scale: 0.86; opacity: 1; } 60% { scale: 1.2; opacity: 0.45; } }
+
   /* After each mobile, and at the end. */
   .card { position: fixed; z-index: 6; left: 50%; bottom: calc(14px + var(--safe-b)); transform: translate(-50%, 16px); width: min(440px, calc(100vw - 32px)); box-sizing: border-box; padding: 16px 20px 16px; border-radius: 18px; background: var(--paper-hi); opacity: 0; transition: opacity 0.5s, transform 0.5s; box-shadow: 0 14px 40px rgba(60, 48, 30, 0.14); }
   .card.show { opacity: 1; transform: translate(-50%, 0); }
@@ -117,6 +130,8 @@
     #actions kbd { display: none; }
     #actions .btn { padding: 8px 12px; font-size: 13.5px; }
     #note { top: calc(70px + var(--safe-t)); }
+    #coach-text { font-size: 14.5px; }
+    #coach-why { font-size: 13.5px; }
     #note p { font-size: 14.5px; }
     #title { top: auto; bottom: calc(18px + var(--safe-b)); transform: none; }
     #title.leaving { transform: translateX(-24px); }
@@ -124,14 +139,20 @@
     #title .lede { margin-bottom: 16px; }
     #title .how { display: none; }
   }
+  @media (max-width: 700px), (orientation: portrait) {
+    #coach { left: max(10px, var(--safe-l)); right: max(10px, var(--safe-r)); width: auto; top: calc(10px + var(--safe-t)); padding: 10px 13px 9px; }
+    #coach .row { margin-top: 6px; }
+  }
   @media (prefers-reduced-motion: reduce) {
     #flame { animation: none; }
+    #coach-point { animation: none; }
   }
 </style>
 <script type="importmap">
 {
   "imports": {
-    "three": "./vendor/three/build/three.module.min.js"
+    "three": "./vendor/three/build/three.module.min.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
   }
 }
 </script>
@@ -174,7 +195,7 @@
   <p class="eyebrow">A mobile, out of balance</p>
   <h1>Equi&shy;<em>librium</em></h1>
   <p class="lede">Hang the weights so every arm rests level.</p>
-  <button id="begin" class="btn primary" type="button">Begin</button>
+  <div class="row"><button id="begin" class="btn primary" type="button">Begin</button><button id="howto" class="btn" type="button" hidden>How to play</button></div>
   <ul class="how paper">
     <li>Each beam pivots at its middle. <b>Weight × distance</b> must match on both sides.</li>
     <li><b>Drag</b> a weight from the shelf onto a hook, or tap it, then tap a hook. Tap a hung weight to take it back.</li>
@@ -183,6 +204,14 @@
   </ul>
   <p class="eyebrow" id="best"></p>
 </section>
+
+<aside id="coach" class="paper" hidden aria-live="polite">
+  <p class="eyebrow" id="coach-step">How to play</p>
+  <p id="coach-text"></p>
+  <p id="coach-why" hidden></p>
+  <div class="row"><button id="coach-skip" class="btn ghost" type="button">Skip tutorial <kbd>Esc</kbd></button></div>
+</aside>
+<div id="coach-point" hidden aria-hidden="true"></div>
 
 <section id="end" class="card" hidden aria-live="polite">
   <h2 id="end-head"></h2>
