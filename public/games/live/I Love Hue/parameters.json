@@ -1,0 +1,16 @@
+{
+    "shuffleShare": {
+        "max": 1.0,
+        "min": 0.25,
+        "type": "float",
+        "default": 1.0,
+        "description": "Share of a level's movable tiles that start shuffled (1 = the game's own puzzle). The rest start in their correct place and are pinned with a dot, like the game's fixed tiles. Applies from the next level started or restarted. Lower values make shorter, easier puzzles."
+    },
+    "colorContrast": {
+        "max": 1.5,
+        "min": 0.5,
+        "type": "float",
+        "default": 1.0,
+        "description": "Scales how different each tile's colour is from the level's average colour (1 = the game's own colours). Lower values make neighbouring tiles harder to tell apart; higher values make the gradient easier to read. Applies from the next level started or restarted."
+    }
+}

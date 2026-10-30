@@ -1,0 +1,43 @@
+{
+  "game_slug": "i-love-hue-115ad80c-adb3-47fb-8be7-4b683133a94e",
+  "is_enabled": true,
+  "parameter_definitions": {
+    "shuffleShare": {
+      "type": "number",
+      "min": 0.25,
+      "max": 1.0,
+      "default": 1.0,
+      "description": "Share of a level's movable tiles that start shuffled (1 = the game's own puzzle). The rest start in their correct place and are pinned with a dot, like the game's fixed tiles. Applies from the next level started or restarted. Lower values make shorter, easier puzzles.",
+      "adjustment_guide": "The main difficulty lever. Lower (0.25-0.5) for relax or a player who leaves levels unfinished; raise toward 1 as the player solves levels in few extra swaps."
+    },
+    "colorContrast": {
+      "type": "number",
+      "min": 0.5,
+      "max": 1.5,
+      "default": 1.0,
+      "description": "Scales how different each tile's colour is from the level's average colour (1 = the game's own colours). Lower values make neighbouring tiles harder to tell apart; higher values make the gradient easier to read. Applies from the next level started or restarted.",
+      "adjustment_guide": "The perceptual lever. Lower (0.5-0.8) for focus and to train colour discrimination once the player solves levels comfortably; raise (1.2-1.5) for relax or a struggling player."
+    }
+  },
+  "adjustment_instructions": "I Love Hue is a colour-gradient puzzle: each level is a grid of colour tiles that should form a smooth gradient. Tiles marked with a dot are fixed; the rest are shuffled, and the player drags tiles to swap them until the gradient is restored. There is no timer; the game logs a SWAP event per swap with correct = 1 when it reduced the number of misplaced tiles. Levels get larger (4x8 up to 5x9) and more shuffled as they go.\nLevers (both apply from the next level started or restarted): shuffleShare sets how much of the grid is scrambled (lower = shorter, easier puzzle); colorContrast sets how distinct the colours are (lower = harder to tell neighbours apart).\n- relax: shuffleShare 0.25-0.5, colorContrast 1.2-1.5.\n- focus: shuffleShare 0.75-1.0, colorContrast 0.7-0.9.\n- grit: shuffleShare 1.0, colorContrast 0.5-0.7; raise colorContrast if many swaps are incorrect.\n- joy: shuffleShare 0.5-0.75, colorContrast 1.0-1.3, so levels resolve quickly and vividly.\nA high share of incorrect SWAP events (correct = 0) means the player is guessing: raise colorContrast or lower shuffleShare.",
+  "skill_adjustment_instructions": "I Love Hue trains Perception (fine colour discrimination), Spatial reasoning (placing a tile by its row and column neighbours) and Planning (choosing swaps that fix two tiles at once).\n- perception: lower colorContrast step by step (0.9 down to 0.5) while incorrect swaps stay rare.\n- spatial, planning: shuffleShare 0.75-1.0 at colorContrast 1.0, so the challenge is the arrangement rather than seeing the colours.",
+  "notes": "I Love Hue's difficulty knobs, matching static/skillprintShim.js, ../parameters.json and GameAdjustmentTester's 'i-love-hue' keys.",
+  "sdk_game_parameters": [
+    {
+      "name": "shuffleShare",
+      "type": "Float",
+      "description": "Share of a level's movable tiles that start shuffled (1 = the game's own puzzle). The rest start in their correct place and are pinned with a dot, like the game's fixed tiles. Applies from the next level started or restarted. Lower values make shorter, easier puzzles.",
+      "min_value": "0.25",
+      "max_value": "1.0",
+      "adjustment_guide": "The main difficulty lever. Lower (0.25-0.5) for relax or a player who leaves levels unfinished; raise toward 1 as the player solves levels in few extra swaps."
+    },
+    {
+      "name": "colorContrast",
+      "type": "Float",
+      "description": "Scales how different each tile's colour is from the level's average colour (1 = the game's own colours). Lower values make neighbouring tiles harder to tell apart; higher values make the gradient easier to read. Applies from the next level started or restarted.",
+      "min_value": "0.5",
+      "max_value": "1.5",
+      "adjustment_guide": "The perceptual lever. Lower (0.5-0.8) for focus and to train colour discrimination once the player solves levels comfortably; raise (1.2-1.5) for relax or a struggling player."
+    }
+  ]
+}

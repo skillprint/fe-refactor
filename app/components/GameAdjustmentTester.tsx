@@ -233,6 +233,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'i-love-hue':
+            // I Love Hue: shuffleShare (share of tiles shuffled), colorContrast (colour spread). Both apply from the next level or restart.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'shuffleShare', parameterValue: 0.25 }]; // shuffleShare 0.25 (a few tiles shuffled)
+                case 2: return [{ parameterName: 'shuffleShare', parameterValue: 0.5 }]; // shuffleShare 0.5
+                case 3: return [{ parameterName: 'shuffleShare', parameterValue: 0.75 }]; // shuffleShare 0.75
+                case 4: return [{ parameterName: 'shuffleShare', parameterValue: 1 }]; // shuffleShare 1 (default)
+                case 5: return [{ parameterName: 'colorContrast', parameterValue: 1.5 }]; // colorContrast 1.5 (vivid)
+                case 6: return [{ parameterName: 'colorContrast', parameterValue: 1.25 }]; // colorContrast 1.25
+                case 7: return [{ parameterName: 'colorContrast', parameterValue: 1 }]; // colorContrast 1 (default)
+                case 8: return [{ parameterName: 'colorContrast', parameterValue: 0.75 }]; // colorContrast 0.75
+                case 9: return [{ parameterName: 'shuffleShare', parameterValue: 1 }, { parameterName: 'colorContrast', parameterValue: 0.5 }]; // hard mode: shuffleShare 1, colorContrast 0.5
+                default:
+                    return [];
+            }
         case 'katana-fruits':
             // OCCURENCE_FRUIT is in ms. Lower is faster.
             switch (keyNumber) {
