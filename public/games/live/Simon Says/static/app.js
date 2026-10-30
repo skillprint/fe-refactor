@@ -11,12 +11,24 @@ const PALETTE = [
   { id: 'teal', grad: 'linear-gradient(135deg, #81ecec, #00b894)', freq: 783.99 },
 ];
 
+// Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+// the message GameClient records and uploads with the next screenshot (as Hextris's
+// skillprint.js does). `at` is when it happened, in epoch ms.
+const emitEvent = (event, data) => {
+  try {
+    if (window.parent === window) return;
+    const at = performance.timeOrigin + performance.now();
+    window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+  } catch (e) { /* telemetry must never break the game */ }
+};
+
 let gameSeq = [];
 let userSeq = [];
 let started = false;
 let level = 0;
 let highScore = localStorage.getItem('simonHighScore') || 0;
 let isShowingSequence = false;
+let turnStartedAt = 0, lastTapAt = 0; // for tap response times
 
 // Skillprint instrumentation state, exposed by reference so skillprintShim.js
 // (and window.__simonControls below) can retune the game live.
@@ -170,6 +182,7 @@ function startGame() {
 
   playBtn.classList.add('hidden');
   h2.textContent = 'Watch the sequence...';
+  emitEvent('GAME_START', { numTiles: state.numTiles, difficultyMultiplier: state.difficultyMultiplier });
 
   setTimeout(() => {
     levelUp();
@@ -212,6 +225,7 @@ function levelUp() {
   }
 
   gameSeq.push(randColor);
+  emitEvent('LEVEL_START', { level, length: gameSeq.length, numTiles: state.numTiles });
   showSequence();
 }
 
@@ -231,6 +245,7 @@ function showSequence() {
         setTimeout(() => {
           isShowingSequence = false;
           enableButtons();
+          turnStartedAt = lastTapAt = performance.now();
           h2.textContent = `Your turn! Repeat the sequence (${gameSeq.length} colors)`;
         }, timings.gapMs);
       }
@@ -239,15 +254,23 @@ function showSequence() {
 }
 
 function checkAns(idx) {
+  const now = performance.now();
+  emitEvent('TILE_PRESS', {
+    level, step: idx, color: userSeq[idx], expected: gameSeq[idx], correct: userSeq[idx] === gameSeq[idx],
+    rt: Math.round(now - lastTapAt),
+  });
+  lastTapAt = now;
   if (userSeq[idx] === gameSeq[idx]) {
     if (userSeq.length === gameSeq.length) {
       // Correct sequence completed — show a checkmark + countdown arc
       // instead of a "Correct! Next level coming..." text message.
       disableButtons();
       h2.textContent = '';
+      emitEvent('LEVEL_COMPLETE', { level, length: gameSeq.length, responseMs: Math.round(now - turnStartedAt) });
       showLevelUpFeedback();
     }
   } else {
+    emitEvent('LEVEL_FAILED', { level, step: idx, length: gameSeq.length });
     gameOver();
   }
 }

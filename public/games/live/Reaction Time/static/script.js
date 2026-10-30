@@ -1,6 +1,17 @@
 // Reaction Time Tester — Skillprint adaptive version
 // State machine: idle -> wait (red) -> go (green) -> result -> next attempt / summary
 
+// Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+// the message GameClient records and uploads with the next screenshot (as Hextris's
+// skillprint.js does). `at` is when it happened, in epoch ms.
+const emitEvent = (event, data) => {
+  try {
+    if (window.parent === window) return;
+    const at = performance.timeOrigin + performance.now();
+    window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+  } catch (e) { /* telemetry must never break the game */ }
+};
+
 const RING_R = 26;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_R;
 
@@ -44,6 +55,7 @@ const ringProgress = document.getElementById('countdown-ring-progress');
 let phase = 'idle'; // idle | wait | go | early | summary
 let waitTimer = null;
 let goAt = 0;
+let waitStartedAt = 0, delayMs = 0;
 let attempt = 0;
 let times = [];
 let bestTime = localStorage.getItem('reactionBestTime') || null;
@@ -77,6 +89,7 @@ function startAttempt() {
   
   const timings = getTimingsForDifficulty(state.difficultyMultiplier);
   const delay = timings.minDelayMs + Math.random() * Math.max(0, timings.maxDelayMs - timings.minDelayMs);
+  waitStartedAt = performance.now(); delayMs = Math.round(delay);
   
   waitTimer = setTimeout(() => {
     goAt = performance.now();
@@ -112,6 +125,7 @@ function showFeedback() {
 
 function finishSession() {
   const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+  emitEvent('LEVEL_COMPLETE', { attempts: times.length, meanRtMs: avg, bestRtMs: Math.min(...times), times: times.slice() });
   setPhase('summary');
   head.textContent = `Average: ${avg} ms`;
   sub.textContent = `Times: ${times.map(t => `${t}ms`).join(', ')}`;
@@ -130,6 +144,7 @@ function finishSession() {
 function handleBoardClick() {
   if (phase === 'wait') {
     clearTimeout(waitTimer);
+    emitEvent('FALSE_START', { attempt, msBeforeGo: Math.round(delayMs - (performance.now() - waitStartedAt)), delayMs });
     setPhase('early');
     head.textContent = 'Too soon!';
     sub.textContent = 'Wait for the screen to turn green.';
@@ -137,6 +152,7 @@ function handleBoardClick() {
   } else if (phase === 'go') {
     const rt = Math.round(performance.now() - goAt);
     times.push(rt);
+    emitEvent('TRIAL_END', { attempt, rt, delayMs });
     head.textContent = `${rt} ms`;
     sub.textContent = '';
     setPhase('idle');
@@ -149,6 +165,7 @@ playBtn.addEventListener('click', (e) => {
   playBtn.classList.add('hidden');
   attempt = 0;
   times = [];
+  emitEvent('LEVEL_START', { attempts: state.attemptCount, difficultyMultiplier: state.difficultyMultiplier });
   startAttempt();
 });
 

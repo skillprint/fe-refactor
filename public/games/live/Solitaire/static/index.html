@@ -267,6 +267,24 @@
     </div>
 
     <script>
+        // Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+        // the message GameClient records and uploads with the next screenshot (as Hextris's
+        // skillprint.js does). `at` is when it happened, in epoch ms.
+        const emitEvent = (event, data) => {
+          try {
+            if (window.parent === window) return;
+            const at = performance.timeOrigin + performance.now();
+            window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+          } catch (e) { /* telemetry must never break the game */ }
+        };
+        let moveCount = 0;
+        const pileIdOf = (arr) => {
+            if (arr === piles.stock) return 'stock';
+            if (arr === piles.waste) return 'waste';
+            const f = piles.foundations.indexOf(arr); if (f >= 0) return `foundation-${f}`;
+            const t = piles.tableau.indexOf(arr); return t >= 0 ? `tableau-${t}` : null;
+        };
+
         // --- Core Data & Rules ---
         const SUITS = ['♥', '♦', '♣', '♠'];
         const COLORS = { '♥': 'red', '♦': 'red', '♣': 'black', '♠': 'black' };
@@ -405,6 +423,8 @@
                 }
             }
             piles.stock = shuffled;
+            moveCount = 0;
+            emitEvent('LEVEL_START', { drawCount: window.__solitaireDrawCount });
             calculateLayout(); 
             renderAll();
         }
@@ -480,16 +500,23 @@
         function moveCards(cards, sourceArr, targetArr) {
             startTimer();
             const idx = sourceArr.indexOf(cards[0]);
+            const from = pileIdOf(sourceArr), to = pileIdOf(targetArr);
             sourceArr.splice(idx, cards.length);
             targetArr.push(...cards);
             
             cards.forEach(c => c.el.classList.add('moving'));
             setTimeout(() => cards.forEach(c => c.el.classList.remove('moving')), 250);
 
+            let revealed = false;
             if (sourceArr.length > 0 && sourceArr !== piles.stock && sourceArr !== piles.waste) {
                 const newTop = sourceArr[sourceArr.length - 1];
-                if (!newTop.isFaceUp) newTop.isFaceUp = true;
+                if (!newTop.isFaceUp) { newTop.isFaceUp = true; revealed = true; }
             }
+            moveCount++;
+            emitEvent(to.startsWith('foundation-') ? 'MATCH' : 'CARD_MOVED', {
+                from, to, card: cards[0].rank + cards[0].suit, count: cards.length, revealed, moves: moveCount,
+                foundationCards: piles.foundations.reduce((n, f) => n + f.length, 0),
+            });
             
             calculateLayout();
             renderAll();
@@ -523,6 +550,7 @@
                 }
             }
             else while (piles.waste.length > 0) piles.stock.push(piles.waste.pop());
+            emitEvent('STOCK_DRAW', { recycled: piles.waste.length === 0, stockLeft: piles.stock.length });
             calculateLayout();
             renderAll();
         }
@@ -641,6 +669,7 @@
         function checkWin() {
             if (piles.foundations.every(f => f.length === 13)) {
                 stopTimer();
+                emitEvent('LEVEL_COMPLETE', { seconds: elapsedSeconds, moves: moveCount, drawCount: window.__solitaireDrawCount });
                 setTimeout(() => alert(`🎉 You Won! Time: ${formatTime(elapsedSeconds)} 🎉`), 300);
                 if (!bestTime || elapsedSeconds < bestTime) {
                     bestTime = elapsedSeconds;

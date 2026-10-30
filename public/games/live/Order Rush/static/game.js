@@ -1,5 +1,16 @@
 (function () {
   const LOGICAL_W = 1000, LOGICAL_H = 600;
+  // Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+  // the message GameClient records and uploads with the next screenshot (as Hextris's
+  // skillprint.js does). `at` is when it happened, in epoch ms.
+  const emitEvent = (event, data) => {
+    try {
+      if (window.parent === window) return;
+      const at = performance.timeOrigin + performance.now();
+      window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+    } catch (e) { /* telemetry must never break the game */ }
+  };
+
   const canvas = document.getElementById('game-canvas');
   const ctx = canvas.getContext('2d');
 
@@ -140,6 +151,7 @@
     state.combo = 1;
     state.shake = 0.35;
     addToast(table ? table.x : DOOR.x, table ? table.y - 60 : DOOR.y - 30, 'Walked out! 😡', '#ff5d73');
+    emitEvent('CUSTOMER_LEFT', { where: 'table', tableId: table ? table.id : null, lives: state.lives });
     if (state.lives <= 0) endGame(false);
   }
 
@@ -177,6 +189,7 @@
       const c = job.customer;
       if (t && t.status === 'clean' && c) {
         t.status = 'deciding'; t.customer = c; t.decideAt = 0.9;
+        emitEvent('CUSTOMER_SEATED', { tableId: t.id, customerType: c.type.id, patience: Math.round(c.patience * 100) / 100 });
       }
     } else if (job.type === 'order') {
       const t = state.tables.find(tb => tb.id === job.tableId);
@@ -186,6 +199,7 @@
         t.customer.order = food;
         t.status = 'cooking';
         state.cooking.push({ tableId: t.id, food, doneAt: cookMs / 1000 });
+        emitEvent('ORDER_TAKEN', { tableId: t.id, food: food.id });
       }
     } else if (job.type === 'pickup') {
       const idx = state.readyTray.findIndex(d => d.tableId === job.dish.tableId);
@@ -204,6 +218,7 @@
         state.combo = Math.min(12, state.combo + 1);
         state.comboBest = Math.max(state.comboBest, state.combo);
         state.served += 1;
+        emitEvent('ORDER_SERVED', { tableId: t.id, food: carrying.food.id, customerType: t.customer.type.id, patience: Math.round(ratio * 100) / 100, tip: Math.round(tip * 100) / 100, combo: state.combo });
         addBurst(t.x, t.y - 40, '#7CFFB2');
         addToast(t.x, t.y - 50, `+${fmtMoney(tip)}`, '#7CFFB2');
         t.status = 'eating';
@@ -212,7 +227,7 @@
       }
     } else if (job.type === 'bus') {
       const t = state.tables.find(tb => tb.id === job.tableId);
-      if (t && t.status === 'dirty') { t.status = 'clean'; addBurst(t.x, t.y, '#9fd3ff'); }
+      if (t && t.status === 'dirty') { t.status = 'clean'; addBurst(t.x, t.y, '#9fd3ff'); emitEvent('TABLE_BUSSED', { tableId: t.id }); }
     }
   }
 
@@ -276,6 +291,7 @@
       c.patience -= dt / c.patienceMax;
       if (c.patience <= 0) {
         addToast(c.tx, c.ty - 30, 'Left 🚶', '#ffb199');
+        emitEvent('CUSTOMER_LEFT', { where: 'queue', customerType: c.type.id, lives: state.lives });
         state.combo = 1;
         state.queue.splice(i, 1);
         layoutQueue();
@@ -576,6 +592,7 @@
   function startGame() {
     resetGame();
     state.phase = 'playing';
+    emitEvent('LEVEL_START', { ...params });
     $('start-screen').classList.add('hidden');
     $('upgrade-modal').classList.add('hidden');
     $('gameover-screen').classList.add('hidden');
@@ -596,7 +613,7 @@
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
       btn.innerHTML = `<span class="emoji">${u.emoji}</span><span>${u.label}</span><span class="desc">${u.desc}</span>`;
-      btn.onclick = () => { applyUpgrade(u.id); resumeFromUpgrade(); };
+      btn.onclick = () => { applyUpgrade(u.id); emitEvent('UPGRADE_CHOSEN', { upgrade: u.id, offered: picks.map(p => p.id) }); resumeFromUpgrade(); };
       box.appendChild(btn);
     });
     showScreen('upgrade-modal');
@@ -608,6 +625,10 @@
 
   function endGame(timeUp) {
     state.phase = 'gameover';
+    emitEvent(timeUp ? 'LEVEL_COMPLETE' : 'LEVEL_FAILED', {
+      score: state.score, tips: Math.round(state.tips * 100) / 100, served: state.served, comboBest: state.comboBest,
+      lives: state.lives, elapsedSec: Math.round(state.elapsed),
+    });
     $('gameover-title').textContent = timeUp ? 'Shift Complete!' : 'The Line Walked Out…';
     $('gameover-stats').innerHTML = `
       <span class="k">Score</span><span class="v">${state.score}</span>

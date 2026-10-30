@@ -1,8 +1,19 @@
+// Gameplay events for the portal, posted as {type: 'gameEvent', data: {event, at, ...}}:
+// the message GameClient records and uploads with the next screenshot (as Hextris's
+// skillprint.js does). `at` is when it happened, in epoch ms.
+const emitEvent = (event, data) => {
+  try {
+    if (window.parent === window) return;
+    const at = performance.timeOrigin + performance.now();
+    window.parent.postMessage({ type: 'gameEvent', data: Object.assign({}, data, { event, at }) }, window.location.origin);
+  } catch (e) { /* telemetry must never break the game */ }
+};
+
 const state = { mazeSize: 11, fogRadius: 0 };
 window.__mazeState = state;
 const $ = (id) => document.getElementById(id);
 const canvas = $('maze'), ctx = canvas.getContext('2d'), msg = $('msg'), playBtn = $('play-btn');
-let N = 0, cells = [], px = 0, py = 0, moves = 0, solved = 0, running = false, startAt = 0, tick = null, elapsed = 0;
+let N = 0, cells = [], px = 0, py = 0, moves = 0, solved = 0, running = false, startAt = 0, tick = null, elapsed = 0, bumps = 0;
 let best = Number(localStorage.getItem('mazeBest') || 0);
 Object.defineProperties(state, {
   running: { get: () => running, enumerable: true }, moves: { get: () => moves, enumerable: true },
@@ -21,6 +32,16 @@ function generate() {
     cells[y * N + x].w[w] = false; cells[ny * N + nx].w[ow] = false; cells[ny * N + nx].v = true; stack.push([nx, ny]);
   }
   px = py = 0; moves = 0;
+}
+// Fewest moves from the start to the exit (BFS), so moves can be read as efficiency.
+function shortestPath() {
+  const dist = new Array(N * N).fill(-1), q = [0]; dist[0] = 0;
+  while (q.length) {
+    const i = q.shift(), x = i % N, y = (i - x) / N;
+    if (i === N * N - 1) return dist[i];
+    DIRS.forEach(([dx, dy, w]) => { const j = (y + dy) * N + (x + dx); if (!cells[i].w[w] && dist[j] < 0) { dist[j] = dist[i] + 1; q.push(j); } });
+  }
+  return null;
 }
 function draw() {
   const s = canvas.width / N; ctx.fillStyle = '#1b1b2f'; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -45,18 +66,20 @@ function hud() { $('hud-moves').textContent = moves; $('hud-time').textContent =
 function move(dx, dy) {
   if (!running) return;
   const d = DIRS.find(([x, y]) => x === dx && y === dy); if (!d) return;
-  if (cells[py * N + px].w[d[2]]) return;
+  if (cells[py * N + px].w[d[2]]) { bumps++; emitEvent('WALL_BUMP', { x: px, y: py, dx, dy }); return; }
   px += dx; py += dy; moves++; draw(); hud();
   if (px === N - 1 && py === N - 1) win();
 }
 function win() {
   running = false; clearInterval(tick);
   if (!best || elapsed < best) { best = elapsed; localStorage.setItem('mazeBest', best); }
+  emitEvent('LEVEL_COMPLETE', { mazeSize: N, fogRadius: state.fogRadius, seconds: Math.round(elapsed * 10) / 10, moves, wallBumps: bumps, optimalMoves: shortestPath() });
   solved++; hud(); msg.textContent = `🎉 Solved in ${elapsed.toFixed(1)}s with ${moves} moves. Next maze…`;
   setTimeout(() => { generate(); start(); }, 1500);
 }
 function start() {
-  running = true; elapsed = 0; startAt = Date.now(); playBtn.classList.add('hidden');
+  running = true; elapsed = 0; startAt = Date.now(); playBtn.classList.add('hidden'); bumps = 0;
+  emitEvent('LEVEL_START', { mazeSize: N, fogRadius: state.fogRadius });
   msg.textContent = `Reach the green exit (${N}×${N}${state.fogRadius ? ', fog ' + state.fogRadius : ''}).`;
   clearInterval(tick); tick = setInterval(() => { elapsed = (Date.now() - startAt) / 1000; hud(); }, 100);
   draw(); hud();
