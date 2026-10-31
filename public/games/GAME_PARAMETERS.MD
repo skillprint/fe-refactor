@@ -1490,6 +1490,34 @@ Three.js task-switching game (slug `lookout`, folder `live/Lookout`): a fire-loo
 
 ---
 
+### Gearworks
+
+A gear-ratio puzzle at a watchmaker's bench: set gears from a tray into a train so the moon dial turns at the commission's ratio and direction (tooth counts multiply along the train, every mesh reverses, double gears compound), then engage it to wake the bench's automaton. Parameters change the kind of ratio, the size of the tray, how much the bench shows while you build, and the chronograph; `ratioComplexity` and `levelOffset` apply from the next mechanism, the rest at once. The tutorial ignores parameters.
+
+**Parameters**
+- `ratioComplexity` (Integer, 0–2, default 1): kind of ratio asked — 0 whole numbers, 1 fractions too, 2 compound ratios through double gears one rung earlier. Next mechanism.
+- `gearChoices` (Integer, 3–9, default 6): kinds of gear in the tray; the solution's gears are always included. Applies at once.
+- `previewSpin` (Integer, 0–2, default 1): 0 train still until Engage, 1 it turns while you build, 2 plus a live ratio readout. Applies at once.
+- `benchTimer` (Integer, 0–180 s, default 0 = untimed): chronograph per mechanism; at zero the train is engaged as it stands. Applies at once, in proportion.
+- `levelOffset` (Integer, −3–3, default 0): shifts the rung of the next mechanism.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "previewSpin", "parameterValue": 2 } }
+```
+
+**Keyboard mapping (GameAdjustmentTester / iframeTest)**
+- 1 Relax: ratioComplexity 0, gearChoices 4, previewSpin 2, benchTimer 0, levelOffset −1
+- 2 Gentle: ratioComplexity 0, gearChoices 5, previewSpin 2, benchTimer 0
+- 3 Default: ratioComplexity 1, gearChoices 6, previewSpin 1, benchTimer 0, levelOffset 0
+- 4 Brisk: gearChoices 8, previewSpin 1, benchTimer 90
+- 5 Grit: ratioComplexity 2, gearChoices 9, previewSpin 0, benchTimer 60, levelOffset 1
+- 6 Easier next level: levelOffset −2
+- 7 Harder next level: levelOffset 2
+- 8 No preview: previewSpin 0
+- 9 Extreme: ratioComplexity 2, gearChoices 9, previewSpin 0, benchTimer 30, levelOffset 3
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

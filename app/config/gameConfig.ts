@@ -469,6 +469,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Lookout/backend/game-scoring-config.json'),
+  },
+
+  'gearworks': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Gearworks/backend/game-scoring-config.json'),
   }
 };
 
@@ -1232,6 +1238,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Switching between tasks', 'Keeping watch on many things', 'Reading cues fast', 'Following changing rules'],
     instructions: 'Turn the tower with Q/E (arrows, swipe or the valley tabs) and answer with A/S/D or the three buttons. Each valley has its own protocol card: radio the right crew for the smoke\'s zone, answer a hiker\'s flash code, call the raft\'s clear channel. Watch the tabs for calls elsewhere and for NEW CARD when dispatch changes a rule.'
   },
+  'gearworks': {
+    name: 'Gearworks',
+    description: 'Set gears on a watchmaker\'s plate so the moon dial turns at the asked ratio, and wake an automaton.',
+    image: gameAssetUrl('live/Gearworks/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Ratios and fractions', 'Visualizing gear trains', 'Planning with few parts', 'Direction parity'],
+    instructions: 'Tap gears in the tray to build a train from the sun dial; tap a gear on the plate to lift it off. Make the moon dial turn at the commission\'s ratio and direction, then press Engage (Space). Double gears multiply ratios; every mesh reverses direction.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1348,4 +1364,5 @@ export const knownGameSlugs = [
   'blockwright',
   'tidepool',
   'lookout',
+  'gearworks',
 ];
