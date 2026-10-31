@@ -457,6 +457,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Blockwright/backend/game-scoring-config.json'),
+  },
+
+  'tidepool': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Tidepool/backend/game-scoring-config.json'),
   }
 };
 
@@ -1200,6 +1206,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Multiplying and dividing', 'Volume and perimeter', 'Fractions of a whole', 'Building in 3D'],
     instructions: 'Tap the plot or a block\'s face to build (drag for a row), with Paint and Remove tools, Q / E to turn and Enter to inspect. Meet every number in the client\'s brief with any design you like; fewer moves and symmetry earn bonuses.'
   },
+  'tidepool': {
+    name: 'Tidepool',
+    description: 'The tide is going out: find the creatures it stranded in a rock pool and carry each gently back to the sea.',
+    image: gameAssetUrl('live/Tidepool/cover.jpg'),
+    category: 'Attention',
+    difficulty: 'Easy',
+    estimatedTime: '3-8 minutes',
+    skills: ['Spotting what\'s camouflaged', 'Scanning a scene quickly', 'Steady, gentle hands', 'Tracking where things go'],
+    instructions: 'Tap a creature hiding in the rock pool to spot it, then hold and drag it slowly over the rocks into the open sea; rushing frightens it. Rescue everyone before the tide drains the pool, and don\'t be fooled by pebbles and shells.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1314,4 +1330,5 @@ export const knownGameSlugs = [
   'switchyard',
   'kind-words-cafe',
   'blockwright',
+  'tidepool',
 ];

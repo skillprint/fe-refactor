@@ -1437,6 +1437,26 @@ Three.js voxel building game where numbers are the blueprint (slug `blockwright`
 
 ---
 
+### Tidepool
+
+The tide is going out and has left creatures stranded in a rock pool on a coastal shelf; the player finds them (they're camouflaged against rock, sand and weed, with pebble and shell decoys at higher rungs) and carries each one gently over the rocks into the open sea before the pool drains. Rushed carries frighten a creature, which wriggles free and hides again. Parameters control how well creatures blend in, how fast the tide drains the pool, how many creatures there are, how quick a hand a carried creature tolerates, and the next pool's rung (species, decoys, relocating creatures, weed, tide time). Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `camouflage` (Float, 0–1, default 0.55): how closely each creature's colours match the ground under it (0.92 × camouflage^0.8 of the way to the substrate) and how often and how visibly it gives a tell (bubbles, a twitch; every 3 + 8 × camouflage s). At once.
+- `tideSpeed` (Float, 0.5–2, default 1): the pool drains in its base tide time (80 s at rung 1 to 60 s at rung 6) divided by this. At once; the time left rescales, the water stays where it is.
+- `creatureCount` (Integer, 3–9, default 5): creatures stranded per pool. At once: extra creatures hide in new spots; an unspotted surplus slips away with a wave.
+- `calmTolerance` (Float, 0.5–2, default 1): a carried creature stays calm while the hand moves slower than 4 m/s × this; faster drains calm, and at zero it startles and hides again. At once, mid-carry included.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next pool's rung (prawn from 2, octopus from 3, plaice from 4; decoys = rung − 1 up to 6; hidden creatures move as the water drops from rung 3; denser weed; shorter tide). Next pool.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "camouflage", "parameterValue": 0.7 } }
+```
+
+Keys 1–9: 1 Relax `{camouflage 0.2, tideSpeed 0.6, creatureCount 4, calmTolerance 1.6, levelOffset −1}` · 2 Gentle `{0.3, 0.8, 4, 1.3}` · 3 Default `{0.55, 1, 5, 1, levelOffset 0}` · 4 Brisk `{tideSpeed 1.3, creatureCount 6}` · 5 Grit `{0.8, 1.5, 7, 0.7}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Master of disguise `{camouflage 0.95}` · 9 Extreme `{1, 2, 9, 0.5, levelOffset 3}`.
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

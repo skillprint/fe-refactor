@@ -1037,6 +1037,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'tidepool':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'camouflage', parameterValue: 0.2 }, { parameterName: 'tideSpeed', parameterValue: 0.6 }, { parameterName: 'creatureCount', parameterValue: 4 }, { parameterName: 'calmTolerance', parameterValue: 1.6 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'camouflage', parameterValue: 0.3 }, { parameterName: 'tideSpeed', parameterValue: 0.8 }, { parameterName: 'creatureCount', parameterValue: 4 }, { parameterName: 'calmTolerance', parameterValue: 1.3 }]; // Gentle
+                case 3: return [{ parameterName: 'camouflage', parameterValue: 0.55 }, { parameterName: 'tideSpeed', parameterValue: 1 }, { parameterName: 'creatureCount', parameterValue: 5 }, { parameterName: 'calmTolerance', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'tideSpeed', parameterValue: 1.3 }, { parameterName: 'creatureCount', parameterValue: 6 }]; // Brisk
+                case 5: return [{ parameterName: 'camouflage', parameterValue: 0.8 }, { parameterName: 'tideSpeed', parameterValue: 1.5 }, { parameterName: 'creatureCount', parameterValue: 7 }, { parameterName: 'calmTolerance', parameterValue: 0.7 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next pool
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next pool
+                case 8: return [{ parameterName: 'camouflage', parameterValue: 0.95 }]; // Master of disguise
+                case 9: return [{ parameterName: 'camouflage', parameterValue: 1 }, { parameterName: 'tideSpeed', parameterValue: 2 }, { parameterName: 'creatureCount', parameterValue: 9 }, { parameterName: 'calmTolerance', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
