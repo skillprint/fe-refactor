@@ -361,6 +361,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Elixir/backend/game-scoring-config.json'),
+  },
+
+  'lumen': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Lumen/backend/game-scoring-config.json'),
   }
 };
 
@@ -944,6 +950,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Fractions', 'Proportional Reasoning', 'Estimation', 'Timing'],
     instructions: 'Hold anywhere (or Space) to pour and release to stop; there\'s no draining. Work out where each layer should end, whether ⅜ of the flask, 65 %, 90 of 240 drops or 2 : 3, then press Enter for the next ingredient and to serve. The true lines appear in gold; Perfect is within 1 %.'
   },
+  'lumen': {
+    name: 'Lumen',
+    description: 'Route and mix sunlight with mirrors and prisms to wake every crystal and light a stained-glass window.',
+    image: gameAssetUrl('live/Lumen/cover.jpg'),
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '3-10 minutes',
+    skills: ['Picturing light paths', 'Colour mixing logic', 'Spatial routing', 'Elegant solutions'],
+    instructions: 'Place mirrors, prisms, filters, splitters and combiners from the tray onto the floor, and click (or scroll, or R) to turn them 45°. Route and mix the light until every crystal glows its colour (shown by its glyph), then seal the window; spare pieces left unused earn Elegance.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1042,4 +1058,5 @@ export const knownGameSlugs = [
   'equilibrium',
   'firefly-gates',
   'elixir',
+  'lumen',
 ];

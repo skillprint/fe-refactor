@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Lumen</title>
+  <desc>Skillprint game card: a leaded rose window in jewel colours above a chapel floor, where a prism splits a sunbeam into red, green and blue beams that reach three crystals</desc>
+  <rect width="380" height="210" fill="#1c1745"/>
+  <g transform="translate(190 10) scale(0.92) translate(-190 0)">
+  <polygon points="128.0,156.0 128.0,108.0 128.3,98.7 129.4,89.5 131.1,80.4 133.5,71.5 136.6,62.7 140.3,54.2 144.6,46.0 149.5,38.1 155.1,30.7 161.1,23.7 167.7,17.1 174.7,11.1 182.1,5.5 190.0,0.6 190.0,0.6 197.9,5.5 205.3,11.1 212.3,17.1 218.9,23.7 224.9,30.7 230.5,38.1 235.4,46.0 239.7,54.2 243.4,62.7 246.5,71.5 248.9,80.4 250.6,89.5 251.7,98.7 252.0,108.0 252.0,156.0" fill="#3a2f5e"/>
+  <polygon points="134.0,152.0 134.0,108.0 134.3,99.6 135.3,91.3 136.8,83.1 139.0,75.0 141.7,67.1 145.1,59.4 149.0,52.0 153.5,44.9 158.4,38.2 163.9,31.8 169.8,25.9 176.2,20.4 182.9,15.5 190.0,11.0 190.0,11.0 197.1,15.5 203.8,20.4 210.2,25.9 216.1,31.8 221.6,38.2 226.5,44.9 231.0,52.0 234.9,59.4 238.3,67.1 241.0,75.0 243.2,83.1 244.7,91.3 245.7,99.6 246.0,108.0 246.0,152.0" fill="#120f22"/>
+  <polygon points="230.0,78.8 229.1,71.6 227.0,64.7 223.6,58.3 219.1,52.6 200.9,69.7 202.6,71.9 203.9,74.3 204.7,76.9 205.0,79.6" fill="#e0405a"/>
+  <polygon points="217.4,50.9 211.7,46.4 205.3,43.0 198.4,40.9 191.2,40.0 190.4,65.0 193.1,65.3 195.7,66.1 198.1,67.4 200.3,69.1" fill="#3f6fe0"/>
+  <polygon points="188.8,40.0 181.6,40.9 174.7,43.0 168.3,46.4 162.6,50.9 179.7,69.1 181.9,67.4 184.3,66.1 186.9,65.3 189.6,65.0" fill="#f2c046"/>
+  <polygon points="160.9,52.6 156.4,58.3 153.0,64.7 150.9,71.6 150.0,78.8 175.0,79.6 175.3,76.9 176.1,74.3 177.4,71.9 179.1,69.7" fill="#2fb27a"/>
+  <polygon points="150.0,81.2 150.9,88.4 153.0,95.3 156.4,101.7 160.9,107.4 179.1,90.3 177.4,88.1 176.1,85.7 175.3,83.1 175.0,80.4" fill="#e0405a"/>
+  <polygon points="162.6,109.1 168.3,113.6 174.7,117.0 181.6,119.1 188.8,120.0 189.6,95.0 186.9,94.7 184.3,93.9 181.9,92.6 179.7,90.9" fill="#3f6fe0"/>
+  <polygon points="191.2,120.0 198.4,119.1 205.3,117.0 211.7,113.6 217.4,109.1 200.3,90.9 198.1,92.6 195.7,93.9 193.1,94.7 190.4,95.0" fill="#f2c046"/>
+  <polygon points="219.1,107.4 223.6,101.7 227.0,95.3 229.1,88.4 230.0,81.2 205.0,80.4 204.7,83.1 203.9,85.7 202.6,88.1 200.9,90.3" fill="#2fb27a"/>
+  <circle cx="190" cy="80" r="12" fill="#fff0c8"/>
+  <circle cx="237.0" cy="80.0" r="3.2" fill="#3f6fe0"/>
+  <circle cx="230.7" cy="56.5" r="3.2" fill="#f2c046"/>
+  <circle cx="213.5" cy="39.3" r="3.2" fill="#2fb27a"/>
+  <circle cx="190.0" cy="33.0" r="3.2" fill="#e0405a"/>
+  <circle cx="166.5" cy="39.3" r="3.2" fill="#3f6fe0"/>
+  <circle cx="149.3" cy="56.5" r="3.2" fill="#f2c046"/>
+  <circle cx="143.0" cy="80.0" r="3.2" fill="#2fb27a"/>
+  <circle cx="149.3" cy="103.5" r="3.2" fill="#e0405a"/>
+  <circle cx="166.5" cy="120.7" r="3.2" fill="#3f6fe0"/>
+  <circle cx="190.0" cy="127.0" r="3.2" fill="#f2c046"/>
+  <circle cx="213.5" cy="120.7" r="3.2" fill="#2fb27a"/>
+  <circle cx="230.7" cy="103.5" r="3.2" fill="#e0405a"/>
+  <rect x="146" y="126" width="19" height="11" fill="#e0405a"/>
+  <rect x="167" y="126" width="19" height="11" fill="#f2c046"/>
+  <rect x="146" y="139" width="19" height="11" fill="#3f6fe0"/>
+  <rect x="167" y="139" width="19" height="11" fill="#2fb27a"/>
+  <rect x="194" y="126" width="19" height="11" fill="#3f6fe0"/>
+  <rect x="215" y="126" width="19" height="11" fill="#2fb27a"/>
+  <rect x="194" y="139" width="19" height="11" fill="#f2c046"/>
+  <rect x="215" y="139" width="19" height="11" fill="#e0405a"/>
+  </g>
+  <rect x="0" y="168" width="380" height="42" fill="#2a2150"/>
+  <path d="M0 168 H380" stroke="#4a3d7e" stroke-width="2"/>
+  <path d="M0 186 H92" stroke="#fff3d4" stroke-width="5" stroke-linecap="round" opacity="0.95"/>
+  <path d="M104 188 L300 174" stroke="#ff5a4e" stroke-width="3.5" stroke-linecap="round"/>
+  <polygon points="310,165 317,174 310,183 303,174" fill="#ff5a4e"/>
+  <path d="M104 188 L316 188" stroke="#54f08a" stroke-width="3.5" stroke-linecap="round"/>
+  <polygon points="326,179 333,188 326,197 319,188" fill="#54f08a"/>
+  <path d="M104 188 L300 202" stroke="#5b8cff" stroke-width="3.5" stroke-linecap="round"/>
+  <polygon points="310,193 317,202 310,211 303,202" fill="#5b8cff"/>
+  <polygon points="98,174 110,196 86,196" fill="#dff0ff" stroke="#f2c46a" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="40" cy="30" r="1.6" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="70" cy="70" r="1.2" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="96" cy="24" r="2" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="30" cy="120" r="1.4" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="320" cy="30" r="2" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="350" cy="80" r="1.4" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="300" cy="120" r="1.2" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="270" cy="46" r="1.2" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="110" cy="140" r="1.2" fill="#f2c46a" opacity="0.8"/>
+  <circle cx="60" cy="150" r="1.6" fill="#f2c46a" opacity="0.8"/>
+</svg>

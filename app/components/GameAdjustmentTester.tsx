@@ -797,6 +797,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'lumen':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'pieceBudget', parameterValue: 3 }, { parameterName: 'colourComplexity', parameterValue: 0 }, { parameterName: 'beamPreview', parameterValue: 2 }, { parameterName: 'windowTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'pieceBudget', parameterValue: 2 }, { parameterName: 'colourComplexity', parameterValue: 1 }, { parameterName: 'beamPreview', parameterValue: 2 }, { parameterName: 'windowTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'pieceBudget', parameterValue: 1 }, { parameterName: 'colourComplexity', parameterValue: 1 }, { parameterName: 'beamPreview', parameterValue: 1 }, { parameterName: 'windowTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'pieceBudget', parameterValue: 1 }, { parameterName: 'beamPreview', parameterValue: 1 }, { parameterName: 'windowTimer', parameterValue: 150 }]; // Brisk
+                case 5: return [{ parameterName: 'pieceBudget', parameterValue: 0 }, { parameterName: 'colourComplexity', parameterValue: 2 }, { parameterName: 'beamPreview', parameterValue: 0 }, { parameterName: 'windowTimer', parameterValue: 75 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next window
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next window
+                case 8: return [{ parameterName: 'pieceBudget', parameterValue: 4 }]; // Many spares
+                case 9: return [{ parameterName: 'pieceBudget', parameterValue: 0 }, { parameterName: 'colourComplexity', parameterValue: 2 }, { parameterName: 'beamPreview', parameterValue: 0 }, { parameterName: 'windowTimer', parameterValue: 45 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

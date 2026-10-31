@@ -975,6 +975,37 @@ Three.js proportion game (slug `elixir`, folder `live/Elixir`): an alchemist's r
 
 ---
 
+### Lumen
+Three.js light-routing puzzle in a chapel at golden hour (slug `lumen`, folder `live/Lumen`): place mirrors, prisms, filters, splitters and combiners on a floor grid to route and mix sunlight and lantern light until every crystal glows its own colour, then seal the stained-glass window above. The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded (strings like "2.6" round to 3). The tutorial ignores every parameter; windows 1-3 are handcrafted and ignore `colourComplexity`.
+
+**Parameters**
+- `pieceBudget` (Integer, 0–4): spare pieces in the tray beyond the glazier's own solution; each spare left unused when the window is sealed scores Elegance. Applies at once (unplaced spares appear or leave the tray; pieces on the floor stay). Default 1.
+- `colourComplexity` (Integer, 0–2): what the crystals want. 0 primaries (or white), no mixing; 1 secondaries too (yellow, cyan, magenta via filters and coloured lanterns); 2 mixed targets that need two beams to meet. From the next window. Default 1.
+- `beamPreview` (Integer, 0–2): 0 no preview; 1 a dashed ghost beam for the held piece over the hovered cell; 2 the ghost also lights the crystals it would reach and previews a placed piece's next turn. Applies at once. Default 1.
+- `windowTimer` (Integer, 0–240): seconds to light each window; 0 untimed, 1–29 count as 30. Switching it on mid-window starts a full timer; changing it scales the time left. When the sun sets the window is lost unless every crystal is lit. Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next window (bigger floors, new pieces, more crystals, fixed fittings). Never mid-window. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "pieceBudget",
+  "parameterValue": 3
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ pieceBudget: 3, colourComplexity: 0, beamPreview: 2, windowTimer: 0 }` (Relax)
+- `2`: `{ pieceBudget: 2, colourComplexity: 1, beamPreview: 2, windowTimer: 0 }` (Gentle)
+- `3`: `{ pieceBudget: 1, colourComplexity: 1, beamPreview: 1, windowTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ pieceBudget: 1, beamPreview: 1, windowTimer: 150 }` (Brisk)
+- `5`: `{ pieceBudget: 0, colourComplexity: 2, beamPreview: 0, windowTimer: 75 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next window)
+- `7`: `{ levelOffset: 2 }` (Harder next window)
+- `8`: `{ pieceBudget: 4 }` (Many spares: room to be creative)
+- `9`: `{ pieceBudget: 0, colourComplexity: 2, beamPreview: 0, windowTimer: 45, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

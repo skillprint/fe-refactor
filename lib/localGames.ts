@@ -69,7 +69,9 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     // Three.js math games, each importing skillprint-js-sdk like Mountain Appreciator.
     'equilibrium': 'Equilibrium',
     'firefly-gates': 'Firefly Gates',
-    'elixir': 'Elixir'
+    'elixir': 'Elixir',
+    // Three.js games from the coverage batch (skills/moods the catalogue lacked), each on skillprint-js-sdk.
+    'lumen': 'Lumen'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
