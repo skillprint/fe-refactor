@@ -51,7 +51,8 @@ class SupportDeskGame {
       onAdjust: (name, value) => this.adjust(name, value),
       onPause: () => this.setPaused(true),
       onResume: () => this.setPaused(false),
-      onConfig: (cfg) => { if (!MOCK && cfg.apiBase) this.engine.setApiBase(cfg.apiBase); },
+      // The portal says where its API is; an explicit ?apiBase on the URL still wins.
+      onConfig: (cfg) => { if (cfg.apiBase && !q.get('apiBase') && typeof this.engine.setApiBase === 'function') this.engine.setApiBase(cfg.apiBase); },
     });
     this.voice = createVoice({ onStatus: (s) => { this.ui.setVoiceLabel(s.startsWith('Voice') ? s : `Voice: ${this.voice.enabled ? 'on' : 'off'}`); if (!this.started) this.ui.setOverlayNote(s); } });
 
@@ -108,10 +109,10 @@ class SupportDeskGame {
         await this.openTicket();
       } catch (e) {
         this.opening -= 1;
-        // No supportsim on this API yet (a 404, or a request the browser refused):
-        // play the scripted practice desk rather than an empty one. Only before
-        // the first live ticket, so a shift never mixes the two.
-        if (this.engine.kind === 'http' && !this.forceLive && !this.order.length && (e.status === 404 || e instanceof TypeError)) {
+        // No supportsim on this API (404), no engine behind it (503), or a request
+        // the browser refused: play the scripted practice desk rather than an
+        // empty one. Only before the first live ticket, so a shift never mixes the two.
+        if (this.engine.kind === 'http' && !this.forceLive && !this.order.length && (e.status === 404 || e.status === 503 || e instanceof TypeError)) {
           this.engine = new MockEngine();
           this.ui.setHud({ domain: 'practice' });
           this.ui.toast('The live customer engine is not on this server yet. Playing the practice desk.', 4500);
@@ -350,14 +351,23 @@ class SupportDeskGame {
 
   async handleReply(t, r, { kind }) {
     if (r.toolResult !== undefined && r.toolResult !== null) {
-      const res = { role: 'tool', who: 'result', text: typeof r.toolResult === 'string' ? r.toolResult : JSON.stringify(r.toolResult, null, 1), at: Date.now() };
+      const tr = r.toolResult;
+      // The live engine wraps a tool's output as {ok, content, error?}; the practice desk returns it bare.
+      const wrapped = tr && typeof tr === 'object' && 'content' in tr;
+      const shown = wrapped ? (tr.ok === false ? (tr.error ?? tr.content) : tr.content) : tr;
+      const res = { role: 'tool', who: wrapped && tr.ok === false ? 'error' : 'result', text: typeof shown === 'string' ? shown : JSON.stringify(shown, null, 1), at: Date.now() };
       t.transcript.push(res); this.ui.appendMessage(t.id, res);
     }
     for (const ev of r.events || []) {
       if (ev.type === 'affect_change') this.bridge.event('AFFECT_CHANGE', { ticketId: t.id, from: ev.from, to: ev.to, patience: ev.patience, trigger: ev.trigger, turn: t.turns });
       else if (ev.type === 'policy_violation') this.bridge.event('POLICY_VIOLATION', { ticketId: t.id, rule: ev.rule, severity: ev.severity, turn: t.turns });
       else if (ev.type === 'belief_corrected') { this.bridge.event('BELIEF_CORRECTED', { ticketId: t.id, turn: t.turns }); this.ui.toast('You set a false belief straight.'); }
+      else if (ev.type === 'unexpected_write') this.bridge.event('UNEXPECTED_WRITE', { ticketId: t.id, tool: ev.tool, turn: t.turns });
+      else if (ev.type === 'customer_fixed') this.bridge.event('CUSTOMER_FIXED', { ticketId: t.id, tool: ev.tool, turn: t.turns });
     }
+    // What the customer did on their own side (telecom's device toggles). The
+    // player isn't shown these, as a tau-bench agent isn't; the scorer gets them.
+    for (const a of r.customerActions || []) this.bridge.event('CUSTOMER_ACTION', { ticketId: t.id, tool: a.name, turn: t.turns });
     if (r.affect) t.affect = r.affect;
     if (r.voiceStyle) t.voiceStyle = r.voiceStyle;
     if (r.policyPatch) {

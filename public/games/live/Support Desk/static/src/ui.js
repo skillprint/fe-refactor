@@ -16,6 +16,8 @@ export function renderMarkdown(md, { changedLines = new Set() } = {}) {
     const line = raw.trimEnd();
     const mark = (html) => (changedLines.has(line.trim()) ? `<mark>${html}</mark>` : html);
     if (!line.trim()) { closeList(); continue; }
+    // tau-bench wraps policy sections in bare tags (<main_policy>); they are structure, not text.
+    if (/^<\/?[a-z_][\w-]*>$/i.test(line.trim())) { closeList(); continue; }
     let m;
     if ((m = /^#{1,4}\s+(.*)$/.exec(line))) { closeList(); out.push(`<h3>${mark(inline(m[1]))}</h3>`); continue; }
     if ((m = /^[-*]\s+(.*)$/.exec(line))) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${mark(inline(m[1]))}</li>`); continue; }
@@ -26,6 +28,29 @@ export function renderMarkdown(md, { changedLines = new Set() } = {}) {
   closeList();
   return out.join('');
 }
+
+/** A JSON-schema property's kind: number, boolean, array, object or string (anyOf's first non-null type). */
+const kindOf = (spec) => {
+  const t = spec?.type || (spec?.anyOf || []).map((s) => s?.type).find((x) => x && x !== 'null');
+  return t === 'integer' ? 'number' : (t || 'string');
+};
+
+/** A form value as the tool expects it. Unparseable lists and objects go through as typed, for the tool to reject. */
+const parseArg = (spec, raw) => {
+  const kind = kindOf(spec);
+  const value = String(raw).trim();
+  if (kind === 'number') return Number(value);
+  if (kind === 'boolean') return value === 'true';
+  if (kind === 'object') { try { return JSON.parse(value); } catch { return value; } }
+  if (kind === 'array') {
+    let list;
+    if (value.startsWith('[')) { try { list = JSON.parse(value); } catch { list = null; } }
+    if (!Array.isArray(list)) list = value.split(',').map((s) => s.trim()).filter(Boolean);
+    const items = spec?.items || (spec?.anyOf || []).find((s) => s?.type === 'array')?.items;
+    return kindOf(items) === 'number' ? list.map(Number) : list;
+  }
+  return value;
+};
 
 const fmtWait = (ms) => (ms < 1000 ? '' : ms < 60000 ? `${Math.floor(ms / 1000)}s` : `${Math.floor(ms / 60000)}m${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`);
 
@@ -205,10 +230,16 @@ export class UI {
     this.$('tool-title').textContent = tool.name;
     this.$('tool-desc').textContent = tool.description || '';
     const props = tool.parameters?.properties || tool.parameters || {};
+    const required = new Set(tool.parameters?.required || []);
     const fields = this.$('tool-fields');
     fields.innerHTML = Object.entries(props).map(([k, spec]) => {
-      const type = spec?.type === 'number' || spec?.type === 'integer' ? 'number' : 'text';
-      return `<label>${esc(k)}${spec?.description ? ` <span class="hint">${esc(spec.description)}</span>` : ''}<input type="${type}" name="${esc(k)}" ${type === 'number' ? 'step="any"' : ''}></label>`;
+      const kind = kindOf(spec);
+      const label = `${esc(k)}${required.has(k) ? ' *' : ''}${spec?.description ? ` <span class="hint">${esc(spec.description)}</span>` : ''}`;
+      if (kind === 'boolean') return `<label>${label}<select name="${esc(k)}"><option value="">—</option><option value="true">true</option><option value="false">false</option></select></label>`;
+      if (kind === 'object') return `<label>${label}<textarea name="${esc(k)}" rows="3" placeholder='{"key": "value"}'></textarea></label>`;
+      if (kind === 'array') return `<label>${label}<input type="text" name="${esc(k)}" placeholder="comma-separated, or a JSON list"></label>`;
+      const type = kind === 'number' ? 'number' : 'text';
+      return `<label>${label}<input type="${type}" name="${esc(k)}" ${type === 'number' ? 'step="any"' : ''}></label>`;
     }).join('') || '<p class="hint">No arguments.</p>';
     return new Promise((resolve) => {
       const done = (v) => { dlg.removeEventListener('close', onClose); this.$('tool-cancel').onclick = null; form.onsubmit = null; resolve(v); };
@@ -220,7 +251,7 @@ export class UI {
         for (const [k, spec] of Object.entries(props)) {
           const el = form.elements.namedItem(k);
           if (!el || el.value === '') continue;
-          args[k] = spec?.type === 'number' || spec?.type === 'integer' ? Number(el.value) : el.value;
+          args[k] = parseArg(spec, el.value);
         }
         dlg.removeEventListener('close', onClose);
         dlg.close();
