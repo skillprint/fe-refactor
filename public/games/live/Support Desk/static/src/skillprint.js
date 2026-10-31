@@ -31,6 +31,12 @@ export class SkillprintBridge {
     this.log = [];
     if (this.embedded) {
       window.addEventListener('message', (e) => this.receive(e));
+      // Player inputs since the last frame, sent with it: the portal can't
+      // listen inside a frame served from the games CDN.
+      this.inputs = 0;
+      for (const type of ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel']) {
+        window.addEventListener(type, () => { this.inputs += 1; }, { capture: true, passive: true });
+      }
       // Keys 1-9 belong to the portal's adjustment tester, but not while typing a reply.
       window.addEventListener('keydown', (e) => {
         if (/^[1-9]$/.test(e.key) && !(e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement)) {
@@ -56,6 +62,8 @@ export class SkillprintBridge {
     this.capturing = true;
     try {
       const capturedAt = epochMs();
+      const inputCount = this.inputs;
+      this.inputs = 0;
       const scale = Math.min(1, this.frameWidth / Math.max(1, this.root.clientWidth));
       const canvas = await window.html2canvas(this.root, {
         backgroundColor: '#0f1218', scale, logging: false, useCORS: true, removeContainer: true,
@@ -64,7 +72,7 @@ export class SkillprintBridge {
       const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.8));
       if (!blob) return;
       const dataUrl = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
-      window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt }, '*');
+      window.parent.postMessage({ type: 'screenshot', dataUrl, capturedAt, inputCount }, '*');
     } catch (e) {
       console.warn('[support-desk] frame not captured', e);
     } finally {
