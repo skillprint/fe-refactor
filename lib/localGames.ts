@@ -1,18 +1,19 @@
 import { baseSlug } from '@/lib/gameSlug';
-import { gameAssetUrl } from '@/lib/gameAssets';
+import { gameAssetUrl, isGamesCdnUrl } from '@/lib/gameAssets';
 
 /**
- * Which games the portal can play and where each build lives on the games
- * CDN come from the backend record: `buildDir` (e.g. `live/Lumen`) and
- * `hasParameterManifest` (marketplace #154), so a new game needs no deploy
- * here. The catalogue also lists games with no build (Last War, Plastoblasto,
- * Natural Bridges...); opening one would iframe a 403, so every game list
- * filters on isPlayableGame.
+ * Which games the portal can play, and where, comes from the backend record:
+ * its `externalWebUrl` (catalog) / `url` (library, playbooks, next game) is
+ * the game's page on the games CDN, e.g.
+ * https://games.skillprint.co/live/Lumen/static/index.html, so a new game
+ * needs no deploy here. The catalogue also lists games the portal can't open
+ * (Last War, Plastoblasto, legacy S3 copies...), so every game list filters
+ * on isPlayableGame.
  *
- * Legacy: the maps below were the source before the record carried
- * `buildDir`. They answer only for records that don't send the field yet
- * (a backend without #154) and for bare slugs; remove them once every
- * backend the portal talks to has it. Don't add games here.
+ * Legacy: the maps below were the source before the records pointed at the
+ * CDN (marketplace #154). They answer only for records that don't yet, and
+ * for bare slugs; remove them once every backend the portal talks to has
+ * #154. Don't add games here.
  */
 export const SLUG_TO_DIR_MAP: Record<string, string> = {
     '0hh1': '0hh1',
@@ -121,51 +122,43 @@ export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
 /** A backend game record, or any part of one that names the game. */
 export interface GameBuildRef {
     slug?: string | null;
-    /** Folder on the games CDN, from the record; `''`/null when it has no build. */
-    buildDir?: string | null;
-    hasParameterManifest?: boolean | null;
+    /** Where the game plays (catalog). */
+    externalWebUrl?: string | null;
+    external_web_url?: string | null;
+    /** Where the game plays (library, playbooks, next game; the catalog sends it too). */
+    url?: string | null;
 }
 
-const legacyBuildDir = (slug: string): string | null => {
+const legacyBuildUrl = (slug: string): string | null => {
     const unifiedSlug = baseSlug(slug);
-    if (INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]) return `inactive/${INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]}`;
-    if (SLUG_TO_DIR_MAP[unifiedSlug]) return `live/${SLUG_TO_DIR_MAP[unifiedSlug]}`;
+    if (INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]) return gameAssetUrl(`inactive/${INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]}/static/index.html`);
+    if (SLUG_TO_DIR_MAP[unifiedSlug]) return gameAssetUrl(`live/${SLUG_TO_DIR_MAP[unifiedSlug]}/static/index.html`);
     return null;
 };
 
 /**
- * The game's folder on the games CDN: the record's `buildDir` when the
- * backend sends one (even empty: then it has no build), else the legacy map.
+ * The game's page on the games CDN: the record's URL when it is on the CDN,
+ * else the legacy map. Other URLs (the old packager's S3 copies, Simmer) are
+ * not games this portal can run: they predate its SDK.
  */
-export const gameBuildDir = (game: GameBuildRef | string | null | undefined): string | null => {
-    if (!game) return null;
-    if (typeof game === 'string') return legacyBuildDir(game);
-    if (game.buildDir !== undefined) return game.buildDir || null;
-    return game.slug ? legacyBuildDir(game.slug) : null;
-};
-
-/** True when the game has a build on the games CDN, so it can be played here. */
-export const isPlayableGame = (game: GameBuildRef | string | null | undefined) => Boolean(gameBuildDir(game));
-
-/** The game's entry page on the games CDN, or null when it has no build. */
 export const gameBuildUrl = (game: GameBuildRef | string | null | undefined): string | null => {
-    const dir = gameBuildDir(game);
-    return dir ? gameAssetUrl(`${dir}/static/index.html`) : null;
+    if (!game) return null;
+    if (typeof game === 'string') return legacyBuildUrl(game);
+    const recordUrl = [game.externalWebUrl, game.external_web_url, game.url].find((u): u is string => !!u && isGamesCdnUrl(u));
+    if (recordUrl) return recordUrl;
+    return game.slug ? legacyBuildUrl(game.slug) : null;
 };
+
+/** True when the game has a page on the games CDN, so it can be played here. */
+export const isPlayableGame = (game: GameBuildRef | string | null | undefined) => Boolean(gameBuildUrl(game));
 
 /**
- * The game's parameter manifest, whose `sdk_game_parameters` go on session
- * start, or undefined when it has none. Legacy: without the record's flag,
- * the static game config says.
+ * The parameter manifest a build ships beside its page
+ * (`<Game>/backend/game-scoring-config.json`). Not every game has one; a
+ * missing one fails the fetch and the session starts without parameters.
  */
-export const gameParameterManifestUrl = (
-    game: GameBuildRef | null | undefined,
-    legacyManifest?: string,
-): string | undefined => {
-    if (game?.hasParameterManifest === undefined || game?.hasParameterManifest === null) return legacyManifest;
-    const dir = gameBuildDir(game);
-    return game.hasParameterManifest && dir ? gameAssetUrl(`${dir}/backend/game-scoring-config.json`) : undefined;
-};
+export const gameParameterManifestUrl = (gamePageUrl: string): string =>
+    new URL('../backend/game-scoring-config.json', gamePageUrl).href;
 
 /** True when the frontend can play this slug (any slug form). Prefer isPlayableGame with the record. */
 export const hasLocalGameDir = (slug: string) => isPlayableGame(slug);

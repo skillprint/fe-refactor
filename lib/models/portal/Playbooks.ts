@@ -44,8 +44,8 @@ export interface PlaybookGame {
   estimatedDurationSeconds: number | null;
   difficulty: string | null;
   targetedSkills: string[];
-  /** Folder on the games CDN; null without a build (absent before marketplace #154). */
-  buildDir?: string | null;
+  /** Where the game plays; null when it has none. */
+  url?: string | null;
 }
 
 export interface PlaybookTargetSkill {

@@ -42,32 +42,27 @@ test('legacy -2 catalog slugs resolve to their builds (SKI-180)', () => {
   }
 });
 
-test('a record\'s buildDir decides where it plays, with no map entry needed', () => {
-  const lumen = { slug: 'brand-new-game', buildDir: 'live/Brand New Game' };
-  assert.equal(isPlayableGame(lumen), true);
-  assert.equal(gameBuildUrl(lumen), gameAssetUrl('live/Brand New Game/static/index.html'));
+test('a record whose URL is on the games CDN plays from there, with no map entry needed', () => {
+  const page = 'https://games.skillprint.co/live/Brand%20New%20Game/static/index.html';
+  assert.equal(gameBuildUrl({ slug: 'brand-new-game', externalWebUrl: page }), page);
+  assert.equal(gameBuildUrl({ slug: 'brand-new-game', url: page }), page);
+  assert.equal(isPlayableGame({ slug: 'brand-new-game', url: 'https://games.staging.skillprint.co/live/X/static/index.html' }), true);
 });
 
-test('a record that sends an empty buildDir has no build, whatever the legacy map says', () => {
-  for (const buildDir of ['', null]) {
-    assert.equal(isPlayableGame({ slug: 'hextris', buildDir }), false, String(buildDir));
-    assert.equal(gameBuildUrl({ slug: 'hextris', buildDir }), null, String(buildDir));
-  }
-});
-
-test('a record from a backend without buildDir falls back to the legacy map', () => {
-  assert.equal(gameBuildUrl({ slug: 'hextris-475aff99-6346-4ea4-b432-dc8aa51f2178' }), gameAssetUrl('live/Hextris/static/index.html'));
-  assert.equal(gameBuildUrl({ slug: 'airport-rush' }), gameAssetUrl('inactive/Airport Rush/static/index.html'));
-  assert.equal(isPlayableGame({ slug: 'natural-bridges' }), false);
-});
-
-test('the parameter manifest follows the record\'s flag, else the static config', () => {
-  const legacy = gameAssetUrl('live/Lumen/backend/game-scoring-config.json');
+test('a URL off the games CDN is not playable here; a mapped game falls back to the legacy map', () => {
+  const legacyS3 = 'https://skillprint-games-production.s3.us-west-2.amazonaws.com/475aff99-6346-4ea4-b432-dc8aa51f2178/index.html';
+  assert.equal(isPlayableGame({ slug: 'natural-bridges', externalWebUrl: 'https://i.simmer.io/@someone/game' }), false);
+  assert.equal(isPlayableGame({ slug: 'some-old-game', externalWebUrl: legacyS3 }), false);
   assert.equal(
-    gameParameterManifestUrl({ slug: 'lumen', buildDir: 'live/Lumen', hasParameterManifest: true }),
-    gameAssetUrl('live/Lumen/backend/game-scoring-config.json'),
+    gameBuildUrl({ slug: 'hextris-475aff99-6346-4ea4-b432-dc8aa51f2178', externalWebUrl: legacyS3 }),
+    gameAssetUrl('live/Hextris/static/index.html'),
   );
-  assert.equal(gameParameterManifestUrl({ slug: 'lumen', buildDir: 'live/Lumen', hasParameterManifest: false }, legacy), undefined);
-  assert.equal(gameParameterManifestUrl({ slug: 'lumen' }, legacy), legacy);
-  assert.equal(gameParameterManifestUrl(null, legacy), legacy);
+  assert.equal(gameBuildUrl({ slug: 'airport-rush' }), gameAssetUrl('inactive/Airport Rush/static/index.html'));
+});
+
+test('the parameter manifest sits beside the game page', () => {
+  assert.equal(
+    gameParameterManifestUrl('https://games.skillprint.co/live/Market%20Day/static/index.html'),
+    'https://games.skillprint.co/live/Market%20Day/backend/game-scoring-config.json',
+  );
 });

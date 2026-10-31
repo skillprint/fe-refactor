@@ -22,7 +22,7 @@ import { useLibraryGame } from '@/lib/models/portal/useLibraryGame';
 import { useLibraryPersonalStats } from '@/lib/models/portal/useLibraryPersonalStats';
 import { useLibraryCommunityStats } from '@/lib/models/portal/useLibraryCommunityStats';
 import { useTaxonomySkills } from '@/lib/models/portal/useTaxonomySkills';
-import { gameParameterManifestUrl, isPlayableGame } from '@/lib/localGames';
+import { isPlayableGame } from '@/lib/localGames';
 import { allTaxonomySkills, findTaxonomySkill } from '@/lib/models/portal/TaxonomySkills';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
@@ -244,7 +244,7 @@ export default function GameDetailClient() {
   const category = game.category || game.genres[0] || null;
   const targetMoods = game.moods.map((m) => findTaxonomySkill(taxonomy, m.slug)?.name || m.name || titleFromSlug(m.slug));
   // Adjustable games ship a parameter manifest the backend tunes during play.
-  const adaptsToYou = Boolean(gameParameterManifestUrl(game, getGameConfig(game.baseSlug).parameterManifest));
+  const adaptsToYou = Boolean(getGameConfig(game.baseSlug).parameterManifest);
   const instructions = game.instructions || getGameDetails(game.baseSlug)?.instructions || '';
   const hasRecord = (personal?.sessionsPlayed ?? 0) > 0;
 

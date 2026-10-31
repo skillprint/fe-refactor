@@ -8,7 +8,7 @@ import SessionVeil from '../../../components/GameSession/SessionVeil';
 import PlayBar from '../../../components/GameSession/PlayBar';
 import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome, type GameResultDialogProps } from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
-import { getGameConfig, getGameDetails } from '../../config/gameConfig';
+import { getGameDetails } from '../../config/gameConfig';
 import React from 'react';
 import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
@@ -311,7 +311,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                 serverSlug,
                 name: record?.name,
                 moods: Array.isArray(record?.moods) ? record.moods : [],
-                parameterManifest: gameParameterManifestUrl(record, getGameConfig(unifiedSlug).parameterManifest),
+                parameterManifest: gameParameterManifestUrl(buildUrl),
             });
             setIsLoadingGamePath(false);
         };
