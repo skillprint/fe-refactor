@@ -4,6 +4,7 @@ import { fetchTalent } from '@/lib/models/portal/serverTalents';
 import { getBadgeArt } from '@/lib/badgeArt';
 import { SKILLPRINT_MARK_DATA_URI, imageDataUri, ogBackground } from '@/lib/ogImage';
 
+// Built only where the portal has a server (`.vercel.tsx`, see next.config.ts).
 export const dynamic = 'force-dynamic';
 
 const WIDTH = 1200;

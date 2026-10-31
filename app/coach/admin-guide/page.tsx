@@ -3,8 +3,8 @@
  * the page can't drift apart. Open without signing in and not in the menu:
  * Skillprint staff send the link to a school's new admin.
  *
- * The file ships with the function through `outputFileTracingIncludes` in
- * next.config.ts.
+ * Rendered at build time (in the static export and on Vercel alike), so the
+ * file only has to be there for the build.
  */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';

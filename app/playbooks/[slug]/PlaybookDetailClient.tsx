@@ -18,12 +18,8 @@ import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
 import { nextGameIndex, playbookGameToTile } from '@/lib/playbookUtils';
 import { skillIconId } from '@/lib/skillIcons';
-
-interface PlaybookDetailClientProps {
-  slug: string;
-  /** Which coach assignment this arrived from, if any (SKI-224). */
-  assignmentId?: string | null;
-}
+import { useSearchParams } from 'next/navigation';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 /**
  * Who set this and by when (SKI-227), in the same voice as the home card:
@@ -57,8 +53,12 @@ function BackToGames() {
   );
 }
 
-export default function PlaybookDetailClient({ slug, assignmentId = null }: PlaybookDetailClientProps) {
+export default function PlaybookDetailClient() {
+  const { slug } = useRouteParams('/playbooks/[slug]');
   const decodedSlug = decodeURIComponent(slug);
+  // `?assignment=` arrives from an "assigned to you" card and says which of a
+  // coach's assignments this is (SKI-224).
+  const assignmentId = useSearchParams().get('assignment');
   const { data: playbook, isLoading, error, notFound } = usePlaybookDetail(decodedSlug, false, assignmentId);
   const { data: allPlaybooks } = usePlaybookList();
   const { data: profile } = useProfileAggregate();

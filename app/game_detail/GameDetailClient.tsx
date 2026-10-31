@@ -41,11 +41,6 @@ import { useIslandCoach } from '@/app/hooks/useIslandCoach';
 import { useUserSession } from '@/app/hooks/useUserSession';
 import PreGameCoachCard from '@/components/GameSession/PreGameCoachCard';
 
-interface GameDetailClientProps {
-  /** The `?game=` value: any slug form; the library detail resolves it. */
-  slug: string;
-}
-
 const TILE_TONES = ['pink', 'mint', 'green', 'blue', 'yellow', 'purple'] as const;
 
 /** A skill slug as a pill, with its real pillar from the taxonomy. */
@@ -104,11 +99,13 @@ export function GameDetailLoading() {
   );
 }
 
-export default function GameDetailClient({ slug }: GameDetailClientProps) {
-  const decodedSlug = decodeURIComponent(slug || '');
+export default function GameDetailClient() {
+  const searchParams = useSearchParams();
+  // `?game=`: any slug form; the library detail resolves it.
+  const decodedSlug = decodeURIComponent(searchParams.get('game') || '');
   // Dev only: `?synthetic=1` renders the mock record (a player with history)
   // and mock community stats without a backend.
-  const synthetic = useSearchParams().get('synthetic') === '1';
+  const synthetic = searchParams.get('synthetic') === '1';
   const { data: game, isLoading, error, notFound } = useLibraryGameDetail(decodedSlug);
   // The record and community calls take the slug the detail resolved to, so a
   // placeholder or legacy slug in the URL still finds the player's history.

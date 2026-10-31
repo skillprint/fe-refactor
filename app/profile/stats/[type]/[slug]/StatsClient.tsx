@@ -8,6 +8,7 @@ import { useSkillprintVisualizationData } from '../../../../hooks/useSkillprintV
 import { useGamesBySkill } from '../../../../hooks/useGamesBySkill';
 import GamePreviewShareSheet from '../../../../components/GamePreviewShareSheet';
 import TopNav from '../../../../components/TopNav';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 const getColorForSlug = (slug: string) => {
     const lowerSlug = slug.toLowerCase();
@@ -26,7 +27,8 @@ const getColorForSlug = (slug: string) => {
     return colors[Math.abs(hash) % colors.length];
 };
 
-export default function StatsClient({ type, slug }: { type: string; slug: string }) {
+export default function StatsClient() {
+    const { type, slug } = useRouteParams('/profile/stats/[type]/[slug]');
     const router = useRouter();
     const { moodProfile, skillProfile, isLoading: isStatsLoading } = useSkillprintVisualizationData(null);
     const { gamesBySkill, gamesByMood, isLoading: isGamesLoading } = useGamesBySkill();

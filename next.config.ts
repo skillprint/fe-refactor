@@ -1,52 +1,45 @@
 import type { NextConfig } from "next";
 
+// `pnpm run build:export`: the portal as plain files for S3 + CloudFront
+// (lib/staticExport.ts). Vercel and `next dev` build without it.
+const staticExport = process.env.STATIC_EXPORT === '1';
+
 const nextConfig: NextConfig = {
+  // The export goes to `out/`.
+  ...(staticExport ? { output: 'export' as const } : {}),
+
+  // `route.vercel.ts(x)` files are route handlers that need a server (share
+  // cards, bot profiles, Island Coach). Vercel and `next dev` build them; the
+  // export can't run them, so it leaves them out.
+  pageExtensions: staticExport ? ['tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js', 'vercel.tsx', 'vercel.ts'],
+
   images: {
     // Disable Next.js optimizations for images (it's not available for static sites
     // and will throw an error)
     unoptimized: true,
   },
 
-  // This tells Next.js to export a static build to the `out` folder
-
-
   // This tells Next.js to export pages as "folders with an `index.html` file inside"
   // We use this option so we can avoid having the `.html` extension at the end of the page URLs.
   trailingSlash: true,
 
-  // Pages that render a checked-in Markdown document at request time need the
-  // file shipped with their serverless function; tracing can't see a path
-  // built at runtime.
-  outputFileTracingIncludes: {
-    '/coach/admin-guide': ['./docs/COACH_ADMIN_README.md'],
-  },
-
   // SKI-144: the profile skill breakdown used to link to /profile/skills/<slug>,
   // which never had a route. Keep old links (bookmarks, the bug tracker) working.
-  async redirects() {
-    return [
-      {
-        source: '/profile/skills/:slug',
-        destination: '/skills/:slug',
-        permanent: true,
-      },
-    ];
-  },
-
-  // Rewrites for development to proxy API requests and avoid CORS
-  // Note: These won't work in the static export, but help during development
-  async rewrites() {
-    // if (process.env.NEXT_PUBLIC_NODE_ENV === 'development') {
-    //   return [
-    //     {
-    //       source: '/api/:path*',
-    //       destination: 'https://api.staging.skillprint.co/:path*',
-    //     },
-    //   ];
-    // }
-
-    return [];
-  },
+  // The export has no server to answer these; its CloudFront function does
+  // (scripts/static-export/viewer-request.template.js).
+  ...(staticExport
+    ? {}
+    : {
+        async redirects() {
+          return [
+            {
+              source: '/profile/skills/:slug',
+              destination: '/skills/:slug',
+              permanent: true,
+            },
+          ];
+        },
+      }),
 };
 
 export default nextConfig;

@@ -12,7 +12,7 @@
  * players may not, until SKI-228. The screen says so, so a coach does not
  * assume everyone was told.
  */
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -25,9 +25,10 @@ import {
 } from '@/lib/models/coach';
 import { ErrorState, Loading, Panel } from '../../../components/ui';
 import { FormError } from '../../../components/AuthForm';
+import { useRouteParams } from '@/lib/useRouteParams';
 
-export default function AssignPage({ params }: { params: Promise<{ playbookId: string }> }) {
-  const { playbookId } = use(params);
+export default function AssignPage() {
+  const { playbookId } = useRouteParams('/coach/playbooks/[playbookId]/assign');
   const router = useRouter();
 
   const playbook = useCoachPlaybook(playbookId);

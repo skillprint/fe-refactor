@@ -11,7 +11,7 @@
  * the player's id when there is none (SKI-251). Coaches build the roster here
  * too (SKI-202): add players by pasting names and emails, rename, remove.
  */
-import { use, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   useCoachRoster,
@@ -31,13 +31,10 @@ import {
 } from '../../components/ui';
 import { AddPlayers, RosterRowActions } from './RosterEditor';
 import { TeamInvites } from './TeamInvites';
+import { useRouteParams } from '@/lib/useRouteParams';
 
-export default function CoachTeamDetailPage({
-  params,
-}: {
-  params: Promise<{ teamId: string }>;
-}) {
-  const { teamId } = use(params);
+export default function CoachTeamDetailPage() {
+  const { teamId } = useRouteParams('/coach/teams/[teamId]');
   const id = Number(teamId);
 
   const [days, setDays] = useState(30);

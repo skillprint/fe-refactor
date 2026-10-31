@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserSession } from '../../../hooks/useUserSession';
 import { useAuth } from '../../../context/AuthContext';
 import { getGameDetails } from '../../../config/gameConfig';
@@ -14,6 +14,7 @@ import NextPlaybookGameTile from '../../../components/NextPlaybookGameTile';
 import { knownGameSlugs } from '../../../config/gameConfig';
 import MoodSurveyWidget from '../../../components/MoodSurveyWidget';
 import { getApiBaseUrl, getCookie, setCookie } from '../../../utils/cookieUtils';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 interface GameResults {
     score?: number;
@@ -25,13 +26,14 @@ interface GameResults {
     bonus?: number;
 }
 
-interface ReviewClientProps {
-    slug: string;
-    sessionId?: string;
-    playbookId?: string;
-}
+export default function ReviewClient() {
+    const { slug } = useRouteParams('/game/[slug]/review');
+    const searchParams = useSearchParams();
+    const sessionId = searchParams.get('sessionId') ?? undefined;
+    const playbookId = searchParams.get('playbookId') ?? undefined;
 
-export default function ReviewClient({ slug, sessionId, playbookId }: ReviewClientProps) {
+    // Decode the URL slug (handle spaces and special characters)
+    const decodedSlug = decodeURIComponent(slug);
     const router = useRouter();
     const { userToken } = useUserSession();
     const { status } = useAuth();
@@ -42,9 +44,6 @@ export default function ReviewClient({ slug, sessionId, playbookId }: ReviewClie
     const [gameResults, setGameResults] = useState<GameResults | null>(null);
     const [showBadge, setShowBadge] = useState(false);
     const [nextGameSlug, setNextGameSlug] = useState<string>('');
-
-    // Decode the URL slug (handle spaces and special characters)
-    const decodedSlug = decodeURIComponent(slug);
 
     // Get game details
     const gameDetails = getGameDetails(decodedSlug);

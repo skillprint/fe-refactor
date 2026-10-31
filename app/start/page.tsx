@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
-import StartClient from './StartClient';
-import VerifyEmailClient from './VerifyEmailClient';
-import ConsumerLinkClient from './ConsumerLinkClient';
+import StartLinkClient from './StartLinkClient';
+import { STATIC_EXPORT } from '@/lib/staticExport';
 
 type Search = Promise<{ token?: string | string[]; verify?: string | string[]; t?: string | string[] }>;
 
 const single = (value?: string | string[]) => (typeof value === 'string' ? value : null);
 
 export async function generateMetadata({ searchParams }: { searchParams: Search }): Promise<Metadata> {
+  // The static export has no request to read.
+  if (STATIC_EXPORT) return { title: 'Opening Skillprint', robots: { index: false } };
   const { verify, t } = await searchParams;
   return {
     title: single(verify) ? 'Confirming your email' : single(t) ? 'Opening Skillprint' : 'Opening your playbook',
@@ -24,12 +25,13 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
  * * `/start?t=…`: a sign-in link in a consumer email -- the daily game, the
  *   weekly digest (SKI-271).
  *
- * Params are read here, server-side, rather than with `useSearchParams`, so
- * the page needs no Suspense boundary to prerender; the client redeems them.
+ * The params are read in the browser, so the page is the same file for every
+ * link; the client redeems them.
  */
-export default async function StartPage({ searchParams }: { searchParams: Search }) {
-  const { token, verify, t } = await searchParams;
-  if (single(verify)) return <VerifyEmailClient token={single(verify)} />;
-  if (single(t)) return <ConsumerLinkClient token={single(t)} />;
-  return <StartClient token={single(token)} />;
+export default function StartPage() {
+  return (
+    <Suspense fallback={null}>
+      <StartLinkClient />
+    </Suspense>
+  );
 }

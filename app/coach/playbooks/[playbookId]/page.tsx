@@ -1,13 +1,13 @@
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
 import { useCoachPlaybook } from '@/lib/models/coach';
 import { ErrorState, Loading, Panel } from '../../components/ui';
 import PlaybookBuilder, { formatDuration } from '../../components/PlaybookBuilder';
+import { useRouteParams } from '@/lib/useRouteParams';
 
-export default function EditPlaybookPage({ params }: { params: Promise<{ playbookId: string }> }) {
-  const { playbookId } = use(params);
+export default function EditPlaybookPage() {
+  const { playbookId } = useRouteParams('/coach/playbooks/[playbookId]');
   const { data, isLoading, error, refetch } = useCoachPlaybook(playbookId);
 
   return (

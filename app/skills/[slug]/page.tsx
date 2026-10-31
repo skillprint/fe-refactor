@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import PortalLayout from '@/components/PortalLayout';
 import { SkillProgressionHeader } from '@/components/SkillProgressionHeader';
@@ -18,22 +18,18 @@ import { useLongitudinalMetric } from '@/lib/models/portal/useLongitudinalMetric
 import type { MetricRange } from '@/lib/models/portal/LongitudinalMetric';
 import { useGamesBySkill } from '@/app/hooks/useGamesBySkill';
 import { buildSkillCatalog, findSkillEntry } from '@/lib/skillCatalog';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 /**
  * Skill progression (SKI-133): the skill itself comes from the taxonomy
  * endpoint; its history from `/metrics/{pillar}/{dimension}/`.
  */
-export default function SkillProgressionPage({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = React.use(params);
-  const [currentSkillId, setCurrentSkillId] = useState(resolvedParams.slug);
+export default function SkillProgressionPage() {
+  // The address bar holds the skill: picking another one pushes its URL, so
+  // back and forward step through the skills looked at.
+  const { slug: currentSkillId } = useRouteParams('/skills/[slug]');
+  const setCurrentSkillId = (skillId: string) => window.history.pushState(null, '', `/skills/${skillId}/`);
   const [range, setRange] = useState<MetricRange>('W');
-
-  // Update URL shallowly if skill changes internally
-  useEffect(() => {
-    if (currentSkillId !== resolvedParams.slug) {
-      window.history.pushState(null, '', `/skills/${currentSkillId}`);
-    }
-  }, [currentSkillId, resolvedParams.slug]);
 
   const { data: taxonomy, isLoading: isTaxonomyLoading } = useTaxonomySkills();
   const { data: profile } = useProfileAggregate();

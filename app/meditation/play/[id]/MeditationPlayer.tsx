@@ -6,12 +6,14 @@ import { Meditation, meditationApi, MeditationApiError, visualSettings } from '.
 import MeditationVisual, { breathLevel, segmentAt } from '../../components/MeditationVisual';
 import { formatDuration } from '../../MeditationStudio';
 import '../../meditation.css';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 const IDLE_MS = 3500;
 /** Pauses at least this long get an on-screen breathing cue. */
 const CUE_MIN_PAUSE = 4;
 
-export default function MeditationPlayer({ id }: { id: string }) {
+export default function MeditationPlayer() {
+  const { id } = useRouteParams('/meditation/play/[id]');
   const [meditation, setMeditation] = useState<Meditation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [started, setStarted] = useState(false);

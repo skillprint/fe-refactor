@@ -6,6 +6,9 @@ import {
   type PlayerExperienceInput,
 } from '@/lib/coachBridge';
 
+// Reads and writes a local LLM Island checkout, so it is built only where the
+// portal has a server (`.vercel.ts`, see next.config.ts); not in the static export.
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

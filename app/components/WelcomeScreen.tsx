@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useRef, useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import Script from 'next/script';
-import { useLinkedIn } from 'react-linkedin-login-oauth2';
 import { knownGameSlugs, getGameDetails } from '../config/gameConfig';
 import { googlePicture, signInWithGoogle } from '../../lib/models/portal/googleSignIn';
 
@@ -41,39 +40,6 @@ export function WelcomeScreen() {
         observer.observe(node);
         return () => observer.disconnect();
     }, []);
-
-    const { linkedInLogin } = useLinkedIn({
-        clientId: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || 'dummy-client-id',
-        redirectUri: typeof window !== 'undefined' ? `${window.location.origin}/linkedin` : '',
-        scope: 'openid profile email',
-        onSuccess: async (code) => {
-            setIsCompletingLogin(true);
-            try {
-                const response = await fetch('/api/auth/linkedin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    loginWithProfile({
-                        firstName: data.firstName || 'LinkedIn User',
-                        picture: data.picture
-                    }, data.email);
-                } else {
-                    console.error('LinkedIn backend error:', await response.text());
-                    setIsCompletingLogin(false);
-                }
-            } catch (err) {
-                console.error('LinkedIn network error', err);
-                setIsCompletingLogin(false);
-            }
-        },
-        onError: (error) => {
-            console.error('LinkedIn Login Failed', error);
-        },
-    });
 
     const handleFacebookLogin = () => {
         if (typeof window !== 'undefined' && (window as any).FB) {
