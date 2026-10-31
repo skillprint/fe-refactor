@@ -1217,6 +1217,39 @@ Keys 1–9: 1 Relax `{yearHints 2, eraSpread 100, obscurity 1, cardsPerChapter 6
 
 ---
 
+### Glide
+Three.js cooperative flying game (slug `glide`, folder `live/Glide`): the player is one folded-paper goose in a migrating V of AI flockmates over cut-paper landscapes at golden hour. Following, they hold the chevron ring in a flockmate's wingtip upwash to rest; when the lead calls "Your turn!" they fly to the point and steer the whole V clear of storm cells, power lines, wind shear and hawks, then drop back. Every bird's stamina counts; a bird at zero lands the flock. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded; the tutorial ignores every parameter.
+
+**Parameters**
+- `windStrength` (Number, 0–2): gusts shove every bird by up to 3 m/s per 1.0 (half that vertically) and the headwind scales stamina drain (0.7× at 0, 1.3× at 2); wind streaks thicken. Higher makes holding the ring and dodging harder. Applies at once. Default 1.0.
+- `leadDuration` (Number, 6–24): seconds each bird spends at the point. The player leads at the first handover of each leg, then every (flockSize − 1) turns, burning stamina faster while every hazard the V meets is theirs to steer round. Applies from the next handover. Default 12.
+- `obstacleDensity` (Number, 0.2–2.0): hazards arrive every 3.4 s ÷ this (kinds set by the rung); thermals unaffected. Applies from the next hazard. Default 1.0.
+- `flockSize` (Integer, 3–11): birds in the V, the player included; each extra bird widens the V by ~2.3 m. Applies at once: new birds fly in from behind, extras peel off. Default 7.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next leg (1 storms → 2 power lines → 3 wind shear → 4 hawks → 5+ drifting storms and double lines; leg 44 s + 3.6 s and airspeed 19 + 1.1 m/s per rung). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "windStrength",
+  "parameterValue": 1.4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ windStrength: 0.3, leadDuration: 8, obstacleDensity: 0.4, flockSize: 7, levelOffset: -1 }` (Relax)
+- `2`: `{ windStrength: 0.6, leadDuration: 10, obstacleDensity: 0.7 }` (Gentle)
+- `3`: `{ windStrength: 1.0, leadDuration: 12, obstacleDensity: 1.0, flockSize: 7, levelOffset: 0 }` (Default)
+- `4`: `{ obstacleDensity: 1.4, leadDuration: 14 }` (Busy sky)
+- `5`: `{ windStrength: 1.6, leadDuration: 18, obstacleDensity: 1.7, flockSize: 9 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next leg)
+- `7`: `{ levelOffset: 2 }` (Harder next leg)
+- `8`: `{ flockSize: 11 }` (Big skein)
+- `9`: `{ windStrength: 2, leadDuration: 24, obstacleDensity: 2, flockSize: 11, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

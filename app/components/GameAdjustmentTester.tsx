@@ -917,6 +917,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'glide':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'windStrength', parameterValue: 0.3 }, { parameterName: 'leadDuration', parameterValue: 8 }, { parameterName: 'obstacleDensity', parameterValue: 0.4 }, { parameterName: 'flockSize', parameterValue: 7 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'windStrength', parameterValue: 0.6 }, { parameterName: 'leadDuration', parameterValue: 10 }, { parameterName: 'obstacleDensity', parameterValue: 0.7 }]; // Gentle
+                case 3: return [{ parameterName: 'windStrength', parameterValue: 1 }, { parameterName: 'leadDuration', parameterValue: 12 }, { parameterName: 'obstacleDensity', parameterValue: 1 }, { parameterName: 'flockSize', parameterValue: 7 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'obstacleDensity', parameterValue: 1.4 }, { parameterName: 'leadDuration', parameterValue: 14 }]; // Busy sky
+                case 5: return [{ parameterName: 'windStrength', parameterValue: 1.6 }, { parameterName: 'leadDuration', parameterValue: 18 }, { parameterName: 'obstacleDensity', parameterValue: 1.7 }, { parameterName: 'flockSize', parameterValue: 9 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next leg
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next leg
+                case 8: return [{ parameterName: 'flockSize', parameterValue: 11 }]; // Big skein (11 birds)
+                case 9: return [{ parameterName: 'windStrength', parameterValue: 2 }, { parameterName: 'leadDuration', parameterValue: 24 }, { parameterName: 'obstacleDensity', parameterValue: 2 }, { parameterName: 'flockSize', parameterValue: 11 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

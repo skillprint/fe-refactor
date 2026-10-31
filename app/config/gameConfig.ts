@@ -409,6 +409,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Chronicle/backend/game-scoring-config.json'),
+  },
+
+  'glide': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Glide/backend/game-scoring-config.json'),
   }
 };
 
@@ -1072,6 +1078,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Recalling when things happened', 'Reasoning from neighbouring dates', 'Planning placements on a crowded timeline', 'Curiosity for history and science'],
     instructions: 'Drag each event card into the gap on the ribbon where it belongs, oldest on the left (or use the arrow keys and Enter). A wrong guess shows the true year and costs one of three bookmarks; hover any pop-up to read its story.'
   },
+  'glide': {
+    name: 'Glide',
+    description: 'Fly in a migrating V of paper geese: draft, take your turn at the point, arrive together.',
+    image: gameAssetUrl('live/Glide/cover.jpg'),
+    category: 'Action',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Steering under gusts', 'Judging space in a formation', 'Timing your dodges', 'Leading a team'],
+    instructions: 'Steer your red goose with the mouse, a finger, or WASD/arrows. Ride the shimmering upwash behind a flockmate\'s wingtip to rest; when the lead calls "Your turn!", fly to the point and steer the whole V clear of storms, power lines, wind shear and hawks.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1178,4 +1194,5 @@ export const knownGameSlugs = [
   'jelly-juggle',
   'xenoflora',
   'chronicle',
+  'glide',
 ];

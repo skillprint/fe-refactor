@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Glide</title>
+  <desc>Skillprint game card: a V of folded-paper geese, one red, flying over layered cut-paper hills and a lake toward a low golden sun, with a shimmering slipstream behind the red goose's flockmate</desc>
+  <rect width="380" height="210" fill="#f6c99a"/>
+  <rect y="0" width="380" height="70" fill="#f0b48a"/>
+  <circle cx="276" cy="104" r="34" fill="#ffe2a0"/>
+  <path d="M0 118 L40 96 L78 110 L120 84 L168 108 L214 92 L262 112 L310 88 L352 104 L380 94 V210 H0Z" fill="#b48aa3"/>
+  <path d="M0 136 Q60 112 120 130 T240 124 T380 128 V210 H0Z" fill="#a0697a"/>
+  <path d="M0 158 Q90 138 190 154 T380 150 V210 H0Z" fill="#7f8f62"/>
+  <path d="M120 176 Q200 160 290 172 Q250 186 160 186Z" fill="#8fb6c6"/>
+  <path d="M0 190 Q100 172 200 188 T380 184 V210 H0Z" fill="#5f7a4c"/>
+  <g fill="#3f5d44">
+    <path d="M30 190 l8 -26 l8 26z"/><path d="M44 190 l6 -18 l6 18z"/><path d="M330 186 l8 -24 l8 24z"/><path d="M344 186 l6 -16 l6 16z"/>
+  </g>
+  <g fill="#fff3c4" opacity="0.55">
+    <path d="M168 76 l14 22 l-6 2z"/><path d="M208 76 l-14 22 l6 2z"/>
+  </g>
+  <g>
+    <path d="M150 62 L188 50 L226 62 L192 58 L188 72 L184 58Z" fill="#efe6d4"/><path d="M188 50 L192 58 L188 72Z" fill="#a99a80"/>
+    <path d="M112 86 L146 76 L180 86 L150 82 L146 94 L142 82Z" fill="#e2553b"/><path d="M146 76 L150 82 L146 94Z" fill="#9e2f1d"/>
+    <path d="M196 86 L230 76 L264 86 L234 82 L230 94 L226 82Z" fill="#efe6d4"/><path d="M230 76 L234 82 L230 94Z" fill="#a99a80"/>
+    <path d="M76 108 L106 100 L136 108 L110 105 L106 115 L102 105Z" fill="#efe6d4"/><path d="M106 100 L110 105 L106 115Z" fill="#a99a80"/>
+    <path d="M240 108 L270 100 L300 108 L274 105 L270 115 L266 105Z" fill="#efe6d4"/><path d="M270 100 L274 105 L270 115Z" fill="#a99a80"/>
+  </g>
+  <g fill="#1f2b44"><path d="M186 48 l2 -6 l2 6z"/><path d="M144 74 l2 -6 l2 6z"/><path d="M228 74 l2 -6 l2 6z"/><path d="M104 98 l2 -5 l2 5z"/><path d="M268 98 l2 -5 l2 5z"/></g>
+</svg>
