@@ -96,12 +96,13 @@ PY
   if [ "$code" != 201 ] && [ "$code" != 200 ]; then
     echo "!! Create failed ($code):"; cat "$TMP/create.json"; echo; exit 1
   fi
-  created_slug=$(python3 -I -c 'import json,sys; print(json.load(open(sys.argv[1])).get("slug",""))' "$TMP/create.json")
-  echo "== Created game, slug '${created_slug:-?}'."
-  if [ -n "$created_slug" ] && [ "$created_slug" != "$SLUG" ]; then
-    echo "!! The backend gave it '$created_slug', not '$SLUG' (a record with that slug exists elsewhere)."
-    echo "   The portal resolves suffixed slugs, but tell whoever runs this before going further."
-    SLUG="$created_slug"
+  echo "== Created the game."
+  # The create response carries no slug: confirm the record answers to ours.
+  code=$(api -o "$TMP/catalog.json" -w '%{http_code}' "$HOST/games/api/catalog/$SLUG/")
+  if [ "$code" != 200 ]; then
+    echo "!! Created, but '$SLUG' is not in the catalog ($code). Another record may hold that slug,"
+    echo "   so the new one got a suffix (support-desk-1...). Check Django admin before going further."
+    exit 1
   fi
 fi
 
@@ -128,7 +129,7 @@ import json, sys
 g, c = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
 names = lambda xs: ", ".join((x.get("slug") or x.get("name") or str(x)) if isinstance(x, dict) else str(x) for x in (xs or []))
 params = c.get("parameterDefinitions") or c.get("parameter_definitions") or {}
-print(f"== Catalog: {g.get('slug')} | listed={g.get('isPubliclyListed', g.get('is_publicly_listed'))} | pwa={g.get('isPlayableInPwa', g.get('is_playable_in_pwa'))}")
+print(f"== Catalog: {g.get('slug')} (the catalog only serves publicly listed games)")
 print(f"   skills: {names(g.get('skills'))}")
 print(f"   moods:  {names(g.get('moods'))}")
 print(f"== Scoring config: enabled={c.get('isEnabled', c.get('is_enabled'))} | params: {', '.join(params)}")
