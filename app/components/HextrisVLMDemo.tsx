@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { mapSlugToGamePath } from '@/lib/localGames';
+import { gameAssetUrl } from '@/lib/gameAssets';
 import { isGameMessageOrigin } from '@/lib/gameAssets';
 
 type VLMStatus = 'idle' | 'capturing' | 'processing' | 'ready';
@@ -155,7 +155,7 @@ export default function HextrisVLMDemo() {
                 <div className="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
                     <iframe
                         ref={iframeRef}
-                        src={mapSlugToGamePath('hextris')}
+                        src={gameAssetUrl('live/Hextris/static/index.html')}
                         className="w-full h-full max-w-[600px] border-0"
                         title="Hextris Game"
                         sandbox="allow-scripts allow-same-origin allow-forms"

@@ -297,7 +297,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
 
             // A catalogue record alone isn't enough: without a build on the games
             // CDN the iframe would load a 403 and still start a scored session.
-            const buildUrl = gameBuildUrl(record ?? decodedSlug);
+            const buildUrl = gameBuildUrl(record);
             if (!buildUrl) {
                 setIsUnknownGame(true);
                 setIsLoadingGamePath(false);

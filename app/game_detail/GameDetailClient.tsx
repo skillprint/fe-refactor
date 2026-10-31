@@ -22,7 +22,8 @@ import { useLibraryGame } from '@/lib/models/portal/useLibraryGame';
 import { useLibraryPersonalStats } from '@/lib/models/portal/useLibraryPersonalStats';
 import { useLibraryCommunityStats } from '@/lib/models/portal/useLibraryCommunityStats';
 import { useTaxonomySkills } from '@/lib/models/portal/useTaxonomySkills';
-import { isPlayableGame } from '@/lib/localGames';
+import { gameBuildUrl, isPlayableGame } from '@/lib/localGames';
+import { useHasParameterManifest } from '@/lib/useHasParameterManifest';
 import { allTaxonomySkills, findTaxonomySkill } from '@/lib/models/portal/TaxonomySkills';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
@@ -34,7 +35,7 @@ import type { TaxonomySkillsResponse } from '@/lib/models/portal/TaxonomySkills'
 import { useRecommendedGames } from '@/app/hooks/useRecommendedGames';
 import { Pillar, skillIconId, titleFromSlug } from '@/lib/skillIcons';
 import { PORTAL_SKILLS } from '@/app/config/skillsTaxonomy';
-import { getGameConfig, getGameDetails } from '@/app/config/gameConfig';
+import { getGameDetails } from '@/app/config/gameConfig';
 import { baseSlug } from '@/lib/gameSlug';
 import { DEFAULT_GAME_IMAGE, formatEstimatedDuration } from '@/lib/playbookUtils';
 import { useIslandCoach } from '@/app/hooks/useIslandCoach';
@@ -107,6 +108,8 @@ export default function GameDetailClient() {
   // and mock community stats without a backend.
   const synthetic = searchParams.get('synthetic') === '1';
   const { data: game, isLoading, error, notFound } = useLibraryGameDetail(decodedSlug);
+  // Adjustable games ship a parameter manifest the backend tunes during play.
+  const adaptsToYou = useHasParameterManifest(gameBuildUrl(game));
   // The record and community calls take the slug the detail resolved to, so a
   // placeholder or legacy slug in the URL still finds the player's history.
   const canonicalSlug = game?.slug || '';
@@ -243,8 +246,6 @@ export default function GameDetailClient() {
   const blurb = game.longDescription || game.shortDescription;
   const category = game.category || game.genres[0] || null;
   const targetMoods = game.moods.map((m) => findTaxonomySkill(taxonomy, m.slug)?.name || m.name || titleFromSlug(m.slug));
-  // Adjustable games ship a parameter manifest the backend tunes during play.
-  const adaptsToYou = Boolean(getGameConfig(game.baseSlug).parameterManifest);
   const instructions = game.instructions || getGameDetails(game.baseSlug)?.instructions || '';
   const hasRecord = (personal?.sessionsPlayed ?? 0) > 0;
 
