@@ -1406,6 +1406,37 @@ Keys 1–9: 1 Relax `{tileChoices 2, nuance 0, customerPace 0.6, hintLevel 2, le
 
 ---
 
+### Blockwright
+Three.js voxel building game where numbers are the blueprint (slug `blockwright`, folder `live/Blockwright`): each commission is a brief of numeric conditions (an exact block count, storeys, ground area, a side length, a solid box of a given volume, a footprint perimeter, a fraction of the blocks in one colour, "twice as tall as it is long"), written backwards from a hidden solid box so it always has an answer. The player lays, paints and removes blocks on a 9 × 9 plot (tap a face, drag a row, or a keyboard cursor), turns the plot, and presses Inspect; any building meeting every condition is approved (100 per condition, bonuses for few moves, symmetry and time left). Rungs: counting, storeys, arrays, volume, volume and perimeter, fractions, proportions, everything combined. Each commission is on a new plot from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `counterVisible` (Integer, 0–2): 0 the survey counter (blocks, footprint, height, perimeter, colour counts) and live ticks on the brief are always shown; 1 hidden, the Measure button shows them for 3 s at 10 points a look; 2 hidden with no Measure. Applies at once. Default 0.
+- `targetSize` (Number, 0.6–1.6): scales the block counts the next commission asks for (4–10 on rung 1, 12–36 on the volume rungs at 1.0). From the next commission. Default 1.0.
+- `constraintCount` (Integer, 1–4): the rung's core condition(s) plus n − 1 extras (height, area, perimeter, fraction, proportion). From the next commission. Default 2.
+- `buildTimer` (Integer, 0–180): seconds on the site clock per commission, 0 untimed (1–29 are raised to 30); when it runs out the building is inspected as it stands. Applies at once: turning it on starts a full clock, changing it rescales the time left, 0 stops it. Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next commission. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "counterVisible",
+  "parameterValue": 1
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ counterVisible: 0, targetSize: 0.75, constraintCount: 1, buildTimer: 0 }` (Relax)
+- `2`: `{ counterVisible: 0, targetSize: 0.9, constraintCount: 2, buildTimer: 0 }` (Gentle)
+- `3`: `{ counterVisible: 0, targetSize: 1, constraintCount: 2, buildTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ buildTimer: 120, constraintCount: 3 }` (Brisk)
+- `5`: `{ counterVisible: 2, targetSize: 1.4, constraintCount: 3, buildTimer: 75 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next commission)
+- `7`: `{ levelOffset: 2 }` (Harder next commission)
+- `8`: `{ counterVisible: 1 }` (Counter on request)
+- `9`: `{ counterVisible: 2, targetSize: 1.6, constraintCount: 4, buildTimer: 45, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

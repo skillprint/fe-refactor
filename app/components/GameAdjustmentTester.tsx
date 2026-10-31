@@ -1022,6 +1022,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'blockwright':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'counterVisible', parameterValue: 0 }, { parameterName: 'targetSize', parameterValue: 0.75 }, { parameterName: 'constraintCount', parameterValue: 1 }, { parameterName: 'buildTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'counterVisible', parameterValue: 0 }, { parameterName: 'targetSize', parameterValue: 0.9 }, { parameterName: 'constraintCount', parameterValue: 2 }, { parameterName: 'buildTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'counterVisible', parameterValue: 0 }, { parameterName: 'targetSize', parameterValue: 1 }, { parameterName: 'constraintCount', parameterValue: 2 }, { parameterName: 'buildTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'buildTimer', parameterValue: 120 }, { parameterName: 'constraintCount', parameterValue: 3 }]; // Brisk
+                case 5: return [{ parameterName: 'counterVisible', parameterValue: 2 }, { parameterName: 'targetSize', parameterValue: 1.4 }, { parameterName: 'constraintCount', parameterValue: 3 }, { parameterName: 'buildTimer', parameterValue: 75 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next commission
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next commission
+                case 8: return [{ parameterName: 'counterVisible', parameterValue: 1 }]; // Counter on request
+                case 9: return [{ parameterName: 'counterVisible', parameterValue: 2 }, { parameterName: 'targetSize', parameterValue: 1.6 }, { parameterName: 'constraintCount', parameterValue: 4 }, { parameterName: 'buildTimer', parameterValue: 45 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

@@ -451,6 +451,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Kind Words Cafe/backend/game-scoring-config.json'),
+  },
+
+  'blockwright': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Blockwright/backend/game-scoring-config.json'),
   }
 };
 
@@ -1184,6 +1190,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Reading how someone feels', 'Choosing the word with the right shade', 'Matching tone to the moment', 'Knowing what comforts and what celebrates'],
     instructions: 'Read the customer\'s note, then tap one tile in each row to build your reply: an opener, the feeling word, a closer and a drink that suit their day. Press Serve (or Enter) before their patience runs out; arrow keys and Space work too, P pauses.'
   },
+  'blockwright': {
+    name: 'Blockwright',
+    description: 'Build voxel houses to a brief of numbers: counts, areas, volumes, perimeters and fractions.',
+    image: gameAssetUrl('live/Blockwright/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Multiplying and dividing', 'Volume and perimeter', 'Fractions of a whole', 'Building in 3D'],
+    instructions: 'Tap the plot or a block\'s face to build (drag for a row), with Paint and Remove tools, Q / E to turn and Enter to inspect. Meet every number in the client\'s brief with any design you like; fewer moves and symmetry earn bonuses.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1297,4 +1313,5 @@ export const knownGameSlugs = [
   'bandstand',
   'switchyard',
   'kind-words-cafe',
+  'blockwright',
 ];
