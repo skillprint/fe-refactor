@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Market Day</title>
+  <desc>Skillprint game card: a village market stall under a red and cream striped awning, crates of apples, pears and pumpkins on the counter, a chalkboard deal sign and a stack of coins beside a price tag</desc>
+  <rect width="380" height="210" fill="#9fd0e6"/>
+  <rect y="150" width="380" height="60" fill="#7d8a3c"/>
+  <circle cx="320" cy="44" r="20" fill="#fff2c4"/>
+  <rect x="72" y="74" width="8" height="96" fill="#5a3a24"/>
+  <rect x="300" y="74" width="8" height="96" fill="#5a3a24"/>
+  <path d="M60 50 H320 L330 82 H50Z" fill="#f4ecd8"/>
+  <path d="M60 50 H86 L82 82 H50Z M112 50 H138 L140 82 H114Z M164 50 H190 L196 82 H170Z M216 50 H242 L252 82 H226Z M268 50 H294 L308 82 H282Z" fill="#c8423a"/>
+  <path d="M50 82 l13 12 l13 -12 l14 12 l14 -12 l14 12 l14 -12 l14 12 l14 -12 l14 12 l14 -12 l14 12 l14 -12 l14 12 l14 -12 l14 12 l14 -12 l14 12 l14 -12 l13 12 l13 -12Z" fill="#c8423a"/>
+  <rect x="58" y="128" width="264" height="12" fill="#8a5a34"/>
+  <rect x="64" y="140" width="252" height="44" fill="#6b4a32"/>
+  <path d="M106 140 V184 M148 140 V184 M190 140 V184 M232 140 V184 M274 140 V184" stroke="#4a3022" stroke-width="3"/>
+  <rect x="82" y="116" width="52" height="14" fill="#c9a06a"/>
+  <circle cx="94" cy="112" r="8" fill="#c8352c"/><circle cx="108" cy="110" r="8" fill="#d8402e"/><circle cx="122" cy="112" r="8" fill="#b92f22"/>
+  <rect x="148" y="116" width="52" height="14" fill="#c9a06a"/>
+  <ellipse cx="160" cy="110" rx="7" ry="9" fill="#b7bf43"/><ellipse cx="174" cy="108" rx="7" ry="9" fill="#c3c94e"/><ellipse cx="188" cy="110" rx="7" ry="9" fill="#a8b03c"/>
+  <rect x="214" y="116" width="58" height="14" fill="#c9a06a"/>
+  <ellipse cx="230" cy="106" rx="14" ry="11" fill="#e2781f"/><ellipse cx="256" cy="108" rx="13" ry="10" fill="#d86a18"/>
+  <rect x="228" y="92" width="4" height="6" fill="#4e7a2a"/><rect x="254" y="94" width="4" height="6" fill="#4e7a2a"/>
+  <rect x="14" y="120" width="44" height="34" rx="3" fill="#2b3330" stroke="#7a5634" stroke-width="4"/>
+  <path d="M22 132 H48 M22 141 H42" stroke="#f4f1e6" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 154 L18 184 M48 154 L54 184" stroke="#7a5634" stroke-width="4"/>
+  <path d="M330 150 H366 V176 H330 L320 163Z" fill="#e3c58f"/>
+  <circle cx="330" cy="163" r="3" fill="#7d8a3c"/>
+  <ellipse cx="346" cy="194" rx="14" ry="5" fill="#d2a234"/><ellipse cx="346" cy="189" rx="14" ry="5" fill="#e8b23a"/><ellipse cx="346" cy="184" rx="14" ry="5" fill="#f2c540"/>
+  <ellipse cx="320" cy="196" rx="11" ry="4" fill="#a8aeb0"/><ellipse cx="320" cy="192" rx="11" ry="4" fill="#d8dcd8"/>
+</svg>

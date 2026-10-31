@@ -1082,6 +1082,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'market-day':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'queuePace', parameterValue: 0.6 }, { parameterName: 'dealComplexity', parameterValue: 0 }, { parameterName: 'changeHelp', parameterValue: 2 }, { parameterName: 'numberScale', parameterValue: 0.6 }]; // Relax
+                case 2: return [{ parameterName: 'queuePace', parameterValue: 0.8 }, { parameterName: 'dealComplexity', parameterValue: 1 }, { parameterName: 'changeHelp', parameterValue: 1 }, { parameterName: 'numberScale', parameterValue: 0.8 }]; // Gentle
+                case 3: return [{ parameterName: 'queuePace', parameterValue: 1 }, { parameterName: 'dealComplexity', parameterValue: 1 }, { parameterName: 'changeHelp', parameterValue: 0 }, { parameterName: 'numberScale', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'queuePace', parameterValue: 1.3 }, { parameterName: 'numberScale', parameterValue: 1.2 }]; // Brisk
+                case 5: return [{ parameterName: 'queuePace', parameterValue: 1.6 }, { parameterName: 'dealComplexity', parameterValue: 2 }, { parameterName: 'changeHelp', parameterValue: 0 }, { parameterName: 'numberScale', parameterValue: 1.6 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next day
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next day
+                case 8: return [{ parameterName: 'dealComplexity', parameterValue: 2 }]; // Percentage deals
+                case 9: return [{ parameterName: 'queuePace', parameterValue: 2 }, { parameterName: 'dealComplexity', parameterValue: 2 }, { parameterName: 'changeHelp', parameterValue: 0 }, { parameterName: 'numberScale', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

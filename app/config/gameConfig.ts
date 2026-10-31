@@ -475,6 +475,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Gearworks/backend/game-scoring-config.json'),
+  },
+
+  'market-day': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Market Day/backend/game-scoring-config.json'),
   }
 };
 
@@ -1248,6 +1254,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Ratios and fractions', 'Visualizing gear trains', 'Planning with few parts', 'Direction parity'],
     instructions: 'Tap gears in the tray to build a train from the sun dial; tap a gear on the plate to lift it off. Make the moon dial turn at the commission\'s ratio and direction, then press Engage (Space). Double gears multiply ratios; every mesh reverses direction.'
   },
+  'market-day': {
+    name: 'Market Day',
+    description: 'Run a market stall with a partner: total the baskets, mind the deal of the day, count out the change.',
+    image: gameAssetUrl('live/Market%20Day/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Mental arithmetic', 'Applying deals and discounts', 'Making change', 'Juggling a busy queue'],
+    instructions: 'Total each shopper\'s basket, apply the deal of the day if it covers their items, and tap coins and notes from the cash tin (A–K keys) to give exact change, then Hand over (Enter). When your partner calls, check her sum with Y or N; pass a shopper to her with X when the queue grows.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1365,4 +1381,5 @@ export const knownGameSlugs = [
   'tidepool',
   'lookout',
   'gearworks',
+  'market-day',
 ];

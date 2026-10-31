@@ -1518,6 +1518,39 @@ A gear-ratio puzzle at a watchmaker's bench: set gears from a tray into a train 
 
 ---
 
+### Market Day
+Three.js mental-arithmetic game (slug `market-day`, folder `live/Market Day`): a village market stall in dithered isometric pixel art, run with an AI partner. Shoppers queue with baskets; the player totals the lines, applies the chalkboard's deal of the day when it covers them ("3 for 2 on pears", "£1 off when you spend over £5", "20% off fruit") and taps exact change out of a cash tin before the shopper's patience runs out. The partner asks the player to check her sums (Y/N) and takes passed shoppers (X). Each market day is a different town from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores all parameters.
+
+**Parameters**
+- `queuePace` (Number, 0.5–2.0): a new shopper joins every 9 s ÷ this, and each waits 50 s ÷ this before walking off (the one being served drains at 0.6×). Applies at once. Default 1.0.
+- `dealComplexity` (Integer, 0–2): which deals the board can carry — 0 none, 1 multibuys and money off, 2 also percentages. Applies from the next shopper rung up (the board is rewritten then, never mid-sum). Default 1.
+- `changeHelp` (Integer, 0–2): 0 none; 1 the till shows the total due after the deal; 2 it also shows the change and the coins to give glow in the tin. Applies at once. Default 0.
+- `numberScale` (Number, 0.5–2.0): multiplies unit prices; at 1.4+ prices fall on 5p and shoppers pay with £20 notes; below 0.75 every price is a round 50p or pound. Applies from the next shopper. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next market day (more lines per basket, 10p then 5p prices, baskets that stop one short of a multibuy, more partner checks). Never mid-day. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "dealComplexity",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ queuePace: 0.6, dealComplexity: 0, changeHelp: 2, numberScale: 0.6 }` (Relax)
+- `2`: `{ queuePace: 0.8, dealComplexity: 1, changeHelp: 1, numberScale: 0.8 }` (Gentle)
+- `3`: `{ queuePace: 1.0, dealComplexity: 1, changeHelp: 0, numberScale: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ queuePace: 1.3, numberScale: 1.2 }` (Brisk)
+- `5`: `{ queuePace: 1.6, dealComplexity: 2, changeHelp: 0, numberScale: 1.6 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next day)
+- `7`: `{ levelOffset: 2 }` (Harder next day)
+- `8`: `{ dealComplexity: 2 }` (Percentage deals)
+- `9`: `{ queuePace: 2.0, dealComplexity: 2, changeHelp: 0, numberScale: 2.0, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 
