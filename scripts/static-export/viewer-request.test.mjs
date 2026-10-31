@@ -101,3 +101,41 @@ test('an unknown path is left for the 404 page', () => {
   assert.equal(served('/nope/'), '/nope/index.html');
   assert.equal(served('/game/hextris/nope/'), '/game/hextris/nope/index.html');
 });
+
+// What CloudFront runs: the same routing, served from the release that the
+// KeyValueStore names. `cloudfront` is the runtime's module; stand in for it.
+function releaseHandler(store) {
+  const { code } = generate(exportWith(PAGES), 'arn:aws:cloudfront::306610558323:key-value-store/kvs-id-1');
+  assert.ok(code.startsWith("import cf from 'cloudfront';\n"));
+  const kvs = (id) => {
+    assert.equal(id, 'kvs-id-1');
+    return { get: async (key) => (key in store ? store[key] : Promise.reject(new Error(`no key ${key}`))) };
+  };
+  const body = code.replace("import cf from 'cloudfront';", '');
+  return new Function('cf', `${body}\nreturn handler;`)({ kvs });
+}
+
+const releaseRequest = (uri, query = {}) => {
+  const querystring = Object.fromEntries(Object.entries(query).map(([k, v]) => [k, { value: v }]));
+  return { request: { method: 'GET', uri, querystring, headers: {} } };
+};
+
+test('in CloudFront, every path is served from the current release', async () => {
+  const handle = releaseHandler({ current: 'abc123' });
+  assert.equal((await handle(releaseRequest('/'))).uri, '/releases/abc123/index.html');
+  assert.equal((await handle(releaseRequest('/game/hextris/'))).uri, '/releases/abc123/game/_/index.html');
+  assert.equal((await handle(releaseRequest('/_next/static/chunks/main.js'))).uri, '/releases/abc123/_next/static/chunks/main.js');
+  assert.equal((await handle(releaseRequest('/opengraph-image/'))).uri, '/releases/abc123/opengraph-image');
+});
+
+test('in CloudFront, redirects are answered before the release is looked up', async () => {
+  const handle = releaseHandler({});
+  const res = await handle(releaseRequest('/start', { t: 'x' }));
+  assert.equal(res.statusCode, 308);
+  assert.equal(res.headers.location.value, '/start/?t=x');
+});
+
+test('in CloudFront, with no release live yet the answer is a 503', async () => {
+  const handle = releaseHandler({});
+  assert.equal((await handle(releaseRequest('/'))).statusCode, 503);
+});
