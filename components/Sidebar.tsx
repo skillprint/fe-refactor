@@ -10,6 +10,7 @@ import { useNotificationsFeatureFlag } from '../lib/notifications';
 import { useGymTrackerFeatureFlag } from '../app/hooks/useGymTracker';
 import { useNutritionFeatureFlag } from '../app/hooks/useNutritionTracker';
 import { useFriendsAndPrivacy, useFriendsFeatureFlag } from '../lib/models/portal/useFriendsAndPrivacy';
+import { useGameReviewer } from '../lib/models/gameReview/useGameReviewer';
 
 // useFriendsAndPrivacy reads the session through useUserSession, which reads
 // the URL; a static page may only do that inside Suspense, so the count sits
@@ -30,6 +31,21 @@ function FriendRequestCount() {
     >
       {incomingRequests.length}
     </span>
+  );
+}
+
+// Game review is for Skillprint staff only; the backend says who that is, so
+// the link appears once it has answered (and, like the count above, sits in
+// its own Suspense-wrapped component).
+function GameReviewNavItem({ pathname }: { pathname: string }) {
+  const reviewer = useGameReviewer();
+  if (!reviewer) return null;
+  const isActive = pathname === '/review' || pathname.startsWith('/review/');
+  return (
+    <Link title="Game Review" href="/review" className={`sp-side-nav__link ${isActive ? 'is-active' : ''}`} aria-current={isActive ? 'page' : undefined} data-game-review-nav-link>
+      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-shield"></use></svg>
+      <span className="sp-side-nav__label">Game Review</span>
+    </Link>
   );
 }
 
@@ -189,6 +205,9 @@ export default function Sidebar() {
       </nav>
       <div className="portal-sidebar__foot">
         <div className="sp-side-nav__group portal-sidebar__utilities">
+          <Suspense fallback={null}>
+            <GameReviewNavItem pathname={pathname} />
+          </Suspense>
           {notificationsFeatureEnabled && (
             <NotificationsNavItem className="sp-side-nav__link sp-side-nav__link--button" />
           )}
