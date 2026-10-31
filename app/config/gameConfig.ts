@@ -445,6 +445,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Switchyard/backend/game-scoring-config.json'),
+  },
+
+  'kind-words': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Kind Words Cafe/backend/game-scoring-config.json'),
   }
 };
 
@@ -1168,6 +1174,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Switching between rules fast', 'Planning routes ahead', 'Timing each switch', 'Reading signs under pressure'],
     instructions: 'Tap a switch (or press A S D F G) to flip it and send each train to the siding the sign asks for: by colour, by cargo, by length or reverse. Watch for the warning when the rule is about to change, and don\'t flip a switch while a train is on it.'
   },
+  'kind-words': {
+    name: 'Kind Words Café',
+    description: 'Run a riverside café at dusk: read each customer\'s day and serve the kind words and drink they need.',
+    image: gameAssetUrl('live/Kind%20Words%20Cafe/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Easy',
+    estimatedTime: '3-8 minutes',
+    skills: ['Reading how someone feels', 'Choosing the word with the right shade', 'Matching tone to the moment', 'Knowing what comforts and what celebrates'],
+    instructions: 'Read the customer\'s note, then tap one tile in each row to build your reply: an opener, the feeling word, a closer and a drink that suit their day. Press Serve (or Enter) before their patience runs out; arrow keys and Space work too, P pauses.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1280,4 +1296,5 @@ export const knownGameSlugs = [
   'viewpoints',
   'bandstand',
   'switchyard',
+  'kind-words',
 ];

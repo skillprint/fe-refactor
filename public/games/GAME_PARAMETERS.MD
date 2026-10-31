@@ -1386,6 +1386,26 @@ Three.js task-switching game on a tilt-shift HO-scale model railway: flip switch
 
 ---
 
+### Kind Words Café
+
+Customers at a cel-shaded riverside café bring a short note about their day; the player builds a kind reply from four rows of word tiles (an opener and a closer that set the tone, the feeling word for "you must feel ___", and a drink that suits the moment) and serves it before the customer's patience runs out. Parameters control how many tiles each row deals, how close the wrong feeling words are to the right one, how long customers wait, how much the note and tiles help, and the next shift's rung (more customers, subtler and mixed notes, confusable tones from rung 3). Values out of range are clamped; integers are rounded. The tutorial ignores parameters.
+
+**Parameters**
+
+- `tileChoices` (Integer, 2–5, default 3): tiles dealt in each of the four rows; one fits. From the next customer.
+- `nuance` (Integer, 0–2, default 1): how close the wrong feeling words are: 0 opposites ("heartbroken" vs "giddy"), 1 same family, 2 near-synonyms ("relieved" vs "content"). From the next customer.
+- `customerPace` (Float, 0.5–2, default 1): each customer waits 45 s ÷ pace; the next arrives 3 s ÷ pace after one leaves. At once; patience left rescales in proportion.
+- `hintLevel` (Integer, 0–2, default 1): 0 plain note; 1 the note's key phrase underlined; 2 also names the tone on the note and marks opener, closer and drink tiles with tone symbols. At once.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next shift's rung (customers 3→6, plain → subtle/mixed notes, confusable wrong tones from rung 3). Next shift.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "nuance", "parameterValue": 2 } }
+```
+
+Keys 1–9: 1 Relax `{tileChoices 2, nuance 0, customerPace 0.6, hintLevel 2, levelOffset −1}` · 2 Gentle `{3, 1, 0.8, 1}` · 3 Default `{3, 1, 1, 1, levelOffset 0}` · 4 Brisk `{tileChoices 4, customerPace 1.3}` · 5 Grit `{5, 2, 1.6, 0, levelOffset 1}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Near-synonyms `{nuance 2}` · 9 Extreme `{5, 2, 2, 0, levelOffset 3}`.
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

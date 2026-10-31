@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Kind Words Café</title>
+  <desc>Skillprint game card: a smiling customer at a riverside café counter at dusk with a mug of cocoa, a speech bubble with a heart, string lights and a striped awning</desc>
+  <rect width="380" height="210" fill="#3d4378"/>
+  <rect y="70" width="380" height="40" fill="#b7748a"/>
+  <circle cx="300" cy="60" r="18" fill="#ffe2a6"/>
+  <path d="M0 96 Q60 70 130 88 T260 84 T380 90 V112 H0 Z" fill="#463f66"/>
+  <rect y="108" width="380" height="34" fill="#26305a"/>
+  <path d="M30 118 h40 M120 126 h56 M230 120 h44 M300 130 h50 M70 134 h30" stroke="#ffe0a0" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M0 0 H380 V22 H0 Z" fill="#f3ead8"/>
+  <path d="M0 22 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 a12 12 0 0 0 24 0 Z" fill="#7a5aa6"/>
+  <path d="M0 40 Q190 74 380 40" fill="none" stroke="#2a1f2e" stroke-width="1.5"/>
+  <g fill="#ffd9a0"><circle cx="40" cy="50" r="4"/><circle cx="90" cy="58" r="4"/><circle cx="140" cy="63" r="4"/><circle cx="190" cy="65" r="4"/><circle cx="240" cy="63" r="4"/><circle cx="290" cy="58" r="4"/><circle cx="340" cy="50" r="4"/></g>
+  <path d="M158 168 q0 -46 32 -46 q32 0 32 46 Z" fill="#d96a4a" stroke="#2a1f2e" stroke-width="3"/>
+  <circle cx="190" cy="104" r="26" fill="#f1c19c" stroke="#2a1f2e" stroke-width="3"/>
+  <path d="M164 102 a26 26 0 0 1 52 0 q-26 -12 -52 0 Z" fill="#5a3524" stroke="#2a1f2e" stroke-width="3"/>
+  <circle cx="190" cy="76" r="8" fill="#5a3524" stroke="#2a1f2e" stroke-width="3"/>
+  <path d="M176 106 q4 -5 8 0 M196 106 q4 -5 8 0" fill="none" stroke="#2a1f2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M182 115 q8 9 16 0 Z" fill="#8a2f3a" stroke="#2a1f2e" stroke-width="2"/>
+  <circle cx="174" cy="113" r="4" fill="#ff8a9a"/><circle cx="206" cy="113" r="4" fill="#ff8a9a"/>
+  <rect y="164" width="380" height="14" fill="#d9b48a" stroke="#2a1f2e" stroke-width="3"/>
+  <rect y="178" width="380" height="32" fill="#a8674a"/>
+  <path d="M40 178 V210 M100 178 V210 M160 178 V210 M220 178 V210 M280 178 V210 M340 178 V210" stroke="#7d4a36" stroke-width="2"/>
+  <path d="M226 138 h26 v24 a4 4 0 0 1 -4 4 h-18 a4 4 0 0 1 -4 -4 Z" fill="#f3ece1" stroke="#2a1f2e" stroke-width="3"/>
+  <path d="M252 144 h5 a6 6 0 0 1 0 12 h-5" fill="none" stroke="#2a1f2e" stroke-width="3"/>
+  <path d="M234 132 q-4 -6 0 -12 M244 132 q-4 -6 0 -12" fill="none" stroke="#f3ece1" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M232 70 h56 a10 10 0 0 1 10 10 v20 a10 10 0 0 1 -10 10 h-34 l-10 10 v-10 h-12 a10 10 0 0 1 -10 -10 v-20 a10 10 0 0 1 10 -10 Z" fill="#fbf4e6" stroke="#2a1f2e" stroke-width="3"/>
+  <path d="M260 102 c-12 -8 -10 -18 -3 -18 c2 0 3 1 3 3 c0 -2 1 -3 3 -3 c7 0 9 10 -3 18 Z" fill="#ff6f91" stroke="#2a1f2e" stroke-width="2"/>
+  <rect x="48" y="134" width="28" height="30" rx="2" fill="#233431" stroke="#8a5a3c" stroke-width="4"/>
+  <path d="M54 144 h16 M54 151 h12 M54 158 h14" stroke="#f4f1e8" stroke-width="2" stroke-linecap="round"/>
+</svg>

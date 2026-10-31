@@ -1007,6 +1007,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'kind-words':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'tileChoices', parameterValue: 2 }, { parameterName: 'nuance', parameterValue: 0 }, { parameterName: 'customerPace', parameterValue: 0.6 }, { parameterName: 'hintLevel', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'tileChoices', parameterValue: 3 }, { parameterName: 'nuance', parameterValue: 1 }, { parameterName: 'customerPace', parameterValue: 0.8 }, { parameterName: 'hintLevel', parameterValue: 1 }]; // Gentle
+                case 3: return [{ parameterName: 'tileChoices', parameterValue: 3 }, { parameterName: 'nuance', parameterValue: 1 }, { parameterName: 'customerPace', parameterValue: 1 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'tileChoices', parameterValue: 4 }, { parameterName: 'customerPace', parameterValue: 1.3 }]; // Brisk
+                case 5: return [{ parameterName: 'tileChoices', parameterValue: 5 }, { parameterName: 'nuance', parameterValue: 2 }, { parameterName: 'customerPace', parameterValue: 1.6 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next shift
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next shift
+                case 8: return [{ parameterName: 'nuance', parameterValue: 2 }]; // Near-synonyms
+                case 9: return [{ parameterName: 'tileChoices', parameterValue: 5 }, { parameterName: 'nuance', parameterValue: 2 }, { parameterName: 'customerPace', parameterValue: 2 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
