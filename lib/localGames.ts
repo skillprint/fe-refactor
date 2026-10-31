@@ -87,7 +87,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'switchyard': 'Switchyard',
     'kind-words-cafe': 'Kind Words Cafe',
     'blockwright': 'Blockwright',
-    'tidepool': 'Tidepool'
+    'tidepool': 'Tidepool',
+    'lookout': 'Lookout'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

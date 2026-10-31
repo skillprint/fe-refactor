@@ -463,6 +463,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Tidepool/backend/game-scoring-config.json'),
+  },
+
+  'lookout': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Lookout/backend/game-scoring-config.json'),
   }
 };
 
@@ -1216,6 +1222,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Spotting what\'s camouflaged', 'Scanning a scene quickly', 'Steady, gentle hands', 'Tracking where things go'],
     instructions: 'Tap a creature hiding in the rock pool to spot it, then hold and drag it slowly over the rocks into the open sea; rushing frightens it. Rescue everyone before the tide drains the pool, and don\'t be fooled by pebbles and shells.'
   },
+  'lookout': {
+    name: 'Lookout',
+    description: 'Watch three valleys from a fire tower: radio crews, guide lost hikers and steer rafts as the rules change.',
+    image: gameAssetUrl('live/Lookout/cover.jpg'),
+    category: 'Attention',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Switching between tasks', 'Keeping watch on many things', 'Reading cues fast', 'Following changing rules'],
+    instructions: 'Turn the tower with Q/E (arrows, swipe or the valley tabs) and answer with A/S/D or the three buttons. Each valley has its own protocol card: radio the right crew for the smoke\'s zone, answer a hiker\'s flash code, call the raft\'s clear channel. Watch the tabs for calls elsewhere and for NEW CARD when dispatch changes a rule.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1331,4 +1347,5 @@ export const knownGameSlugs = [
   'kind-words-cafe',
   'blockwright',
   'tidepool',
+  'lookout',
 ];

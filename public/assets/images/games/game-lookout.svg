@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Lookout</title>
+  <desc>Skillprint game card: a fire-lookout tower on a ridge at dusk, layered poster-style mountains, a smoke plume rising from the pines and a river forking below</desc>
+  <rect width="380" height="210" fill="#283b6b"/>
+  <rect y="40" width="380" height="40" fill="#7a4a72"/>
+  <rect y="66" width="380" height="40" fill="#c8607a"/>
+  <rect y="92" width="380" height="30" fill="#f4b26a"/>
+  <circle cx="92" cy="104" r="30" fill="#fff0c0"/>
+  <path d="M0 122 L60 92 L105 110 L170 64 L230 104 L290 84 L380 116 V210 H0Z" fill="#d9806f"/>
+  <path d="M0 136 L50 118 L120 132 L200 106 L262 126 L330 112 L380 126 V210 H0Z" fill="#a2546a"/>
+  <path d="M0 150 L70 136 L150 146 L230 130 L300 142 L380 134 V210 H0Z" fill="#6a3a5e"/>
+  <path d="M0 162 L8 150 L16 162 L26 146 L36 162 L48 152 L58 162 L70 148 L80 162 L94 150 L104 162 L118 146 L128 162 V210 H0Z" fill="#241d38"/>
+  <rect y="162" width="380" height="48" fill="#2e2440"/>
+  <path d="M206 210 C214 190 236 182 244 170 C250 160 262 158 270 162" fill="none" stroke="#f2a66e" stroke-width="7"/>
+  <path d="M244 170 C252 176 268 178 282 172" fill="none" stroke="#f2a66e" stroke-width="5"/>
+  <g fill="#18132a"><path d="M150 166 L160 140 L170 166Z"/><path d="M164 168 L176 134 L188 168Z"/><path d="M180 166 L190 144 L200 166Z"/></g>
+  <path d="M168 128 C160 112 176 104 170 90 C164 76 180 66 176 50" fill="none" stroke="#f3e6d6" stroke-width="13" stroke-linecap="round" opacity="0.92"/>
+  <path d="M170 136 L166 128 L172 120 L176 128 L180 124 L178 136Z" fill="#ff8a3a"/>
+  <g fill="#1f2a24">
+    <rect x="316" y="86" width="5" height="76"/><rect x="345" y="86" width="5" height="76"/>
+    <path d="M318 162 L333 120 L348 162" fill="none" stroke="#1f2a24" stroke-width="2.5"/>
+    <path d="M318 120 L348 162 M348 120 L318 162" stroke="#1f2a24" stroke-width="2"/>
+    <rect x="308" y="70" width="50" height="20"/>
+    <path d="M302 72 L333 52 L364 72Z"/>
+  </g>
+  <rect x="314" y="74" width="38" height="11" fill="#ffd98a"/>
+  <rect x="331" y="74" width="3" height="11" fill="#1f2a24"/>
+</svg>

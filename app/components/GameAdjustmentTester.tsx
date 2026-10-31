@@ -1052,6 +1052,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'lookout':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'eventRate', parameterValue: 0.7 }, { parameterName: 'protocolChanges', parameterValue: 0 }, { parameterName: 'cueVisibility', parameterValue: 1 }, { parameterName: 'responseWindow', parameterValue: 1.7 }]; // Relax
+                case 2: return [{ parameterName: 'eventRate', parameterValue: 0.85 }, { parameterName: 'protocolChanges', parameterValue: 1 }, { parameterName: 'cueVisibility', parameterValue: 0.95 }, { parameterName: 'responseWindow', parameterValue: 1.3 }]; // Gentle
+                case 3: return [{ parameterName: 'eventRate', parameterValue: 1 }, { parameterName: 'protocolChanges', parameterValue: 1 }, { parameterName: 'cueVisibility', parameterValue: 1 }, { parameterName: 'responseWindow', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'eventRate', parameterValue: 1.3 }, { parameterName: 'responseWindow', parameterValue: 0.85 }]; // Brisk
+                case 5: return [{ parameterName: 'eventRate', parameterValue: 1.6 }, { parameterName: 'protocolChanges', parameterValue: 3 }, { parameterName: 'cueVisibility', parameterValue: 0.55 }, { parameterName: 'responseWindow', parameterValue: 0.7 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next shift
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next shift
+                case 8: return [{ parameterName: 'cueVisibility', parameterValue: 0.35 }]; // Thick fog
+                case 9: return [{ parameterName: 'eventRate', parameterValue: 2 }, { parameterName: 'protocolChanges', parameterValue: 4 }, { parameterName: 'cueVisibility', parameterValue: 0.3 }, { parameterName: 'responseWindow', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

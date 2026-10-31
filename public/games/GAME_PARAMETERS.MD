@@ -1457,6 +1457,39 @@ Keys 1–9: 1 Relax `{camouflage 0.2, tideSpeed 0.6, creatureCount 4, calmTolera
 
 ---
 
+### Lookout
+Three.js task-switching game (slug `lookout`, folder `live/Lookout`): a fire-lookout tower above three valleys, drawn like a 1930s park poster. Calls come in from all three at once — smoke in Ridge Valley (radio the crew the zone's card names), a lost hiker's flashlight code in the Hollow (answer by the hiker code), a raft at River Fork (call the clear channel, mirrored when the raft faces the tower) — and the same three buttons mean something different in each valley. Dispatch rewrites cards mid-shift. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores all parameters.
+
+**Parameters**
+- `eventRate` (Number, 0.5–2.0): the gap between new calls is the rung's base gap (8 s at rung 1 → 4.5 s at rung 8) ÷ this. One open call per valley; the rung caps calls open at once (1, then 2, then 3). Applies at once. Default 1.0.
+- `protocolChanges` (Integer, 0–4): card rewrites per 75 s shift (a zone moves to another crew, two flash codes swap, or the raft turns round so calls are mirrored); rung 5+ adds one. Applies at once: the changes left are re-spread over the rest of the shift. Default 1.
+- `cueVisibility` (Number, 0.3–1.0): weather. Lower thickens the valley fog and fades smoke plumes, flashlights and log jams. Applies at once. Default 1.0.
+- `responseWindow` (Number, 0.5–2.0): each call stays open (11 s at rung 1 → 7.5 s at rung 8) × this before it is missed. Applies at once; open calls keep their fraction of time left. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next shift (calls open at once 1 → 2 → 3, shorter gaps and windows, faster flash codes, an extra card change from rung 5, drifting fog from rung 6). Never mid-shift. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "protocolChanges",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ eventRate: 0.7, protocolChanges: 0, cueVisibility: 1.0, responseWindow: 1.7 }` (Relax)
+- `2`: `{ eventRate: 0.85, protocolChanges: 1, cueVisibility: 0.95, responseWindow: 1.3 }` (Gentle)
+- `3`: `{ eventRate: 1.0, protocolChanges: 1, cueVisibility: 1.0, responseWindow: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ eventRate: 1.3, responseWindow: 0.85 }` (Brisk)
+- `5`: `{ eventRate: 1.6, protocolChanges: 3, cueVisibility: 0.55, responseWindow: 0.7 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next shift)
+- `7`: `{ levelOffset: 2 }` (Harder next shift)
+- `8`: `{ cueVisibility: 0.35 }` (Thick fog)
+- `9`: `{ eventRate: 2.0, protocolChanges: 4, cueVisibility: 0.3, responseWindow: 0.5, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 
