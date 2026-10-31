@@ -962,6 +962,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'viewpoints':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'sightCones', parameterValue: 2 }, { parameterName: 'eventCount', parameterValue: 1 }, { parameterName: 'replay', parameterValue: 3 }, { parameterName: 'answerTimer', parameterValue: 0 }, { parameterName: 'storySpeed', parameterValue: 0.75 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'sightCones', parameterValue: 2 }, { parameterName: 'eventCount', parameterValue: 2 }, { parameterName: 'replay', parameterValue: 2 }, { parameterName: 'answerTimer', parameterValue: 0 }, { parameterName: 'storySpeed', parameterValue: 0.85 }]; // Gentle
+                case 3: return [{ parameterName: 'sightCones', parameterValue: 1 }, { parameterName: 'eventCount', parameterValue: 2 }, { parameterName: 'replay', parameterValue: 1 }, { parameterName: 'answerTimer', parameterValue: 0 }, { parameterName: 'storySpeed', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'sightCones', parameterValue: 1 }, { parameterName: 'eventCount', parameterValue: 3 }, { parameterName: 'answerTimer', parameterValue: 20 }, { parameterName: 'storySpeed', parameterValue: 1.15 }]; // Brisk
+                case 5: return [{ parameterName: 'sightCones', parameterValue: 0 }, { parameterName: 'eventCount', parameterValue: 5 }, { parameterName: 'replay', parameterValue: 0 }, { parameterName: 'answerTimer', parameterValue: 10 }, { parameterName: 'storySpeed', parameterValue: 1.4 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next story
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next story
+                case 8: return [{ parameterName: 'sightCones', parameterValue: 2 }]; // All sight cones
+                case 9: return [{ parameterName: 'sightCones', parameterValue: 0 }, { parameterName: 'eventCount', parameterValue: 6 }, { parameterName: 'replay', parameterValue: 0 }, { parameterName: 'answerTimer', parameterValue: 6 }, { parameterName: 'storySpeed', parameterValue: 1.6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

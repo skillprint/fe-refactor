@@ -1290,6 +1290,38 @@ Keys 1–9: 1 Relax `{boardSize 9, clueClarity 1, decoyStrength 0.1, turnTimer 0
 
 ---
 
+### Viewpoints
+Three.js theory-of-mind puzzle (slug `viewpoints`, folder `live/Viewpoints`): a short story plays in a cutaway dollhouse — peg dolls hop between rooms or step outside, turn to the wall, doze off or peek through a window while the dolls or Pip the cat secretly move things between labelled containers — then the player taps the container or doll that answers 2–4 questions (what really happened, where a doll will look, who saw it, and from rung 5 where one doll thinks another will look). Each story is another house from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores parameters.
+
+**Parameters**
+- `sightCones` (Integer, 0–2): 0 no sight cones, 1 a doll's cone on hover/tap, 2 every doll's cone always. Applies at once. Default 1.
+- `eventCount` (Integer, 1–6): secret moves (or an eating) per story. Applies from the next story. Default 2.
+- `replay` (Integer, 0–3): watch-again replays allowed per story. Applies at once (left = value − used). Default 1.
+- `answerTimer` (Integer, 0–30): seconds per question, 0 = untimed; a timeout counts as wrong. Applies at once (switching on starts a full clock; other changes keep the fraction left). Default 0.
+- `storySpeed` (Number, 0.6–1.6): story playback speed, about 1.6 s per beat at 1.0. Applies at once, mid-beat. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next story (2 → 4 dolls, 1 → 3 objects, 1 → 4 rooms, turning away and dozing, window peeks, second-order questions, a mirror, eating). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "sightCones",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ sightCones: 2, eventCount: 1, replay: 3, answerTimer: 0, storySpeed: 0.75, levelOffset: -1 }` (Relax)
+- `2`: `{ sightCones: 2, eventCount: 2, replay: 2, answerTimer: 0, storySpeed: 0.85 }` (Gentle)
+- `3`: `{ sightCones: 1, eventCount: 2, replay: 1, answerTimer: 0, storySpeed: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ sightCones: 1, eventCount: 3, answerTimer: 20, storySpeed: 1.15 }` (Brisk)
+- `5`: `{ sightCones: 0, eventCount: 5, replay: 0, answerTimer: 10, storySpeed: 1.4, levelOffset: 1 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next story)
+- `7`: `{ levelOffset: 2 }` (Harder next story)
+- `8`: `{ sightCones: 2 }` (All sight cones)
+- `9`: `{ sightCones: 0, eventCount: 6, replay: 0, answerTimer: 6, storySpeed: 1.6, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

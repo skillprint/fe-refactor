@@ -427,6 +427,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Treehouse Telegraph/backend/game-scoring-config.json'),
+  },
+
+  'viewpoints': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Viewpoints/backend/game-scoring-config.json'),
   }
 };
 
@@ -1120,6 +1126,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Finding the words a clue connects', 'Ruling out near-misses and the storm', 'Choosing a clue a friend will understand', 'Everyday word knowledge'],
     instructions: 'Your friend sends a clue word and a number; tap the picture cards that fit, then press Done when you\'re unsure. Avoid the thunderstorm card. On talk boards you pick the clue and your friend guesses.'
   },
+  'viewpoints': {
+    name: 'Viewpoints',
+    description: 'Watch a dollhouse story, then answer from inside the dolls\' heads: who saw what, and where will they look?',
+    image: gameAssetUrl('live/Viewpoints/cover.jpg'),
+    category: 'Logic',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Seeing through others\' eyes', 'Tracking who saw what', 'Reasoning about beliefs', 'Watching closely'],
+    instructions: 'Watch the story as dolls come and go and the cat moves things between containers. Then tap the place or the doll that answers each question (arrows + Enter work too); R watches the story again.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1229,4 +1245,5 @@ export const knownGameSlugs = [
   'glide',
   'cache',
   'treehouse-telegraph',
+  'viewpoints',
 ];
