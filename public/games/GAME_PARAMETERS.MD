@@ -1103,6 +1103,71 @@ Three.js geography game (slug `wayfinder`, folder `live/Wayfinder`): a clue card
 
 ---
 
+### Hearthlight
+Three.js memory-and-empathy game (slug `hearthlight`, folder `live/Hearthlight`): at dusk the windows of a felt-and-knit snowy village light up one by one, each showing a felted animal resident and how they feel (cold, sad, scared, lonely, tired, excited, unwell; door notes can swap the usual comfort); at night the curtains close and the player pulls the lamplighter's sled from house to house and brings each the right comfort from memory. Each night is another village from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores parameters.
+
+**Parameters**
+- `showTime` (Number, 1.0–4.0): seconds each window stays open at dusk. Applies at once (the open window rescales). Default 2.5.
+- `feelingClarity` (Integer, 0–2): 0 face only, 1 face + posture and props, 2 plus a thought bubble with the feeling's icon. Applies at once. Default 1.
+- `peeks` (Integer, 0–3): curtain peeks per night (a comfort after a peek scores half). Applies at once. Default 1.
+- `nightTimer` (Integer, 0–15): seconds of night per house before the moon sets (houses × this + 4 s); 0 = untimed. Applies at once (rescales; 0 removes it). Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next night (3 → 8 houses, door notes, out-of-order windows, shared windows, houses calling in order, residents moving next door). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "showTime",
+  "parameterValue": 3.5
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ showTime: 3.6, feelingClarity: 2, peeks: 3, nightTimer: 0 }` (Relax)
+- `2`: `{ showTime: 3.0, feelingClarity: 2, peeks: 2 }` (Gentle)
+- `3`: `{ showTime: 2.5, feelingClarity: 1, peeks: 1, nightTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ showTime: 1.8, nightTimer: 9 }` (Brisk)
+- `5`: `{ showTime: 1.4, feelingClarity: 0, peeks: 0, nightTimer: 6 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next night)
+- `7`: `{ levelOffset: 2 }` (Harder next night)
+- `8`: `{ feelingClarity: 0 }` (Faces only)
+- `9`: `{ showTime: 1.0, feelingClarity: 0, peeks: 0, nightTimer: 4, levelOffset: 3 }` (Extreme)
+
+---
+
+### Jelly Juggle
+Three.js claymation action game: slide a trampoline round a toybox playroom and bounce wobbly jellies into the hoop with the matching shape, releasing the crouch as one lands for a Super Boing (slug `jelly-juggle`, folder `live/Jelly Juggle`). The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded. The tutorial plays with its own gentle settings and ignores them.
+
+**Parameters**
+- `gravity` (Number, 0.6–1.6): scales gravity on every jelly (10.5 units/s² × this × the rung's 1.00–1.10). Bounce heights are fixed, so a plain bounce stays up 1.71 s at 0.6, 1.32 s at 1.0 and 1.05 s at 1.6. Applies at once, mid-flight too. Default 1.0.
+- `spawnRate` (Number, 6–40): jellies per minute launched from the toy pipes while there is room (× the rung's pace, ×0.85 at rung 1 to ×1.4 from rung 7); also moves the cap on jellies in the air by one per 10 above or below 16 (between 1 and 6). Applies at once; the next launch is re-timed. Default 16.
+- `trampolineSize` (Number, 0.7–1.5): scales the trampoline (radius 0.95 units × this). Applies at once, eased over a third of a second. Default 1.0.
+- `hoopSize` (Number, 0.7–1.5): scales the hoop, bowl and saucer openings (radius 0.72 × this; a jelly is 0.4). Applies at once, eased over half a second. Default 1.0.
+- `superWindowMs` (Integer, 60–400): width of the Super Boing timing window centred on a landing (Perfect inside its middle half). Applies at once. Default 180.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next level (more jellies at once, more hoops, sliding hoops, wind, sticky and splitting jellies, the Jelly Mountain boss at rung 8). Applies when the next level is built, never mid-level. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "superWindowMs",
+  "parameterValue": 240
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ gravity: 0.75, spawnRate: 10, trampolineSize: 1.3, hoopSize: 1.3, superWindowMs: 300 }` (Relax)
+- `2`: `{ gravity: 0.88, spawnRate: 13, trampolineSize: 1.15, hoopSize: 1.15, superWindowMs: 240 }` (Gentle)
+- `3`: `{ gravity: 1.0, spawnRate: 16, trampolineSize: 1.0, hoopSize: 1.0, superWindowMs: 180, levelOffset: 0 }` (Default)
+- `4`: `{ gravity: 1.15, spawnRate: 22 }` (Brisk)
+- `5`: `{ gravity: 1.35, spawnRate: 30, trampolineSize: 0.8, hoopSize: 0.8, superWindowMs: 110 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next level)
+- `7`: `{ levelOffset: 2 }` (Harder next level)
+- `8`: `{ trampolineSize: 1.5 }` (Giant trampoline)
+- `9`: `{ gravity: 1.6, spawnRate: 40, trampolineSize: 0.7, hoopSize: 0.7, superWindowMs: 60, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

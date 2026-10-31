@@ -74,7 +74,9 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'lumen': 'Lumen',
     'flockwork': 'Flockwork',
     'broadsheet': 'Broadsheet',
-    'wayfinder': 'Wayfinder'
+    'wayfinder': 'Wayfinder',
+    'hearthlight': 'Hearthlight',
+    'jelly-juggle': 'Jelly Juggle'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

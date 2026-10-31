@@ -385,6 +385,18 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Wayfinder/backend/game-scoring-config.json'),
+  },
+
+  'hearthlight': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Hearthlight/backend/game-scoring-config.json'),
+  },
+
+  'jelly-juggle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Jelly Juggle/backend/game-scoring-config.json'),
   }
 };
 
@@ -1008,6 +1020,26 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Geographic knowledge', 'Mental mapping', 'Spatial reasoning', 'Reading riddles and clues'],
     instructions: 'Drag to spin the globe, scroll or pinch to zoom, tap to drop a pin, then Confirm (Enter). Land close to the true spot for points and a passport stamp; each journey is 5 to 7 places on a theme.'
   },
+  'hearthlight': {
+    name: 'Hearthlight',
+    description: 'Watch a felt village\'s windows at dusk, then bring each neighbour the comfort they need, from memory.',
+    image: gameAssetUrl('live/Hearthlight/cover.jpg'),
+    category: 'Memory',
+    difficulty: 'Easy',
+    estimatedTime: '4-10 minutes',
+    skills: ['Remembering who lives where', 'Reading feelings from faces', 'Keeping track of changes', 'Finding your way around'],
+    instructions: 'At dusk, watch each window: who is there and how they feel (notes on doors change what they need). At night, tap a house (or use arrow keys) to pull your sled there, then pick the right comfort from your basket (tap it or press its letter). Peek (Space) lifts a curtain, at half points.'
+  },
+  'jelly-juggle': {
+    name: 'Jelly Juggle',
+    description: 'Bounce wobbly jellies off a trampoline into matching hoops. Let go just as one lands: Super Boing!',
+    image: gameAssetUrl('live/Jelly%20Juggle/cover.jpg'),
+    category: 'Action',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Quick, accurate movement', 'Split-second timing', 'Tracking many things at once', 'Aiming under pressure'],
+    instructions: 'Move the trampoline with the mouse, a drag or WASD to catch falling jellies, and bounce them into the hoop with the same shape. Hold Space, the mouse button or BOING to crouch and let go just as a jelly lands for a Super Boing. Don\'t let them splat!'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1110,4 +1142,6 @@ export const knownGameSlugs = [
   'flockwork',
   'broadsheet',
   'wayfinder',
+  'hearthlight',
+  'jelly-juggle',
 ];

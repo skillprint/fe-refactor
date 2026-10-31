@@ -857,6 +857,36 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'hearthlight':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'showTime', parameterValue: 3.6 }, { parameterName: 'feelingClarity', parameterValue: 2 }, { parameterName: 'peeks', parameterValue: 3 }, { parameterName: 'nightTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'showTime', parameterValue: 3 }, { parameterName: 'feelingClarity', parameterValue: 2 }, { parameterName: 'peeks', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'showTime', parameterValue: 2.5 }, { parameterName: 'feelingClarity', parameterValue: 1 }, { parameterName: 'peeks', parameterValue: 1 }, { parameterName: 'nightTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'showTime', parameterValue: 1.8 }, { parameterName: 'nightTimer', parameterValue: 9 }]; // Brisk
+                case 5: return [{ parameterName: 'showTime', parameterValue: 1.4 }, { parameterName: 'feelingClarity', parameterValue: 0 }, { parameterName: 'peeks', parameterValue: 0 }, { parameterName: 'nightTimer', parameterValue: 6 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next night
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next night
+                case 8: return [{ parameterName: 'feelingClarity', parameterValue: 0 }]; // Faces only
+                case 9: return [{ parameterName: 'showTime', parameterValue: 1 }, { parameterName: 'feelingClarity', parameterValue: 0 }, { parameterName: 'peeks', parameterValue: 0 }, { parameterName: 'nightTimer', parameterValue: 4 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'jelly-juggle':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'gravity', parameterValue: 0.75 }, { parameterName: 'spawnRate', parameterValue: 10 }, { parameterName: 'trampolineSize', parameterValue: 1.3 }, { parameterName: 'hoopSize', parameterValue: 1.3 }, { parameterName: 'superWindowMs', parameterValue: 300 }]; // Relax
+                case 2: return [{ parameterName: 'gravity', parameterValue: 0.88 }, { parameterName: 'spawnRate', parameterValue: 13 }, { parameterName: 'trampolineSize', parameterValue: 1.15 }, { parameterName: 'hoopSize', parameterValue: 1.15 }, { parameterName: 'superWindowMs', parameterValue: 240 }]; // Gentle
+                case 3: return [{ parameterName: 'gravity', parameterValue: 1 }, { parameterName: 'spawnRate', parameterValue: 16 }, { parameterName: 'trampolineSize', parameterValue: 1 }, { parameterName: 'hoopSize', parameterValue: 1 }, { parameterName: 'superWindowMs', parameterValue: 180 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'gravity', parameterValue: 1.15 }, { parameterName: 'spawnRate', parameterValue: 22 }]; // Brisk
+                case 5: return [{ parameterName: 'gravity', parameterValue: 1.35 }, { parameterName: 'spawnRate', parameterValue: 30 }, { parameterName: 'trampolineSize', parameterValue: 0.8 }, { parameterName: 'hoopSize', parameterValue: 0.8 }, { parameterName: 'superWindowMs', parameterValue: 110 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next level
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next level
+                case 8: return [{ parameterName: 'trampolineSize', parameterValue: 1.5 }]; // Giant trampoline
+                case 9: return [{ parameterName: 'gravity', parameterValue: 1.6 }, { parameterName: 'spawnRate', parameterValue: 40 }, { parameterName: 'trampolineSize', parameterValue: 0.7 }, { parameterName: 'hoopSize', parameterValue: 0.7 }, { parameterName: 'superWindowMs', parameterValue: 60 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
