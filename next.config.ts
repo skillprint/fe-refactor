@@ -5,13 +5,9 @@ import type { NextConfig } from "next";
 const staticExport = process.env.STATIC_EXPORT === '1';
 
 const nextConfig: NextConfig = {
-  // The export goes to `out/`.
+  // The export goes to `out/`. Route handlers that need a server export
+  // nothing there (serverOnly in lib/staticExport.ts).
   ...(staticExport ? { output: 'export' as const } : {}),
-
-  // `route.vercel.ts(x)` files are route handlers that need a server (share
-  // cards, bot profiles, Island Coach). Vercel and `next dev` build them; the
-  // export can't run them, so it leaves them out.
-  pageExtensions: staticExport ? ['tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js', 'vercel.tsx', 'vercel.ts'],
 
   images: {
     // Disable Next.js optimizations for images (it's not available for static sites

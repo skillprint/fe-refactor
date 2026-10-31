@@ -26,3 +26,13 @@ export function shellParams<K extends string>(...names: K[]): (() => Record<K, s
   const shell = Object.fromEntries(names.map((name) => [name, SHELL_PARAM])) as Record<K, string>;
   return () => [shell];
 }
+
+/**
+ * A route handler that needs a server: share cards, bot profiles, Island
+ * Coach. `export const GET = serverOnly(handleGet)`. In the export the route
+ * exports no handler, so Next leaves it out of `out/`; Vercel and `next dev`
+ * get the handler. (The share Lambda serves what the export needs.)
+ */
+export function serverOnly<H>(handler: H): H | undefined {
+  return STATIC_EXPORT ? undefined : handler;
+}
