@@ -415,6 +415,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Glide/backend/game-scoring-config.json'),
+  },
+
+  'cache': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Cache/backend/game-scoring-config.json'),
   }
 };
 
@@ -1088,6 +1094,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Steering under gusts', 'Judging space in a formation', 'Timing your dodges', 'Leading a team'],
     instructions: 'Steer your red goose with the mouse, a finger, or WASD/arrows. Ride the shimmering upwash behind a flockmate\'s wingtip to rest; when the lead calls "Your turn!", fly to the point and steer the whole V clear of storms, power lines, wind shear and hawks.'
   },
+  'cache': {
+    name: 'Cache',
+    description: 'Bury acorns in an autumn park, let winter come, then dig them up from memory before the jays do.',
+    image: gameAssetUrl('live/Cache/cover.jpg'),
+    category: 'Memory',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Remembering where things are', 'Using landmarks to find your way', 'Noticing what changed', 'Keeping watch for rivals'],
+    instructions: 'Tap the grass to bury each acorn beside something you\'ll remember, then catch falling berries while snow covers the park and some landmarks move. In winter, tap where each acorn lies to dig it up, and dig first where a jay is circling.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1195,4 +1211,5 @@ export const knownGameSlugs = [
   'xenoflora',
   'chronicle',
   'glide',
+  'cache',
 ];

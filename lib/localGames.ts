@@ -79,7 +79,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'jelly-juggle': 'Jelly Juggle',
     'xenoflora': 'Xenoflora',
     'chronicle': 'Chronicle',
-    'glide': 'Glide'
+    'glide': 'Glide',
+    'cache': 'Cache'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

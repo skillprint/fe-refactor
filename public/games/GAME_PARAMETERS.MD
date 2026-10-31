@@ -1250,6 +1250,26 @@ Three.js cooperative flying game (slug `glide`, folder `live/Glide`): the player
 
 ---
 
+### Cache
+
+A squirrel buries acorns in a low-poly autumn park, the season turns (snow hides the mounds, landmarks change, berries fall for a mini-task), and in winter the player digs the acorns up from memory before jays steal them. Parameters control how many acorns there are, how much the park changes, how long the delay is, how much a miss tells the player, and the next park's rung (gusts, decoy mounds, a turned winter camera, faster jays). Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `cacheCount` (Integer, 2–8, default 4): acorns buried per park. At once while still burying (never below those already buried); otherwise next park.
+- `landmarkChanges` (Integer, 0–4, default 1): landmarks moved 4–8 m, removed (the red kite blows away, a lamp is taken) or added (a snowman) while the season turns. Next season turn.
+- `delaySeconds` (Float, 4–30, default 10): length of the season's turn between burying and digging, filled with catching berries. At once; a turn in progress rescales.
+- `digHints` (Integer, 0–2, default 1): 0 none; 1 misses marked Warm (an acorn within 4.5 m) or Cold; 2 also an arrow toward the nearest unfound acorn. Next dig.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next park's rung (gusts from 2, decoy mounds from 3, a winter camera turned 20–45° from 4, faster jays). Next park.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "cacheCount", "parameterValue": 5 } }
+```
+
+Keys 1–9: 1 Relax `{cacheCount 3, landmarkChanges 0, delaySeconds 6, digHints 2, levelOffset −1}` · 2 Gentle `{3, 1, 8, 2}` · 3 Default `{4, 1, 10, 1, levelOffset 0}` · 4 Brisk `{cacheCount 5, landmarkChanges 2, delaySeconds 12}` · 5 Grit `{6, 3, 20, 0, levelOffset 1}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Shifting park `{landmarkChanges 4}` · 9 Extreme `{8, 4, 30, 0, levelOffset 3}`.
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

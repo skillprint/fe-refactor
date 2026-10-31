@@ -932,6 +932,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'cache':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'cacheCount', parameterValue: 3 }, { parameterName: 'landmarkChanges', parameterValue: 0 }, { parameterName: 'delaySeconds', parameterValue: 6 }, { parameterName: 'digHints', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'cacheCount', parameterValue: 3 }, { parameterName: 'landmarkChanges', parameterValue: 1 }, { parameterName: 'delaySeconds', parameterValue: 8 }, { parameterName: 'digHints', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'cacheCount', parameterValue: 4 }, { parameterName: 'landmarkChanges', parameterValue: 1 }, { parameterName: 'delaySeconds', parameterValue: 10 }, { parameterName: 'digHints', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'cacheCount', parameterValue: 5 }, { parameterName: 'landmarkChanges', parameterValue: 2 }, { parameterName: 'delaySeconds', parameterValue: 12 }]; // Brisk
+                case 5: return [{ parameterName: 'cacheCount', parameterValue: 6 }, { parameterName: 'landmarkChanges', parameterValue: 3 }, { parameterName: 'delaySeconds', parameterValue: 20 }, { parameterName: 'digHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next park
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next park
+                case 8: return [{ parameterName: 'landmarkChanges', parameterValue: 4 }]; // Shifting park
+                case 9: return [{ parameterName: 'cacheCount', parameterValue: 8 }, { parameterName: 'landmarkChanges', parameterValue: 4 }, { parameterName: 'delaySeconds', parameterValue: 30 }, { parameterName: 'digHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

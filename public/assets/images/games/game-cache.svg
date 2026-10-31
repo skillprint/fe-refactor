@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Cache</title>
+  <desc>Skillprint game card: a squirrel burying an acorn in an autumn park, beside a tree with a red kite, a bench and a lamp post, with snow beginning to fall</desc>
+  <rect width="380" height="210" fill="#e9b97c"/>
+  <path d="M0 150 Q95 132 190 140 T380 136 V210 H0 Z" fill="#8f9a3e"/>
+  <path d="M0 168 Q120 154 240 162 T380 158 V210 H0 Z" fill="#a8a346"/>
+  <rect x="88" y="92" width="9" height="58" fill="#4b3426"/>
+  <circle cx="92" cy="80" r="30" fill="#d8692a"/>
+  <circle cx="70" cy="94" r="20" fill="#e7a034"/>
+  <circle cx="114" cy="92" r="19" fill="#b8431f"/>
+  <path d="M120 52 L134 66 L120 84 L106 66 Z" fill="#d6312a" stroke="#2b1a12" stroke-width="1.5"/>
+  <path d="M120 52 V84 M106 66 H134" stroke="#2b1a12" stroke-width="1.2"/>
+  <path d="M120 84 q4 8 -2 14 q-6 6 2 12" fill="none" stroke="#f1e4c8" stroke-width="2"/>
+  <rect x="300" y="78" width="4" height="70" fill="#2a2b30"/>
+  <path d="M293 76 L302 66 L311 76 L302 84 Z" fill="#ffd98a"/>
+  <rect x="236" y="132" width="44" height="6" rx="1" fill="#8c5a30"/>
+  <rect x="236" y="122" width="44" height="5" rx="1" fill="#8c5a30"/>
+  <rect x="240" y="138" width="3" height="10" fill="#2b2724"/><rect x="273" y="138" width="3" height="10" fill="#2b2724"/>
+  <ellipse cx="196" cy="166" rx="16" ry="5" fill="#6b4a2e"/>
+  <path d="M160 132 q-22 -10 -14 -34 q8 -16 24 -6 q10 8 2 22 q-6 10 -12 18 Z" fill="#b8571f"/>
+  <ellipse cx="176" cy="146" rx="13" ry="15" fill="#b8571f"/>
+  <ellipse cx="179" cy="150" rx="7" ry="10" fill="#ecd0a6"/>
+  <circle cx="186" cy="128" r="10" fill="#b8571f"/>
+  <path d="M181 120 l2 -9 l4 8 Z" fill="#b8571f"/>
+  <circle cx="190" cy="126" r="1.8" fill="#22150e"/>
+  <path d="M188 150 q6 -2 8 4 q-1 6 -7 5 q-4 -3 -1 -9 Z" fill="#d99a2b"/>
+  <path d="M187 150 q5 -4 10 1 Z" fill="#5b3a20"/>
+  <path d="M330 42 l10 4 l-10 4 l3 -4 Z" fill="#46699a"/>
+  <circle cx="40" cy="40" r="2.2" fill="#f6f2ea"/><circle cx="160" cy="28" r="2" fill="#f6f2ea"/><circle cx="220" cy="60" r="2.4" fill="#f6f2ea"/><circle cx="270" cy="34" r="1.8" fill="#f6f2ea"/><circle cx="350" cy="90" r="2" fill="#f6f2ea"/><circle cx="20" cy="110" r="1.8" fill="#f6f2ea"/>
+  <path d="M150 100 l6 3 l-5 2 Z M232 104 l5 4 l-6 1 Z M60 128 l6 2 l-5 3 Z" fill="#c4501e"/>
+</svg>
