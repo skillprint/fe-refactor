@@ -65,3 +65,5 @@ With the voice on, a customer line never holds up the conversation: the reply cl
 ## Not in this phase
 
 Speech input, the local Qwen3-TTS voice with emotion, the result panel in the portal dialog, the text-only scoring path, and the agent adapter that drives `window.__harness` live in later phases of the plan.
+
+One gap for that adapter: actions through `window.__harness.play()` fire no DOM input, and the portal counts a same-origin frame's inputs itself (it ignores the game's own count there), so an agent's chunks would reach the backend with `input_count` 0 and be left out of skill scores. Either the adapter types and clicks with real input events, as the harness's portal adapter already does, or the portal takes the larger of its count and the game's.
