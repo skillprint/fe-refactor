@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Broadsheet</title>
+  <desc>Skillprint game card: a tilted case of wooden type with red-inked letters, a composing stick holding three blocks, and a two-colour poster pinned to a drying line, a sheet flying up to it</desc>
+  <rect width="380" height="210" fill="#efe2c8"/>
+  <g fill="#c4281c" opacity="0.16">
+    <circle cx="300" cy="22" r="2"/><circle cx="312" cy="22" r="2"/><circle cx="324" cy="22" r="2"/><circle cx="306" cy="32" r="2"/><circle cx="318" cy="32" r="2"/><circle cx="330" cy="32" r="2"/><circle cx="312" cy="42" r="2"/><circle cx="324" cy="42" r="2"/>
+  </g>
+  <rect y="122" width="380" height="5" fill="#a23a26"/>
+  <path d="M0 30 Q190 44 380 30" fill="none" stroke="#bfae8c" stroke-width="1.5"/>
+  <g>
+    <rect x="236" y="38" width="96" height="132" fill="#f6ecd2"/>
+    <rect x="243" y="45" width="82" height="118" fill="none" stroke="#1c1714" stroke-width="2"/>
+    <rect x="254" y="54" width="60" height="7" fill="#1c1714"/>
+    <rect x="250" y="66" width="68" height="11" fill="#c4281c"/>
+    <rect x="252" y="81" width="64" height="2" fill="#1c1714"/>
+    <rect x="258" y="92" width="52" height="13" fill="#c4281c"/>
+    <rect x="262" y="112" width="44" height="12" fill="#1c1714"/>
+    <rect x="256" y="131" width="56" height="12" fill="#c4281c"/>
+    <rect x="266" y="150" width="36" height="4" fill="#1c1714" opacity="0.6"/>
+    <circle cx="296" cy="146" r="13" fill="none" stroke="#26449a" stroke-width="3" opacity="0.75"/>
+    <rect x="248" y="32" width="5" height="14" rx="1" fill="#c49a6c"/>
+    <rect x="315" y="32" width="5" height="14" rx="1" fill="#c49a6c"/>
+  </g>
+  <path d="M206 112 l20 -6 l4 14 l-20 6z" fill="#f6ecd2" stroke="#d9c9a4" stroke-width="1"/>
+  <rect y="168" width="380" height="42" fill="#7a4a2c"/>
+  <rect y="166" width="380" height="4" fill="#9a643c"/>
+  <g transform="translate(34 70) skewX(-8)">
+    <rect width="150" height="104" rx="3" fill="#a8703f"/>
+    <rect x="6" y="6" width="138" height="92" fill="#4a2c18"/>
+    <g fill="#e6c48e">
+      <rect x="10" y="10" width="29" height="19" rx="3"/><rect x="44" y="10" width="29" height="19" rx="3"/><rect x="78" y="10" width="29" height="19" rx="3"/><rect x="112" y="10" width="29" height="19" rx="3"/>
+      <rect x="10" y="33" width="29" height="19" rx="3"/><rect x="78" y="33" width="29" height="19" rx="3"/><rect x="112" y="33" width="29" height="19" rx="3"/>
+      <rect x="10" y="56" width="29" height="19" rx="3"/><rect x="44" y="56" width="29" height="19" rx="3"/><rect x="112" y="56" width="29" height="19" rx="3"/>
+      <rect x="10" y="79" width="29" height="15" rx="3"/><rect x="44" y="79" width="29" height="15" rx="3"/><rect x="78" y="79" width="29" height="15" rx="3"/><rect x="112" y="79" width="29" height="15" rx="3"/>
+    </g>
+    <g fill="none" stroke="#c4281c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 26 L24 13 L29 26 M21 21 H27"/>
+      <path d="M53 13 V26 M53 13 H60 Q63 16 60 19 H53 M58 19 L62 26"/>
+      <path d="M90 14 Q85 13 86 19 Q85 26 91 25 Q96 26 96 19 Q96 13 90 14"/>
+      <path d="M120 13 H133 M126 13 V26"/>
+      <path d="M20 36 V49 H29"/>
+      <path d="M93 36 H86 V49 H94 M86 42 H92"/>
+      <path d="M121 49 V36 L132 49 V36"/>
+      <path d="M19 59 V72 M30 59 V72 M19 65 H30"/>
+      <path d="M58 60 Q52 59 53 63 Q54 66 59 66 Q64 67 63 70 Q62 73 53 72"/>
+      <path d="M120 59 L126 72 L132 59"/>
+      <path d="M20 81 V92 L29 92"/>
+      <path d="M54 81 V92 M54 81 H61 Q64 84 61 87 H54"/>
+      <path d="M88 81 V92 M88 81 L96 92 M96 81 L88 92"/>
+      <path d="M121 81 H131 M126 81 V92"/>
+    </g>
+    <path d="M58 44 L92 66 L126 44" fill="none" stroke="#c4281c" stroke-width="2.2" opacity="0.8"/>
+  </g>
+  <rect x="40" y="184" width="170" height="10" rx="2" fill="#9aa1a7"/>
+  <rect x="40" y="176" width="170" height="4" fill="#6f757b"/>
+  <g fill="#e6c48e"><rect x="92" y="171" width="20" height="16" rx="2"/><rect x="114" y="171" width="20" height="16" rx="2"/><rect x="136" y="166" width="20" height="16" rx="2" transform="rotate(-10 146 174)"/></g>
+  <g fill="none" stroke="#c4281c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M98 183 V175 L102 180 L106 175 V183"/><path d="M119 183 L124 174 L129 183"/><path d="M142 178 V169 H148 Q151 172 148 174 H142 M146 174 L150 179" transform="rotate(-10 146 174)"/></g>
+  <rect x="270" y="150" width="110" height="60" fill="#26352d"/>
+  <rect x="270" y="148" width="110" height="4" fill="#c49a48"/>
+  <circle cx="312" cy="138" r="18" fill="#efe6cf"/>
+  <circle cx="312" cy="138" r="18" fill="none" stroke="#1b231f" stroke-width="4"/>
+  <circle cx="312" cy="138" r="5" fill="#c49a48"/>
+</svg>

@@ -373,6 +373,18 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Flockwork/backend/game-scoring-config.json'),
+  },
+
+  'broadsheet': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Broadsheet/backend/game-scoring-config.json'),
+  },
+
+  'wayfinder': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Wayfinder/backend/game-scoring-config.json'),
   }
 };
 
@@ -976,6 +988,26 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Juggling several jobs at once', 'Planning the order of moves', 'Reading space and angles', 'Working as a team'],
     instructions: 'Pick a dog (its board, the dog, or Tab/Q/E), then click the sheep to fetch them, the grass to send it, or the gate to hold it open. Steer with A come-bye, D away, W walk up and S lie down. One dog holds the gate while the others drive: pen the number on the slate before sundown.'
   },
+  'broadsheet': {
+    name: 'Broadsheet',
+    description: 'Spell words from a case of letterpress type and print each client\'s poster before the press run ends.',
+    image: gameAssetUrl('live/Broadsheet/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Word finding', 'Spotting letter patterns', 'Vocabulary', 'Rhyme and theme recall'],
+    instructions: 'Drag across touching blocks (diagonals too), tap them, or type a word, then release or press Enter to set it. Fill every line on the client\'s order slip before the press run\'s clock or paper runs out; any other real word still prints and scores.'
+  },
+  'wayfinder': {
+    name: 'Wayfinder',
+    description: 'Spin a watercolour paper globe, pin places from clues and fill a travel journal with passport stamps.',
+    image: gameAssetUrl('live/Wayfinder/cover.jpg'),
+    category: 'Geography',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Geographic knowledge', 'Mental mapping', 'Spatial reasoning', 'Reading riddles and clues'],
+    instructions: 'Drag to spin the globe, scroll or pinch to zoom, tap to drop a pin, then Confirm (Enter). Land close to the true spot for points and a passport stamp; each journey is 5 to 7 places on a theme.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1076,4 +1108,6 @@ export const knownGameSlugs = [
   'elixir',
   'lumen',
   'flockwork',
+  'broadsheet',
+  'wayfinder',
 ];

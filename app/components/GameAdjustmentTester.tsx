@@ -827,6 +827,36 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'broadsheet':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'pressTime', parameterValue: 1.8 }, { parameterName: 'vowelShare', parameterValue: 0.44 }, { parameterName: 'minWordLength', parameterValue: 3 }, { parameterName: 'hintLevel', parameterValue: 2 }]; // Relax
+                case 2: return [{ parameterName: 'pressTime', parameterValue: 1.3 }, { parameterName: 'vowelShare', parameterValue: 0.41 }, { parameterName: 'hintLevel', parameterValue: 1 }]; // Gentle
+                case 3: return [{ parameterName: 'pressTime', parameterValue: 1 }, { parameterName: 'vowelShare', parameterValue: 0.38 }, { parameterName: 'minWordLength', parameterValue: 3 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'pressTime', parameterValue: 0.75 }, { parameterName: 'minWordLength', parameterValue: 4 }]; // Brisk
+                case 5: return [{ parameterName: 'pressTime', parameterValue: 0.65 }, { parameterName: 'vowelShare', parameterValue: 0.31 }, { parameterName: 'minWordLength', parameterValue: 4 }, { parameterName: 'hintLevel', parameterValue: 0 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next commission
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next commission
+                case 8: return [{ parameterName: 'minWordLength', parameterValue: 5 }]; // Five-letter press
+                case 9: return [{ parameterName: 'pressTime', parameterValue: 0.5 }, { parameterName: 'vowelShare', parameterValue: 0.28 }, { parameterName: 'minWordLength', parameterValue: 5 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'wayfinder':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'labelDensity', parameterValue: 3 }, { parameterName: 'clueClarity', parameterValue: 2 }, { parameterName: 'scoreRadiusKm', parameterValue: 1000 }, { parameterName: 'clueTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'labelDensity', parameterValue: 2 }, { parameterName: 'clueClarity', parameterValue: 1 }, { parameterName: 'scoreRadiusKm', parameterValue: 750 }]; // Gentle
+                case 3: return [{ parameterName: 'labelDensity', parameterValue: 1 }, { parameterName: 'clueClarity', parameterValue: 1 }, { parameterName: 'scoreRadiusKm', parameterValue: 500 }, { parameterName: 'clueTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'clueTimer', parameterValue: 30 }, { parameterName: 'scoreRadiusKm', parameterValue: 400 }]; // Brisk
+                case 5: return [{ parameterName: 'labelDensity', parameterValue: 0 }, { parameterName: 'clueClarity', parameterValue: 0 }, { parameterName: 'scoreRadiusKm', parameterValue: 250 }, { parameterName: 'clueTimer', parameterValue: 20 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next journey
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next journey
+                case 8: return [{ parameterName: 'clueClarity', parameterValue: 0 }]; // Riddles only
+                case 9: return [{ parameterName: 'labelDensity', parameterValue: 0 }, { parameterName: 'clueClarity', parameterValue: 0 }, { parameterName: 'scoreRadiusKm', parameterValue: 150 }, { parameterName: 'clueTimer', parameterValue: 12 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

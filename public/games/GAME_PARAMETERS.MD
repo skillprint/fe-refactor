@@ -1039,6 +1039,70 @@ Three.js cooperative herding game (slug `flockwork`, folder `live/Flockwork`): t
 
 ---
 
+### Broadsheet
+Three.js letterpress word game (slug `broadsheet`, folder `live/Broadsheet`): the player spells words from a tilted case of type (Boggle rules: touching blocks, diagonals too, each block once; drag, tap or type) to fill a client's order slip of three or four constrained lines (a theme word, N+ letters, a given letter, a plural, a rhyme, a chained first letter, a double letter) before the press run's clock or sheets run out; every word is printed onto the client's poster. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `pressTime` (Number, 0.5–2.0): multiplies the press-run clock, 45 s + 15 s per order line at 1.0. Applies at once; the time left scales in proportion. Default 1.0.
+- `vowelShare` (Number, 0.28–0.5): the vowel share the type drawer aims for in new blocks. Applies to every block dealt from then on (every word set refills the case). Default 0.38.
+- `minWordLength` (Integer, 3–5): the shortest word the press accepts. Applies from the next word set. Default 3.
+- `hintLevel` (Integer, 0–2): after 8 s without a word, 0 nothing, 1 a gold glint on the first block of a good word, 2 the first two blocks glint and are written on the order slip. Applies at once (0 clears a glint). Default 1.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next commission (bigger case, four lines, rhymes, chained lines, rare and double letters). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "minWordLength",
+  "parameterValue": 4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ pressTime: 1.8, vowelShare: 0.44, minWordLength: 3, hintLevel: 2 }` (Relax)
+- `2`: `{ pressTime: 1.3, vowelShare: 0.41, hintLevel: 1 }` (Gentle)
+- `3`: `{ pressTime: 1.0, vowelShare: 0.38, minWordLength: 3, hintLevel: 1, levelOffset: 0 }` (Default)
+- `4`: `{ pressTime: 0.75, minWordLength: 4 }` (Brisk)
+- `5`: `{ pressTime: 0.65, vowelShare: 0.31, minWordLength: 4, hintLevel: 0 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next commission)
+- `7`: `{ levelOffset: 2 }` (Harder next commission)
+- `8`: `{ minWordLength: 5 }` (Five-letter press)
+- `9`: `{ pressTime: 0.5, vowelShare: 0.28, minWordLength: 5, hintLevel: 0, levelOffset: 3 }` (Extreme)
+
+---
+
+### Wayfinder
+Three.js geography game (slug `wayfinder`, folder `live/Wayfinder`): a clue card asks for a place (by name, description or riddle), the player spins a watercolour paper globe, drops a pin and confirms; a dotted line flies to the true spot and close answers earn passport stamps. Journeys of 5–7 places on a theme, each in its own look. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded (the game parses them itself), `true`/`false` read as 1/0.
+
+**Parameters**
+- `labelDensity` (Integer, 0–3): 0 coasts and mountain hachures only, 1 dashed country borders, 2 + ~55 reference cities (none within 450 km of the answer), 3 + oceans, seas and continents. Applies at once. Default 1.
+- `clueClarity` (Integer, 0–2): 0 riddle, 1 description, 2 the place's name. Applies at once (the open clue is reworded until confirmed). Default 1.
+- `scoreRadiusKm` (Integer, 150–1500): full-credit radius, dotted round the pin; Pinpoint within a quarter of it, Visited stamp within twice it. Applies at once. Default 500.
+- `clueTimer` (Integer, 0–90): seconds per clue, 0 untimed; at zero the pin stands where it is, or the clue is missed. Applies at once, keeping the share of time left. Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next journey (famous places → lesser-known → the well travelled, mixed subjects from rung 5). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "clueClarity",
+  "parameterValue": 0
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ labelDensity: 3, clueClarity: 2, scoreRadiusKm: 1000, clueTimer: 0 }` (Relax)
+- `2`: `{ labelDensity: 2, clueClarity: 1, scoreRadiusKm: 750 }` (Gentle)
+- `3`: `{ labelDensity: 1, clueClarity: 1, scoreRadiusKm: 500, clueTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ clueTimer: 30, scoreRadiusKm: 400 }` (Brisk)
+- `5`: `{ labelDensity: 0, clueClarity: 0, scoreRadiusKm: 250, clueTimer: 20 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next journey)
+- `7`: `{ levelOffset: 2 }` (Harder next journey)
+- `8`: `{ clueClarity: 0 }` (Riddles only)
+- `9`: `{ labelDensity: 0, clueClarity: 0, scoreRadiusKm: 150, clueTimer: 12, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 
