@@ -1551,6 +1551,38 @@ Three.js mental-arithmetic game (slug `market-day`, folder `live/Market Day`): a
 
 ---
 
+### Waggle
+Three.js memory and spatial game (slug `waggle`, folder `live/Waggle`): the player is a forager honeybee. On the comb, sisters perform the real waggle dance (the run's angle from up = bearing clockwise from the sun; each waggle = 50 m); the player remembers one to four dances, flies out over a meadow to find the danced patches among decoys (mirror-image and sun-drift traps), then aims and waggles their own dance home to recruit sisters and fill the hive with honey. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores every parameter.
+
+**Parameters**
+- `danceRepeats` (Integer, 1–6): figure-eight circuits each sister dances. Applies at once, the current dance included. Default 3.
+- `danceCount` (Integer, 0–4): sisters (patches to remember) per foray; 0 follows the rung (1, 2 from rung 3, 3 from rung 6). From the next foray. Default 0.
+- `patchSpread` (Number, 0.5–2.0): minimum separation of decoys from true patches (26° / 130 m at 1.0). From the next foray. Default 1.0.
+- `sunMarker` (Integer, 0–2): aids: 0 sun only; 1 sun-bearing line from the hive; 2 plus 30° compass ticks from the sun, labelled 100 m rings and a dashed angle guide under each dance. Applies at once. Default 1.
+- `danceSpeed` (Number, 0.6–1.6): tempo of the sisters' dances (5 waggles/s at 1.0); the waggle count never changes. Applies at once. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next foray (more decoys, more dances, sun drift from rung 4, wind from rung 5). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "sunMarker",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ danceRepeats: 5, danceCount: 1, patchSpread: 1.7, sunMarker: 2, danceSpeed: 0.75 }` (Relax)
+- `2`: `{ danceRepeats: 4, patchSpread: 1.3, sunMarker: 2, danceSpeed: 0.9 }` (Gentle)
+- `3`: `{ danceRepeats: 3, danceCount: 0, patchSpread: 1.0, sunMarker: 1, danceSpeed: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ danceRepeats: 2, danceSpeed: 1.25, danceCount: 2 }` (Brisk)
+- `5`: `{ danceRepeats: 1, danceCount: 3, patchSpread: 0.65, sunMarker: 0, danceSpeed: 1.4 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next foray)
+- `7`: `{ levelOffset: 2 }` (Harder next foray)
+- `8`: `{ sunMarker: 0 }` (No sun line)
+- `9`: `{ danceRepeats: 1, danceCount: 4, patchSpread: 0.5, sunMarker: 0, danceSpeed: 1.6, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

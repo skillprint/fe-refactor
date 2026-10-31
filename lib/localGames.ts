@@ -90,7 +90,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'tidepool': 'Tidepool',
     'lookout': 'Lookout',
     'gearworks': 'Gearworks',
-    'market-day': 'Market Day'
+    'market-day': 'Market Day',
+    'waggle': 'Waggle'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

@@ -1097,6 +1097,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'waggle':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'danceRepeats', parameterValue: 5 }, { parameterName: 'danceCount', parameterValue: 1 }, { parameterName: 'patchSpread', parameterValue: 1.7 }, { parameterName: 'sunMarker', parameterValue: 2 }, { parameterName: 'danceSpeed', parameterValue: 0.75 }]; // Relax
+                case 2: return [{ parameterName: 'danceRepeats', parameterValue: 4 }, { parameterName: 'patchSpread', parameterValue: 1.3 }, { parameterName: 'sunMarker', parameterValue: 2 }, { parameterName: 'danceSpeed', parameterValue: 0.9 }]; // Gentle
+                case 3: return [{ parameterName: 'danceRepeats', parameterValue: 3 }, { parameterName: 'danceCount', parameterValue: 0 }, { parameterName: 'patchSpread', parameterValue: 1 }, { parameterName: 'sunMarker', parameterValue: 1 }, { parameterName: 'danceSpeed', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'danceRepeats', parameterValue: 2 }, { parameterName: 'danceSpeed', parameterValue: 1.25 }, { parameterName: 'danceCount', parameterValue: 2 }]; // Brisk
+                case 5: return [{ parameterName: 'danceRepeats', parameterValue: 1 }, { parameterName: 'danceCount', parameterValue: 3 }, { parameterName: 'patchSpread', parameterValue: 0.65 }, { parameterName: 'sunMarker', parameterValue: 0 }, { parameterName: 'danceSpeed', parameterValue: 1.4 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next foray
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next foray
+                case 8: return [{ parameterName: 'sunMarker', parameterValue: 0 }]; // No sun line
+                case 9: return [{ parameterName: 'danceRepeats', parameterValue: 1 }, { parameterName: 'danceCount', parameterValue: 4 }, { parameterName: 'patchSpread', parameterValue: 0.5 }, { parameterName: 'sunMarker', parameterValue: 0 }, { parameterName: 'danceSpeed', parameterValue: 1.6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

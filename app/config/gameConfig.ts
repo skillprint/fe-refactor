@@ -481,6 +481,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Market Day/backend/game-scoring-config.json'),
+  },
+
+  'waggle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Waggle/backend/game-scoring-config.json'),
   }
 };
 
@@ -1264,6 +1270,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Mental arithmetic', 'Applying deals and discounts', 'Making change', 'Juggling a busy queue'],
     instructions: 'Total each shopper\'s basket, apply the deal of the day if it covers their items, and tap coins and notes from the cash tin (A–K keys) to give exact change, then Hand over (Enter). When your partner calls, check her sum with Y or N; pass a shopper to her with X when the queue grows.'
   },
+  'waggle': {
+    name: 'Waggle',
+    description: 'Read a honeybee\'s waggle dance, fly out to find the flowers, then dance the way home for the hive.',
+    image: gameAssetUrl('live/Waggle/cover.jpg'),
+    category: 'Memory',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Remembering several directions at once', 'Turning angles into places', 'Allowing for a moving sun', 'Communicating a route'],
+    instructions: 'Watch your sisters dance: the waggle run\'s angle from straight up is the bearing clockwise from the sun, and each waggle is 50 m. Press Fly out, tap the flower patches they danced, then aim your own run (drag or arrow keys) and hold Hold to waggle (or Space) for the right count to dance it home.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1382,4 +1398,5 @@ export const knownGameSlugs = [
   'lookout',
   'gearworks',
   'market-day',
+  'waggle',
 ];
