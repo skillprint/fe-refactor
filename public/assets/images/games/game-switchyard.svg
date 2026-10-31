@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Switchyard</title>
+  <desc>Skillprint game card: a toy steam train on a model railway yard, its track fanning through a switch into three numbered sidings, under an enamel station sign</desc>
+  <rect width="380" height="210" fill="#9fd07a"/>
+  <path d="M0 40 L60 18 L110 36 L170 10 L230 34 L290 14 L350 36 L380 26 V48 H0Z" fill="#7f9a8e"/>
+  <path d="M152 18 L170 10 L186 17 L176 22 L166 18Z M276 20 L290 14 L304 20 L292 24Z" fill="#f4f7fa"/>
+  <rect y="46" width="380" height="164" fill="#8cc466"/>
+  <g fill="#3f7a46"><path d="M22 92 l10 -26 10 26z"/><path d="M38 96 l8 -20 8 20z"/><path d="M336 182 l10 -24 10 24z"/><path d="M352 186 l8 -18 8 18z"/></g>
+  <g fill="#8a8578">
+    <path d="M0 132 H120 C160 132 170 92 210 92 H380 V108 H210 C180 108 170 148 120 148 H0Z"/>
+    <path d="M120 132 C150 132 170 134 210 134 H380 V150 H210 C172 150 150 148 120 148Z"/>
+    <path d="M150 140 C175 140 185 176 214 176 H380 V192 H214 C178 192 168 156 140 156Z"/>
+  </g>
+  <g stroke="#5b4636" stroke-width="3">
+    <path d="M14 129 v22 M30 129 v22 M46 129 v22 M62 129 v22 M78 129 v22 M94 129 v22 M110 129 v22"/>
+    <path d="M230 89 v22 M250 89 v22 M270 89 v22 M290 89 v22 M310 89 v22 M330 89 v22 M350 89 v22"/>
+    <path d="M230 131 v22 M250 131 v22 M270 131 v22 M290 131 v22 M310 131 v22 M330 131 v22 M350 131 v22"/>
+    <path d="M230 173 v22 M250 173 v22 M270 173 v22 M290 173 v22 M310 173 v22 M330 173 v22 M350 173 v22"/>
+  </g>
+  <g fill="none" stroke="#d9d4ca" stroke-width="2.5">
+    <path d="M0 134 H120 C160 134 170 95 210 95 H364 M0 146 H120 C165 146 175 105 210 105 H364"/>
+    <path d="M120 134 C150 134 170 137 210 137 H364 M120 146 C150 146 170 147 210 147 H364"/>
+    <path d="M140 146 C172 146 182 179 214 179 H364 M150 154 C178 154 186 189 214 189 H364"/>
+  </g>
+  <path d="M120 140 C160 140 172 100 210 100 H360" fill="none" stroke="#ffd23f" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+  <g fill="#c8322a" stroke="#1b1b1f" stroke-width="2"><rect x="362" y="92" width="8" height="18" rx="2"/><rect x="362" y="134" width="8" height="18" rx="2"/><rect x="362" y="176" width="8" height="18" rx="2"/></g>
+  <path d="M198 121 l-13 -13 v8 h-17 v10 h17 v8z" fill="#ffd23f" stroke="#1b1b1f" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="146" cy="168" r="11" fill="#1b2f55" stroke="#fff" stroke-width="3"/>
+  <g stroke="#1b1b1f" stroke-width="2" stroke-linejoin="round">
+    <rect x="18" y="116" width="34" height="16" rx="3" fill="#6b4a35"/>
+    <circle cx="27" cy="114" r="5" fill="#e8762b"/><circle cx="38" cy="113" r="5" fill="#e8762b"/><circle cx="46" cy="115" r="4" fill="#e8762b"/>
+    <rect x="56" y="116" width="34" height="16" rx="3" fill="#5a5f66"/>
+    <circle cx="65" cy="114" r="5" fill="#e8762b"/><circle cx="76" cy="113" r="5" fill="#e8762b"/><circle cx="84" cy="115" r="4" fill="#e8762b"/>
+    <rect x="94" y="110" width="46" height="22" rx="4" fill="#d2382c"/>
+    <rect x="94" y="98" width="18" height="16" rx="2" fill="#d2382c"/>
+    <rect x="128" y="96" width="6" height="14" fill="#2b2a2c"/>
+    <circle cx="103" cy="99" r="6" fill="#fbf8f0"/>
+  </g>
+  <circle cx="103" cy="99" r="3" fill="#d2382c"/>
+  <g fill="#f4f1ea" opacity="0.85"><circle cx="131" cy="86" r="6"/><circle cx="138" cy="76" r="8"/><circle cx="148" cy="66" r="10"/></g>
+  <g fill="#2b2a2c"><circle cx="26" cy="134" r="4"/><circle cx="44" cy="134" r="4"/><circle cx="64" cy="134" r="4"/><circle cx="82" cy="134" r="4"/><circle cx="102" cy="134" r="5"/><circle cx="117" cy="134" r="5"/><circle cx="132" cy="134" r="5"/></g>
+  <rect x="236" y="54" width="104" height="30" rx="7" fill="#b3261e" stroke="#1b1b1f" stroke-width="2"/>
+  <rect x="241" y="59" width="94" height="20" rx="4" fill="none" stroke="#fff" stroke-width="2"/>
+  <g fill="#fff"><circle cx="256" cy="66" r="4"/><rect x="262" y="62" width="7" height="7"/><path d="M259 76 l5 -7 5 7z"/><rect x="276" y="64" width="50" height="4" rx="2"/><rect x="276" y="71" width="36" height="3" rx="1.5"/></g>
+  <path d="M248 84 v8 M328 84 v8" stroke="#2b2a2c" stroke-width="3"/>
+</svg>

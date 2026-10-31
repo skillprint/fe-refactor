@@ -1353,6 +1353,39 @@ Three.js call-and-response rhythm game in a 1930s rubber-hose cartoon style (slu
 
 ---
 
+### Switchyard
+Three.js task-switching game on a tilt-shift HO-scale model railway: flip switches to route toy trains into numbered sidings by the station-master's rule (by colour, by cargo, by length, reverse), which changes every few trains with a warning first (slug `switchyard`, folder `live/Switchyard`). The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded. The tutorial runs its own slow trains and ignores them.
+
+**Parameters**
+- `trainSpeed` (Number, 0.5–2.0): multiplies how fast every train runs (2.4 table units/s at 1.0, about 1.7 s from the tunnel mouth to the first switch; +3 % per rung) and how often trains leave the tunnel (every 8.5 s on rung 1, 0.5 s less per rung, min 3.4 s, divided by this). Applies at once, to trains already moving. Default 1.0.
+- `ruleSwitchEvery` (Integer, 1–8): trains per routing rule before the sign changes; the change happens as the first train under the new rule leaves the tunnel. Applies at once, counted from the last change. Default 3.
+- `cueWarning` (Number, 0–6): seconds of "Next ▸ CARGO in n" warning before a rule change (0 = no warning). Applies at once, to the next change. Default 3.
+- `trackComplexity` (Integer, 1–4): yard size, 3 / 4 / 5 / 6 sidings with 2–5 switches. Takes effect from the next shift. Default 2.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next shift (7–12 trains, shorter gaps, the length rule from rung 2, reverse from rung 4, more trains whose colour, cargo and length point to different sidings). Applies when the next shift starts, never mid-shift. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "ruleSwitchEvery",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ trainSpeed: 0.65, ruleSwitchEvery: 6, cueWarning: 5.5, trackComplexity: 1 }` (Relax)
+- `2`: `{ trainSpeed: 0.8, ruleSwitchEvery: 4, cueWarning: 4.5, trackComplexity: 2 }` (Gentle)
+- `3`: `{ trainSpeed: 1.0, ruleSwitchEvery: 3, cueWarning: 3, trackComplexity: 2, levelOffset: 0 }` (Default)
+- `4`: `{ trainSpeed: 1.2, ruleSwitchEvery: 3, cueWarning: 2 }` (Brisk)
+- `5`: `{ trainSpeed: 1.45, ruleSwitchEvery: 1, cueWarning: 0.5, trackComplexity: 4 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next level)
+- `7`: `{ levelOffset: 2 }` (Harder next level)
+- `8`: `{ ruleSwitchEvery: 1 }` (New rule every train)
+- `9`: `{ trainSpeed: 2.0, ruleSwitchEvery: 1, cueWarning: 0, trackComplexity: 4, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

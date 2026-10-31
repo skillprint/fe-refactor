@@ -992,6 +992,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'switchyard':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'trainSpeed', parameterValue: 0.65 }, { parameterName: 'ruleSwitchEvery', parameterValue: 6 }, { parameterName: 'cueWarning', parameterValue: 5.5 }, { parameterName: 'trackComplexity', parameterValue: 1 }]; // Relax
+                case 2: return [{ parameterName: 'trainSpeed', parameterValue: 0.8 }, { parameterName: 'ruleSwitchEvery', parameterValue: 4 }, { parameterName: 'cueWarning', parameterValue: 4.5 }, { parameterName: 'trackComplexity', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'trainSpeed', parameterValue: 1 }, { parameterName: 'ruleSwitchEvery', parameterValue: 3 }, { parameterName: 'cueWarning', parameterValue: 3 }, { parameterName: 'trackComplexity', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'trainSpeed', parameterValue: 1.2 }, { parameterName: 'ruleSwitchEvery', parameterValue: 3 }, { parameterName: 'cueWarning', parameterValue: 2 }]; // Brisk
+                case 5: return [{ parameterName: 'trainSpeed', parameterValue: 1.45 }, { parameterName: 'ruleSwitchEvery', parameterValue: 1 }, { parameterName: 'cueWarning', parameterValue: 0.5 }, { parameterName: 'trackComplexity', parameterValue: 4 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next level
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next level
+                case 8: return [{ parameterName: 'ruleSwitchEvery', parameterValue: 1 }]; // New rule every train
+                case 9: return [{ parameterName: 'trainSpeed', parameterValue: 2 }, { parameterName: 'ruleSwitchEvery', parameterValue: 1 }, { parameterName: 'cueWarning', parameterValue: 0 }, { parameterName: 'trackComplexity', parameterValue: 4 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

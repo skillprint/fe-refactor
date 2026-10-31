@@ -439,6 +439,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Bandstand/backend/game-scoring-config.json'),
+  },
+
+  'switchyard': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Switchyard/backend/game-scoring-config.json'),
   }
 };
 
@@ -1152,6 +1158,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Remembering melodies', 'Keeping the beat', 'Quick reactions', 'Playing with a band'],
     instructions: 'Play the xylophone with D F J K, the arrow keys, or the four pads. Listen to a bandmate\'s call, play it back from memory in the same rhythm, then hit each bouncing note as it lands while someone solos.'
   },
+  'switchyard': {
+    name: 'Switchyard',
+    description: 'Throw the points to route toy trains to their sidings, while the station-master keeps changing the rule.',
+    image: gameAssetUrl('live/Switchyard/cover.jpg'),
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Switching between rules fast', 'Planning routes ahead', 'Timing each switch', 'Reading signs under pressure'],
+    instructions: 'Tap a switch (or press A S D F G) to flip it and send each train to the siding the sign asks for: by colour, by cargo, by length or reverse. Watch for the warning when the rule is about to change, and don\'t flip a switch while a train is on it.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1263,4 +1279,5 @@ export const knownGameSlugs = [
   'treehouse-telegraph',
   'viewpoints',
   'bandstand',
+  'switchyard',
 ];
