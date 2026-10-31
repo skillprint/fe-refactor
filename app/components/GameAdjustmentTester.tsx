@@ -887,6 +887,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'xenoflora':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'trialBudget', parameterValue: 8 }, { parameterName: 'ruleComplexity', parameterValue: 0 }, { parameterName: 'attributeCount', parameterValue: 2 }, { parameterName: 'journalHints', parameterValue: 2 }]; // Relax
+                case 2: return [{ parameterName: 'trialBudget', parameterValue: 6 }, { parameterName: 'attributeCount', parameterValue: 3 }, { parameterName: 'journalHints', parameterValue: 1 }]; // Gentle
+                case 3: return [{ parameterName: 'trialBudget', parameterValue: 5 }, { parameterName: 'ruleComplexity', parameterValue: 0 }, { parameterName: 'attributeCount', parameterValue: 3 }, { parameterName: 'journalHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'trialBudget', parameterValue: 8 }, { parameterName: 'attributeCount', parameterValue: 4 }, { parameterName: 'journalHints', parameterValue: 0 }]; // Curious
+                case 5: return [{ parameterName: 'trialBudget', parameterValue: 3 }, { parameterName: 'ruleComplexity', parameterValue: 2 }, { parameterName: 'attributeCount', parameterValue: 5 }, { parameterName: 'journalHints', parameterValue: 0 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next garden
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next garden
+                case 8: return [{ parameterName: 'journalHints', parameterValue: 2 }]; // Full journal hints
+                case 9: return [{ parameterName: 'trialBudget', parameterValue: 3 }, { parameterName: 'ruleComplexity', parameterValue: 2 }, { parameterName: 'attributeCount', parameterValue: 5 }, { parameterName: 'journalHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

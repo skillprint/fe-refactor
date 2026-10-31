@@ -1168,6 +1168,34 @@ Three.js claymation action game: slide a trampoline round a toybox playroom and 
 
 ---
 
+### Xenoflora
+
+A deduction game in pastel alien gardens: players plant specimens (colour, petal count, leaves, petal pattern, height) into a bed, press Sunrise to see which bloom under the garden's hidden rule, then predict which new specimens will bloom and may name the rule. `trialBudget` and `journalHints` apply at once; `ruleComplexity`, `attributeCount` and `levelOffset` take effect with the next expedition. The tutorial ignores all parameters. Integers are rounded, values clamped.
+
+**Parameters**
+- `trialBudget` (Integer, 3–10, default 5): sunrises per expedition (one fewer from rung 5, two fewer from rung 9, never under 2). More = easier.
+- `ruleComplexity` (Integer, 0–2, default 0): steps up the rule ladder beyond the rung (one feature → property → two features → neighbours → counts). Higher = harder.
+- `attributeCount` (Integer, 2–5, default 3): features that vary between specimens (one more from rung 5, two more from rung 9, max 5); the rest are the same on every plant. More = more distractors.
+- `journalHints` (Integer, 0–2, default 0): 0 none; 1 per-feature pencil notes and a "fits your notes" check on the hypothesis; 2 also a pencilled guess at the rule.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next expedition's rung (rule family, bed and tray size).
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "trialBudget", "parameterValue": 7 } }
+```
+
+**Keyboard mapping (1–9)**
+1. Relax — `trialBudget 8, ruleComplexity 0, attributeCount 2, journalHints 2`
+2. Gentle — `trialBudget 6, attributeCount 3, journalHints 1`
+3. Default — `trialBudget 5, ruleComplexity 0, attributeCount 3, journalHints 0, levelOffset 0`
+4. Curious — `trialBudget 8, attributeCount 4, journalHints 0`
+5. Grit — `trialBudget 3, ruleComplexity 2, attributeCount 5, journalHints 0`
+6. Easier next garden — `levelOffset −2`
+7. Harder next garden — `levelOffset +2`
+8. Full journal hints — `journalHints 2`
+9. Extreme — `trialBudget 3, ruleComplexity 2, attributeCount 5, journalHints 0, levelOffset 3`
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

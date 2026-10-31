@@ -397,6 +397,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Jelly Juggle/backend/game-scoring-config.json'),
+  },
+
+  'xenoflora': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Xenoflora/backend/game-scoring-config.json'),
   }
 };
 
@@ -1040,6 +1046,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Quick, accurate movement', 'Split-second timing', 'Tracking many things at once', 'Aiming under pressure'],
     instructions: 'Move the trampoline with the mouse, a drag or WASD to catch falling jellies, and bounce them into the hoop with the same shape. Hold Space, the mouse button or BOING to crouch and let go just as a jelly lands for a Super Boing. Don\'t let them splat!'
   },
+  'xenoflora': {
+    name: 'Xenoflora',
+    description: 'Plant alien specimens, watch which bloom at sunrise, and crack each garden\'s hidden rule.',
+    image: gameAssetUrl('live/Xenoflora/cover.jpg'),
+    category: 'Logic',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Forming and testing hypotheses', 'Spotting patterns across features', 'Focusing on what matters', 'Predicting from evidence'],
+    instructions: 'Pick specimens from the seed tray and plant them in the bed (click, tap or drag), then press Sunrise to see which bloom. When you know the garden\'s rule, press Predict, mark which new specimens will bloom, and name the rule in your journal for a bonus.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1144,4 +1160,5 @@ export const knownGameSlugs = [
   'wayfinder',
   'hearthlight',
   'jelly-juggle',
+  'xenoflora',
 ];
