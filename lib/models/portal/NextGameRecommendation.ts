@@ -1,6 +1,7 @@
 /** `GET /api/portal/recommendations/next-game/` — camelCase on the wire. */
 export interface NextGameRecommendation {
-  game: { name: string; slug: string; };
+  /** `buildDir`: folder on the games CDN, null without a build (absent before marketplace #154). */
+  game: { name: string; slug: string; buildDir?: string | null; };
   reasonCode: string;
   reasonText: string;
 }

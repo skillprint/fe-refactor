@@ -1,5 +1,5 @@
 import type { Pillar } from '../../skillIcons';
-import { hasLocalGameDir } from '../../localGames';
+import { isPlayableGame } from '../../localGames';
 
 /** `GET /api/portal/playbooks/` and `/playbooks/{slug}/` (SKI-129). */
 
@@ -44,6 +44,8 @@ export interface PlaybookGame {
   estimatedDurationSeconds: number | null;
   difficulty: string | null;
   targetedSkills: string[];
+  /** Folder on the games CDN; null without a build (absent before marketplace #154). */
+  buildDir?: string | null;
 }
 
 export interface PlaybookTargetSkill {
@@ -122,9 +124,9 @@ export function normalizePlaybookDetail(raw: Partial<PlaybookDetail> & { slug: s
           dismissedAt: flat.dismissedAt ?? null,
         }
       : undefined;
-  // Backend-generated playbooks can include games this frontend has no build
-  // for; their tiles would open a 404. Drop them and count progress over what's left.
-  const games = (raw.games || []).filter((g) => hasLocalGameDir(g.slug));
+  // Backend-generated playbooks can include games with no build on the games
+  // CDN; their tiles would open a 403. Drop them and count progress over what's left.
+  const games = (raw.games || []).filter((g) => isPlayableGame(g));
   const playedGames = Math.min(base.progress.playedGames, games.length);
   const progress: PlaybookProgress = raw.games && games.length !== raw.games.length
     ? { totalGames: games.length, playedGames, percent: games.length ? Math.round((playedGames / games.length) * 100) : 0 }

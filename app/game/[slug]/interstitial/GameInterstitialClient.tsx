@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
-import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
+import { detailsFromCatalogRecord, getGameDetails } from '../../../config/gameConfig';
 import { getCatalogGame } from '../../../api/api';
 import { getAdaptiveParametersForGame } from '../../../utils/adaptiveParameters';
 import { useRouteParams } from '@/lib/useRouteParams';
@@ -37,14 +37,15 @@ export default function GameInterstitialClient() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [gameApiData, setGameApiData] = useState<any>(null);
+    const [catalogChecked, setCatalogChecked] = useState(false);
 
     const { slug } = useRouteParams('/game/[slug]/interstitial');
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
 
-    // Get game configuration and details
-    const gameConfig = getGameConfig(decodedSlug);
-    const gameDetails = getGameDetails(decodedSlug);
+    const searchParams = useSearchParams();
+    // The static details cover only older games; any other is described by its catalog record.
+    const gameDetails = getGameDetails(decodedSlug) ?? detailsFromCatalogRecord(gameApiData);
 
     useEffect(() => {
         const fetchGameData = async () => {
@@ -56,15 +57,10 @@ export default function GameInterstitialClient() {
             } catch (error) {
                 console.error("Error fetching game data:", error);
             }
+            setCatalogChecked(true);
         };
         fetchGameData();
     }, [decodedSlug]);
-
-    if (!gameDetails) {
-        notFound();
-    }
-
-    const searchParams = useSearchParams();
     const source = searchParams.get('source');
     const playbookId = searchParams.get('playbookId');
     // The email a player came from (SKI-271), for the session's attribution.
@@ -85,6 +81,11 @@ export default function GameInterstitialClient() {
     const handleBackToGames = () => {
         router.push('/games');
     };
+
+    if (!gameDetails) {
+        if (catalogChecked) notFound();
+        return <div className="font-sans min-h-screen bg-background" />;
+    }
 
     const displayImage = gameDetails.image || gameApiData?.image;
 

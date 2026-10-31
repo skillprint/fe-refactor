@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getGameDetails } from '../config/gameConfig';
+import { detailsFromCatalogRecord, getGameDetails } from '../config/gameConfig';
 import { getCatalogGame } from '../api/api';
 import { getAdaptiveParametersForGame } from '../utils/adaptiveParameters';
 
@@ -91,7 +91,8 @@ export default function GamePreviewShareSheet({ slug, isOpen, onClose, source, p
     if (!isMounted || !slug) return null;
 
     const decodedSlug = decodeURIComponent(slug);
-    const gameDetails = getGameDetails(decodedSlug);
+    // The static details cover only older games; any other is described by its catalog record.
+    const gameDetails = getGameDetails(decodedSlug) ?? detailsFromCatalogRecord(gameApiData);
 
     if (!gameDetails) {
         return null;

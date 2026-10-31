@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import { useCoachResource, type CoachResource } from './useCoachResource';
 import { portalFetch } from '../portal/portalFetch';
 import type { LibraryGame } from '../portal/LibraryGame';
-import { hasLocalGameDir } from '../../localGames';
+import { isPlayableGame } from '../../localGames';
 import { coachFetch, isCoachMocked } from './coachFetch';
 import type {
   CoachAssignment,
@@ -73,8 +73,8 @@ export function useCoachCatalogue(): CoachResource<CoachCatalogue> {
           isLoading: false,
           error: null,
           data: {
-            // Only games the portal can open; a student sent to any other would hit a 404.
-            games: games.filter((game) => hasLocalGameDir(game.slug)).map((game) => ({
+            // Only games the portal can open; a student sent to any other would hit a 403.
+            games: games.filter((game) => isPlayableGame(game)).map((game) => ({
               slug: game.slug,
               name: game.name,
               suggestedDurationSeconds: game.suggestedDurationSeconds,

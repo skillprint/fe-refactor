@@ -38,10 +38,12 @@ export interface CatalogSlugRecord {
   url?: string | null;
   externalWebUrl?: string | null;
   external_web_url?: string | null;
+  /** Folder on the games CDN (marketplace #154). */
+  buildDir?: string | null;
 }
 
 export function isPlayableRecord(game: CatalogSlugRecord): boolean {
-  return Boolean(game.url || game.externalWebUrl || game.external_web_url);
+  return Boolean(game.buildDir || game.url || game.externalWebUrl || game.external_web_url);
 }
 
 /**

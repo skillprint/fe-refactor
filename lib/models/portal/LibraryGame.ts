@@ -18,6 +18,10 @@ export interface LibraryGame {
   orientation: string;
   /** Hosted game entry point; "" for a placeholder record. */
   url: string;
+  /** Folder on the games CDN (e.g. `live/Lumen`); null when it has no build. Absent before marketplace #154. */
+  buildDir?: string | null;
+  /** The build ships a parameter manifest the backend tunes during play. Absent before marketplace #154. */
+  hasParameterManifest?: boolean;
   isActive: boolean;
   isPlayableInPwa: boolean;
   isPubliclyListed: boolean;

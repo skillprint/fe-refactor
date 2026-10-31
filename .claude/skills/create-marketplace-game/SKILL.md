@@ -102,8 +102,19 @@ curl -X POST "https://<host>/games/api/games/" \
   -F "name=Simon Says" \
   -F "short_description=Watch, remember, and repeat the growing color sequence." \
   -F "skills=memory" \
-  -F "is_publicly_listed=true"
+  -F "is_publicly_listed=true" \
+  -F "is_playable_in_pwa=true" \
+  -F "build_dir=live/Simon Says" \
+  -F "has_parameter_manifest=true"
 ```
+
+`build_dir` is what makes the portal play the game: its folder on the games CDN, exactly as in the
+games repo (`live/<GameName>` or `inactive/<GameName>`). The portal plays
+`<CDN>/<build_dir>/static/index.html` and lists only games that have one, so a game registered
+with it needs no portal change or deploy. Send `has_parameter_manifest=true` only when the build
+ships `backend/game-scoring-config.json`; the portal then sends its `sdk_game_parameters` on
+session start. The portal's library also needs `is_playable_in_pwa=true` and `is_active` (see
+Step 7).
 
 (swap `-H "X-Api-Key: <partner_api_key>"` for `-H "Authorization: Token <knox_admin_token>"` to use
 the Knox admin path instead.)
