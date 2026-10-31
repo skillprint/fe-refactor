@@ -947,6 +947,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'treehouse-telegraph':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'boardSize', parameterValue: 9 }, { parameterName: 'clueClarity', parameterValue: 1 }, { parameterName: 'decoyStrength', parameterValue: 0.1 }, { parameterName: 'turnTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'boardSize', parameterValue: 10 }, { parameterName: 'clueClarity', parameterValue: 0.9 }, { parameterName: 'decoyStrength', parameterValue: 0.25 }, { parameterName: 'turnTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'boardSize', parameterValue: 12 }, { parameterName: 'clueClarity', parameterValue: 0.75 }, { parameterName: 'decoyStrength', parameterValue: 0.4 }, { parameterName: 'turnTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'boardSize', parameterValue: 12 }, { parameterName: 'turnTimer', parameterValue: 30 }]; // Brisk
+                case 5: return [{ parameterName: 'boardSize', parameterValue: 16 }, { parameterName: 'clueClarity', parameterValue: 0.45 }, { parameterName: 'decoyStrength', parameterValue: 0.85 }, { parameterName: 'turnTimer', parameterValue: 20 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next board
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next board
+                case 8: return [{ parameterName: 'decoyStrength', parameterValue: 1 }]; // Sneaky decoys
+                case 9: return [{ parameterName: 'boardSize', parameterValue: 16 }, { parameterName: 'clueClarity', parameterValue: 0.3 }, { parameterName: 'decoyStrength', parameterValue: 1 }, { parameterName: 'turnTimer', parameterValue: 10 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

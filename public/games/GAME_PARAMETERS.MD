@@ -1270,6 +1270,26 @@ Keys 1–9: 1 Relax `{cacheCount 3, landmarkChanges 0, delaySeconds 6, digHints 
 
 ---
 
+### Treehouse Telegraph
+
+A cooperative word-association game between two treehouses joined by a tin-can string. On listen boards the AI friend sends one clue word and a number and the player taps the picture-word cards on the clothesline that fit; a dud ends the turn and the hidden thunderstorm card ends the board. On talk boards (every third) the player sees the secret cards and the storm, picks one of three clues, and the friend guesses from a hand-written association table. Parameters control how many cards hang on the line, how obvious the friend's associations are (and how strictly the friend reads the player's clue), how tempting the wrong cards are, a per-turn timer and the next board's rung. Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `boardSize` (Integer, 9–16, default 12): cards on the clotheslines; the secret cards stay at two or three clue groups, so more cards means more duds and decoys. Next board.
+- `clueClarity` (Float, 0.3–1.0, default 0.75): listen boards: how far down each clue's word list the secret cards are drawn (1.0 only the most obvious fits). Talk boards: how strictly the friend reads the player's clue (low values let the friend reach for a looser card). Higher is easier. Listen half next board; talk half at once.
+- `decoyStrength` (Float, 0–1, default 0.4): about 0.6 × this of the duds are near-misses of a live clue; from 0.5 the storm is a near-miss; on talk boards from 0.6 the storm is a word one of the player's candidate clues also fits. Higher is harder. Next board.
+- `turnTimer` (Integer, 0–60, default 0): seconds per turn to pick cards or choose a clue; 0 untimed, 1–7 count as 8; running out passes the turn and uses up a clue. At once (re-timed in proportion).
+- `levelOffset` (Integer, −3–3, default 0): shifts the next board's rung (two clues of two cards → near-miss decoys → clues worth three → three clues → three clues of three stretchier cards). Next board.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "clueClarity", "parameterValue": 0.9 } }
+```
+
+Keys 1–9: 1 Relax `{boardSize 9, clueClarity 1, decoyStrength 0.1, turnTimer 0, levelOffset −1}` · 2 Gentle `{10, 0.9, 0.25, 0}` · 3 Default `{12, 0.75, 0.4, 0, levelOffset 0}` · 4 Brisk `{boardSize 12, turnTimer 30}` · 5 Grit `{16, 0.45, 0.85, 20, levelOffset 1}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Sneaky decoys `{decoyStrength 1}` · 9 Extreme `{16, 0.3, 1, turnTimer 10, levelOffset 3}`.
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

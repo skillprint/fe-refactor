@@ -80,7 +80,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'xenoflora': 'Xenoflora',
     'chronicle': 'Chronicle',
     'glide': 'Glide',
-    'cache': 'Cache'
+    'cache': 'Cache',
+    'treehouse-telegraph': 'Treehouse Telegraph'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

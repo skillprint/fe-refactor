@@ -421,6 +421,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Cache/backend/game-scoring-config.json'),
+  },
+
+  'treehouse-telegraph': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Treehouse Telegraph/backend/game-scoring-config.json'),
   }
 };
 
@@ -1104,6 +1110,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Remembering where things are', 'Using landmarks to find your way', 'Noticing what changed', 'Keeping watch for rivals'],
     instructions: 'Tap the grass to bury each acorn beside something you\'ll remember, then catch falling berries while snow covers the park and some landmarks move. In winter, tap where each acorn lies to dig it up, and dig first where a jay is circling.'
   },
+  'treehouse-telegraph': {
+    name: 'Treehouse Telegraph',
+    description: 'One word down a tin-can string: read your friend\'s clue and pick the cards that fit, then send one back.',
+    image: gameAssetUrl('live/Treehouse%20Telegraph/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Finding the words a clue connects', 'Ruling out near-misses and the storm', 'Choosing a clue a friend will understand', 'Everyday word knowledge'],
+    instructions: 'Your friend sends a clue word and a number; tap the picture cards that fit, then press Done when you\'re unsure. Avoid the thunderstorm card. On talk boards you pick the clue and your friend guesses.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1212,4 +1228,5 @@ export const knownGameSlugs = [
   'chronicle',
   'glide',
   'cache',
+  'treehouse-telegraph',
 ];
