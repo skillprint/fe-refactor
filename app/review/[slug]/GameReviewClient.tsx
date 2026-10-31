@@ -109,7 +109,7 @@ export default function GameReviewClient() {
             <div className="gr-stack">
               <AboutPanel game={state.game} playHref={playHref} />
               <ReviewForm key={state.game.slug} game={state.game} questions={state.questions} token={userToken} onFiled={() => load(true)} />
-              <ReviewsPanel reviews={state.game.reviews} />
+              <ReviewsPanel reviews={state.game.latestReviews} total={state.game.reviews.count} />
             </div>
             <div className="gr-stack">
               <DecisionPanel game={state.game} token={userToken} onDecided={() => load(true)} />
@@ -123,9 +123,6 @@ export default function GameReviewClient() {
     </PortalLayout>
   );
 }
-
-const average = (values: number[]) =>
-  values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
 
 function AboutPanel({ game, playHref }: { game: ReviewGameDetail; playHref: string }) {
   const { reviews } = game;
@@ -166,20 +163,19 @@ function AboutPanel({ game, playHref }: { game: ReviewGameDetail; playHref: stri
         <dd>{game.url ? <a href={game.url} target="_blank" rel="noopener">{game.url}</a> : 'No playable URL on the record'}</dd>
         <dt>Reviews</dt>
         <dd>
-          {reviews.length} ({reviews.filter((r) => r.reviewer.kind === 'human').length} staff,{' '}
-          {reviews.filter((r) => r.reviewer.kind === 'agent').length} agent) · target fit{' '}
-          {formatRating(average(reviews.map((r) => r.targetFitRating)))} · adjustments{' '}
-          {formatRating(average(reviews.map((r) => r.adjustmentFitRating)))}
+          {reviews.count} ({reviews.human} staff, {reviews.agent} agent) · target fit{' '}
+          {formatRating(reviews.avgTargetFit)} · adjustments {formatRating(reviews.avgAdjustmentFit)}
         </dd>
       </dl>
     </section>
   );
 }
 
-function ReviewsPanel({ reviews }: { reviews: GameReview[] }) {
+function ReviewsPanel({ reviews, total }: { reviews: GameReview[]; total: number }) {
   return (
     <section className="sp-card gr-panel" aria-labelledby="gr-reviews-heading" data-review-list>
-      <h2 id="gr-reviews-heading">Reviews ({reviews.length})</h2>
+      <h2 id="gr-reviews-heading">Reviews ({total})</h2>
+      {total > reviews.length && <p className="margin-none font-sm gr-muted">The {reviews.length} newest.</p>}
       {reviews.length === 0 && <p className="margin-none font-sm gr-muted">No reviews yet.</p>}
       {reviews.map((review) => <ReviewCard key={review.id} review={review} />)}
     </section>

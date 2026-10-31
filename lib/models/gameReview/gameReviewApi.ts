@@ -123,8 +123,8 @@ export interface GameReview {
   updatedAt: string;
 }
 
-/** One game. Its `reviews` is the list itself (the latest 50), not the queue's stats. */
-export interface ReviewGameDetail extends Omit<ReviewGameSummary, 'reviews'> {
+/** One game: the queue row (its `reviews` stats included) and everything about it. */
+export interface ReviewGameDetail extends ReviewGameSummary {
   longDescription: string;
   instructions: string;
   isActive: boolean;
@@ -140,7 +140,8 @@ export interface ReviewGameDetail extends Omit<ReviewGameSummary, 'reviews'> {
   } | null;
   decisions: ReviewDecision[];
   recentSessions: ReviewRecentSession[];
-  reviews: GameReview[];
+  /** The 50 newest reviews. */
+  latestReviews: GameReview[];
 }
 
 export interface NewGameReview {
