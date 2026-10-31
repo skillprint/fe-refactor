@@ -11,6 +11,9 @@ set -euo pipefail
 
 sha="${1:?usage: activate.sh <git sha>}"
 : "${PORTAL_BUCKET:?}" "${PORTAL_FUNCTION:?}" "${PORTAL_KVS_ARN:?}"
+# CloudFront and its key-value stores are global, answered from us-east-1;
+# a local profile may name no region at all.
+export AWS_REGION="${AWS_REGION:-us-east-1}"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
