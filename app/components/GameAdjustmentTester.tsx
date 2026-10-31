@@ -902,6 +902,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'chronicle':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'yearHints', parameterValue: 2 }, { parameterName: 'eraSpread', parameterValue: 100 }, { parameterName: 'obscurity', parameterValue: 1 }, { parameterName: 'cardsPerChapter', parameterValue: 6 }, { parameterName: 'placeTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'yearHints', parameterValue: 1 }, { parameterName: 'eraSpread', parameterValue: 50 }, { parameterName: 'obscurity', parameterValue: 1 }, { parameterName: 'cardsPerChapter', parameterValue: 7 }, { parameterName: 'placeTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'yearHints', parameterValue: 0 }, { parameterName: 'eraSpread', parameterValue: 15 }, { parameterName: 'obscurity', parameterValue: 2 }, { parameterName: 'cardsPerChapter', parameterValue: 8 }, { parameterName: 'placeTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'placeTimer', parameterValue: 30 }, { parameterName: 'cardsPerChapter', parameterValue: 9 }]; // Brisk
+                case 5: return [{ parameterName: 'yearHints', parameterValue: 0 }, { parameterName: 'eraSpread', parameterValue: 2 }, { parameterName: 'obscurity', parameterValue: 3 }, { parameterName: 'cardsPerChapter', parameterValue: 11 }, { parameterName: 'placeTimer', parameterValue: 15 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next chapter
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next chapter
+                case 8: return [{ parameterName: 'yearHints', parameterValue: 2 }]; // Decade hints
+                case 9: return [{ parameterName: 'yearHints', parameterValue: 0 }, { parameterName: 'eraSpread', parameterValue: 0 }, { parameterName: 'obscurity', parameterValue: 3 }, { parameterName: 'cardsPerChapter', parameterValue: 12 }, { parameterName: 'placeTimer', parameterValue: 8 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

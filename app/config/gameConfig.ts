@@ -403,6 +403,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Xenoflora/backend/game-scoring-config.json'),
+  },
+
+  'chronicle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Chronicle/backend/game-scoring-config.json'),
   }
 };
 
@@ -1056,6 +1062,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Forming and testing hypotheses', 'Spotting patterns across features', 'Focusing on what matters', 'Predicting from evidence'],
     instructions: 'Pick specimens from the seed tray and plant them in the bed (click, tap or drag), then press Sunrise to see which bloom. When you know the garden\'s rule, press Predict, mark which new specimens will bloom, and name the rule in your journal for a bonus.'
   },
+  'chronicle': {
+    name: 'Chronicle',
+    description: 'Drop history\'s wonders into a pop-up storybook timeline, reasoning from the years on either side.',
+    image: gameAssetUrl('live/Chronicle/cover.jpg'),
+    category: 'Knowledge',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Recalling when things happened', 'Reasoning from neighbouring dates', 'Planning placements on a crowded timeline', 'Curiosity for history and science'],
+    instructions: 'Drag each event card into the gap on the ribbon where it belongs, oldest on the left (or use the arrow keys and Enter). A wrong guess shows the true year and costs one of three bookmarks; hover any pop-up to read its story.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1161,4 +1177,5 @@ export const knownGameSlugs = [
   'hearthlight',
   'jelly-juggle',
   'xenoflora',
+  'chronicle',
 ];

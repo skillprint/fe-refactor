@@ -1196,6 +1196,27 @@ A deduction game in pastel alien gardens: players plant specimens (colour, petal
 
 ---
 
+### Chronicle
+
+A paper-craft pop-up storybook: each chapter is a different book, and the player drops event cards into a ribbon timeline, reasoning from the years printed under the pop-ups either side. A wrong placement turns the card over to its true year, moves it to its place and costs one of three bookmarks. Parameters control how much the book helps with dates, how far apart the dealt events are from their neighbours, how obscure they may be, chapter length, a per-card timer and the next chapter's rung. Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `yearHints` (Integer, 0–2, default 0): 0 none; 1 a century/millennium stamp on the card and round-year marks (centuries, millennia) on the ribbon; 2 early/mid/late century or decade stamps and half-century/decade marks. Applies at once.
+- `eraSpread` (Integer, 0–150, default 15): fewest years between a dealt event and every placed event (relaxed only if the book runs out). Larger is easier. Next card.
+- `obscurity` (Integer, 1–3, default 2): most obscure tier dealt (1 famous … 3 for the curious). Next card.
+- `cardsPerChapter` (Integer, 5–12, default 8): cards per chapter; more cards narrow the gaps. At once.
+- `placeTimer` (Integer, 0–45, default 0): seconds per card, 0 untimed; running out counts as wrong. Next card.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next chapter's rung (more events standing at the start, closer calls). Next chapter.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "yearHints", "parameterValue": 1 } }
+```
+
+Keys 1–9: 1 Relax `{yearHints 2, eraSpread 100, obscurity 1, cardsPerChapter 6, placeTimer 0}` · 2 Gentle `{1, 50, 1, 7, 0}` · 3 Default `{0, 15, 2, 8, 0, levelOffset 0}` · 4 Brisk `{placeTimer 30, cardsPerChapter 9}` · 5 Grit `{0, 2, 3, 11, 15}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Decade hints `{yearHints 2}` · 9 Extreme `{0, 0, 3, 12, placeTimer 8, levelOffset 3}`.
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 
