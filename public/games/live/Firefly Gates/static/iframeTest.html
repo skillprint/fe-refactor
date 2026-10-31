@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Firefly Gates — iframe harness</title></head>
+<body>
+  <iframe id="game" src="index.html" allow="autoplay"></iframe>
+  <aside id="panel"></aside>
+  <script>
+    window.HARNESS = {
+      slug: 'firefly-gates',
+      params: [
+        {name:'runSpeed',default:1},
+        {name:'gateTrickiness',default:0.5},
+        {name:'numberScale',default:1},
+        {name:'beaconStrictness',default:0.9},
+        {name:'hazardDensity',default:1},
+        {name:'levelOffset',default:0},
+      ],
+      presets: {
+        1:{runSpeed:0.7,gateTrickiness:0.2,beaconStrictness:0.7,hazardDensity:0.3},
+        2:{runSpeed:0.85,beaconStrictness:0.8},
+        3:{runSpeed:1,gateTrickiness:0.5,numberScale:1,beaconStrictness:0.9,hazardDensity:1,levelOffset:0},
+        4:{runSpeed:1.3},
+        5:{runSpeed:1.4,gateTrickiness:0.85,beaconStrictness:0.97,hazardDensity:1.5},
+        6:{levelOffset:-2},
+        7:{levelOffset:2},
+        8:{numberScale:2.5},
+        9:{runSpeed:1.8,gateTrickiness:1,numberScale:3,beaconStrictness:1,hazardDensity:2,levelOffset:3},
+      },
+      readState: (w) => ({ ...w.__firefliesState, tuning: JSON.stringify(w.__firefliesTuning) }),
+    };
+  </script>
+  <script src="../../_shared/harness.js"></script>
+</body></html>

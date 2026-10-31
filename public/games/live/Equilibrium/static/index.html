@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Equilibrium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Outfit:wght@400;500;600;700&display=swap">
+<style>
+  /* A white-walled gallery: the 3D view is the page, the HUD is museum print. */
+  :root {
+    --wall: #efe9df;
+    --ink: #1d1b18;
+    --ink-soft: rgba(29, 27, 24, 0.68);
+    --ink-faint: rgba(29, 27, 24, 0.42);
+    --paper: rgba(251, 249, 244, 0.82);
+    --paper-hi: rgba(251, 249, 244, 0.95);
+    --hairline: rgba(29, 27, 24, 0.13);
+    --red: #c8322a;
+    --blue: #1f4fa3;
+    --yellow: #f2b632;
+    --accent: #e8743b;
+    --display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --sans: 'Outfit', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+    color-scheme: light;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; background: var(--wall); color: var(--ink); overflow: hidden; }
+  body { font: 16px/1.45 var(--sans); -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+  button { font: inherit; color: inherit; }
+  kbd { font: 500 10px/1 var(--sans); letter-spacing: 0.04em; padding: 3px 5px; border: 1px solid var(--hairline); border-radius: 4px; color: var(--ink-soft); }
+
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #scene.grab { cursor: grab; }
+  #scene.grabbing { cursor: grabbing; }
+  /* The edges of the room fall into shadow, tinted by the exhibit. */
+  @property --vig { syntax: '<color>'; inherits: true; initial-value: rgba(60, 48, 30, 0.16); }
+  #vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 85% 80% at 50% 42%, transparent 55%, var(--vig) 100%); transition: --vig 1.4s; }
+
+  .paper { background: var(--paper); backdrop-filter: blur(10px) saturate(1.1); -webkit-backdrop-filter: blur(10px) saturate(1.1); border: 1px solid var(--hairline); }
+  .eyebrow { font: 600 11px/1.2 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); margin: 0; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--paper); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); cursor: pointer; font-size: 15px; font-weight: 500; white-space: nowrap; transition: background 0.2s, border-color 0.2s, transform 0.15s, opacity 0.2s; touch-action: manipulation; }
+  .btn:hover { background: var(--paper-hi); border-color: rgba(29, 27, 24, 0.28); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn.primary { background: var(--ink); color: #faf7f0; border-color: var(--ink); padding: 11px 24px; }
+  .btn.primary:hover { background: #34312c; }
+  .btn.release { background: var(--red); color: #fff8f0; border-color: var(--red); }
+  .btn.release:hover:not(:disabled) { background: #b02a23; }
+  .btn.ghost { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; color: var(--ink-soft); }
+  .btn.icon { width: 40px; height: 40px; padding: 0; justify-content: center; }
+  .btn.icon.off { color: var(--ink-faint); text-decoration: line-through; }
+
+  /* Title */
+  #title { position: fixed; z-index: 5; left: max(6vw, calc(18px + var(--safe-l))); top: 50%; transform: translateY(-50%); width: min(460px, calc(100vw - 36px)); transition: opacity 0.6s, transform 0.6s; }
+  #title.leaving { opacity: 0; transform: translateY(-50%) translateX(-24px); }
+  #title h1 { font: 330 clamp(52px, 7.6vw, 108px)/0.92 var(--display); font-variation-settings: 'opsz' 144; letter-spacing: -0.025em; margin: 14px 0 18px; }
+  #title h1 em { font-style: italic; font-weight: 300; color: var(--red); }
+  #title .lede { font: 400 clamp(17px, 1.6vw, 20px)/1.4 var(--display); margin: 0 0 24px; max-width: 30ch; color: var(--ink); }
+  #title .how { list-style: none; padding: 15px 18px; margin: 24px 0 14px; border-radius: 14px; display: grid; gap: 8px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.4; }
+  #title .how b { color: var(--ink); font-weight: 600; }
+  #best { color: var(--ink-faint); }
+
+  /* Play HUD */
+  #hud { position: fixed; z-index: 3; top: 0; left: 0; right: 0; padding: calc(14px + var(--safe-t)) max(16px, calc(14px + var(--safe-r))) 0 max(16px, calc(14px + var(--safe-l))); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; pointer-events: none; }
+  #plate { padding: 9px 14px 10px; border-radius: 12px; max-width: min(360px, 54vw); }
+  #plate h2 { margin: 2px 0 0; font: 420 19px/1.2 var(--display); letter-spacing: -0.005em; }
+  #plate h2 b { font-weight: 560; }
+  #gauges { display: flex; align-items: center; gap: 14px; padding: 8px 14px; border-radius: 12px; }
+  #score { text-align: right; }
+  #score-n { font: 600 22px/1 var(--sans); font-variant-numeric: tabular-nums; }
+  #candle { display: grid; grid-template-columns: auto auto; align-items: end; gap: 7px; }
+  #candle svg { width: 16px; height: 40px; overflow: visible; }
+  #candle-time { font: 500 13px/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--ink-soft); padding-bottom: 2px; }
+  #candle.low #candle-time { color: var(--red); }
+  #flame { transform-origin: 8px 6px; animation: flicker 0.18s infinite alternate; }
+  @keyframes flicker { to { transform: scale(0.92, 1.06) rotate(2deg); } }
+
+  #actions { position: fixed; z-index: 3; left: 50%; bottom: calc(14px + var(--safe-b)); transform: translateX(-50%); display: flex; gap: 8px; align-items: center; }
+  #actions .btn { font-size: 14px; padding: 8px 14px; }
+
+  #note { position: fixed; z-index: 4; left: 50%; top: calc(84px + var(--safe-t)); width: max-content; max-width: min(460px, calc(100vw - 32px)); transform: translate(-50%, -10px); opacity: 0; transition: opacity 0.4s, transform 0.4s; pointer-events: none; padding: 10px 16px 11px; border-radius: 12px; box-sizing: border-box; text-align: center; }
+  #note.show { opacity: 1; transform: translate(-50%, 0); }
+  #note p { margin: 0; font: 420 16px/1.35 var(--display); }
+  #note p b { font-weight: 600; }
+
+  /* How to play: the coach's card, and a ring over what to touch. */
+  #coach { position: fixed; z-index: 4; left: max(18px, calc(14px + var(--safe-l))); top: calc(18px + var(--safe-t)); width: min(340px, 30vw); box-sizing: border-box; padding: 13px 16px 12px; border-radius: 14px; background: var(--paper-hi); box-shadow: 0 12px 34px rgba(60, 48, 30, 0.14); }
+  #coach-text { margin: 6px 0 0; font: 400 16.5px/1.42 var(--display); text-wrap: pretty; }
+  #coach-text b { font-weight: 600; }
+  #coach.praised #coach-text { color: #2f6b45; }
+  #coach-why { margin: 10px 0 0; padding: 8px 11px; border-radius: 10px; border-left: 3px solid var(--accent); background: rgba(232, 116, 59, 0.09); font: 400 15px/1.38 var(--display); text-wrap: pretty; }
+  #coach-why b { font-weight: 600; }
+  #coach .row { margin-top: 10px; justify-content: flex-end; }
+  #coach-skip { font-size: 13.5px; padding: 6px 10px; }
+  #coach-point { position: fixed; z-index: 4; left: 0; top: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; border: 3px solid var(--accent); box-shadow: 0 0 0 7px rgba(232, 116, 59, 0.16); box-sizing: border-box; pointer-events: none; animation: ping 1.3s ease-in-out infinite; }
+  @keyframes ping { 0%, 100% { scale: 0.86; opacity: 1; } 60% { scale: 1.2; opacity: 0.45; } }
+
+  /* After each mobile, and at the end. */
+  .card { position: fixed; z-index: 6; left: 50%; bottom: calc(14px + var(--safe-b)); transform: translate(-50%, 16px); width: min(440px, calc(100vw - 32px)); box-sizing: border-box; padding: 16px 20px 16px; border-radius: 18px; background: var(--paper-hi); opacity: 0; transition: opacity 0.5s, transform 0.5s; box-shadow: 0 14px 40px rgba(60, 48, 30, 0.14); }
+  .card.show { opacity: 1; transform: translate(-50%, 0); }
+  .card h2 { margin: 0; font: 380 26px/1.15 var(--display); letter-spacing: -0.01em; }
+  .card h2 em { color: var(--red); }
+  .card .sub { margin: 3px 0 12px; font: italic 380 15px/1.35 var(--display); color: var(--ink-soft); }
+  .tally { list-style: none; margin: 0 0 12px; padding: 10px 0 0; border-top: 1px solid var(--hairline); display: grid; gap: 4px; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+  .tally li { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-soft); }
+  .tally li b { color: var(--ink); font-weight: 600; }
+  .tally li.total { color: var(--ink); font-weight: 600; padding-top: 4px; border-top: 1px dashed var(--hairline); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+  #veil { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: var(--wall); opacity: 0; pointer-events: none; transition: opacity 0.7s; }
+  #veil.on { opacity: 1; pointer-events: auto; }
+  #veil p { font: italic 300 22px var(--display); color: var(--ink-soft); }
+  #nogl { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: var(--wall); text-align: center; font-size: 18px; }
+
+  @media (max-width: 700px) {
+    #hud { padding-top: calc(10px + var(--safe-t)); gap: 8px; }
+    #plate { padding: 7px 11px 8px; }
+    #plate h2 { font-size: 15.5px; }
+    #gauges { gap: 10px; padding: 6px 10px; }
+    #score-n { font-size: 18px; }
+    #candle svg { height: 32px; }
+    #actions kbd { display: none; }
+    #actions .btn { padding: 8px 12px; font-size: 13.5px; }
+    #note { top: calc(70px + var(--safe-t)); }
+    #coach-text { font-size: 14.5px; }
+    #coach-why { font-size: 13.5px; }
+    #note p { font-size: 14.5px; }
+    #title { top: auto; bottom: calc(18px + var(--safe-b)); transform: none; }
+    #title.leaving { transform: translateX(-24px); }
+    #title h1 { margin: 6px 0 10px; }
+    #title .lede { margin-bottom: 16px; }
+    #title .how { display: none; }
+  }
+  @media (max-width: 700px), (orientation: portrait) {
+    #coach { left: max(10px, var(--safe-l)); right: max(10px, var(--safe-r)); width: auto; top: calc(10px + var(--safe-t)); padding: 10px 13px 9px; }
+    #coach .row { margin-top: 6px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #flame { animation: none; }
+    #coach-point { animation: none; }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/build/three.module.min.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene" aria-label="A hanging mobile of painted weights on steel beams"></canvas>
+<div id="vignette" aria-hidden="true"></div>
+
+<header id="hud" hidden>
+  <div id="plate" class="paper">
+    <p class="eyebrow" id="plate-no">Mobile 1</p>
+    <h2 id="plate-status">Hang every weight</h2>
+  </div>
+  <div id="gauges" class="paper">
+    <div id="candle" title="Candle: time left on this mobile">
+      <svg viewBox="0 0 16 40" aria-hidden="true">
+        <g id="flame"><path d="M8 0 C10.5 4 11 6.5 8 9.5 C5 6.5 5.5 4 8 0Z" fill="#f2b632"/><path d="M8 3.5 C9.2 5.6 9.3 6.8 8 8.4 C6.7 6.8 6.8 5.6 8 3.5Z" fill="#fff4d6"/></g>
+        <line id="wick" x1="8" y1="9.5" x2="8" y2="12" stroke="#1d1b18" stroke-width="1"/>
+        <rect id="wax" x="4" y="12" width="8" height="28" rx="1.5" fill="#fbf9f4" stroke="#1d1b18" stroke-width="1"/>
+      </svg>
+      <span id="candle-time">1:35</span>
+    </div>
+    <div id="score">
+      <p class="eyebrow">Score</p>
+      <div id="score-n">0</div>
+    </div>
+  </div>
+</header>
+
+<div id="note" class="paper" role="status" aria-live="polite"><p id="note-text"></p></div>
+
+<nav id="actions" hidden>
+  <button id="release" class="btn release" type="button" hidden><span>Release</span><kbd>Space</kbd></button>
+  <button id="reset" class="btn" type="button" title="Take the loose weights back to the shelf"><span>Clear</span><kbd>C</kbd></button>
+  <button id="mute" class="btn icon" type="button" aria-label="Sound on" aria-pressed="false">♪</button>
+  <button id="quit" class="btn ghost" type="button" hidden>Finish</button>
+</nav>
+
+<section id="title" hidden>
+  <p class="eyebrow">A mobile, out of balance</p>
+  <h1>Equi&shy;<em>librium</em></h1>
+  <p class="lede">Hang the weights so every arm rests level.</p>
+  <div class="row"><button id="begin" class="btn primary" type="button">Begin</button><button id="howto" class="btn" type="button" hidden>How to play</button></div>
+  <ul class="how paper">
+    <li>Each beam pivots at its middle. <b>Weight × distance</b> must match on both sides.</li>
+    <li><b>Drag</b> a weight from the shelf onto a hook, or tap it, then tap a hook. Tap a hung weight to take it back.</li>
+    <li>A beam hanging from a hook weighs <b>everything below it</b>.</li>
+    <li>Hang every loose weight before the candle burns down.</li>
+  </ul>
+  <p class="eyebrow" id="best"></p>
+</section>
+
+<aside id="coach" class="paper" hidden aria-live="polite">
+  <p class="eyebrow" id="coach-step">How to play</p>
+  <p id="coach-text"></p>
+  <p id="coach-why" hidden></p>
+  <div class="row"><button id="coach-skip" class="btn ghost" type="button">Skip tutorial <kbd>Esc</kbd></button></div>
+</aside>
+<div id="coach-point" hidden aria-hidden="true"></div>
+
+<section id="end" class="card" hidden aria-live="polite">
+  <h2 id="end-head"></h2>
+  <p class="sub" id="end-sub"></p>
+  <ul class="tally" id="end-tally"></ul>
+  <div class="row"><button id="next" class="btn primary" type="button">Next mobile <kbd style="color:#faf7f0;border-color:rgba(250,247,240,.35)">Enter</kbd></button><button id="finish" class="btn ghost" type="button" hidden>Finish</button></div>
+</section>
+
+<section id="summary" class="card" hidden aria-live="polite">
+  <h2>That’s the <em>show</em>.</h2>
+  <p class="sub" id="summary-sub"></p>
+  <ul class="tally" id="summary-tally"></ul>
+  <div class="row"><button id="again" class="btn primary" type="button">Hang another</button></div>
+</section>
+
+<div id="veil" class="on"><p>Hanging the show…</p></div>
+<div id="nogl" hidden><p>This needs WebGL, which this browser isn’t offering. Try a recent Chrome, Safari or Firefox.</p></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -65,6 +65,10 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'trails-webar': 'Trails',
     // Three.js game from game-builder (games/mountain-appreciator).
     'mountain-appreciator': 'Mountain Appreciator',
+    // Three.js math games, each importing skillprint-js-sdk like Mountain Appreciator.
+    'equilibrium': 'Equilibrium',
+    'firefly-gates': 'Firefly Gates',
+    'elixir': 'Elixir',
     // The customer-support simulation (tau2-engine behind supportsim; ?mock=1 plays without it).
     'support-desk': 'Support Desk',
 };

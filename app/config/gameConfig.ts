@@ -344,6 +344,25 @@ export const gameConfigs: Record<string, GameConfig> = {
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Mountain Appreciator/backend/game-scoring-config.json'),
   },
+
+  'equilibrium': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Equilibrium/backend/game-scoring-config.json'),
+  },
+
+  'firefly-gates': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Firefly Gates/backend/game-scoring-config.json'),
+  },
+
+  'elixir': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Elixir/backend/game-scoring-config.json'),
+  },
+
   'support-desk': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -911,6 +930,36 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Emotional Intelligence', 'Theory of Mind', 'Policy Adherence', 'Calibration', 'Task Switching'],
     instructions: 'Read the policy for the ticket, then talk to the customer in the chat. Use the tools on the right to look things up and act on the account; some actions are against policy, however hard the customer pushes. Watch the mood badge: a customer who is angry needs to be heard before they will accept an answer. When you are done, close the ticket and set the slider to how sure you are that it is resolved. You are scored on being right about that, not on being confident. With more than one ticket open, switch between them with the tabs and keep their names and order numbers straight.'
   },
+  'equilibrium': {
+    name: 'Equilibrium',
+    description: 'A Calder mobile, out of balance: hang the weights so every arm rests level',
+    image: gameAssetUrl('live/Equilibrium/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-10 minutes',
+    skills: ['Mental Arithmetic', 'Multiplication', 'Deduction', 'Planning'],
+    instructions: 'Each beam pivots at its middle, so weight × distance must match on both sides, and a beam hanging from a hook weighs everything below it. Drag a weight from the shelf onto a hook, or tap a weight and then a hook; tap a hung weight to take it back. Hang every loose weight before the candle burns down. When the beams are held, press Release (Space) to test your answer.'
+  },
+  'firefly-gates': {
+    name: 'Firefly Gates',
+    description: 'Lead a swarm of fireflies through gates that add, subtract, multiply and divide them, and gather enough light to wake the beacon',
+    image: gameAssetUrl('live/Firefly%20Gates/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Mental Arithmetic', 'Number Sense', 'Processing Speed', 'Quick Decisions'],
+    instructions: 'Steer with the mouse, a finger, or ← → (a tap hops one gate). Fly through the gate in each row that leaves you more fireflies — the bigger number isn\'t always the better sum — and dodge the moths. Bring at least the beacon\'s number to light it.'
+  },
+  'elixir': {
+    name: 'Elixir',
+    description: 'An alchemist\'s recipes in fractions, percents and ratios: pour each layer by eye to a line nobody drew',
+    image: gameAssetUrl('live/Elixir/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Fractions', 'Proportional Reasoning', 'Estimation', 'Timing'],
+    instructions: 'Hold anywhere (or Space) to pour and release to stop; there\'s no draining. Work out where each layer should end, whether ⅜ of the flask, 65 %, 90 of 240 drops or 2 : 3, then press Enter for the next ingredient and to serve. The true lines appear in gold; Perfect is within 1 %.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1006,5 +1055,8 @@ export const knownGameSlugs = [
   'solitaire',
   'order-rush',
   'mountain-appreciator',
+  'equilibrium',
+  'firefly-gates',
+  'elixir',
   'support-desk',
 ];

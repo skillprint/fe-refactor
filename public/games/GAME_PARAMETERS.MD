@@ -881,6 +881,100 @@ The daylight parameters do nothing while the player has ticked "No sunset"; LEVE
 
 ---
 
+### Equilibrium
+Three.js puzzle about balancing a hanging Calder-style mobile (slug `equilibrium`, folder `live/Equilibrium`): weight × distance must match on both sides of every beam, and a hanging beam weighs everything below it. Same skillprint-js-sdk setup as Mountain Appreciator: `static/src/params.js` holds the `ParameterDefinition`s and `backend/export-config.mjs` writes `backend/game-scoring-config.json`. Out-of-range values are clamped, integers rounded; `liveTilt` takes `true`/`false`, `"true"`/`"false"` or `1`/`0`.
+
+**Parameters**
+- `levelOffset` (Integer, −3–3): shifts the rung of the next mobile (more beams, longer reach, more loose weights). Applies when the next mobile is built. Default 0.
+- `maxWeight` (Integer, 6–15): the largest number on a weight, so the size of the products and sums. Applies to the next mobile. Default 9.
+- `hintLevel` (Integer, 0–2): 1 shows each hanging beam's total weight on its wire; 2 also shows weight × distance per arm. Applies at once. Default 0.
+- `liveTilt` (Boolean): true lets beams swing as weights go on; false holds them level until the player presses Release, and a failed release costs 30 points. Applies at once. Default true.
+- `candleScale` (Number, 0.5–2.5): the candle lasts (45 s + 25 s per loose weight) × this. Applies at once; the time left scales in proportion. Default 1.0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "liveTilt",
+  "parameterValue": false
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ liveTilt: true, hintLevel: 2, candleScale: 2.2, maxWeight: 8 }` (Relax)
+- `2`: `{ hintLevel: 1, candleScale: 1.6 }` (Gentle)
+- `3`: `{ levelOffset: 0, maxWeight: 9, hintLevel: 0, liveTilt: true, candleScale: 1.0 }` (Default)
+- `4`: `{ candleScale: 0.75 }` (Brisk)
+- `5`: `{ liveTilt: false, hintLevel: 0, candleScale: 0.7, maxWeight: 12 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next mobile)
+- `7`: `{ levelOffset: 2 }` (Harder next mobile)
+- `8`: `{ maxWeight: 15 }` (Heavier weights)
+- `9`: `{ liveTilt: false, hintLevel: 0, candleScale: 0.5, maxWeight: 15, levelOffset: 3 }` (Extreme)
+
+---
+
+### Firefly Gates
+Three.js arithmetic runner (slug `firefly-gates`, folder `live/Firefly Gates`): a firefly swarm flies through rows of gates that add, subtract, multiply or divide its count, and must reach a beacon's number. Same skillprint-js-sdk setup as Mountain Appreciator (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `runSpeed` (Number, 0.6–1.8): forward speed; about 3.5 s between rows at 1.0. Applies at once. Default 1.0.
+- `gateTrickiness` (Number, 0–1): how close a row's results are, and how often the gate with the bigger-looking number is the worse one (30% of rows at 0, 80% at 1). Applies from the next stage. Default 0.5.
+- `numberScale` (Number, 0.5–3): scales the starting swarm and the band the count is kept in, so the operands grow with it. Applies from the next stage. Default 1.0.
+- `beaconStrictness` (Number, 0.6–1.0): the beacon's number as a share of the best possible finish. Applies from the next stage. Default 0.9.
+- `hazardDensity` (Number, 0–2): moths between the rows (about one per gap at 1.0); 0 clears those ahead. Applies to moths from now on. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next stage (more rows, bigger operands, three gates per row from rung 5, two-step gates from rung 6). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "runSpeed",
+  "parameterValue": 1.3
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ runSpeed: 0.7, gateTrickiness: 0.2, beaconStrictness: 0.7, hazardDensity: 0.3 }` (Relax)
+- `2`: `{ runSpeed: 0.85, beaconStrictness: 0.8 }` (Gentle)
+- `3`: `{ runSpeed: 1.0, gateTrickiness: 0.5, numberScale: 1.0, beaconStrictness: 0.9, hazardDensity: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ runSpeed: 1.3 }` (Faster)
+- `5`: `{ runSpeed: 1.4, gateTrickiness: 0.85, beaconStrictness: 0.97, hazardDensity: 1.5 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next stage)
+- `7`: `{ levelOffset: 2 }` (Harder next stage)
+- `8`: `{ numberScale: 2.5 }` (Bigger numbers)
+- `9`: `{ runSpeed: 1.8, gateTrickiness: 1.0, numberScale: 3.0, beaconStrictness: 1.0, hazardDensity: 2.0, levelOffset: 3 }` (Extreme)
+
+---
+
+### Elixir
+Three.js proportion game (slug `elixir`, folder `live/Elixir`): an alchemist's recipe gives each layer of a potion as a fraction, decimal, percent, ratio or count of drops in a flask of stated capacity, and the player pours each layer by eye into a flask marked only empty and full. Same skillprint-js-sdk setup as Mountain Appreciator (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `pourRate` (Number, 0.4–2.0): how fast the liquid rises while the tap is held; the empty flask fills in 6 s ÷ this. Applies at once, mid-pour too. Default 1.0.
+- `tolerance` (Number, 0.5–2.0): scales the grade bands (Perfect within 1 %, Fine 3 %, Fair 6 % of the flask at 1.0). Applies from the next serve. Default 1.0.
+- `gradations` (Integer, 0–10): faint ticks on the flask at every 1/n (0 none, 4 quarters, 10 tenths). Applies at once. Default 0.
+- `brewTimeScale` (Number, 0.5–2.5): the hourglass lasts (15 s + 9 s per layer) × this; when it runs out the potion is served as it stands. Applies at once; the sand left scales in proportion. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next recipe (one easy fraction → decimals and percents → two and three layers → capacities in drops → ratios → partial ratio fills). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "gradations",
+  "parameterValue": 4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ pourRate: 0.6, tolerance: 1.6, gradations: 4, brewTimeScale: 2.2 }` (Relax)
+- `2`: `{ pourRate: 0.8, tolerance: 1.3, gradations: 2 }` (Gentle)
+- `3`: `{ pourRate: 1.0, tolerance: 1.0, gradations: 0, brewTimeScale: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ brewTimeScale: 0.7, pourRate: 1.3 }` (Brisk)
+- `5`: `{ pourRate: 1.6, tolerance: 0.7, gradations: 0, brewTimeScale: 0.6 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next potion)
+- `7`: `{ levelOffset: 2 }` (Harder next potion)
+- `8`: `{ gradations: 10 }` (Tenths marked)
+- `9`: `{ pourRate: 2.0, tolerance: 0.5, gradations: 0, brewTimeScale: 0.5, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 
