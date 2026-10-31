@@ -311,6 +311,15 @@ export const gameConfigs: Record<string, GameConfig> = {
     }
   },
 
+  'flanker-task': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    customExitButton: {
+      color: 'blue',
+      size: 'md'
+    }
+  },
+
   'reaction-time': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
@@ -1009,6 +1018,15 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Spatial Reasoning', 'Planning', 'Exploration'],
     instructions: 'Move the yellow dot to the green exit with the arrow keys, WASD, swipes, or the on-screen pad. A new maze is generated after each solve.'
   },
+  'flanker-task': {
+    name: 'Arrow Task',
+    description: 'Respond to the middle arrow and ignore the ones around it',
+    category: 'Attention',
+    difficulty: 'Easy',
+    estimatedTime: '3-4 minutes',
+    skills: ['Selective Attention', 'Inhibitory Control', 'Processing Speed'],
+    instructions: 'A row of five arrows appears. Tap the left or right half of the screen to match the direction of the MIDDLE arrow only. 8 practice trials, then 40 more. Be fast and accurate.'
+  },
   'reaction-time': {
     name: 'Reaction Time Tester',
     description: 'Measure and improve your reaction speed to visual stimuli',
@@ -1384,6 +1402,7 @@ export const knownGameSlugs = [
   'simon-says',
   'dual-n-back',
   'stroop-test',
+  'flanker-task',
   'typing-speed',
   'guided-breathing',
   'procedural-maze',
