@@ -15,6 +15,7 @@ import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/a
 import GameAdjustmentBanner from '../../components/GameAdjustmentBanner';
 import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
+import { gameReviewApi } from '@/lib/models/gameReview/gameReviewApi';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
 import { gameBuildUrl, gameParameterManifestUrl, type GameBuildRef } from '@/lib/localGames';
@@ -75,6 +76,11 @@ async function loadGameParameters(manifestUrl?: string): Promise<SdkGameParamete
 export default function GameClient({ slug, autoPlay = false, exitHref = '/games', resultOptions }: GameClientProps) {
     const router = useRouter();
     const { userId, userToken } = useUserSession();
+    // For lookups that start before the token has arrived (resolvePath).
+    const userTokenRef = useRef(userToken);
+    useEffect(() => {
+        userTokenRef.current = userToken;
+    }, [userToken]);
     type SequenceState = 'loading' | 'ready' | 'playing' | 'calculating' | 'review' | 'badge';
     const [sequence, setSequence] = useState<SequenceState>('loading');
     const [isGamePaused, setIsGamePaused] = useState(false);
@@ -269,6 +275,15 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         return () => clearInterval(interval);
     }, [sequence, coachFeatureEnabled, tipsEnabled, gameStartTime, personalStats?.bestScore, requestWhisper]);
 
+    /** The player's token once useUserSession has it, or null if it doesn't come within TOKEN_WAIT_MS. */
+    const waitForUserToken = async (): Promise<string | null> => {
+        const deadline = Date.now() + TOKEN_WAIT_MS;
+        while (!userTokenRef.current && Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        return userTokenRef.current;
+    };
+
     useEffect(() => {
         let isMounted = true;
         setIsLoadingGamePath(true);
@@ -291,6 +306,20 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                     if (detail?.slug) record = detail;
                 } catch {
                     // Unknown to the backend; a local build may still exist.
+                }
+            }
+            if (!record) {
+                // A game in review is unlisted, so the catalog hasn't got it. Staff
+                // play it from the review queue (/review), and the review API has
+                // its record; anyone else gets a 403 here and falls through.
+                const token = await waitForUserToken();
+                if (token) {
+                    try {
+                        const review = await gameReviewApi.game(decodedSlug, token);
+                        record = { slug: review.slug, name: review.name, moods: review.moods, url: review.url };
+                    } catch {
+                        // Not staff, or not a game.
+                    }
                 }
             }
             if (!isMounted) return;
