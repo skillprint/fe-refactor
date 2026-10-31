@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback, CSSProperties } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { mapSlugToGamePath } from '@/lib/localGames';
+import { gameBuildUrl } from '@/lib/localGames';
 import { isGameMessageOrigin } from '@/lib/gameAssets';
 import { SkillprintClient, Mood, Adjustment, SkillScores, MoodScores, epochNow } from '../../lib/skillprintSdk';
 import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
-import { resolveCatalogGame } from '@/lib/gameSlug';
+import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { useTheme } from '../../components/ThemeProvider';
 import { ConsoleIcon } from '@/components/LiveConsole/ConsoleIcon';
@@ -144,7 +144,8 @@ export default function AiGuideClient() {
   // Canonical catalog slug for the selected game; the ref feeds the message handler closure.
   const [serverSlug, setServerSlug] = useState(selectedGame);
   const serverSlugRef = useRef(selectedGame);
-  const gamePath = mapSlugToGamePath(selectedGame);
+  // The game's page comes from its catalog record; the previous game's record doesn't count.
+  const gamePath = gameMetadata && baseSlug(gameMetadata.slug || '') === baseSlug(selectedGame) ? gameBuildUrl(gameMetadata) || '' : '';
 
   const addLog = useCallback((message: string, level: string = 'info') => {
     const date = new Date();
@@ -801,7 +802,7 @@ export default function AiGuideClient() {
                   </div>
 
                   <div className="aa-stage__frame aa-stage__frame--phone">
-                    <iframe ref={iframeRef} onLoad={handleIframeLoad} src={gamePath} title={`${game.name} game`} allowFullScreen allow="autoplay; fullscreen; gamepad" />
+                    {gamePath && <iframe ref={iframeRef} onLoad={handleIframeLoad} src={gamePath} title={`${game.name} game`} allowFullScreen allow="autoplay; fullscreen; gamepad" />}
                     {isSessionEnded && (
                       <div className="aa-stage__veil" data-state={isSessionClosedOnBackend ? 'closed' : 'closing'}>
                         <div className="aa-stage__ready">

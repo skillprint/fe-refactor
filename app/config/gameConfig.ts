@@ -5,8 +5,6 @@ import { gameAssetUrl } from '@/lib/gameAssets';
 export interface GameConfig {
   exitButtonPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   hideBottomTabs?: boolean;
-  /** Static JSON whose `sdk_game_parameters` are sent on session start so the backend can auto-provision its GameScoringConfig. */
-  parameterManifest?: string;
   customExitButton?: {
     icon?: string;
     color?: 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'gray';
@@ -54,12 +52,10 @@ export const gameConfigs: Record<string, GameConfig> = {
   'box-tower': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Box Tower/backend/game-scoring-config.json'),
   },
   'brick-out': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Brick Out/backend/game-scoring-config.json'),
   },
   'bubble-spirit': {
     exitButtonPosition: 'top-right',
@@ -73,7 +69,6 @@ export const gameConfigs: Record<string, GameConfig> = {
   'change-word': {
     exitButtonPosition: 'bottom-left',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Change Word/backend/game-scoring-config.json'),
     customExitButton: {
       color: 'green',
       size: 'sm'
@@ -119,13 +114,11 @@ export const gameConfigs: Record<string, GameConfig> = {
   'gummy-blocks': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Gummy Blocks/backend/game-scoring-config.json'),
   },
 
   'trails-webar': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Trails/backend/game-scoring-config.json'),
   },
   'hextris': {
     exitButtonPosition: 'bottom-left',
@@ -166,7 +159,6 @@ export const gameConfigs: Record<string, GameConfig> = {
   'match-doodle': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Match Doodle/backend/game-scoring-config.json'),
   },
 
   'mine-rusher': {
@@ -181,7 +173,6 @@ export const gameConfigs: Record<string, GameConfig> = {
   'photo-hunt': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Photo Hunt/backend/game-scoring-config.json'),
   },
 
   'snake-attack': {
@@ -250,7 +241,6 @@ export const gameConfigs: Record<string, GameConfig> = {
   'dungeon-runner': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Dungeon Runner/backend/game-scoring-config.json'),
     customExitButton: {
       color: 'red',
       size: 'md'
@@ -332,7 +322,6 @@ export const gameConfigs: Record<string, GameConfig> = {
   'order-rush': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Order Rush/backend/game-scoring-config.json'),
     customExitButton: {
       color: 'purple',
       size: 'md'
@@ -342,157 +331,131 @@ export const gameConfigs: Record<string, GameConfig> = {
   'mountain-appreciator': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Mountain Appreciator/backend/game-scoring-config.json'),
   },
 
   'equilibrium': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Equilibrium/backend/game-scoring-config.json'),
   },
 
   'firefly-gates': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Firefly Gates/backend/game-scoring-config.json'),
   },
 
   'elixir': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Elixir/backend/game-scoring-config.json'),
   },
 
   'lumen': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Lumen/backend/game-scoring-config.json'),
   },
 
   'flockwork': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Flockwork/backend/game-scoring-config.json'),
   },
 
   'broadsheet': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Broadsheet/backend/game-scoring-config.json'),
   },
 
   'wayfinder': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Wayfinder/backend/game-scoring-config.json'),
   },
 
   'hearthlight': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Hearthlight/backend/game-scoring-config.json'),
   },
 
   'jelly-juggle': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Jelly Juggle/backend/game-scoring-config.json'),
   },
 
   'xenoflora': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Xenoflora/backend/game-scoring-config.json'),
   },
 
   'chronicle': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Chronicle/backend/game-scoring-config.json'),
   },
 
   'glide': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Glide/backend/game-scoring-config.json'),
   },
 
   'cache': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Cache/backend/game-scoring-config.json'),
   },
 
   'treehouse-telegraph': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Treehouse Telegraph/backend/game-scoring-config.json'),
   },
 
   'viewpoints': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Viewpoints/backend/game-scoring-config.json'),
   },
 
   'bandstand': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Bandstand/backend/game-scoring-config.json'),
   },
 
   'switchyard': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Switchyard/backend/game-scoring-config.json'),
   },
 
   'kind-words-cafe': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Kind Words Cafe/backend/game-scoring-config.json'),
   },
 
   'blockwright': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Blockwright/backend/game-scoring-config.json'),
   },
 
   'tidepool': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Tidepool/backend/game-scoring-config.json'),
   },
 
   'lookout': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Lookout/backend/game-scoring-config.json'),
   },
 
   'gearworks': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Gearworks/backend/game-scoring-config.json'),
   },
 
   'market-day': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Market Day/backend/game-scoring-config.json'),
   },
 
   'waggle': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Waggle/backend/game-scoring-config.json'),
   },
 
   'rootwords': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
-    parameterManifest: gameAssetUrl('live/Rootwords/backend/game-scoring-config.json'),
   }
 };
 
