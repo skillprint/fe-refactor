@@ -447,7 +447,7 @@ export const gameConfigs: Record<string, GameConfig> = {
     parameterManifest: gameAssetUrl('live/Switchyard/backend/game-scoring-config.json'),
   },
 
-  'kind-words': {
+  'kind-words-cafe': {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Kind Words Cafe/backend/game-scoring-config.json'),
@@ -1174,7 +1174,7 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Switching between rules fast', 'Planning routes ahead', 'Timing each switch', 'Reading signs under pressure'],
     instructions: 'Tap a switch (or press A S D F G) to flip it and send each train to the siding the sign asks for: by colour, by cargo, by length or reverse. Watch for the warning when the rule is about to change, and don\'t flip a switch while a train is on it.'
   },
-  'kind-words': {
+  'kind-words-cafe': {
     name: 'Kind Words Café',
     description: 'Run a riverside café at dusk: read each customer\'s day and serve the kind words and drink they need.',
     image: gameAssetUrl('live/Kind%20Words%20Cafe/cover.jpg'),
@@ -1296,5 +1296,5 @@ export const knownGameSlugs = [
   'viewpoints',
   'bandstand',
   'switchyard',
-  'kind-words',
+  'kind-words-cafe',
 ];

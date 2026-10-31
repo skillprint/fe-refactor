@@ -1007,7 +1007,7 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
-        case 'kind-words':
+        case 'kind-words-cafe':
             // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
             switch (keyNumber) {
                 case 1: return [{ parameterName: 'tileChoices', parameterValue: 2 }, { parameterName: 'nuance', parameterValue: 0 }, { parameterName: 'customerPace', parameterValue: 0.6 }, { parameterName: 'hintLevel', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
