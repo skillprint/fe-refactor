@@ -361,6 +361,138 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Elixir/backend/game-scoring-config.json'),
+  },
+
+  'lumen': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Lumen/backend/game-scoring-config.json'),
+  },
+
+  'flockwork': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Flockwork/backend/game-scoring-config.json'),
+  },
+
+  'broadsheet': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Broadsheet/backend/game-scoring-config.json'),
+  },
+
+  'wayfinder': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Wayfinder/backend/game-scoring-config.json'),
+  },
+
+  'hearthlight': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Hearthlight/backend/game-scoring-config.json'),
+  },
+
+  'jelly-juggle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Jelly Juggle/backend/game-scoring-config.json'),
+  },
+
+  'xenoflora': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Xenoflora/backend/game-scoring-config.json'),
+  },
+
+  'chronicle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Chronicle/backend/game-scoring-config.json'),
+  },
+
+  'glide': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Glide/backend/game-scoring-config.json'),
+  },
+
+  'cache': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Cache/backend/game-scoring-config.json'),
+  },
+
+  'treehouse-telegraph': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Treehouse Telegraph/backend/game-scoring-config.json'),
+  },
+
+  'viewpoints': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Viewpoints/backend/game-scoring-config.json'),
+  },
+
+  'bandstand': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Bandstand/backend/game-scoring-config.json'),
+  },
+
+  'switchyard': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Switchyard/backend/game-scoring-config.json'),
+  },
+
+  'kind-words-cafe': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Kind Words Cafe/backend/game-scoring-config.json'),
+  },
+
+  'blockwright': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Blockwright/backend/game-scoring-config.json'),
+  },
+
+  'tidepool': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Tidepool/backend/game-scoring-config.json'),
+  },
+
+  'lookout': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Lookout/backend/game-scoring-config.json'),
+  },
+
+  'gearworks': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Gearworks/backend/game-scoring-config.json'),
+  },
+
+  'market-day': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Market Day/backend/game-scoring-config.json'),
+  },
+
+  'waggle': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Waggle/backend/game-scoring-config.json'),
+  },
+
+  'rootwords': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Rootwords/backend/game-scoring-config.json'),
   }
 };
 
@@ -944,6 +1076,226 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Fractions', 'Proportional Reasoning', 'Estimation', 'Timing'],
     instructions: 'Hold anywhere (or Space) to pour and release to stop; there\'s no draining. Work out where each layer should end, whether ⅜ of the flask, 65 %, 90 of 240 drops or 2 : 3, then press Enter for the next ingredient and to serve. The true lines appear in gold; Perfect is within 1 %.'
   },
+  'lumen': {
+    name: 'Lumen',
+    description: 'Route and mix sunlight with mirrors and prisms to wake every crystal and light a stained-glass window.',
+    image: gameAssetUrl('live/Lumen/cover.jpg'),
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '3-10 minutes',
+    skills: ['Picturing light paths', 'Colour mixing logic', 'Spatial routing', 'Elegant solutions'],
+    instructions: 'Place mirrors, prisms, filters, splitters and combiners from the tray onto the floor, and click (or scroll, or R) to turn them 45°. Route and mix the light until every crystal glows its colour (shown by its glyph), then seal the window; spare pieces left unused earn Elegance.'
+  },
+  'flockwork': {
+    name: 'Flockwork',
+    description: 'Lead three sheepdogs: switch dogs, whistle commands and pen the flock before sundown.',
+    image: gameAssetUrl('live/Flockwork/cover.jpg'),
+    category: 'Strategy',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Juggling several jobs at once', 'Planning the order of moves', 'Reading space and angles', 'Working as a team'],
+    instructions: 'Pick a dog (its board, the dog, or Tab/Q/E), then click the sheep to fetch them, the grass to send it, or the gate to hold it open. Steer with A come-bye, D away, W walk up and S lie down. One dog holds the gate while the others drive: pen the number on the slate before sundown.'
+  },
+  'broadsheet': {
+    name: 'Broadsheet',
+    description: 'Spell words from a case of letterpress type and print each client\'s poster before the press run ends.',
+    image: gameAssetUrl('live/Broadsheet/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Word finding', 'Spotting letter patterns', 'Vocabulary', 'Rhyme and theme recall'],
+    instructions: 'Drag across touching blocks (diagonals too), tap them, or type a word, then release or press Enter to set it. Fill every line on the client\'s order slip before the press run\'s clock or paper runs out; any other real word still prints and scores.'
+  },
+  'wayfinder': {
+    name: 'Wayfinder',
+    description: 'Spin a watercolour paper globe, pin places from clues and fill a travel journal with passport stamps.',
+    image: gameAssetUrl('live/Wayfinder/cover.jpg'),
+    category: 'Geography',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Geographic knowledge', 'Mental mapping', 'Spatial reasoning', 'Reading riddles and clues'],
+    instructions: 'Drag to spin the globe, scroll or pinch to zoom, tap to drop a pin, then Confirm (Enter). Land close to the true spot for points and a passport stamp; each journey is 5 to 7 places on a theme.'
+  },
+  'hearthlight': {
+    name: 'Hearthlight',
+    description: 'Watch a felt village\'s windows at dusk, then bring each neighbour the comfort they need, from memory.',
+    image: gameAssetUrl('live/Hearthlight/cover.jpg'),
+    category: 'Memory',
+    difficulty: 'Easy',
+    estimatedTime: '4-10 minutes',
+    skills: ['Remembering who lives where', 'Reading feelings from faces', 'Keeping track of changes', 'Finding your way around'],
+    instructions: 'At dusk, watch each window: who is there and how they feel (notes on doors change what they need). At night, tap a house (or use arrow keys) to pull your sled there, then pick the right comfort from your basket (tap it or press its letter). Peek (Space) lifts a curtain, at half points.'
+  },
+  'jelly-juggle': {
+    name: 'Jelly Juggle',
+    description: 'Bounce wobbly jellies off a trampoline into matching hoops. Let go just as one lands: Super Boing!',
+    image: gameAssetUrl('live/Jelly%20Juggle/cover.jpg'),
+    category: 'Action',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Quick, accurate movement', 'Split-second timing', 'Tracking many things at once', 'Aiming under pressure'],
+    instructions: 'Move the trampoline with the mouse, a drag or WASD to catch falling jellies, and bounce them into the hoop with the same shape. Hold Space, the mouse button or BOING to crouch and let go just as a jelly lands for a Super Boing. Don\'t let them splat!'
+  },
+  'xenoflora': {
+    name: 'Xenoflora',
+    description: 'Plant alien specimens, watch which bloom at sunrise, and crack each garden\'s hidden rule.',
+    image: gameAssetUrl('live/Xenoflora/cover.jpg'),
+    category: 'Logic',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Forming and testing hypotheses', 'Spotting patterns across features', 'Focusing on what matters', 'Predicting from evidence'],
+    instructions: 'Pick specimens from the seed tray and plant them in the bed (click, tap or drag), then press Sunrise to see which bloom. When you know the garden\'s rule, press Predict, mark which new specimens will bloom, and name the rule in your journal for a bonus.'
+  },
+  'chronicle': {
+    name: 'Chronicle',
+    description: 'Drop history\'s wonders into a pop-up storybook timeline, reasoning from the years on either side.',
+    image: gameAssetUrl('live/Chronicle/cover.jpg'),
+    category: 'Knowledge',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Recalling when things happened', 'Reasoning from neighbouring dates', 'Planning placements on a crowded timeline', 'Curiosity for history and science'],
+    instructions: 'Drag each event card into the gap on the ribbon where it belongs, oldest on the left (or use the arrow keys and Enter). A wrong guess shows the true year and costs one of three bookmarks; hover any pop-up to read its story.'
+  },
+  'glide': {
+    name: 'Glide',
+    description: 'Fly in a migrating V of paper geese: draft, take your turn at the point, arrive together.',
+    image: gameAssetUrl('live/Glide/cover.jpg'),
+    category: 'Action',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Steering under gusts', 'Judging space in a formation', 'Timing your dodges', 'Leading a team'],
+    instructions: 'Steer your red goose with the mouse, a finger, or WASD/arrows. Ride the shimmering upwash behind a flockmate\'s wingtip to rest; when the lead calls "Your turn!", fly to the point and steer the whole V clear of storms, power lines, wind shear and hawks.'
+  },
+  'cache': {
+    name: 'Cache',
+    description: 'Bury acorns in an autumn park, let winter come, then dig them up from memory before the jays do.',
+    image: gameAssetUrl('live/Cache/cover.jpg'),
+    category: 'Memory',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Remembering where things are', 'Using landmarks to find your way', 'Noticing what changed', 'Keeping watch for rivals'],
+    instructions: 'Tap the grass to bury each acorn beside something you\'ll remember, then catch falling berries while snow covers the park and some landmarks move. In winter, tap where each acorn lies to dig it up, and dig first where a jay is circling.'
+  },
+  'treehouse-telegraph': {
+    name: 'Treehouse Telegraph',
+    description: 'One word down a tin-can string: read your friend\'s clue and pick the cards that fit, then send one back.',
+    image: gameAssetUrl('live/Treehouse%20Telegraph/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Finding the words a clue connects', 'Ruling out near-misses and the storm', 'Choosing a clue a friend will understand', 'Everyday word knowledge'],
+    instructions: 'Your friend sends a clue word and a number; tap the picture cards that fit, then press Done when you\'re unsure. Avoid the thunderstorm card. On talk boards you pick the clue and your friend guesses.'
+  },
+  'viewpoints': {
+    name: 'Viewpoints',
+    description: 'Watch a dollhouse story, then answer from inside the dolls\' heads: who saw what, and where will they look?',
+    image: gameAssetUrl('live/Viewpoints/cover.jpg'),
+    category: 'Logic',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Seeing through others\' eyes', 'Tracking who saw what', 'Reasoning about beliefs', 'Watching closely'],
+    instructions: 'Watch the story as dolls come and go and the cat moves things between containers. Then tap the place or the doll that answers each question (arrows + Enter work too); R watches the story again.'
+  },
+  'bandstand': {
+    name: 'Bandstand',
+    description: 'Sit in with a 1930s cartoon band: answer each bandmate\'s call from memory, then keep the groove.',
+    image: gameAssetUrl('live/Bandstand/cover.jpg'),
+    category: 'Music',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Remembering melodies', 'Keeping the beat', 'Quick reactions', 'Playing with a band'],
+    instructions: 'Play the xylophone with D F J K, the arrow keys, or the four pads. Listen to a bandmate\'s call, play it back from memory in the same rhythm, then hit each bouncing note as it lands while someone solos.'
+  },
+  'switchyard': {
+    name: 'Switchyard',
+    description: 'Throw the points to route toy trains to their sidings, while the station-master keeps changing the rule.',
+    image: gameAssetUrl('live/Switchyard/cover.jpg'),
+    category: 'Puzzle',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Switching between rules fast', 'Planning routes ahead', 'Timing each switch', 'Reading signs under pressure'],
+    instructions: 'Tap a switch (or press A S D F G) to flip it and send each train to the siding the sign asks for: by colour, by cargo, by length or reverse. Watch for the warning when the rule is about to change, and don\'t flip a switch while a train is on it.'
+  },
+  'kind-words-cafe': {
+    name: 'Kind Words Café',
+    description: 'Run a riverside café at dusk: read each customer\'s day and serve the kind words and drink they need.',
+    image: gameAssetUrl('live/Kind%20Words%20Cafe/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Easy',
+    estimatedTime: '3-8 minutes',
+    skills: ['Reading how someone feels', 'Choosing the word with the right shade', 'Matching tone to the moment', 'Knowing what comforts and what celebrates'],
+    instructions: 'Read the customer\'s note, then tap one tile in each row to build your reply: an opener, the feeling word, a closer and a drink that suit their day. Press Serve (or Enter) before their patience runs out; arrow keys and Space work too, P pauses.'
+  },
+  'blockwright': {
+    name: 'Blockwright',
+    description: 'Build voxel houses to a brief of numbers: counts, areas, volumes, perimeters and fractions.',
+    image: gameAssetUrl('live/Blockwright/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Multiplying and dividing', 'Volume and perimeter', 'Fractions of a whole', 'Building in 3D'],
+    instructions: 'Tap the plot or a block\'s face to build (drag for a row), with Paint and Remove tools, Q / E to turn and Enter to inspect. Meet every number in the client\'s brief with any design you like; fewer moves and symmetry earn bonuses.'
+  },
+  'tidepool': {
+    name: 'Tidepool',
+    description: 'The tide is going out: find the creatures it stranded in a rock pool and carry each gently back to the sea.',
+    image: gameAssetUrl('live/Tidepool/cover.jpg'),
+    category: 'Attention',
+    difficulty: 'Easy',
+    estimatedTime: '3-8 minutes',
+    skills: ['Spotting what\'s camouflaged', 'Scanning a scene quickly', 'Steady, gentle hands', 'Tracking where things go'],
+    instructions: 'Tap a creature hiding in the rock pool to spot it, then hold and drag it slowly over the rocks into the open sea; rushing frightens it. Rescue everyone before the tide drains the pool, and don\'t be fooled by pebbles and shells.'
+  },
+  'lookout': {
+    name: 'Lookout',
+    description: 'Watch three valleys from a fire tower: radio crews, guide lost hikers and steer rafts as the rules change.',
+    image: gameAssetUrl('live/Lookout/cover.jpg'),
+    category: 'Attention',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Switching between tasks', 'Keeping watch on many things', 'Reading cues fast', 'Following changing rules'],
+    instructions: 'Turn the tower with Q/E (arrows, swipe or the valley tabs) and answer with A/S/D or the three buttons. Each valley has its own protocol card: radio the right crew for the smoke\'s zone, answer a hiker\'s flash code, call the raft\'s clear channel. Watch the tabs for calls elsewhere and for NEW CARD when dispatch changes a rule.'
+  },
+  'gearworks': {
+    name: 'Gearworks',
+    description: 'Set gears on a watchmaker\'s plate so the moon dial turns at the asked ratio, and wake an automaton.',
+    image: gameAssetUrl('live/Gearworks/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Ratios and fractions', 'Visualizing gear trains', 'Planning with few parts', 'Direction parity'],
+    instructions: 'Tap gears in the tray to build a train from the sun dial; tap a gear on the plate to lift it off. Make the moon dial turn at the commission\'s ratio and direction, then press Engage (Space). Double gears multiply ratios; every mesh reverses direction.'
+  },
+  'market-day': {
+    name: 'Market Day',
+    description: 'Run a market stall with a partner: total the baskets, mind the deal of the day, count out the change.',
+    image: gameAssetUrl('live/Market%20Day/cover.jpg'),
+    category: 'Math',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Mental arithmetic', 'Applying deals and discounts', 'Making change', 'Juggling a busy queue'],
+    instructions: 'Total each shopper\'s basket, apply the deal of the day if it covers their items, and tap coins and notes from the cash tin (A–K keys) to give exact change, then Hand over (Enter). When your partner calls, check her sum with Y or N; pass a shopper to her with X when the queue grows.'
+  },
+  'waggle': {
+    name: 'Waggle',
+    description: 'Read a honeybee\'s waggle dance, fly out to find the flowers, then dance the way home for the hive.',
+    image: gameAssetUrl('live/Waggle/cover.jpg'),
+    category: 'Memory',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Remembering several directions at once', 'Turning angles into places', 'Allowing for a moving sun', 'Communicating a route'],
+    instructions: 'Watch your sisters dance: the waggle run\'s angle from straight up is the bearing clockwise from the sun, and each waggle is 50 m. Press Fly out, tap the flower patches they danced, then aim your own run (drag or arrow keys) and hold Hold to waggle (or Space) for the right count to dance it home.'
+  },
+  'rootwords': {
+    name: 'Rootwords',
+    description: 'Graft Greek and Latin roots into words on an engraved tree, decode strange words and coin new ones.',
+    image: gameAssetUrl('live/Rootwords/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Building words from roots', 'Word knowledge', 'Reading meaning from parts', 'Spotting shared roots'],
+    instructions: 'Tap the root buds on the tree in order to graft the word for a definition, pick what an unfamiliar word means from its roots (A-D), and invent new words from roots with the right meanings. Type a root\'s letters and press Enter to graft from the keyboard; ? gives a hint.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1042,4 +1394,26 @@ export const knownGameSlugs = [
   'equilibrium',
   'firefly-gates',
   'elixir',
+  'lumen',
+  'flockwork',
+  'broadsheet',
+  'wayfinder',
+  'hearthlight',
+  'jelly-juggle',
+  'xenoflora',
+  'chronicle',
+  'glide',
+  'cache',
+  'treehouse-telegraph',
+  'viewpoints',
+  'bandstand',
+  'switchyard',
+  'kind-words-cafe',
+  'blockwright',
+  'tidepool',
+  'lookout',
+  'gearworks',
+  'market-day',
+  'waggle',
+  'rootwords',
 ];

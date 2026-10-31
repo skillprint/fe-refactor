@@ -24,6 +24,12 @@ import { GameRail } from '@/components/GameRail';
 import { GamesFilter, SkillOption } from '@/components/GamesFilter';
 import { useRecommendedGames } from '../hooks/useRecommendedGames';
 
+// A catalogue record's tile art: its screenshot, then its uploaded thumbnail,
+// then the cover this frontend ships for it, then the generic art.
+function tileImage(game: any): string {
+  return game.screenshot || game.thumbnail || game.image || getGameDetails(game.slug)?.image || '/assets/images/games/game-arcade-machine.svg';
+}
+
 // The list response has no games, so each tile reads its playbook's detail for
 // the thumbnail: the next game in sequence, as the playbook page picks it.
 function PlaybookRailTile({ playbook }: { playbook: PlaybookSummary }) {
@@ -167,7 +173,7 @@ function GamesPageContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description}
-                    image={game.screenshot || game.image || '/assets/images/games/game-arcade-machine.svg'}
+                    image={tileImage(game)}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}
@@ -272,7 +278,7 @@ function GamesPageContent() {
                     id={game.slug}
                     title={game.name}
                     description={game.description || ''}
-                    image={game.screenshot || game.image || '/assets/images/games/game-arcade-machine.svg'}
+                    image={tileImage(game)}
                     url={`/game/${game.slug}`}
                     skills={game.skills ? game.skills.map((s: string | any) => ({ id: s.slug || s.id || s.name || String(s), name: s.name || String(s), dimension: 'cognition' as const })) : []}
                     tone={(["pink", "mint", "green", "blue", "yellow", "purple"] as const)[i % 6]}

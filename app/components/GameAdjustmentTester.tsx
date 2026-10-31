@@ -797,6 +797,336 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'lumen':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'pieceBudget', parameterValue: 3 }, { parameterName: 'colourComplexity', parameterValue: 0 }, { parameterName: 'beamPreview', parameterValue: 2 }, { parameterName: 'windowTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'pieceBudget', parameterValue: 2 }, { parameterName: 'colourComplexity', parameterValue: 1 }, { parameterName: 'beamPreview', parameterValue: 2 }, { parameterName: 'windowTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'pieceBudget', parameterValue: 1 }, { parameterName: 'colourComplexity', parameterValue: 1 }, { parameterName: 'beamPreview', parameterValue: 1 }, { parameterName: 'windowTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'pieceBudget', parameterValue: 1 }, { parameterName: 'beamPreview', parameterValue: 1 }, { parameterName: 'windowTimer', parameterValue: 150 }]; // Brisk
+                case 5: return [{ parameterName: 'pieceBudget', parameterValue: 0 }, { parameterName: 'colourComplexity', parameterValue: 2 }, { parameterName: 'beamPreview', parameterValue: 0 }, { parameterName: 'windowTimer', parameterValue: 75 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next window
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next window
+                case 8: return [{ parameterName: 'pieceBudget', parameterValue: 4 }]; // Many spares
+                case 9: return [{ parameterName: 'pieceBudget', parameterValue: 0 }, { parameterName: 'colourComplexity', parameterValue: 2 }, { parameterName: 'beamPreview', parameterValue: 0 }, { parameterName: 'windowTimer', parameterValue: 45 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'flockwork':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'flightiness', parameterValue: 0.65 }, { parameterName: 'dogAutonomy', parameterValue: 0.85 }, { parameterName: 'flockSize', parameterValue: 9 }, { parameterName: 'dayLength', parameterValue: 1.8 }]; // Relax
+                case 2: return [{ parameterName: 'flightiness', parameterValue: 0.8 }, { parameterName: 'dogAutonomy', parameterValue: 0.7 }, { parameterName: 'dayLength', parameterValue: 1.3 }]; // Gentle
+                case 3: return [{ parameterName: 'flightiness', parameterValue: 1 }, { parameterName: 'dogAutonomy', parameterValue: 0.5 }, { parameterName: 'flockSize', parameterValue: 12 }, { parameterName: 'dayLength', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'dayLength', parameterValue: 0.75 }, { parameterName: 'flockSize', parameterValue: 16 }]; // Brisk
+                case 5: return [{ parameterName: 'flightiness', parameterValue: 1.5 }, { parameterName: 'dogAutonomy', parameterValue: 0.1 }, { parameterName: 'flockSize', parameterValue: 18 }, { parameterName: 'dayLength', parameterValue: 0.7 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next field
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next field
+                case 8: return [{ parameterName: 'dogAutonomy', parameterValue: 1 }]; // Dogs do it all
+                case 9: return [{ parameterName: 'flightiness', parameterValue: 1.8 }, { parameterName: 'dogAutonomy', parameterValue: 0 }, { parameterName: 'flockSize', parameterValue: 30 }, { parameterName: 'dayLength', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'broadsheet':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'pressTime', parameterValue: 1.8 }, { parameterName: 'vowelShare', parameterValue: 0.44 }, { parameterName: 'minWordLength', parameterValue: 3 }, { parameterName: 'hintLevel', parameterValue: 2 }]; // Relax
+                case 2: return [{ parameterName: 'pressTime', parameterValue: 1.3 }, { parameterName: 'vowelShare', parameterValue: 0.41 }, { parameterName: 'hintLevel', parameterValue: 1 }]; // Gentle
+                case 3: return [{ parameterName: 'pressTime', parameterValue: 1 }, { parameterName: 'vowelShare', parameterValue: 0.38 }, { parameterName: 'minWordLength', parameterValue: 3 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'pressTime', parameterValue: 0.75 }, { parameterName: 'minWordLength', parameterValue: 4 }]; // Brisk
+                case 5: return [{ parameterName: 'pressTime', parameterValue: 0.65 }, { parameterName: 'vowelShare', parameterValue: 0.31 }, { parameterName: 'minWordLength', parameterValue: 4 }, { parameterName: 'hintLevel', parameterValue: 0 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next commission
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next commission
+                case 8: return [{ parameterName: 'minWordLength', parameterValue: 5 }]; // Five-letter press
+                case 9: return [{ parameterName: 'pressTime', parameterValue: 0.5 }, { parameterName: 'vowelShare', parameterValue: 0.28 }, { parameterName: 'minWordLength', parameterValue: 5 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'wayfinder':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'labelDensity', parameterValue: 3 }, { parameterName: 'clueClarity', parameterValue: 2 }, { parameterName: 'scoreRadiusKm', parameterValue: 1000 }, { parameterName: 'clueTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'labelDensity', parameterValue: 2 }, { parameterName: 'clueClarity', parameterValue: 1 }, { parameterName: 'scoreRadiusKm', parameterValue: 750 }]; // Gentle
+                case 3: return [{ parameterName: 'labelDensity', parameterValue: 1 }, { parameterName: 'clueClarity', parameterValue: 1 }, { parameterName: 'scoreRadiusKm', parameterValue: 500 }, { parameterName: 'clueTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'clueTimer', parameterValue: 30 }, { parameterName: 'scoreRadiusKm', parameterValue: 400 }]; // Brisk
+                case 5: return [{ parameterName: 'labelDensity', parameterValue: 0 }, { parameterName: 'clueClarity', parameterValue: 0 }, { parameterName: 'scoreRadiusKm', parameterValue: 250 }, { parameterName: 'clueTimer', parameterValue: 20 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next journey
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next journey
+                case 8: return [{ parameterName: 'clueClarity', parameterValue: 0 }]; // Riddles only
+                case 9: return [{ parameterName: 'labelDensity', parameterValue: 0 }, { parameterName: 'clueClarity', parameterValue: 0 }, { parameterName: 'scoreRadiusKm', parameterValue: 150 }, { parameterName: 'clueTimer', parameterValue: 12 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'hearthlight':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'showTime', parameterValue: 3.6 }, { parameterName: 'feelingClarity', parameterValue: 2 }, { parameterName: 'peeks', parameterValue: 3 }, { parameterName: 'nightTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'showTime', parameterValue: 3 }, { parameterName: 'feelingClarity', parameterValue: 2 }, { parameterName: 'peeks', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'showTime', parameterValue: 2.5 }, { parameterName: 'feelingClarity', parameterValue: 1 }, { parameterName: 'peeks', parameterValue: 1 }, { parameterName: 'nightTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'showTime', parameterValue: 1.8 }, { parameterName: 'nightTimer', parameterValue: 9 }]; // Brisk
+                case 5: return [{ parameterName: 'showTime', parameterValue: 1.4 }, { parameterName: 'feelingClarity', parameterValue: 0 }, { parameterName: 'peeks', parameterValue: 0 }, { parameterName: 'nightTimer', parameterValue: 6 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next night
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next night
+                case 8: return [{ parameterName: 'feelingClarity', parameterValue: 0 }]; // Faces only
+                case 9: return [{ parameterName: 'showTime', parameterValue: 1 }, { parameterName: 'feelingClarity', parameterValue: 0 }, { parameterName: 'peeks', parameterValue: 0 }, { parameterName: 'nightTimer', parameterValue: 4 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'jelly-juggle':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'gravity', parameterValue: 0.75 }, { parameterName: 'spawnRate', parameterValue: 10 }, { parameterName: 'trampolineSize', parameterValue: 1.3 }, { parameterName: 'hoopSize', parameterValue: 1.3 }, { parameterName: 'superWindowMs', parameterValue: 300 }]; // Relax
+                case 2: return [{ parameterName: 'gravity', parameterValue: 0.88 }, { parameterName: 'spawnRate', parameterValue: 13 }, { parameterName: 'trampolineSize', parameterValue: 1.15 }, { parameterName: 'hoopSize', parameterValue: 1.15 }, { parameterName: 'superWindowMs', parameterValue: 240 }]; // Gentle
+                case 3: return [{ parameterName: 'gravity', parameterValue: 1 }, { parameterName: 'spawnRate', parameterValue: 16 }, { parameterName: 'trampolineSize', parameterValue: 1 }, { parameterName: 'hoopSize', parameterValue: 1 }, { parameterName: 'superWindowMs', parameterValue: 180 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'gravity', parameterValue: 1.15 }, { parameterName: 'spawnRate', parameterValue: 22 }]; // Brisk
+                case 5: return [{ parameterName: 'gravity', parameterValue: 1.35 }, { parameterName: 'spawnRate', parameterValue: 30 }, { parameterName: 'trampolineSize', parameterValue: 0.8 }, { parameterName: 'hoopSize', parameterValue: 0.8 }, { parameterName: 'superWindowMs', parameterValue: 110 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next level
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next level
+                case 8: return [{ parameterName: 'trampolineSize', parameterValue: 1.5 }]; // Giant trampoline
+                case 9: return [{ parameterName: 'gravity', parameterValue: 1.6 }, { parameterName: 'spawnRate', parameterValue: 40 }, { parameterName: 'trampolineSize', parameterValue: 0.7 }, { parameterName: 'hoopSize', parameterValue: 0.7 }, { parameterName: 'superWindowMs', parameterValue: 60 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'xenoflora':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'trialBudget', parameterValue: 8 }, { parameterName: 'ruleComplexity', parameterValue: 0 }, { parameterName: 'attributeCount', parameterValue: 2 }, { parameterName: 'journalHints', parameterValue: 2 }]; // Relax
+                case 2: return [{ parameterName: 'trialBudget', parameterValue: 6 }, { parameterName: 'attributeCount', parameterValue: 3 }, { parameterName: 'journalHints', parameterValue: 1 }]; // Gentle
+                case 3: return [{ parameterName: 'trialBudget', parameterValue: 5 }, { parameterName: 'ruleComplexity', parameterValue: 0 }, { parameterName: 'attributeCount', parameterValue: 3 }, { parameterName: 'journalHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'trialBudget', parameterValue: 8 }, { parameterName: 'attributeCount', parameterValue: 4 }, { parameterName: 'journalHints', parameterValue: 0 }]; // Curious
+                case 5: return [{ parameterName: 'trialBudget', parameterValue: 3 }, { parameterName: 'ruleComplexity', parameterValue: 2 }, { parameterName: 'attributeCount', parameterValue: 5 }, { parameterName: 'journalHints', parameterValue: 0 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next garden
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next garden
+                case 8: return [{ parameterName: 'journalHints', parameterValue: 2 }]; // Full journal hints
+                case 9: return [{ parameterName: 'trialBudget', parameterValue: 3 }, { parameterName: 'ruleComplexity', parameterValue: 2 }, { parameterName: 'attributeCount', parameterValue: 5 }, { parameterName: 'journalHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'chronicle':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'yearHints', parameterValue: 2 }, { parameterName: 'eraSpread', parameterValue: 100 }, { parameterName: 'obscurity', parameterValue: 1 }, { parameterName: 'cardsPerChapter', parameterValue: 6 }, { parameterName: 'placeTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'yearHints', parameterValue: 1 }, { parameterName: 'eraSpread', parameterValue: 50 }, { parameterName: 'obscurity', parameterValue: 1 }, { parameterName: 'cardsPerChapter', parameterValue: 7 }, { parameterName: 'placeTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'yearHints', parameterValue: 0 }, { parameterName: 'eraSpread', parameterValue: 15 }, { parameterName: 'obscurity', parameterValue: 2 }, { parameterName: 'cardsPerChapter', parameterValue: 8 }, { parameterName: 'placeTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'placeTimer', parameterValue: 30 }, { parameterName: 'cardsPerChapter', parameterValue: 9 }]; // Brisk
+                case 5: return [{ parameterName: 'yearHints', parameterValue: 0 }, { parameterName: 'eraSpread', parameterValue: 2 }, { parameterName: 'obscurity', parameterValue: 3 }, { parameterName: 'cardsPerChapter', parameterValue: 11 }, { parameterName: 'placeTimer', parameterValue: 15 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next chapter
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next chapter
+                case 8: return [{ parameterName: 'yearHints', parameterValue: 2 }]; // Decade hints
+                case 9: return [{ parameterName: 'yearHints', parameterValue: 0 }, { parameterName: 'eraSpread', parameterValue: 0 }, { parameterName: 'obscurity', parameterValue: 3 }, { parameterName: 'cardsPerChapter', parameterValue: 12 }, { parameterName: 'placeTimer', parameterValue: 8 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'glide':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'windStrength', parameterValue: 0.3 }, { parameterName: 'leadDuration', parameterValue: 8 }, { parameterName: 'obstacleDensity', parameterValue: 0.4 }, { parameterName: 'flockSize', parameterValue: 7 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'windStrength', parameterValue: 0.6 }, { parameterName: 'leadDuration', parameterValue: 10 }, { parameterName: 'obstacleDensity', parameterValue: 0.7 }]; // Gentle
+                case 3: return [{ parameterName: 'windStrength', parameterValue: 1 }, { parameterName: 'leadDuration', parameterValue: 12 }, { parameterName: 'obstacleDensity', parameterValue: 1 }, { parameterName: 'flockSize', parameterValue: 7 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'obstacleDensity', parameterValue: 1.4 }, { parameterName: 'leadDuration', parameterValue: 14 }]; // Busy sky
+                case 5: return [{ parameterName: 'windStrength', parameterValue: 1.6 }, { parameterName: 'leadDuration', parameterValue: 18 }, { parameterName: 'obstacleDensity', parameterValue: 1.7 }, { parameterName: 'flockSize', parameterValue: 9 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next leg
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next leg
+                case 8: return [{ parameterName: 'flockSize', parameterValue: 11 }]; // Big skein (11 birds)
+                case 9: return [{ parameterName: 'windStrength', parameterValue: 2 }, { parameterName: 'leadDuration', parameterValue: 24 }, { parameterName: 'obstacleDensity', parameterValue: 2 }, { parameterName: 'flockSize', parameterValue: 11 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'cache':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'cacheCount', parameterValue: 3 }, { parameterName: 'landmarkChanges', parameterValue: 0 }, { parameterName: 'delaySeconds', parameterValue: 6 }, { parameterName: 'digHints', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'cacheCount', parameterValue: 3 }, { parameterName: 'landmarkChanges', parameterValue: 1 }, { parameterName: 'delaySeconds', parameterValue: 8 }, { parameterName: 'digHints', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'cacheCount', parameterValue: 4 }, { parameterName: 'landmarkChanges', parameterValue: 1 }, { parameterName: 'delaySeconds', parameterValue: 10 }, { parameterName: 'digHints', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'cacheCount', parameterValue: 5 }, { parameterName: 'landmarkChanges', parameterValue: 2 }, { parameterName: 'delaySeconds', parameterValue: 12 }]; // Brisk
+                case 5: return [{ parameterName: 'cacheCount', parameterValue: 6 }, { parameterName: 'landmarkChanges', parameterValue: 3 }, { parameterName: 'delaySeconds', parameterValue: 20 }, { parameterName: 'digHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next park
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next park
+                case 8: return [{ parameterName: 'landmarkChanges', parameterValue: 4 }]; // Shifting park
+                case 9: return [{ parameterName: 'cacheCount', parameterValue: 8 }, { parameterName: 'landmarkChanges', parameterValue: 4 }, { parameterName: 'delaySeconds', parameterValue: 30 }, { parameterName: 'digHints', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'treehouse-telegraph':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'boardSize', parameterValue: 9 }, { parameterName: 'clueClarity', parameterValue: 1 }, { parameterName: 'decoyStrength', parameterValue: 0.1 }, { parameterName: 'turnTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'boardSize', parameterValue: 10 }, { parameterName: 'clueClarity', parameterValue: 0.9 }, { parameterName: 'decoyStrength', parameterValue: 0.25 }, { parameterName: 'turnTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'boardSize', parameterValue: 12 }, { parameterName: 'clueClarity', parameterValue: 0.75 }, { parameterName: 'decoyStrength', parameterValue: 0.4 }, { parameterName: 'turnTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'boardSize', parameterValue: 12 }, { parameterName: 'turnTimer', parameterValue: 30 }]; // Brisk
+                case 5: return [{ parameterName: 'boardSize', parameterValue: 16 }, { parameterName: 'clueClarity', parameterValue: 0.45 }, { parameterName: 'decoyStrength', parameterValue: 0.85 }, { parameterName: 'turnTimer', parameterValue: 20 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next board
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next board
+                case 8: return [{ parameterName: 'decoyStrength', parameterValue: 1 }]; // Sneaky decoys
+                case 9: return [{ parameterName: 'boardSize', parameterValue: 16 }, { parameterName: 'clueClarity', parameterValue: 0.3 }, { parameterName: 'decoyStrength', parameterValue: 1 }, { parameterName: 'turnTimer', parameterValue: 10 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'viewpoints':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'sightCones', parameterValue: 2 }, { parameterName: 'eventCount', parameterValue: 1 }, { parameterName: 'replay', parameterValue: 3 }, { parameterName: 'answerTimer', parameterValue: 0 }, { parameterName: 'storySpeed', parameterValue: 0.75 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'sightCones', parameterValue: 2 }, { parameterName: 'eventCount', parameterValue: 2 }, { parameterName: 'replay', parameterValue: 2 }, { parameterName: 'answerTimer', parameterValue: 0 }, { parameterName: 'storySpeed', parameterValue: 0.85 }]; // Gentle
+                case 3: return [{ parameterName: 'sightCones', parameterValue: 1 }, { parameterName: 'eventCount', parameterValue: 2 }, { parameterName: 'replay', parameterValue: 1 }, { parameterName: 'answerTimer', parameterValue: 0 }, { parameterName: 'storySpeed', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'sightCones', parameterValue: 1 }, { parameterName: 'eventCount', parameterValue: 3 }, { parameterName: 'answerTimer', parameterValue: 20 }, { parameterName: 'storySpeed', parameterValue: 1.15 }]; // Brisk
+                case 5: return [{ parameterName: 'sightCones', parameterValue: 0 }, { parameterName: 'eventCount', parameterValue: 5 }, { parameterName: 'replay', parameterValue: 0 }, { parameterName: 'answerTimer', parameterValue: 10 }, { parameterName: 'storySpeed', parameterValue: 1.4 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next story
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next story
+                case 8: return [{ parameterName: 'sightCones', parameterValue: 2 }]; // All sight cones
+                case 9: return [{ parameterName: 'sightCones', parameterValue: 0 }, { parameterName: 'eventCount', parameterValue: 6 }, { parameterName: 'replay', parameterValue: 0 }, { parameterName: 'answerTimer', parameterValue: 6 }, { parameterName: 'storySpeed', parameterValue: 1.6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'bandstand':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'tempo', parameterValue: 80 }, { parameterName: 'phraseLength', parameterValue: 3 }, { parameterName: 'timingWindowMs', parameterValue: 220 }, { parameterName: 'bandHelp', parameterValue: 2 }]; // Relax
+                case 2: return [{ parameterName: 'tempo', parameterValue: 90 }, { parameterName: 'phraseLength', parameterValue: 3 }, { parameterName: 'timingWindowMs', parameterValue: 180 }, { parameterName: 'bandHelp', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'tempo', parameterValue: 100 }, { parameterName: 'phraseLength', parameterValue: 4 }, { parameterName: 'timingWindowMs', parameterValue: 140 }, { parameterName: 'bandHelp', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'tempo', parameterValue: 116 }, { parameterName: 'phraseLength', parameterValue: 4 }, { parameterName: 'timingWindowMs', parameterValue: 130 }]; // Brisk
+                case 5: return [{ parameterName: 'tempo', parameterValue: 128 }, { parameterName: 'phraseLength', parameterValue: 6 }, { parameterName: 'timingWindowMs', parameterValue: 90 }, { parameterName: 'bandHelp', parameterValue: 0 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next tune
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next tune
+                case 8: return [{ parameterName: 'phraseLength', parameterValue: 8 }]; // Long calls
+                case 9: return [{ parameterName: 'tempo', parameterValue: 150 }, { parameterName: 'phraseLength', parameterValue: 8 }, { parameterName: 'timingWindowMs', parameterValue: 60 }, { parameterName: 'bandHelp', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'switchyard':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'trainSpeed', parameterValue: 0.65 }, { parameterName: 'ruleSwitchEvery', parameterValue: 6 }, { parameterName: 'cueWarning', parameterValue: 5.5 }, { parameterName: 'trackComplexity', parameterValue: 1 }]; // Relax
+                case 2: return [{ parameterName: 'trainSpeed', parameterValue: 0.8 }, { parameterName: 'ruleSwitchEvery', parameterValue: 4 }, { parameterName: 'cueWarning', parameterValue: 4.5 }, { parameterName: 'trackComplexity', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'trainSpeed', parameterValue: 1 }, { parameterName: 'ruleSwitchEvery', parameterValue: 3 }, { parameterName: 'cueWarning', parameterValue: 3 }, { parameterName: 'trackComplexity', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'trainSpeed', parameterValue: 1.2 }, { parameterName: 'ruleSwitchEvery', parameterValue: 3 }, { parameterName: 'cueWarning', parameterValue: 2 }]; // Brisk
+                case 5: return [{ parameterName: 'trainSpeed', parameterValue: 1.45 }, { parameterName: 'ruleSwitchEvery', parameterValue: 1 }, { parameterName: 'cueWarning', parameterValue: 0.5 }, { parameterName: 'trackComplexity', parameterValue: 4 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next level
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next level
+                case 8: return [{ parameterName: 'ruleSwitchEvery', parameterValue: 1 }]; // New rule every train
+                case 9: return [{ parameterName: 'trainSpeed', parameterValue: 2 }, { parameterName: 'ruleSwitchEvery', parameterValue: 1 }, { parameterName: 'cueWarning', parameterValue: 0 }, { parameterName: 'trackComplexity', parameterValue: 4 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'kind-words-cafe':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'tileChoices', parameterValue: 2 }, { parameterName: 'nuance', parameterValue: 0 }, { parameterName: 'customerPace', parameterValue: 0.6 }, { parameterName: 'hintLevel', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'tileChoices', parameterValue: 3 }, { parameterName: 'nuance', parameterValue: 1 }, { parameterName: 'customerPace', parameterValue: 0.8 }, { parameterName: 'hintLevel', parameterValue: 1 }]; // Gentle
+                case 3: return [{ parameterName: 'tileChoices', parameterValue: 3 }, { parameterName: 'nuance', parameterValue: 1 }, { parameterName: 'customerPace', parameterValue: 1 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'tileChoices', parameterValue: 4 }, { parameterName: 'customerPace', parameterValue: 1.3 }]; // Brisk
+                case 5: return [{ parameterName: 'tileChoices', parameterValue: 5 }, { parameterName: 'nuance', parameterValue: 2 }, { parameterName: 'customerPace', parameterValue: 1.6 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next shift
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next shift
+                case 8: return [{ parameterName: 'nuance', parameterValue: 2 }]; // Near-synonyms
+                case 9: return [{ parameterName: 'tileChoices', parameterValue: 5 }, { parameterName: 'nuance', parameterValue: 2 }, { parameterName: 'customerPace', parameterValue: 2 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'blockwright':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'counterVisible', parameterValue: 0 }, { parameterName: 'targetSize', parameterValue: 0.75 }, { parameterName: 'constraintCount', parameterValue: 1 }, { parameterName: 'buildTimer', parameterValue: 0 }]; // Relax
+                case 2: return [{ parameterName: 'counterVisible', parameterValue: 0 }, { parameterName: 'targetSize', parameterValue: 0.9 }, { parameterName: 'constraintCount', parameterValue: 2 }, { parameterName: 'buildTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'counterVisible', parameterValue: 0 }, { parameterName: 'targetSize', parameterValue: 1 }, { parameterName: 'constraintCount', parameterValue: 2 }, { parameterName: 'buildTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'buildTimer', parameterValue: 120 }, { parameterName: 'constraintCount', parameterValue: 3 }]; // Brisk
+                case 5: return [{ parameterName: 'counterVisible', parameterValue: 2 }, { parameterName: 'targetSize', parameterValue: 1.4 }, { parameterName: 'constraintCount', parameterValue: 3 }, { parameterName: 'buildTimer', parameterValue: 75 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next commission
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next commission
+                case 8: return [{ parameterName: 'counterVisible', parameterValue: 1 }]; // Counter on request
+                case 9: return [{ parameterName: 'counterVisible', parameterValue: 2 }, { parameterName: 'targetSize', parameterValue: 1.6 }, { parameterName: 'constraintCount', parameterValue: 4 }, { parameterName: 'buildTimer', parameterValue: 45 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'tidepool':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'camouflage', parameterValue: 0.2 }, { parameterName: 'tideSpeed', parameterValue: 0.6 }, { parameterName: 'creatureCount', parameterValue: 4 }, { parameterName: 'calmTolerance', parameterValue: 1.6 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'camouflage', parameterValue: 0.3 }, { parameterName: 'tideSpeed', parameterValue: 0.8 }, { parameterName: 'creatureCount', parameterValue: 4 }, { parameterName: 'calmTolerance', parameterValue: 1.3 }]; // Gentle
+                case 3: return [{ parameterName: 'camouflage', parameterValue: 0.55 }, { parameterName: 'tideSpeed', parameterValue: 1 }, { parameterName: 'creatureCount', parameterValue: 5 }, { parameterName: 'calmTolerance', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'tideSpeed', parameterValue: 1.3 }, { parameterName: 'creatureCount', parameterValue: 6 }]; // Brisk
+                case 5: return [{ parameterName: 'camouflage', parameterValue: 0.8 }, { parameterName: 'tideSpeed', parameterValue: 1.5 }, { parameterName: 'creatureCount', parameterValue: 7 }, { parameterName: 'calmTolerance', parameterValue: 0.7 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next pool
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next pool
+                case 8: return [{ parameterName: 'camouflage', parameterValue: 0.95 }]; // Master of disguise
+                case 9: return [{ parameterName: 'camouflage', parameterValue: 1 }, { parameterName: 'tideSpeed', parameterValue: 2 }, { parameterName: 'creatureCount', parameterValue: 9 }, { parameterName: 'calmTolerance', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'lookout':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'eventRate', parameterValue: 0.7 }, { parameterName: 'protocolChanges', parameterValue: 0 }, { parameterName: 'cueVisibility', parameterValue: 1 }, { parameterName: 'responseWindow', parameterValue: 1.7 }]; // Relax
+                case 2: return [{ parameterName: 'eventRate', parameterValue: 0.85 }, { parameterName: 'protocolChanges', parameterValue: 1 }, { parameterName: 'cueVisibility', parameterValue: 0.95 }, { parameterName: 'responseWindow', parameterValue: 1.3 }]; // Gentle
+                case 3: return [{ parameterName: 'eventRate', parameterValue: 1 }, { parameterName: 'protocolChanges', parameterValue: 1 }, { parameterName: 'cueVisibility', parameterValue: 1 }, { parameterName: 'responseWindow', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'eventRate', parameterValue: 1.3 }, { parameterName: 'responseWindow', parameterValue: 0.85 }]; // Brisk
+                case 5: return [{ parameterName: 'eventRate', parameterValue: 1.6 }, { parameterName: 'protocolChanges', parameterValue: 3 }, { parameterName: 'cueVisibility', parameterValue: 0.55 }, { parameterName: 'responseWindow', parameterValue: 0.7 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next shift
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next shift
+                case 8: return [{ parameterName: 'cueVisibility', parameterValue: 0.35 }]; // Thick fog
+                case 9: return [{ parameterName: 'eventRate', parameterValue: 2 }, { parameterName: 'protocolChanges', parameterValue: 4 }, { parameterName: 'cueVisibility', parameterValue: 0.3 }, { parameterName: 'responseWindow', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'gearworks':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'ratioComplexity', parameterValue: 0 }, { parameterName: 'gearChoices', parameterValue: 4 }, { parameterName: 'previewSpin', parameterValue: 2 }, { parameterName: 'benchTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'ratioComplexity', parameterValue: 0 }, { parameterName: 'gearChoices', parameterValue: 5 }, { parameterName: 'previewSpin', parameterValue: 2 }, { parameterName: 'benchTimer', parameterValue: 0 }]; // Gentle
+                case 3: return [{ parameterName: 'ratioComplexity', parameterValue: 1 }, { parameterName: 'gearChoices', parameterValue: 6 }, { parameterName: 'previewSpin', parameterValue: 1 }, { parameterName: 'benchTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'gearChoices', parameterValue: 8 }, { parameterName: 'previewSpin', parameterValue: 1 }, { parameterName: 'benchTimer', parameterValue: 90 }]; // Brisk
+                case 5: return [{ parameterName: 'ratioComplexity', parameterValue: 2 }, { parameterName: 'gearChoices', parameterValue: 9 }, { parameterName: 'previewSpin', parameterValue: 0 }, { parameterName: 'benchTimer', parameterValue: 60 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next level
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next level
+                case 8: return [{ parameterName: 'previewSpin', parameterValue: 0 }]; // No preview
+                case 9: return [{ parameterName: 'ratioComplexity', parameterValue: 2 }, { parameterName: 'gearChoices', parameterValue: 9 }, { parameterName: 'previewSpin', parameterValue: 0 }, { parameterName: 'benchTimer', parameterValue: 30 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'market-day':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'queuePace', parameterValue: 0.6 }, { parameterName: 'dealComplexity', parameterValue: 0 }, { parameterName: 'changeHelp', parameterValue: 2 }, { parameterName: 'numberScale', parameterValue: 0.6 }]; // Relax
+                case 2: return [{ parameterName: 'queuePace', parameterValue: 0.8 }, { parameterName: 'dealComplexity', parameterValue: 1 }, { parameterName: 'changeHelp', parameterValue: 1 }, { parameterName: 'numberScale', parameterValue: 0.8 }]; // Gentle
+                case 3: return [{ parameterName: 'queuePace', parameterValue: 1 }, { parameterName: 'dealComplexity', parameterValue: 1 }, { parameterName: 'changeHelp', parameterValue: 0 }, { parameterName: 'numberScale', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'queuePace', parameterValue: 1.3 }, { parameterName: 'numberScale', parameterValue: 1.2 }]; // Brisk
+                case 5: return [{ parameterName: 'queuePace', parameterValue: 1.6 }, { parameterName: 'dealComplexity', parameterValue: 2 }, { parameterName: 'changeHelp', parameterValue: 0 }, { parameterName: 'numberScale', parameterValue: 1.6 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next day
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next day
+                case 8: return [{ parameterName: 'dealComplexity', parameterValue: 2 }]; // Percentage deals
+                case 9: return [{ parameterName: 'queuePace', parameterValue: 2 }, { parameterName: 'dealComplexity', parameterValue: 2 }, { parameterName: 'changeHelp', parameterValue: 0 }, { parameterName: 'numberScale', parameterValue: 2 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'waggle':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'danceRepeats', parameterValue: 5 }, { parameterName: 'danceCount', parameterValue: 1 }, { parameterName: 'patchSpread', parameterValue: 1.7 }, { parameterName: 'sunMarker', parameterValue: 2 }, { parameterName: 'danceSpeed', parameterValue: 0.75 }]; // Relax
+                case 2: return [{ parameterName: 'danceRepeats', parameterValue: 4 }, { parameterName: 'patchSpread', parameterValue: 1.3 }, { parameterName: 'sunMarker', parameterValue: 2 }, { parameterName: 'danceSpeed', parameterValue: 0.9 }]; // Gentle
+                case 3: return [{ parameterName: 'danceRepeats', parameterValue: 3 }, { parameterName: 'danceCount', parameterValue: 0 }, { parameterName: 'patchSpread', parameterValue: 1 }, { parameterName: 'sunMarker', parameterValue: 1 }, { parameterName: 'danceSpeed', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'danceRepeats', parameterValue: 2 }, { parameterName: 'danceSpeed', parameterValue: 1.25 }, { parameterName: 'danceCount', parameterValue: 2 }]; // Brisk
+                case 5: return [{ parameterName: 'danceRepeats', parameterValue: 1 }, { parameterName: 'danceCount', parameterValue: 3 }, { parameterName: 'patchSpread', parameterValue: 0.65 }, { parameterName: 'sunMarker', parameterValue: 0 }, { parameterName: 'danceSpeed', parameterValue: 1.4 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next foray
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next foray
+                case 8: return [{ parameterName: 'sunMarker', parameterValue: 0 }]; // No sun line
+                case 9: return [{ parameterName: 'danceRepeats', parameterValue: 1 }, { parameterName: 'danceCount', parameterValue: 4 }, { parameterName: 'patchSpread', parameterValue: 0.5 }, { parameterName: 'sunMarker', parameterValue: 0 }, { parameterName: 'danceSpeed', parameterValue: 1.6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
+        case 'rootwords':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'rootChoices', parameterValue: 5 }, { parameterName: 'rarity', parameterValue: 0 }, { parameterName: 'hintLevel', parameterValue: 2 }, { parameterName: 'decodeTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'rootChoices', parameterValue: 6 }, { parameterName: 'rarity', parameterValue: 0 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'decodeTimer', parameterValue: 30 }]; // Gentle
+                case 3: return [{ parameterName: 'rootChoices', parameterValue: 8 }, { parameterName: 'rarity', parameterValue: 1 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'decodeTimer', parameterValue: 20 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'rootChoices', parameterValue: 10 }, { parameterName: 'decodeTimer', parameterValue: 14 }]; // Brisk
+                case 5: return [{ parameterName: 'rootChoices', parameterValue: 11 }, { parameterName: 'rarity', parameterValue: 2 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'decodeTimer', parameterValue: 10 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next tree
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next tree
+                case 8: return [{ parameterName: 'hintLevel', parameterValue: 0 }]; // Bare roots (no meanings)
+                case 9: return [{ parameterName: 'rootChoices', parameterValue: 12 }, { parameterName: 'rarity', parameterValue: 2 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'decodeTimer', parameterValue: 6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

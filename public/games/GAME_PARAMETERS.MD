@@ -975,6 +975,634 @@ Three.js proportion game (slug `elixir`, folder `live/Elixir`): an alchemist's r
 
 ---
 
+### Lumen
+Three.js light-routing puzzle in a chapel at golden hour (slug `lumen`, folder `live/Lumen`): place mirrors, prisms, filters, splitters and combiners on a floor grid to route and mix sunlight and lantern light until every crystal glows its own colour, then seal the stained-glass window above. The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded (strings like "2.6" round to 3). The tutorial ignores every parameter; windows 1-3 are handcrafted and ignore `colourComplexity`.
+
+**Parameters**
+- `pieceBudget` (Integer, 0–4): spare pieces in the tray beyond the glazier's own solution; each spare left unused when the window is sealed scores Elegance. Applies at once (unplaced spares appear or leave the tray; pieces on the floor stay). Default 1.
+- `colourComplexity` (Integer, 0–2): what the crystals want. 0 primaries (or white), no mixing; 1 secondaries too (yellow, cyan, magenta via filters and coloured lanterns); 2 mixed targets that need two beams to meet. From the next window. Default 1.
+- `beamPreview` (Integer, 0–2): 0 no preview; 1 a dashed ghost beam for the held piece over the hovered cell; 2 the ghost also lights the crystals it would reach and previews a placed piece's next turn. Applies at once. Default 1.
+- `windowTimer` (Integer, 0–240): seconds to light each window; 0 untimed, 1–29 count as 30. Switching it on mid-window starts a full timer; changing it scales the time left. When the sun sets the window is lost unless every crystal is lit. Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next window (bigger floors, new pieces, more crystals, fixed fittings). Never mid-window. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "pieceBudget",
+  "parameterValue": 3
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ pieceBudget: 3, colourComplexity: 0, beamPreview: 2, windowTimer: 0 }` (Relax)
+- `2`: `{ pieceBudget: 2, colourComplexity: 1, beamPreview: 2, windowTimer: 0 }` (Gentle)
+- `3`: `{ pieceBudget: 1, colourComplexity: 1, beamPreview: 1, windowTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ pieceBudget: 1, beamPreview: 1, windowTimer: 150 }` (Brisk)
+- `5`: `{ pieceBudget: 0, colourComplexity: 2, beamPreview: 0, windowTimer: 75 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next window)
+- `7`: `{ levelOffset: 2 }` (Harder next window)
+- `8`: `{ pieceBudget: 4 }` (Many spares: room to be creative)
+- `9`: `{ pieceBudget: 0, colourComplexity: 2, beamPreview: 0, windowTimer: 45, levelOffset: 3 }` (Extreme)
+
+---
+
+### Flockwork
+Three.js cooperative herding game (slug `flockwork`, folder `live/Flockwork`): the player leads two or three sheepdogs (Moss the outrunner, Bramble the driver black-faces respect, Pip the pup who holds gates), selecting a dog and whistling commands (fetch, send, hold the gate, come-bye, away, walk up, lie down) to pen the flock before sundown on a new painted hillside each field. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded; the tutorial ignores every parameter.
+
+**Parameters**
+- `flightiness` (Number, 0.5–1.8): how easily the sheep take fright; flight zone 4.6 m × f^0.7, stress from pressing or running dogs × f, and the ram breaks every ~24 s ÷ f^0.9. Higher scatters more. Applies at once. Default 1.0.
+- `dogAutonomy` (Number, 0–1): how much idle dogs do unbidden: take the gate (≥ 0.25), block a threatened wall gap (≥ 0.4), head off the ram (≥ 0.55), fetch loose groups (≥ 0.7), after 12 s idle at 0.05 down to 1.5 s at 1. Applies at once. Default 0.5.
+- `flockSize` (Integer, 6–30): sheep per field (× 0.9 at rung 1 to × 1.2 from rung 7). Next field; raising it mid-field also sends the extra sheep (up to 8) over the far wall as strays and raises the number to pen. Default 12.
+- `dayLength` (Number, 0.5–2.0): multiplies the time to sundown (75 s at rung 1 to 100 s from rung 6). Applies at once; daylight left scales in proportion. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next field (2 lambs and a wall gap → 3 Bramble, black-faces, stream and bridge → 4 bog → 5 the ram → 6 dividing wall → 7+ more of everything). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "dogAutonomy",
+  "parameterValue": 0.8
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ flightiness: 0.65, dogAutonomy: 0.85, flockSize: 9, dayLength: 1.8 }` (Relax)
+- `2`: `{ flightiness: 0.8, dogAutonomy: 0.7, dayLength: 1.3 }` (Gentle)
+- `3`: `{ flightiness: 1.0, dogAutonomy: 0.5, flockSize: 12, dayLength: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ dayLength: 0.75, flockSize: 16 }` (Brisk)
+- `5`: `{ flightiness: 1.5, dogAutonomy: 0.1, flockSize: 18, dayLength: 0.7 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next field)
+- `7`: `{ levelOffset: 2 }` (Harder next field)
+- `8`: `{ dogAutonomy: 1 }` (Dogs do it all)
+- `9`: `{ flightiness: 1.8, dogAutonomy: 0, flockSize: 30, dayLength: 0.5, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Broadsheet
+Three.js letterpress word game (slug `broadsheet`, folder `live/Broadsheet`): the player spells words from a tilted case of type (Boggle rules: touching blocks, diagonals too, each block once; drag, tap or type) to fill a client's order slip of three or four constrained lines (a theme word, N+ letters, a given letter, a plural, a rhyme, a chained first letter, a double letter) before the press run's clock or sheets run out; every word is printed onto the client's poster. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `pressTime` (Number, 0.5–2.0): multiplies the press-run clock, 45 s + 15 s per order line at 1.0. Applies at once; the time left scales in proportion. Default 1.0.
+- `vowelShare` (Number, 0.28–0.5): the vowel share the type drawer aims for in new blocks. Applies to every block dealt from then on (every word set refills the case). Default 0.38.
+- `minWordLength` (Integer, 3–5): the shortest word the press accepts. Applies from the next word set. Default 3.
+- `hintLevel` (Integer, 0–2): after 8 s without a word, 0 nothing, 1 a gold glint on the first block of a good word, 2 the first two blocks glint and are written on the order slip. Applies at once (0 clears a glint). Default 1.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next commission (bigger case, four lines, rhymes, chained lines, rare and double letters). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "minWordLength",
+  "parameterValue": 4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ pressTime: 1.8, vowelShare: 0.44, minWordLength: 3, hintLevel: 2 }` (Relax)
+- `2`: `{ pressTime: 1.3, vowelShare: 0.41, hintLevel: 1 }` (Gentle)
+- `3`: `{ pressTime: 1.0, vowelShare: 0.38, minWordLength: 3, hintLevel: 1, levelOffset: 0 }` (Default)
+- `4`: `{ pressTime: 0.75, minWordLength: 4 }` (Brisk)
+- `5`: `{ pressTime: 0.65, vowelShare: 0.31, minWordLength: 4, hintLevel: 0 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next commission)
+- `7`: `{ levelOffset: 2 }` (Harder next commission)
+- `8`: `{ minWordLength: 5 }` (Five-letter press)
+- `9`: `{ pressTime: 0.5, vowelShare: 0.28, minWordLength: 5, hintLevel: 0, levelOffset: 3 }` (Extreme)
+
+---
+
+### Wayfinder
+Three.js geography game (slug `wayfinder`, folder `live/Wayfinder`): a clue card asks for a place (by name, description or riddle), the player spins a watercolour paper globe, drops a pin and confirms; a dotted line flies to the true spot and close answers earn passport stamps. Journeys of 5–7 places on a theme, each in its own look. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded (the game parses them itself), `true`/`false` read as 1/0.
+
+**Parameters**
+- `labelDensity` (Integer, 0–3): 0 coasts and mountain hachures only, 1 dashed country borders, 2 + ~55 reference cities (none within 450 km of the answer), 3 + oceans, seas and continents. Applies at once. Default 1.
+- `clueClarity` (Integer, 0–2): 0 riddle, 1 description, 2 the place's name. Applies at once (the open clue is reworded until confirmed). Default 1.
+- `scoreRadiusKm` (Integer, 150–1500): full-credit radius, dotted round the pin; Pinpoint within a quarter of it, Visited stamp within twice it. Applies at once. Default 500.
+- `clueTimer` (Integer, 0–90): seconds per clue, 0 untimed; at zero the pin stands where it is, or the clue is missed. Applies at once, keeping the share of time left. Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next journey (famous places → lesser-known → the well travelled, mixed subjects from rung 5). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "clueClarity",
+  "parameterValue": 0
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ labelDensity: 3, clueClarity: 2, scoreRadiusKm: 1000, clueTimer: 0 }` (Relax)
+- `2`: `{ labelDensity: 2, clueClarity: 1, scoreRadiusKm: 750 }` (Gentle)
+- `3`: `{ labelDensity: 1, clueClarity: 1, scoreRadiusKm: 500, clueTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ clueTimer: 30, scoreRadiusKm: 400 }` (Brisk)
+- `5`: `{ labelDensity: 0, clueClarity: 0, scoreRadiusKm: 250, clueTimer: 20 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next journey)
+- `7`: `{ levelOffset: 2 }` (Harder next journey)
+- `8`: `{ clueClarity: 0 }` (Riddles only)
+- `9`: `{ labelDensity: 0, clueClarity: 0, scoreRadiusKm: 150, clueTimer: 12, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Hearthlight
+Three.js memory-and-empathy game (slug `hearthlight`, folder `live/Hearthlight`): at dusk the windows of a felt-and-knit snowy village light up one by one, each showing a felted animal resident and how they feel (cold, sad, scared, lonely, tired, excited, unwell; door notes can swap the usual comfort); at night the curtains close and the player pulls the lamplighter's sled from house to house and brings each the right comfort from memory. Each night is another village from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores parameters.
+
+**Parameters**
+- `showTime` (Number, 1.0–4.0): seconds each window stays open at dusk. Applies at once (the open window rescales). Default 2.5.
+- `feelingClarity` (Integer, 0–2): 0 face only, 1 face + posture and props, 2 plus a thought bubble with the feeling's icon. Applies at once. Default 1.
+- `peeks` (Integer, 0–3): curtain peeks per night (a comfort after a peek scores half). Applies at once. Default 1.
+- `nightTimer` (Integer, 0–15): seconds of night per house before the moon sets (houses × this + 4 s); 0 = untimed. Applies at once (rescales; 0 removes it). Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next night (3 → 8 houses, door notes, out-of-order windows, shared windows, houses calling in order, residents moving next door). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "showTime",
+  "parameterValue": 3.5
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ showTime: 3.6, feelingClarity: 2, peeks: 3, nightTimer: 0 }` (Relax)
+- `2`: `{ showTime: 3.0, feelingClarity: 2, peeks: 2 }` (Gentle)
+- `3`: `{ showTime: 2.5, feelingClarity: 1, peeks: 1, nightTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ showTime: 1.8, nightTimer: 9 }` (Brisk)
+- `5`: `{ showTime: 1.4, feelingClarity: 0, peeks: 0, nightTimer: 6 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next night)
+- `7`: `{ levelOffset: 2 }` (Harder next night)
+- `8`: `{ feelingClarity: 0 }` (Faces only)
+- `9`: `{ showTime: 1.0, feelingClarity: 0, peeks: 0, nightTimer: 4, levelOffset: 3 }` (Extreme)
+
+---
+
+### Jelly Juggle
+Three.js claymation action game: slide a trampoline round a toybox playroom and bounce wobbly jellies into the hoop with the matching shape, releasing the crouch as one lands for a Super Boing (slug `jelly-juggle`, folder `live/Jelly Juggle`). The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded. The tutorial plays with its own gentle settings and ignores them.
+
+**Parameters**
+- `gravity` (Number, 0.6–1.6): scales gravity on every jelly (10.5 units/s² × this × the rung's 1.00–1.10). Bounce heights are fixed, so a plain bounce stays up 1.71 s at 0.6, 1.32 s at 1.0 and 1.05 s at 1.6. Applies at once, mid-flight too. Default 1.0.
+- `spawnRate` (Number, 6–40): jellies per minute launched from the toy pipes while there is room (× the rung's pace, ×0.85 at rung 1 to ×1.4 from rung 7); also moves the cap on jellies in the air by one per 10 above or below 16 (between 1 and 6). Applies at once; the next launch is re-timed. Default 16.
+- `trampolineSize` (Number, 0.7–1.5): scales the trampoline (radius 0.95 units × this). Applies at once, eased over a third of a second. Default 1.0.
+- `hoopSize` (Number, 0.7–1.5): scales the hoop, bowl and saucer openings (radius 0.72 × this; a jelly is 0.4). Applies at once, eased over half a second. Default 1.0.
+- `superWindowMs` (Integer, 60–400): width of the Super Boing timing window centred on a landing (Perfect inside its middle half). Applies at once. Default 180.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next level (more jellies at once, more hoops, sliding hoops, wind, sticky and splitting jellies, the Jelly Mountain boss at rung 8). Applies when the next level is built, never mid-level. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "superWindowMs",
+  "parameterValue": 240
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ gravity: 0.75, spawnRate: 10, trampolineSize: 1.3, hoopSize: 1.3, superWindowMs: 300 }` (Relax)
+- `2`: `{ gravity: 0.88, spawnRate: 13, trampolineSize: 1.15, hoopSize: 1.15, superWindowMs: 240 }` (Gentle)
+- `3`: `{ gravity: 1.0, spawnRate: 16, trampolineSize: 1.0, hoopSize: 1.0, superWindowMs: 180, levelOffset: 0 }` (Default)
+- `4`: `{ gravity: 1.15, spawnRate: 22 }` (Brisk)
+- `5`: `{ gravity: 1.35, spawnRate: 30, trampolineSize: 0.8, hoopSize: 0.8, superWindowMs: 110 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next level)
+- `7`: `{ levelOffset: 2 }` (Harder next level)
+- `8`: `{ trampolineSize: 1.5 }` (Giant trampoline)
+- `9`: `{ gravity: 1.6, spawnRate: 40, trampolineSize: 0.7, hoopSize: 0.7, superWindowMs: 60, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Xenoflora
+
+A deduction game in pastel alien gardens: players plant specimens (colour, petal count, leaves, petal pattern, height) into a bed, press Sunrise to see which bloom under the garden's hidden rule, then predict which new specimens will bloom and may name the rule. `trialBudget` and `journalHints` apply at once; `ruleComplexity`, `attributeCount` and `levelOffset` take effect with the next expedition. The tutorial ignores all parameters. Integers are rounded, values clamped.
+
+**Parameters**
+- `trialBudget` (Integer, 3–10, default 5): sunrises per expedition (one fewer from rung 5, two fewer from rung 9, never under 2). More = easier.
+- `ruleComplexity` (Integer, 0–2, default 0): steps up the rule ladder beyond the rung (one feature → property → two features → neighbours → counts). Higher = harder.
+- `attributeCount` (Integer, 2–5, default 3): features that vary between specimens (one more from rung 5, two more from rung 9, max 5); the rest are the same on every plant. More = more distractors.
+- `journalHints` (Integer, 0–2, default 0): 0 none; 1 per-feature pencil notes and a "fits your notes" check on the hypothesis; 2 also a pencilled guess at the rule.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next expedition's rung (rule family, bed and tray size).
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "trialBudget", "parameterValue": 7 } }
+```
+
+**Keyboard mapping (1–9)**
+1. Relax — `trialBudget 8, ruleComplexity 0, attributeCount 2, journalHints 2`
+2. Gentle — `trialBudget 6, attributeCount 3, journalHints 1`
+3. Default — `trialBudget 5, ruleComplexity 0, attributeCount 3, journalHints 0, levelOffset 0`
+4. Curious — `trialBudget 8, attributeCount 4, journalHints 0`
+5. Grit — `trialBudget 3, ruleComplexity 2, attributeCount 5, journalHints 0`
+6. Easier next garden — `levelOffset −2`
+7. Harder next garden — `levelOffset +2`
+8. Full journal hints — `journalHints 2`
+9. Extreme — `trialBudget 3, ruleComplexity 2, attributeCount 5, journalHints 0, levelOffset 3`
+
+---
+
+### Chronicle
+
+A paper-craft pop-up storybook: each chapter is a different book, and the player drops event cards into a ribbon timeline, reasoning from the years printed under the pop-ups either side. A wrong placement turns the card over to its true year, moves it to its place and costs one of three bookmarks. Parameters control how much the book helps with dates, how far apart the dealt events are from their neighbours, how obscure they may be, chapter length, a per-card timer and the next chapter's rung. Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `yearHints` (Integer, 0–2, default 0): 0 none; 1 a century/millennium stamp on the card and round-year marks (centuries, millennia) on the ribbon; 2 early/mid/late century or decade stamps and half-century/decade marks. Applies at once.
+- `eraSpread` (Integer, 0–150, default 15): fewest years between a dealt event and every placed event (relaxed only if the book runs out). Larger is easier. Next card.
+- `obscurity` (Integer, 1–3, default 2): most obscure tier dealt (1 famous … 3 for the curious). Next card.
+- `cardsPerChapter` (Integer, 5–12, default 8): cards per chapter; more cards narrow the gaps. At once.
+- `placeTimer` (Integer, 0–45, default 0): seconds per card, 0 untimed; running out counts as wrong. Next card.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next chapter's rung (more events standing at the start, closer calls). Next chapter.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "yearHints", "parameterValue": 1 } }
+```
+
+Keys 1–9: 1 Relax `{yearHints 2, eraSpread 100, obscurity 1, cardsPerChapter 6, placeTimer 0}` · 2 Gentle `{1, 50, 1, 7, 0}` · 3 Default `{0, 15, 2, 8, 0, levelOffset 0}` · 4 Brisk `{placeTimer 30, cardsPerChapter 9}` · 5 Grit `{0, 2, 3, 11, 15}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Decade hints `{yearHints 2}` · 9 Extreme `{0, 0, 3, 12, placeTimer 8, levelOffset 3}`.
+
+---
+
+### Glide
+Three.js cooperative flying game (slug `glide`, folder `live/Glide`): the player is one folded-paper goose in a migrating V of AI flockmates over cut-paper landscapes at golden hour. Following, they hold the chevron ring in a flockmate's wingtip upwash to rest; when the lead calls "Your turn!" they fly to the point and steer the whole V clear of storm cells, power lines, wind shear and hawks, then drop back. Every bird's stamina counts; a bird at zero lands the flock. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded; the tutorial ignores every parameter.
+
+**Parameters**
+- `windStrength` (Number, 0–2): gusts shove every bird by up to 3 m/s per 1.0 (half that vertically) and the headwind scales stamina drain (0.7× at 0, 1.3× at 2); wind streaks thicken. Higher makes holding the ring and dodging harder. Applies at once. Default 1.0.
+- `leadDuration` (Number, 6–24): seconds each bird spends at the point. The player leads at the first handover of each leg, then every (flockSize − 1) turns, burning stamina faster while every hazard the V meets is theirs to steer round. Applies from the next handover. Default 12.
+- `obstacleDensity` (Number, 0.2–2.0): hazards arrive every 3.4 s ÷ this (kinds set by the rung); thermals unaffected. Applies from the next hazard. Default 1.0.
+- `flockSize` (Integer, 3–11): birds in the V, the player included; each extra bird widens the V by ~2.3 m. Applies at once: new birds fly in from behind, extras peel off. Default 7.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next leg (1 storms → 2 power lines → 3 wind shear → 4 hawks → 5+ drifting storms and double lines; leg 44 s + 3.6 s and airspeed 19 + 1.1 m/s per rung). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "windStrength",
+  "parameterValue": 1.4
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ windStrength: 0.3, leadDuration: 8, obstacleDensity: 0.4, flockSize: 7, levelOffset: -1 }` (Relax)
+- `2`: `{ windStrength: 0.6, leadDuration: 10, obstacleDensity: 0.7 }` (Gentle)
+- `3`: `{ windStrength: 1.0, leadDuration: 12, obstacleDensity: 1.0, flockSize: 7, levelOffset: 0 }` (Default)
+- `4`: `{ obstacleDensity: 1.4, leadDuration: 14 }` (Busy sky)
+- `5`: `{ windStrength: 1.6, leadDuration: 18, obstacleDensity: 1.7, flockSize: 9 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next leg)
+- `7`: `{ levelOffset: 2 }` (Harder next leg)
+- `8`: `{ flockSize: 11 }` (Big skein)
+- `9`: `{ windStrength: 2, leadDuration: 24, obstacleDensity: 2, flockSize: 11, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Cache
+
+A squirrel buries acorns in a low-poly autumn park, the season turns (snow hides the mounds, landmarks change, berries fall for a mini-task), and in winter the player digs the acorns up from memory before jays steal them. Parameters control how many acorns there are, how much the park changes, how long the delay is, how much a miss tells the player, and the next park's rung (gusts, decoy mounds, a turned winter camera, faster jays). Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `cacheCount` (Integer, 2–8, default 4): acorns buried per park. At once while still burying (never below those already buried); otherwise next park.
+- `landmarkChanges` (Integer, 0–4, default 1): landmarks moved 4–8 m, removed (the red kite blows away, a lamp is taken) or added (a snowman) while the season turns. Next season turn.
+- `delaySeconds` (Float, 4–30, default 10): length of the season's turn between burying and digging, filled with catching berries. At once; a turn in progress rescales.
+- `digHints` (Integer, 0–2, default 1): 0 none; 1 misses marked Warm (an acorn within 4.5 m) or Cold; 2 also an arrow toward the nearest unfound acorn. Next dig.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next park's rung (gusts from 2, decoy mounds from 3, a winter camera turned 20–45° from 4, faster jays). Next park.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "cacheCount", "parameterValue": 5 } }
+```
+
+Keys 1–9: 1 Relax `{cacheCount 3, landmarkChanges 0, delaySeconds 6, digHints 2, levelOffset −1}` · 2 Gentle `{3, 1, 8, 2}` · 3 Default `{4, 1, 10, 1, levelOffset 0}` · 4 Brisk `{cacheCount 5, landmarkChanges 2, delaySeconds 12}` · 5 Grit `{6, 3, 20, 0, levelOffset 1}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Shifting park `{landmarkChanges 4}` · 9 Extreme `{8, 4, 30, 0, levelOffset 3}`.
+
+---
+
+### Treehouse Telegraph
+
+A cooperative word-association game between two treehouses joined by a tin-can string. On listen boards the AI friend sends one clue word and a number and the player taps the picture-word cards on the clothesline that fit; a dud ends the turn and the hidden thunderstorm card ends the board. On talk boards (every third) the player sees the secret cards and the storm, picks one of three clues, and the friend guesses from a hand-written association table. Parameters control how many cards hang on the line, how obvious the friend's associations are (and how strictly the friend reads the player's clue), how tempting the wrong cards are, a per-turn timer and the next board's rung. Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `boardSize` (Integer, 9–16, default 12): cards on the clotheslines; the secret cards stay at two or three clue groups, so more cards means more duds and decoys. Next board.
+- `clueClarity` (Float, 0.3–1.0, default 0.75): listen boards: how far down each clue's word list the secret cards are drawn (1.0 only the most obvious fits). Talk boards: how strictly the friend reads the player's clue (low values let the friend reach for a looser card). Higher is easier. Listen half next board; talk half at once.
+- `decoyStrength` (Float, 0–1, default 0.4): about 0.6 × this of the duds are near-misses of a live clue; from 0.5 the storm is a near-miss; on talk boards from 0.6 the storm is a word one of the player's candidate clues also fits. Higher is harder. Next board.
+- `turnTimer` (Integer, 0–60, default 0): seconds per turn to pick cards or choose a clue; 0 untimed, 1–7 count as 8; running out passes the turn and uses up a clue. At once (re-timed in proportion).
+- `levelOffset` (Integer, −3–3, default 0): shifts the next board's rung (two clues of two cards → near-miss decoys → clues worth three → three clues → three clues of three stretchier cards). Next board.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "clueClarity", "parameterValue": 0.9 } }
+```
+
+Keys 1–9: 1 Relax `{boardSize 9, clueClarity 1, decoyStrength 0.1, turnTimer 0, levelOffset −1}` · 2 Gentle `{10, 0.9, 0.25, 0}` · 3 Default `{12, 0.75, 0.4, 0, levelOffset 0}` · 4 Brisk `{boardSize 12, turnTimer 30}` · 5 Grit `{16, 0.45, 0.85, 20, levelOffset 1}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Sneaky decoys `{decoyStrength 1}` · 9 Extreme `{16, 0.3, 1, turnTimer 10, levelOffset 3}`.
+
+---
+
+### Viewpoints
+Three.js theory-of-mind puzzle (slug `viewpoints`, folder `live/Viewpoints`): a short story plays in a cutaway dollhouse — peg dolls hop between rooms or step outside, turn to the wall, doze off or peek through a window while the dolls or Pip the cat secretly move things between labelled containers — then the player taps the container or doll that answers 2–4 questions (what really happened, where a doll will look, who saw it, and from rung 5 where one doll thinks another will look). Each story is another house from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores parameters.
+
+**Parameters**
+- `sightCones` (Integer, 0–2): 0 no sight cones, 1 a doll's cone on hover/tap, 2 every doll's cone always. Applies at once. Default 1.
+- `eventCount` (Integer, 1–6): secret moves (or an eating) per story. Applies from the next story. Default 2.
+- `replay` (Integer, 0–3): watch-again replays allowed per story. Applies at once (left = value − used). Default 1.
+- `answerTimer` (Integer, 0–30): seconds per question, 0 = untimed; a timeout counts as wrong. Applies at once (switching on starts a full clock; other changes keep the fraction left). Default 0.
+- `storySpeed` (Number, 0.6–1.6): story playback speed, about 1.6 s per beat at 1.0. Applies at once, mid-beat. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next story (2 → 4 dolls, 1 → 3 objects, 1 → 4 rooms, turning away and dozing, window peeks, second-order questions, a mirror, eating). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "sightCones",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ sightCones: 2, eventCount: 1, replay: 3, answerTimer: 0, storySpeed: 0.75, levelOffset: -1 }` (Relax)
+- `2`: `{ sightCones: 2, eventCount: 2, replay: 2, answerTimer: 0, storySpeed: 0.85 }` (Gentle)
+- `3`: `{ sightCones: 1, eventCount: 2, replay: 1, answerTimer: 0, storySpeed: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ sightCones: 1, eventCount: 3, answerTimer: 20, storySpeed: 1.15 }` (Brisk)
+- `5`: `{ sightCones: 0, eventCount: 5, replay: 0, answerTimer: 10, storySpeed: 1.4, levelOffset: 1 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next story)
+- `7`: `{ levelOffset: 2 }` (Harder next story)
+- `8`: `{ sightCones: 2 }` (All sight cones)
+- `9`: `{ sightCones: 0, eventCount: 6, replay: 0, answerTimer: 6, storySpeed: 1.6, levelOffset: 3 }` (Extreme)
+
+---
+
+### Bandstand
+Three.js call-and-response rhythm game in a 1930s rubber-hose cartoon style (slug `bandstand`, folder `live/Bandstand`): the player is the rabbit at a four-bar xylophone (circle, triangle, square, star; D F J K, arrows or pads) in a band with Pip (trumpet), Bess (banjo), Duke (drums) and Otis (tuba). Each round is 24 beats: a bandmate calls a phrase (8 beats), the player plays it back from memory in the same rhythm (8 beats), then keeps the groove by hitting visible bouncing notes while another bandmate solos (8 beats). Misses are covered by a bandmate's fill depending on `bandHelp`; streaks fill a crowd-energy meter. Each tune plays in a new venue from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `tempo` (Integer, 70–150): the band's beats per minute; a round is 24 beats (14.4 s at 100). Applies from the next bar line. Default 100.
+- `phraseLength` (Integer, 2–8): notes in each call at rungs 1–3; rungs 4–6 add one and rungs 7–9 add two (max 10); more than 6 notes use eighth notes. Applies from the next call. Default 4.
+- `timingWindowMs` (Integer, 60–250): ± ms a note may land from its beat and still count; the inner 40 % scores "Swell!" (full points), the rest "Nice" (half). Applies at once. Default 140.
+- `bandHelp` (Integer, 0–2): 0 misses flub and break the streak (−14 % crowd); 1 a bandmate covers each miss with a fill, streak still breaks (−6 %); 2 covers keep the streak and the next answer note is hinted faintly one beat ahead. Applies at once. Default 1.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next tune (fourth bar, eighth notes, extra call notes, leaps, busier grooves, more rounds). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "phraseLength",
+  "parameterValue": 6
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ tempo: 80, phraseLength: 3, timingWindowMs: 220, bandHelp: 2 }` (Relax)
+- `2`: `{ tempo: 90, phraseLength: 3, timingWindowMs: 180, bandHelp: 2 }` (Gentle)
+- `3`: `{ tempo: 100, phraseLength: 4, timingWindowMs: 140, bandHelp: 1, levelOffset: 0 }` (Default)
+- `4`: `{ tempo: 116, phraseLength: 4, timingWindowMs: 130 }` (Brisk)
+- `5`: `{ tempo: 128, phraseLength: 6, timingWindowMs: 90, bandHelp: 0 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next tune)
+- `7`: `{ levelOffset: 2 }` (Harder next tune)
+- `8`: `{ phraseLength: 8 }` (Long calls)
+- `9`: `{ tempo: 150, phraseLength: 8, timingWindowMs: 60, bandHelp: 0, levelOffset: 3 }` (Extreme)
+
+---
+
+### Switchyard
+Three.js task-switching game on a tilt-shift HO-scale model railway: flip switches to route toy trains into numbered sidings by the station-master's rule (by colour, by cargo, by length, reverse), which changes every few trains with a warning first (slug `switchyard`, folder `live/Switchyard`). The parameters are skillprint-js-sdk `ParameterDefinition`s in `static/src/params.js`; `backend/export-config.mjs` writes the manifest (`backend/game-scoring-config.json`) from them. Out-of-range values are clamped, integers rounded. The tutorial runs its own slow trains and ignores them.
+
+**Parameters**
+- `trainSpeed` (Number, 0.5–2.0): multiplies how fast every train runs (2.4 table units/s at 1.0, about 1.7 s from the tunnel mouth to the first switch; +3 % per rung) and how often trains leave the tunnel (every 8.5 s on rung 1, 0.5 s less per rung, min 3.4 s, divided by this). Applies at once, to trains already moving. Default 1.0.
+- `ruleSwitchEvery` (Integer, 1–8): trains per routing rule before the sign changes; the change happens as the first train under the new rule leaves the tunnel. Applies at once, counted from the last change. Default 3.
+- `cueWarning` (Number, 0–6): seconds of "Next ▸ CARGO in n" warning before a rule change (0 = no warning). Applies at once, to the next change. Default 3.
+- `trackComplexity` (Integer, 1–4): yard size, 3 / 4 / 5 / 6 sidings with 2–5 switches. Takes effect from the next shift. Default 2.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next shift (7–12 trains, shorter gaps, the length rule from rung 2, reverse from rung 4, more trains whose colour, cargo and length point to different sidings). Applies when the next shift starts, never mid-shift. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "ruleSwitchEvery",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ trainSpeed: 0.65, ruleSwitchEvery: 6, cueWarning: 5.5, trackComplexity: 1 }` (Relax)
+- `2`: `{ trainSpeed: 0.8, ruleSwitchEvery: 4, cueWarning: 4.5, trackComplexity: 2 }` (Gentle)
+- `3`: `{ trainSpeed: 1.0, ruleSwitchEvery: 3, cueWarning: 3, trackComplexity: 2, levelOffset: 0 }` (Default)
+- `4`: `{ trainSpeed: 1.2, ruleSwitchEvery: 3, cueWarning: 2 }` (Brisk)
+- `5`: `{ trainSpeed: 1.45, ruleSwitchEvery: 1, cueWarning: 0.5, trackComplexity: 4 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next level)
+- `7`: `{ levelOffset: 2 }` (Harder next level)
+- `8`: `{ ruleSwitchEvery: 1 }` (New rule every train)
+- `9`: `{ trainSpeed: 2.0, ruleSwitchEvery: 1, cueWarning: 0, trackComplexity: 4, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Kind Words Café
+
+Customers at a cel-shaded riverside café bring a short note about their day; the player builds a kind reply from four rows of word tiles (an opener and a closer that set the tone, the feeling word for "you must feel ___", and a drink that suits the moment) and serves it before the customer's patience runs out. Parameters control how many tiles each row deals, how close the wrong feeling words are to the right one, how long customers wait, how much the note and tiles help, and the next shift's rung (more customers, subtler and mixed notes, confusable tones from rung 3). Values out of range are clamped; integers are rounded. The tutorial ignores parameters.
+
+**Parameters**
+
+- `tileChoices` (Integer, 2–5, default 3): tiles dealt in each of the four rows; one fits. From the next customer.
+- `nuance` (Integer, 0–2, default 1): how close the wrong feeling words are: 0 opposites ("heartbroken" vs "giddy"), 1 same family, 2 near-synonyms ("relieved" vs "content"). From the next customer.
+- `customerPace` (Float, 0.5–2, default 1): each customer waits 45 s ÷ pace; the next arrives 3 s ÷ pace after one leaves. At once; patience left rescales in proportion.
+- `hintLevel` (Integer, 0–2, default 1): 0 plain note; 1 the note's key phrase underlined; 2 also names the tone on the note and marks opener, closer and drink tiles with tone symbols. At once.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next shift's rung (customers 3→6, plain → subtle/mixed notes, confusable wrong tones from rung 3). Next shift.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "nuance", "parameterValue": 2 } }
+```
+
+Keys 1–9: 1 Relax `{tileChoices 2, nuance 0, customerPace 0.6, hintLevel 2, levelOffset −1}` · 2 Gentle `{3, 1, 0.8, 1}` · 3 Default `{3, 1, 1, 1, levelOffset 0}` · 4 Brisk `{tileChoices 4, customerPace 1.3}` · 5 Grit `{5, 2, 1.6, 0, levelOffset 1}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Near-synonyms `{nuance 2}` · 9 Extreme `{5, 2, 2, 0, levelOffset 3}`.
+
+---
+
+### Blockwright
+Three.js voxel building game where numbers are the blueprint (slug `blockwright`, folder `live/Blockwright`): each commission is a brief of numeric conditions (an exact block count, storeys, ground area, a side length, a solid box of a given volume, a footprint perimeter, a fraction of the blocks in one colour, "twice as tall as it is long"), written backwards from a hidden solid box so it always has an answer. The player lays, paints and removes blocks on a 9 × 9 plot (tap a face, drag a row, or a keyboard cursor), turns the plot, and presses Inspect; any building meeting every condition is approved (100 per condition, bonuses for few moves, symmetry and time left). Rungs: counting, storeys, arrays, volume, volume and perimeter, fractions, proportions, everything combined. Each commission is on a new plot from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `counterVisible` (Integer, 0–2): 0 the survey counter (blocks, footprint, height, perimeter, colour counts) and live ticks on the brief are always shown; 1 hidden, the Measure button shows them for 3 s at 10 points a look; 2 hidden with no Measure. Applies at once. Default 0.
+- `targetSize` (Number, 0.6–1.6): scales the block counts the next commission asks for (4–10 on rung 1, 12–36 on the volume rungs at 1.0). From the next commission. Default 1.0.
+- `constraintCount` (Integer, 1–4): the rung's core condition(s) plus n − 1 extras (height, area, perimeter, fraction, proportion). From the next commission. Default 2.
+- `buildTimer` (Integer, 0–180): seconds on the site clock per commission, 0 untimed (1–29 are raised to 30); when it runs out the building is inspected as it stands. Applies at once: turning it on starts a full clock, changing it rescales the time left, 0 stops it. Default 0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next commission. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "counterVisible",
+  "parameterValue": 1
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ counterVisible: 0, targetSize: 0.75, constraintCount: 1, buildTimer: 0 }` (Relax)
+- `2`: `{ counterVisible: 0, targetSize: 0.9, constraintCount: 2, buildTimer: 0 }` (Gentle)
+- `3`: `{ counterVisible: 0, targetSize: 1, constraintCount: 2, buildTimer: 0, levelOffset: 0 }` (Default)
+- `4`: `{ buildTimer: 120, constraintCount: 3 }` (Brisk)
+- `5`: `{ counterVisible: 2, targetSize: 1.4, constraintCount: 3, buildTimer: 75 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next commission)
+- `7`: `{ levelOffset: 2 }` (Harder next commission)
+- `8`: `{ counterVisible: 1 }` (Counter on request)
+- `9`: `{ counterVisible: 2, targetSize: 1.6, constraintCount: 4, buildTimer: 45, levelOffset: 3 }` (Extreme)
+
+---
+
+### Tidepool
+
+The tide is going out and has left creatures stranded in a rock pool on a coastal shelf; the player finds them (they're camouflaged against rock, sand and weed, with pebble and shell decoys at higher rungs) and carries each one gently over the rocks into the open sea before the pool drains. Rushed carries frighten a creature, which wriggles free and hides again. Parameters control how well creatures blend in, how fast the tide drains the pool, how many creatures there are, how quick a hand a carried creature tolerates, and the next pool's rung (species, decoys, relocating creatures, weed, tide time). Values out of range are clamped; integers are rounded.
+
+**Parameters**
+
+- `camouflage` (Float, 0–1, default 0.55): how closely each creature's colours match the ground under it (0.92 × camouflage^0.8 of the way to the substrate) and how often and how visibly it gives a tell (bubbles, a twitch; every 3 + 8 × camouflage s). At once.
+- `tideSpeed` (Float, 0.5–2, default 1): the pool drains in its base tide time (80 s at rung 1 to 60 s at rung 6) divided by this. At once; the time left rescales, the water stays where it is.
+- `creatureCount` (Integer, 3–9, default 5): creatures stranded per pool. At once: extra creatures hide in new spots; an unspotted surplus slips away with a wave.
+- `calmTolerance` (Float, 0.5–2, default 1): a carried creature stays calm while the hand moves slower than 4 m/s × this; faster drains calm, and at zero it startles and hides again. At once, mid-carry included.
+- `levelOffset` (Integer, −3–3, default 0): shifts the next pool's rung (prawn from 2, octopus from 3, plaice from 4; decoys = rung − 1 up to 6; hidden creatures move as the water drops from rung 3; denser weed; shorter tide). Next pool.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "camouflage", "parameterValue": 0.7 } }
+```
+
+Keys 1–9: 1 Relax `{camouflage 0.2, tideSpeed 0.6, creatureCount 4, calmTolerance 1.6, levelOffset −1}` · 2 Gentle `{0.3, 0.8, 4, 1.3}` · 3 Default `{0.55, 1, 5, 1, levelOffset 0}` · 4 Brisk `{tideSpeed 1.3, creatureCount 6}` · 5 Grit `{0.8, 1.5, 7, 0.7}` · 6 `levelOffset −2` · 7 `levelOffset +2` · 8 Master of disguise `{camouflage 0.95}` · 9 Extreme `{1, 2, 9, 0.5, levelOffset 3}`.
+
+---
+
+### Lookout
+Three.js task-switching game (slug `lookout`, folder `live/Lookout`): a fire-lookout tower above three valleys, drawn like a 1930s park poster. Calls come in from all three at once — smoke in Ridge Valley (radio the crew the zone's card names), a lost hiker's flashlight code in the Hollow (answer by the hiker code), a raft at River Fork (call the clear channel, mirrored when the raft faces the tower) — and the same three buttons mean something different in each valley. Dispatch rewrites cards mid-shift. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores all parameters.
+
+**Parameters**
+- `eventRate` (Number, 0.5–2.0): the gap between new calls is the rung's base gap (8 s at rung 1 → 4.5 s at rung 8) ÷ this. One open call per valley; the rung caps calls open at once (1, then 2, then 3). Applies at once. Default 1.0.
+- `protocolChanges` (Integer, 0–4): card rewrites per 75 s shift (a zone moves to another crew, two flash codes swap, or the raft turns round so calls are mirrored); rung 5+ adds one. Applies at once: the changes left are re-spread over the rest of the shift. Default 1.
+- `cueVisibility` (Number, 0.3–1.0): weather. Lower thickens the valley fog and fades smoke plumes, flashlights and log jams. Applies at once. Default 1.0.
+- `responseWindow` (Number, 0.5–2.0): each call stays open (11 s at rung 1 → 7.5 s at rung 8) × this before it is missed. Applies at once; open calls keep their fraction of time left. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next shift (calls open at once 1 → 2 → 3, shorter gaps and windows, faster flash codes, an extra card change from rung 5, drifting fog from rung 6). Never mid-shift. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "protocolChanges",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ eventRate: 0.7, protocolChanges: 0, cueVisibility: 1.0, responseWindow: 1.7 }` (Relax)
+- `2`: `{ eventRate: 0.85, protocolChanges: 1, cueVisibility: 0.95, responseWindow: 1.3 }` (Gentle)
+- `3`: `{ eventRate: 1.0, protocolChanges: 1, cueVisibility: 1.0, responseWindow: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ eventRate: 1.3, responseWindow: 0.85 }` (Brisk)
+- `5`: `{ eventRate: 1.6, protocolChanges: 3, cueVisibility: 0.55, responseWindow: 0.7 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next shift)
+- `7`: `{ levelOffset: 2 }` (Harder next shift)
+- `8`: `{ cueVisibility: 0.35 }` (Thick fog)
+- `9`: `{ eventRate: 2.0, protocolChanges: 4, cueVisibility: 0.3, responseWindow: 0.5, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Gearworks
+
+A gear-ratio puzzle at a watchmaker's bench: set gears from a tray into a train so the moon dial turns at the commission's ratio and direction (tooth counts multiply along the train, every mesh reverses, double gears compound), then engage it to wake the bench's automaton. Parameters change the kind of ratio, the size of the tray, how much the bench shows while you build, and the chronograph; `ratioComplexity` and `levelOffset` apply from the next mechanism, the rest at once. The tutorial ignores parameters.
+
+**Parameters**
+- `ratioComplexity` (Integer, 0–2, default 1): kind of ratio asked — 0 whole numbers, 1 fractions too, 2 compound ratios through double gears one rung earlier. Next mechanism.
+- `gearChoices` (Integer, 3–9, default 6): kinds of gear in the tray; the solution's gears are always included. Applies at once.
+- `previewSpin` (Integer, 0–2, default 1): 0 train still until Engage, 1 it turns while you build, 2 plus a live ratio readout. Applies at once.
+- `benchTimer` (Integer, 0–180 s, default 0 = untimed): chronograph per mechanism; at zero the train is engaged as it stands. Applies at once, in proportion.
+- `levelOffset` (Integer, −3–3, default 0): shifts the rung of the next mechanism.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "previewSpin", "parameterValue": 2 } }
+```
+
+**Keyboard mapping (GameAdjustmentTester / iframeTest)**
+- 1 Relax: ratioComplexity 0, gearChoices 4, previewSpin 2, benchTimer 0, levelOffset −1
+- 2 Gentle: ratioComplexity 0, gearChoices 5, previewSpin 2, benchTimer 0
+- 3 Default: ratioComplexity 1, gearChoices 6, previewSpin 1, benchTimer 0, levelOffset 0
+- 4 Brisk: gearChoices 8, previewSpin 1, benchTimer 90
+- 5 Grit: ratioComplexity 2, gearChoices 9, previewSpin 0, benchTimer 60, levelOffset 1
+- 6 Easier next level: levelOffset −2
+- 7 Harder next level: levelOffset 2
+- 8 No preview: previewSpin 0
+- 9 Extreme: ratioComplexity 2, gearChoices 9, previewSpin 0, benchTimer 30, levelOffset 3
+
+---
+
+### Market Day
+Three.js mental-arithmetic game (slug `market-day`, folder `live/Market Day`): a village market stall in dithered isometric pixel art, run with an AI partner. Shoppers queue with baskets; the player totals the lines, applies the chalkboard's deal of the day when it covers them ("3 for 2 on pears", "£1 off when you spend over £5", "20% off fruit") and taps exact change out of a cash tin before the shopper's patience runs out. The partner asks the player to check her sums (Y/N) and takes passed shoppers (X). Each market day is a different town from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores all parameters.
+
+**Parameters**
+- `queuePace` (Number, 0.5–2.0): a new shopper joins every 9 s ÷ this, and each waits 50 s ÷ this before walking off (the one being served drains at 0.6×). Applies at once. Default 1.0.
+- `dealComplexity` (Integer, 0–2): which deals the board can carry — 0 none, 1 multibuys and money off, 2 also percentages. Applies from the next shopper rung up (the board is rewritten then, never mid-sum). Default 1.
+- `changeHelp` (Integer, 0–2): 0 none; 1 the till shows the total due after the deal; 2 it also shows the change and the coins to give glow in the tin. Applies at once. Default 0.
+- `numberScale` (Number, 0.5–2.0): multiplies unit prices; at 1.4+ prices fall on 5p and shoppers pay with £20 notes; below 0.75 every price is a round 50p or pound. Applies from the next shopper. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next market day (more lines per basket, 10p then 5p prices, baskets that stop one short of a multibuy, more partner checks). Never mid-day. Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "dealComplexity",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ queuePace: 0.6, dealComplexity: 0, changeHelp: 2, numberScale: 0.6 }` (Relax)
+- `2`: `{ queuePace: 0.8, dealComplexity: 1, changeHelp: 1, numberScale: 0.8 }` (Gentle)
+- `3`: `{ queuePace: 1.0, dealComplexity: 1, changeHelp: 0, numberScale: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ queuePace: 1.3, numberScale: 1.2 }` (Brisk)
+- `5`: `{ queuePace: 1.6, dealComplexity: 2, changeHelp: 0, numberScale: 1.6 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next day)
+- `7`: `{ levelOffset: 2 }` (Harder next day)
+- `8`: `{ dealComplexity: 2 }` (Percentage deals)
+- `9`: `{ queuePace: 2.0, dealComplexity: 2, changeHelp: 0, numberScale: 2.0, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
+### Waggle
+Three.js memory and spatial game (slug `waggle`, folder `live/Waggle`): the player is a forager honeybee. On the comb, sisters perform the real waggle dance (the run's angle from up = bearing clockwise from the sun; each waggle = 50 m); the player remembers one to four dances, flies out over a meadow to find the danced patches among decoys (mirror-image and sun-drift traps), then aims and waggles their own dance home to recruit sisters and fill the hive with honey. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded. The tutorial ignores every parameter.
+
+**Parameters**
+- `danceRepeats` (Integer, 1–6): figure-eight circuits each sister dances. Applies at once, the current dance included. Default 3.
+- `danceCount` (Integer, 0–4): sisters (patches to remember) per foray; 0 follows the rung (1, 2 from rung 3, 3 from rung 6). From the next foray. Default 0.
+- `patchSpread` (Number, 0.5–2.0): minimum separation of decoys from true patches (26° / 130 m at 1.0). From the next foray. Default 1.0.
+- `sunMarker` (Integer, 0–2): aids: 0 sun only; 1 sun-bearing line from the hive; 2 plus 30° compass ticks from the sun, labelled 100 m rings and a dashed angle guide under each dance. Applies at once. Default 1.
+- `danceSpeed` (Number, 0.6–1.6): tempo of the sisters' dances (5 waggles/s at 1.0); the waggle count never changes. Applies at once. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next foray (more decoys, more dances, sun drift from rung 4, wind from rung 5). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "sunMarker",
+  "parameterValue": 2
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ danceRepeats: 5, danceCount: 1, patchSpread: 1.7, sunMarker: 2, danceSpeed: 0.75 }` (Relax)
+- `2`: `{ danceRepeats: 4, patchSpread: 1.3, sunMarker: 2, danceSpeed: 0.9 }` (Gentle)
+- `3`: `{ danceRepeats: 3, danceCount: 0, patchSpread: 1.0, sunMarker: 1, danceSpeed: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ danceRepeats: 2, danceSpeed: 1.25, danceCount: 2 }` (Brisk)
+- `5`: `{ danceRepeats: 1, danceCount: 3, patchSpread: 0.65, sunMarker: 0, danceSpeed: 1.4 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next foray)
+- `7`: `{ levelOffset: 2 }` (Harder next foray)
+- `8`: `{ sunMarker: 0 }` (No sun line)
+- `9`: `{ danceRepeats: 1, danceCount: 4, patchSpread: 0.5, sunMarker: 0, danceSpeed: 1.6, levelOffset: 3 }` (Extreme)
+
+---
+
+### Rootwords
+
+Word game on a copperplate-engraved tree whose buds are Greek and Latin roots: Graft roots into the word for a definition, Decode an unfamiliar word from its roots (A-D, optionally timed), and Coin a new word from any roots with the right meanings. Each tree is a plate of 5-8 tasks; rungs (trees finished + levelOffset) add tasks, decoys that form real words, three-root words and more Coin tasks. The tutorial ignores parameters.
+
+**Parameters**
+- `rootChoices` (integer, 4-12, default 8): buds on the tree for Graft/Coin, needed roots plus decoys. Next task.
+- `rarity` (integer, 0-2, default 1): word obscurity, 0 everyday, 1 school, 2 rare. Next task.
+- `hintLevel` (integer, 0-2, default 1): 0 tags show only the root, 1 also its meaning, 2 also lights the next needed root and strikes one wrong Decode choice. At once.
+- `decodeTimer` (integer seconds, 0-40, default 20): time per Decode question, 0 untimed. At once (re-based, at least 3 s left).
+- `levelOffset` (integer, -3 to 3, default 0): shifts the rung of the next tree.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "hintLevel", "parameterValue": 0 } }
+```
+
+**Keyboard mapping (GameAdjustmentTester / iframeTest.html)**
+1 Relax `{rootChoices:5, rarity:0, hintLevel:2, decodeTimer:0, levelOffset:-1}` · 2 Gentle `{rootChoices:6, rarity:0, hintLevel:1, decodeTimer:30}` · 3 Default `{rootChoices:8, rarity:1, hintLevel:1, decodeTimer:20, levelOffset:0}` · 4 Brisk `{rootChoices:10, decodeTimer:14}` · 5 Grit `{rootChoices:11, rarity:2, hintLevel:0, decodeTimer:10, levelOffset:1}` · 6 Easier next tree `{levelOffset:-2}` · 7 Harder next tree `{levelOffset:2}` · 8 Bare roots `{hintLevel:0}` · 9 Extreme `{rootChoices:12, rarity:2, hintLevel:0, decodeTimer:6, levelOffset:3}`
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

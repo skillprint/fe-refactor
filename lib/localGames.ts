@@ -69,7 +69,30 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     // Three.js math games, each importing skillprint-js-sdk like Mountain Appreciator.
     'equilibrium': 'Equilibrium',
     'firefly-gates': 'Firefly Gates',
-    'elixir': 'Elixir'
+    'elixir': 'Elixir',
+    // Three.js games from the coverage batch (skills/moods the catalogue lacked), each on skillprint-js-sdk.
+    'lumen': 'Lumen',
+    'flockwork': 'Flockwork',
+    'broadsheet': 'Broadsheet',
+    'wayfinder': 'Wayfinder',
+    'hearthlight': 'Hearthlight',
+    'jelly-juggle': 'Jelly Juggle',
+    'xenoflora': 'Xenoflora',
+    'chronicle': 'Chronicle',
+    'glide': 'Glide',
+    'cache': 'Cache',
+    'treehouse-telegraph': 'Treehouse Telegraph',
+    'viewpoints': 'Viewpoints',
+    'bandstand': 'Bandstand',
+    'switchyard': 'Switchyard',
+    'kind-words-cafe': 'Kind Words Cafe',
+    'blockwright': 'Blockwright',
+    'tidepool': 'Tidepool',
+    'lookout': 'Lookout',
+    'gearworks': 'Gearworks',
+    'market-day': 'Market Day',
+    'waggle': 'Waggle',
+    'rootwords': 'Rootwords'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
