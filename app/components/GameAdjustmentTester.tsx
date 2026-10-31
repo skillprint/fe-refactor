@@ -812,6 +812,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'flockwork':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'flightiness', parameterValue: 0.65 }, { parameterName: 'dogAutonomy', parameterValue: 0.85 }, { parameterName: 'flockSize', parameterValue: 9 }, { parameterName: 'dayLength', parameterValue: 1.8 }]; // Relax
+                case 2: return [{ parameterName: 'flightiness', parameterValue: 0.8 }, { parameterName: 'dogAutonomy', parameterValue: 0.7 }, { parameterName: 'dayLength', parameterValue: 1.3 }]; // Gentle
+                case 3: return [{ parameterName: 'flightiness', parameterValue: 1 }, { parameterName: 'dogAutonomy', parameterValue: 0.5 }, { parameterName: 'flockSize', parameterValue: 12 }, { parameterName: 'dayLength', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'dayLength', parameterValue: 0.75 }, { parameterName: 'flockSize', parameterValue: 16 }]; // Brisk
+                case 5: return [{ parameterName: 'flightiness', parameterValue: 1.5 }, { parameterName: 'dogAutonomy', parameterValue: 0.1 }, { parameterName: 'flockSize', parameterValue: 18 }, { parameterName: 'dayLength', parameterValue: 0.7 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next field
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next field
+                case 8: return [{ parameterName: 'dogAutonomy', parameterValue: 1 }]; // Dogs do it all
+                case 9: return [{ parameterName: 'flightiness', parameterValue: 1.8 }, { parameterName: 'dogAutonomy', parameterValue: 0 }, { parameterName: 'flockSize', parameterValue: 30 }, { parameterName: 'dayLength', parameterValue: 0.5 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

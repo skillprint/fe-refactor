@@ -1006,6 +1006,39 @@ Three.js light-routing puzzle in a chapel at golden hour (slug `lumen`, folder `
 
 ---
 
+### Flockwork
+Three.js cooperative herding game (slug `flockwork`, folder `live/Flockwork`): the player leads two or three sheepdogs (Moss the outrunner, Bramble the driver black-faces respect, Pip the pup who holds gates), selecting a dog and whistling commands (fetch, send, hold the gate, come-bye, away, walk up, lie down) to pen the flock before sundown on a new painted hillside each field. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded; the tutorial ignores every parameter.
+
+**Parameters**
+- `flightiness` (Number, 0.5–1.8): how easily the sheep take fright; flight zone 4.6 m × f^0.7, stress from pressing or running dogs × f, and the ram breaks every ~24 s ÷ f^0.9. Higher scatters more. Applies at once. Default 1.0.
+- `dogAutonomy` (Number, 0–1): how much idle dogs do unbidden: take the gate (≥ 0.25), block a threatened wall gap (≥ 0.4), head off the ram (≥ 0.55), fetch loose groups (≥ 0.7), after 12 s idle at 0.05 down to 1.5 s at 1. Applies at once. Default 0.5.
+- `flockSize` (Integer, 6–30): sheep per field (× 0.9 at rung 1 to × 1.2 from rung 7). Next field; raising it mid-field also sends the extra sheep (up to 8) over the far wall as strays and raises the number to pen. Default 12.
+- `dayLength` (Number, 0.5–2.0): multiplies the time to sundown (75 s at rung 1 to 100 s from rung 6). Applies at once; daylight left scales in proportion. Default 1.0.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next field (2 lambs and a wall gap → 3 Bramble, black-faces, stream and bridge → 4 bog → 5 the ram → 6 dividing wall → 7+ more of everything). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "dogAutonomy",
+  "parameterValue": 0.8
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ flightiness: 0.65, dogAutonomy: 0.85, flockSize: 9, dayLength: 1.8 }` (Relax)
+- `2`: `{ flightiness: 0.8, dogAutonomy: 0.7, dayLength: 1.3 }` (Gentle)
+- `3`: `{ flightiness: 1.0, dogAutonomy: 0.5, flockSize: 12, dayLength: 1.0, levelOffset: 0 }` (Default)
+- `4`: `{ dayLength: 0.75, flockSize: 16 }` (Brisk)
+- `5`: `{ flightiness: 1.5, dogAutonomy: 0.1, flockSize: 18, dayLength: 0.7 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next field)
+- `7`: `{ levelOffset: 2 }` (Harder next field)
+- `8`: `{ dogAutonomy: 1 }` (Dogs do it all)
+- `9`: `{ flightiness: 1.8, dogAutonomy: 0, flockSize: 30, dayLength: 0.5, levelOffset: 3 }` (Extreme)
+
+---
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

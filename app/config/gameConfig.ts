@@ -367,6 +367,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Lumen/backend/game-scoring-config.json'),
+  },
+
+  'flockwork': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Flockwork/backend/game-scoring-config.json'),
   }
 };
 
@@ -960,6 +966,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Picturing light paths', 'Colour mixing logic', 'Spatial routing', 'Elegant solutions'],
     instructions: 'Place mirrors, prisms, filters, splitters and combiners from the tray onto the floor, and click (or scroll, or R) to turn them 45°. Route and mix the light until every crystal glows its colour (shown by its glyph), then seal the window; spare pieces left unused earn Elegance.'
   },
+  'flockwork': {
+    name: 'Flockwork',
+    description: 'Lead three sheepdogs: switch dogs, whistle commands and pen the flock before sundown.',
+    image: gameAssetUrl('live/Flockwork/cover.jpg'),
+    category: 'Strategy',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Juggling several jobs at once', 'Planning the order of moves', 'Reading space and angles', 'Working as a team'],
+    instructions: 'Pick a dog (its board, the dog, or Tab/Q/E), then click the sheep to fetch them, the grass to send it, or the gate to hold it open. Steer with A come-bye, D away, W walk up and S lie down. One dog holds the gate while the others drive: pen the number on the slate before sundown.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1059,4 +1075,5 @@ export const knownGameSlugs = [
   'firefly-gates',
   'elixir',
   'lumen',
+  'flockwork',
 ];

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="210" viewBox="0 0 380 210">
+  <title>Flockwork</title>
+  <desc>Skillprint game card: a painted green hillside at golden hour, a sheepdog lying by an open gate while another walks a small flock toward a round stone fold</desc>
+  <rect width="380" height="210" fill="#f2e3c4"/>
+  <circle cx="304" cy="40" r="17" fill="#f6c25b"/>
+  <path d="M0 78 Q70 52 150 70 Q230 50 300 66 Q345 58 380 64 V210 H0Z" fill="#9db86a"/>
+  <path d="M0 98 Q90 84 190 94 Q290 84 380 92 V210 H0Z" fill="#7fa552"/>
+  <path d="M0 150 Q120 138 380 146 V210 H0Z" fill="#6f9648"/>
+  <g fill="#8a8f8c">
+    <rect x="14" y="94" width="352" height="6" rx="3"/>
+  </g>
+  <g fill="#6c7270"><circle cx="30" cy="94" r="2.4"/><circle cx="64" cy="95" r="2.4"/><circle cx="100" cy="94" r="2.4"/><circle cx="140" cy="95" r="2.4"/><circle cx="182" cy="94" r="2.4"/><circle cx="222" cy="95" r="2.4"/><circle cx="262" cy="94" r="2.4"/><circle cx="300" cy="95" r="2.4"/><circle cx="340" cy="94" r="2.4"/></g>
+  <ellipse cx="300" cy="150" rx="54" ry="30" fill="#7d8482"/>
+  <ellipse cx="300" cy="148" rx="46" ry="24" fill="#c8ad73"/>
+  <path d="M246 140 L246 158" stroke="#7d8482" stroke-width="7"/>
+  <g fill="#fbf8ef"><ellipse cx="292" cy="142" rx="11" ry="8"/><ellipse cx="312" cy="152" rx="11" ry="8"/><ellipse cx="290" cy="158" rx="10" ry="7"/></g>
+  <rect x="214" y="150" width="34" height="5" rx="2" fill="#efe6cf" transform="rotate(-28 246 152)"/>
+  <g transform="translate(206 160)"><ellipse cx="0" cy="0" rx="11" ry="5" fill="#b0613a"/><circle cx="10" cy="-3" r="4.5" fill="#b0613a"/><ellipse cx="3" cy="1" rx="4" ry="3" fill="#f7f0e5"/></g>
+  <g fill="#fbf8ef"><ellipse cx="150" cy="140" rx="13" ry="9"/><ellipse cx="174" cy="132" rx="12" ry="8.5"/><ellipse cx="168" cy="152" rx="12" ry="8.5"/><ellipse cx="190" cy="146" rx="11" ry="8"/></g>
+  <g fill="#2f2a28"><ellipse cx="200" cy="146" rx="4" ry="3.5"/><ellipse cx="185" cy="131" rx="4" ry="3.5"/><ellipse cx="179" cy="152" rx="4" ry="3.5"/><ellipse cx="162" cy="139" rx="4" ry="3.5"/></g>
+  <g transform="translate(108 152)"><ellipse cx="0" cy="0" rx="13" ry="5.5" fill="#26262b"/><circle cx="12" cy="-4" r="5" fill="#26262b"/><ellipse cx="6" cy="0" rx="4" ry="4" fill="#f3eee6"/><path d="M-12 -1 Q-20 -8 -22 -2" stroke="#26262b" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M14 -6 v-4" stroke="#26262b" stroke-width="2.4" stroke-linecap="round"/></g>
+  <path d="M128 162 Q150 172 176 164" stroke="#fffaf0" stroke-width="2.4" stroke-dasharray="5 4" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <g transform="translate(58 72)"><rect x="-2" y="0" width="4" height="12" fill="#5a4632"/><circle cx="0" cy="-4" r="11" fill="#5f8f3c"/><circle cx="-4" cy="-8" r="2" fill="#fbf6ee"/><circle cx="5" cy="-2" r="2" fill="#fbf6ee"/></g>
+  <g transform="translate(340 72)"><rect x="-2" y="0" width="4" height="10" fill="#5a4632"/><circle cx="0" cy="-3" r="9" fill="#6f9d45"/></g>
+</svg>

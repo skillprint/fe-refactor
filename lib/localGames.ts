@@ -71,7 +71,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'firefly-gates': 'Firefly Gates',
     'elixir': 'Elixir',
     // Three.js games from the coverage batch (skills/moods the catalogue lacked), each on skillprint-js-sdk.
-    'lumen': 'Lumen'
+    'lumen': 'Lumen',
+    'flockwork': 'Flockwork'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
