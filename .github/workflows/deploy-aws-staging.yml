@@ -49,6 +49,16 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # Next's build cache from the last deploy (what keeps Vercel's builds
+      # short). Keyed on the sources, so it never matches exactly and falls
+      # back to the newest cache for the same lockfile.
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('app/**', 'components/**', 'lib/**', 'next.config.ts', 'tsconfig.json') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
