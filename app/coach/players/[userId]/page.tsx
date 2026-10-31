@@ -14,7 +14,7 @@
  *
  * Individual mood is deliberately absent at every level in v1 (SKI-192).
  */
-import { use, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   CoachApiError,
@@ -35,14 +35,15 @@ import {
   Sparkline,
   Tile,
 } from '../../components/ui';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 /** A 403 is a consent gap; anything else is a real failure. */
 function isConsentGap(error: Error | null): boolean {
   return error instanceof CoachApiError && error.isConsentGap;
 }
 
-export default function CoachPlayerPage({ params }: { params: Promise<{ userId: string }> }) {
-  const { userId } = use(params);
+export default function CoachPlayerPage() {
+  const { userId } = useRouteParams('/coach/players/[userId]');
   const id = Number(userId);
   const valid = Number.isFinite(id);
 

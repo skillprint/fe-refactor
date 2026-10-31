@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import PortalLayout from '@/components/PortalLayout';
 import PortalHead from '@/components/PortalHead';
@@ -15,6 +15,7 @@ import { PRIVACY_GROUPING_CATALOG } from '@/lib/models/portal/FriendsAndPrivacy'
 import { getGameDetails } from '@/app/config/gameConfig';
 import { DEFAULT_GAME_IMAGE, showDefaultGameImageOnError } from '@/lib/playbookUtils';
 import type { SkillBaselineMap } from '@/components/Profile/ProfileSkillBreakdown';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 function formatSecondsToDuration(sec: number): string {
   if (!sec || isNaN(sec)) return '0m 0s';
@@ -24,8 +25,8 @@ function formatSecondsToDuration(sec: number): string {
   return `${s}s`;
 }
 
-export default function FriendProfilePage({ params }: { params: Promise<{ userId: string }> }) {
-  const { userId } = use(params);
+export default function FriendProfilePage() {
+  const { userId } = useRouteParams('/profile/[userId]');
   const decodedId = decodeURIComponent(userId);
   const { friendsFeatureEnabled, setFriendsFeatureEnabled } = useFriendsFeatureFlag();
   const {

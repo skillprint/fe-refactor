@@ -5,8 +5,11 @@ import {
   rateCoachTip,
   type PlayerExperienceInput,
 } from '@/lib/coachBridge';
+import { serverOnly } from '@/lib/staticExport';
 
-export async function GET(request: NextRequest) {
+// Reads and writes a local LLM Island checkout: no route in the static export.
+
+async function handleGet(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const game = searchParams.get('game') || 'hextris';
@@ -64,7 +67,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const action = body?.action || 'whisper';
@@ -113,3 +116,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const GET = serverOnly(handleGet);
+export const POST = serverOnly(handlePost);

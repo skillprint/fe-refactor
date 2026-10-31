@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 interface GameSession {
     game_name: string;
@@ -11,10 +12,6 @@ interface GameSession {
     plays_last_day: number;
     plays_last_week: number;
     plays_last_month: number;
-}
-
-interface SkillDetailClientProps {
-    skillId: string;
 }
 
 // Dummy game data mapped to skills
@@ -102,7 +99,8 @@ const generateDailyData = (totalPlaysLastMonth: number) => {
     return data;
 };
 
-export default function SkillDetailClient({ skillId }: SkillDetailClientProps) {
+export default function SkillDetailClient() {
+    const { skillId } = useRouteParams('/profile/skill/[skillId]');
     const router = useRouter();
 
     const [skillName, setSkillName] = useState<string>('');

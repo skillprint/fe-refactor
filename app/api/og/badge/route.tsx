@@ -3,8 +3,7 @@ import type { NextRequest } from 'next/server';
 import { fetchTalent } from '@/lib/models/portal/serverTalents';
 import { getBadgeArt } from '@/lib/badgeArt';
 import { SKILLPRINT_MARK_DATA_URI, imageDataUri, ogBackground } from '@/lib/ogImage';
-
-export const dynamic = 'force-dynamic';
+import { serverOnly } from '@/lib/staticExport';
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -16,7 +15,7 @@ const HEIGHT = 630;
  * and what it marks. The art is the SVG shipped in public/, fetched from this
  * deployment and inlined for the renderer.
  */
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug') || '';
   const talent = await fetchTalent(slug);
   if (!talent) {
@@ -67,3 +66,5 @@ export async function GET(req: NextRequest) {
     },
   );
 }
+
+export const GET = serverOnly(handleGet);

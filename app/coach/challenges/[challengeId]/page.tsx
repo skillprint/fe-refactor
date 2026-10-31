@@ -6,7 +6,7 @@
  * named). Skill figures appear only for players with a profile-level grant;
  * the rest say so rather than showing a blank.
  */
-import { use, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   playerLabel,
@@ -19,6 +19,7 @@ import {
 } from '@/lib/models/coach';
 import { Empty, ErrorState, Loading, Panel, Suppressed, Tile } from '../../components/ui';
 import { challengeGoal } from '../format';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 function unit(c: CoachChallenge): string {
   return c.kind === 'Skill' ? 'pts' : c.metric === 'Minutes' ? 'min' : 'sessions';
@@ -39,8 +40,8 @@ function rowLabel(row: CoachLeaderboardRow, scope: CoachLeaderboardScope): strin
   return scope === 'playvs' ? 'Another player' : 'Player';
 }
 
-export default function CoachChallengePage({ params }: { params: Promise<{ challengeId: string }> }) {
-  const { challengeId } = use(params);
+export default function CoachChallengePage() {
+  const { challengeId } = useRouteParams('/coach/challenges/[challengeId]');
   const id = Number.isFinite(Number(challengeId)) ? Number(challengeId) : null;
   const detail = useCoachChallenge(id);
   const [scope, setScope] = useState<CoachLeaderboardScope>('team');

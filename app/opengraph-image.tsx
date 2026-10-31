@@ -4,6 +4,8 @@ import { SKILLPRINT_MARK_DATA_URI, ogBackground } from '@/lib/ogImage';
 export const alt = 'Skillprint: short games that read your mood, cognition and personality';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+// Nothing in it depends on the request: built once, which the static export requires.
+export const dynamic = 'force-static';
 
 /** The site's preview card: what a shared portal link unfurls into. */
 export default function Image() {

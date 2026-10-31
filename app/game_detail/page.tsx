@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import GameDetailClient, { GameDetailLoading } from './GameDetailClient';
 import { fetchLibraryGame } from '@/lib/models/portal/serverLibraryGame';
 import { gameSharePath } from '@/lib/share';
+import { STATIC_EXPORT } from '@/lib/staticExport';
 
 interface GameDetailPageProps {
   searchParams: Promise<{
@@ -14,8 +15,12 @@ interface GameDetailPageProps {
  * The game's preview card for anything that unfurls a link (X, Facebook,
  * LinkedIn, iMessage, Slack...). Crawlers do not run the page, so this is
  * resolved on the server from the library record.
+ *
+ * The static export has no request to read: it gets the generic card until
+ * share cards are prebuilt for it.
  */
 export async function generateMetadata({ searchParams }: GameDetailPageProps): Promise<Metadata> {
+  if (STATIC_EXPORT) return { title: 'Game Detail' };
   const { game } = await searchParams;
   const record = game ? await fetchLibraryGame(decodeURIComponent(game)) : null;
   if (!record) return { title: 'Game Detail' };
@@ -43,11 +48,10 @@ export async function generateMetadata({ searchParams }: GameDetailPageProps): P
  * the library record, the player's own record on the game and the community's
  * play need the player's token, so the page body is a client component.
  */
-export default async function GameDetailPage({ searchParams }: GameDetailPageProps) {
-  const { game } = await searchParams;
+export default function GameDetailPage() {
   return (
     <Suspense fallback={<GameDetailLoading />}>
-      <GameDetailClient slug={game || ''} />
+      <GameDetailClient />
     </Suspense>
   );
 }

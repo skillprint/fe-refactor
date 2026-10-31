@@ -2,8 +2,7 @@ import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
 import { fetchLibraryGame, libraryGameImage } from '@/lib/models/portal/serverLibraryGame';
 import { SKILLPRINT_MARK_DATA_URI, imageDataUri, ogBackground } from '@/lib/ogImage';
-
-export const dynamic = 'force-dynamic';
+import { serverOnly } from '@/lib/staticExport';
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -15,7 +14,7 @@ const HEIGHT = 630;
  * trains, in the 1200x630 frame every network expects. The game page's
  * metadata points `og:image` here.
  */
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug') || '';
   const game = await fetchLibraryGame(slug);
   if (!game) {
@@ -101,3 +100,5 @@ export async function GET(req: NextRequest) {
     },
   );
 }
+
+export const GET = serverOnly(handleGet);

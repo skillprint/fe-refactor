@@ -5,6 +5,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { getGameConfig, getGameDetails } from '../../../config/gameConfig';
 import { getCatalogGame } from '../../../api/api';
 import { getAdaptiveParametersForGame } from '../../../utils/adaptiveParameters';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 const SKILL_ICONS: Record<string, string> = {
     // Explicit mappings for known deviations or preferred naming
@@ -32,15 +33,12 @@ const MOOD_ICONS: Record<string, string> = {
     // Fallbacks or missing icons can use default handling or be added here
 };
 
-interface GameInterstitialClientProps {
-    slug: string;
-}
-
-export default function GameInterstitialClient({ slug }: GameInterstitialClientProps) {
+export default function GameInterstitialClient() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [gameApiData, setGameApiData] = useState<any>(null);
 
+    const { slug } = useRouteParams('/game/[slug]/interstitial');
     // Decode the URL slug (handle spaces and special characters)
     const decodedSlug = decodeURIComponent(slug);
 

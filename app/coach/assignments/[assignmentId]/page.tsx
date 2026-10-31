@@ -16,7 +16,7 @@
  * Closing and cancelling are one-way status changes, never deletes: the record
  * that the work was asked for outlives the coach changing their mind.
  */
-import { use, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   useCoachAssignment,
@@ -25,6 +25,7 @@ import {
   type CoachRemindResult,
 } from '@/lib/models/coach';
 import { ErrorState, Loading, Panel, Tile, localDay } from '../../components/ui';
+import { useRouteParams } from '@/lib/useRouteParams';
 
 const STATUS_LABEL = {
   not_started: 'Not started',
@@ -46,12 +47,8 @@ const isOutstanding = (status: keyof typeof STATUS_LABEL) =>
 
 type SortKey = 'userId' | 'status' | 'progress';
 
-export default function AssignmentDetailPage({
-  params,
-}: {
-  params: Promise<{ assignmentId: string }>;
-}) {
-  const { assignmentId } = use(params);
+export default function AssignmentDetailPage() {
+  const { assignmentId } = useRouteParams('/coach/assignments/[assignmentId]');
   const { data, isLoading, error, refetch } = useCoachAssignment(assignmentId);
   const { remind, closeAssignment } = useCoachWrites();
 
