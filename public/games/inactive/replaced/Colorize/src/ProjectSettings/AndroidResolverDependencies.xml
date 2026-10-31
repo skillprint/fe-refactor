@@ -1,6 +1,0 @@
-<dependencies>
-  <packages>
-    <package>com.google.android.gms:play-services-ads:12.0.1</package>
-  </packages>
-  <files />
-</dependencies>

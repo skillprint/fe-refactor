@@ -1,11 +1,11 @@
 ---
 name: create-marketplace-game
-description: Creates a new Game record on the Skillprint marketplace backend (staging or production Django API) via POST /games/api/games/ — authenticated with either a partner API key or a Knox admin token — so a game already added to skillprint-rewrite (public/games/live/<GameName>/) gets a real catalog entry — the thing that makes it show up in games/api/catalog/<slug>/, the AI Guide "Target" dropdown, and portal game listings. Use this whenever the user asks to add a game to the catalog, register/publish a game with the backend, attach skills or moods to a game record, or when games/api/catalog/<slug>/ 404s for a game slug that clearly exists in this repo. Always confirms with the user before writing to a live backend, and never invents skill/mood slugs or touches production without explicit sign-off.
+description: Creates a new Game record on the Skillprint marketplace backend (staging or production Django API) via POST /games/api/games/ — authenticated with either a partner API key or a Knox admin token — so a game already added to the games repo (live/<GameName>/) gets a real catalog entry — the thing that makes it show up in games/api/catalog/<slug>/, the AI Guide "Target" dropdown, and portal game listings. Use this whenever the user asks to add a game to the catalog, register/publish a game with the backend, attach skills or moods to a game record, or when games/api/catalog/<slug>/ 404s for a game slug that clearly exists in this repo. Always confirms with the user before writing to a live backend, and never invents skill/mood slugs or touches production without explicit sign-off.
 ---
 
 # Create Marketplace Game
 
-Adding a game's code to `public/games/live/<GameName>/` in skillprint-rewrite does not register it
+Adding a game's code to `live/<GameName>/` in the games repo does not register it
 with the Skillprint marketplace backend — that's a separate Django service (sibling repo
 `marketplace/api_backend/`) with its own `Game` model. A game with no `Game` row there will 404 on
 `games/api/catalog/<slug>/`, won't appear in the AI Guide Target dropdown, and won't show up in

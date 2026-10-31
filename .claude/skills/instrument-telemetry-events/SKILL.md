@@ -1,6 +1,6 @@
 ---
 name: instrument-telemetry-events
-description: Instruments a Skillprint game (public/games/live/<GameName>/) with universal (game-agnostic, fixed-vocabulary) and/or custom (game-specific) telemetry events — the two event-based layers of Skillprint's three-layer telemetry design (raw screenshots+state, universal events, custom events), which exist to give convergent validity: independent signals about the same gameplay that cross-check each other. Use this whenever the user asks to add telemetry/event tracking to a game, wire up LEVEL_START/LEVEL_COMPLETE/GAME_PAUSE-style events, add custom per-action events for an owned game, or mentions "universal telemetry", "convergent validity", "world model corpus", or the telemetry layers by name. Always checks whether the event actually reaches the backend before claiming the game is instrumented — the pipe is dead-by-default in this codebase, not just unused.
+description: Instruments a Skillprint game (live/<GameName>/ in the games repo) with universal (game-agnostic, fixed-vocabulary) and/or custom (game-specific) telemetry events — the two event-based layers of Skillprint's three-layer telemetry design (raw screenshots+state, universal events, custom events), which exist to give convergent validity: independent signals about the same gameplay that cross-check each other. Use this whenever the user asks to add telemetry/event tracking to a game, wire up LEVEL_START/LEVEL_COMPLETE/GAME_PAUSE-style events, add custom per-action events for an owned game, or mentions "universal telemetry", "convergent validity", "world model corpus", or the telemetry layers by name. Always checks whether the event actually reaches the backend before claiming the game is instrumented — the pipe is dead-by-default in this codebase, not just unused.
 ---
 
 # Instrument Telemetry Events
@@ -43,7 +43,7 @@ Verified against the code; re-check Step 1 each time, since this moves:
 - **Don't post to `POST /games/api/sessions/telemetry`.** It takes one event per request, and it
   has `authentication_classes = []`, so it 404s every player-owned session, which is every portal
   session (marketplace #110).
-- **Reference implementation: Hextris** (`public/games/live/Hextris/static/skillprint.js`).
+- **Reference implementation: Hextris** (`live/Hextris/static/skillprint.js` in the games repo).
   `Skillprint.send(event, data)` posts the message. Its hooks sit in `Hex.rotate` (every applied
   rotation, keys or taps), in `checking.js` (MATCH), in `view.js` (pause and resume), and in the
   start, restart and game-over paths in `main.js`, `initialization.js` and `input.js`.
@@ -63,7 +63,7 @@ Verified against the code; re-check Step 1 each time, since this moves:
 ```bash
 grep -n "'gameEvent'" "app/game/[slug]/GameClient.tsx"
 grep -n "recordEvent\|SessionTimeline" app/lib/skillprintSdk.ts
-grep -n "capturedAt" public/games/live/SkillprintLib/skillprintScreenshot.js
+grep -n "capturedAt" ../games/live/SkillprintLib/skillprintScreenshot.js
 ```
 
 If any is missing, restore it before instrumenting a game: an event that only reaches

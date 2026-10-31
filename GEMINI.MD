@@ -28,7 +28,7 @@ When working on front-end tasks or UI updates, you must maintain context on this
    - **Screenshot Transmission**: Implement periodic transmission of game screenshots, which are strictly required for performing ongoing scoring calculations.
 
 2. **Code References for Implementation**
-   - **Game-Side SDK Usage**: Review `public/games/live/Hextris` as an implementation guide for sending screenshot transmissions and listening for incoming game parameter adjustments.
+   - **Game-Side SDK Usage**: Review `live/Hextris` in the games repo as an implementation guide for sending screenshot transmissions and listening for incoming game parameter adjustments.
    - **Client-Side Message Handling**: Review `app/game/[slug]/GameClient.tsx` (specifically around lines 227-272) to understand how the platform handles screenshot transmissions from the game iframe.
 
 3. **Game Parameter Configurations**
