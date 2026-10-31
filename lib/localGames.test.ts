@@ -2,17 +2,22 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { gameAssetUrl } from './gameAssets';
 import { SLUG_TO_DIR_MAP, hasLocalGameDir, mapSlugToGamePath } from './localGames';
 
-test('every mapped live game has a build on disk', () => {
+// The builds live in the games repo. Point GAMES_REPO at an up-to-date
+// checkout of it (e.g. GAMES_REPO=../games) to check every mapping has one.
+const gamesRepo = process.env.GAMES_REPO;
+
+test('every mapped live game has a build in the games repo', { skip: !gamesRepo && 'GAMES_REPO not set' }, () => {
   for (const [slug, dir] of Object.entries(SLUG_TO_DIR_MAP)) {
-    const index = join(__dirname, '..', 'public', 'games', 'live', dir, 'static', 'index.html');
+    const index = join(gamesRepo, 'live', dir, 'static', 'index.html');
     assert.ok(existsSync(index), `${slug} → ${dir} has no static/index.html`);
   }
 });
 
 test('Mage Duel resolves to its 2D build', () => {
-  assert.equal(mapSlugToGamePath('mage-duel'), '/games/live/mage-duel-2d/static/index.html');
+  assert.equal(mapSlugToGamePath('mage-duel'), gameAssetUrl('live/mage-duel-2d/static/index.html'));
 });
 
 test('catalogue games with no build are not playable here', () => {
@@ -31,6 +36,6 @@ test('legacy -2 catalog slugs resolve to their builds (SKI-180)', () => {
     ['sweet-memory-2-6b558e2a-cf49-4ea7-be60-2a8dda06b60', 'Sweet Memory'],
   ]) {
     assert.equal(hasLocalGameDir(slug), true, slug);
-    assert.equal(mapSlugToGamePath(slug), `/games/live/${dir}/static/index.html`, slug);
+    assert.equal(mapSlugToGamePath(slug), gameAssetUrl(`live/${dir}/static/index.html`), slug);
   }
 });

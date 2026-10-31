@@ -2,10 +2,11 @@ import { baseSlug } from '@/lib/gameSlug';
 import { gameAssetUrl } from '@/lib/gameAssets';
 
 /**
- * The games this frontend ships a build for, keyed by base slug, and where
- * each one lives under public/games. The backend catalogue also lists games
- * with no build here (Last War, Plastoblasto, Natural Bridges...); opening
- * one would iframe a 404, so every game list filters on hasLocalGameDir.
+ * The games this frontend can play, keyed by base slug, and each one's folder
+ * on the games CDN (the games repo's live/ and inactive/). The backend
+ * catalogue also lists games with no build there (Last War, Plastoblasto,
+ * Natural Bridges...); opening one would iframe a 403, so every game list
+ * filters on hasLocalGameDir.
  */
 export const SLUG_TO_DIR_MAP: Record<string, string> = {
     '0hh1': '0hh1',

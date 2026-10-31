@@ -1,6 +1,6 @@
 ---
 name: game-tuning-params
-description: Generates the two artifacts a Skillprint game needs to plug into the LLM-based mood/difficulty adjustment system — a natural-language mood-adjustment prompt (relax/focus/grit guidance for an LLM) and a JSON parameter schema (min/max/type/default/description per tunable parameter). Use this whenever the user asks to write, generate, or update tuning instructions, adjustment prompts, or parameter definitions for a game under public/games/live/, or mentions "mood adjustment", "difficulty tuning", "ADJUST_GAME", "skillprintShim", or a specific game by name (e.g. Dungeon Runner, Stroop Test, Simon Says, Typing Speed) in the context of difficulty or parameters. Always grounds parameters in the real game code — never invents them.
+description: Generates the two artifacts a Skillprint game needs to plug into the LLM-based mood/difficulty adjustment system — a natural-language mood-adjustment prompt (relax/focus/grit guidance for an LLM) and a JSON parameter schema (min/max/type/default/description per tunable parameter). Use this whenever the user asks to write, generate, or update tuning instructions, adjustment prompts, or parameter definitions for a game under live/ in the games repo, or mentions "mood adjustment", "difficulty tuning", "ADJUST_GAME", "skillprintShim", or a specific game by name (e.g. Dungeon Runner, Stroop Test, Simon Says, Typing Speed) in the context of difficulty or parameters. Always grounds parameters in the real game code — never invents them.
 ---
 
 # Game Tuning Params
@@ -20,7 +20,7 @@ default must come from code you actually read**, not from what seems plausible.
 
 ## Step 1: Find the real exposed parameters
 
-For a game at `public/games/live/<GameName>/`, look for:
+For a game at `live/<GameName>/` in the games repo (the sibling `../games` checkout), look for:
 
 - `static/skillprintShim.js` (or similar) — the `ADJUST_GAME` postMessage listener is the
   actual contract with the adjustment system. Whatever parameter names it reads off the message

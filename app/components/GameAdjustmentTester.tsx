@@ -500,7 +500,7 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                     return [];
             }
         case 'dungeon-runner':
-            // Mirrors PRESETS in public/games/live/Dungeon Runner/static/js/params.js
+            // Mirrors PRESETS in the games repo's live/Dungeon Runner/static/js/params.js
             switch (keyNumber) {
                 case 1: return [
                     { parameterName: 'playerSpeed', parameterValue: 7 },
