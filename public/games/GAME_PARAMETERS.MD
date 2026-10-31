@@ -1322,6 +1322,37 @@ Three.js theory-of-mind puzzle (slug `viewpoints`, folder `live/Viewpoints`): a 
 
 ---
 
+### Bandstand
+Three.js call-and-response rhythm game in a 1930s rubber-hose cartoon style (slug `bandstand`, folder `live/Bandstand`): the player is the rabbit at a four-bar xylophone (circle, triangle, square, star; D F J K, arrows or pads) in a band with Pip (trumpet), Bess (banjo), Duke (drums) and Otis (tuba). Each round is 24 beats: a bandmate calls a phrase (8 beats), the player plays it back from memory in the same rhythm (8 beats), then keeps the groove by hitting visible bouncing notes while another bandmate solos (8 beats). Misses are covered by a bandmate's fill depending on `bandHelp`; streaks fill a crowd-energy meter. Each tune plays in a new venue from a shuffle bag. Same skillprint-js-sdk setup as Elixir (`static/src/params.js`, `backend/export-config.mjs` → `backend/game-scoring-config.json`). Out-of-range values are clamped, integers rounded.
+
+**Parameters**
+- `tempo` (Integer, 70–150): the band's beats per minute; a round is 24 beats (14.4 s at 100). Applies from the next bar line. Default 100.
+- `phraseLength` (Integer, 2–8): notes in each call at rungs 1–3; rungs 4–6 add one and rungs 7–9 add two (max 10); more than 6 notes use eighth notes. Applies from the next call. Default 4.
+- `timingWindowMs` (Integer, 60–250): ± ms a note may land from its beat and still count; the inner 40 % scores "Swell!" (full points), the rest "Nice" (half). Applies at once. Default 140.
+- `bandHelp` (Integer, 0–2): 0 misses flub and break the streak (−14 % crowd); 1 a bandmate covers each miss with a fill, streak still breaks (−6 %); 2 covers keep the streak and the next answer note is hinted faintly one beat ahead. Applies at once. Default 1.
+- `levelOffset` (Integer, −3–3): shifts the rung of the next tune (fourth bar, eighth notes, extra call notes, leaps, busier grooves, more rounds). Default 0.
+
+**JSON Payload Example**
+```json
+{
+  "parameterName": "phraseLength",
+  "parameterValue": 6
+}
+```
+
+**Keyboard Test Utility Mapping (`GameAdjustmentTester`)**
+- `1`: `{ tempo: 80, phraseLength: 3, timingWindowMs: 220, bandHelp: 2 }` (Relax)
+- `2`: `{ tempo: 90, phraseLength: 3, timingWindowMs: 180, bandHelp: 2 }` (Gentle)
+- `3`: `{ tempo: 100, phraseLength: 4, timingWindowMs: 140, bandHelp: 1, levelOffset: 0 }` (Default)
+- `4`: `{ tempo: 116, phraseLength: 4, timingWindowMs: 130 }` (Brisk)
+- `5`: `{ tempo: 128, phraseLength: 6, timingWindowMs: 90, bandHelp: 0 }` (Grit)
+- `6`: `{ levelOffset: -2 }` (Easier next tune)
+- `7`: `{ levelOffset: 2 }` (Harder next tune)
+- `8`: `{ phraseLength: 8 }` (Long calls)
+- `9`: `{ tempo: 150, phraseLength: 8, timingWindowMs: 60, bandHelp: 0, levelOffset: 3 }` (Extreme)
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

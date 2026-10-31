@@ -977,6 +977,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'bandstand':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'tempo', parameterValue: 80 }, { parameterName: 'phraseLength', parameterValue: 3 }, { parameterName: 'timingWindowMs', parameterValue: 220 }, { parameterName: 'bandHelp', parameterValue: 2 }]; // Relax
+                case 2: return [{ parameterName: 'tempo', parameterValue: 90 }, { parameterName: 'phraseLength', parameterValue: 3 }, { parameterName: 'timingWindowMs', parameterValue: 180 }, { parameterName: 'bandHelp', parameterValue: 2 }]; // Gentle
+                case 3: return [{ parameterName: 'tempo', parameterValue: 100 }, { parameterName: 'phraseLength', parameterValue: 4 }, { parameterName: 'timingWindowMs', parameterValue: 140 }, { parameterName: 'bandHelp', parameterValue: 1 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'tempo', parameterValue: 116 }, { parameterName: 'phraseLength', parameterValue: 4 }, { parameterName: 'timingWindowMs', parameterValue: 130 }]; // Brisk
+                case 5: return [{ parameterName: 'tempo', parameterValue: 128 }, { parameterName: 'phraseLength', parameterValue: 6 }, { parameterName: 'timingWindowMs', parameterValue: 90 }, { parameterName: 'bandHelp', parameterValue: 0 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next tune
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next tune
+                case 8: return [{ parameterName: 'phraseLength', parameterValue: 8 }]; // Long calls
+                case 9: return [{ parameterName: 'tempo', parameterValue: 150 }, { parameterName: 'phraseLength', parameterValue: 8 }, { parameterName: 'timingWindowMs', parameterValue: 60 }, { parameterName: 'bandHelp', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }

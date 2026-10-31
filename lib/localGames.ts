@@ -82,7 +82,8 @@ export const SLUG_TO_DIR_MAP: Record<string, string> = {
     'glide': 'Glide',
     'cache': 'Cache',
     'treehouse-telegraph': 'Treehouse Telegraph',
-    'viewpoints': 'Viewpoints'
+    'viewpoints': 'Viewpoints',
+    'bandstand': 'Bandstand'
 };
 
 export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {

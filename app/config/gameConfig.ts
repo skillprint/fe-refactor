@@ -433,6 +433,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Viewpoints/backend/game-scoring-config.json'),
+  },
+
+  'bandstand': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Bandstand/backend/game-scoring-config.json'),
   }
 };
 
@@ -1136,6 +1142,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Seeing through others\' eyes', 'Tracking who saw what', 'Reasoning about beliefs', 'Watching closely'],
     instructions: 'Watch the story as dolls come and go and the cat moves things between containers. Then tap the place or the doll that answers each question (arrows + Enter work too); R watches the story again.'
   },
+  'bandstand': {
+    name: 'Bandstand',
+    description: 'Sit in with a 1930s cartoon band: answer each bandmate\'s call from memory, then keep the groove.',
+    image: gameAssetUrl('live/Bandstand/cover.jpg'),
+    category: 'Music',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Remembering melodies', 'Keeping the beat', 'Quick reactions', 'Playing with a band'],
+    instructions: 'Play the xylophone with D F J K, the arrow keys, or the four pads. Listen to a bandmate\'s call, play it back from memory in the same rhythm, then hit each bouncing note as it lands while someone solos.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1246,4 +1262,5 @@ export const knownGameSlugs = [
   'cache',
   'treehouse-telegraph',
   'viewpoints',
+  'bandstand',
 ];
