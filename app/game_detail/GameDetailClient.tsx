@@ -22,7 +22,7 @@ import { useLibraryGame } from '@/lib/models/portal/useLibraryGame';
 import { useLibraryPersonalStats } from '@/lib/models/portal/useLibraryPersonalStats';
 import { useLibraryCommunityStats } from '@/lib/models/portal/useLibraryCommunityStats';
 import { useTaxonomySkills } from '@/lib/models/portal/useTaxonomySkills';
-import { hasLocalGameDir } from '@/lib/localGames';
+import { isPlayableGame } from '@/lib/localGames';
 import { allTaxonomySkills, findTaxonomySkill } from '@/lib/models/portal/TaxonomySkills';
 import { useProfileAggregate } from '@/lib/models/portal/useProfileAggregate';
 import { profileDimensionMap } from '@/lib/models/portal/ProfileAggregate';
@@ -183,13 +183,13 @@ export default function GameDetailClient() {
   }, [taxonomy]);
 
   // Games that share a skill or mood with this one, most overlap first. Only
-  // games this frontend ships a build for: the library also lists games the
-  // PWA cannot open yet (their "playable" flag is the backend's, not ours).
+  // games with a build on the games CDN: the library also lists games the
+  // PWA cannot open yet.
   const moreLikeThis = useMemo(() => {
     if (!game || !library) return [];
     const mine = new Set([...game.skills.map((s) => s.slug), ...game.moods.map((m) => m.slug)]);
     return library
-      .filter((g) => g.baseSlug !== game.baseSlug && hasLocalGameDir(g.baseSlug))
+      .filter((g) => g.baseSlug !== game.baseSlug && isPlayableGame(g))
       .map((g) => ({ game: g, overlap: [...g.skills, ...g.moods].filter((s) => mine.has(s)).length }))
       .filter((x) => x.overlap > 0)
       .sort((a, b) => b.overlap - a.overlap)

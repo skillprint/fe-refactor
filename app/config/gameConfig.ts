@@ -1334,6 +1334,21 @@ export function getGameDetails(gameSlug: string): GameDetails | null {
   return gameDetails[normalizedSlug] || null;
 }
 
+/**
+ * Details for a game the static config doesn't name, from its catalog record
+ * (`games/api/catalog/`), so a game added on the backend needs no deploy here.
+ */
+export function detailsFromCatalogRecord(record: any): GameDetails | null {
+  if (!record?.name) return null;
+  return {
+    name: record.name,
+    description: record.shortDescription || '',
+    image: record.screenshot || record.thumbnail || undefined,
+    category: Array.isArray(record.genres) ? record.genres[0] : undefined,
+    instructions: record.instructions || undefined,
+  };
+}
+
 /** Card-sized play time for a game ("1-3 minutes" → "1–3 min"), or the generic range when the game has none. */
 export function gameDurationLabel(gameSlug: string): string {
   const estimate = getGameDetails(gameSlug)?.estimatedTime;

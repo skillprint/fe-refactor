@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getCatalogItemsByMood } from '../api/api';
-import { hasLocalGameDir } from '@/lib/localGames';
+import { isPlayableGame } from '@/lib/localGames';
 
 export function useGamesByMood(moodSlug: string) {
     const [games, setGames] = useState<any[]>([]);
@@ -17,7 +17,7 @@ export function useGamesByMood(moodSlug: string) {
                 const data = await getCatalogItemsByMood(moodSlug);
                 // The API returns { results: [...] } based on useGamesBySkill.ts
                 const gamesToFilterBySlug = ["hextris", "lastwar-frontline", "flappy-bird", "flappy-bird-1", "fruit-ninja", "infinite-runner-3d", "last-war-zombie"];
-                const filteredGames = data.results.filter((game: any) => !gamesToFilterBySlug.includes(game.slug) && hasLocalGameDir(game.slug));
+                const filteredGames = data.results.filter((game: any) => !gamesToFilterBySlug.includes(game.slug) && isPlayableGame(game));
                 setGames(filteredGames || []);
             } catch (err) {
                 setError(err as Error);

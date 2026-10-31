@@ -8,7 +8,7 @@ import SessionVeil from '../../../components/GameSession/SessionVeil';
 import PlayBar from '../../../components/GameSession/PlayBar';
 import GameResultDialog, { MIN_SCORED_SECONDS, SessionOutcome, type GameResultDialogProps } from '../../../components/GameSession/GameResultDialog';
 import { AnimatedGameTiles } from '../../components/AnimatedGameTiles';
-import { getGameConfig, getGameDetails, knownGameSlugs } from '../../config/gameConfig';
+import { getGameDetails } from '../../config/gameConfig';
 import React from 'react';
 import { SkillprintClient, LogLevel, ParameterUpdateResult, PollResultsResponse, Adjustment, SdkGameParameter } from '../../lib/skillprintSdk';
 import { latestPerParameter, markApplied, pendingAdjustments } from '../../lib/adjustments';
@@ -17,7 +17,7 @@ import GameAdjustmentTester from '../../components/GameAdjustmentTester';
 import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
-import { hasLocalGameDir, mapSlugToGamePath } from '@/lib/localGames';
+import { gameBuildUrl, gameParameterManifestUrl, type GameBuildRef } from '@/lib/localGames';
 import { isGameMessageOrigin } from '@/lib/gameAssets';
 import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
 import { titleFromSlug } from '@/lib/skillIcons';
@@ -121,12 +121,12 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
     // The catalog record this URL slug resolved to. `forSlug` guards against a stale
     // resolution being used for a new slug while the next lookup is in flight.
-    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string; moods: CatalogMood[] } | null>(null);
+    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string; name?: string; moods: CatalogMood[]; parameterManifest?: string } | null>(null);
     const [isUnknownGame, setIsUnknownGame] = useState(false);
     const [hasImageError, setHasImageError] = useState(false);
 
-    // Get game configuration
-    const gameConfig = getGameConfig(unifiedSlug);
+    // The static config names only older games; the catalog record names every one.
+    const gameTitle = getGameDetails(unifiedSlug)?.name || resolvedGame?.name || unifiedSlug;
 
     // Fetch player's past record, leaderboards, and profile aggregate
     const { data: personalStats, refetch: refetchPersonalStats } = useLibraryPersonalStats(resolvedGame?.serverSlug || unifiedSlug);
@@ -278,7 +278,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         const resolvePath = async () => {
             // Any slug form (bare, legacy UUID-suffixed, truncated) resolves to one canonical
             // catalog record; that record's slug is what the backend gets on session start.
-            let record: { slug: string; moods?: CatalogMood[] } | null = null;
+            let record: { slug: string; name?: string; moods?: CatalogMood[] } & GameBuildRef | null = null;
             try {
                 record = resolveCatalogGame(decodedSlug, await getCatalogGames());
             } catch (error) {
@@ -295,17 +295,24 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             }
             if (!isMounted) return;
 
-            // A catalogue record alone isn't enough: without a local build the
-            // iframe would load a 404 and still start a scored session.
-            if (!hasLocalGameDir(record?.slug || decodedSlug)) {
+            // A catalogue record alone isn't enough: without a build on the games
+            // CDN the iframe would load a 403 and still start a scored session.
+            const buildUrl = gameBuildUrl(record ?? decodedSlug);
+            if (!buildUrl) {
                 setIsUnknownGame(true);
                 setIsLoadingGamePath(false);
                 return;
             }
 
             const serverSlug = record?.slug || unifiedSlug;
-            setGamePath(mapSlugToGamePath(serverSlug));
-            setResolvedGame({ forSlug: decodedSlug, serverSlug, moods: Array.isArray(record?.moods) ? record.moods : [] });
+            setGamePath(buildUrl);
+            setResolvedGame({
+                forSlug: decodedSlug,
+                serverSlug,
+                name: record?.name,
+                moods: Array.isArray(record?.moods) ? record.moods : [],
+                parameterManifest: gameParameterManifestUrl(buildUrl),
+            });
             setIsLoadingGamePath(false);
         };
         resolvePath();
@@ -733,7 +740,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                 // How the player got here -- an email, a playbook -- goes on the
                 // session, so a click in an email can be followed to a play (SKI-271).
                 const attribution = sessionAttribution(new URLSearchParams(window.location.search));
-                loadGameParameters(gameConfig.parameterManifest)
+                loadGameParameters(resolvedGame.parameterManifest)
                     .then((gameParameters) => client.startSession(sessionId, targetMood, serverSideSlug, false, gameParameters, attribution))
                     .then((ok) => { if (ok && skillprintSessionIdRef.current === sessionId) setSessionRecorded(true); })
                     .catch((e) => console.error('Failed to start Skillprint session', e));
@@ -813,7 +820,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
 
             {sequence === 'ready' && (
                 <PlayStage
-                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
+                    gameTitle={gameTitle}
                     onPlay={() => handleTogglePlay()}
                     briefing={coachFeatureEnabled ? briefing : null}
                     isLoadingBriefing={coachFeatureEnabled ? isLoadingBriefing : false}
@@ -825,7 +832,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             )}
 
             {sequence === 'loading' && (
-                <SessionVeil step="loading" title="Loading game" description={`${getGameDetails(unifiedSlug)?.name || unifiedSlug} is starting up.`} isCanvas />
+                <SessionVeil step="loading" title="Loading game" description={`${gameTitle} is starting up.`} isCanvas />
             )}
 
             {sequence === 'calculating' && (
@@ -834,7 +841,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
 
             {sequence === 'review' && gameResults && (
                 <GameResultDialog
-                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
+                    gameTitle={gameTitle}
                     score={gameResults.score}
                     highScore={preSessionBaselineRef.current.personalAllTime ?? undefined}
                     weeklyHighScore={preSessionBaselineRef.current.personalWeek}
@@ -867,7 +874,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
 
             {sequence === 'playing' && (
                 <PlayBar
-                    gameTitle={getGameDetails(unifiedSlug)?.name || unifiedSlug}
+                    gameTitle={gameTitle}
                     gameSlug={unifiedSlug}
                     onExit={handleExitGame}
                     targetMood={sessionMood}

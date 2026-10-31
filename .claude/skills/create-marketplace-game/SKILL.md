@@ -102,8 +102,17 @@ curl -X POST "https://<host>/games/api/games/" \
   -F "name=Simon Says" \
   -F "short_description=Watch, remember, and repeat the growing color sequence." \
   -F "skills=memory" \
-  -F "is_publicly_listed=true"
+  -F "is_publicly_listed=true" \
+  -F "is_playable_in_pwa=true" \
+  -F "external_web_url=https://games.skillprint.co/live/Simon%20Says/static/index.html"
 ```
+
+`external_web_url` is what makes the portal play the game: its page on the games CDN, at the same
+path as in the games repo (`live/<GameName>/static/index.html`, spaces as `%20`). The portal lists
+and plays any record whose URL is on the games CDN, so a game registered with it needs no portal
+change or deploy; if the build ships `backend/game-scoring-config.json`, the portal sends its
+`sdk_game_parameters` on session start. The portal's library also needs `is_playable_in_pwa=true`
+and `is_active` (see Step 7).
 
 (swap `-H "X-Api-Key: <partner_api_key>"` for `-H "Authorization: Token <knox_admin_token>"` to use
 the Knox admin path instead.)

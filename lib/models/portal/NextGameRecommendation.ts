@@ -1,6 +1,7 @@
 /** `GET /api/portal/recommendations/next-game/` — camelCase on the wire. */
 export interface NextGameRecommendation {
-  game: { name: string; slug: string; };
+  /** `url`: where the game plays (marketplace #154); null when it has none. */
+  game: { name: string; slug: string; url?: string | null; };
   reasonCode: string;
   reasonText: string;
 }

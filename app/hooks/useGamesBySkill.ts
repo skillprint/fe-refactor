@@ -3,7 +3,7 @@
 import { baseSlug } from '@/lib/gameSlug';
 import { useEffect, useState } from 'react';
 import { getSkills, getMoods, getCatalogItemsBySkill, getCatalogItemsByMood } from '../api/api';
-import { hasLocalGameDir } from '@/lib/localGames';
+import { isPlayableGame } from '@/lib/localGames';
 import { gameAssetUrl } from '@/lib/gameAssets';
 
 /**
@@ -38,8 +38,8 @@ export function useGamesBySkill() {
                 let allGamesSkill = gamesBySkillRaw.map((game: any) => game.results).flat();
                 let allGamesMood = gamesByMoodRaw.map((game: any) => game.results).flat();
 
-                allGamesSkill = allGamesSkill.filter((game: any) => !gamesToFilterBySlug.includes(game.slug) && hasLocalGameDir(game.slug));
-                allGamesMood = allGamesMood.filter((game: any) => !gamesToFilterBySlug.includes(game.slug) && hasLocalGameDir(game.slug));
+                allGamesSkill = allGamesSkill.filter((game: any) => !gamesToFilterBySlug.includes(game.slug) && isPlayableGame(game));
+                allGamesMood = allGamesMood.filter((game: any) => !gamesToFilterBySlug.includes(game.slug) && isPlayableGame(game));
 
                 console.log("DUMPING SKILL SLUGS:", allGamesSkill.map(g => g.slug).slice(0,5));
                 console.log("DUMPING MOOD SLUGS:", allGamesMood.map(g => g.slug).slice(0,5));

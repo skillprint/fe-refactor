@@ -1,12 +1,19 @@
 import { baseSlug } from '@/lib/gameSlug';
-import { gameAssetUrl } from '@/lib/gameAssets';
+import { gameAssetUrl, isGamesCdnUrl } from '@/lib/gameAssets';
 
 /**
- * The games this frontend can play, keyed by base slug, and each one's folder
- * on the games CDN (the games repo's live/ and inactive/). The backend
- * catalogue also lists games with no build there (Last War, Plastoblasto,
- * Natural Bridges...); opening one would iframe a 403, so every game list
- * filters on hasLocalGameDir.
+ * Which games the portal can play, and where, comes from the backend record:
+ * its `externalWebUrl` (catalog) / `url` (library, playbooks, next game) is
+ * the game's page on the games CDN, e.g.
+ * https://games.skillprint.co/live/Lumen/static/index.html, so a new game
+ * needs no deploy here. The catalogue also lists games the portal can't open
+ * (Last War, Plastoblasto, legacy S3 copies...), so every game list filters
+ * on isPlayableGame.
+ *
+ * Legacy: the maps below were the source before the records pointed at the
+ * CDN (marketplace #154). They answer only for records that don't yet, and
+ * for bare slugs; remove them once every backend the portal talks to has
+ * #154. Don't add games here.
  */
 export const SLUG_TO_DIR_MAP: Record<string, string> = {
     '0hh1': '0hh1',
@@ -112,19 +119,50 @@ export const INACTIVE_SLUG_TO_DIR_MAP: Record<string, string> = {
     'zig-zag-switch': 'Zig Zag Switch'
 };
 
-/** True when the frontend ships a local build for this slug (any slug form). */
-export const hasLocalGameDir = (slug: string) => {
+/** A backend game record, or any part of one that names the game. */
+export interface GameBuildRef {
+    slug?: string | null;
+    /** Where the game plays (catalog). */
+    externalWebUrl?: string | null;
+    external_web_url?: string | null;
+    /** Where the game plays (library, playbooks, next game; the catalog sends it too). */
+    url?: string | null;
+}
+
+const legacyBuildUrl = (slug: string): string | null => {
     const unifiedSlug = baseSlug(slug);
-    return Boolean(SLUG_TO_DIR_MAP[unifiedSlug] || INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]);
+    if (INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]) return gameAssetUrl(`inactive/${INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug]}/static/index.html`);
+    if (SLUG_TO_DIR_MAP[unifiedSlug]) return gameAssetUrl(`live/${SLUG_TO_DIR_MAP[unifiedSlug]}/static/index.html`);
+    return null;
 };
 
-export const mapSlugToGamePath = (slug: string) => {
-    const unifiedSlug = baseSlug(slug);
-
-    const inactiveDir = INACTIVE_SLUG_TO_DIR_MAP[unifiedSlug];
-    if (inactiveDir) return gameAssetUrl(`inactive/${inactiveDir}/static/index.html`);
-
-    const dir = SLUG_TO_DIR_MAP[unifiedSlug];
-    if (dir) return gameAssetUrl(`live/${dir}/static/index.html`);
-    return gameAssetUrl(`live/${slug}/static/index.html`);
+/**
+ * The game's page on the games CDN: the record's URL when it is on the CDN,
+ * else the legacy map. Other URLs (the old packager's S3 copies, Simmer) are
+ * not games this portal can run: they predate its SDK.
+ */
+export const gameBuildUrl = (game: GameBuildRef | string | null | undefined): string | null => {
+    if (!game) return null;
+    if (typeof game === 'string') return legacyBuildUrl(game);
+    const recordUrl = [game.externalWebUrl, game.external_web_url, game.url].find((u): u is string => !!u && isGamesCdnUrl(u));
+    if (recordUrl) return recordUrl;
+    return game.slug ? legacyBuildUrl(game.slug) : null;
 };
+
+/** True when the game has a page on the games CDN, so it can be played here. */
+export const isPlayableGame = (game: GameBuildRef | string | null | undefined) => Boolean(gameBuildUrl(game));
+
+/**
+ * The parameter manifest a build ships beside its page
+ * (`<Game>/backend/game-scoring-config.json`). Not every game has one; a
+ * missing one fails the fetch and the session starts without parameters.
+ */
+export const gameParameterManifestUrl = (gamePageUrl: string): string =>
+    new URL('../backend/game-scoring-config.json', gamePageUrl).href;
+
+/** True when the frontend can play this slug (any slug form). Prefer isPlayableGame with the record. */
+export const hasLocalGameDir = (slug: string) => isPlayableGame(slug);
+
+/** The entry page for a slug (any slug form). Prefer gameBuildUrl with the record. */
+export const mapSlugToGamePath = (slug: string) =>
+    gameBuildUrl(slug) ?? gameAssetUrl(`live/${slug}/static/index.html`);

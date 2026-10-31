@@ -1,7 +1,7 @@
 'use client';
 
 import { baseSlug, dedupeByBaseSlug } from '@/lib/gameSlug';
-import { hasLocalGameDir } from '@/lib/localGames';
+import { isPlayableGame } from '@/lib/localGames';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -220,7 +220,7 @@ const gradients = [
 const RUN_TARGET = 5;
 const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five'];
 
-type NextUpGame = { slug: string; name: string };
+type NextUpGame = { slug: string; name: string; url?: string | null };
 
 function getNextUpCopy(count: number, nextGames: NextUpGame[]) {
   const played = Math.min(Math.max(count, 0), RUN_TARGET);
@@ -377,10 +377,10 @@ function HomeContent() {
 
   // The portal recommender leads; the legacy games recommender fills in until it answers.
   const nextGames: NextUpGame[] = (nextGameRecs && nextGameRecs.length > 0)
-    ? nextGameRecs.map(r => ({ slug: r.game.slug, name: r.game.name }))
-    : recommendedGames.map((g: any) => ({ slug: g.slug, name: g.name }));
+    ? nextGameRecs.map(r => ({ slug: r.game.slug, name: r.game.name, url: r.game.url }))
+    : recommendedGames.map((g: any) => ({ slug: g.slug, name: g.name, url: g.externalWebUrl || g.url }));
   // One entry per game: staging still carries a bare placeholder `hextris` beside the real record.
-  const nextUp = getNextUpCopy(count, dedupeByBaseSlug(nextGames.filter((g: NextUpGame) => g.slug && g.name && hasLocalGameDir(g.slug))));
+  const nextUp = getNextUpCopy(count, dedupeByBaseSlug(nextGames.filter((g: NextUpGame) => g.slug && g.name && isPlayableGame(g))));
 
   const flowScores = playedSessions.map(s => s.primaryScore).filter((n): n is number => typeof n === 'number');
   const flowScore = flowScores.length ? Math.round(flowScores.reduce((a, b) => a + b, 0) / flowScores.length) : null;
