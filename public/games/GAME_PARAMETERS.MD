@@ -1583,6 +1583,26 @@ Three.js memory and spatial game (slug `waggle`, folder `live/Waggle`): the play
 
 ---
 
+### Rootwords
+
+Word game on a copperplate-engraved tree whose buds are Greek and Latin roots: Graft roots into the word for a definition, Decode an unfamiliar word from its roots (A-D, optionally timed), and Coin a new word from any roots with the right meanings. Each tree is a plate of 5-8 tasks; rungs (trees finished + levelOffset) add tasks, decoys that form real words, three-root words and more Coin tasks. The tutorial ignores parameters.
+
+**Parameters**
+- `rootChoices` (integer, 4-12, default 8): buds on the tree for Graft/Coin, needed roots plus decoys. Next task.
+- `rarity` (integer, 0-2, default 1): word obscurity, 0 everyday, 1 school, 2 rare. Next task.
+- `hintLevel` (integer, 0-2, default 1): 0 tags show only the root, 1 also its meaning, 2 also lights the next needed root and strikes one wrong Decode choice. At once.
+- `decodeTimer` (integer seconds, 0-40, default 20): time per Decode question, 0 untimed. At once (re-based, at least 3 s left).
+- `levelOffset` (integer, -3 to 3, default 0): shifts the rung of the next tree.
+
+```json
+{ "type": "ADJUST_GAME", "data": { "parameterName": "hintLevel", "parameterValue": 0 } }
+```
+
+**Keyboard mapping (GameAdjustmentTester / iframeTest.html)**
+1 Relax `{rootChoices:5, rarity:0, hintLevel:2, decodeTimer:0, levelOffset:-1}` · 2 Gentle `{rootChoices:6, rarity:0, hintLevel:1, decodeTimer:30}` · 3 Default `{rootChoices:8, rarity:1, hintLevel:1, decodeTimer:20, levelOffset:0}` · 4 Brisk `{rootChoices:10, decodeTimer:14}` · 5 Grit `{rootChoices:11, rarity:2, hintLevel:0, decodeTimer:10, levelOffset:1}` · 6 Easier next tree `{levelOffset:-2}` · 7 Harder next tree `{levelOffset:2}` · 8 Bare roots `{hintLevel:0}` · 9 Extreme `{rootChoices:12, rarity:2, hintLevel:0, decodeTimer:6, levelOffset:3}`
+
+---
+
 ### Trails WebAR
 Unity WebGL trail-making game (slug `trails-webar`, folder `live/Trails`). Numbered levels apply adjustments live; the endless "Mood Run" applies them at the start of the next wave. Full manifest: `live/Trails/backend/game-scoring-config.json`.
 

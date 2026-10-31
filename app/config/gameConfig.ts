@@ -487,6 +487,12 @@ export const gameConfigs: Record<string, GameConfig> = {
     exitButtonPosition: 'top-right',
     hideBottomTabs: true,
     parameterManifest: gameAssetUrl('live/Waggle/backend/game-scoring-config.json'),
+  },
+
+  'rootwords': {
+    exitButtonPosition: 'top-right',
+    hideBottomTabs: true,
+    parameterManifest: gameAssetUrl('live/Rootwords/backend/game-scoring-config.json'),
   }
 };
 
@@ -1280,6 +1286,16 @@ export const gameDetails: Record<string, GameDetails> = {
     skills: ['Remembering several directions at once', 'Turning angles into places', 'Allowing for a moving sun', 'Communicating a route'],
     instructions: 'Watch your sisters dance: the waggle run\'s angle from straight up is the bearing clockwise from the sun, and each waggle is 50 m. Press Fly out, tap the flower patches they danced, then aim your own run (drag or arrow keys) and hold Hold to waggle (or Space) for the right count to dance it home.'
   },
+  'rootwords': {
+    name: 'Rootwords',
+    description: 'Graft Greek and Latin roots into words on an engraved tree, decode strange words and coin new ones.',
+    image: gameAssetUrl('live/Rootwords/cover.jpg'),
+    category: 'Word',
+    difficulty: 'Medium',
+    estimatedTime: '3-8 minutes',
+    skills: ['Building words from roots', 'Word knowledge', 'Reading meaning from parts', 'Spotting shared roots'],
+    instructions: 'Tap the root buds on the tree in order to graft the word for a definition, pick what an unfamiliar word means from its roots (A-D), and invent new words from roots with the right meanings. Type a root\'s letters and press Enter to graft from the keyboard; ? gives a hint.'
+  },
 };
 
 // Legacy catalog records whose base slug differs from the local key (SKI-180):
@@ -1399,4 +1415,5 @@ export const knownGameSlugs = [
   'gearworks',
   'market-day',
   'waggle',
+  'rootwords',
 ];

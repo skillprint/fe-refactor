@@ -1112,6 +1112,21 @@ function getAdjustmentsForGame(slug: string, keyNumber: number): any[] {
                 default:
                     return [];
             }
+        case 'rootwords':
+            // Mirrors GAME_PARAMETERS.MD and the game's iframeTest.html. levelOffset applies from the next level.
+            switch (keyNumber) {
+                case 1: return [{ parameterName: 'rootChoices', parameterValue: 5 }, { parameterName: 'rarity', parameterValue: 0 }, { parameterName: 'hintLevel', parameterValue: 2 }, { parameterName: 'decodeTimer', parameterValue: 0 }, { parameterName: 'levelOffset', parameterValue: -1 }]; // Relax
+                case 2: return [{ parameterName: 'rootChoices', parameterValue: 6 }, { parameterName: 'rarity', parameterValue: 0 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'decodeTimer', parameterValue: 30 }]; // Gentle
+                case 3: return [{ parameterName: 'rootChoices', parameterValue: 8 }, { parameterName: 'rarity', parameterValue: 1 }, { parameterName: 'hintLevel', parameterValue: 1 }, { parameterName: 'decodeTimer', parameterValue: 20 }, { parameterName: 'levelOffset', parameterValue: 0 }]; // Default
+                case 4: return [{ parameterName: 'rootChoices', parameterValue: 10 }, { parameterName: 'decodeTimer', parameterValue: 14 }]; // Brisk
+                case 5: return [{ parameterName: 'rootChoices', parameterValue: 11 }, { parameterName: 'rarity', parameterValue: 2 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'decodeTimer', parameterValue: 10 }, { parameterName: 'levelOffset', parameterValue: 1 }]; // Grit
+                case 6: return [{ parameterName: 'levelOffset', parameterValue: -2 }]; // Easier next tree
+                case 7: return [{ parameterName: 'levelOffset', parameterValue: 2 }]; // Harder next tree
+                case 8: return [{ parameterName: 'hintLevel', parameterValue: 0 }]; // Bare roots (no meanings)
+                case 9: return [{ parameterName: 'rootChoices', parameterValue: 12 }, { parameterName: 'rarity', parameterValue: 2 }, { parameterName: 'hintLevel', parameterValue: 0 }, { parameterName: 'decodeTimer', parameterValue: 6 }, { parameterName: 'levelOffset', parameterValue: 3 }]; // Extreme
+                default:
+                    return [];
+            }
         default:
             return []; // No test adjustments implemented yet for this game
     }
