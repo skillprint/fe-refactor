@@ -1,6 +1,10 @@
 // Generates the CloudFront viewer-request function from a static export.
 //
-//   node scripts/static-export/gen-viewer-request.mjs [out] [build/viewer-request.js]
+//   node scripts/static-export/gen-viewer-request.mjs [out] [build/viewer-request.js] [kvs-arn]
+//
+// With the distribution's KeyValueStore ARN, the function serves the release
+// the store names (viewer-request.release.js): what CloudFront runs. Without
+// it, it serves the export as it is: what serve.mjs runs locally.
 //
 // Every directory under out/ with an index.html is a page. A page with a `_`
 // segment is a dynamic route's shell (lib/staticExport.ts). Static pages that
@@ -40,18 +44,24 @@ function matches(shell, page) {
   return a.length === b.length && a.every((seg, i) => seg === '_' || seg === b[i]);
 }
 
-/** The function's source for the export in `outDir`. */
-export function generate(outDir) {
+/** The function's source for the export in `outDir`, served from the release a KeyValueStore names if `kvsArn` is given. */
+export function generate(outDir, kvsArn) {
   const { pages, files } = scan(outDir);
   const isShell = (page) => page.split('/').includes('_');
   const shells = pages.filter(isShell).sort((a, b) => b.split('/').length - a.split('/').length || a.localeCompare(b));
   const statics = pages.filter((page) => !isShell(page) && shells.some((shell) => matches(shell, page))).sort();
 
-  const template = fs.readFileSync(new URL('./viewer-request.template.js', import.meta.url), 'utf8');
-  const code = template
-    .replace('/*SHELLS*/[]', JSON.stringify(shells))
-    .replace('/*STATIC*/[]', JSON.stringify(statics))
-    .replace('/*FILES*/[]', JSON.stringify(files.sort()));
+  const read = (name) => fs.readFileSync(new URL(name, import.meta.url), 'utf8');
+  // Replacer functions: the code holds `$1`, which a replacement string would expand.
+  const route = read('./viewer-request.template.js')
+    .replace('/*SHELLS*/[]', () => JSON.stringify(shells))
+    .replace('/*STATIC*/[]', () => JSON.stringify(statics))
+    .replace('/*FILES*/[]', () => JSON.stringify(files.sort()));
+  const code = kvsArn
+    ? read('./viewer-request.release.js')
+        .replace('/*KVS_ID*/', () => kvsArn.split('/').pop())
+        .replace('/*ROUTE*/', () => route)
+    : `${route}\nfunction handler(event) {\n  return route(event.request);\n}\n`;
   const bytes = Buffer.byteLength(code);
   if (bytes > MAX_FUNCTION_BYTES) {
     throw new Error(`viewer-request function is ${bytes} bytes; CloudFront allows ${MAX_FUNCTION_BYTES}`);
@@ -62,7 +72,7 @@ export function generate(outDir) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const outDir = process.argv[2] || 'out';
   const target = process.argv[3] || 'build/viewer-request.js';
-  const { code, shells, statics, files } = generate(outDir);
+  const { code, shells, statics, files } = generate(outDir, process.argv[4]);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, code);
   console.log(`${target}: ${shells.length} shells, ${statics.length} static pages beside them, ${files.length} extensionless files, ${Buffer.byteLength(code)} bytes`);

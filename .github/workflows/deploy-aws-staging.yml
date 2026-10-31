@@ -1,0 +1,85 @@
+name: Deploy to AWS (staging)
+
+# The static export, built against the staging API, uploaded as a release to
+# the staging CloudFront distribution (portal_site module in the marketplace
+# Terraform) and made live. Runs beside Vercel until the cutover; until the
+# aws-staging environment has its variables, it fails at the AWS login.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time, and never cancel one halfway through switching.
+concurrency:
+  group: deploy-aws-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # The deploy role trusts only jobs in this environment (GitHub OIDC), so
+    # no AWS key is stored.
+    environment:
+      name: aws-staging
+      url: https://${{ vars.PORTAL_HOST }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      NEXT_PUBLIC_SKILLPRINT_API_BASE_URL: https://api.staging.skillprint.co/
+      NEXT_PUBLIC_GAMES_BASE_URL: https://games.staging.skillprint.co
+      NEXT_PUBLIC_SITE_URL: https://${{ vars.PORTAL_HOST }}
+      NEXT_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_API_KEY }}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+      NEXT_PUBLIC_FACEBOOK_APP_ID: ${{ vars.NEXT_PUBLIC_FACEBOOK_APP_ID }}
+      PORTAL_BUCKET: ${{ vars.PORTAL_BUCKET }}
+      PORTAL_FUNCTION: ${{ vars.PORTAL_FUNCTION }}
+      PORTAL_KVS_ARN: ${{ vars.PORTAL_KVS_ARN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test the viewer-request function
+        run: node --test scripts/static-export/viewer-request.test.mjs
+
+      - name: Build the static export
+        run: pnpm run build:export
+
+      - name: Generate the function for this distribution
+        run: node scripts/static-export/gen-viewer-request.mjs out build/viewer-request.js "$PORTAL_KVS_ARN"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Upload the release and make it live
+        run: scripts/static-export/deploy.sh "$GITHUB_SHA"
+
+      # The switch reaches the edge in seconds; give it a minute.
+      - name: Check the live site
+        env:
+          SITE: https://${{ vars.PORTAL_HOST }}
+        run: |
+          for path in / /games/ /game/hextris/ /badge/focus/ /coach/login/ /opengraph-image/; do
+            for attempt in 1 2 3 4 5 6; do
+              status="$(curl -s -o /dev/null -w '%{http_code}' "$SITE$path")"
+              [ "$status" = 200 ] && break
+              sleep 10
+            done
+            echo "$status $path"
+            [ "$status" = 200 ]
+          done

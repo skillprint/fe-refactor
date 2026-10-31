@@ -1,6 +1,6 @@
 // CloudFront viewer-request function for the static portal (runtime
-// cloudfront-js-2.0). gen-viewer-request.mjs fills in the tables from the
-// export; don't edit its output.
+// cloudfront-js-2.0): the routing. gen-viewer-request.mjs fills in the tables
+// from the export and adds the handler; don't edit its output.
 
 // Shell pages of dynamic routes, deepest first. `_` stands for any one segment.
 var SHELLS = /*SHELLS*/[];
@@ -54,8 +54,8 @@ function shellFor(dir) {
   return null;
 }
 
-function handler(event) {
-  var request = event.request;
+// The request to serve from the export, or a redirect.
+function route(request) {
   var uri = request.uri;
 
   for (var r = 0; r < REDIRECTS.length; r++) {
