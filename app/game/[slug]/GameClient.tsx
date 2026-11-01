@@ -18,8 +18,10 @@ import { getCatalogGames, getGameCatalogDetail } from '../../api/api';
 import { gameReviewApi } from '@/lib/models/gameReview/gameReviewApi';
 import { getApiBaseUrl } from '../../utils/cookieUtils';
 import { baseSlug, resolveCatalogGame } from '@/lib/gameSlug';
-import { gameBuildUrl, gameParameterManifestUrl, type GameBuildRef } from '@/lib/localGames';
+import { gameBuildUrl, gameParameterManifestUrl, isRoomGame, type GameBuildRef } from '@/lib/localGames';
 import { isGameMessageOrigin } from '@/lib/gameAssets';
+import { openPortalRoom, stopPortalRoom, type PortalRoom } from '@/lib/models/portal/portalRooms';
+import { PortalApiError } from '@/lib/models/portal/portalFetch';
 import { chooseTargetMood, type CatalogMood } from '@/lib/targetMood';
 import { titleFromSlug } from '@/lib/skillIcons';
 import { sessionAttribution } from '@/lib/emailLinks';
@@ -127,8 +129,11 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     const [isLoadingGamePath, setIsLoadingGamePath] = useState<boolean>(true);
     // The catalog record this URL slug resolved to. `forSlug` guards against a stale
     // resolution being used for a new slug while the next lookup is in flight.
-    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string; name?: string; moods: CatalogMood[]; parameterManifest?: string } | null>(null);
+    const [resolvedGame, setResolvedGame] = useState<{ forSlug: string; serverSlug: string; name?: string; moods: CatalogMood[]; parameterManifest?: string; roomGame?: boolean } | null>(null);
     const [isUnknownGame, setIsUnknownGame] = useState(false);
+    // A room game's room, once the backend has opened it, and why it couldn't.
+    const roomRef = useRef<PortalRoom | null>(null);
+    const [roomError, setRoomError] = useState<string | null>(null);
     const [hasImageError, setHasImageError] = useState(false);
 
     // The static config names only older games; the catalog record names every one.
@@ -324,25 +329,29 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             }
             if (!isMounted) return;
 
+            // A game played in a room has no build: its frame is the room the
+            // backend opens once the session has started (see openRoom below).
+            const roomGame = isRoomGame(record);
             // A catalogue record alone isn't enough: without a build on the games
             // CDN the iframe would load a 403 and still start a scored session.
-            const buildUrl = gameBuildUrl(record);
-            if (!buildUrl) {
+            const buildUrl = roomGame ? null : gameBuildUrl(record);
+            if (!buildUrl && !roomGame) {
                 setIsUnknownGame(true);
                 setIsLoadingGamePath(false);
                 return;
             }
 
             const serverSlug = record?.slug || unifiedSlug;
-            setGamePath(buildUrl);
+            if (buildUrl) setGamePath(buildUrl);
             setResolvedGame({
                 forSlug: decodedSlug,
                 serverSlug,
                 name: record?.name,
                 moods: Array.isArray(record?.moods) ? record.moods : [],
-                parameterManifest: gameParameterManifestUrl(buildUrl),
+                parameterManifest: buildUrl ? gameParameterManifestUrl(buildUrl) : undefined,
+                roomGame,
             });
-            setIsLoadingGamePath(false);
+            if (buildUrl) setIsLoadingGamePath(false);
         };
         resolvePath();
 
@@ -400,8 +409,10 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     };
 
     const handleGameMessage = (event: MessageEvent) => {
-        // Only messages from this page's own game frame
-        if (!isGameMessageOrigin(event.origin) || event.source !== iframeRef.current?.contentWindow) return;
+        // Only messages from this page's own game frame: a build on the games CDN,
+        // or, for a room game, the game server the room is on.
+        const fromRoom = roomRef.current !== null && event.origin === new URL(roomRef.current.server).origin;
+        if (!(isGameMessageOrigin(event.origin) || fromRoom) || event.source !== iframeRef.current?.contentWindow) return;
 
         const { type, data } = event.data;
 
@@ -426,6 +437,9 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
                 break;
             case 'gameEvent':
                 recordGameEvent(data);
+                // A room's round begins once the team is in, not when its lobby
+                // loaded: the wait for the agents is not time played.
+                if (roomRef.current && data?.event === 'GAME_START') setGameStartTime(Date.now());
                 break;
         }
     };
@@ -457,6 +471,19 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         if (typeof data?.isGameOver === 'boolean') next.isGameOver = data.isGameOver;
         reportedGameStateRef.current = next;
     };
+
+    // A room game's agents play on until the round ends. A player who leaves
+    // before then stops them; once it has ended they stop by themselves, and a
+    // stop then would throw the round's record away.
+    const leaveRoom = () => {
+        const room = roomRef.current;
+        if (!room || reportedGameStateRef.current?.isGameOver) return;
+        roomRef.current = null;
+        stopPortalRoom(room, userTokenRef.current || localStorage.getItem('userToken'));
+    };
+    // For the unmount cleanup, which outlives the render that defined leaveRoom.
+    const leaveRoomRef = useRef(leaveRoom);
+    leaveRoomRef.current = leaveRoom;
 
     const handleScreenshot = async (event: MessageEvent) => {
         if (skillprintClientRef.current && skillprintSessionIdRef.current) {
@@ -639,6 +666,11 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
     };
 
     const handlePlayAgain = () => {
+        // A room is one round: another one is a new room, with a new session.
+        if (resolvedGame?.roomGame) {
+            window.location.reload();
+            return;
+        }
         if (typeof gameResults?.score === 'number' && gameResults.score > 0) {
             const s = gameResults.score;
             const prev = preSessionBaselineRef.current;
@@ -691,6 +723,7 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             };
 
             stopIframe();
+            leaveRoom();
             shouldPollRef.current = false;
 
             if (skillprintClientRef.current && skillprintSessionIdRef.current) {
@@ -792,10 +825,46 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
         }
     }, [userToken]);
 
-    // Cleanup message listener
+    // A room game's frame is a room the backend opens for this player, with
+    // agents in the other seats, once the session their seat is recorded
+    // against has started. The player takes the seat when they press Play.
+    useEffect(() => {
+        if (!resolvedGame?.roomGame || resolvedGame.forSlug !== decodedSlug || !canStartSession) return;
+        let isCurrent = true;
+        setRoomError(null);
+        const token = userTokenRef.current || localStorage.getItem('userToken');
+        if (!token) {
+            setRoomError('Playing with others needs a player profile. Sign in or play as a guest, then reload.');
+            return;
+        }
+        openPortalRoom(token, { game: resolvedGame.serverSlug, sessionId: skillprintSessionIdRef.current || undefined })
+            .then((room) => {
+                if (!isCurrent) {
+                    stopPortalRoom(room, token);
+                    return;
+                }
+                roomRef.current = room;
+                setGamePath(room.playUrl);
+                setIsLoadingGamePath(false);
+            })
+            .catch((error) => {
+                if (!isCurrent) return;
+                console.error('Could not open a room', error);
+                const busy = error instanceof PortalApiError && (error.status === 503 || error.status === 429);
+                setRoomError(busy
+                    ? 'Every AI player is busy. Try again in a few minutes.'
+                    : 'The game server could not open a room. Try again in a moment.');
+            });
+        return () => {
+            isCurrent = false;
+        };
+    }, [resolvedGame, decodedSlug, canStartSession]);
+
+    // Cleanup message listener, and a room left mid-round
     useEffect(() => {
         return () => {
             window.removeEventListener('message', onWindowMessage);
+            leaveRoomRef.current();
         };
     }, [onWindowMessage]);
 
@@ -861,7 +930,9 @@ export default function GameClient({ slug, autoPlay = false, exitHref = '/games'
             )}
 
             {sequence === 'loading' && (
-                <SessionVeil step="loading" title="Loading game" description={`${gameTitle} is starting up.`} isCanvas />
+                roomError
+                    ? <SessionVeil step="loading" title="No room right now" description={roomError} isCanvas />
+                    : <SessionVeil step="loading" title="Loading game" description={`${gameTitle} is starting up.`} isCanvas />
             )}
 
             {sequence === 'calculating' && (

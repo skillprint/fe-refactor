@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { gameBuildUrl, gameParameterManifestUrl, isPlayableGame } from './localGames';
+import { gameBuildUrl, gameParameterManifestUrl, isPlayableGame, isRoomGame } from './localGames';
 
 test('a record whose URL is on the games CDN plays from there, with no map entry needed', () => {
   const page = 'https://games.skillprint.co/live/Brand%20New%20Game/static/index.html';
@@ -15,6 +15,14 @@ test('a record without a games CDN URL is not playable here, whatever its slug',
   assert.equal(isPlayableGame({ slug: 'hextris-475aff99-6346-4ea4-b432-dc8aa51f2178', externalWebUrl: legacyS3 }), false);
   assert.equal(isPlayableGame({ slug: 'hextris' }), false);
   assert.equal(gameBuildUrl(null), null);
+});
+
+test('a game played in a room is playable without a build, and only it is a room game', () => {
+  const runLink = { slug: 'runlink', multiplayer: { environment: 'runlink', maxSeats: 8 } };
+  assert.equal(isPlayableGame(runLink), true);
+  assert.equal(isRoomGame(runLink), true);
+  assert.equal(gameBuildUrl(runLink), null);
+  assert.equal(isRoomGame({ slug: 'hextris', url: 'https://games.skillprint.co/live/Hextris/static/index.html', multiplayer: null }), false);
 });
 
 test('the parameter manifest sits beside the game page', () => {
