@@ -29,6 +29,17 @@
   justify-content: space-between;
 }
 
+.gr-search {
+  flex: 0 1 18rem;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .gr-search {
+    flex-basis: 100%;
+  }
+}
+
 .gr-count {
   margin-left: 0.35rem;
   font-variant-numeric: tabular-nums;
