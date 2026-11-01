@@ -126,6 +126,11 @@ export default function MeditationStudio() {
   }, []);
 
   const wasOnline = useRef(false);
+  // A hosted page (not localhost) needs the browser's permission to call a service on this computer.
+  const [hostedPage, setHostedPage] = useState(false);
+  useEffect(() => {
+    setHostedPage(!/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname));
+  }, []);
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -319,6 +324,13 @@ export default function MeditationStudio() {
             The meditation generator runs on your machine and isn&apos;t reachable at {GENERATOR_URL}. Start it from the
             meditation-generator project:
             <pre>./start.sh</pre>
+            {hostedPage && (
+              <>
+                Already running? Your browser may be stopping this page from reaching your computer. In Chrome, open
+                the site settings (the icon left of the address), allow <strong>Local network access</strong>, then
+                reload.
+              </>
+            )}
           </div>
         )}
 
