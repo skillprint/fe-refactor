@@ -48,8 +48,11 @@ export function TargetTags({ moods, skills }: { moods: string[]; skills: string[
   );
 }
 
-/** What a signed-in player who isn't recognised as staff sees, with a way to sign in as staff. */
-export function ReviewerGate() {
+/**
+ * What a signed-in player who isn't recognised as staff sees, with a way to sign in as staff.
+ * `purpose` names the tool, e.g. "Game coverage is".
+ */
+export function ReviewerGate({ purpose = 'Reviewing new games is' }: { purpose?: string } = {}) {
   const { completeGoogleSignIn, status: authStatus } = useAuth();
   const [signInError, setSignInError] = useState<string | null>(null);
 
@@ -64,7 +67,7 @@ export function ReviewerGate() {
         </p>
       ) : (
         <p className="margin-none font-sm gr-muted">
-          Reviewing new games is limited to Skillprint staff. Sign in with your verified skillprint.co Google account
+          {purpose} limited to Skillprint staff. Sign in with your verified skillprint.co Google account
           to continue.
         </p>
       )}
