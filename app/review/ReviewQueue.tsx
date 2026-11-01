@@ -6,12 +6,55 @@ import { useEffect, useState } from 'react';
 import PortalLayout from '@/components/PortalLayout';
 import PortalHead from '@/components/PortalHead';
 import { PortalSection } from '@/components/LayoutGrid';
+import { GamesFilter, SkillOption } from '@/components/GamesFilter';
 import { useUserSession } from '../hooks/useUserSession';
+import { PORTAL_SKILLS } from '../config/skillsTaxonomy';
+import { titleFromSlug } from '../../lib/skillIcons';
 import {
   gameReviewApi, GameReviewApiError, REVIEW_STATUSES, ReviewGameSummary, ReviewStatus,
 } from '../../lib/models/gameReview/gameReviewApi';
 import { formatRating, formatWhen, ReviewerGate, StatusPill, TargetTags } from './components';
 import './review.css';
+
+type Pillar = SkillOption['pillar'];
+
+/** The URL parameter each filter dropdown keeps its choice in. */
+const FILTER_PARAMS: Record<Pillar, string> = { mood: 'mood', cognition: 'skill', personality: 'trait' };
+
+const targetName = (slug: string) => PORTAL_SKILLS[slug]?.name ?? titleFromSlug(slug);
+
+/** A game's skill tag belongs under personality when the taxonomy says so, else cognition. */
+const skillPillar = (slug: string): Pillar => (PORTAL_SKILLS[slug]?.pillar === 'personality' ? 'personality' : 'cognition');
+
+/**
+ * The dropdown options: the targets the loaded games carry, A–Z, plus any
+ * chosen one they don't (picked in another tab, or from a link), so its
+ * dropdown still names it.
+ */
+function filterOptions(games: ReviewGameSummary[], selected: Record<Pillar, string | null>) {
+  const slugs: Record<Pillar, Set<string>> = { mood: new Set(), cognition: new Set(), personality: new Set() };
+  for (const game of games) {
+    game.moods.forEach((slug) => slugs.mood.add(slug));
+    game.skills.forEach((slug) => slugs[skillPillar(slug)].add(slug));
+  }
+  const options = {} as Record<Pillar, SkillOption[]>;
+  for (const pillar of Object.keys(slugs) as Pillar[]) {
+    if (selected[pillar]) slugs[pillar].add(selected[pillar]!);
+    options[pillar] = [...slugs[pillar]]
+      .map((slug) => ({ slug, name: targetName(slug), pillar }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+  return options;
+}
+
+function matchesFilters(game: ReviewGameSummary, selected: Record<Pillar, string | null>, query: string) {
+  if (selected.mood && !game.moods.includes(selected.mood)) return false;
+  if (selected.cognition && !game.skills.includes(selected.cognition)) return false;
+  if (selected.personality && !game.skills.includes(selected.personality)) return false;
+  if (!query) return true;
+  const haystack = [game.name, game.slug, game.shortDescription, ...[...game.moods, ...game.skills].map(targetName)];
+  return haystack.some((text) => text?.toLowerCase().includes(query));
+}
 
 type QueueState =
   | { kind: 'loading' }
@@ -43,9 +86,15 @@ export default function ReviewQueue() {
   const searchParams = useSearchParams();
   const requested = searchParams.get('status');
   const tab: ReviewStatus = isReviewStatus(requested) ? requested : 'in_review';
+  const selected: Record<Pillar, string | null> = {
+    mood: searchParams.get(FILTER_PARAMS.mood),
+    cognition: searchParams.get(FILTER_PARAMS.cognition),
+    personality: searchParams.get(FILTER_PARAMS.personality),
+  };
   const { userToken } = useUserSession();
 
   const [state, setState] = useState<QueueState>({ kind: 'loading' });
+  const [query, setQuery] = useState('');
   // How many games wait in the two working tabs, for their labels.
   const [waiting, setWaiting] = useState<Partial<Record<ReviewStatus, number>>>({});
 
@@ -84,6 +133,27 @@ export default function ReviewQueue() {
   const countFor = (status: ReviewStatus) =>
     status === tab && state.kind === 'ready' ? state.games.length : waiting[status];
 
+  // The tab and the dropdown choices live in the URL, so a filtered queue can be linked to.
+  const updateUrl = (changes: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    router.replace(`/review/?${params}`, { scroll: false });
+  };
+  const select = (pillar: Pillar) => (slug: string | null) => updateUrl({ [FILTER_PARAMS[pillar]]: slug });
+  const clearFilters = () => {
+    setQuery('');
+    updateUrl({ mood: null, skill: null, trait: null });
+  };
+
+  const games = state.kind === 'ready' ? state.games : [];
+  const options = filterOptions(games, selected);
+  const needle = query.trim().toLowerCase();
+  const shown = games.filter((game) => matchesFilters(game, selected, needle));
+  const filtering = Boolean(needle || selected.mood || selected.cognition || selected.personality);
+
   return (
     <PortalLayout
       pageClass="page--portal-review"
@@ -112,7 +182,7 @@ export default function ReviewQueue() {
                       aria-selected={tab === status}
                       aria-pressed={tab === status}
                       className={`button-group__item ${tab === status ? 'is-current' : ''}`}
-                      onClick={() => router.replace(`/review/?status=${status}`, { scroll: false })}
+                      onClick={() => updateUrl({ status })}
                     >
                       {label}
                       {count !== undefined && <span className="gr-count">{count}</span>}
@@ -120,17 +190,48 @@ export default function ReviewQueue() {
                   );
                 })}
               </div>
+              <label className="field gr-search">
+                <span className="sr-only">Search games</span>
+                <input
+                  type="search"
+                  placeholder="Search name, slug or target"
+                  autoComplete="off"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </label>
             </div>
+            <GamesFilter
+              moods={options.mood}
+              cognitions={options.cognition}
+              // Personality shows only once a game carries a personality skill tag.
+              personalities={options.personality.length > 0 ? options.personality : undefined}
+              selectedMood={selected.mood}
+              selectedCognition={selected.cognition}
+              selectedPersonality={selected.personality}
+              onSelectMood={select('mood')}
+              onSelectCognition={select('cognition')}
+              onSelectPersonality={select('personality')}
+              onClearAll={clearFilters}
+            />
           </PortalSection>
 
           {state.kind === 'loading' && <p className="font-sm gr-muted">Loading the queue…</p>}
           {state.kind === 'error' && <div className="gr-alert" role="alert">{state.message}</div>}
-          {state.kind === 'ready' && state.games.length === 0 && (
+          {state.kind === 'ready' && games.length === 0 && (
             <p className="font-sm gr-muted">{EMPTY[tab]}</p>
           )}
-          {state.kind === 'ready' && state.games.length > 0 && (
+          {state.kind === 'ready' && games.length > 0 && filtering && (
+            <div className="gr-actions font-sm gr-muted" role="status" data-review-filter-count>
+              {shown.length} of {games.length} {games.length === 1 ? 'game' : 'games'}
+              <button type="button" className="button button--tertiary button--sm" onClick={clearFilters}>
+                Clear filters
+              </button>
+            </div>
+          )}
+          {shown.length > 0 && (
             <div className="gr-grid" data-review-queue>
-              {state.games.map((game) => <QueueCard key={game.slug} game={game} />)}
+              {shown.map((game) => <QueueCard key={game.slug} game={game} />)}
             </div>
           )}
         </div>

@@ -9,13 +9,14 @@ export interface SkillOption {
 export interface GamesFilterProps {
   moods: SkillOption[];
   cognitions: SkillOption[];
-  personalities: SkillOption[];
+  /** Leave out to hide the personality dropdown. */
+  personalities?: SkillOption[];
   selectedMood: string | null;
   selectedCognition: string | null;
-  selectedPersonality: string | null;
+  selectedPersonality?: string | null;
   onSelectMood: (slug: string | null) => void;
   onSelectCognition: (slug: string | null) => void;
-  onSelectPersonality: (slug: string | null) => void;
+  onSelectPersonality?: (slug: string | null) => void;
   onClearAll: () => void;
 }
 
@@ -123,7 +124,8 @@ export function GamesFilter({
 
       {renderDropdown('mood', 'Mood', 'All moods', 'ti-category-mood', moods, selectedMood, onSelectMood)}
       {renderDropdown('cognition', 'Cognition', 'All cognition', 'ti-category-cognition', cognitions, selectedCognition, onSelectCognition)}
-      {renderDropdown('personality', 'Personality', 'All personality', 'ti-category-personality', personalities, selectedPersonality, onSelectPersonality)}
+      {personalities && onSelectPersonality &&
+        renderDropdown('personality', 'Personality', 'All personality', 'ti-category-personality', personalities, selectedPersonality ?? null, onSelectPersonality)}
     </div>
   );
 }
