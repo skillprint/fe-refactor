@@ -18,6 +18,12 @@ export interface GameBuildRef {
     external_web_url?: string | null;
     /** Where the game plays (library, playbooks, next game; the catalog sends it too). */
     url?: string | null;
+    /**
+     * Set (catalog) for a game played in a room on the agents' game server:
+     * the backend opens a room with agents in the other seats instead of the
+     * portal loading a build (lib/models/portal/portalRooms).
+     */
+    multiplayer?: { environment: string; maxSeats: number } | null;
 }
 
 /**
@@ -28,8 +34,11 @@ export interface GameBuildRef {
 export const gameBuildUrl = (game: GameBuildRef | null | undefined): string | null =>
     [game?.externalWebUrl, game?.external_web_url, game?.url].find((u): u is string => !!u && isGamesCdnUrl(u)) ?? null;
 
-/** True when the game has a page on the games CDN, so it can be played here. */
-export const isPlayableGame = (game: GameBuildRef | null | undefined) => Boolean(gameBuildUrl(game));
+/** True for a game played in a room with others rather than from a build. */
+export const isRoomGame = (game: GameBuildRef | null | undefined) => Boolean(game?.multiplayer);
+
+/** True when the game has a page on the games CDN, or a room, so it can be played here. */
+export const isPlayableGame = (game: GameBuildRef | null | undefined) => Boolean(gameBuildUrl(game)) || isRoomGame(game);
 
 /**
  * The parameter manifest a build ships beside its page
