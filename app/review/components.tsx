@@ -28,9 +28,11 @@ export function StatusPill({ status }: { status: string }) {
   );
 }
 
-/** A game's target moods and skills as tags. */
-export function TargetTags({ moods, skills }: { moods: string[]; skills: string[] }) {
-  if (moods.length === 0 && skills.length === 0) return <span className="font-xs gr-muted">No targets set</span>;
+/** A game's target moods, skills and personality traits as tags. */
+export function TargetTags({ moods, skills, traits = [] }: { moods: string[]; skills: string[]; traits?: string[] }) {
+  if (moods.length === 0 && skills.length === 0 && traits.length === 0) {
+    return <span className="font-xs gr-muted">No targets set</span>;
+  }
   return (
     <div className="gr-tags">
       {moods.map((slug) => (
@@ -41,6 +43,12 @@ export function TargetTags({ moods, skills }: { moods: string[]; skills: string[
       ))}
       {skills.map((slug) => (
         <span key={`skill-${slug}`} className="ui-tag" title="Target skill">
+          {titleFromSlug(slug)}
+        </span>
+      ))}
+      {traits.map((slug) => (
+        <span key={`trait-${slug}`} className="ui-tag" title="Target personality trait">
+          <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href={`#${skillIconId('personality', slug)}`}></use></svg>
           {titleFromSlug(slug)}
         </span>
       ))}

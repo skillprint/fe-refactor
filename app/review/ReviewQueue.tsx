@@ -23,9 +23,6 @@ const FILTER_PARAMS: Record<Pillar, string> = { mood: 'mood', cognition: 'skill'
 
 const targetName = (slug: string) => PORTAL_SKILLS[slug]?.name ?? titleFromSlug(slug);
 
-/** A game's skill tag belongs under personality when the taxonomy says so, else cognition. */
-const skillPillar = (slug: string): Pillar => (PORTAL_SKILLS[slug]?.pillar === 'personality' ? 'personality' : 'cognition');
-
 /**
  * The dropdown options: the targets the loaded games carry, A–Z, plus any
  * chosen one they don't (picked in another tab, or from a link), so its
@@ -35,7 +32,8 @@ function filterOptions(games: ReviewGameSummary[], selected: Record<Pillar, stri
   const slugs: Record<Pillar, Set<string>> = { mood: new Set(), cognition: new Set(), personality: new Set() };
   for (const game of games) {
     game.moods.forEach((slug) => slugs.mood.add(slug));
-    game.skills.forEach((slug) => slugs[skillPillar(slug)].add(slug));
+    game.skills.forEach((slug) => slugs.cognition.add(slug));
+    game.traits?.forEach((slug) => slugs.personality.add(slug));
   }
   const options = {} as Record<Pillar, SkillOption[]>;
   for (const pillar of Object.keys(slugs) as Pillar[]) {
@@ -50,9 +48,10 @@ function filterOptions(games: ReviewGameSummary[], selected: Record<Pillar, stri
 function matchesFilters(game: ReviewGameSummary, selected: Record<Pillar, string | null>, query: string) {
   if (selected.mood && !game.moods.includes(selected.mood)) return false;
   if (selected.cognition && !game.skills.includes(selected.cognition)) return false;
-  if (selected.personality && !game.skills.includes(selected.personality)) return false;
+  if (selected.personality && !game.traits?.includes(selected.personality)) return false;
   if (!query) return true;
-  const haystack = [game.name, game.slug, game.shortDescription, ...[...game.moods, ...game.skills].map(targetName)];
+  const targets = [...game.moods, ...game.skills, ...(game.traits ?? [])];
+  const haystack = [game.name, game.slug, game.shortDescription, ...targets.map(targetName)];
   return haystack.some((text) => text?.toLowerCase().includes(query));
 }
 
@@ -204,7 +203,7 @@ export default function ReviewQueue() {
             <GamesFilter
               moods={options.mood}
               cognitions={options.cognition}
-              // Personality shows only once a game carries a personality skill tag.
+              // Hidden until some game in the tab targets a personality trait.
               personalities={options.personality.length > 0 ? options.personality : undefined}
               selectedMood={selected.mood}
               selectedCognition={selected.cognition}
@@ -261,7 +260,7 @@ function QueueCard({ game }: { game: ReviewGameSummary }) {
           {game.slug} · since {formatWhen(game.reviewStatusChangedAt)}
         </span>
         {game.shortDescription && <p className="font-sm gr-clamp">{game.shortDescription}</p>}
-        <TargetTags moods={game.moods} skills={game.skills} />
+        <TargetTags moods={game.moods} skills={game.skills} traits={game.traits} />
         <dl className="gr-stats">
           <div>
             <dt>Reviews</dt>

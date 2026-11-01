@@ -141,6 +141,7 @@ export default function ReviewForm({ game, questions, token, onFiled }: {
   const targets = [
     ...game.moods.map((slug) => ({ kind: 'mood' as const, slug })),
     ...game.skills.map((slug) => ({ kind: 'skill' as const, slug })),
+    ...(game.traits ?? []).map((slug) => ({ kind: 'trait' as const, slug })),
   ];
 
   const toggleSession = (id: string) => {
@@ -207,7 +208,7 @@ export default function ReviewForm({ game, questions, token, onFiled }: {
       </div>
       <form className="gr-form" onSubmit={submit} noValidate>
         <fieldset className="gr-fieldset">
-          <legend>Meets its target moods and skills<span className="gr-required" aria-hidden="true">*</span></legend>
+          <legend>Meets its target moods, skills and traits<span className="gr-required" aria-hidden="true">*</span></legend>
           <Scale
             name="targetFit"
             label="Target fit, 1 to 5"
@@ -242,7 +243,7 @@ export default function ReviewForm({ game, questions, token, onFiled }: {
               const entry = draft.targets[key] ?? { rating: null, note: '' };
               const setEntry = (patch: Partial<typeof entry>) =>
                 update({ targets: { ...draft.targets, [key]: { ...entry, ...patch } } });
-              const title = `${titleFromSlug(slug)} (${kind})`;
+              const title = `${titleFromSlug(slug)} (${kind === 'trait' ? 'personality' : kind})`;
               return (
                 <div className="gr-target-row" key={key}>
                   <span className="font-sm">{title}</span>
