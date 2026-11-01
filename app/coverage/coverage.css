@@ -1,0 +1,450 @@
+/* Game coverage (staff) at /coverage. Builds on review.css (gr-*) for panels, tables and scales. */
+
+.cv-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cv-panel-head {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.cv-panel-head h2 {
+  margin: 0;
+}
+
+[data-pillar="cognition"] { --cv-pillar: var(--cognition-500, #38d9a9); }
+[data-pillar="mood"] { --cv-pillar: var(--mood-500, #a9e34b); }
+[data-pillar="personality"] { --cv-pillar: var(--personality-500, #4dabf7); }
+
+/* ---- dimension coverage ---- */
+
+.cv-pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1.25rem;
+}
+
+.cv-pillar {
+  min-width: 0;
+}
+
+.cv-pillar h3 {
+  margin: 0 0 0.4rem;
+}
+
+.cv-dims {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.cv-dim,
+.cv-level-row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 1fr) minmax(2.5rem, 1.2fr) 4.6rem 2.9rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.cv-dim[data-gap] {
+  background: color-mix(in srgb, var(--skills-pink-500, #e64980) 10%, transparent);
+}
+
+.cv-dim__name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.cv-dim__name .sp-icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.cv-dim__stat {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cv-gap {
+  color: var(--skills-pink-500, #e64980);
+  font-weight: 600;
+}
+
+.cv-bar {
+  display: block;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-raised, rgba(127, 127, 127, 0.15));
+  overflow: hidden;
+}
+
+.cv-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cv-pillar, var(--mindset-violet-500, #7048e8));
+}
+
+.cv-bar--trait > span {
+  background: var(--personality-500, #4dabf7);
+}
+
+/* ---- shortlist ---- */
+
+.cv-picks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.cv-picks li {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(8rem, 12rem) 1fr;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cv-pick__n {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cv-pick__game {
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0;
+  font-weight: 600;
+}
+
+.cv-pick__adds,
+.cv-primary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.cv-tag {
+  border-left: 3px solid var(--cv-pillar, var(--surface-border));
+}
+
+/* ---- ranking ---- */
+
+.cv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.cv-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.65rem;
+  height: 2.25rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-box);
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+.cv-search input {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+  outline: none;
+}
+
+.cv-search .sp-icon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.6;
+}
+
+/* Keeps the header's screen-reader-only label inside the scroller, not widening the page. */
+.cv-table-wrap {
+  position: relative;
+}
+
+.cv-table td,
+.cv-table th {
+  vertical-align: middle;
+}
+
+.cv-num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cv-game {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 13rem;
+}
+
+.cv-game__thumb {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+  background: var(--surface-raised);
+  display: grid;
+  place-items: center;
+}
+
+.cv-game__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cv-game__thumb .sp-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  opacity: 0.4;
+}
+
+.cv-game__text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.cv-game__name {
+  font-weight: 600;
+}
+
+.cv-game__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  word-break: break-all;
+}
+
+.cv-status,
+.cv-source {
+  white-space: nowrap;
+}
+
+.cv-status[data-tone="listed"] { border-color: var(--core-green-500, #12b886); }
+.cv-status[data-tone="review"] { border-color: var(--mindset-violet-400, #845ef7); }
+.cv-status[data-tone="rejected"] { border-color: var(--skills-pink-500, #e64980); }
+.cv-status[data-tone="unplayable"] { border-color: var(--skills-orange-500, #fd7e14); }
+
+.cv-source[data-source="assessed"] { border-color: var(--core-green-500, #12b886); }
+.cv-source[data-source="tags"] { border-color: var(--skills-orange-500, #fd7e14); }
+.cv-source[data-source="none"] { border-color: var(--skills-pink-500, #e64980); }
+
+/* ---- assessment dialog ---- */
+
+.page--portal .popup.cv-dialog,
+.popup.cv-dialog {
+  width: min(64rem, 100%);
+  max-height: calc(100vh - 2 * var(--space-30, 1.875rem));
+  display: flex;
+}
+
+.cv-dialog .popup__content {
+  overflow: auto;
+  width: 100%;
+}
+
+.cv-dialog__title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cv-editor__head {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cv-editor__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cv-editor__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1.25rem;
+}
+
+.cv-level-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 0.1rem 0;
+}
+
+.cv-level-row--derived {
+  grid-template-columns: minmax(0, 1fr) minmax(3rem, 1fr) 2.6rem;
+}
+
+.cv-scale {
+  flex-wrap: nowrap;
+}
+
+.cv-scale span {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.4rem;
+}
+
+.cv-editor textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-base, transparent);
+  color: inherit;
+  resize: vertical;
+}
+
+.cv-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cv-editor__clear {
+  margin-left: auto;
+}
+
+/* ---- weights ---- */
+
+.cv-weights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.25rem;
+}
+
+.cv-weights .cv-editor__actions {
+  grid-column: 1 / -1;
+}
+
+.cv-weight {
+  display: grid;
+  grid-template-columns: 1fr 5.5rem;
+  gap: 0.15rem 0.6rem;
+  align-items: center;
+}
+
+.cv-weight .gr-muted {
+  grid-column: 1 / -1;
+}
+
+.cv-weight input {
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface-box);
+  color: inherit;
+  text-align: right;
+}
+
+.cv-weight[data-changed] input {
+  border-color: var(--mindset-violet-500, #7048e8);
+}
+
+/* ---- matrix ---- */
+
+.cv-matrix {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.75rem;
+}
+
+.cv-matrix th,
+.cv-matrix td {
+  padding: 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.cv-matrix__game {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-box, var(--surface-base));
+  text-align: left;
+  padding: 0.2rem 0.6rem 0.2rem 0 !important;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.cv-matrix__game .button--link {
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+.cv-matrix__pillar {
+  text-align: left;
+  padding: 0.3rem 0.4rem !important;
+  border-bottom: 2px solid var(--cv-pillar) !important;
+}
+
+.cv-matrix__dim {
+  height: 7.5rem;
+  vertical-align: bottom;
+  font-weight: 500;
+  color: var(--surface-text-muted, var(--text-muted));
+}
+
+.cv-matrix__dim span {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  padding: 0.3rem 0;
+}
+
+.cv-matrix td {
+  width: 1.9rem;
+  min-width: 1.9rem;
+  height: 1.7rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--cv-pillar) var(--cv-strength, 0%), transparent);
+}
+
+@media (max-width: 640px) {
+  .cv-picks li {
+    grid-template-columns: 1.6rem 1fr;
+  }
+
+  .cv-pick__adds {
+    grid-column: 2;
+  }
+}

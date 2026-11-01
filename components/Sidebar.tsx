@@ -49,6 +49,19 @@ function GameReviewNavItem({ pathname }: { pathname: string }) {
   );
 }
 
+// Game coverage is for the same staff, so it shows under the same check.
+function GameCoverageNavItem({ pathname }: { pathname: string }) {
+  const reviewer = useGameReviewer();
+  if (!reviewer) return null;
+  const isActive = pathname === '/coverage' || pathname.startsWith('/coverage/');
+  return (
+    <Link title="Game Coverage" href="/coverage" className={`sp-side-nav__link ${isActive ? 'is-active' : ''}`} aria-current={isActive ? 'page' : undefined} data-game-coverage-nav-link>
+      <svg className="sp-icon" aria-hidden="true" viewBox="0 0 24 24"><use href="#ti-chart"></use></svg>
+      <span className="sp-side-nav__label">Game Coverage</span>
+    </Link>
+  );
+}
+
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeSkillSection, setActiveSkillSection] = useState('mood');
@@ -207,6 +220,7 @@ export default function Sidebar() {
         <div className="sp-side-nav__group portal-sidebar__utilities">
           <Suspense fallback={null}>
             <GameReviewNavItem pathname={pathname} />
+            <GameCoverageNavItem pathname={pathname} />
           </Suspense>
           {notificationsFeatureEnabled && (
             <NotificationsNavItem className="sp-side-nav__link sp-side-nav__link--button" />
