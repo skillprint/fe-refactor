@@ -92,14 +92,19 @@ function GamesPageContent() {
     // In a real app we'd map this accurately from the taxonomy.
     .map((s: any) => ({ slug: s.slug, name: s.name, pillar: 'cognition' }));
 
-  const personalityOptions: SkillOption[] = []; // Add if available
-
   // Get all unique games
   const allAvailableGames = useMemo(() => {
     const combined = [...gamesBySkill, ...gamesByMood];
     const unique = dedupeByBaseSlug(combined);
     return unique.filter((game: any) => !BLACKLISTED_GAMES.includes(game.slug));
   }, [gamesBySkill, gamesByMood]);
+
+  // The personality traits these games target (catalog `traits`), A–Z.
+  const traitNames = new Map<string, string>();
+  allAvailableGames.forEach((game: any) => game.traits?.forEach((t: any) => traitNames.set(t.slug, t.name)));
+  const personalityOptions: SkillOption[] = [...traitNames]
+    .map(([slug, name]) => ({ slug, name, pillar: 'personality' as const }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Apply filters
   let filteredGames = allAvailableGames.filter((game: any) => {
@@ -113,7 +118,9 @@ function GamesPageContent() {
     if (selectedCognition) {
       matchesCognition = game.skills?.some((s: any) => s.slug === selectedCognition) || false;
     }
-    // No personality games implemented yet, so skip matching it
+    if (selectedPersonality) {
+      matchesPersonality = game.traits?.some((t: any) => t.slug === selectedPersonality) || false;
+    }
 
     const matchesSearch = searchQuery === '' ||
       game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

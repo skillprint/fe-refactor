@@ -132,7 +132,7 @@ function AboutPanel({ game, playHref }: { game: ReviewGameDetail; playHref: stri
       {game.longDescription && <p className="gr-prose">{game.longDescription}</p>}
       <div className="gr-stack" style={{ gap: '0.4rem' }}>
         <h3>Targets</h3>
-        <TargetTags moods={game.moods} skills={game.skills} />
+        <TargetTags moods={game.moods} skills={game.skills} traits={game.traits} />
       </div>
       {game.moods.length > 0 && (
         <div className="gr-play">

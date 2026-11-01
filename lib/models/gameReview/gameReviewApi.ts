@@ -73,6 +73,8 @@ export interface ReviewGameSummary {
   reviewStatusChangedAt: string | null;
   skills: string[];
   moods: string[];
+  /** Personality trait slugs (openness, ...). Missing on a backend from before game traits. */
+  traits?: string[];
   thumbnail: string | null;
   /** Where the game plays (the games CDN), when the record has it. */
   url: string | null;
@@ -98,7 +100,7 @@ export interface ReviewRecentSession {
 }
 
 export interface TargetRating {
-  kind: 'mood' | 'skill';
+  kind: 'mood' | 'skill' | 'trait';
   slug: string;
   rating: number;
   note?: string;
